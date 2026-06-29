@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khuyến mãi — Chi nhánh</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<style>
+body { font-family: 'Inter', sans-serif; }
+  .nav-link { display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;color:#52525b;font-size:14px;font-weight:500;text-decoration:none;transition:all .15s;white-space:nowrap;position:relative; }
+  .nav-link:hover { background:#f4f4f5;color:#18181b; }
+  .nav-link.active { background:#f4f4f5;color:#18181b;font-weight:600; }
+  .nav-link.active::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; background:#27272a; border-radius:0 3px 3px 0; }
+  .card { background:#fff;border:1px solid #e4e4e7;border-radius:16px; transition:box-shadow .2s, transform .2s; }
+  .card-hover:hover { box-shadow:0 8px 24px -8px rgba(0,0,0,.08); transform:translateY(-2px); }
+  .badge { display:inline-flex;align-items:center;padding:3px 9px;border-radius:9999px;font-size:11px;font-weight:600; }
+  .badge-green { background:#dcfce7;color:#15803d; }
+  .badge-amber { background:#fef3c7;color:#b45309; }
+  .badge-red { background:#fee2e2;color:#b91c1c; }
+  .badge-blue { background:#dbeafe;color:#1e40af; }
+  .badge-gray { background:#f4f4f5;color:#52525b; }
+  .badge-purple { background:#f3e8ff;color:#7e22ce; }
+  .promo-card { background:#fff; border:1px solid #e4e4e7; border-radius:16px; overflow:hidden; transition:all .2s ease; display:flex; flex-direction:column; position:relative; }
+  .promo-card:hover { transform:translateY(-3px); box-shadow:0 12px 24px -10px rgba(0,0,0,.08); border-color:#d4d4d8; }
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:#a1a1aa}
+  
+  /* Robust Pure CSS entry transitions (Offline friendly!) */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4);} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0);} }
+  
+  .animate-fade-up {
+    animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+  aside a .material-symbols-outlined { transition: transform .2s ease; }
+  aside a:hover .material-symbols-outlined { transform: translateX(2px); }
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important;} }
+</style>
+</head>
+<body class="bg-zinc-50 text-zinc-900 min-h-screen">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-zinc-200 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+  <div class="px-5 py-4 border-b border-zinc-100 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shrink-0 shadow-md shadow-blue-200">
+      <span class="material-symbols-outlined text-white text-[18px]">sports_tennis</span>
+    </div>
+    <div>
+      <p class="text-sm font-bold text-zinc-900 leading-tight tracking-tight">V-SPORT</p>
+      <p class="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Manager Portal</p>
+    </div>
+  </div>
+  <div class="px-4 py-3 border-b border-zinc-100">
+    <div class="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-br from-blue-50 to-zinc-50 rounded-xl border border-blue-100/50">
+      <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-zinc-200">
+        <span class="material-symbols-outlined text-[14px] text-blue-700">storefront</span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-[11px] font-bold text-zinc-800 truncate">V-Sport Vũng Tàu</p>
+        <p class="text-[10px] text-zinc-500 truncate">CS01 · Đang hoạt động</p>
+      </div>
+      <span class="w-2 h-2 rounded-full bg-green-500 shrink-0 live-dot"></span>
+    </div>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mb-1.5">Vận hành</p>
+    <a href="Dashboard.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">space_dashboard</span>Tổng quan</a>
+    <a href="LichDatSan.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">event</span>Lịch đặt sân<span class="ml-auto text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md">5</span></a>
+    <a href="QuanLySan.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">stadium</span>Quản lý sân</a>
+    <a href="KhoDichVu.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">inventory_2</span>Kho & Dịch vụ<span class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md">3</span></a>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
+    <a href="NhanSu.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">groups</span>Nhân sự</a>
+    <a href="HoaDon.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">receipt_long</span>Hóa đơn</a>
+    <a href="KhuyenMai.html" class="nav-link active"><span class="material-symbols-outlined text-[19px]" style="font-variation-settings:'FILL' 1">loyalty</span>Khuyến mãi</a>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
+    <a href="HoTro.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">contact_support</span>Hỗ trợ Admin</a>
+  </nav>
+  <div class="px-3 py-3 border-t border-zinc-100">
+    <a href="../admin/Dashboard.html" class="nav-link text-zinc-400 text-xs"><span class="material-symbols-outlined text-[16px]">arrow_back_ios</span>Về Admin Portal</a>
+  </div>
+</aside>
+
+<!-- Header -->
+<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
+  <div class="flex items-center gap-3">
+    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
+    <div>
+      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Khuyến mãi</h1>
+      <p class="text-xs text-zinc-555 text-zinc-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">database</span>Bảng KhuyenMai lọc theo CoSoID = CS01</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-1.5">
+    <button onclick="location.href='HoTro.html'" class="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-650 text-xs font-semibold">
+      <span class="material-symbols-outlined text-[15px]">help</span>Hỗ trợ
+    </button>
+    <button class="relative p-2 rounded-lg hover:bg-zinc-100 text-zinc-500">
+      <span class="material-symbols-outlined text-[20px]">notifications</span>
+      <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 live-dot"></span>
+    </button>
+    <div class="w-px h-6 bg-zinc-200 mx-1"></div>
+    <div class="relative">
+      <button id="profileBtn" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+        <img src="https://i.pravatar.cc/64?img=68" class="w-8 h-8 rounded-full object-cover ring-2 ring-white" alt="">
+        <div class="hidden sm:block text-left font-sans">
+          <p class="text-sm font-bold text-zinc-900 leading-tight">Nguyễn Văn Quân</p>
+          <p class="text-[10px] font-semibold text-zinc-450 text-zinc-500">Quản lý · CS01</p>
+        </div>
+        <span id="profileChevron" class="material-symbols-outlined text-[16px] text-zinc-400 hidden sm:block transition-transform duration-150">expand_more</span>
+      </button>
+      <div id="profileDrop" class="hidden absolute top-[calc(100%+8px)] right-0 w-[320px] bg-white rounded-2xl shadow-xl border border-zinc-200 z-50 overflow-hidden font-sans">
+        <div class="relative px-5 py-4 border-b border-zinc-100">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-600/[0.04] to-transparent pointer-events-none"></div>
+          <div class="flex items-start gap-3.5">
+            <div class="relative shrink-0"><img class="w-[52px] h-[52px] rounded-full object-cover ring-2 ring-blue-600/30" src="https://i.pravatar.cc/80?img=68"><span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#05cd99] border-2 border-white"></span></div>
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-[15px] text-zinc-900 leading-tight">Nguyễn Văn Quân</p>
+              <div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap"><span class="material-symbols-outlined text-[11px]" style="font-variation-settings:'FILL' 1">verified_user</span>Quản lý chi nhánh</span><span class="inline-flex items-center gap-1 text-[11px] font-medium text-[#05cd99] bg-[#e6fcf5] px-2 py-0.5 rounded-full whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-[#05cd99] inline-block"></span>Online</span></div>
+              <p class="text-xs text-zinc-555 text-zinc-500 mt-1.5">ID: <span class="font-bold text-zinc-800 font-mono">MGR042</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 border-b border-zinc-100 flex flex-col gap-2.5">
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">mail</span><p class="text-[13px] text-zinc-700 truncate">quan.nv@vsport.vn</p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">phone</span><p class="text-[13px] text-zinc-700">+84 912 345 678</p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">domain</span><p class="text-[13px] text-zinc-700">CS01 — V-Sport Vũng Tàu</p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">schedule</span><p class="text-[13px] text-zinc-500">Đăng nhập lần cuối: <span class="text-zinc-700 font-medium">18/05/2026 09:42</span></p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">calendar_today</span><p class="text-[13px] text-zinc-500">Tạo tài khoản: <span class="text-zinc-700 font-medium">12/03/2024</span></p></div>
+        </div>
+        <div class="px-4 py-3 border-b border-zinc-100">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Hoạt động chi nhánh hôm nay</p>
+          <div class="grid grid-cols-3 gap-2"><div class="bg-zinc-50 rounded-xl py-2.5 px-2 text-center"><p class="text-[17px] font-bold text-blue-700 leading-none">18</p><p class="text-[10px] text-zinc-500 mt-1 leading-tight">Lịch đặt<br>hôm nay</p></div><div class="bg-zinc-50 rounded-xl py-2.5 px-2 text-center"><p class="text-[17px] font-bold text-blue-700 leading-none">8/14</p><p class="text-[10px] text-zinc-500 mt-1 leading-tight">Nhân sự<br>làm việc</p></div><div class="bg-zinc-50 rounded-xl py-2.5 px-2 text-center"><p class="text-[17px] font-bold text-blue-700 leading-none">12/15</p><p class="text-[10px] text-zinc-500 mt-1 leading-tight">Hiệu suất<br>sân</p></div></div>
+        </div>
+        <div class="p-2">
+          <button onclick="document.getElementById('profileDrop').classList.add('hidden');document.getElementById('editProfileModal').classList.remove('hidden');" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-zinc-400">manage_accounts</span><span class="text-[13px] font-medium text-zinc-700">Hồ sơ cá nhân</span></button>
+          <button onclick="document.getElementById('profileDrop').classList.add('hidden');document.getElementById('changePwModal').classList.remove('hidden');" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-zinc-400">lock_reset</span><span class="text-[13px] font-medium text-zinc-700">Đổi mật khẩu</span></button>
+          <button class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-zinc-400">settings</span><span class="text-[13px] font-medium text-zinc-700">Cài đặt</span></button>
+          <div class="border-t border-zinc-100 mt-1 pt-1"><button class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-red-600">logout</span><span class="text-[13px] font-semibold text-red-650 text-red-650 text-red-600">Đăng xuất</span></button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="card p-4 flex items-center gap-3 animate-fade-up" style="animation-delay: 0ms;">
+      <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center shrink-0 border border-green-100/50"><span class="material-symbols-outlined text-[18px] text-green-600">campaign</span></div>
+      <div><p class="text-xs text-zinc-500 font-semibold">Đang chạy</p><p id="statActiveCount" class="text-xl font-extrabold text-green-600">0</p></div>
+    </div>
+    <div class="card p-4 flex items-center gap-3 animate-fade-up" style="animation-delay: 50ms;">
+      <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100/50"><span class="material-symbols-outlined text-[18px] text-blue-600">schedule</span></div>
+      <div><p class="text-xs text-zinc-500 font-semibold">Sắp diễn ra</p><p id="statUpcomingCount" class="text-xl font-extrabold text-blue-600">0</p></div>
+    </div>
+    <div class="card p-4 flex items-center gap-3 animate-fade-up" style="animation-delay: 100ms;">
+      <div class="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 border border-zinc-200/50"><span class="material-symbols-outlined text-[18px] text-zinc-500">history</span></div>
+      <div><p class="text-xs text-zinc-500 font-semibold">Đã kết thúc</p><p id="statExpiredCount" class="text-xl font-extrabold text-zinc-555 text-zinc-600">0</p></div>
+    </div>
+    <div class="card p-4 flex items-center gap-3 animate-fade-up" style="animation-delay: 150ms;">
+      <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100/50"><span class="material-symbols-outlined text-[18px] text-amber-600">savings</span></div>
+      <div><p class="text-xs text-zinc-500 font-semibold">Tổng đã giảm</p><p id="statTotalSaved" class="text-xl font-extrabold text-zinc-900">0 đ</p></div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-up" style="animation-delay: 200ms;">
+    <div class="flex items-center gap-2 flex-wrap">
+      <!-- Status filter tabs -->
+      <div class="flex rounded-lg border border-zinc-200 overflow-hidden bg-white text-sm">
+        <button id="tabFilterAll" onclick="switchFilterTab('all')" class="promo-tab px-3.5 py-1.5 bg-zinc-900 text-white font-semibold transition-all">Tất cả</button>
+        <button id="tabFilterActive" onclick="switchFilterTab('Đang chạy')" class="promo-tab px-3.5 py-1.5 text-zinc-500 hover:bg-zinc-50 transition-all font-medium">Đang chạy</button>
+        <button id="tabFilterUpcoming" onclick="switchFilterTab('Sắp diễn ra')" class="promo-tab px-3.5 py-1.5 text-zinc-500 hover:bg-zinc-50 transition-all font-medium">Sắp tới</button>
+        <button id="tabFilterExpired" onclick="switchFilterTab('Đã kết thúc')" class="promo-tab px-3.5 py-1.5 text-zinc-500 hover:bg-zinc-50 transition-all font-medium">Đã kết thúc</button>
+      </div>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[15px] text-zinc-400 font-bold">search</span>
+        <input id="searchPromo" type="text" placeholder="Tìm mã, tên khuyến mãi..." class="h-9 pl-8 pr-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 w-[220px]">
+      </div>
+    </div>
+    <button onclick="document.getElementById('promoModal').classList.remove('hidden'); document.getElementById('promoModalCard').classList.add('animate-scale-in');" class="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 active:scale-95 transition-all shrink-0 shadow-sm">
+      <span class="material-symbols-outlined text-[16px] font-bold">add</span>Tạo khuyến mãi
+    </button>
+  </div>
+
+  <!-- Promo cards grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="promoGrid">
+    <!-- Dynamic Cards Rendered Here -->
+  </div>
+
+</main>
+
+<!-- SUCCESS TOAST NOTIFICATION -->
+<div id="successToast" class="fixed bottom-6 right-6 bg-zinc-900 text-white rounded-2xl p-4 shadow-2xl border border-zinc-800 z-[9999] flex items-start gap-3 transition-all duration-350 translate-y-12 opacity-0 pointer-events-none w-80">
+  <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+    <span class="material-symbols-outlined text-[18px]">check</span>
+  </div>
+  <div class="flex-1">
+    <p id="toastTitle" class="text-xs font-bold text-white">Thành công</p>
+    <p id="toastMessage" class="text-[11px] text-zinc-400 mt-0.5">Yêu cầu đã được thực hiện.</p>
+  </div>
+</div>
+
+<!-- Create/Edit Promo Modal -->
+<div id="promoModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePromoModal()"></div>
+  <div id="promoModalCard" class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[500px] max-h-[90vh] overflow-y-auto z-10 border border-zinc-200">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-150">
+      <h2 id="modalPromoTitle" class="text-base font-bold text-zinc-900">Tạo khuyến mãi mới</h2>
+      <button onclick="closePromoModal()" class="p-1.5 rounded-lg hover:bg-zinc-100 flex items-center justify-center"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <div class="px-6 py-4 flex flex-col gap-4 text-sm">
+      <input type="hidden" id="editPromoId">
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Mã khuyến mãi <span class="text-red-500">*</span></label>
+          <input type="text" id="promoCode" placeholder="KM008" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 uppercase font-mono font-bold">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Tên chương trình <span class="text-red-500">*</span></label>
+          <input type="text" id="promoName" placeholder="VD: Khai trương sân mới" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      
+      <!-- Discount type -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-500">Loại giảm giá <span class="text-red-500">*</span></label>
+        <div class="grid grid-cols-3 gap-2" id="discountTypeGroup">
+          <label class="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50/50 has-[:checked]:ring-2 has-[:checked]:ring-zinc-900/5 transition-all">
+            <input type="radio" name="discountType" value="Phần trăm" checked class="sr-only" onchange="toggleDiscountSymbol('%')">
+            <span class="material-symbols-outlined text-[18px] text-zinc-600">percent</span>
+            <span class="text-xs font-bold text-zinc-800">Phần trăm</span>
+          </label>
+          <label class="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50/50 has-[:checked]:ring-2 has-[:checked]:ring-zinc-900/5 transition-all">
+            <input type="radio" name="discountType" value="Cố định" class="sr-only" onchange="toggleDiscountSymbol('đ')">
+            <span class="material-symbols-outlined text-[18px] text-zinc-600">payments</span>
+            <span class="text-xs font-bold text-zinc-800">Tiền mặt</span>
+          </label>
+          <label class="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50/50 has-[:checked]:ring-2 has-[:checked]:ring-zinc-900/5 transition-all">
+            <input type="radio" name="discountType" value="Tặng kèm" class="sr-only" onchange="toggleDiscountSymbol('giờ')">
+            <span class="material-symbols-outlined text-[18px] text-zinc-600">redeem</span>
+            <span class="text-xs font-bold text-zinc-800">Tặng kèm</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Giá trị giảm <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <input type="number" id="promoVal" placeholder="20" class="h-9 w-full pl-3 pr-10 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 font-bold">
+            <span id="promoValSymbol" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">%</span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Đơn tối thiểu (đ)</label>
+          <input type="number" id="promoMinBill" placeholder="100000" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-500">Giảm tối đa (đ) <span class="text-[10px] text-zinc-400 font-normal">(Chừa trống nếu không giới hạn)</span></label>
+        <input type="number" id="promoMaxDiscount" placeholder="100000" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Ngày bắt đầu <span class="text-red-500">*</span></label>
+          <input type="date" id="promoStart" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Ngày kết thúc <span class="text-red-500">*</span></label>
+          <input type="date" id="promoEnd" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Tổng lượt tối đa</label>
+          <input type="number" id="promoLimit" placeholder="100" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-500">Áp dụng cho bộ môn</label>
+          <select id="promoApplyGroup" class="h-9 px-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 text-zinc-700 bg-white font-medium">
+            <option value="Tất cả sân">Tất cả bộ môn</option>
+            <option value="Cầu lông">Cầu lông</option>
+            <option value="Pickleball">Pickleball</option>
+            <option value="Bóng đá">Bóng đá</option>
+            <option value="Tennis">Tennis</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-500">Mô tả điều kiện áp dụng</label>
+        <textarea id="promoDesc" rows="2" placeholder="Ví dụ: Chỉ áp dụng vào khung giờ vàng từ 17h đến 20h cuối tuần..." class="px-3 py-2 rounded-lg border border-zinc-200 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-zinc-400"></textarea>
+      </div>
+    </div>
+    
+    <div class="px-6 py-4 border-t border-zinc-150 bg-zinc-50 flex justify-between items-center">
+      <span class="text-[10px] text-zinc-450 font-bold font-mono uppercase tracking-wider text-zinc-400">Bảng KhuyenMai</span>
+      <div class="flex gap-2">
+        <button onclick="closePromoModal()" class="h-9 px-4 rounded-lg bg-zinc-200 hover:bg-zinc-300 text-zinc-700 text-xs font-bold transition-all">Hủy</button>
+        <button onclick="savePromoAction()" id="btnSubmitPromo" class="h-9 px-4 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 text-xs font-bold transition-all">Lưu khuyến mãi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('editProfileModal').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[520px] max-h-[90vh] overflow-y-auto z-10 border border-zinc-200">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+      <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-blue-700">manage_accounts</span><h3 class="text-base font-bold text-zinc-900 font-sans">Hồ sơ cá nhân</h3></div>
+      <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <div class="flex flex-col items-center gap-3 pt-6 pb-4 border-b border-zinc-100">
+      <div class="relative"><img id="editAvatarPreview" class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-600/30" src="https://i.pravatar.cc/80?img=68"><label for="avatarUpload" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-700 text-white flex items-center justify-center cursor-pointer shadow hover:opacity-90 transition-opacity"><span class="material-symbols-outlined text-[14px]">photo_camera</span></label><input id="avatarUpload" type="file" accept="image/*" class="hidden" onchange="previewAvatar(this)"></div>
+      <p class="text-xs text-zinc-555 text-zinc-500">Nhấn biểu tượng máy ảnh để thay ảnh đại diện</p>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4">Thông tin chi tiết — <span class="text-blue-700">Bảng Accounts</span></p>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Họ và tên</label><input type="text" id="editFullName" value="Nguyễn Văn Quân" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors font-medium"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mã tài khoản</label><input type="text" value="MGR042" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none font-medium"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Email</label><input type="email" id="editEmail" value="quan.nv@vsport.vn" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors font-medium"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Số điện thoại</label><input type="tel" id="editPhone" value="+84 912 345 678" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors font-medium"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Vai trò</label><input type="text" value="Quản lý chi nhánh" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none font-medium"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Chi nhánh</label><div class="relative"><input type="text" value="CS01 — V-Sport Vũng Tàu" readonly class="w-full h-10 px-3 pr-9 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none font-medium"><span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">lock</span></div></div>
+      </div>
+      <p class="text-[11px] text-zinc-500 mt-4 italic">Dữ liệu được đồng bộ từ bảng <code class="font-mono bg-zinc-50 px-1 rounded">Accounts</code> của CSDL V-Sport V4</p>
+    </div>
+    <div class="px-6 pb-5 flex gap-3 justify-end">
+      <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">Hủy</button>
+      <button onclick="saveProfileChanges()" class="h-10 px-5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95">Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePwModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('changePwModal').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] z-10 border border-zinc-200">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+      <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-blue-700">lock_reset</span><h3 class="text-base font-bold text-zinc-900 font-sans">Đổi mật khẩu</h3></div>
+      <button onclick="document.getElementById('changePwModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <div class="px-6 py-5 flex flex-col gap-4">
+      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu hiện tại</label><div class="relative"><input type="password" id="pwCurrent" placeholder="••••••••" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwCurrent" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
+      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu mới</label><div class="relative"><input type="password" id="pwNew" placeholder="••••••••" oninput="updatePwStrength(this)" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwNew" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div><div class="flex gap-1 mt-2"><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str1"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str2"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str3"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str4"></div></div><p id="pwStrengthLabel" class="text-[11px] text-zinc-500 mt-1"></p></div>
+      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Xác nhận mật khẩu mới</label><div class="relative"><input type="password" id="pwConfirm" placeholder="••••••••" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwConfirm" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
+    </div>
+    <div class="px-6 pb-5 flex gap-3 justify-end">
+      <button onclick="document.getElementById('changePwModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">Hủy</button>
+      <button onclick="savePassword()" class="h-10 px-5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95">Đổi mật khẩu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Mock data aligning with database schema (KhuyenMai table + specific fields)
+let mockPromotions = [
+  {
+    KhuyenMaiID: 1,
+    MaCode: 'KM001',
+    TenKM: 'Giảm 20% cuối tuần',
+    MoTa: 'Giảm 20% cho tất cả sân vào T7, CN',
+    LoaiGiam: 'Phần trăm',
+    GiaTriGiam: 20,
+    NgayBatDau: '2026-05-01',
+    NgayKetThuc: '2026-05-31',
+    SoLanToiDa: 100,
+    SoLanDaDung: 47,
+    TrangThai: 'Đang chạy',
+    DonToiThieu: 0,
+    GiamToiDa: 100000,
+    ApDung: 'Tất cả sân'
+  },
+  {
+    KhuyenMaiID: 2,
+    MaCode: 'KM002',
+    TenKM: 'Mua 10 tặng 1',
+    MoTa: 'Đặt 10 giờ sân nhận 1 giờ miễn phí',
+    LoaiGiam: 'Tặng kèm',
+    GiaTriGiam: 1,
+    NgayBatDau: '2026-05-01',
+    NgayKetThuc: '2026-06-30',
+    SoLanToiDa: 50,
+    SoLanDaDung: 12,
+    TrangThai: 'Đang chạy',
+    DonToiThieu: 0,
+    GiamToiDa: 0,
+    ApDung: 'Cầu lông'
+  },
+  {
+    KhuyenMaiID: 3,
+    MaCode: 'KM003',
+    TenKM: 'Khách mới –50.000 đ',
+    MoTa: 'Giảm 50.000đ cho lần đặt đầu tiên',
+    LoaiGiam: 'Cố định',
+    GiaTriGiam: 50000,
+    NgayBatDau: '2026-01-01',
+    NgayKetThuc: '2026-12-31',
+    SoLanToiDa: null,
+    SoLanDaDung: 29,
+    TrangThai: 'Đang chạy',
+    DonToiThieu: 150000,
+    GiamToiDa: 50000,
+    ApDung: 'Tất cả sân'
+  },
+  {
+    KhuyenMaiID: 4,
+    MaCode: 'KM004',
+    TenKM: 'Flash Sale 6.6 — Giảm 30%',
+    MoTa: 'Giảm 30% tất cả sân · Flash Sale 24h',
+    LoaiGiam: 'Phần trăm',
+    GiaTriGiam: 30,
+    NgayBatDau: '2026-06-06',
+    NgayKetThuc: '2026-06-06',
+    SoLanToiDa: 100,
+    SoLanDaDung: 0,
+    TrangThai: 'Sắp diễn ra',
+    DonToiThieu: 0,
+    GiamToiDa: 200000,
+    ApDung: 'Tất cả sân'
+  },
+  {
+    KhuyenMaiID: 5,
+    MaCode: 'KM005',
+    TenKM: 'Combo gia đình cuối tuần',
+    MoTa: 'Đặt 2 sân liền kề: Giảm 25%',
+    LoaiGiam: 'Phần trăm',
+    GiaTriGiam: 25,
+    NgayBatDau: '2026-06-01',
+    NgayKetThuc: '2026-08-31',
+    SoLanToiDa: null,
+    SoLanDaDung: 0,
+    TrangThai: 'Sắp diễn ra',
+    DonToiThieu: 300000,
+    GiamToiDa: 150000,
+    ApDung: 'Tất cả sân'
+  },
+  {
+    KhuyenMaiID: 6,
+    MaCode: 'KM006',
+    TenKM: 'Khai trương tháng 4',
+    MoTa: 'Giảm 50% tháng khai trương, tối đa 100k',
+    LoaiGiam: 'Phần trăm',
+    GiaTriGiam: 50,
+    NgayBatDau: '2026-04-01',
+    NgayKetThuc: '2026-04-30',
+    SoLanToiDa: 200,
+    SoLanDaDung: 83,
+    TrangThai: 'Đã kết thúc',
+    DonToiThieu: 100000,
+    GiamToiDa: 100000,
+    ApDung: 'Tất cả sân'
+  }
+];
+
+// Active state
+let currentTabFilter = 'all';
+const searchInput = document.getElementById('searchPromo');
+const promoGrid = document.getElementById('promoGrid');
+
+// Format Cash helper
+function formatVND(val) {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val).replace('₫', 'đ');
+}
+
+function formatDate(isoString) {
+  if (!isoString) return '-';
+  const parts = isoString.split('-');
+  return `${parts[2]}/${parts[1]}`;
+}
+
+// Accent / Diacritics remover utility (Insensitive Vietnamese search helper)
+function removeSign(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
+// Success toast
+function showToast(title, msg) {
+  const toast = document.getElementById('successToast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMessage').textContent = msg;
+  toast.classList.remove('opacity-0', 'translate-y-12', 'pointer-events-none');
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-12', 'pointer-events-none');
+  }, 4000);
+}
+
+// Tab Switching
+function switchFilterTab(tab) {
+  currentTabFilter = tab;
+  document.querySelectorAll('.promo-tab').forEach(btn => {
+    btn.className = 'promo-tab px-3.5 py-1.5 text-zinc-500 hover:bg-zinc-50 transition-all font-medium';
+  });
+  
+  if (tab === 'all') {
+    document.getElementById('tabFilterAll').className = 'promo-tab px-3.5 py-1.5 bg-zinc-900 text-white font-semibold transition-all';
+  } else if (tab === 'Đang chạy') {
+    document.getElementById('tabFilterActive').className = 'promo-tab px-3.5 py-1.5 bg-zinc-900 text-white font-semibold transition-all';
+  } else if (tab === 'Sắp diễn ra') {
+    document.getElementById('tabFilterUpcoming').className = 'promo-tab px-3.5 py-1.5 bg-zinc-900 text-white font-semibold transition-all';
+  } else {
+    document.getElementById('tabFilterExpired').className = 'promo-tab px-3.5 py-1.5 bg-zinc-900 text-white font-semibold transition-all';
+  }
+  
+  renderGrid();
+}
+
+// Dropdown Action toggler
+function togglePromoMenu(event, id) {
+  event.stopPropagation();
+  document.querySelectorAll('[id^="pm"]').forEach(m => {
+    if (m.id !== id) m.classList.add('hidden');
+  });
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+// Setup global close actions for menus
+document.addEventListener('click', () => {
+  document.querySelectorAll('[id^="pm"]').forEach(m => m.classList.add('hidden'));
+});
+
+// Render dynamic stats bar
+function renderStats() {
+  const active = mockPromotions.filter(p => p.TrangThai === 'Đang chạy').length;
+  const upcoming = mockPromotions.filter(p => p.TrangThai === 'Sắp diễn ra').length;
+  const expired = mockPromotions.filter(p => p.TrangThai === 'Đã kết thúc' || p.TrangThai === 'Đã dừng').length;
+
+  document.getElementById('statActiveCount').textContent = active;
+  document.getElementById('statUpcomingCount').textContent = upcoming;
+  document.getElementById('statExpiredCount').textContent = expired;
+
+  // Compute actual savings in real-time
+  let totalSaved = 0;
+  mockPromotions.forEach(p => {
+    if (p.LoaiGiam === 'Phần trăm') {
+      totalSaved += p.SoLanDaDung * (p.GiaTriGiam * 1000); 
+    } else if (p.LoaiGiam === 'Cố định') {
+      totalSaved += p.SoLanDaDung * p.GiaTriGiam;
+    } else {
+      totalSaved += p.SoLanDaDung * 80000; 
+    }
+  });
+
+  document.getElementById('statTotalSaved').textContent = formatVND(totalSaved);
+}
+
+// Render dynamic card grid
+function renderGrid() {
+  const query = removeSign(searchInput.value.toLowerCase().trim());
+  promoGrid.innerHTML = '';
+
+  let filtered = mockPromotions.filter(p => {
+    const codeClean = removeSign(p.MaCode.toLowerCase());
+    const nameClean = removeSign(p.TenKM.toLowerCase());
+    const descClean = removeSign(p.MoTa.toLowerCase());
+
+    const matchesSearch = codeClean.includes(query) || 
+      nameClean.includes(query) || 
+      descClean.includes(query);
+
+    let matchesTab = true;
+    if (currentTabFilter !== 'all') {
+      if (currentTabFilter === 'Đã kết thúc') {
+        matchesTab = (p.TrangThai === 'Đã kết thúc' || p.TrangThai === 'Đã dừng');
+      } else {
+        matchesTab = (p.TrangThai === currentTabFilter);
+      }
+    }
+
+    return matchesSearch && matchesTab;
+  });
+
+  if (filtered.length === 0) {
+    promoGrid.innerHTML = `
+      <div class="col-span-1 md:col-span-2 xl:col-span-3 text-center py-12 text-zinc-400 text-sm font-medium">
+        Không tìm thấy chương trình khuyến mãi nào khớp với bộ lọc.
+      </div>
+    `;
+    return;
+  }
+
+  filtered.forEach((p, index) => {
+    const card = document.createElement('div');
+    card.className = `promo-card animate-fade-up ${p.TrangThai === 'Đã kết thúc' || p.TrangThai === 'Đã dừng' ? 'opacity-65' : ''}`;
+    card.style.animationDelay = `${index * 55}ms`;
+
+    let topBorderClass = 'h-2 bg-green-500';
+    let badgeClass = 'badge badge-green';
+    if (p.TrangThai === 'Sắp diễn ra') {
+      topBorderClass = 'h-2 bg-blue-500';
+      badgeClass = 'badge badge-blue';
+    } else if (p.TrangThai === 'Đã kết thúc' || p.TrangThai === 'Đã dừng') {
+      topBorderClass = 'h-2 bg-zinc-300';
+      badgeClass = 'badge badge-gray';
+    }
+
+    let leftBlock = '';
+    if (p.LoaiGiam === 'Phần trăm') {
+      leftBlock = `<span class="text-lg font-black text-green-600">${p.GiaTriGiam}%</span>`;
+    } else if (p.LoaiGiam === 'Cố định') {
+      leftBlock = `<span class="text-xs font-black text-green-600">-${p.GiaTriGiam / 1000}k</span>`;
+    } else {
+      leftBlock = `<span class="material-symbols-outlined text-[20px] text-green-600">redeem</span>`;
+    }
+
+    // Limit calculations
+    let limitText = 'Không giới hạn';
+    let progressPercent = 0;
+    if (p.SoLanToiDa) {
+      limitText = `${p.SoLanDaDung} / ${p.SoLanToiDa} lượt`;
+      progressPercent = (p.SoLanDaDung / p.SoLanToiDa) * 100;
+    }
+
+    // Days calculation
+    const today = new Date('2026-05-19');
+    const end = new Date(p.NgayKetThuc);
+    const start = new Date(p.NgayBatDau);
+    let remText = '';
+    if (p.TrangThai === 'Đang chạy') {
+      const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+      remText = diff >= 0 ? `Còn ${diff} ngày` : 'Liên tục';
+    } else if (p.TrangThai === 'Sắp diễn ra') {
+      const diff = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+      remText = `Còn ${diff} ngày nữa`;
+    } else {
+      remText = 'Đã kết thúc';
+    }
+
+    // Simulated saved amount
+    let sumSaved = 0;
+    if (p.LoaiGiam === 'Phần trăm') {
+      sumSaved = p.SoLanDaDung * (p.GiaTriGiam * 1000);
+    } else if (p.LoaiGiam === 'Cố định') {
+      sumSaved = p.SoLanDaDung * p.GiaTriGiam;
+    } else {
+      sumSaved = p.SoLanDaDung * 80000;
+    }
+
+    card.innerHTML = `
+      <div class="${topBorderClass}"></div>
+      <div class="p-4 flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="${badgeClass}">${p.TrangThai}</span>
+                <span class="text-[10px] text-zinc-400 font-mono font-semibold">${p.MaCode}</span>
+              </div>
+              <h3 class="text-[14px] font-bold text-zinc-900 leading-tight">${p.TenKM}</h3>
+            </div>
+            <div class="relative shrink-0">
+              <button onclick="togglePromoMenu(event, 'pm${p.KhuyenMaiID}')" class="p-1 rounded-lg hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[16px] text-zinc-400 font-bold">more_vert</span></button>
+              <div id="pm${p.KhuyenMaiID}" class="hidden absolute right-0 top-full mt-1.5 w-[150px] bg-white rounded-xl shadow-xl border border-zinc-200 py-1.5 z-[70] overflow-hidden font-sans">
+                <button onclick="openEditPromoModal(${p.KhuyenMaiID})" class="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-50 transition-colors text-left"><span class="material-symbols-outlined text-[14px]">edit</span>Chỉnh sửa</button>
+                <button onclick="clonePromoAction(${p.KhuyenMaiID})" class="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-50 transition-colors text-left"><span class="material-symbols-outlined text-[14px]">content_copy</span>Nhân bản</button>
+                <button onclick="togglePromoStatus(${p.KhuyenMaiID})" class="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-50 transition-colors text-left font-medium">
+                  <span class="material-symbols-outlined text-[14px]">${p.TrangThai === 'Đang chạy' ? 'stop_circle' : 'play_circle'}</span>
+                  <span>${p.TrangThai === 'Đang chạy' ? 'Tạm dừng' : 'Kích hoạt'}</span>
+                </button>
+                <div class="border-t border-zinc-100 mt-1 pt-1"><button onclick="deletePromoAction(${p.KhuyenMaiID})" class="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-red-650 hover:bg-red-50 transition-colors text-left font-medium"><span class="material-symbols-outlined text-[14px]">delete</span>Xóa bỏ</button></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200/50 my-3">
+            <div class="w-12 h-12 rounded-lg bg-green-50/50 flex items-center justify-center shrink-0 border border-green-100/50">
+              ${leftBlock}
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs text-zinc-600 font-medium truncate">${p.MoTa}</p>
+              <p class="text-[10px] text-zinc-400 mt-0.5 font-medium">Áp dụng: <span class="font-bold text-zinc-500">${p.ApDung}</span>${p.DonToiThieu ? ` · Đơn ≥ ${formatVND(p.DonToiThieu)}` : ''}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          ${p.SoLanToiDa ? `
+            <div class="mb-3">
+              <div class="flex justify-between text-[10px] text-zinc-400 font-semibold mb-1">
+                <span>Lượt sử dụng</span>
+                <span>${limitText}</span>
+              </div>
+              <div class="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden border border-zinc-200/30">
+                <div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${progressPercent}%"></div>
+              </div>
+            </div>
+          ` : ''}
+          
+          <div class="flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-100 pt-3 mt-1 font-medium">
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">calendar_today</span>${formatDate(p.NgayBatDau)} – ${formatDate(p.NgayKetThuc)}</span>
+            <span class="font-bold ${p.TrangThai === 'Đang chạy' ? 'text-green-600' : p.TrangThai === 'Sắp diễn ra' ? 'text-blue-600' : 'text-zinc-500'}">${remText}</span>
+          </div>
+          ${p.SoLanDaDung > 0 ? `
+            <div class="flex items-center justify-between text-[10px] text-zinc-400 mt-1.5 font-medium">
+              <span>Đã tiết kiệm cho khách:</span>
+              <span class="font-semibold text-zinc-650">${formatVND(sumSaved)}</span>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+    promoGrid.appendChild(card);
+  });
+}
+
+// Modal handling
+function toggleDiscountSymbol(sym) {
+  document.getElementById('promoValSymbol').textContent = sym;
+}
+
+function closePromoModal() {
+  document.getElementById('promoModalCard').classList.remove('animate-scale-in');
+  document.getElementById('promoModal').classList.add('hidden');
+  resetPromoForm();
+}
+
+function resetPromoForm() {
+  document.getElementById('editPromoId').value = '';
+  document.getElementById('promoCode').value = '';
+  document.getElementById('promoName').value = '';
+  document.getElementById('promoVal').value = '';
+  document.getElementById('promoMinBill').value = '';
+  document.getElementById('promoMaxDiscount').value = '';
+  document.getElementById('promoStart').value = '';
+  document.getElementById('promoEnd').value = '';
+  document.getElementById('promoLimit').value = '';
+  document.getElementById('promoDesc').value = '';
+  document.getElementById('promoApplyGroup').value = 'Tất cả sân';
+  document.getElementById('modalPromoTitle').textContent = 'Tạo khuyến mãi mới';
+  document.getElementById('promoCode').disabled = false;
+  
+  // Reset radios
+  const radios = document.getElementsByName('discountType');
+  radios[0].checked = true;
+  toggleDiscountSymbol('%');
+}
+
+function openEditPromoModal(id) {
+  const promo = mockPromotions.find(p => p.KhuyenMaiID === id);
+  if (!promo) return;
+
+  document.getElementById('editPromoId').value = promo.KhuyenMaiID;
+  document.getElementById('promoCode').value = promo.MaCode;
+  document.getElementById('promoCode').disabled = true;
+  document.getElementById('promoName').value = promo.TenKM;
+  document.getElementById('promoVal').value = promo.GiaTriGiam;
+  document.getElementById('promoMinBill').value = promo.DonToiThieu || '';
+  document.getElementById('promoMaxDiscount').value = promo.GiamToiDa || '';
+  document.getElementById('promoStart').value = promo.NgayBatDau;
+  document.getElementById('promoEnd').value = promo.NgayKetThuc;
+  document.getElementById('promoLimit').value = promo.SoLanToiDa || '';
+  document.getElementById('promoDesc').value = promo.MoTa;
+  document.getElementById('promoApplyGroup').value = promo.ApDung;
+
+  const radios = document.getElementsByName('discountType');
+  radios.forEach(r => {
+    if (r.value === promo.LoaiGiam) {
+      r.checked = true;
+      const symbols = { 'Phần trăm': '%', 'Cố định': 'đ', 'Tặng kèm': 'giờ' };
+      toggleDiscountSymbol(symbols[promo.LoaiGiam]);
+    }
+  });
+
+  document.getElementById('modalPromoTitle').textContent = 'Chỉnh sửa khuyến mãi';
+  document.getElementById('promoModal').classList.remove('hidden');
+  document.getElementById('promoModalCard').classList.add('animate-scale-in');
+}
+
+function savePromoAction() {
+  const idVal = document.getElementById('editPromoId').value;
+  const code = document.getElementById('promoCode').value.toUpperCase().trim();
+  const name = document.getElementById('promoName').value.trim();
+  const val = parseFloat(document.getElementById('promoVal').value);
+  const start = document.getElementById('promoStart').value;
+  const end = document.getElementById('promoEnd').value;
+  const minBill = parseFloat(document.getElementById('promoMinBill').value) || 0;
+  const maxDisc = parseFloat(document.getElementById('promoMaxDiscount').value) || 0;
+  const limit = parseInt(document.getElementById('promoLimit').value) || null;
+  const desc = document.getElementById('promoDesc').value.trim();
+  const applyGroup = document.getElementById('promoApplyGroup').value;
+
+  if (!code || !name || isNaN(val) || !start || !end) {
+    alert('Vui lòng nhập đầy đủ các trường bắt buộc (*)');
+    return;
+  }
+
+  const selectedRadio = Array.from(document.getElementsByName('discountType')).find(r => r.checked);
+  const discountType = selectedRadio ? selectedRadio.value : 'Phần trăm';
+
+  const simulationToday = new Date('2026-05-19');
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  
+  let calculatedStatus = 'Đang chạy';
+  if (startDate > simulationToday) {
+    calculatedStatus = 'Sắp diễn ra';
+  } else if (endDate < simulationToday) {
+    calculatedStatus = 'Đã kết thúc';
+  }
+
+  if (idVal) {
+    // Edit existing promo
+    const promo = mockPromotions.find(p => p.KhuyenMaiID === parseInt(idVal));
+    if (promo) {
+      promo.TenKM = name;
+      promo.GiaTriGiam = val;
+      promo.LoaiGiam = discountType;
+      promo.DonToiThieu = minBill;
+      promo.GiamToiDa = maxDisc;
+      promo.NgayBatDau = start;
+      promo.NgayKetThuc = end;
+      promo.SoLanToiDa = limit;
+      promo.MoTa = desc || `Giảm giá theo chương trình ${name}`;
+      promo.ApDung = applyGroup;
+      promo.TrangThai = calculatedStatus;
+    }
+    showToast('Thành công', `Cập nhật khuyến mãi ${code} thành công.`);
+  } else {
+    // Add new promo
+    const existing = mockPromotions.find(p => p.MaCode === code);
+    if (existing) {
+      alert('Mã khuyến mãi này đã tồn tại trong hệ thống chi nhánh!');
+      return;
+    }
+
+    const newId = mockPromotions.length > 0 ? Math.max(...mockPromotions.map(p => p.KhuyenMaiID)) + 1 : 1;
+    mockPromotions.unshift({
+      KhuyenMaiID: newId,
+      MaCode: code,
+      TenKM: name,
+      MoTa: desc || `Giảm giá theo chương trình ${name}`,
+      LoaiGiam: discountType,
+      GiaTriGiam: val,
+      NgayBatDau: start,
+      NgayKetThuc: end,
+      SoLanToiDa: limit,
+      SoLanDaDung: 0,
+      TrangThai: calculatedStatus,
+      DonToiThieu: minBill,
+      GiamToiDa: maxDisc,
+      ApDung: applyGroup
+    });
+    showToast('Tạo thành công', `Đã tạo chương trình khuyến mãi ${code} mới.`);
+  }
+
+  closePromoModal();
+  renderAll();
+}
+
+function clonePromoAction(id) {
+  const promo = mockPromotions.find(p => p.KhuyenMaiID === id);
+  if (!promo) return;
+
+  const newId = mockPromotions.length > 0 ? Math.max(...mockPromotions.map(p => p.KhuyenMaiID)) + 1 : 1;
+  const newCode = `${promo.MaCode}_CLONE`;
+  
+  mockPromotions.unshift({
+    ...promo,
+    KhuyenMaiID: newId,
+    MaCode: newCode,
+    TenKM: `${promo.TenKM} - Sao bản`,
+    SoLanDaDung: 0
+  });
+
+  renderAll();
+  showToast('Đã nhân bản', `Đã nhân bản chương trình khuyến mãi thành mã mới: ${newCode}.`);
+}
+
+function togglePromoStatus(id) {
+  const promo = mockPromotions.find(p => p.KhuyenMaiID === id);
+  if (!promo) return;
+
+  if (promo.TrangThai === 'Đang chạy') {
+    promo.TrangThai = 'Đã dừng';
+    showToast('Tạm dừng', `Đã tạm dừng áp dụng khuyến mãi ${promo.MaCode}.`);
+  } else {
+    // Re-check dates
+    const simulationToday = new Date('2026-05-19');
+    const start = new Date(promo.NgayBatDau);
+    const end = new Date(promo.NgayKetThuc);
+    if (end < simulationToday) {
+      alert('Khuyến mãi này đã hết hạn, vui lòng chỉnh sửa lại thời gian trước khi kích hoạt!');
+      return;
+    }
+    promo.TrangThai = start > simulationToday ? 'Sắp diễn ra' : 'Đang chạy';
+    showToast('Đang chạy', `Đã kích hoạt hoạt động khuyến mãi ${promo.MaCode}.`);
+  }
+
+  renderAll();
+}
+
+function deletePromoAction(id) {
+  const index = mockPromotions.findIndex(p => p.KhuyenMaiID === id);
+  if (index === -1) return;
+  
+  const code = mockPromotions[index].MaCode;
+  if (confirm(`Bạn có chắc chắn muốn xóa bỏ chương trình khuyến mãi ${code} khỏi chi nhánh?`)) {
+    mockPromotions.splice(index, 1);
+    renderAll();
+    showToast('Đã xóa', `Đã xóa bỏ hoàn toàn khuyến mãi ${code}.`);
+  }
+}
+
+// Global refresh
+function renderAll() {
+  renderGrid();
+  renderStats();
+}
+
+// Profile Modal operations
+function saveProfileChanges() {
+  document.getElementById('editProfileModal').classList.add('hidden');
+  showToast('Thành công', 'Đã lưu thay đổi hồ sơ cá nhân.');
+}
+
+function savePassword() {
+  const pw = document.getElementById('pwNew');
+  const cf = document.getElementById('pwConfirm');
+  if (!pw.value) return;
+  if (pw.value !== cf.value) {
+    cf.style.borderColor = '#ef4444';
+    setTimeout(() => { cf.style.borderColor = ''; }, 1550);
+    return;
+  }
+  document.getElementById('changePwModal').classList.add('hidden');
+  document.getElementById('pwCurrent').value = '';
+  pw.value = '';
+  cf.value = '';
+  ['str1', 'str2', 'str3', 'str4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.backgroundColor = '';
+  });
+  const lbl = document.getElementById('pwStrengthLabel');
+  if (lbl) lbl.textContent = '';
+  showToast('Thành công', 'Đã đổi mật khẩu tài khoản.');
+}
+
+function togglePw(btn) {
+  const inp = document.getElementById(btn.dataset.target);
+  const ic = btn.querySelector('.material-symbols-outlined');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ic.textContent = 'visibility';
+  } else {
+    inp.type = 'password';
+    ic.textContent = 'visibility_off';
+  }
+}
+
+function updatePwStrength(inp) {
+  const v = inp.value;
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const cols = ['#ef4444', '#f59e0b', '#2563eb', '#10b981'];
+  const labs = ['', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('str' + i);
+    if (el) el.style.backgroundColor = i <= s ? cols[s - 1] : '';
+  }
+  const lbl = document.getElementById('pwStrengthLabel');
+  if (lbl) lbl.textContent = v.length ? labs[s] : '';
+}
+
+function previewAvatar(input) {
+  if (input.files && input.files[0]) {
+    const r = new FileReader();
+    r.onload = function(e) {
+      document.getElementById('editAvatarPreview').src = e.target.result;
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+
+// DOM Setup
+document.addEventListener('DOMContentLoaded', () => {
+  searchInput.addEventListener('input', renderGrid);
+
+  // Mobile sidebar menu toggler
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+  if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('-translate-x-full');
+    });
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        sidebar.classList.add('-translate-x-full');
+      }
+    });
+  }
+
+  // Profile toggler
+  const profileBtn = document.getElementById('profileBtn');
+  const profileDrop = document.getElementById('profileDrop');
+  const profileChevron = document.getElementById('profileChevron');
+  if (profileBtn && profileDrop) {
+    function openDrop() {
+      profileDrop.classList.remove('hidden');
+      profileDrop.style.cssText = 'opacity:0;transform:translateY(-8px) scale(0.97);transition:opacity 0.18s ease,transform 0.18s ease';
+      requestAnimationFrame(() => {
+        profileDrop.style.opacity = '1';
+        profileDrop.style.transform = 'translateY(0) scale(1)';
+      });
+      if (profileChevron) profileChevron.style.transform = 'rotate(180deg)';
+    }
+    function closeDrop() {
+      profileDrop.style.opacity = '0';
+      profileDrop.style.transform = 'translateY(-8px) scale(0.97)';
+      setTimeout(() => {
+        profileDrop.classList.add('hidden');
+        profileDrop.style.cssText = '';
+      }, 180);
+      if (profileChevron) profileChevron.style.transform = '';
+    }
+    profileBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      profileDrop.classList.contains('hidden') ? openDrop() : closeDrop();
+    });
+    document.addEventListener('click', e => {
+      if (!profileDrop.classList.contains('hidden') && !profileBtn.contains(e.target) && !profileDrop.contains(e.target)) {
+        closeDrop();
+      }
+    });
+  }
+
+  renderAll();
+});
+</script>
+</body>
+</html>

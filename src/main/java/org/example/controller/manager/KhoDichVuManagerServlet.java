@@ -1,0 +1,458 @@
+package org.example.controller.manager;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.example.dao.DanhMucSanPhamDAO;
+import org.example.dao.SanPhamDichVuDAO;
+import org.example.dao.impl.DanhMucSanPhamDAOImpl;
+import org.example.dao.impl.SanPhamDichVuDAOImpl;
+import org.example.model.DanhMucSanPham;
+import org.example.model.SanPham_DichVu;
+import org.example.model.TaiKhoan;
+import org.example.util.Constants;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@WebServlet("/manager/kho-dich-vu")
+public class KhoDichVuManagerServlet extends HttpServlet {
+
+    private final SanPhamDichVuDAO sanPhamDAO = new SanPhamDichVuDAOImpl();
+    private final DanhMucSanPhamDAO categoryDAO = new DanhMucSanPhamDAOImpl();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            return;
+        }
+
+        if (user.getRoleId() != Constants.ROLE_MANAGER) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này.");
+            return;
+        }
+
+        int coSoId = user.getCoSoId();
+
+        // Seed default categories if empty
+        List<DanhMucSanPham> categories = categoryDAO.findAll();
+        if (categories.isEmpty()) {
+            categoryDAO.insert(new DanhMucSanPham(0, "Nước uống"));
+            categoryDAO.insert(new DanhMucSanPham(0, "Đồ ăn nhanh"));
+            categoryDAO.insert(new DanhMucSanPham(0, "Thuê dụng cụ"));
+            categoryDAO.insert(new DanhMucSanPham(0, "Phụ kiện thể thao"));
+            categories = categoryDAO.findAll();
+        }
+
+        // Get filter inputs
+        String search = req.getParameter("search");
+        String categoryIdStr = req.getParameter("category");
+        String status = req.getParameter("status");
+
+        List<SanPham_DichVu> list = sanPhamDAO.findByCoSo(coSoId);
+
+        // Apply filters in memory for flexibility (search name or SKU)
+        if (search != null && !search.trim().isEmpty()) {
+            String q = search.trim().toLowerCase();
+            list = list.stream()
+                    .filter(s -> (s.getTenSanPham() != null && s.getTenSanPham().toLowerCase().contains(q)) ||
+                                 (s.getSkuCode() != null && s.getSkuCode().toLowerCase().contains(q)))
+                    .collect(Collectors.toList());
+        }
+
+        if (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) {
+            try {
+                int catId = Integer.parseInt(categoryIdStr.trim());
+                list = list.stream()
+                        .filter(s -> s.getDanhMucID() == catId)
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            list = list.stream()
+                    .filter(s -> status.trim().equals(s.getTrangThai()))
+                    .collect(Collectors.toList());
+        }
+
+        // Calculate KPI values
+        long totalItems = list.size();
+        double totalInventoryValue = list.stream()
+                .mapToDouble(s -> s.getSoLuongTon() * s.getGiaNhap())
+                .sum();
+        long lowStockCount = list.stream()
+                .filter(s -> s.getSoLuongTon() <= 5 && !Constants.TRANG_THAI_SP_NGUNG_KINH_DOANH.equals(s.getTrangThai()))
+                .count();
+        long outOfStockCount = list.stream()
+                .filter(s -> s.getSoLuongTon() == 0 && !Constants.TRANG_THAI_SP_NGUNG_KINH_DOANH.equals(s.getTrangThai()))
+                .count();
+
+        // Retrieve flash messages
+        String successMsg = (String) session.getAttribute("successMsg");
+        String errorMsg = (String) session.getAttribute("errorMsg");
+        session.removeAttribute("successMsg");
+        session.removeAttribute("errorMsg");
+
+        req.setAttribute("productList", list);
+        req.setAttribute("categories", categories);
+        req.setAttribute("totalItems", totalItems);
+        req.setAttribute("totalInventoryValue", totalInventoryValue);
+        req.setAttribute("lowStockCount", lowStockCount);
+        req.setAttribute("outOfStockCount", outOfStockCount);
+        req.setAttribute("search", search);
+        req.setAttribute("selectedCategory", categoryIdStr);
+        req.setAttribute("selectedStatus", status);
+        req.setAttribute("successMsg", successMsg);
+        req.setAttribute("errorMsg", errorMsg);
+        req.setAttribute("pageTitle", "Quản lý kho dịch vụ");
+
+        req.getRequestDispatcher("/manager/KhoDichVu.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            return;
+        }
+
+        if (user.getRoleId() != Constants.ROLE_MANAGER) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền thực hiện hành động này.");
+            return;
+        }
+
+        int coSoId = user.getCoSoId();
+        String action = req.getParameter("action");
+
+        try {
+            if ("add".equals(action)) {
+                String sku = req.getParameter("skuCode");
+                String name = req.getParameter("tenSanPham");
+                String categoryIdStr = req.getParameter("danhMucID");
+                String donGiaStr = req.getParameter("donGia");
+                String giaNhapStr = req.getParameter("giaNhap");
+                String unit = req.getParameter("donViTinh");
+                String stockStr = req.getParameter("soLuongTon");
+                String status = req.getParameter("trangThai");
+                String desc = req.getParameter("moTa");
+
+                if (name == null || name.trim().isEmpty()) {
+                    session.setAttribute("errorMsg", "Tên sản phẩm không được trống.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                // Auto-generate SKU if not provided
+                if (sku == null || sku.trim().isEmpty()) {
+                    String nanoHex = Long.toHexString(System.nanoTime()).toUpperCase();
+                    sku = "SKU-" + (nanoHex.length() > 6 ? nanoHex.substring(nanoHex.length() - 6) : nanoHex);
+                } else {
+                    sku = sku.trim();
+                }
+
+                // Check SkuCode uniqueness
+                SanPham_DichVu existingSp = sanPhamDAO.findBySkuAndCoSo(sku, coSoId);
+                if (existingSp != null) {
+                    session.setAttribute("errorMsg", "Mã SKU '" + sku + "' đã tồn tại trong kho của chi nhánh.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                int categoryId = Integer.parseInt(categoryIdStr);
+                double donGia = Double.parseDouble(donGiaStr);
+                double giaNhap = Double.parseDouble(giaNhapStr);
+                int stock = Integer.parseInt(stockStr);
+
+                SanPham_DichVu sp = new SanPham_DichVu();
+                sp.setSkuCode(sku.trim());
+                sp.setTenSanPham(name.trim());
+                sp.setDanhMucID(categoryId);
+                sp.setCoSoID(coSoId);
+                sp.setDonGia(donGia);
+                sp.setGiaNhap(giaNhap);
+                sp.setDonViTinh(unit);
+                sp.setSoLuongTon(stock);
+                sp.setTrangThai(status != null ? status : Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                sp.setMoTa(desc);
+
+                boolean success = sanPhamDAO.insert(sp);
+                if (success) {
+                    session.setAttribute("successMsg", "Thêm sản phẩm mới thành công.");
+                } else {
+                    session.setAttribute("errorMsg", "Không thể thêm sản phẩm vào cơ sở dữ liệu.");
+                }
+
+            } else if ("update".equals(action)) {
+                String idStr = req.getParameter("sanPhamID");
+                String sku = req.getParameter("skuCode");
+                String name = req.getParameter("tenSanPham");
+                String categoryIdStr = req.getParameter("danhMucID");
+                String donGiaStr = req.getParameter("donGia");
+                String giaNhapStr = req.getParameter("giaNhap");
+                String unit = req.getParameter("donViTinh");
+                String stockStr = req.getParameter("soLuongTon");
+                String status = req.getParameter("trangThai");
+                String desc = req.getParameter("moTa");
+
+                int id = Integer.parseInt(idStr);
+                SanPham_DichVu sp = sanPhamDAO.findById(id);
+
+                if (sp == null || sp.getCoSoID() != coSoId) {
+                    session.setAttribute("errorMsg", "Sản phẩm không tồn tại hoặc không thuộc chi nhánh này.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                // Check SKU conflict
+                if (sku != null && !sku.trim().equalsIgnoreCase(sp.getSkuCode())) {
+                    SanPham_DichVu other = sanPhamDAO.findBySkuAndCoSo(sku.trim(), coSoId);
+                    if (other != null) {
+                        session.setAttribute("errorMsg", "Mã SKU '" + sku + "' đã được sử dụng bởi sản phẩm khác.");
+                        resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                        return;
+                    }
+                    sp.setSkuCode(sku.trim());
+                }
+
+                sp.setTenSanPham(name.trim());
+                sp.setDanhMucID(Integer.parseInt(categoryIdStr));
+                sp.setDonGia(Double.parseDouble(donGiaStr));
+                sp.setGiaNhap(Double.parseDouble(giaNhapStr));
+                sp.setDonViTinh(unit);
+                sp.setSoLuongTon(Integer.parseInt(stockStr));
+                sp.setTrangThai(status);
+                sp.setMoTa(desc);
+
+                boolean success = sanPhamDAO.update(sp);
+                if (success) {
+                    session.setAttribute("successMsg", "Cập nhật sản phẩm thành công.");
+                } else {
+                    session.setAttribute("errorMsg", "Lỗi khi cập nhật sản phẩm.");
+                }
+
+            } else if ("delete".equals(action)) {
+                String idStr = req.getParameter("id");
+                int id = Integer.parseInt(idStr);
+                SanPham_DichVu sp = sanPhamDAO.findById(id);
+
+                if (sp == null || sp.getCoSoID() != coSoId) {
+                    session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                // Check if used in invoices
+                if (sanPhamDAO.existsInInvoices(id)) {
+                    // Soft delete
+                    sp.setTrangThai(Constants.TRANG_THAI_SP_NGUNG_KINH_DOANH);
+                    sanPhamDAO.update(sp);
+                    session.setAttribute("successMsg", "Sản phẩm đã được bán trên hóa đơn trước đây. Đã chuyển trạng thái sang 'Ngừng kinh doanh' để bảo vệ lịch sử thanh toán.");
+                } else {
+                    // Hard delete
+                    boolean success = sanPhamDAO.delete(id);
+                    if (success) {
+                        session.setAttribute("successMsg", "Xóa sản phẩm vĩnh viễn thành công.");
+                    } else {
+                        session.setAttribute("errorMsg", "Không thể xóa sản phẩm.");
+                    }
+                }
+
+            } else if ("nhap-kho".equals(action)) {
+                String idStr = req.getParameter("id");
+                String qtyStr = req.getParameter("amount");
+
+                int id = Integer.parseInt(idStr);
+                int qty = Integer.parseInt(qtyStr);
+
+                if (qty <= 0) {
+                    session.setAttribute("errorMsg", "Số lượng nhập kho phải lớn hơn 0.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                SanPham_DichVu sp = sanPhamDAO.findById(id);
+                if (sp == null || sp.getCoSoID() != coSoId) {
+                    session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                sp.setSoLuongTon(sp.getSoLuongTon() + qty);
+                // If it was temporarily out of stock, change status to Active
+                if (Constants.TRANG_THAI_SP_TAM_HET_HANG.equals(sp.getTrangThai())) {
+                    sp.setTrangThai(Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                }
+
+                boolean success = sanPhamDAO.update(sp);
+                if (success) {
+                    session.setAttribute("successMsg", "Nhập kho thêm " + qty + " " + sp.getDonViTinh() + " cho '" + sp.getTenSanPham() + "' thành công.");
+                } else {
+                    session.setAttribute("errorMsg", "Lỗi khi cập nhật số lượng nhập kho.");
+                }
+
+            } else if ("xuat-kho".equals(action)) {
+                String idStr = req.getParameter("id");
+                String qtyStr = req.getParameter("amount");
+
+                int id = Integer.parseInt(idStr);
+                int qty = Integer.parseInt(qtyStr);
+
+                if (qty <= 0) {
+                    session.setAttribute("errorMsg", "Số lượng xuất kho phải lớn hơn 0.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                SanPham_DichVu sp = sanPhamDAO.findById(id);
+                if (sp == null || sp.getCoSoID() != coSoId) {
+                    session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                if (sp.getSoLuongTon() < qty) {
+                    session.setAttribute("errorMsg", "Lỗi: Số lượng xuất kho vượt quá số lượng tồn hiện có (" + sp.getSoLuongTon() + ").");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                sp.setSoLuongTon(sp.getSoLuongTon() - qty);
+                // If stock reaches 0, set status to out of stock
+                if (sp.getSoLuongTon() == 0 && Constants.TRANG_THAI_SP_DANG_KINH_DOANH.equals(sp.getTrangThai())) {
+                    sp.setTrangThai(Constants.TRANG_THAI_SP_TAM_HET_HANG);
+                }
+
+                boolean success = sanPhamDAO.update(sp);
+                if (success) {
+                    session.setAttribute("successMsg", "Xuất kho giảm " + qty + " " + sp.getDonViTinh() + " cho '" + sp.getTenSanPham() + "' thành công.");
+                } else {
+                    session.setAttribute("errorMsg", "Lỗi khi cập nhật số lượng xuất kho.");
+                }
+
+            } else if ("add-category".equals(action)) {
+                String catName = req.getParameter("tenDanhMuc");
+                if (catName == null || catName.trim().isEmpty()) {
+                    session.setAttribute("errorMsg", "Tên danh mục không được trống.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                DanhMucSanPham dm = new DanhMucSanPham();
+                dm.setTenDanhMuc(catName.trim());
+
+                boolean success = categoryDAO.insert(dm);
+                if (success) {
+                    session.setAttribute("successMsg", "Thêm danh mục '" + catName + "' thành công.");
+                } else {
+                    session.setAttribute("errorMsg", "Lỗi khi thêm danh mục mới.");
+                }
+            } else if ("add-presets".equals(action)) {
+                String[] presetNames = req.getParameterValues("presetNames");
+                String[] presetCatNames = req.getParameterValues("presetCatNames");
+                String[] presetDonGias = req.getParameterValues("presetDonGias");
+                String[] presetGiaNhaps = req.getParameterValues("presetGiaNhaps");
+                String[] presetUnits = req.getParameterValues("presetUnits");
+                String[] presetStocks = req.getParameterValues("presetStocks");
+
+                if (presetNames != null) {
+                    int addedCount = 0;
+                    List<DanhMucSanPham> allCats = categoryDAO.findAll();
+                    List<SanPham_DichVu> currentList = sanPhamDAO.findByCoSo(coSoId);
+
+                    for (int i = 0; i < presetNames.length; i++) {
+                        String name = presetNames[i];
+                        String catName = presetCatNames[i];
+                        double donGia = Double.parseDouble(presetDonGias[i]);
+                        double giaNhap = Double.parseDouble(presetGiaNhaps[i]);
+                        String unit = presetUnits[i];
+                        int stock = Integer.parseInt(presetStocks[i]);
+
+                        if (stock <= 0) continue;
+
+                        boolean exists = false;
+                        for (SanPham_DichVu spExisting : currentList) {
+                            if (spExisting.getTenSanPham() != null && spExisting.getTenSanPham().trim().equalsIgnoreCase(name.trim())) {
+                                exists = true;
+                                spExisting.setSoLuongTon(spExisting.getSoLuongTon() + stock);
+                                if (org.example.util.Constants.TRANG_THAI_SP_TAM_HET_HANG.equals(spExisting.getTrangThai())) {
+                                    spExisting.setTrangThai(org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                                }
+                                sanPhamDAO.update(spExisting);
+                                addedCount++;
+                                break;
+                            }
+                        }
+                        if (exists) {
+                            continue;
+                        }
+
+                        int catId = -1;
+                        for (DanhMucSanPham dm : allCats) {
+                            if (dm.getTenDanhMuc().trim().equalsIgnoreCase(catName.trim())) {
+                                catId = dm.getDanhMucID();
+                                break;
+                            }
+                        }
+                        if (catId == -1) {
+                            DanhMucSanPham newCat = new DanhMucSanPham();
+                            newCat.setTenDanhMuc(catName.trim());
+                            categoryDAO.insert(newCat);
+                            allCats = categoryDAO.findAll();
+                            for (DanhMucSanPham dm : allCats) {
+                                if (dm.getTenDanhMuc().trim().equalsIgnoreCase(catName.trim())) {
+                                    catId = dm.getDanhMucID();
+                                    break;
+                                }
+                            }
+                        }
+
+                        String nanoHex = Long.toHexString(System.nanoTime() + i).toUpperCase();
+                        String sku = "SKU-" + (nanoHex.length() > 6 ? nanoHex.substring(nanoHex.length() - 6) : nanoHex);
+
+                        SanPham_DichVu sp = new SanPham_DichVu();
+                        sp.setSkuCode(sku);
+                        sp.setTenSanPham(name.trim());
+                        sp.setDanhMucID(catId);
+                        sp.setCoSoID(coSoId);
+                        sp.setDonGia(donGia);
+                        sp.setGiaNhap(giaNhap);
+                        sp.setDonViTinh(unit);
+                        sp.setSoLuongTon(stock);
+                        sp.setTrangThai(org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                        sp.setMoTa(name.trim() + " chất lượng cao");
+
+                        boolean successInsert = sanPhamDAO.insert(sp);
+                        if (successInsert) {
+                            addedCount++;
+                        }
+                    }
+                    if (addedCount > 0) {
+                        session.setAttribute("successMsg", "Đã thêm/cập nhật thành công " + addedCount + " sản phẩm vào kho.");
+                    } else {
+                        session.setAttribute("errorMsg", "Không có sản phẩm nào được chọn để thêm.");
+                    }
+                } else {
+                    session.setAttribute("errorMsg", "Không nhận được danh sách sản phẩm mẫu.");
+                }
+            } else {
+                session.setAttribute("errorMsg", "Hành động không hợp lệ.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.setAttribute("errorMsg", "Đã xảy ra lỗi hệ thống: " + e.getMessage());
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+    }
+}

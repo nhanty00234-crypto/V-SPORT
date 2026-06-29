@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BIGSIZE SPORT - Đặt Lịch Sân Chi Tiết</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+              850: '#854d0e',
+            },
+            background: "#fafaf9",
+            surface: "#ffffff",
+            "on-surface": "#1c1917",
+            "on-surface-variant": "#78716c",
+            outline: "#e7e5e4",
+            success: "#10b981",
+            error: "#ef4444",
+          },
+          fontFamily: { sans: ["Plus Jakarta Sans", "sans-serif"] },
+          boxShadow: {
+            'soft': '0 4px 30px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 12px 30px rgba(234, 179, 8, 0.12)',
+            'gold-glow': '0 0 25px rgba(234, 179, 8, 0.5)',
+            'glass': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.5)',
+          }
+        }
+      }
+    }
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafaf9; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e7e5e4; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ca8a04; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .glass-nav {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Time Slot States */
+    .slot-available {
+        border-color: #e7e5e4;
+        background-color: #ffffff;
+        color: #1c1917;
+    }
+    .slot-available:hover {
+        border-color: #fde047;
+        background-color: #fefce8;
+    }
+    .slot-booked {
+        background-color: #f5f5f4;
+        border-color: #e7e5e4;
+        color: #a8a29e;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    .slot-selected {
+        background-color: #eab308;
+        border-color: #ca8a04;
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+        transform: scale(1.02);
+    }
+</style>
+</head>
+<body class="text-on-surface pb-28 min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-outline px-4 py-3 flex items-center justify-between shadow-soft">
+        <div class="flex items-center gap-2">
+            <a href="Dashboard.html" class="p-2 text-stone-500 hover:text-primary-600 rounded-full hover:bg-stone-50 transition-all flex items-center justify-center active:scale-95">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <h1 class="text-sm font-extrabold text-stone-850">Đặt Sân Chi Tiết</h1>
+        </div>
+        <button onclick="showToast('Chia sẻ', 'Đã sao chép liên kết sân này!')" class="p-2 text-stone-500 hover:text-primary-600 rounded-full hover:bg-stone-50 transition-all">
+            <span class="material-symbols-outlined">share</span>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto px-4 mt-4 flex flex-col gap-5">
+
+        <!-- Yard Presentation Card -->
+        <section class="bg-white border border-outline rounded-3xl overflow-hidden shadow-soft animate__animated animate__fadeIn">
+            <div class="relative h-48">
+                <img id="yardImage" src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&h=400&fit=crop" class="w-full h-full object-cover" alt="Sân bóng đá">
+                <span class="absolute bottom-3 left-3 bg-stone-900/80 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary-400 text-xs filled">star</span> 
+                    <span id="yardRating">4.9 (140 đánh giá)</span>
+                </span>
+            </div>
+            
+            <div class="p-5 flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <h2 id="yardTitle" class="text-base font-extrabold text-stone-850 leading-tight">BIGSIZE SPORT Sân Bóng Quận 1</h2>
+                    <span id="yardBadge" class="text-[10px] font-extrabold bg-primary-100 text-primary-600 px-2 py-0.5 rounded-lg">Bóng đá</span>
+                </div>
+                <p id="yardAddress" class="text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>12 Nguyễn Thị Minh Khai, Q.1, HCM</p>
+                
+                <!-- Amenities icons -->
+                <div class="flex gap-4 mt-3 pt-3 border-t border-outline flex-wrap text-stone-500">
+                    <span class="flex items-center gap-1 text-[10px] font-semibold"><span class="material-symbols-outlined text-xs text-primary-500">local_parking</span> Gửi xe miễn phí</span>
+                    <span class="flex items-center gap-1 text-[10px] font-semibold"><span class="material-symbols-outlined text-xs text-primary-500">shower</span> Phòng tắm/Thay đồ</span>
+                    <span class="flex items-center gap-1 text-[10px] font-semibold"><span class="material-symbols-outlined text-xs text-primary-500">wifi</span> Wifi căng đét</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Date Picker Scroller -->
+        <section class="flex flex-col gap-3">
+            <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 text-lg">calendar_month</span>Chọn Ngày Đặt</h3>
+            <div class="flex gap-3 overflow-x-auto pb-1 hide-scrollbar" id="datePicker">
+                <!-- Javascript will load dates dynamically starting from today -->
+            </div>
+        </section>
+
+        <!-- Time Slot Grid -->
+        <section class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 text-lg">schedule</span>Khung Giờ Sân</h3>
+                <div class="flex gap-2 text-[10px] font-medium text-stone-400">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full border border-stone-250 bg-white"></span> Trống</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-stone-200"></span> Đã đặt</span>
+                </div>
+            </div>
+
+            <!-- Morning -->
+            <div class="flex flex-col gap-2">
+                <span class="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider">Sáng (06:00 - 12:00) · 150k - 200k/h</span>
+                <div class="grid grid-cols-4 gap-2.5" id="morningSlots">
+                    <!-- Morning slots go here -->
+                </div>
+            </div>
+
+            <!-- Afternoon -->
+            <div class="flex flex-col gap-2">
+                <span class="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider">Chiều (12:00 - 17:00) · 200k/h</span>
+                <div class="grid grid-cols-4 gap-2.5" id="afternoonSlots">
+                    <!-- Afternoon slots go here -->
+                </div>
+            </div>
+
+            <!-- Evening (Peak) -->
+            <div class="flex flex-col gap-2">
+                <span class="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider flex items-center gap-1">Tối (17:00 - 22:00) <span class="bg-primary-100 text-primary-600 px-1 py-0.2 rounded text-[8px] font-bold">Giờ cao điểm</span> · 250k - 300k/h</span>
+                <div class="grid grid-cols-4 gap-2.5" id="eveningSlots">
+                    <!-- Evening slots go here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Addons Counter -->
+        <section class="flex flex-col gap-3">
+            <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 text-lg">restaurant</span>Dịch Vụ Đi Kèm</h3>
+            
+            <div class="flex flex-col gap-3 bg-white border border-outline rounded-3xl p-4 shadow-soft">
+                <!-- Service Item 1 -->
+                <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-stone-50 flex items-center justify-center text-stone-600"><span class="material-symbols-outlined">local_drink</span></div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-800">Nước suối Aquafina</p>
+                            <p class="text-[10px] text-stone-400">10,000 ₫ / chai</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateQty('water', -1)" class="w-7 h-7 rounded-lg border border-outline hover:bg-stone-50 flex items-center justify-center text-stone-500 font-bold active:scale-90">-</button>
+                        <span id="qty_water" class="text-xs font-bold w-5 text-center">0</span>
+                        <button onclick="updateQty('water', 1)" class="w-7 h-7 rounded-lg border border-outline hover:bg-stone-50 flex items-center justify-center text-stone-500 font-bold active:scale-90">+</button>
+                    </div>
+                </div>
+
+                <!-- Service Item 2 -->
+                <div class="flex items-center justify-between pb-3 border-b border-stone-100" id="rentalServiceItem">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-stone-50 flex items-center justify-center text-stone-600"><span class="material-symbols-outlined">sports_tennis</span></div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-850" id="rentalServiceName">Thuê áo bib tập</p>
+                            <p class="text-[10px] text-stone-400" id="rentalServicePrice">20,000 ₫ / bộ</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateQty('item', -1)" class="w-7 h-7 rounded-lg border border-outline hover:bg-stone-50 flex items-center justify-center text-stone-500 font-bold active:scale-90">-</button>
+                        <span id="qty_item" class="text-xs font-bold w-5 text-center">0</span>
+                        <button onclick="updateQty('item', 1)" class="w-7 h-7 rounded-lg border border-outline hover:bg-stone-50 flex items-center justify-center text-stone-500 font-bold active:scale-90">+</button>
+                    </div>
+                </div>
+
+                <!-- Service Item 3 -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-stone-50 flex items-center justify-center text-stone-600"><span class="material-symbols-outlined">sports_soccer</span></div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-850">Thuê bóng phụ</p>
+                            <p class="text-[10px] text-stone-400">30,000 ₫ / quả</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateQty('ball', -1)" class="w-7 h-7 rounded-lg border border-outline hover:bg-stone-50 flex items-center justify-center text-stone-500 font-bold active:scale-90">-</button>
+                        <span id="qty_ball" class="text-xs font-bold w-5 text-center">0</span>
+                        <button onclick="updateQty('ball', 1)" class="w-7 h-7 rounded-lg border border-outline hover:bg-stone-50 flex items-center justify-center text-stone-500 font-bold active:scale-90">+</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Voucher Promotion Input -->
+        <section class="flex flex-col gap-3">
+            <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 text-lg">local_activity</span>Mã Giảm Giá</h3>
+            <div class="flex gap-2">
+                <input type="text" id="voucherInput" class="flex-1 bg-white border border-outline rounded-xl px-4 py-2.5 text-xs focus:ring-1 focus:ring-primary-500 focus:outline-none" placeholder="Nhập mã giảm giá (ví dụ: GIOVANG20)...">
+                <button onclick="applyVoucher()" class="bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl active:scale-95 transition-all shadow-md shadow-primary-50">Áp dụng</button>
+            </div>
+            <div id="appliedVoucherContainer" class="hidden flex items-center justify-between bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-xs font-semibold">
+                <span id="voucherText">Đã áp dụng mã GIOVANG20 (giảm 20%)</span>
+                <button onclick="removeVoucher()" class="text-emerald-500 hover:text-emerald-800"><span class="material-symbols-outlined text-xs">close</span></button>
+            </div>
+        </section>
+
+        <!-- Dynamic Invoice Card -->
+        <section class="bg-white border border-outline rounded-3xl p-5 shadow-soft flex flex-col gap-4">
+            <h3 class="text-xs font-extrabold uppercase text-stone-400 tracking-wider">Chi Tiết Tạm Tính</h3>
+            
+            <div class="flex flex-col gap-2.5 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Tiền sân (<span id="invoiceHours">0</span> giờ)</span>
+                    <span class="font-bold text-stone-850" id="invoiceCourtPrice">0 ₫</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Dịch vụ đi kèm</span>
+                    <span class="font-bold text-stone-850" id="invoiceServicePrice">0 ₫</span>
+                </div>
+                <div class="flex justify-between text-emerald-600 hidden" id="discountRow">
+                    <span>Mã giảm giá</span>
+                    <span class="font-bold" id="invoiceDiscountPrice">-0 ₫</span>
+                </div>
+                <div class="border-t border-stone-100 pt-3 flex justify-between text-sm">
+                    <span class="font-extrabold text-stone-800">Tổng thanh toán</span>
+                    <span class="font-extrabold text-primary-600 text-base" id="invoiceTotalPrice">0 ₫</span>
+                </div>
+            </div>
+
+            <!-- Booking Buttons -->
+            <button id="bookBtn" onclick="openCheckoutModal()" disabled class="w-full bg-stone-300 text-white font-bold py-3.5 rounded-2xl cursor-not-allowed text-xs transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5">
+                Vui lòng chọn khung giờ <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+        </section>
+
+    </main>
+
+    <!-- CHECKOUT MODAL OVERLAY -->
+    <div id="checkoutOverlay" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
+        <div id="checkoutPanel" class="bg-white w-full max-w-md rounded-t-[32px] p-6 flex flex-col gap-6 shadow-2xl translate-y-full transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-500 text-lg filled">payment</span>
+                    <h3 class="font-extrabold text-stone-850">Thanh toán đặt sân</h3>
+                </div>
+                <button onclick="closeCheckoutModal()" class="p-2 text-stone-400 hover:text-stone-700 hover:bg-stone-50 rounded-full"><span class="material-symbols-outlined">close</span></button>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <!-- Payment methods -->
+                <div>
+                    <label class="block text-[10px] font-extrabold text-stone-400 uppercase tracking-wider mb-2">Phương thức thanh toán</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setPaymentMethod('qr')" id="btnPayQR" class="border-2 border-primary-500 bg-primary-50/50 p-3 rounded-2xl text-left flex flex-col gap-1 transition-all">
+                            <span class="material-symbols-outlined text-primary-600 filled">qr_code_2</span>
+                            <span class="text-xs font-bold text-stone-850">Chuyển khoản QR</span>
+                            <span class="text-[9px] text-stone-400">VietQR xử lý tự động</span>
+                        </button>
+                        <button onclick="setPaymentMethod('momo')" id="btnPayMomo" class="border border-outline hover:border-primary-400 p-3 rounded-2xl text-left flex flex-col gap-1 transition-all">
+                            <span class="material-symbols-outlined text-stone-500">wallet</span>
+                            <span class="text-xs font-bold text-stone-850">Ví MoMo / E-Wallet</span>
+                            <span class="text-[9px] text-stone-400">Xác nhận bằng ứng dụng</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QR Panel -->
+                <div id="qrPanel" class="bg-primary-50/40 border border-primary-100 rounded-3xl p-4 flex flex-col items-center justify-center gap-3 animate__animated animate__fadeIn animate__faster">
+                    <p class="text-[10px] font-bold text-primary-700 text-center uppercase tracking-wide">Quét mã VietQR chuyển khoản nhanh</p>
+                    <div class="bg-white p-2 rounded-2xl border border-primary-200/50 shadow-sm relative">
+                        <img id="vietqrCode" src="" class="w-44 h-44 object-cover" alt="QR VietQR">
+                        <div class="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-xs flex-col gap-2 rounded-2xl hidden" id="qrLoading">
+                            <div class="w-8 h-8 rounded-full border-4 border-primary-500 border-t-transparent animate-spin"></div>
+                            <span class="text-[10px] text-stone-500 font-bold">Đang tạo mã QR...</span>
+                        </div>
+                    </div>
+                    <div class="w-full flex flex-col gap-1 text-[10px] text-stone-500">
+                        <p class="flex justify-between">Ngân hàng: <span class="font-bold text-stone-800">MB BANK (Ngân hàng Quân đội)</span></p>
+                        <p class="flex justify-between">Số tài khoản: <span class="font-mono font-bold text-stone-850">0909123456</span></p>
+                        <p class="flex justify-between">Chủ tài khoản: <span class="font-bold text-stone-850">BIGSIZE SPORT VN</span></p>
+                        <p class="flex justify-between">Số tiền: <span class="font-bold text-primary-600 font-mono" id="qrPrice">0 ₫</span></p>
+                        <p class="flex justify-between">Nội dung chuyển khoản: <span class="font-mono font-bold text-stone-850" id="qrMemo">VS011705</span></p>
+                    </div>
+                </div>
+
+                <!-- Momo Panel -->
+                <div id="momoPanel" class="hidden bg-stone-50 border border-outline rounded-3xl p-5 text-center flex flex-col items-center justify-center gap-3 animate__animated animate__fadeIn animate__faster">
+                    <div class="w-12 h-12 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center"><span class="material-symbols-outlined text-2xl">smartphone</span></div>
+                    <div>
+                        <p class="text-xs font-bold text-stone-800">Thanh toán qua ví MoMo</p>
+                        <p class="text-[10px] text-stone-400 mt-1 max-w-[240px] mx-auto leading-snug">Hệ thống sẽ chuyển hướng bạn sang ứng dụng ví điện tử MoMo để tiến hành thanh toán.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Button -->
+            <button onclick="confirmPayment()" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3.5 rounded-2xl active:scale-[0.98] text-xs transition-all shadow-md shadow-primary-200 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">verified_user</span> Xác nhận đã thanh toán
+            </button>
+        </div>
+    </div>
+
+    <!-- SUCCESS BOOKING MODAL -->
+    <div id="successOverlay" class="fixed inset-0 bg-stone-900/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 flex flex-col items-center text-center gap-5 shadow-2xl animate__animated animate__bounceIn">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-100/50">
+                <span class="material-symbols-outlined text-3xl filled">check_circle</span>
+            </div>
+            
+            <div>
+                <h3 class="text-base font-extrabold text-stone-850">Đặt sân thành công!</h3>
+                <p class="text-[11px] text-on-surface-variant mt-1.5 leading-snug">Hệ thống đã xác nhận giao dịch của bạn. Vui lòng check-in khi đến sân.</p>
+            </div>
+
+            <!-- Ticket details mockup -->
+            <div class="w-full bg-stone-50 border border-outline border-dashed rounded-2xl p-4 flex flex-col gap-2 text-left text-[11px]">
+                <div class="flex justify-between"><span class="text-stone-400">Mã đặt sân:</span><span class="font-mono font-extrabold text-stone-850" id="successBookingId">BK001</span></div>
+                <div class="flex justify-between"><span class="text-stone-400">Sân:</span><span class="font-bold text-stone-850" id="successYardName">BIGSIZE SPORT Sân Bóng Quận 1</span></div>
+                <div class="flex justify-between"><span class="text-stone-400">Ngày đặt:</span><span class="font-bold text-stone-850" id="successDate">21/05/2026</span></div>
+                <div class="flex justify-between"><span class="text-stone-400">Khung giờ:</span><span class="font-bold text-stone-850" id="successTime">08:00 - 10:00</span></div>
+                <div class="flex justify-between"><span class="text-stone-400">Tổng thanh toán:</span><span class="font-bold text-primary-600 font-mono" id="successPrice">250,000 ₫</span></div>
+                
+                <!-- QR Checkin mock -->
+                <div class="flex flex-col items-center gap-2 mt-2 pt-3 border-t border-outline border-dotted">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=BK001" class="w-20 h-20 object-cover border border-stone-200 p-1 bg-white rounded-lg" alt="Checkin QR">
+                    <span class="text-[9px] text-stone-400 font-semibold uppercase">Mã vé Check-in của bạn</span>
+                </div>
+            </div>
+
+            <div class="w-full flex gap-3">
+                <a href="Dashboard.html" class="flex-1 border border-outline hover:bg-stone-50 text-stone-600 font-bold py-3 rounded-xl text-xs transition-colors">Về trang chủ</a>
+                <a href="LichSuDat.html" class="flex-1 bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-primary-100">Vé của tôi</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING BOTTOM NAVIGATION HEADER/DOCK -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-40">
+        <nav class="glass-nav rounded-2xl py-3 px-4 flex justify-between items-center shadow-lg border border-white/60">
+            <a href="Dashboard.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">home</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Trang Chủ</span>
+            </a>
+            <a href="DatSan.html" class="flex flex-col items-center gap-1 flex-1 nav-active transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 text-primary-600 bg-primary-100 shadow-sm shadow-primary-200">
+                    <span class="material-symbols-outlined filled">event_seat</span>
+                </div>
+                <span class="text-[9px] font-extrabold tracking-wide uppercase">Đặt Sân</span>
+            </a>
+            <a href="LichSuDat.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Lịch Sử</span>
+            </a>
+            <a href="HoTro.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">forum</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Hỗ Trợ</span>
+            </a>
+            <a href="TaiKhoan.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Cá Nhân</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Active Toast Alert System -->
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // Set details based on URL queries for simulation
+        const params = new URLSearchParams(window.location.search);
+        const yardId = params.get('yard') || 'q1_soccer';
+
+        const yardData = {
+            q1_soccer: {
+                title: "BIGSIZE SPORT Sân Bóng Quận 1",
+                category: "Bóng đá",
+                badge: "Bóng đá",
+                address: "12 Nguyễn Thị Minh Khai, Q.1, HCM",
+                rating: "4.9 (140 đánh giá)",
+                image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&h=400&fit=crop",
+                rentalName: "Thuê áo bib tập",
+                rentalPrice: 20000,
+                rentalUnit: "bộ"
+            },
+            govap_pickleball: {
+                title: "BIGSIZE SPORT Pickleball Gò Vấp",
+                category: "Pickleball",
+                badge: "Pickleball",
+                address: "45 Phan Văn Trị, Gò Vấp, HCM",
+                rating: "4.8 (85 đánh giá)",
+                image: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&h=400&fit=crop",
+                rentalName: "Thuê vợt Pickleball",
+                rentalPrice: 30000,
+                rentalUnit: "cái"
+            },
+            tanbinh_badminton: {
+                title: "BIGSIZE SPORT Cầu Lông Tân Bình",
+                category: "Cầu lông",
+                badge: "Cầu lông",
+                address: "89 Cộng Hòa, Tân Bình, HCM",
+                rating: "4.7 (64 đánh giá)",
+                image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&h=400&fit=crop",
+                rentalName: "Thuê vợt cầu lông",
+                rentalPrice: 25000,
+                rentalUnit: "cái"
+            },
+            vungtau_tennis: {
+                title: "BIGSIZE SPORT Tennis Vũng Tàu",
+                category: "Tennis",
+                badge: "Tennis",
+                address: "125 Thùy Vân, Vũng Tàu",
+                rating: "4.9 (42 đánh giá)",
+                image: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&h=400&fit=crop",
+                rentalName: "Thuê vợt Tennis",
+                rentalPrice: 50000,
+                rentalUnit: "cái"
+            }
+        };
+
+        const activeYard = yardData[yardId] || yardData.q1_soccer;
+
+        // Load details
+        document.getElementById('yardTitle').textContent = activeYard.title;
+        document.getElementById('yardBadge').textContent = activeYard.badge;
+        document.getElementById('yardAddress').innerHTML = `<span class="material-symbols-outlined text-xs">location_on</span>${activeYard.address}`;
+        document.getElementById('yardRating').innerHTML = `4.9 (${Math.floor(Math.random()*100 + 40)} đánh giá)`;
+        document.getElementById('yardImage').src = activeYard.image;
+        document.getElementById('rentalServiceName').textContent = activeYard.rentalName;
+        document.getElementById('rentalServicePrice').textContent = activeYard.rentalPrice.toLocaleString() + ' ₫ / ' + activeYard.rentalUnit;
+
+        // State trackers
+        const selectedSlots = new Set();
+        let selectedDate = "";
+        let waterQty = 0;
+        let itemQty = 0;
+        let ballQty = 0;
+        let discountRate = 0; // 0.2 means 20%
+        let paymentMethod = "qr";
+
+        // Date Picker Setup
+        function setupDates() {
+            const container = document.getElementById('datePicker');
+            const weekdays = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                
+                const dayName = i === 0 ? "Hôm nay" : weekdays[date.getDay()];
+                const dayNum = date.getDate();
+                const month = date.getMonth() + 1;
+                const formattedDate = `${dayNum}/${month}`;
+                const dateString = date.toISOString().split('T')[0];
+
+                if (i === 0) selectedDate = dateString;
+
+                const activeClass = i === 0 ? "border-primary-500 bg-primary-500 text-white" : "border-outline bg-white text-stone-600 hover:border-primary-400";
+                
+                const dateHTML = `
+                    <button onclick="selectDate('${dateString}', this)" class="date-btn shrink-0 flex flex-col items-center gap-1 w-16 py-3 rounded-2xl border text-center transition-all active:scale-95 duration-200 ${activeClass}">
+                        <span class="text-[9px] font-semibold tracking-wide">${dayName}</span>
+                        <span class="text-base font-extrabold leading-none">${dayNum}</span>
+                        <span class="text-[8px] font-medium opacity-80">${formattedDate}</span>
+                    </button>
+                `;
+                container.insertAdjacentHTML('beforeend', dateHTML);
+            }
+        }
+
+        function selectDate(dateStr, btn) {
+            selectedDate = dateStr;
+            const buttons = document.querySelectorAll('.date-btn');
+            buttons.forEach(b => {
+                b.className = "date-btn shrink-0 flex flex-col items-center gap-1 w-16 py-3 rounded-2xl border bg-white text-stone-600 hover:border-primary-400 text-center transition-all active:scale-95 duration-200";
+            });
+            btn.className = "date-btn shrink-0 flex flex-col items-center gap-1 w-16 py-3 rounded-2xl border border-primary-500 bg-primary-500 text-white text-center transition-all active:scale-95 duration-200 shadow-sm shadow-primary-200";
+            
+            // Re-render slots (simulated refresh)
+            selectedSlots.clear();
+            renderSlots();
+            updateInvoice();
+            showToast('Lịch đặt', `Đã đổi ngày đặt sang ngày ${dateStr}`);
+        }
+
+        // Slot Generator
+        const rawMorning = ["06:00 - 07:00", "07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00"];
+        const rawAfternoon = ["12:00 - 13:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"];
+        const rawEvening = ["17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00"];
+
+        function renderSlots() {
+            renderSlotSection('morningSlots', rawMorning, 150000);
+            renderSlotSection('afternoonSlots', rawAfternoon, 200000);
+            renderSlotSection('eveningSlots', rawEvening, 250000); // peak
+        }
+
+        function renderSlotSection(elementId, slotList, price) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = "";
+
+            slotList.forEach((time, index) => {
+                const isBooked = index === 2 || index === 4; // simulated booked slots
+                const isSelected = selectedSlots.has(time);
+                
+                let stateClass = "slot-available";
+                let clickAction = `selectSlot('${time}', ${price})`;
+                
+                if (isBooked) {
+                    stateClass = "slot-booked";
+                    clickAction = "";
+                } else if (isSelected) {
+                    stateClass = "slot-selected";
+                }
+
+                const slotHTML = `
+                    <button onclick="${clickAction}" class="border text-center py-2.5 rounded-xl text-[10px] font-semibold transition-all active:scale-95 duration-200 ${stateClass}">
+                        <span>${time.split(' - ')[0]}</span>
+                        <span class="block text-[8px] opacity-75 mt-0.5">${(price/1000)}K/h</span>
+                    </button>
+                `;
+                container.insertAdjacentHTML('beforeend', slotHTML);
+            });
+        }
+
+        function selectSlot(time, price) {
+            if (selectedSlots.has(time)) {
+                selectedSlots.delete(time);
+            } else {
+                // simple single slot selector or multi-slots allowed? Multi-slots is fine!
+                selectedSlots.add(time);
+            }
+            renderSlots();
+            updateInvoice();
+        }
+
+        // Qty updator
+        function updateQty(type, val) {
+            if (type === 'water') {
+                waterQty = Math.max(0, waterQty + val);
+                document.getElementById('qty_water').textContent = waterQty;
+            } else if (type === 'item') {
+                itemQty = Math.max(0, itemQty + val);
+                document.getElementById('qty_item').textContent = itemQty;
+            } else if (type === 'ball') {
+                ballQty = Math.max(0, ballQty + val);
+                document.getElementById('qty_ball').textContent = ballQty;
+            }
+            updateInvoice();
+        }
+
+        // Voucher discount
+        function applyVoucher() {
+            const val = document.getElementById('voucherInput').value.trim().toUpperCase();
+            if (val === 'GIOVANG20') {
+                discountRate = 0.2;
+                document.getElementById('appliedVoucherContainer').classList.remove('hidden');
+                document.getElementById('voucherText').textContent = "Đã áp dụng mã GIOVANG20 (giảm 20%)";
+                document.getElementById('discountRow').classList.remove('hidden');
+                showToast('Khuyến mãi', 'Áp dụng mã GIOVANG20 thành công! Giảm 20% tiền sân.');
+            } else if (val === 'FREEWATER') {
+                discountRate = 0; // handled differently in real app, we show text here
+                document.getElementById('appliedVoucherContainer').classList.remove('hidden');
+                document.getElementById('voucherText').textContent = "Đã áp dụng mã FREEWATER (tặng nước suối)";
+                showToast('Khuyến mãi', 'Áp dụng mã FREEWATER thành công! Nhận 2 chai nước miễn phí.');
+            } else {
+                showToast('Khuyến mãi', 'Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+            }
+            updateInvoice();
+        }
+
+        function removeVoucher() {
+            discountRate = 0;
+            document.getElementById('appliedVoucherContainer').classList.add('hidden');
+            document.getElementById('discountRow').classList.add('hidden');
+            updateInvoice();
+            showToast('Khuyến mãi', 'Đã gỡ mã giảm giá.');
+        }
+
+        // Invoice updates
+        let finalCourtPrice = 0;
+        let finalServicePrice = 0;
+        let finalTotalPrice = 0;
+
+        function updateInvoice() {
+            const hours = selectedSlots.size;
+            document.getElementById('invoiceHours').textContent = hours;
+
+            // Calculate court price
+            let courtPrice = 0;
+            selectedSlots.forEach(time => {
+                if (rawMorning.includes(time)) courtPrice += 150000;
+                else if (rawAfternoon.includes(time)) courtPrice += 200000;
+                else if (rawEvening.includes(time)) courtPrice += 250000;
+            });
+            finalCourtPrice = courtPrice;
+            document.getElementById('invoiceCourtPrice').textContent = courtPrice.toLocaleString() + ' ₫';
+
+            // Services
+            finalServicePrice = (waterQty * 10000) + (itemQty * activeYard.rentalPrice) + (ballQty * 30000);
+            document.getElementById('invoiceServicePrice').textContent = finalServicePrice.toLocaleString() + ' ₫';
+
+            // Discount (applied only on Court price)
+            const discount = courtPrice * discountRate;
+            document.getElementById('invoiceDiscountPrice').textContent = '-' + discount.toLocaleString() + ' ₫';
+
+            // Final Total
+            finalTotalPrice = courtPrice + finalServicePrice - discount;
+            document.getElementById('invoiceTotalPrice').textContent = finalTotalPrice.toLocaleString() + ' ₫';
+
+            // Enable/Disable checkout button
+            const bookBtn = document.getElementById('bookBtn');
+            if (hours > 0) {
+                bookBtn.disabled = false;
+                bookBtn.className = "w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-[0.98] shadow-md shadow-primary-200 text-xs flex items-center justify-center gap-1.5 cursor-pointer";
+                bookBtn.innerHTML = `Đặt sân ngay (${finalTotalPrice.toLocaleString()} ₫) <span class="material-symbols-outlined text-sm">arrow_forward</span>`;
+            } else {
+                bookBtn.disabled = true;
+                bookBtn.className = "w-full bg-stone-300 text-white font-bold py-3.5 rounded-2xl cursor-not-allowed text-xs transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5";
+                bookBtn.innerHTML = `Vui lòng chọn khung giờ <span class="material-symbols-outlined text-sm">arrow_forward</span>`;
+            }
+        }
+
+        // Checkout Modal Functions
+        function openCheckoutModal() {
+            document.getElementById('checkoutOverlay').classList.remove('hidden');
+            
+            // Set dynamic QR code MB Bank via quick VietQR generator API
+            // format: https://img.vietqr.io/image/MBBank-0909123456-compact2.jpg?amount=100000&addInfo=VS011705
+            document.getElementById('qrLoading').classList.remove('hidden');
+            const amount = finalTotalPrice;
+            const memo = 'VS01' + Math.floor(Math.random() * 9000 + 1000);
+            document.getElementById('qrPrice').textContent = amount.toLocaleString() + ' ₫';
+            document.getElementById('qrMemo').textContent = memo;
+
+            const qrUrl = `https://img.vietqr.io/image/MBBank-0909123456-compact2.jpg?amount=${amount}&addInfo=${memo}&accountName=BIGSIZE SPORT%20VIETNAM`;
+            const imgElement = document.getElementById('vietqrCode');
+            imgElement.src = qrUrl;
+            imgElement.onload = () => {
+                document.getElementById('qrLoading').classList.add('hidden');
+            };
+
+            setTimeout(() => {
+                document.getElementById('checkoutPanel').classList.remove('translate-y-full');
+            }, 50);
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutPanel').classList.add('translate-y-full');
+            setTimeout(() => {
+                document.getElementById('checkoutOverlay').classList.add('hidden');
+            }, 300);
+        }
+
+        function setPaymentMethod(method) {
+            paymentMethod = method;
+            const btnQR = document.getElementById('btnPayQR');
+            const btnMomo = document.getElementById('btnPayMomo');
+            const qrPanel = document.getElementById('qrPanel');
+            const momoPanel = document.getElementById('momoPanel');
+
+            if (method === 'qr') {
+                btnQR.className = "border-2 border-primary-500 bg-primary-50/50 p-3 rounded-2xl text-left flex flex-col gap-1 transition-all";
+                btnMomo.className = "border border-outline hover:border-primary-400 p-3 rounded-2xl text-left flex flex-col gap-1 transition-all";
+                qrPanel.classList.remove('hidden');
+                momoPanel.classList.add('hidden');
+            } else {
+                btnQR.className = "border border-outline hover:border-primary-400 p-3 rounded-2xl text-left flex flex-col gap-1 transition-all";
+                btnMomo.className = "border-2 border-primary-500 bg-primary-50/50 p-3 rounded-2xl text-left flex flex-col gap-1 transition-all";
+                qrPanel.classList.add('hidden');
+                momoPanel.classList.remove('hidden');
+            }
+        }
+
+        // Mock payment confirmation logic
+        function confirmPayment() {
+            closeCheckoutModal();
+            setTimeout(() => {
+                // Load success details
+                const randBookingId = 'BK' + Math.floor(Math.random() * 90000 + 10000);
+                document.getElementById('successBookingId').textContent = randBookingId;
+                document.getElementById('successYardName').textContent = activeYard.title;
+                
+                // Format dates
+                const dateParts = selectedDate.split('-');
+                document.getElementById('successDate').textContent = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                
+                // Format times
+                const times = Array.from(selectedSlots).join(', ');
+                document.getElementById('successTime').textContent = times;
+                document.getElementById('successPrice').textContent = finalTotalPrice.toLocaleString() + ' ₫';
+
+                // Save to local storage for History page simulation
+                const localBookings = JSON.parse(localStorage.getItem('vsport_customer_bookings') || '[]');
+                localBookings.unshift({
+                    id: randBookingId,
+                    title: activeYard.title,
+                    category: activeYard.category,
+                    date: `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`,
+                    time: times,
+                    price: finalTotalPrice,
+                    status: 'Upcoming' // Active booking
+                });
+                localStorage.setItem('vsport_customer_bookings', JSON.stringify(localBookings));
+
+                // Show success screen
+                document.getElementById('successOverlay').classList.remove('hidden');
+            }, 350);
+        }
+
+        // Universal Toast function
+        function showToast(title, message) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast_' + Date.now();
+            
+            const toastHTML = `
+                <div id="${toastId}" class="bg-stone-900/95 backdrop-blur-md text-white border border-stone-850 px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 animate__animated animate__fadeInUp animate__faster">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-primary-500/20 text-primary-400 flex items-center justify-center shrink-0 mt-0.5">
+                            <span class="material-symbols-outlined text-[16px] filled">sports_tennis</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-extrabold text-primary-400">${title}</p>
+                            <p class="text-[11px] text-stone-300 mt-0.5 leading-snug">${message}</p>
+                        </div>
+                    </div>
+                    <button onclick="closeToast('${toastId}')" class="text-stone-400 hover:text-white transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHTML);
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 3500);
+        }
+
+        function closeToast(id) {
+            const toast = document.getElementById(id);
+            if (toast) {
+                toast.classList.remove('animate__fadeInUp');
+                toast.classList.add('animate__fadeOutDown');
+                setTimeout(() => { toast.remove(); }, 300);
+            }
+        }
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', () => {
+            setupDates();
+            renderSlots();
+            updateInvoice();
+        });
+    </script>
+</body>
+</html>
+ml>

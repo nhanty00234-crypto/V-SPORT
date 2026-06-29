@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BIGSIZE SPORT - Đặt Sân Thể Thao Trực Tuyến</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // Premium Yellow-Gold Theme
+            primary: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308', // Core Yellow
+              600: '#ca8a04',
+              700: '#a16207',
+              800: '#854d0e',
+              900: '#713f12',
+            },
+            background: "#fafaf9", // Warm white
+            surface: "#ffffff",
+            "on-surface": "#1c1917", // Dark charcoal
+            "on-surface-variant": "#78716c", // Medium warm gray
+            outline: "#e7e5e4",
+            success: "#10b981",
+            error: "#ef4444",
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"],
+          },
+          boxShadow: {
+            'soft': '0 4px 30px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 12px 30px rgba(234, 179, 8, 0.12)',
+            'floating': '0 10px 40px -10px rgba(0,0,0,0.06)',
+            'gold-glow': '0 0 20px rgba(234, 179, 8, 0.4)',
+            'glass': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.5)',
+          }
+        }
+      }
+    }
+</script>
+<style>
+    body { 
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #fafaf9;
+    }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e7e5e4; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ca8a04; }
+
+    /* Hide scrollbar for category list */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Glassmorphism elements */
+    .glass-nav {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Hover effects */
+    .hover-gold-trigger:hover .hover-gold-target {
+        color: #ca8a04;
+        transform: translateY(-2px);
+    }
+    
+    /* Bottom Navigation Active Indicator */
+    .nav-active {
+        color: #ca8a04;
+    }
+    .nav-active .icon-container {
+        background-color: #fef9c3;
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(234, 179, 8, 0.2);
+    }
+</style>
+</head>
+<body class="text-on-surface pb-28 min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-outline px-4 py-3 flex items-center justify-between shadow-soft">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md shadow-primary-200">
+                <span class="material-symbols-outlined text-white text-[22px] filled">sports_tennis</span>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold text-primary-600 leading-none tracking-tight flex items-center gap-1">
+                    BIGSIZE SPORT
+                </h1>
+                <p class="text-[10px] text-on-surface-variant font-medium mt-0.5">Đặt sân nhanh chóng</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Location Selector Dropdown -->
+            <div class="relative">
+                <button onclick="toggleDropdown('locationDropdown')" class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline hover:bg-stone-50 text-xs font-semibold transition-all">
+                    <span class="material-symbols-outlined text-primary-600 text-sm">location_on</span>
+                    <span id="currentLocation">Hồ Chí Minh</span>
+                    <span class="material-symbols-outlined text-stone-400 text-xs">expand_more</span>
+                </button>
+                <div id="locationDropdown" class="hidden absolute right-0 mt-1 w-40 bg-white border border-outline rounded-xl shadow-lg z-50 overflow-hidden animate__animated animate__fadeIn animate__faster">
+                    <button onclick="changeLocation('Hồ Chí Minh')" class="w-full text-left px-4 py-2 text-xs font-medium hover:bg-primary-50 transition-colors">Hồ Chí Minh</button>
+                    <button onclick="changeLocation('Hà Nội')" class="w-full text-left px-4 py-2 text-xs font-medium hover:bg-primary-50 transition-colors">Hà Nội</button>
+                    <button onclick="changeLocation('Vũng Tàu')" class="w-full text-left px-4 py-2 text-xs font-medium hover:bg-primary-50 transition-colors">Vũng Tàu</button>
+                    <button onclick="changeLocation('Bà Rịa')" class="w-full text-left px-4 py-2 text-xs font-medium hover:bg-primary-50 transition-colors">Bà Rịa</button>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <button onclick="showToast('Thông báo', 'Không có thông báo mới nào!')" class="p-2 text-on-surface-variant hover:text-primary-600 rounded-full hover:bg-stone-50 relative transition-all active:scale-95">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-white"></span>
+            </button>
+
+            <!-- Mini Profile -->
+            <a href="TaiKhoan.html" class="flex items-center gap-1 hover:bg-stone-50 p-1.5 rounded-lg transition-all">
+                <img src="https://ui-avatars.com/api/?name=Khach+Hang&background=ca8a04&color=fff&bold=true" class="w-7 h-7 rounded-full object-cover ring-2 ring-primary-100" alt="Avatar">
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-md mx-auto px-4 mt-6 flex flex-col gap-6">
+
+        <!-- Welcome & Banner (Yellow/White theme) -->
+        <section class="relative bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 rounded-3xl p-6 text-white overflow-hidden shadow-lg animate__animated animate__fadeIn">
+            <!-- Decorative circles -->
+            <div class="absolute -right-10 -top-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -left-10 -bottom-10 w-28 h-28 bg-primary-300/20 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <span class="bg-white/20 text-white font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">Chào mừng bạn! 👋</span>
+                <h2 class="text-2xl font-extrabold mt-3 leading-tight tracking-tight">Sân bóng cực đẹp,<br>Đặt ngay 30 giây!</h2>
+                <p class="text-xs text-primary-50/90 mt-2 font-medium">Chọn sân của bạn, chọn giờ vàng, đặt và chiến game thôi!</p>
+                
+                <!-- Quick Search Input inside banner -->
+                <div class="mt-5 relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">search</span>
+                    <input type="text" id="searchInput" oninput="filterFields()" class="w-full bg-white text-stone-900 placeholder-stone-400 pl-10 pr-4 py-2.5 rounded-2xl border-none focus:ring-2 focus:ring-primary-300 focus:outline-none text-xs shadow-soft transition-all" placeholder="Tìm tên sân, bộ môn hoặc chi nhánh...">
+                </div>
+            </div>
+        </section>
+
+        <!-- Promotion Vouchers Carousel -->
+        <section class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 filled text-lg">local_offer</span>Khuyến Mãi Hot</h3>
+                <span class="text-[10px] font-semibold text-primary-600 hover:underline cursor-pointer" onclick="showToast('Khuyến mãi', 'Tất cả khuyến mãi đã được cập nhật bên dưới!')">Xem tất cả</span>
+            </div>
+            
+            <!-- Horizontal scroll voucher list -->
+            <div class="flex gap-4 overflow-x-auto pb-2 hide-scrollbar snap-x">
+                
+                <!-- Voucher 1 -->
+                <div class="snap-start shrink-0 w-[240px] bg-white border border-primary-100 rounded-2xl p-4 flex gap-3 relative shadow-soft hover:shadow-card-hover transition-all duration-300 group">
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-6 bg-background border-r border-primary-100 rounded-r-full"></div>
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-6 bg-background border-l border-primary-100 rounded-l-full"></div>
+                    
+                    <div class="w-12 h-12 rounded-xl bg-primary-100/50 flex items-center justify-center text-primary-600 shrink-0">
+                        <span class="material-symbols-outlined text-xl">percent</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-extrabold text-stone-800">Giảm 20% Giờ Vàng</p>
+                        <p class="text-[10px] text-on-surface-variant mt-0.5">Khung giờ: 08:00 - 14:00</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-[10px] font-mono font-bold bg-primary-50 border border-primary-200 text-primary-600 px-2 py-0.5 rounded">GIOVANG20</span>
+                            <button onclick="claimVoucher('GIOVANG20', this)" class="text-[10px] font-bold text-white bg-primary-500 hover:bg-primary-600 px-3 py-1 rounded-lg transition-all active:scale-95">Nhận</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voucher 2 -->
+                <div class="snap-start shrink-0 w-[240px] bg-white border border-primary-100 rounded-2xl p-4 flex gap-3 relative shadow-soft hover:shadow-card-hover transition-all duration-300 group">
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-6 bg-background border-r border-primary-100 rounded-r-full"></div>
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-6 bg-background border-l border-primary-100 rounded-l-full"></div>
+                    
+                    <div class="w-12 h-12 rounded-xl bg-primary-100/50 flex items-center justify-center text-primary-600 shrink-0">
+                        <span class="material-symbols-outlined text-xl">sports_bar</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-extrabold text-stone-800">Tặng Nước Suối</p>
+                        <p class="text-[10px] text-on-surface-variant mt-0.5">Đặt sân trên 2 tiếng</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-[10px] font-mono font-bold bg-primary-50 border border-primary-200 text-primary-600 px-2 py-0.5 rounded">FREEWATER</span>
+                            <button onclick="claimVoucher('FREEWATER', this)" class="text-[10px] font-bold text-white bg-primary-500 hover:bg-primary-600 px-3 py-1 rounded-lg transition-all active:scale-95">Nhận</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voucher 3 -->
+                <div class="snap-start shrink-0 w-[240px] bg-white border border-primary-100 rounded-2xl p-4 flex gap-3 relative shadow-soft hover:shadow-card-hover transition-all duration-300 group">
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-6 bg-background border-r border-primary-100 rounded-r-full"></div>
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-6 bg-background border-l border-primary-100 rounded-l-full"></div>
+                    
+                    <div class="w-12 h-12 rounded-xl bg-primary-100/50 flex items-center justify-center text-primary-600 shrink-0">
+                        <span class="material-symbols-outlined text-xl">flash_on</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-extrabold text-stone-800">Pickleball Deal Hè</p>
+                        <p class="text-[10px] text-on-surface-variant mt-0.5">Đồng giá 100k/giờ</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-[10px] font-mono font-bold bg-primary-50 border border-primary-200 text-primary-600 px-2 py-0.5 rounded">PBHE2026</span>
+                            <button onclick="claimVoucher('PBHE2026', this)" class="text-[10px] font-bold text-white bg-primary-500 hover:bg-primary-600 px-3 py-1 rounded-lg transition-all active:scale-95">Nhận</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Categories (Sport Filter) -->
+        <section class="flex flex-col gap-3">
+            <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 text-lg">sports_soccer</span>Môn Thể Thao</h3>
+            
+            <div class="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+                
+                <!-- Category 1: All -->
+                <button onclick="filterCategory('all', this)" class="category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary-500 bg-primary-500 text-white font-semibold text-xs transition-all active:scale-95 shadow-sm">
+                    Tất cả
+                </button>
+
+                <!-- Category 2: Soccer -->
+                <button onclick="filterCategory('soccer', this)" class="category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline bg-white hover:border-primary-400 hover:bg-primary-50 text-stone-600 font-semibold text-xs transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">sports_soccer</span> Bóng đá
+                </button>
+
+                <!-- Category 3: Badminton -->
+                <button onclick="filterCategory('badminton', this)" class="category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline bg-white hover:border-primary-400 hover:bg-primary-50 text-stone-600 font-semibold text-xs transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">sports_tennis</span> Cầu lông
+                </button>
+
+                <!-- Category 4: Pickleball -->
+                <button onclick="filterCategory('pickleball', this)" class="category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline bg-white hover:border-primary-400 hover:bg-primary-50 text-stone-600 font-semibold text-xs transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">sports_baseball</span> Pickleball
+                </button>
+
+                <!-- Category 5: Tennis -->
+                <button onclick="filterCategory('tennis', this)" class="category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline bg-white hover:border-primary-400 hover:bg-primary-50 text-stone-600 font-semibold text-xs transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">sports_tennis</span> Tennis
+                </button>
+
+            </div>
+        </section>
+
+        <!-- Yard Lists -->
+        <section class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 text-lg">explore</span>Đề xuất gần bạn</h3>
+                <span class="text-[10px] text-stone-400 font-medium">Còn trống trong ngày</span>
+            </div>
+
+            <div id="yardsGrid" class="flex flex-col gap-4">
+                
+                <!-- Yard 1 -->
+                <div class="yard-card bg-white border border-outline rounded-3xl overflow-hidden shadow-soft hover:shadow-card-hover transition-all duration-300 group" data-category="soccer">
+                    <div class="relative h-44 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=500&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Sân bóng">
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-stone-800 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                            <span class="material-symbols-outlined text-primary-500 text-[12px] filled">star</span> 4.9
+                        </span>
+                        <span class="absolute top-3 right-3 bg-primary-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
+                            Bóng đá
+                        </span>
+                    </div>
+                    <div class="p-5 flex flex-col gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-stone-850 group-hover:text-primary-600 transition-colors">BIGSIZE SPORT Sân Bóng Quận 1</h4>
+                            <p class="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>12 Nguyễn Thị Minh Khai, Q.1, HCM</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-outline">
+                            <div>
+                                <span class="text-[10px] text-on-surface-variant font-medium block">Giá chỉ từ</span>
+                                <span class="text-sm font-extrabold text-stone-850">250k - 420k <span class="text-[10px] text-on-surface-variant font-normal">/h</span></span>
+                            </div>
+                            <a href="DatSan.html?yard=q1_soccer" class="bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-primary-100 hover:shadow-md hover:shadow-primary-300 transition-all active:scale-95 flex items-center gap-1">
+                                Đặt sân <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yard 2 -->
+                <div class="yard-card bg-white border border-outline rounded-3xl overflow-hidden shadow-soft hover:shadow-card-hover transition-all duration-300 group" data-category="pickleball">
+                    <div class="relative h-44 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=500&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Sân Pickleball">
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-stone-800 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                            <span class="material-symbols-outlined text-primary-500 text-[12px] filled">star</span> 4.8
+                        </span>
+                        <span class="absolute top-3 right-3 bg-primary-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
+                            Pickleball
+                        </span>
+                    </div>
+                    <div class="p-5 flex flex-col gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-stone-850 group-hover:text-primary-600 transition-colors">BIGSIZE SPORT Pickleball Gò Vấp</h4>
+                            <p class="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>45 Phan Văn Trị, Gò Vấp, HCM</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-outline">
+                            <div>
+                                <span class="text-[10px] text-on-surface-variant font-medium block">Giá chỉ từ</span>
+                                <span class="text-sm font-extrabold text-stone-850">150k - 200k <span class="text-[10px] text-on-surface-variant font-normal">/h</span></span>
+                            </div>
+                            <a href="DatSan.html?yard=govap_pickleball" class="bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-primary-100 hover:shadow-md hover:shadow-primary-300 transition-all active:scale-95 flex items-center gap-1">
+                                Đặt sân <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yard 3 -->
+                <div class="yard-card bg-white border border-outline rounded-3xl overflow-hidden shadow-soft hover:shadow-card-hover transition-all duration-300 group" data-category="badminton">
+                    <div class="relative h-44 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Sân cầu lông">
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-stone-800 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                            <span class="material-symbols-outlined text-primary-500 text-[12px] filled">star</span> 4.7
+                        </span>
+                        <span class="absolute top-3 right-3 bg-primary-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
+                            Cầu lông
+                        </span>
+                    </div>
+                    <div class="p-5 flex flex-col gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-stone-850 group-hover:text-primary-600 transition-colors">BIGSIZE SPORT Cầu Lông Tân Bình</h4>
+                            <p class="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>89 Cộng Hòa, Tân Bình, HCM</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-outline">
+                            <div>
+                                <span class="text-[10px] text-on-surface-variant font-medium block">Giá chỉ từ</span>
+                                <span class="text-sm font-extrabold text-stone-850">80k - 130k <span class="text-[10px] text-on-surface-variant font-normal">/h</span></span>
+                            </div>
+                            <a href="DatSan.html?yard=tanbinh_badminton" class="bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-primary-100 hover:shadow-md hover:shadow-primary-300 transition-all active:scale-95 flex items-center gap-1">
+                                Đặt sân <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yard 4 -->
+                <div class="yard-card bg-white border border-outline rounded-3xl overflow-hidden shadow-soft hover:shadow-card-hover transition-all duration-300 group" data-category="tennis">
+                    <div class="relative h-44 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=500&h=300&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Sân tennis">
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-stone-800 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                            <span class="material-symbols-outlined text-primary-500 text-[12px] filled">star</span> 4.9
+                        </span>
+                        <span class="absolute top-3 right-3 bg-primary-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
+                            Tennis
+                        </span>
+                    </div>
+                    <div class="p-5 flex flex-col gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-stone-850 group-hover:text-primary-600 transition-colors">BIGSIZE SPORT Tennis Vũng Tàu</h4>
+                            <p class="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>125 Thùy Vân, Vũng Tàu</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-outline">
+                            <div>
+                                <span class="text-[10px] text-on-surface-variant font-medium block">Giá chỉ từ</span>
+                                <span class="text-sm font-extrabold text-stone-850">200k - 350k <span class="text-[10px] text-on-surface-variant font-normal">/h</span></span>
+                            </div>
+                            <a href="DatSan.html?yard=vungtau_tennis" class="bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-primary-100 hover:shadow-md hover:shadow-primary-300 transition-all active:scale-95 flex items-center gap-1">
+                                Đặt sân <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FLOATING BOTTOM NAVIGATION HEADER/DOCK -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50">
+        <nav class="glass-nav rounded-2xl py-3 px-4 flex justify-between items-center shadow-lg border border-white/60">
+            
+            <!-- Home -->
+            <a href="Dashboard.html" class="flex flex-col items-center gap-1 flex-1 nav-active transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 text-primary-600 bg-primary-100 shadow-sm shadow-primary-200">
+                    <span class="material-symbols-outlined filled">home</span>
+                </div>
+                <span class="text-[9px] font-extrabold tracking-wide uppercase">Trang Chủ</span>
+            </a>
+
+            <!-- Book Court -->
+            <a href="DatSan.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">event_seat</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Đặt Sân</span>
+            </a>
+
+            <!-- History -->
+            <a href="LichSuDat.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Hoạt Động</span>
+            </a>
+
+            <!-- Help & Chat -->
+            <a href="HoTro.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200 relative">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">forum</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Hỗ Trợ</span>
+                <span class="absolute top-1 right-4 w-2 h-2 bg-primary-500 rounded-full animate-ping"></span>
+            </a>
+
+            <!-- Profile -->
+            <a href="TaiKhoan.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Tài Khoản</span>
+            </a>
+
+        </nav>
+    </div>
+
+    <!-- Active Toast Alert System -->
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Dropdown toggle helper
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            if (dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        // Change location simulation
+        function changeLocation(location) {
+            document.getElementById('currentLocation').textContent = location;
+            document.getElementById('locationDropdown').classList.add('hidden');
+            showToast('Vị trí', `Đã chuyển sang chi nhánh tại ${location}`);
+        }
+
+        // Filter categories
+        function filterCategory(category, element) {
+            // Update active state of buttons
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => {
+                btn.className = "category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline bg-white hover:border-primary-400 hover:bg-primary-50 text-stone-600 font-semibold text-xs transition-all active:scale-95";
+            });
+            
+            // Set active styles for the clicked one
+            if (category === 'all') {
+                element.className = "category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary-500 bg-primary-500 text-white font-semibold text-xs transition-all active:scale-95 shadow-sm";
+            } else {
+                element.className = "category-btn shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary-500 bg-primary-500 text-white font-semibold text-xs transition-all active:scale-95 shadow-sm";
+            }
+
+            // Filter cards
+            const cards = document.querySelectorAll('.yard-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'block';
+                    card.classList.add('animate__animated', 'animate__fadeIn');
+                    setTimeout(() => card.classList.remove('animate__animated', 'animate__fadeIn'), 500);
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Search filter
+        function filterFields() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.yard-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('h4').textContent.toLowerCase();
+                const address = card.querySelector('p').textContent.toLowerCase();
+                const category = card.getAttribute('data-category').toLowerCase();
+                
+                if (title.includes(query) || address.includes(query) || category.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Claim voucher simulation
+        function claimVoucher(code, btn) {
+            btn.innerHTML = `<span class="material-symbols-outlined text-[12px] filled mr-0.5">check</span> Đã lưu`;
+            btn.className = "text-[10px] font-bold text-primary-600 bg-primary-100 px-3 py-1 rounded-lg transition-all cursor-default pointer-events-none";
+            showToast('Khuyến mãi', `Lưu mã ${code} thành công! Áp dụng tại bước đặt sân.`);
+        }
+
+        // Universal Toast function
+        function showToast(title, message) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast_' + Date.now();
+            
+            const toastHTML = `
+                <div id="${toastId}" class="bg-stone-900/95 backdrop-blur-md text-white border border-stone-850 px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 animate__animated animate__fadeInUp animate__faster">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-primary-500/20 text-primary-400 flex items-center justify-center shrink-0 mt-0.5">
+                            <span class="material-symbols-outlined text-[16px] filled">sports_tennis</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-extrabold text-primary-400">${title}</p>
+                            <p class="text-[11px] text-stone-300 mt-0.5 leading-snug">${message}</p>
+                        </div>
+                    </div>
+                    <button onclick="closeToast('${toastId}')" class="text-stone-400 hover:text-white transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', toastHTML);
+            
+            // Auto close after 3.5s
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 3500);
+        }
+
+        function closeToast(id) {
+            const toast = document.getElementById(id);
+            if (toast) {
+                toast.classList.remove('animate__fadeInUp');
+                toast.classList.add('animate__fadeOutDown');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+    </script>
+</body>
+</html>

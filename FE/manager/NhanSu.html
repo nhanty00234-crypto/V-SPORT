@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhân sự — Chi nhánh</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<style>
+body { font-family: 'Inter', sans-serif; }
+  .nav-link { display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;color:#52525b;font-size:14px;font-weight:500;text-decoration:none;transition:all .15s;white-space:nowrap;position:relative; }
+  .nav-link:hover { background:#f4f4f5;color:#18181b; }
+  .nav-link.active { background:#f4f4f5;color:#18181b;font-weight:600; }
+  .nav-link.active::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; background:#27272a; border-radius:0 3px 3px 0; }
+  .card { background:#fff;border:1px solid #e4e4e7;border-radius:16px; transition:box-shadow .2s, transform .2s; }
+  .card-hover:hover { box-shadow:0 8px 24px -8px rgba(0,0,0,.08); transform:translateY(-2px); }
+  .badge { display:inline-flex;align-items:center;padding:3px 9px;border-radius:9999px;font-size:11px;font-weight:600; }
+  .badge-green { background:#dcfce7;color:#15803d; }
+  .badge-amber { background:#fef3c7;color:#b45309; }
+  .badge-red { background:#fee2e2;color:#b91c1c; }
+  .badge-blue { background:#dbeafe;color:#1e40af; }
+  .badge-gray { background:#f4f4f5;color:#52525b; }
+  .badge-purple { background:#f3e8ff;color:#7e22ce; }
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:#a1a1aa}
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pop { 0% { opacity:0; transform:scale(.94); } 100% { opacity:1; transform:scale(1); } }
+  @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4);} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0);} }
+  @keyframes drawBar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  main > section { animation: fadeUp .4s ease both; }
+  main > section:nth-child(1) { animation-delay: 0ms; }
+  main > section:nth-child(2) { animation-delay: 80ms; }
+  main > section:nth-child(3) { animation-delay: 160ms; }
+  main > section:nth-child(4) { animation-delay: 240ms; }
+  .stagger > *:nth-child(1){animation:pop .35s ease both;animation-delay:50ms}
+  .stagger > *:nth-child(2){animation:pop .35s ease both;animation-delay:120ms}
+  .stagger > *:nth-child(3){animation:pop .35s ease both;animation-delay:190ms}
+  .stagger > *:nth-child(4){animation:pop .35s ease both;animation-delay:260ms}
+  button { transition: transform .12s ease, opacity .15s ease, background-color .15s ease; }
+  button:active:not([disabled]) { transform: scale(.97); }
+  .live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+  .chart-bar { transform-origin: bottom; animation: drawBar .6s cubic-bezier(.34,1.56,.64,1) both; }
+  .chart-bar:nth-child(1){animation-delay:50ms} .chart-bar:nth-child(2){animation-delay:120ms} .chart-bar:nth-child(3){animation-delay:190ms} .chart-bar:nth-child(4){animation-delay:260ms} .chart-bar:nth-child(5){animation-delay:330ms} .chart-bar:nth-child(6){animation-delay:400ms} .chart-bar:nth-child(7){animation-delay:470ms}
+  aside a .material-symbols-outlined { transition: transform .2s ease; }
+  aside a:hover .material-symbols-outlined { transform: translateX(2px); }
+  .hero-gradient { background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 60%, #eff6ff 100%); }
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important;} }
+</style>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+<body class="bg-zinc-50 text-zinc-900 min-h-screen">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-zinc-200 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+  <div class="px-5 py-4 border-b border-zinc-100 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shrink-0 shadow-md shadow-blue-200">
+      <span class="material-symbols-outlined text-white text-[18px]" >sports_tennis</span>
+    </div>
+    <div>
+      <p class="text-sm font-bold text-zinc-900 leading-tight tracking-tight">V-SPORT</p>
+      <p class="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Manager Portal</p>
+    </div>
+  </div>
+  <div class="px-4 py-3 border-b border-zinc-100">
+    <div class="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-br from-blue-50 to-zinc-50 rounded-xl border border-blue-100/50">
+      <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-zinc-200">
+        <span class="material-symbols-outlined text-[14px] text-blue-700">storefront</span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-[11px] font-bold text-zinc-800 truncate">V-Sport Vũng Tàu</p>
+        <p class="text-[10px] text-zinc-500 truncate">CS01 · Đang hoạt động</p>
+      </div>
+      <span class="w-2 h-2 rounded-full bg-green-500 shrink-0 live-dot"></span>
+    </div>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mb-1.5">Vận hành</p>
+    <a href="Dashboard.html" class="nav-link"><span class="material-symbols-outlined text-[19px]" >space_dashboard</span>Tổng quan</a>
+    <a href="LichDatSan.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">event</span>Lịch đặt sân<span class="ml-auto text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md">5</span></a>
+    <a href="QuanLySan.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">stadium</span>Quản lý sân</a>
+    <a href="KhoDichVu.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">inventory_2</span>Kho & Dịch vụ<span class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md">3</span></a>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
+    <a href="NhanSu.html" class="nav-link active"><span class="material-symbols-outlined text-[19px]" style="font-variation-settings:'FILL' 1">groups</span>Nhân sự</a>
+    <a href="HoaDon.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">receipt_long</span>Hóa đơn</a>
+    <a href="KhuyenMai.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">loyalty</span>Khuyến mãi</a>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
+    <a href="HoTro.html" class="nav-link"><span class="material-symbols-outlined text-[19px]">contact_support</span>Hỗ trợ Admin</a>
+  </nav>
+  <div class="px-3 py-3 border-t border-zinc-100">
+    <a href="../admin/Dashboard.html" class="nav-link text-zinc-400 text-xs"><span class="material-symbols-outlined text-[16px]">arrow_back_ios</span>Về Admin Portal</a>
+  </div>
+</aside>
+
+<!-- Header -->
+<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
+  <div class="flex items-center gap-3">
+    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
+    <div>
+      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Nhân sự & Ca làm việc</h1>
+      <p class="text-xs text-zinc-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">database</span>Bảng Accounts  CaLamViec</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-1.5">
+    <button onclick="location.href='HoTro.html'" class="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 text-xs font-medium">
+      <span class="material-symbols-outlined text-[15px]">help</span>Hỗ trợ
+    </button>
+    <button class="relative p-2 rounded-lg hover:bg-zinc-100 text-zinc-500">
+      <span class="material-symbols-outlined text-[20px]">notifications</span>
+      <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 live-dot"></span>
+    </button>
+    <div class="w-px h-6 bg-zinc-200 mx-1"></div>
+    <div class="relative">
+      <button id="profileBtn" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+        <img src="https://i.pravatar.cc/64?img=68" class="w-8 h-8 rounded-full object-cover ring-2 ring-white" alt="">
+        <div class="hidden sm:block text-left">
+          <p class="text-sm font-semibold text-zinc-900 leading-tight">Nguyễn Văn Quân</p>
+          <p class="text-[10px] text-zinc-500">Quản lý · CS01</p>
+        </div>
+        <span id="profileChevron" class="material-symbols-outlined text-[16px] text-zinc-400 hidden sm:block transition-transform duration-150">expand_more</span>
+      </button>
+            <div id="profileDrop" class="hidden absolute top-[calc(100%+8px)] right-0 w-[320px] bg-white rounded-2xl shadow-xl border border-zinc-200 z-50 overflow-hidden">
+        <div class="relative px-5 py-4 border-b border-zinc-100">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-600/[0.04] to-transparent pointer-events-none"></div>
+          <div class="flex items-start gap-3.5">
+            <div class="relative shrink-0"><img class="w-[52px] h-[52px] rounded-full object-cover ring-2 ring-blue-600/30" src="https://i.pravatar.cc/80?img=68"><span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#05cd99] border-2 border-white"></span></div>
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-[15px] text-zinc-900 leading-tight">Nguyễn Văn Quân</p>
+              <div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap"><span class="material-symbols-outlined text-[11px]" style="font-variation-settings:'FILL' 1">verified_user</span>Quản lý chi nhánh</span><span class="inline-flex items-center gap-1 text-[11px] font-medium text-[#05cd99] bg-[#e6fcf5] px-2 py-0.5 rounded-full whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-[#05cd99] inline-block"></span>Online</span></div>
+              <p class="text-xs text-zinc-500 mt-1.5">ID: <span class="font-semibold text-zinc-800 font-mono">MGR042</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 border-b border-zinc-100 flex flex-col gap-2.5">
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">mail</span><p class="text-[13px] text-zinc-700 truncate">quan.nv@vsport.vn</p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">phone</span><p class="text-[13px] text-zinc-700">+84 912 345 678</p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">domain</span><p class="text-[13px] text-zinc-700">CS01 — V-Sport Vũng Tàu</p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">schedule</span><p class="text-[13px] text-zinc-500">Đăng nhập lần cuối: <span class="text-zinc-700 font-medium">18/05/2026 09:42</span></p></div>
+          <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[16px] text-zinc-400 w-4 shrink-0">calendar_today</span><p class="text-[13px] text-zinc-500">Tạo tài khoản: <span class="text-zinc-700 font-medium">12/03/2024</span></p></div>
+        </div>
+        <div class="px-4 py-3 border-b border-zinc-100">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Hoạt động chi nhánh hôm nay</p>
+          <div class="grid grid-cols-3 gap-2"><div class="bg-zinc-50 rounded-xl py-2.5 px-2 text-center"><p class="text-[17px] font-bold text-blue-700 leading-none">18</p><p class="text-[10px] text-zinc-500 mt-1 leading-tight">Lịch đặt<br>hôm nay</p></div><div class="bg-zinc-50 rounded-xl py-2.5 px-2 text-center"><p class="text-[17px] font-bold text-blue-700 leading-none">8/14</p><p class="text-[10px] text-zinc-500 mt-1 leading-tight">Nhân sự<br>làm việc</p></div><div class="bg-zinc-50 rounded-xl py-2.5 px-2 text-center"><p class="text-[17px] font-bold text-blue-700 leading-none">12/15</p><p class="text-[10px] text-zinc-500 mt-1 leading-tight">Hiệu suất<br>sân</p></div></div>
+        </div>
+        <div class="p-2">
+          <button onclick="document.getElementById('profileDrop').classList.add('hidden');document.getElementById('editProfileModal').classList.remove('hidden');" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-zinc-400">manage_accounts</span><span class="text-[13px] font-medium text-zinc-700">Hồ sơ cá nhân</span></button>
+          <button onclick="document.getElementById('profileDrop').classList.add('hidden');document.getElementById('changePwModal').classList.remove('hidden');" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-zinc-400">lock_reset</span><span class="text-[13px] font-medium text-zinc-700">Đổi mật khẩu</span></button>
+          <button class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-zinc-400">settings</span><span class="text-[13px] font-medium text-zinc-700">Cài đặt</span></button>
+          <div class="border-t border-zinc-100 mt-1 pt-1"><button class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-50 transition-colors text-left w-full"><span class="material-symbols-outlined text-[17px] text-red-600">logout</span><span class="text-[13px] font-medium text-red-600">Đăng xuất</span></button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
+
+  <!-- Tabs: Nhân viên / Ca làm việc -->
+  <div class="flex items-center gap-1 border-b border-zinc-200">
+    <button id="tabStaff" onclick="switchTab('staff')" class="px-4 py-2.5 text-sm font-semibold text-zinc-900 border-b-2 border-zinc-900 -mb-px flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">badge</span>Nhân viên <span class="text-xs bg-zinc-100 px-1.5 py-0.5 rounded font-medium text-zinc-600">14</span>
+    </button>
+    <button id="tabShift" onclick="switchTab('shift')" class="px-4 py-2.5 text-sm font-medium text-zinc-500 hover:text-zinc-700 flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">calendar_month</span>Ca làm việc
+    </button>
+  </div>
+
+  <!-- Staff panel -->
+  <div id="panelStaff">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
+          <input type="text" placeholder="Tìm nhân viên..." class="h-9 pl-8 pr-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 w-[200px]">
+        </div>
+        <select class="h-9 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+          <option>Tất cả vai trò</option>
+          <option>Nhân viên lễ tân</option>
+          <option>Nhân viên kỹ thuật</option>
+          <option>Nhân viên bảo vệ</option>
+          <option>Thu ngân</option>
+        </select>
+        <select class="h-9 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+          <option>Tất cả trạng thái</option>
+          <option>Đang làm việc</option>
+          <option>Nghỉ phép</option>
+          <option>Nghỉ việc</option>
+        </select>
+      </div>
+      <button onclick="document.getElementById('staffModal').classList.remove('hidden')" class="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition-colors shrink-0">
+        <span class="material-symbols-outlined text-[16px]">person_add</span>Thêm nhân viên
+      </button>
+    </div>
+    <div data-aos="fade-up" class="card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-zinc-50 border-b border-zinc-200">
+          <tr>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Nhân viên</th>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs hidden sm:table-cell">Vai trò</th>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs hidden md:table-cell">Điện thoại</th>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs hidden lg:table-cell">Ngày vào làm</th>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Trạng thái</th>
+            <th class="px-4 py-3 text-right font-semibold text-zinc-600 text-xs">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100" id="staffBody">
+          <!-- Dynamic staff rows go here -->
+        </tbody>
+      </table>
+      <div class="px-4 py-3 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
+        <span>Hiển thị 5 / 14 nhân viên</span>
+        <div class="flex items-center gap-1">
+          <button class="px-2 py-1 rounded hover:bg-zinc-100 disabled:opacity-40" disabled><span class="material-symbols-outlined text-[14px]">chevron_left</span></button>
+          <button class="px-2.5 py-1 rounded bg-zinc-900 text-white font-medium">1</button>
+          <button class="px-2.5 py-1 rounded hover:bg-zinc-100">2</button>
+          <button class="px-2.5 py-1 rounded hover:bg-zinc-100">3</button>
+          <button class="px-2 py-1 rounded hover:bg-zinc-100"><span class="material-symbols-outlined text-[14px]">chevron_right</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shift panel -->
+  <div id="panelShift" class="hidden flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <button class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+        <span class="text-sm font-semibold text-zinc-900">Tuần 12/05 – 18/05/2026</span>
+        <button class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+      </div>
+      <button onclick="document.getElementById('shiftModal').classList.remove('hidden')" class="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">add</span>Tạo ca mới
+      </button>
+    </div>
+    <!-- Weekly schedule grid -->
+    <div data-aos="fade-up" class="card overflow-x-auto">
+      <table class="w-full text-xs min-w-[700px]">
+        <thead class="bg-zinc-50 border-b border-zinc-200">
+          <tr>
+            <th class="px-3 py-3 text-left font-semibold text-zinc-600 w-[160px]">Nhân viên</th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">T2<br><span class="font-normal text-zinc-400">12/05</span></th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">T3<br><span class="font-normal text-zinc-400">13/05</span></th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">T4<br><span class="font-normal text-zinc-400">14/05</span></th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">T5<br><span class="font-normal text-zinc-400">15/05</span></th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">T6<br><span class="font-normal text-zinc-400">16/05</span></th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">T7<br><span class="font-normal text-zinc-400 text-blue-400">17/05</span></th>
+            <th class="px-2 py-3 text-center font-semibold text-zinc-600">CN<br><span class="font-normal text-zinc-400 text-blue-400">18/05</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100">
+          <tr class="hover:bg-zinc-50">
+            <td class="px-3 py-2.5">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0"><span class="text-[9px] font-bold text-blue-700">TH</span></div>
+                <span class="font-medium text-zinc-900">Trần Hữu Lộc</span>
+              </div>
+            </td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700">S2 14–22</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+          </tr>
+          <tr class="hover:bg-zinc-50">
+            <td class="px-3 py-2.5">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center shrink-0"><span class="text-[9px] font-bold text-purple-700">LM</span></div>
+                <span class="font-medium text-zinc-900">Lê Minh Tuấn</span>
+              </div>
+            </td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700">S2 14–22</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700">S2 14–22</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700">S2 14–22</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700">S2 14–22</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700">S2 14–22</div></td>
+          </tr>
+          <tr class="hover:bg-zinc-50">
+            <td class="px-3 py-2.5">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0"><span class="text-[9px] font-bold text-green-700">NQ</span></div>
+                <span class="font-medium text-zinc-900">Nguyễn Quốc Bảo</span>
+              </div>
+            </td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700">S1 06–14</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+          </tr>
+          <tr class="hover:bg-zinc-50">
+            <td class="px-3 py-2.5">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center shrink-0"><span class="text-[9px] font-bold text-zinc-600">PT</span></div>
+                <span class="font-medium text-zinc-500">Phạm Thị Nga</span>
+              </div>
+            </td>
+            <td class="px-2 py-2.5" colspan="7"><div class="shift-cell bg-amber-50 text-amber-600 w-full">Nghỉ phép cả tuần</div></td>
+          </tr>
+          <tr class="hover:bg-zinc-50">
+            <td class="px-3 py-2.5">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center shrink-0"><span class="text-[9px] font-bold text-orange-700">VD</span></div>
+                <span class="font-medium text-zinc-900">Võ Đình Khoa</span>
+              </div>
+            </td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500">Nghỉ</div></td>
+            <td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700">S3 22–06</div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="px-4 py-3 border-t border-zinc-100 flex items-center gap-4 text-xs text-zinc-500">
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-100 border border-green-300"></span>Ca sáng (06–14)</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-100 border border-blue-300"></span>Ca chiều (14–22)</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-100 border border-amber-300"></span>Ca đêm (22–06)</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-zinc-100 border border-zinc-300"></span>Nghỉ</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- SUCCESS TOAST NOTIFICATION -->
+<div id="successToast" class="fixed bottom-6 right-6 bg-zinc-900 text-white rounded-2xl p-4 shadow-2xl border border-zinc-800 z-[99] flex items-start gap-3 transition-all duration-300 translate-y-12 opacity-0 pointer-events-none w-80">
+  <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+    <span class="material-symbols-outlined text-[18px]">check</span>
+  </div>
+  <div class="flex-1">
+    <p class="text-sm font-bold text-white">Thành công</p>
+    <p id="successToastMsg" class="text-xs text-zinc-400 mt-0.5">Thao tác đã được xử lý hoàn tất.</p>
+  </div>
+</div>
+
+<!-- Add/Edit Staff Modal -->
+<div id="staffModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeStaffModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+      <h2 id="staffModalTitle" class="text-base font-semibold text-zinc-900">Thêm nhân viên mới</h2>
+      <button onclick="closeStaffModal()" class="p-1.5 rounded-lg hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <form id="staffForm" onsubmit="handleStaffSubmit(event)" class="px-6 py-4 flex flex-col gap-4">
+      <input type="hidden" id="staffEditId" value="">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Họ và tên <span class="text-red-500">*</span></label>
+          <input type="text" id="staffName" required placeholder="Nhập họ tên đầy đủ" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Mã nhân viên</label>
+          <input type="text" id="staffCode" placeholder="Tự sinh hoặc nhập" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Vai trò <span class="text-red-500">*</span></label>
+        <select id="staffRole" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+          <option value="">-- Chọn vai trò --</option>
+          <option value="Nhân viên lễ tân">Nhân viên lễ tân</option>
+          <option value="Nhân viên kỹ thuật">Nhân viên kỹ thuật</option>
+          <option value="Nhân viên bảo vệ">Nhân viên bảo vệ</option>
+          <option value="Thu ngân">Thu ngân</option>
+          <option value="Quản lý ca">Quản lý ca</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Điện thoại</label>
+          <input type="tel" id="staffPhone" placeholder="0xxx xxx xxx" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Ngày vào làm</label>
+          <input type="date" id="staffJoinDate" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Email đăng nhập <span class="text-[10px] text-zinc-400 font-normal">· Bảng Accounts</span></label>
+        <input type="email" id="staffEmail" required placeholder="nhanvien@vsport.vn" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Mật khẩu tạm thời</label>
+          <input type="password" id="staffPassword" placeholder="••••••••" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Lương cơ bản (đ)</label>
+          <input type="text" id="staffSalary" placeholder="5,000,000" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-2">
+        <button type="button" onclick="closeStaffModal()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50">Hủy</button>
+        <button type="submit" id="saveStaffBtn" class="h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800">Tạo tài khoản</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Shift Modal -->
+<div id="shiftModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeShiftModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[420px]">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+      <h2 id="shiftModalTitle" class="text-base font-semibold text-zinc-900">Phân ca làm việc</h2>
+      <button onclick="closeShiftModal()" class="p-1.5 rounded-lg hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <form id="shiftForm" onsubmit="handleShiftSubmit(event)" class="px-6 py-4 flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Nhân viên <span class="text-red-500">*</span></label>
+        <select id="shiftEmployee" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+          <!-- Dynamically filled in JS -->
+        </select>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Ca làm <span class="text-red-500">*</span></label>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-green-400 has-[:checked]:bg-green-50">
+            <input type="radio" name="shiftType" value="morning" checked class="sr-only">
+            <span class="material-symbols-outlined text-[20px] text-green-600">wb_sunny</span>
+            <span class="text-xs font-semibold text-zinc-900">Ca sáng</span>
+            <span class="text-[10px] text-zinc-400">06:00–14:00</span>
+          </label>
+          <label class="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50">
+            <input type="radio" name="shiftType" value="afternoon" class="sr-only">
+            <span class="material-symbols-outlined text-[20px] text-blue-600">partly_cloudy_day</span>
+            <span class="text-xs font-semibold text-zinc-900">Ca chiều</span>
+            <span class="text-[10px] text-zinc-400">14:00–22:00</span>
+          </label>
+          <label class="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50">
+            <input type="radio" name="shiftType" value="night" class="sr-only">
+            <span class="material-symbols-outlined text-[20px] text-amber-600">nights_stay</span>
+            <span class="text-xs font-semibold text-zinc-900">Ca đêm</span>
+            <span class="text-[10px] text-zinc-400">22:00–06:00</span>
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Áp dụng ngày <span class="text-red-500">*</span></label>
+          <input type="date" id="shiftDate" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Lặp lại</label>
+          <select id="shiftRepeat" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+            <option value="none">Không lặp (1 ngày)</option>
+            <option value="week">Lặp trong tuần này</option>
+            <option value="weekly">Lặp hàng tuần</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-2">
+        <button type="button" onclick="closeShiftModal()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50">Hủy</button>
+        <button type="submit" class="h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800">Lưu ca</button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- SUCCESS TOAST NOTIFICATION -->
+<div id="successToast" class="fixed bottom-6 right-6 bg-zinc-900 text-white rounded-2xl p-4 shadow-2xl border border-zinc-800 z-[99] flex items-start gap-3 transition-all duration-300 translate-y-12 opacity-0 pointer-events-none w-80">
+  <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+    <span class="material-symbols-outlined text-[18px]">check</span>
+  </div>
+  <div class="flex-1">
+    <p class="text-sm font-bold text-white">Thành công</p>
+    <p id="successToastMsg" class="text-xs text-zinc-400 mt-0.5">Thao tác đã được xử lý hoàn tất.</p>
+  </div>
+</div>
+
+<!-- Add/Edit Staff Modal -->
+<div id="staffModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeStaffModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+      <h2 id="staffModalTitle" class="text-base font-semibold text-zinc-900">Thêm nhân viên mới</h2>
+      <button onclick="closeStaffModal()" class="p-1.5 rounded-lg hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <form id="staffForm" onsubmit="handleStaffSubmit(event)" class="px-6 py-4 flex flex-col gap-4">
+      <input type="hidden" id="staffEditId" value="">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Họ và tên <span class="text-red-500">*</span></label>
+          <input type="text" id="staffName" required placeholder="Nhập họ tên đầy đủ" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Mã nhân viên</label>
+          <input type="text" id="staffCode" placeholder="Tự sinh hoặc nhập" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Vai trò <span class="text-red-500">*</span></label>
+        <select id="staffRole" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+          <option value="">-- Chọn vai trò --</option>
+          <option value="Nhân viên lễ tân">Nhân viên lễ tân</option>
+          <option value="Nhân viên kỹ thuật">Nhân viên kỹ thuật</option>
+          <option value="Nhân viên bảo vệ">Nhân viên bảo vệ</option>
+          <option value="Thu ngân">Thu ngân</option>
+          <option value="Quản lý ca">Quản lý ca</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Điện thoại</label>
+          <input type="tel" id="staffPhone" placeholder="0xxx xxx xxx" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Ngày vào làm</label>
+          <input type="date" id="staffJoinDate" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Email đăng nhập <span class="text-[10px] text-zinc-400 font-normal">· Bảng Accounts</span></label>
+        <input type="email" id="staffEmail" required placeholder="nhanvien@vsport.vn" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Mật khẩu tạm thời</label>
+          <input type="password" id="staffPassword" placeholder="••••••••" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Lương cơ bản (đ)</label>
+          <input type="number" id="staffSalary" placeholder="5000000" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-2">
+        <button type="button" onclick="closeStaffModal()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50">Hủy</button>
+        <button type="submit" id="saveStaffBtn" class="h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800">Tạo tài khoản</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Shift Modal -->
+<div id="shiftModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeShiftModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[420px]">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+      <h2 id="shiftModalTitle" class="text-base font-semibold text-zinc-900">Phân ca làm việc</h2>
+      <button onclick="closeShiftModal()" class="p-1.5 rounded-lg hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <form id="shiftForm" onsubmit="handleShiftSubmit(event)" class="px-6 py-4 flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Nhân viên <span class="text-red-500">*</span></label>
+        <select id="shiftEmployee" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+          <!-- Dynamically filled in JS -->
+        </select>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-zinc-700">Ca làm <span class="text-red-500">*</span></label>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-green-400 has-[:checked]:bg-green-50">
+            <input type="radio" name="shiftType" value="morning" checked class="sr-only">
+            <span class="material-symbols-outlined text-[20px] text-green-600">wb_sunny</span>
+            <span class="text-xs font-semibold text-zinc-900">Ca sáng</span>
+            <span class="text-[10px] text-zinc-400">06:00–14:00</span>
+          </label>
+          <label class="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50">
+            <input type="radio" name="shiftType" value="afternoon" class="sr-only">
+            <span class="material-symbols-outlined text-[20px] text-blue-600">partly_cloudy_day</span>
+            <span class="text-xs font-semibold text-zinc-900">Ca chiều</span>
+            <span class="text-[10px] text-zinc-400">14:00–22:00</span>
+          </label>
+          <label class="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-50 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50">
+            <input type="radio" name="shiftType" value="night" class="sr-only">
+            <span class="material-symbols-outlined text-[20px] text-amber-600">nights_stay</span>
+            <span class="text-xs font-semibold text-zinc-900">Ca đêm</span>
+            <span class="text-[10px] text-zinc-400">22:00–06:00</span>
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Áp dụng ngày <span class="text-red-500">*</span></label>
+          <input type="date" id="shiftDate" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-zinc-700">Lặp lại</label>
+          <select id="shiftRepeat" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+            <option value="none">Không lặp (1 ngày)</option>
+            <option value="week">Lặp trong tuần này</option>
+            <option value="weekly">Lặp hàng tuần</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-2">
+        <button type="button" onclick="closeShiftModal()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50">Hủy</button>
+        <button type="submit" class="h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800">Lưu ca</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Mock data based on SQL Database schema for CS01 / NhanSu / Accounts
+let staffList = [
+  { id: 'NV001', name: 'Trần Hữu Lộc', role: 'Nhân viên lễ tân', phone: '0912345678', joinDate: '2024-03-01', status: 'Đang làm', email: 'loc.th@vsport.vn', salary: 5500000, initial: 'TH', color: 'blue' },
+  { id: 'NV002', name: 'Lê Minh Tuấn', role: 'Nhân viên kỹ thuật', phone: '0909876543', joinDate: '2023-06-15', status: 'Đang làm', email: 'tuan.lm@vsport.vn', salary: 6000000, initial: 'LM', color: 'purple' },
+  { id: 'NV003', name: 'Nguyễn Quốc Bảo', role: 'Thu ngân', phone: '0978123456', joinDate: '2024-01-20', status: 'Đang làm', email: 'bao.nq@vsport.vn', salary: 5800000, initial: 'NQ', color: 'green' },
+  { id: 'NV004', name: 'Phạm Thị Nga', role: 'Nhân viên lễ tân', phone: '0903654321', joinDate: '2022-09-05', status: 'Nghỉ phép', email: 'nga.pt@vsport.vn', salary: 5500000, initial: 'PT', color: 'zinc' },
+  { id: 'NV005', name: 'Võ Đình Khoa', role: 'Nhân viên bảo vệ', phone: '0966789012', joinDate: '2023-11-10', status: 'Đang làm', email: 'khoa.vd@vsport.vn', salary: 4800000, initial: 'VD', color: 'orange' }
+];
+
+let shiftList = [
+  { employeeId: 'NV001', date: '2026-05-12', shift: 'morning' },
+  { employeeId: 'NV001', date: '2026-05-13', shift: 'morning' },
+  { employeeId: 'NV001', date: '2026-05-15', shift: 'morning' },
+  { employeeId: 'NV001', date: '2026-05-16', shift: 'morning' },
+  { employeeId: 'NV001', date: '2026-05-17', shift: 'afternoon' },
+  
+  { employeeId: 'NV002', date: '2026-05-12', shift: 'afternoon' },
+  { employeeId: 'NV002', date: '2026-05-13', shift: 'afternoon' },
+  { employeeId: 'NV002', date: '2026-05-14', shift: 'afternoon' },
+  { employeeId: 'NV002', date: '2026-05-16', shift: 'afternoon' },
+  { employeeId: 'NV002', date: '2026-05-17', shift: 'morning' },
+  { employeeId: 'NV002', date: '2026-05-18', shift: 'afternoon' },
+
+  { employeeId: 'NV003', date: '2026-05-12', shift: 'morning' },
+  { employeeId: 'NV003', date: '2026-05-14', shift: 'morning' },
+  { employeeId: 'NV003', date: '2026-05-15', shift: 'morning' },
+  { employeeId: 'NV003', date: '2026-05-17', shift: 'night' },
+  { employeeId: 'NV003', date: '2026-05-18', shift: 'night' },
+
+  { employeeId: 'NV005', date: '2026-05-12', shift: 'night' },
+  { employeeId: 'NV005', date: '2026-05-13', shift: 'night' },
+  { employeeId: 'NV005', date: '2026-05-15', shift: 'night' },
+  { employeeId: 'NV005', date: '2026-05-16', shift: 'night' },
+  { employeeId: 'NV005', date: '2026-05-18', shift: 'night' }
+];
+
+// Current week range
+const weekDates = [
+  '2026-05-12',
+  '2026-05-13',
+  '2026-05-14',
+  '2026-05-15',
+  '2026-05-16',
+  '2026-05-17',
+  '2026-05-18'
+];
+
+// Document elements
+const staffBody = document.getElementById('staffBody');
+const searchInput = document.querySelector('input[placeholder="Tìm nhân viên..."]');
+const roleSelect = document.querySelector('select:nth-of-type(1)');
+const statusSelect = document.querySelector('select:nth-of-type(2)');
+
+function formatNumberWithCommas(value) {
+  const clean = value.replace(/\D/g, '');
+  if (!clean) return '';
+  return Number(clean).toLocaleString('en-US');
+}
+
+// Initialize and render
+document.addEventListener('DOMContentLoaded', () => {
+  renderStaff();
+  renderShifts();
+  initShiftForm();
+
+  const salaryInput = document.getElementById('staffSalary');
+  if (salaryInput) {
+    salaryInput.addEventListener('input', (e) => {
+      let cursorPosition = e.target.selectionStart;
+      const originalLength = e.target.value.length;
+      
+      const formatted = formatNumberWithCommas(e.target.value);
+      e.target.value = formatted;
+      
+      const newLength = formatted.length;
+      cursorPosition = cursorPosition + (newLength - originalLength);
+      e.target.setSelectionRange(cursorPosition, cursorPosition);
+    });
+  }
+  
+  // Attach search/filter event listeners
+  if (searchInput) searchInput.addEventListener('input', renderStaff);
+  if (roleSelect) roleSelect.addEventListener('change', renderStaff);
+  if (statusSelect) statusSelect.addEventListener('change', renderStaff);
+});
+
+// Switch Tab Staff / Shift
+function switchTab(tab){
+  const s = document.getElementById('panelStaff');
+  const sh = document.getElementById('panelShift');
+  const ts = document.getElementById('tabStaff');
+  const tsh = document.getElementById('tabShift');
+  
+  if (tab === 'staff') {
+    s.classList.remove('hidden');
+    sh.classList.add('hidden');
+    ts.className = 'px-4 py-2.5 text-sm font-semibold text-zinc-900 border-b-2 border-zinc-900 -mb-px flex items-center gap-1.5';
+    tsh.className = 'px-4 py-2.5 text-sm font-medium text-zinc-500 hover:text-zinc-700 flex items-center gap-1.5';
+  } else {
+    sh.classList.remove('hidden');
+    s.classList.add('hidden');
+    tsh.className = 'px-4 py-2.5 text-sm font-semibold text-zinc-900 border-b-2 border-zinc-900 -mb-px flex items-center gap-1.5';
+    ts.className = 'px-4 py-2.5 text-sm font-medium text-zinc-500 hover:text-zinc-700 flex items-center gap-1.5';
+    renderShifts();
+  }
+}
+
+// Render Staff Table
+function renderStaff() {
+  if (!staffBody) return;
+  
+  const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const selectedRole = roleSelect ? roleSelect.value : 'Tất cả vai trò';
+  const selectedStatus = statusSelect ? statusSelect.value : 'Tất cả trạng thái';
+  
+  const filtered = staffList.filter(s => {
+    const matchQuery = s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query) || s.phone.includes(query);
+    const matchRole = selectedRole === 'Tất cả vai trò' || s.role === selectedRole;
+    const matchStatus = selectedStatus === 'Tất cả trạng thái' || 
+                        (selectedStatus === 'Đang làm việc' && s.status === 'Đang làm') ||
+                        (selectedStatus === 'Nghỉ phép' && s.status === 'Nghỉ phép') ||
+                        (selectedStatus === 'Nghỉ việc' && s.status === 'Nghỉ việc');
+    return matchQuery && matchRole && matchStatus;
+  });
+  
+  // Render html
+  if (filtered.length === 0) {
+    staffBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="px-4 py-8 text-center text-zinc-400 text-sm">Không tìm thấy nhân viên nào</td>
+      </tr>
+    `;
+    return;
+  }
+  
+  staffBody.innerHTML = filtered.map(s => {
+    const badgeClass = s.status === 'Đang làm' ? 'badge-green' : s.status === 'Nghỉ phép' ? 'badge-amber' : 'badge-gray';
+    const initialsColors = {
+      blue: 'bg-blue-100 text-blue-700',
+      purple: 'bg-purple-100 text-purple-700',
+      green: 'bg-green-100 text-green-700',
+      zinc: 'bg-zinc-200 text-zinc-650',
+      orange: 'bg-orange-100 text-orange-700'
+    };
+    const colorClass = initialsColors[s.color] || 'bg-zinc-100 text-zinc-700';
+    
+    return `
+      <tr class="hover:bg-zinc-50 transition-colors">
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full ${colorClass} flex items-center justify-center shrink-0">
+              <span class="text-xs font-bold">${s.initial}</span>
+            </div>
+            <div>
+              <p class="font-semibold text-zinc-900">${s.name}</p>
+              <p class="text-xs text-zinc-400">${s.id} · ${s.role}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-zinc-600 hidden sm:table-cell">${s.role}</td>
+        <td class="px-4 py-3 text-zinc-600 hidden md:table-cell">${s.phone || 'Chưa cập nhật'}</td>
+        <td class="px-4 py-3 text-zinc-500 hidden lg:table-cell">${formatDate(s.joinDate)}</td>
+        <td class="px-4 py-3"><span class="badge ${badgeClass}">${s.status}</span></td>
+        <td class="px-4 py-3 text-right flex items-center justify-end gap-1.5 h-[61px]">
+          <button onclick="openShiftAssign('${s.id}')" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition-colors" title="Phân ca">
+            <span class="material-symbols-outlined text-[16px]">schedule</span>
+          </button>
+          <button onclick="editStaff('${s.id}')" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition-colors" title="Chỉnh sửa">
+            <span class="material-symbols-outlined text-[16px]">edit</span>
+          </button>
+          <button onclick="deleteStaff('${s.id}')" class="p-1.5 rounded-lg hover:bg-zinc-100 text-red-500 hover:bg-red-50 transition-colors" title="Xóa">
+            <span class="material-symbols-outlined text-[16px]">person_remove</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Render Weekly Schedule Grid
+function renderShifts() {
+  const tbody = document.querySelector('#panelShift tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = staffList.map(s => {
+    const initialsColors = {
+      blue: 'bg-blue-100 text-blue-700',
+      purple: 'bg-purple-100 text-purple-700',
+      green: 'bg-green-100 text-green-700',
+      zinc: 'bg-zinc-200 text-zinc-650',
+      orange: 'bg-orange-100 text-orange-700'
+    };
+    const colorClass = initialsColors[s.color] || 'bg-zinc-100 text-zinc-700';
+
+    if (s.status === 'Nghỉ phép') {
+      return `
+        <tr class="hover:bg-zinc-50">
+          <td class="px-3 py-2.5">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full ${colorClass} flex items-center justify-center shrink-0">
+                <span class="text-[9px] font-bold">${s.initial}</span>
+              </div>
+              <span class="font-medium text-zinc-500">${s.name}</span>
+            </div>
+          </td>
+          <td class="px-2 py-2.5" colspan="7">
+            <div class="shift-cell bg-amber-50 text-amber-600 border border-amber-200/50 w-full text-center">Nghỉ phép cả tuần</div>
+          </td>
+        </tr>
+      `;
+    }
+
+    const dayCellsHtml = weekDates.map(d => {
+      const assigned = shiftList.find(sh => sh.employeeId === s.id && sh.date === d);
+      if (!assigned) {
+        return `<td class="px-2 py-2.5"><div class="shift-cell bg-zinc-100 text-zinc-500 border border-zinc-200/40">Nghỉ</div></td>`;
+      }
+      
+      if (assigned.shift === 'morning') {
+        return `<td class="px-2 py-2.5"><div class="shift-cell bg-green-100 text-green-700 border border-green-200/50">S1 06–14</div></td>`;
+      } else if (assigned.shift === 'afternoon') {
+        return `<td class="px-2 py-2.5"><div class="shift-cell bg-blue-100 text-blue-700 border border-blue-200/50">S2 14–22</div></td>`;
+      } else {
+        return `<td class="px-2 py-2.5"><div class="shift-cell bg-amber-100 text-amber-700 border border-amber-200/50">S3 22–06</div></td>`;
+      }
+    }).join('');
+
+    return `
+      <tr class="hover:bg-zinc-50">
+        <td class="px-3 py-2.5">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full ${colorClass} flex items-center justify-center shrink-0">
+              <span class="text-[9px] font-bold">${s.initial}</span>
+            </div>
+            <span class="font-medium text-zinc-900">${s.name}</span>
+          </div>
+        </td>
+        ${dayCellsHtml}
+      </tr>
+    `;
+  }).join('');
+}
+
+// Format Date Utility
+function formatDate(dStr) {
+  if (!dStr) return '';
+  const [y, m, d] = dStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// Show Toast
+function showToast(message) {
+  const toast = document.getElementById('successToast');
+  document.getElementById('successToastMsg').innerText = message;
+  toast.classList.remove('opacity-0', 'translate-y-12', 'pointer-events-none');
+  toast.classList.add('opacity-100', 'translate-y-0');
+  
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-12', 'pointer-events-none');
+    toast.classList.remove('opacity-100', 'translate-y-0');
+  }, 3500);
+}
+
+// Modal Staff CRUD controls
+function closeStaffModal() {
+  document.getElementById('staffModal').classList.add('hidden');
+}
+
+function editStaff(id) {
+  const s = staffList.find(x => x.id === id);
+  if (!s) return;
+  
+  document.getElementById('staffModalTitle').innerText = 'Chỉnh sửa thông tin';
+  document.getElementById('staffEditId').value = s.id;
+  document.getElementById('staffCode').value = s.id;
+  document.getElementById('staffCode').disabled = true;
+  document.getElementById('staffName').value = s.name;
+  document.getElementById('staffRole').value = s.role;
+  document.getElementById('staffPhone').value = s.phone;
+  document.getElementById('staffJoinDate').value = s.joinDate;
+  document.getElementById('staffEmail').value = s.email;
+  document.getElementById('staffSalary').value = formatNumberWithCommas(String(s.salary));
+  document.getElementById('staffPassword').placeholder = 'Để trống nếu giữ nguyên';
+  
+  document.getElementById('staffModal').classList.remove('hidden');
+}
+
+function handleStaffSubmit(e) {
+  e.preventDefault();
+  
+  const editId = document.getElementById('staffEditId').value;
+  const name = document.getElementById('staffName').value.trim();
+  const code = document.getElementById('staffCode').value.trim();
+  const role = document.getElementById('staffRole').value;
+  const phone = document.getElementById('staffPhone').value.trim();
+  const joinDate = document.getElementById('staffJoinDate').value || new Date().toISOString().split('T')[0];
+  const email = document.getElementById('staffEmail').value.trim();
+  const salary = parseInt(document.getElementById('staffSalary').value.replace(/,/g, '')) || 5000000;
+  
+  if (editId) {
+    // Edit mode
+    const idx = staffList.findIndex(x => x.id === editId);
+    if (idx !== -1) {
+      staffList[idx] = {
+        ...staffList[idx],
+        name,
+        role,
+        phone,
+        joinDate,
+        email,
+        salary
+      };
+      showToast('Cập nhật thông tin nhân viên thành công.');
+    }
+  } else {
+    // Create mode
+    const newId = code || 'NV' + String(staffList.length + 1).padStart(3, '0');
+    const parts = name.split(' ');
+    const initial = parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+    const colors = ['blue', 'purple', 'green', 'orange', 'zinc'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    staffList.push({
+      id: newId,
+      name,
+      role,
+      phone,
+      joinDate,
+      status: 'Đang làm',
+      email,
+      salary,
+      initial,
+      color: randomColor
+    });
+    showToast('Tạo tài khoản & hồ sơ nhân viên thành công!');
+  }
+  
+  closeStaffModal();
+  renderStaff();
+  renderShifts();
+}
+
+// Reset staff form for Add
+document.querySelector('[onclick*="staffModal"]').setAttribute('onclick', 'openAddStaff()');
+function openAddStaff() {
+  document.getElementById('staffModalTitle').innerText = 'Thêm nhân viên mới';
+  document.getElementById('staffEditId').value = '';
+  document.getElementById('staffCode').value = '';
+  document.getElementById('staffCode').disabled = false;
+  document.getElementById('staffName').value = '';
+  document.getElementById('staffRole').value = '';
+  document.getElementById('staffPhone').value = '';
+  document.getElementById('staffJoinDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('staffEmail').value = '';
+  document.getElementById('staffSalary').value = '';
+  document.getElementById('staffPassword').placeholder = '••••••••';
+  
+  document.getElementById('staffModal').classList.remove('hidden');
+}
+
+function deleteStaff(id) {
+  if (confirm(`Bạn có chắc chắn muốn xóa hồ sơ nhân viên ${id}? Thao tác này cũng sẽ thu hồi tài khoản Accounts tương ứng.`)) {
+    staffList = staffList.filter(x => x.id !== id);
+    shiftList = shiftList.filter(x => x.employeeId !== id);
+    showToast('Đã xóa nhân viên & thu hồi tài khoản thành công.');
+    renderStaff();
+    renderShifts();
+  }
+}
+
+// Shift Assignment
+function openShiftAssign(empId) {
+  initShiftForm();
+  if (empId) {
+    document.getElementById('shiftEmployee').value = empId;
+  }
+  document.getElementById('shiftModal').classList.remove('hidden');
+}
+
+function closeShiftModal() {
+  document.getElementById('shiftModal').classList.add('hidden');
+}
+
+function initShiftForm() {
+  const select = document.getElementById('shiftEmployee');
+  if (!select) return;
+  
+  select.innerHTML = '<option value="">-- Chọn nhân viên --</option>' + 
+    staffList.filter(s => s.status !== 'Nghỉ phép' && s.status !== 'Nghỉ việc').map(s => `
+      <option value="${s.id}">${s.id} — ${s.name}</option>
+    `).join('');
+  
+  document.getElementById('shiftDate').value = new Date().toISOString().split('T')[0];
+}
+
+function handleShiftSubmit(e) {
+  e.preventDefault();
+  const empId = document.getElementById('shiftEmployee').value;
+  const shiftType = document.querySelector('input[name="shiftType"]:checked').value;
+  const date = document.getElementById('shiftDate').value;
+  const repeat = document.getElementById('shiftRepeat').value;
+  
+  if (!empId || !date) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc!');
+    return;
+  }
+  
+  // Check if holiday/leave
+  const emp = staffList.find(s => s.id === empId);
+  if (emp && emp.status === 'Nghỉ phép') {
+    alert('Nhân viên đang nghỉ phép không thể phân ca làm việc!');
+    return;
+  }
+  
+  if (repeat === 'none') {
+    // Single assignment
+    const idx = shiftList.findIndex(sh => sh.employeeId === empId && sh.date === date);
+    if (idx !== -1) {
+      shiftList[idx].shift = shiftType;
+    } else {
+      shiftList.push({ employeeId: empId, date, shift: shiftType });
+    }
+  } else if (repeat === 'week' || repeat === 'weekly') {
+    // Fill all dates in the week
+    weekDates.forEach(d => {
+      const idx = shiftList.findIndex(sh => sh.employeeId === empId && sh.date === d);
+      if (idx !== -1) {
+        shiftList[idx].shift = shiftType;
+      } else {
+        shiftList.push({ employeeId: empId, date: d, shift: shiftType });
+      }
+    });
+  }
+  
+  showToast('Đã phân ca làm việc và đồng bộ bảng công.');
+  closeShiftModal();
+  renderShifts();
+}
+
+</script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 600,
+    once: true
+});
+</script>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('editProfileModal').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[520px] max-h-[90vh] overflow-y-auto z-10 border border-zinc-200">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+      <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-blue-700">manage_accounts</span><h3 class="text-base font-bold text-zinc-900">Hồ sơ cá nhân</h3></div>
+      <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <div class="flex flex-col items-center gap-3 pt-6 pb-4 border-b border-zinc-100">
+      <div class="relative"><img id="editAvatarPreview" class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-600/30" src="https://i.pravatar.cc/80?img=68"><label for="avatarUpload" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-700 text-white flex items-center justify-center cursor-pointer shadow hover:opacity-90 transition-opacity"><span class="material-symbols-outlined text-[14px]">photo_camera</span></label><input id="avatarUpload" type="file" accept="image/*" class="hidden" onchange="previewAvatar(this)"></div>
+      <p class="text-xs text-zinc-500">Nhấn biểu tượng máy ảnh để thay ảnh đại diện</p>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4">Thông tin chi tiết — <span class="text-blue-700">Bảng Accounts</span></p>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Họ và tên</label><input type="text" id="editFullName" value="Nguyễn Văn Quân" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mã tài khoản</label><input type="text" value="MGR042" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Email</label><input type="email" id="editEmail" value="quan.nv@vsport.vn" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Số điện thoại</label><input type="tel" id="editPhone" value="+84 912 345 678" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Vai trò</label><input type="text" value="Quản lý chi nhánh" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none"></div>
+        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Chi nhánh</label><div class="relative"><input type="text" value="CS01 — V-Sport Vũng Tàu" readonly class="w-full h-10 px-3 pr-9 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none"><span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">lock</span></div></div>
+      </div>
+      <p class="text-[11px] text-zinc-500 mt-4 italic">Dữ liệu được đồng bộ từ bảng <code class="font-mono bg-zinc-50 px-1 rounded">Accounts</code> của CSDL V-Sport V4</p>
+    </div>
+    <div class="px-6 pb-5 flex gap-3 justify-end">
+      <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">Hủy</button>
+      <button onclick="saveProfileChanges()" class="h-10 px-5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95">Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePwModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('changePwModal').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] z-10 border border-zinc-200">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+      <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-blue-700">lock_reset</span><h3 class="text-base font-bold text-zinc-900">Đổi mật khẩu</h3></div>
+      <button onclick="document.getElementById('changePwModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <div class="px-6 py-5 flex flex-col gap-4">
+      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu hiện tại</label><div class="relative"><input type="password" id="pwCurrent" placeholder="••••••••" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwCurrent" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
+      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu mới</label><div class="relative"><input type="password" id="pwNew" placeholder="••••••••" oninput="updatePwStrength(this)" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwNew" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div><div class="flex gap-1 mt-2"><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str1"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str2"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str3"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str4"></div></div><p id="pwStrengthLabel" class="text-[11px] text-zinc-500 mt-1"></p></div>
+      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Xác nhận mật khẩu mới</label><div class="relative"><input type="password" id="pwConfirm" placeholder="••••••••" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-blue-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwConfirm" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
+    </div>
+    <div class="px-6 pb-5 flex gap-3 justify-end">
+      <button onclick="document.getElementById('changePwModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">Hủy</button>
+      <button onclick="savePassword()" class="h-10 px-5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95">Đổi mật khẩu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const btn = document.getElementById('profileBtn');
+  const drop = document.getElementById('profileDrop');
+  const chev = document.getElementById('profileChevron');
+  if (btn && drop) {
+    function openDrop() {
+      drop.classList.remove('hidden');
+      drop.style.cssText = 'opacity:0;transform:translateY(-8px) scale(0.97);transition:opacity 0.18s ease,transform 0.18s ease';
+      requestAnimationFrame(() => {
+        drop.style.opacity = '1';
+        drop.style.transform = 'translateY(0) scale(1)';
+      });
+      if (chev) chev.style.transform = 'rotate(180deg)';
+    }
+    function closeDrop() {
+      drop.style.opacity = '0';
+      drop.style.transform = 'translateY(-8px) scale(0.97)';
+      setTimeout(() => {
+        drop.classList.add('hidden');
+        drop.style.cssText = '';
+      }, 180);
+      if (chev) chev.style.transform = '';
+    }
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      drop.classList.contains('hidden') ? openDrop() : closeDrop();
+    });
+    document.addEventListener('click', e => {
+      if (!drop.classList.contains('hidden') && !btn.contains(e.target) && !drop.contains(e.target)) {
+        closeDrop();
+      }
+    });
+  }
+})();
+
+function showToast(msg) {
+  let t = document.createElement('div');
+  t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold z-[9999] shadow-lg flex items-center gap-2 border border-zinc-800';
+  t.innerHTML = '<span class="material-symbols-outlined text-[16px] text-blue-500" style="font-variation-settings:\'FILL\' 1">check_circle</span> ' + msg;
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.transition = 'opacity 0.3s';
+    t.style.opacity = '0';
+    setTimeout(() => { t.remove(); }, 350);
+  }, 2200);
+}
+
+function saveProfileChanges() {
+  document.getElementById('editProfileModal').classList.add('hidden');
+  showToast('Đã lưu thay đổi hồ sơ');
+}
+function savePassword() {
+  const pw = document.getElementById('pwNew');
+  const cf = document.getElementById('pwConfirm');
+  if (!pw.value) return;
+  if (pw.value !== cf.value) {
+    cf.style.borderColor = '#ef4444';
+    setTimeout(() => { cf.style.borderColor = ''; }, 1500);
+    return;
+  }
+  document.getElementById('changePwModal').classList.add('hidden');
+  document.getElementById('pwCurrent').value = '';
+  pw.value = '';
+  cf.value = '';
+  ['str1', 'str2', 'str3', 'str4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.backgroundColor = '';
+  });
+  const lbl = document.getElementById('pwStrengthLabel');
+  if (lbl) lbl.textContent = '';
+  showToast('Đã đổi mật khẩu thành công');
+}
+function togglePw(btn) {
+  const inp = document.getElementById(btn.dataset.target);
+  const ic = btn.querySelector('.material-symbols-outlined');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ic.textContent = 'visibility';
+  } else {
+    inp.type = 'password';
+    ic.textContent = 'visibility_off';
+  }
+}
+function updatePwStrength(inp) {
+  const v = inp.value;
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const cols = ['#ef4444', '#f59e0b', '#2563eb', '#10b981'];
+  const labs = ['', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('str' + i);
+    if (el) el.style.backgroundColor = i <= s ? cols[s - 1] : '';
+  }
+  const lbl = document.getElementById('pwStrengthLabel');
+  if (lbl) lbl.textContent = v.length ? labs[s] : '';
+}
+function previewAvatar(input) {
+  if (input.files && input.files[0]) {
+    const r = new FileReader();
+    r.onload = function(e) {
+      document.getElementById('editAvatarPreview').src = e.target.result;
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+</body>
+</html>

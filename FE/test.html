@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-SPORT | Hệ Sinh Thái Thể Thao AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Tùy chỉnh hiệu ứng Neon Gradient và Animation */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,700;0,900;1,900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a; /* Deep Space Black */
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .neon-text {
+            background: linear-gradient(90deg, #facc15, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
+        }
+
+        .neon-button {
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.5), inset 0 0 10px rgba(250, 204, 21, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .neon-button:hover {
+            box-shadow: 0 0 40px rgba(250, 204, 21, 0.8), inset 0 0 15px rgba(250, 204, 21, 0.4);
+            transform: scale(1.05);
+        }
+
+        .glass-card {
+            background: rgba(31, 41, 55, 0.4); /* Dark Glassmorphism */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(250, 204, 21, 0.2);
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(250, 204, 21, 0.8);
+            transform: translateY(-5px);
+        }
+
+        /* Lưới nền tạo cảm giác công nghệ */
+        .bg-mesh {
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(250, 204, 21, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(250, 204, 21, 0.05), transparent 25%);
+        }
+    </style>
+</head>
+<body class="bg-mesh antialiased">
+
+    <header class="fixed w-full top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-black italic text-yellow-400 tracking-tighter">
+                V-SPORT
+            </div>
+            <nav class="hidden md:flex gap-6 text-sm font-semibold text-gray-300">
+                <a href="#" class="hover:text-yellow-400 transition-colors">Tính năng</a>
+                <a href="#" class="hover:text-yellow-400 transition-colors">Bảng giá</a>
+                <a href="#" class="hover:text-yellow-400 transition-colors">Đối tác</a>
+            </nav>
+            <button class="text-sm font-bold bg-white text-black px-4 py-1.5 rounded-full hover:bg-gray-200 transition-colors">
+                Đăng Nhập
+            </button>
+        </div>
+    </header>
+
+    <section class="relative min-h-[90vh] flex flex-col justify-center items-center text-center px-4 pt-16">
+        <h1 class="text-7xl md:text-9xl font-black italic neon-text tracking-tighter mb-4">
+            V-SPORT
+        </h1>
+        <p class="mt-2 text-lg md:text-2xl text-gray-300 font-light max-w-2xl">
+            Hệ Sinh Thái Quản Lý Thể Thao Thông Minh Tích Hợp <span class="font-bold text-yellow-400">AI</span>
+        </p>
+        
+        <button class="mt-10 px-10 py-4 bg-yellow-400 text-black font-black text-lg md:text-xl rounded-full uppercase tracking-widest neon-button flex items-center gap-3">
+            <span>Vào Ứng Dụng</span>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+        </button>
+    </section>
+
+    <section class="relative z-10 max-w-7xl mx-auto px-4 pb-20 -mt-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="glass-card rounded-2xl p-8 text-left">
+                <div class="w-14 h-14 bg-yellow-400/10 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">AI Dynamic Pricing</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Thuật toán phân tích khung giờ và nhu cầu thời gian thực, tự động tối ưu hóa giá sân để lấp đầy giờ trống.</p>
+            </div>
+
+            <div class="glass-card rounded-2xl p-8 text-left relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
+                <div class="w-14 h-14 bg-yellow-400/10 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Matchmaking ELO</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Hệ thống ghép kèo thông minh dựa trên trình độ ELO và điểm uy tín, mang lại trận đấu cân sức và công bằng.</p>
+            </div>
+
+            <div class="glass-card rounded-2xl p-8 text-left">
+                <div class="w-14 h-14 bg-yellow-400/10 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">AI Bill Splitting</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Chốt hóa đơn gộp (sân, nước, xe), tự động tính toán chia tiền và sinh mã QR cá nhân hóa nhanh chóng.</p>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>

@@ -1,0 +1,2484 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <title>Đặt Sân - V-SPORT Elite Arena</title>
+    
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+        --bg-warm: #f4f4ef;
+        --text-dark: #2a2a2a;
+        --primary-blue: #2563eb;
+    }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: var(--bg-warm); color: var(--text-dark); }
+    .font-serif { font-family: 'Playfair Display', 'Times New Roman', serif; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in-up { animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    ::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; outline: none !important; }
+</style>
+    <style>
+        .filter-btn.active,
+        .branch-filter-btn.active {
+            background-color: #16a34a !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .filter-btn:not(.active):hover,
+        .branch-filter-btn:not(.active):hover {
+            background-color: #f8fafc !important;
+        }
+        .court-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .court-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+            border-color: rgba(22, 163, 74, 0.2);
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            color: #1e293b;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+        }
+        .form-input:focus {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+            outline: none;
+            background-color: white;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-[#f4f6f8] text-[#1e293b] min-h-screen flex flex-col antialiased">
+
+    
+
+
+<div class="fixed top-6 left-0 right-0 z-[100] px-6">
+    <nav class="max-w-[1400px] mx-auto bg-white/80 backdrop-blur-md border border-white/20 h-[72px] rounded-[18px] shadow-sm flex items-center justify-between px-8">
+        <!-- Left: Logo -->
+        <div class="flex items-center gap-3">
+            <a href="/Backend_java/index.jsp" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 bg-[#2a2a2a] rounded-[10px] flex items-center justify-center text-white font-bold text-sm transition-transform group-hover:scale-105">VS</div>
+                <div class="flex flex-col leading-none">
+                    <span class="text-[15px] font-bold text-[#2a2a2a] tracking-tight">V-Sport</span>
+                    <span class="text-[10px] text-[#2a2a2a]/40 font-medium tracking-wide uppercase">Elite Arena</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Center: Navigation Links -->
+        <div class="hidden lg:flex items-center gap-10">
+            <a href="/Backend_java/index.jsp" class="text-[13px] font-medium text-[#2a2a2a]/70 hover:text-[#2a2a2a] transition-colors">Trang chủ</a>
+            <a href="/Backend_java/customer/dat-san" class="text-[13px] font-medium text-[#2a2a2a]/70 hover:text-[#2a2a2a] transition-colors">Đặt sân</a>
+            <a href="/Backend_java/ghep-keo" class="text-[13px] font-medium text-[#2a2a2a]/70 hover:text-[#2a2a2a] transition-colors">Ghép kèo</a>
+            <a href="/Backend_java/sos" class="text-[13px] font-medium text-[#2a2a2a]/70 hover:text-[#2a2a2a] transition-colors">Tìm đồng đội</a>
+            <a href="/Backend_java/cua-hang" class="text-[13px] font-medium text-[#2a2a2a]/70 hover:text-[#2a2a2a] transition-colors">Cửa hàng</a>
+            <a href="/Backend_java/bang-xep-hang" class="text-[13px] font-medium text-[#2a2a2a]/70 hover:text-[#2a2a2a] transition-colors">Xếp hạng</a>
+        </div>
+
+        <!-- Right: Action Buttons -->
+        <div class="flex items-center gap-4">
+            
+                
+                
+                    <a href="/Backend_java/dangnhap" class="text-[13px] font-semibold text-[#2a2a2a]/70 hover:text-[#2a2a2a] px-4 transition-colors">Đăng nhập</a>
+                
+            
+            
+            <a href="#" class="bg-[#2563eb] text-white px-6 h-[44px] flex items-center justify-center rounded-[12px] text-[12px] font-bold uppercase tracking-widest hover:bg-[#1d4ed8] transition-all shadow-sm">
+                Nhận báo giá
+            </a>
+            
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-menu-toggle" class="lg:hidden text-[#2a2a2a] p-2">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden fixed inset-0 z-[110] bg-[#f4f4ef] flex flex-col items-center justify-center gap-8 p-10">
+    <a href="/Backend_java/index.jsp" class="text-3xl font-serif italic text-[#2a2a2a]">Trang chủ</a>
+    <a href="/Backend_java/customer/dat-san" class="text-3xl font-serif italic text-[#2a2a2a]">Dịch vụ</a>
+    <a href="#" class="text-3xl font-serif italic text-[#2a2a2a]">Quy trình</a>
+    <a href="#" class="text-3xl font-serif italic text-[#2a2a2a]">Đánh giá</a>
+    
+    <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="mt-12 w-14 h-14 rounded-full border border-[#2a2a2a]/10 flex items-center justify-center text-[#2a2a2a]">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+</div>
+
+<script>
+    // Existing User Dropdown Toggle
+    const userMenuBtn = document.getElementById('user-menu-button');
+    const userDropdown = document.getElementById('user-dropdown');
+    
+    if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('opacity-0');
+            userDropdown.classList.toggle('invisible');
+            userDropdown.classList.toggle('translate-y-2');
+            userDropdown.classList.toggle('translate-y-0');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
+                userDropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                userDropdown.classList.remove('translate-y-0');
+            }
+        });
+    }
+
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (toggleBtn && mobileMenu) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+</script>
+
+
+
+
+<!-- CSS overrides for modal transitions and scrollbars -->
+<style>
+    .auth-modal-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    .auth-modal-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .auth-modal-scroll::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
+    }
+    
+    /* Smooth width & transform transitions for the modal card */
+    #auth-modal-card {
+        transition: max-width 400ms cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    opacity 300ms ease-out;
+    }
+    
+    /* Transition styles for form panels */
+    .modal-panel {
+        transition: opacity 200ms ease-out, transform 200ms ease-out;
+    }
+    
+    /* Reset default browser button styling due to disabled Tailwind preflight */
+    :where(#auth-modal button) {
+        background-color: transparent;
+        background-image: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        outline: none;
+        box-shadow: none;
+    }
+</style>
+
+<!-- Main Modal Backdrop Wrapper -->
+<div id="auth-modal" class="fixed inset-0 z-[120] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300" onclick="handleBackdropClick(event)">
+    
+    <!-- Modal Container (Dynamically resizes between 460px and 880px) -->
+    <div id="auth-modal-card" class="bg-white rounded-3xl w-full max-w-[460px] max-h-[95vh] flex flex-col shadow-2xl relative border border-slate-100 transform scale-95 opacity-0">
+        
+        <!-- Close Button -->
+        <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors z-[130] w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+
+        <!-- Toggle Tabs -->
+        <div id="modal-tabs-header" class="px-8 pt-8 pb-4 border-b border-slate-100 flex items-center justify-start gap-4">
+            <button id="modal-tab-login" onclick="switchAuthTab('login')" class="text-xl font-bold tracking-tight text-slate-900 border-b-2 border-[#378b76] pb-2 transition-all">
+                Đăng nhập
+            </button>
+            <button id="modal-tab-register" onclick="switchAuthTab('register')" class="text-xl font-bold tracking-tight text-slate-400 hover:text-slate-900 border-b-2 border-transparent pb-2 transition-all">
+                Đăng ký
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-grow overflow-y-auto p-8 auth-modal-scroll">
+
+            <!-- ========================================== -->
+            <!-- 1. LOGIN FORM PANEL                        -->
+            <!-- ========================================== -->
+            <div id="modal-login-panel" class="modal-panel flex flex-col">
+                <!-- Heading & Subtitle -->
+                <div class="mb-6">
+                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
+                        <span>Hệ thống V-Sport</span>
+                    </div>
+                    <p class="text-[13px] text-slate-400 font-medium">Chào mừng trở lại! Nhập thông tin tài khoản của bạn để tiếp tục.</p>
+                </div>
+
+                <!-- Error Banner -->
+                <div id="login-error-banner" class="hidden mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-xs font-semibold border border-red-100 flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">error</span>
+                    <span class="error-msg"></span>
+                </div>
+
+                <!-- Success Banner -->
+                <div id="login-success-banner" class="hidden mb-6 p-4 bg-green-50 text-green-600 rounded-xl text-xs font-semibold border border-green-100 flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                    <span class="success-msg"></span>
+                </div>
+
+                <!-- Form -->
+                <form id="modal-login-form" action="/Backend_java/dangnhap" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitLoginForm(event)">
+                    <input type="hidden" name="loginType" value="customer">
+                    <!-- Username Input -->
+                    <div class="mb-4 relative">
+                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Tên đăng nhập hoặc Email</label>
+                        <div class="relative">
+                            <input type="text" name="username" required placeholder="Nhập tên đăng nhập hoặc email" class="w-full h-12 pl-12 pr-12 border-1.5 border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">account_circle</span>
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="mb-5 relative">
+                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Mật khẩu</label>
+                        <div class="relative">
+                            <input type="password" name="password" id="modal-login-pass" required placeholder="Nhập mật khẩu" class="w-full h-12 pl-12 pr-12 border-1.5 border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">key</span>
+                            <button type="button" onclick="togglePassField('modal-login-pass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
+                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me and Forgot Password -->
+                    <div class="flex items-center justify-between mb-6">
+                        <label class="flex items-center gap-2 cursor-pointer select-none text-[12px] text-slate-500 font-semibold">
+                            <input type="checkbox" name="rememberMe" class="w-4 h-4 accent-[#378b76] rounded border-slate-300">
+                            <span>Ghi nhớ đăng nhập (7 ngày)</span>
+                        </label>
+                        
+                        <button type="button" onclick="switchAuthTab('forgot-password')" class="text-[12px] font-bold text-[#378b76] hover:underline cursor-pointer">
+                            Quên mật khẩu?
+                        </button>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="modal-login-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden">
+                        <span class="btn-text flex items-center gap-1.5">
+                            Đăng nhập
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </span>
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
+                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        </div>
+                    </button>
+
+                </form>
+
+                <div class="mt-5 text-center border-t border-slate-100 pt-4">
+                    <p class="text-[12px] text-slate-500 font-medium">
+                        Bạn chưa có tài khoản? 
+                        <button onclick="switchAuthTab('register')" class="font-bold text-[#378b76] hover:underline ml-1">
+                            Đăng ký ngay
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 2. REGISTER FORM PANEL                     -->
+            <!-- ========================================== -->
+            <div id="modal-register-panel" class="modal-panel hidden flex flex-col">
+                <!-- Heading & Subtitle -->
+                <div class="mb-5">
+                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
+                        <span>Hệ thống V-Sport</span>
+                    </div>
+                    <p class="text-[13px] text-slate-400 font-medium">Bắt đầu hành trình chinh phục sân đấu và kết nối bạn bè ngay hôm nay.</p>
+                </div>
+
+                <!-- Error Banner -->
+                <div id="register-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-600 rounded-xl text-xs font-semibold border border-red-100 flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">error</span>
+                    <span class="error-msg"></span>
+                </div>
+
+                <!-- Form with Horizontal Layout (Two Columns) -->
+                <form id="modal-register-form" action="/Backend_java/dangky" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitRegisterForm(event)">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                        
+                        <!-- LEFT COLUMN: 1. THÔNG TIN TÀI KHOẢN -->
+                        <div class="space-y-4">
+                            <span class="text-[11px] font-bold text-[#378b76] uppercase tracking-wider block border-b border-slate-100 pb-2">1. Thông tin tài khoản</span>
+                            
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Tên đăng nhập</label>
+                                <div class="relative">
+                                    <input type="text" name="username" required placeholder="Tên đăng nhập" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">account_circle</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Email</label>
+                                <div class="relative">
+                                    <input type="email" name="email" required placeholder="Địa chỉ email" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">mail</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Mật khẩu</label>
+                                <div class="relative">
+                                    <input type="password" name="password" id="modal-reg-pass" required placeholder="Tạo mật khẩu" oninput="updateModalPwStrength(this)" class="w-full h-10 pl-10 pr-10 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">key</span>
+                                    <button type="button" onclick="togglePassField('modal-reg-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Xác nhận mật khẩu</label>
+                                <div class="relative">
+                                    <input type="password" name="confirm_password" id="modal-reg-confirm" required placeholder="Nhập lại mật khẩu" class="w-full h-10 pl-10 pr-10 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">key</span>
+                                    <button type="button" onclick="togglePassField('modal-reg-confirm', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Password strength indicator -->
+                            <div class="mt-2 w-full">
+                                <div class="flex gap-1 w-1/2 mb-1.5">
+                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr1"></div>
+                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr2"></div>
+                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr3"></div>
+                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr4"></div>
+                                </div>
+                                <p class="text-[9.5px] text-slate-400 leading-tight">Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: 2. THÔNG TIN CÁ NHÂN & 3. THỂ THAO -->
+                        <div class="space-y-6">
+                            
+                            <!-- 2. THÔNG TIN CÁ NHÂN -->
+                            <div class="space-y-4">
+                                <span class="text-[11px] font-bold text-[#378b76] uppercase tracking-wider block border-b border-slate-100 pb-2">2. Thông tin cá nhân</span>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Họ và Tên</label>
+                                        <div class="relative">
+                                            <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">person</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Số điện thoại</label>
+                                        <div class="relative">
+                                            <input type="tel" name="phone" required placeholder="Nhập số điện thoại" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">call</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Giới tính</label>
+                                    <div class="relative">
+                                        <select name="gender" required class="w-full h-10 pl-10 pr-10 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none appearance-none" style="border-width: 1.5px;">
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">face</span>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">arrow_drop_down</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. THỂ THAO & KỸ NĂNG -->
+                            <div class="space-y-4">
+                                <span class="text-[11px] font-bold text-[#378b76] uppercase tracking-wider block border-b border-slate-100 pb-2">3. Thể thao & kỹ năng</span>
+                                
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Vị trí sở trường</label>
+                                    <div class="relative">
+                                        <input type="text" name="viTriSoTruong" placeholder="Ví dụ: Tiền đạo, Hậu vệ, Đập cầu..." class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">sports_handball</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-400 block mb-2">Môn thể thao yêu thích</label>
+                                    <div class="grid grid-cols-2 gap-2.5">
+                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
+                                            <input type="checkbox" name="sport" value="Bóng đá" class="w-4 h-4 accent-[#378b76] rounded">
+                                            Bóng đá
+                                        </label>
+                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
+                                            <input type="checkbox" name="sport" value="Cầu lông" class="w-4 h-4 accent-[#378b76] rounded">
+                                            Cầu lông
+                                        </label>
+                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
+                                            <input type="checkbox" name="sport" value="Pickleball" class="w-4 h-4 accent-[#378b76] rounded">
+                                            Pickleball
+                                        </label>
+                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
+                                            <input type="checkbox" name="sport" value="Tennis" class="w-4 h-4 accent-[#378b76] rounded">
+                                            Tennis
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- FOOTER: AGREEMENT & SUBMIT BUTTON -->
+                    <div class="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-4">
+                        <!-- Agreement checkbox -->
+                        <div class="flex items-start gap-2.5 select-none">
+                            <input type="checkbox" name="agree" value="Đồng ý" required class="w-4 h-4 mt-0.5 accent-[#378b76] rounded border-slate-300 cursor-pointer">
+                            <span class="text-[11.5px] text-slate-500 font-semibold leading-tight font-medium">
+                                Tôi đồng ý với các <a href="#" class="text-[#378b76] font-bold hover:underline">điều khoản</a> và <a href="#" class="text-[#378b76] font-bold hover:underline">chính sách</a> của hệ thống.
+                            </span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="modal-register-btn" class="w-full h-11 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[13.5px] flex items-center justify-center gap-2 transition-all relative overflow-hidden">
+                            <span class="btn-text flex items-center gap-1.5">
+                                Kích hoạt Athlete Pass
+                                <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                            </span>
+                            <!-- Loading Spinner -->
+                            <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
+                                <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Bottom Navigation Link -->
+                <div class="mt-5 text-center border-t border-slate-100 pt-4">
+                    <p class="text-[12px] text-slate-500 font-medium">
+                        Đã có tài khoản? 
+                        <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1">
+                            Đăng nhập ngay
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 3. FORGOT PASSWORD PANEL                    -->
+            <!-- ========================================== -->
+            <div id="modal-forgot-password-panel" class="modal-panel hidden flex flex-col">
+                <!-- Heading & Subtitle -->
+                <div class="mb-6">
+                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
+                        <span>Hệ thống V-Sport</span>
+                    </div>
+                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Quên mật khẩu?</h2>
+                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">Đừng lo lắng, hãy nhập địa chỉ email đã đăng ký của bạn để bắt đầu khôi phục mật khẩu.</p>
+                </div>
+
+                <!-- Error Banner -->
+                <div id="forgot-password-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                    <span class="error-msg"></span>
+                </div>
+
+                <!-- Form -->
+                <form id="modal-forgot-password-form" action="/Backend_java/quenmatkhau" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitForgotPasswordForm(event)">
+                    <!-- Email Input -->
+                    <div class="mb-5">
+                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Email đã đăng ký</label>
+                        <div class="relative">
+                            <input type="email" name="email" required placeholder="Nhập địa chỉ email" 
+                                   class="w-full h-12 pl-12 pr-4 border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" 
+                                   style="border-width: 1.5px;">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">mail</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="modal-forgot-password-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
+                        <span class="btn-text flex items-center gap-1.5">
+                            Gửi mã xác thực
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </span>
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
+                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        </div>
+                    </button>
+                </form>
+
+                <!-- Back to Login footer -->
+                <div class="mt-6 text-center border-t border-slate-100 pt-4">
+                    <p class="text-[12px] text-slate-500 font-medium">
+                        Bạn đã nhớ lại mật khẩu? 
+                        <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">
+                            Đăng nhập ngay
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 4. OTP VERIFICATION PANEL                   -->
+            <!-- ========================================== -->
+            <div id="modal-otp-panel" class="modal-panel hidden flex flex-col">
+                <!-- Heading & Subtitle -->
+                <div class="mb-6">
+                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
+                        <span>Xác minh danh tính</span>
+                    </div>
+                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Xác thực OTP</h2>
+                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">
+                        Vui lòng kiểm tra email và nhập mã xác thực OTP 6 chữ số gửi tới <b id="otp-email-display" class="text-slate-800"></b>.
+                    </p>
+                </div>
+
+                <!-- Error Banner -->
+                <div id="otp-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                    <span class="error-msg"></span>
+                </div>
+
+                <!-- Success Banner -->
+                <div id="otp-success-banner" class="hidden mb-5 p-4 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+                    <span class="success-msg"></span>
+                </div>
+
+                <!-- Form -->
+                <form id="modal-otp-form" action="/Backend_java/nhapma" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitOtpForm(event)">
+                    <input type="hidden" name="email" id="otp-hidden-email">
+
+                    <!-- OTP Input -->
+                    <div class="mb-5">
+                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Nhập mã OTP 6 chữ số</label>
+                        <div class="relative">
+                            <input type="text" name="otp" required maxlength="6" placeholder="••••••" 
+                                   class="w-full h-14 border border-slate-300 rounded-xl text-center text-2xl font-bold tracking-[0.35em] focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" 
+                                   style="border-width: 1.5px;">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="modal-otp-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
+                        <span class="btn-text flex items-center gap-1.5">
+                            Xác minh OTP
+                            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                        </span>
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
+                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        </div>
+                    </button>
+                </form>
+
+                <!-- Resend Footer -->
+                <div class="mt-6 text-center border-t border-slate-100 pt-4 flex flex-col gap-2">
+                    <p class="text-[12px] text-slate-500 font-medium">
+                        Không nhận được mã? 
+                        <button onclick="resendOtp()" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">
+                            Gửi lại ngay
+                        </button>
+                    </p>
+                    <p class="text-[12px]">
+                        <button onclick="goBackFromOtp()" class="font-bold text-slate-400 hover:text-slate-600 hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto">
+                            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Quay lại
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 5. RESET PASSWORD PANEL                     -->
+            <!-- ========================================== -->
+            <div id="modal-reset-password-panel" class="modal-panel hidden flex flex-col">
+                <!-- Heading & Subtitle -->
+                <div class="mb-6">
+                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
+                        <span>Thiết lập mật khẩu</span>
+                    </div>
+                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Mật khẩu mới</h2>
+                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">
+                        Đã xác minh danh tính thành công. Vui lòng tạo mật khẩu mới an toàn cho tài khoản của bạn.
+                    </p>
+                </div>
+
+                <!-- Error Banner -->
+                <div id="reset-password-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                    <span class="error-msg"></span>
+                </div>
+
+                <!-- Form -->
+                <form id="modal-reset-password-form" action="/Backend_java/nhapmatkhaumoi" method="POST" class="flex flex-col gap-4" onsubmit="submitResetPasswordForm(event)">
+                    <!-- New Password -->
+                    <div>
+                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Mật khẩu mới</label>
+                        <div class="relative">
+                            <input type="password" name="password" id="modal-new-pass" required placeholder="••••••••" oninput="updateModalResetPwStrength(this)"
+                                   class="w-full h-12 pl-12 pr-12 border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" 
+                                   style="border-width: 1.5px;">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">key</span>
+                            <button type="button" onclick="togglePassField('modal-new-pass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
+                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            </button>
+                        </div>
+                        <!-- Password strength indicator -->
+                        <div class="mt-2 w-full">
+                            <div class="flex gap-1 w-1/2 mb-1.5">
+                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr1"></div>
+                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr2"></div>
+                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr3"></div>
+                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr4"></div>
+                            </div>
+                            <p class="text-[9.5px] text-slate-400 leading-tight">Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-4">
+                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Xác nhận mật khẩu mới</label>
+                        <div class="relative">
+                            <input type="password" name="confirm_password" id="modal-new-confirm" required placeholder="••••••••" 
+                                   class="w-full h-12 pl-12 pr-12 border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" 
+                                   style="border-width: 1.5px;">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">key</span>
+                            <button type="button" onclick="togglePassField('modal-new-confirm', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
+                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" id="modal-reset-password-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
+                        <span class="btn-text flex items-center gap-1.5">
+                            Lưu mật khẩu mới
+                            <span class="material-symbols-outlined text-[18px]">save</span>
+                        </span>
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
+                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Scripts for Modal Behavior & AJAX -->
+<script>
+    let otpSourceTab = 'login'; // Keep track of where we came from for the back button
+
+    // Open the auth modal, optionally pre-selecting a tab
+    function openAuthModal(tab = 'login') {
+        const modal = document.getElementById('auth-modal');
+        const card = document.getElementById('auth-modal-card');
+        
+        if (modal && card) {
+            // Clean up old messages/errors
+            clearModalAlerts();
+
+            // Set target card width instantly depending on active tab to prevent jumpy entrance
+            if (tab === 'register') {
+                card.classList.remove('max-w-[460px]');
+                card.classList.add('max-w-[880px]');
+            } else {
+                card.classList.remove('max-w-[880px]');
+                card.classList.add('max-w-[460px]');
+            }
+
+            // Show backdrop
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Trigger transition
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Render the active tab content
+            const tabHeader = document.getElementById('modal-tabs-header');
+            const tabLogin = document.getElementById('modal-tab-login');
+            const tabRegister = document.getElementById('modal-tab-register');
+            const panelLogin = document.getElementById('modal-login-panel');
+            const panelRegister = document.getElementById('modal-register-panel');
+            const panelForgotPassword = document.getElementById('modal-forgot-password-panel');
+            const panelOtp = document.getElementById('modal-otp-panel');
+            const panelResetPassword = document.getElementById('modal-reset-password-panel');
+            
+            // Hide all panels
+            panelLogin.classList.add('hidden');
+            panelRegister.classList.add('hidden');
+            if (panelForgotPassword) panelForgotPassword.classList.add('hidden');
+            if (panelOtp) panelOtp.classList.add('hidden');
+            if (panelResetPassword) panelResetPassword.classList.add('hidden');
+
+            if (tab === 'login' || tab === 'register') {
+                if (tabHeader) tabHeader.classList.remove('hidden');
+                
+                if (tab === 'login') {
+                    tabLogin.classList.remove('text-slate-400', 'border-transparent');
+                    tabLogin.classList.add('text-slate-900', 'border-[#378b76]');
+                    tabRegister.classList.remove('text-slate-900', 'border-[#378b76]');
+                    tabRegister.classList.add('text-slate-400', 'border-transparent');
+                    
+                    panelLogin.classList.remove('hidden');
+                    panelLogin.style.opacity = '1';
+                    panelLogin.style.transform = 'translateY(0)';
+                } else {
+                    tabRegister.classList.remove('text-slate-400', 'border-transparent');
+                    tabRegister.classList.add('text-slate-900', 'border-[#378b76]');
+                    tabLogin.classList.remove('text-slate-900', 'border-[#378b76]');
+                    tabLogin.classList.add('text-slate-400', 'border-transparent');
+                    
+                    panelRegister.classList.remove('hidden');
+                    panelRegister.style.opacity = '1';
+                    panelRegister.style.transform = 'translateY(0)';
+                }
+            } else {
+                if (tabHeader) tabHeader.classList.add('hidden');
+                
+                let targetPanel;
+                if (tab === 'forgot-password') targetPanel = panelForgotPassword;
+                else if (tab === 'otp') targetPanel = panelOtp;
+                else if (tab === 'reset-password') targetPanel = panelResetPassword;
+
+                if (targetPanel) {
+                    targetPanel.classList.remove('hidden');
+                    targetPanel.style.opacity = '1';
+                    targetPanel.style.transform = 'translateY(0)';
+                }
+            }
+
+            // Prevent background page scrolling
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // Close the auth modal
+    function closeAuthModal() {
+        const modal = document.getElementById('auth-modal');
+        const card = document.getElementById('auth-modal-card');
+        
+        if (modal && card) {
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+    }
+
+    // Handle click on backdrop to close
+    function handleBackdropClick(event) {
+        const card = document.getElementById('auth-modal-card');
+        if (card && !card.contains(event.target)) {
+            closeAuthModal();
+        }
+    }
+
+    // Switch between Login and Register tabs with a smooth transition
+    function switchAuthTab(tab) {
+        const tabLogin = document.getElementById('modal-tab-login');
+        const tabRegister = document.getElementById('modal-tab-register');
+        const panelLogin = document.getElementById('modal-login-panel');
+        const panelRegister = document.getElementById('modal-register-panel');
+        const panelForgotPassword = document.getElementById('modal-forgot-password-panel');
+        const panelOtp = document.getElementById('modal-otp-panel');
+        const panelResetPassword = document.getElementById('modal-reset-password-panel');
+        const card = document.getElementById('auth-modal-card');
+        const tabHeader = document.getElementById('modal-tabs-header');
+        
+        if (!card) return;
+
+        const currentPanel = document.querySelector('.modal-panel:not(.hidden)');
+        if (!currentPanel) return;
+
+        if (tab === 'otp') {
+            if (currentPanel === panelForgotPassword) {
+                otpSourceTab = 'forgot-password';
+            } else if (currentPanel === panelRegister) {
+                otpSourceTab = 'register';
+            }
+        }
+
+        let targetPanel;
+        if (tab === 'login') targetPanel = panelLogin;
+        else if (tab === 'register') targetPanel = panelRegister;
+        else if (tab === 'forgot-password') targetPanel = panelForgotPassword;
+        else if (tab === 'otp') targetPanel = panelOtp;
+        else if (tab === 'reset-password') targetPanel = panelResetPassword;
+
+        if (!targetPanel || targetPanel === currentPanel) return;
+
+        // Clean up old messages/errors
+        clearModalAlerts();
+
+        // 1. Fade out inactive panel first
+        currentPanel.style.opacity = '0';
+        currentPanel.style.transform = 'translateY(8px)';
+        
+        // 2. Animate card width
+        if (tab === 'register') {
+            card.classList.remove('max-w-[460px]');
+            card.classList.add('max-w-[880px]');
+        } else {
+            card.classList.remove('max-w-[880px]');
+            card.classList.add('max-w-[460px]');
+        }
+
+        // 3. Tab headers display and active tabs
+        if (tab === 'login' || tab === 'register') {
+            if (tabHeader) tabHeader.classList.remove('hidden');
+            
+            if (tab === 'login') {
+                tabLogin.classList.remove('text-slate-400', 'border-transparent');
+                tabLogin.classList.add('text-slate-900', 'border-[#378b76]');
+                
+                tabRegister.classList.remove('text-slate-900', 'border-[#378b76]');
+                tabRegister.classList.add('text-slate-400', 'border-transparent');
+            } else {
+                tabRegister.classList.remove('text-slate-400', 'border-transparent');
+                tabRegister.classList.add('text-slate-900', 'border-[#378b76]');
+                
+                tabLogin.classList.remove('text-slate-900', 'border-[#378b76]');
+                tabLogin.classList.add('text-slate-400', 'border-transparent');
+            }
+        } else {
+            if (tabHeader) tabHeader.classList.add('hidden');
+        }
+
+        // 4. Toggle hidden classes and fade in the active panel
+        setTimeout(() => {
+            currentPanel.classList.add('hidden');
+            targetPanel.classList.remove('hidden');
+            
+            // Set initial state for active panel transition
+            targetPanel.style.opacity = '0';
+            targetPanel.style.transform = 'translateY(8px)';
+            targetPanel.style.transition = 'opacity 300ms ease-out, transform 300ms ease-out';
+            
+            // Trigger animation frame for fade-in
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    targetPanel.style.opacity = '1';
+                    targetPanel.style.transform = 'translateY(0)';
+                }, 20);
+            });
+        }, 150);
+    }
+
+    function goBackFromOtp() {
+        switchAuthTab(otpSourceTab);
+    }
+
+    // Clear existing alert banners
+    function clearModalAlerts() {
+        const alerts = [
+            'login-error-banner', 'login-success-banner',
+            'register-error-banner', 
+            'forgot-password-error-banner',
+            'otp-error-banner', 'otp-success-banner',
+            'reset-password-error-banner'
+        ];
+        alerts.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+    }
+
+    // Toggle password visibility
+    function togglePassField(id, btn) {
+        const input = document.getElementById(id);
+        const icon = btn.querySelector('span');
+        if (input) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+    }
+
+    // Password strength indicator for registration
+    function updateModalPwStrength(inp) {
+        const v = inp.value;
+        let s = 0;
+        if (v.length >= 8) s++;
+        if (/[A-Z]/.test(v)) s++;
+        if (/[a-z]/.test(v)) s++;
+        if (/[0-9]/.test(v)) s++;
+        if (/[^A-Za-z0-9]/.test(v)) s++;
+        
+        let strength = 0;
+        if (v.length > 0) strength = 1;
+        if (s >= 3) strength = 2;
+        if (s >= 4) strength = 3;
+        if (s >= 5) strength = 4;
+        
+        const cols = ['#f43f5e', '#f59e0b', '#8b5cf6', '#10b981'];
+        for (let i = 1; i <= 4; i++) {
+            const el = document.getElementById('modalRegStr' + i);
+            if (el) {
+                if (i <= strength) {
+                    el.style.backgroundColor = cols[strength - 1];
+                } else {
+                    el.style.backgroundColor = '#e2e8f0';
+                }
+            }
+        }
+    }
+
+    // Password strength indicator for reset password
+    function updateModalResetPwStrength(inp) {
+        const v = inp.value;
+        let s = 0;
+        if (v.length >= 8) s++;
+        if (/[A-Z]/.test(v)) s++;
+        if (/[a-z]/.test(v)) s++;
+        if (/[0-9]/.test(v)) s++;
+        if (/[^A-Za-z0-9]/.test(v)) s++;
+        
+        let strength = 0;
+        if (v.length > 0) strength = 1;
+        if (s >= 3) strength = 2;
+        if (s >= 4) strength = 3;
+        if (s >= 5) strength = 4;
+        
+        const cols = ['#f43f5e', '#f59e0b', '#8b5cf6', '#10b981'];
+        for (let i = 1; i <= 4; i++) {
+            const el = document.getElementById('modalResetStr' + i);
+            if (el) {
+                if (i <= strength) {
+                    el.style.backgroundColor = cols[strength - 1];
+                } else {
+                    el.style.backgroundColor = '#e2e8f0';
+                }
+            }
+        }
+    }
+
+    // AJAX Login submission
+    function submitLoginForm(event) {
+        event.preventDefault();
+        
+        const form = document.getElementById('modal-login-form');
+        const btn = document.getElementById('modal-login-btn');
+        const spinner = btn.querySelector('.loading-spinner');
+        const btnText = btn.querySelector('.btn-text');
+        
+        const errorBanner = document.getElementById('login-error-banner');
+        const successBanner = document.getElementById('login-success-banner');
+        
+        if (errorBanner) errorBanner.classList.add('hidden');
+        if (successBanner) successBanner.classList.add('hidden');
+        
+        // Show spinner
+        if (spinner && btnText) {
+            spinner.classList.remove('hidden');
+            btnText.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+        }
+        
+        const formData = new FormData(form);
+        const searchParams = new URLSearchParams(formData);
+        
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: searchParams
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (successBanner) {
+                    successBanner.querySelector('.success-msg').textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+                    successBanner.classList.remove('hidden');
+                }
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl;
+                }, 800);
+            } else {
+                // Reset spinner
+                if (spinner && btnText) {
+                    spinner.classList.add('hidden');
+                    btnText.style.opacity = '1';
+                    btn.style.pointerEvents = '';
+                }
+                if (errorBanner) {
+                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng nhập không thành công.';
+                    errorBanner.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi login AJAX:', err);
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
+                errorBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    // AJAX Register submission
+    function submitRegisterForm(event) {
+        event.preventDefault();
+        
+        const form = document.getElementById('modal-register-form');
+        const btn = document.getElementById('modal-register-btn');
+        const spinner = btn.querySelector('.loading-spinner');
+        const btnText = btn.querySelector('.btn-text');
+        
+        const errorBanner = document.getElementById('register-error-banner');
+        if (errorBanner) errorBanner.classList.add('hidden');
+        
+        // Show spinner
+        if (spinner && btnText) {
+            spinner.classList.remove('hidden');
+            btnText.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+        }
+        
+        const formData = new FormData(form);
+        const searchParams = new URLSearchParams();
+        
+        // Convert FormData to URLSearchParams
+        for (const [key, value] of formData.entries()) {
+            searchParams.append(key, value);
+        }
+        
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: searchParams
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.step === 'otp') {
+                    // Populate email in OTP displays
+                    const displayEl = document.getElementById('otp-email-display');
+                    const hiddenEmailEl = document.getElementById('otp-hidden-email');
+                    if (displayEl) displayEl.textContent = data.email;
+                    if (hiddenEmailEl) hiddenEmailEl.value = data.email;
+                    
+                    // Reset registration spinner
+                    if (spinner && btnText) {
+                        spinner.classList.add('hidden');
+                        btnText.style.opacity = '1';
+                        btn.style.pointerEvents = '';
+                    }
+
+                    // Show success banner in OTP modal
+                    const otpSuccessBanner = document.getElementById('otp-success-banner');
+                    if (otpSuccessBanner) {
+                        otpSuccessBanner.querySelector('.success-msg').textContent = 'Đăng ký thông tin thành công! Vui lòng nhập mã OTP để kích hoạt.';
+                        otpSuccessBanner.classList.remove('hidden');
+                    }
+                    
+                    // Switch to OTP panel
+                    switchAuthTab('otp');
+                } else {
+                    window.location.href = data.redirectUrl;
+                }
+            } else {
+                // Reset spinner
+                if (spinner && btnText) {
+                    spinner.classList.add('hidden');
+                    btnText.style.opacity = '1';
+                    btn.style.pointerEvents = '';
+                }
+                if (errorBanner) {
+                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng ký không thành công.';
+                    errorBanner.classList.remove('hidden');
+                    
+                    // Scroll modal card content to top
+                    const scrollContainer = document.querySelector('.auth-modal-scroll');
+                    if (scrollContainer) {
+                        scrollContainer.scrollTop = 0;
+                    }
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi register AJAX:', err);
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
+                errorBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    // AJAX Forgot Password submission
+    function submitForgotPasswordForm(event) {
+        event.preventDefault();
+        
+        const form = document.getElementById('modal-forgot-password-form');
+        const btn = document.getElementById('modal-forgot-password-btn');
+        const spinner = btn.querySelector('.loading-spinner');
+        const btnText = btn.querySelector('.btn-text');
+        const errorBanner = document.getElementById('forgot-password-error-banner');
+        
+        if (errorBanner) errorBanner.classList.add('hidden');
+        
+        // Show spinner
+        if (spinner && btnText) {
+            spinner.classList.remove('hidden');
+            btnText.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+        }
+        
+        const formData = new FormData(form);
+        const searchParams = new URLSearchParams(formData);
+        const email = formData.get('email');
+        
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: searchParams
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset spinner
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            
+            if (data.success) {
+                // Populate email in OTP displays
+                const displayEl = document.getElementById('otp-email-display');
+                const hiddenEmailEl = document.getElementById('otp-hidden-email');
+                if (displayEl) displayEl.textContent = email;
+                if (hiddenEmailEl) hiddenEmailEl.value = email;
+                
+                // Show dynamic OTP success banner
+                const otpSuccessBanner = document.getElementById('otp-success-banner');
+                if (otpSuccessBanner) {
+                    otpSuccessBanner.querySelector('.success-msg').textContent = 'Mã OTP đã được gửi đến email của bạn!';
+                    otpSuccessBanner.classList.remove('hidden');
+                }
+                
+                // Switch to OTP panel
+                switchAuthTab('otp');
+            } else {
+                if (errorBanner) {
+                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Có lỗi xảy ra.';
+                    errorBanner.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi Forgot Password AJAX:', err);
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
+                errorBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    // AJAX OTP submission
+    function submitOtpForm(event) {
+        event.preventDefault();
+        
+        const form = document.getElementById('modal-otp-form');
+        const btn = document.getElementById('modal-otp-btn');
+        const spinner = btn.querySelector('.loading-spinner');
+        const btnText = btn.querySelector('.btn-text');
+        
+        const errorBanner = document.getElementById('otp-error-banner');
+        const successBanner = document.getElementById('otp-success-banner');
+        
+        if (errorBanner) errorBanner.classList.add('hidden');
+        if (successBanner) successBanner.classList.add('hidden');
+        
+        // Show spinner
+        if (spinner && btnText) {
+            spinner.classList.remove('hidden');
+            btnText.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+        }
+        
+        const formData = new FormData(form);
+        const searchParams = new URLSearchParams(formData);
+        
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: searchParams
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset spinner
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            
+            if (data.success) {
+                if (data.step === 'reset-password') {
+                    // Transition to reset password panel
+                    switchAuthTab('reset-password');
+                } else if (data.step === 'register-success') {
+                    // Registration complete! Show success banner on Login tab and switch there
+                    switchAuthTab('login');
+                    const loginSuccessBanner = document.getElementById('login-success-banner');
+                    if (loginSuccessBanner) {
+                        loginSuccessBanner.querySelector('.success-msg').textContent = data.thongbao || 'Đăng ký thành công! Vui lòng đăng nhập.';
+                        loginSuccessBanner.classList.remove('hidden');
+                    }
+                }
+            } else {
+                if (errorBanner) {
+                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Mã xác thực không đúng.';
+                    errorBanner.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi Verify OTP AJAX:', err);
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
+                errorBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    // AJAX OTP Resend
+    function resendOtp() {
+        const errorBanner = document.getElementById('otp-error-banner');
+        const successBanner = document.getElementById('otp-success-banner');
+        const emailInput = document.getElementById('otp-hidden-email');
+        
+        if (errorBanner) errorBanner.classList.add('hidden');
+        if (successBanner) successBanner.classList.add('hidden');
+        
+        if (!emailInput || !emailInput.value) {
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Không tìm thấy email để gửi lại mã!';
+                errorBanner.classList.remove('hidden');
+            }
+            return;
+        }
+        
+        const params = new URLSearchParams();
+        params.append('email', emailInput.value);
+        
+        fetch('/Backend_java/resend-otp', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (successBanner) {
+                    successBanner.querySelector('.success-msg').textContent = data.thongbao || 'Gửi lại mã OTP thành công!';
+                    successBanner.classList.remove('hidden');
+                }
+            } else {
+                if (errorBanner) {
+                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Không thể gửi lại mã OTP.';
+                    errorBanner.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi Resend OTP AJAX:', err);
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
+                errorBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    // AJAX Reset Password submission
+    function submitResetPasswordForm(event) {
+        event.preventDefault();
+        
+        const form = document.getElementById('modal-reset-password-form');
+        const btn = document.getElementById('modal-reset-password-btn');
+        const spinner = btn.querySelector('.loading-spinner');
+        const btnText = btn.querySelector('.btn-text');
+        
+        const errorBanner = document.getElementById('reset-password-error-banner');
+        if (errorBanner) errorBanner.classList.add('hidden');
+        
+        const p1 = document.getElementById('modal-new-pass').value;
+        const p2 = document.getElementById('modal-new-confirm').value;
+        
+        if (p1.trim() === '') {
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Mật khẩu không được để trống hoặc chỉ chứa khoảng trắng!';
+                errorBanner.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // Strong password check
+        const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+        if (!strongRegex.test(p1)) {
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Mật khẩu phải có tối thiểu 8 ký tự, bao gồm cả chữ hoa, chữ thường, số và ký tự đặc biệt.';
+                errorBanner.classList.remove('hidden');
+            }
+            return;
+        }
+        
+        if (p1 !== p2) {
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Mật khẩu xác nhận chưa trùng khớp!';
+                errorBanner.classList.remove('hidden');
+            }
+            return;
+        }
+        
+        // Show spinner
+        if (spinner && btnText) {
+            spinner.classList.remove('hidden');
+            btnText.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+        }
+        
+        const formData = new FormData(form);
+        const searchParams = new URLSearchParams(formData);
+        
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: searchParams
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset spinner
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            
+            if (data.success) {
+                // Switch to login and display success banner
+                switchAuthTab('login');
+                const loginSuccessBanner = document.getElementById('login-success-banner');
+                if (loginSuccessBanner) {
+                    loginSuccessBanner.querySelector('.success-msg').textContent = data.thongbao || 'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.';
+                    loginSuccessBanner.classList.remove('hidden');
+                }
+            } else {
+                if (errorBanner) {
+                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Có lỗi xảy ra.';
+                    errorBanner.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi Reset Password AJAX:', err);
+            if (spinner && btnText) {
+                spinner.classList.add('hidden');
+                btnText.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }
+            if (errorBanner) {
+                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
+                errorBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    // Intercept links to dangnhap / dangky and check URL parameters on load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.body.addEventListener('click', (e) => {
+            const anchor = e.target.closest('a');
+            if (anchor && anchor.href) {
+                const url = new URL(anchor.href, window.location.origin);
+                const path = url.pathname;
+                
+                // Do not intercept if it is marked as no-modal or contains admin parameter
+                if (anchor.hasAttribute('data-no-modal') || url.searchParams.has('admin') || url.searchParams.get('role') === 'admin') {
+                    return;
+                }
+                
+                if (path.endsWith('/dangnhap')) {
+                    e.preventDefault();
+                    openAuthModal('login');
+                } else if (path.endsWith('/dangky')) {
+                    e.preventDefault();
+                    openAuthModal('register');
+                }
+            }
+        });
+
+        // Check query parameters to automatically show modal
+        const urlParams = new URLSearchParams(window.location.search);
+        const authAction = urlParams.get('auth');
+        if (authAction === 'login') {
+            openAuthModal('login');
+        } else if (authAction === 'register') {
+            openAuthModal('register');
+        }
+    });
+</script>
+
+
+
+
+    <main class="flex-grow pt-[120px] pb-24">
+        <div class="max-w-[1280px] mx-auto px-4 sm:px-6">
+            
+            <!-- Page Header -->
+            <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 animate-fade-in-up">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[#1e293b] tracking-tight">Tìm và Đặt sân</h1>
+                    <p class="mt-2 text-sm text-slate-500">Hệ thống sân bãi hiện đại, cập nhật lịch theo thời gian thực.</p>
+                </div>
+                <!-- Optional: Search bar or Sorting could go here -->
+            </div>
+
+            <!-- Alert Messages -->
+            
+
+            
+
+            <!-- Main Layout Grid (Sidebar + List) -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+                
+                <!-- LEFT SIDEBAR: Filters -->
+                <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-[120px] animate-fade-in-up">
+                    
+                    <!-- Sport Type Filter -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="font-bold text-slate-800">Môn thể thao</h3>
+                        </div>
+                        <div class="p-3 flex flex-col gap-1">
+                            <button type="button" onclick="filterSport(0)" id="btn-sport-0" class="filter-btn active w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                <span class="material-symbols-outlined text-[20px]">apps</span>
+                                Tất cả
+                            </button>
+                            
+                                <button type="button" onclick="filterSport(1)" id="btn-sport-1" class="filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        
+                                            sports_soccer
+                                            
+                                            
+                                            
+                                            
+                                        
+                                    </span>
+                                    Bóng đá
+                                </button>
+                            
+                                <button type="button" onclick="filterSport(2)" id="btn-sport-2" class="filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        
+                                            
+                                            sports_tennis
+                                            
+                                            
+                                            
+                                        
+                                    </span>
+                                    Cầu lông
+                                </button>
+                            
+                                <button type="button" onclick="filterSport(3)" id="btn-sport-3" class="filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        
+                                            
+                                            
+                                            sports_tennis
+                                            
+                                            
+                                        
+                                    </span>
+                                    Pickleball
+                                </button>
+                            
+                                <button type="button" onclick="filterSport(4)" id="btn-sport-4" class="filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        
+                                            
+                                            
+                                            
+                                            sports_tennis
+                                            
+                                        
+                                    </span>
+                                    Tennis
+                                </button>
+                            
+                                <button type="button" onclick="filterSport(5)" id="btn-sport-5" class="filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        
+                                            
+                                            
+                                            
+                                            
+                                            sports_volleyball
+                                        
+                                    </span>
+                                    Bóng bàn
+                                </button>
+                            
+                                <button type="button" onclick="filterSport(6)" id="btn-sport-6" class="filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        
+                                            
+                                            
+                                            
+                                            
+                                            sports_volleyball
+                                        
+                                    </span>
+                                    Gym / Fitness
+                                </button>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Branch Filter -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="font-bold text-slate-800">Chọn Cơ Sở</h3>
+                        </div>
+                        <div class="p-3 flex flex-col gap-1">
+                            <button type="button" onclick="filterBranch(0)" id="btn-branch-0" class="branch-filter-btn active w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                <span class="material-symbols-outlined text-[20px]">map</span>
+                                Tất cả Cơ Sở
+                            </button>
+                            
+                                <button type="button" onclick="filterBranch(6)" id="btn-branch-6" class="branch-filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                    <span class="truncate">sân bà dịa</span>
+                                </button>
+                            
+                                <button type="button" onclick="filterBranch(7)" id="btn-branch-7" class="branch-filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                    <span class="truncate">Sân Long Điền</span>
+                                </button>
+                            
+                                <button type="button" onclick="filterBranch(8)" id="btn-branch-8" class="branch-filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                    <span class="truncate">Sân Long Điền</span>
+                                </button>
+                            
+                                <button type="button" onclick="filterBranch(9)" id="btn-branch-9" class="branch-filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                    <span class="truncate">fhsewbfwifnewb fw</span>
+                                </button>
+                            
+                                <button type="button" onclick="filterBranch(10)" id="btn-branch-10" class="branch-filter-btn w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-600 text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                    <span class="truncate">Sân Bưng Riềng</span>
+                                </button>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT MAIN CONTENT: Court List -->
+                <div class="lg:col-span-3 space-y-4 animate-fade-in-up" style="animation-delay: 0.1s">
+                    <div class="flex justify-between items-center px-1 mb-2">
+                        <span class="text-sm text-slate-500 font-medium">Tìm thấy <strong id="court-count" class="text-slate-800">0</strong> sân</span>
+                    </div>
+                    
+                    <div id="courts-container" class="flex flex-col gap-5">
+                        <!-- Dynamically loaded via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- BOOKING & CHECKOUT MODAL FLOW -->
+    <!-- OVERLAY -->
+    <div id="bookingModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+        
+        <!-- STEP 1: BOOKING FORM PANEL -->
+        <div id="bookingFormPanel" class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
+            
+            <div class="bg-green-600 px-6 py-4 flex items-center justify-between text-white">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined">event_available</span> Đăng ký đặt sân
+                </h3>
+                <button onclick="closeBookingModal()" class="text-white/80 hover:text-white transition-colors p-1">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="p-6 md:p-8">
+                <!-- Selected Court Info -->
+                <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                    <img id="modal-court-img" src="" class="w-20 h-20 rounded-xl object-cover shadow-sm hidden md:block">
+                    <div>
+                        <h4 id="modal-court-name" class="font-bold text-slate-800 text-lg">Tên sân</h4>
+                        <p id="modal-court-branch" class="text-sm text-slate-500 flex items-center gap-1 mt-1">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span> Cơ sở
+                        </p>
+                        <p id="modal-court-type" class="text-xs font-semibold text-green-600 mt-2 bg-green-50 px-2 py-1 rounded-md inline-block">Loại sân</p>
+                    </div>
+                </div>
+
+                <form id="booking-form" action="/Backend_java/customer/dat-san" method="post" class="space-y-5">
+                    <input type="hidden" name="sanId" id="input-san-id" required>
+                    <input type="hidden" name="paymentMethod" id="input-payment-method" value="qr">
+
+                    <div class="space-y-1.5">
+                        <label for="ngayDat" class="form-label">Ngày thi đấu <span class="text-red-500">*</span></label>
+                        <input type="date" name="ngayDat" id="ngayDat" required class="form-input" onchange="checkScheduleAndPrice()">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label for="gioBatDau" class="form-label">Giờ bắt đầu <span class="text-red-500">*</span></label>
+                            <input type="time" name="gioBatDau" id="gioBatDau" required class="form-input" onchange="checkScheduleAndPrice()">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label for="gioKetThuc" class="form-label">Giờ kết thúc <span class="text-red-500">*</span></label>
+                            <input type="time" name="gioKetThuc" id="gioKetThuc" required class="form-input" onchange="checkScheduleAndPrice()">
+                        </div>
+                    </div>
+
+                    <!-- Timetable Preview Block -->
+                    <div id="timetable-block" class="hidden mt-2">
+                        <label class="form-label text-amber-600">Lịch đã có người đặt trong ngày</label>
+                        <div id="timeline-slots" class="flex flex-wrap gap-2 mt-2">
+                            <!-- Slots go here -->
+                        </div>
+                    </div>
+                    
+                    <div id="overlap-warning" class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl text-sm hidden flex gap-2 items-start mt-2 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px] mt-0.5">warning</span>
+                        <span id="overlap-warning-text">Trùng lịch!</span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="ghiChu" class="form-label">Ghi chú yêu cầu</label>
+                        <textarea name="ghiChu" id="ghiChu" rows="2" class="form-input resize-none" placeholder="Thuê bóng, mượn áo tập..."></textarea>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
+                        <button type="button" onclick="closeBookingModal()" class="px-6 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                            Hủy
+                        </button>
+                        
+                        
+                            
+                            
+                                <a href="/Backend_java/dangnhap"
+                                   class="px-8 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                    Đăng nhập để đặt sân <span class="material-symbols-outlined text-[18px]">login</span>
+                                </a>
+                            
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- STEP 2: CHECKOUT PAYMENT PANEL -->
+        <div id="checkoutPanel" class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 hidden relative my-auto">
+            <div class="px-6 py-4 flex items-center gap-3 border-b border-slate-100">
+                <button onclick="backToBookingForm()" class="p-1.5 text-slate-400 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                </button>
+                <h3 class="font-bold text-slate-800 text-lg">Thanh toán đặt sân</h3>
+            </div>
+
+            <div class="p-6">
+                <!-- Summary -->
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6 space-y-2 text-sm">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Thời gian chơi</span>
+                        <span id="summary-duration" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Đơn giá</span>
+                        <span id="summary-rate" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div id="summary-lights-row" class="flex justify-between text-amber-600 hidden">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">wb_twilight</span> Phụ thu đèn tối</span>
+                        <span class="font-bold">Có áp dụng</span>
+                    </div>
+                    <div class="pt-3 mt-1 border-t border-slate-200 flex justify-between items-end">
+                        <span class="text-xs font-bold uppercase text-slate-500">Tổng cộng</span>
+                        <span id="summary-total" class="text-2xl font-bold text-green-600">-</span>
+                    </div>
+                </div>
+
+                <!-- Payment methods -->
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Hình thức thanh toán</label>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button type="button" onclick="setPaymentMethod('qr')" id="btnPayQR" class="border-2 border-green-500 bg-green-50 p-3 rounded-xl text-left flex flex-col gap-1 transition-all">
+                        <span class="material-symbols-outlined text-green-600">qr_code_2</span>
+                        <span class="text-sm font-bold text-slate-800">Quét mã QR</span>
+                        <span class="text-[10px] text-slate-500">Duyệt tự động</span>
+                    </button>
+                    <button type="button" onclick="setPaymentMethod('sau')" id="btnPaySau" class="border border-slate-200 bg-white hover:bg-slate-50 p-3 rounded-xl text-left flex flex-col gap-1 transition-all">
+                        <span class="material-symbols-outlined text-slate-500">pending_actions</span>
+                        <span class="text-sm font-bold text-slate-800">Thanh toán sau</span>
+                        <span class="text-[10px] text-slate-500">Chờ admin duyệt</span>
+                    </button>
+                </div>
+
+                <!-- QR Panel -->
+                <div id="qrPanel" class="bg-green-50 border border-green-100 rounded-2xl p-5 flex flex-col items-center justify-center gap-4">
+                    <p class="text-xs font-bold text-green-700 text-center uppercase tracking-widest">Quét VietQR để thanh toán</p>
+                    <div class="bg-white p-2 rounded-2xl shadow-sm relative">
+                        <img id="vietqrCode" src="" class="w-48 h-48 object-cover" alt="QR VietQR">
+                        <div class="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-2xl hidden" id="qrLoading">
+                            <div class="w-8 h-8 rounded-full border-4 border-green-500 border-t-transparent animate-spin"></div>
+                        </div>
+                    </div>
+                    <p id="qrPrice" class="text-sm font-bold text-green-700"></p>
+                </div>
+
+                <!-- Pay Later Panel -->
+                <div id="sauPanel" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center flex flex-col items-center justify-center gap-3">
+                    <div class="w-12 h-12 bg-white text-slate-600 rounded-full flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-[24px]">schedule</span></div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-800">Chờ duyệt yêu cầu</p>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">Admin sẽ duyệt yêu cầu của bạn. Vui lòng thanh toán tại quầy khi đến sân.</p>
+                    </div>
+                </div>
+
+                <button onclick="confirmBooking()" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-bold h-12 rounded-xl text-[14px] transition-colors shadow-md shadow-green-600/20 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">verified</span> Hoàn tất đặt sân
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+<footer class="py-12 px-6 border-t border-[#2a2a2a]/5 mt-20">
+    <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <span class="text-[14px] font-bold text-[#2a2a2a] tracking-widest uppercase">Hệ thống V-Sport</span>
+            <span class="hidden md:block w-[1px] h-4 bg-[#2a2a2a]/10"></span>
+            <span class="text-[11px] font-medium text-[#2a2a2a]/40 uppercase tracking-widest">&copy; 2026 Elite Management Hub. Bản quyền được bảo lưu.</span>
+        </div>
+        <div class="flex gap-8 text-[11px] font-bold uppercase tracking-widest text-[#2a2a2a]/40">
+            <a href="#" class="hover:text-[#2a2a2a] transition-colors">Chính sách bảo mật</a>
+            <a href="#" class="hover:text-[#2a2a2a] transition-colors">Điều khoản dịch vụ</a>
+        </div>
+    </div>
+</footer>
+
+
+    <!-- JavaScript Bridges and UI Handling -->
+    <script>
+        // Set min date of picker to today
+        const dateInput = document.getElementById('ngayDat');
+        const todayStr = new Date().toISOString().split('T')[0];
+        dateInput.min = todayStr;
+        dateInput.value = todayStr;
+
+        // 1. Data bridge from Java context
+        const branches = {
+            
+                "6": {
+                    id: 6,
+                    name: `sân bà dịa`,
+                    address: `ádasd`
+                },
+            
+                "7": {
+                    id: 7,
+                    name: `Sân Long Điền`,
+                    address: `asadasd`
+                },
+            
+                "8": {
+                    id: 8,
+                    name: `Sân Long Điền`,
+                    address: `adads`
+                },
+            
+                "9": {
+                    id: 9,
+                    name: `fhsewbfwifnewb fw`,
+                    address: `123 fhadaj`
+                },
+            
+                "10": {
+                    id: 10,
+                    name: `Sân Bưng Riềng`,
+                    address: `tổ 5 ấp 3 xã Xuyên Mộc Thành Phố Hồ Chí MInh`
+                }
+            
+        };
+
+        const sports = {
+            
+                "1": `Bóng đá `.trim(),
+            
+                "2": `Cầu lông `.trim(),
+            
+                "3": `Pickleball `.trim(),
+            
+                "4": `Tennis `.trim(),
+            
+                "5": `Bóng bàn `.trim(),
+            
+                "6": `Gym / Fitness `.trim()
+            
+        };
+
+        const courtTypes = {
+            
+                "1": {
+                    id: 1,
+                    sportId: 1,
+                    name: `Sân bóng đá 5 người `.trim(),
+                    priceDay: 150000.0,
+                    priceNight: 200000.0,
+                    lightTime: `17:30`, // HH:mm:ss format
+                    branchId: null
+                },
+            
+                "2": {
+                    id: 2,
+                    sportId: 3,
+                    name: `Sân Pickleball chuẩn `.trim(),
+                    priceDay: 80000.0,
+                    priceNight: 120000.0,
+                    lightTime: `17:00`, // HH:mm:ss format
+                    branchId: null
+                },
+            
+                "3": {
+                    id: 3,
+                    sportId: 2,
+                    name: `Sân Cầu lông thảm PVC `.trim(),
+                    priceDay: 60000.0,
+                    priceNight: 60000.0,
+                    lightTime: `06:00`, // HH:mm:ss format
+                    branchId: null
+                },
+            
+                "4": {
+                    id: 4,
+                    sportId: 2,
+                    name: `Sân Bóng bàn chuẩn `.trim(),
+                    priceDay: 80000.0,
+                    priceNight: 120000.0,
+                    lightTime: `17:00`, // HH:mm:ss format
+                    branchId: 6
+                },
+            
+                "5": {
+                    id: 5,
+                    sportId: 6,
+                    name: `Sân Gym / Fitness chuẩn `.trim(),
+                    priceDay: 80000.0,
+                    priceNight: 120000.0,
+                    lightTime: `17:00`, // HH:mm:ss format
+                    branchId: 6
+                },
+            
+                "6": {
+                    id: 6,
+                    sportId: 3,
+                    name: `Sân `.trim(),
+                    priceDay: 56.0,
+                    priceNight: 654.0,
+                    lightTime: `17:30`, // HH:mm:ss format
+                    branchId: 6
+                },
+            
+                "7": {
+                    id: 7,
+                    sportId: 3,
+                    name: `Điện máy xanh `.trim(),
+                    priceDay: 60000.0,
+                    priceNight: 90000.0,
+                    lightTime: `17:30`, // HH:mm:ss format
+                    branchId: 6
+                }
+            
+        };
+
+        const courts = [
+            
+                {
+                    id: 5,
+                    name: `Pickleball 01 `.trim(),
+                    typeId: 6,
+                    branchId: 6,
+                    status: `Đang dùng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 7,
+                    name: `Gym / Fitness 01 `.trim(),
+                    typeId: 7,
+                    branchId: 6,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 8,
+                    name: `Tennis 01 `.trim(),
+                    typeId: 1,
+                    branchId: 7,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 9,
+                    name: `Bóng đá 01 `.trim(),
+                    typeId: 1,
+                    branchId: 8,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 10,
+                    name: `Tennis 01 `.trim(),
+                    typeId: 1,
+                    branchId: 8,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 11,
+                    name: `Bóng đá 01 `.trim(),
+                    typeId: 1,
+                    branchId: 9,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 12,
+                    name: `Bóng đá 02 `.trim(),
+                    typeId: 1,
+                    branchId: 9,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                },
+            
+                {
+                    id: 13,
+                    name: `Bóng đá 01 `.trim(),
+                    typeId: 1,
+                    branchId: 10,
+                    status: `Sẵn sàng `.trim(),
+                    desc: `Sân thi đấu tự động tạo cho Cơ Sở. `.trim(),
+                    image: ` `.trim()
+                }
+            
+        ];
+
+        const activeBookings = [
+            
+        ];
+
+        // 2. State management
+        let selectedBranchId = 0;
+        let selectedSportId = 0;
+        let selectedCourtId = null;
+        let currentTotalCost = 0;
+
+        // Parse query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramSportId = parseInt(urlParams.get('sportId')) || 0;
+        const paramBranchId = parseInt(urlParams.get('branchId')) || 0;
+        const paramDate = urlParams.get('date');
+
+        if (paramBranchId) selectedBranchId = paramBranchId;
+        if (paramSportId) selectedSportId = paramSportId;
+        if (paramDate) dateInput.value = paramDate;
+
+        // Fallback images based on sport ID
+        const sportDefaultImages = {
+            "1": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop", // Bóng đá
+            "2": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=800&auto=format&fit=crop", // Cầu lông
+            "3": "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=800&auto=format&fit=crop", // Pickleball
+            "4": "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=800&auto=format&fit=crop", // Tennis
+        };
+
+        // 3. Render Courts in Horizontal List
+        function renderCourts() {
+            const container = document.getElementById("courts-container");
+            container.innerHTML = "";
+
+            // Filter courts array
+            const filteredCourts = courts.filter(c => {
+                const matchBranch = (selectedBranchId === 0 || c.branchId === selectedBranchId);
+                const type = courtTypes[c.typeId];
+                const matchSport = (selectedSportId === 0 || (type && type.sportId === selectedSportId));
+                return matchBranch && matchSport;
+            });
+
+            document.getElementById("court-count").textContent = filteredCourts.length;
+
+            if (filteredCourts.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-3xl p-12 text-center border border-slate-200">
+                        <span class="material-symbols-outlined text-[64px] text-slate-200 block mb-4">search_off</span>
+                        <p class="text-base text-slate-500 font-medium">Không tìm thấy sân đấu phù hợp với bộ lọc.</p>
+                        <button onclick="filterBranch(0); filterSport(0);" class="mt-4 text-green-600 font-bold hover:underline">Xóa bộ lọc</button>
+                    </div>
+                `;
+                return;
+            }
+
+            filteredCourts.forEach(c => {
+                const type = courtTypes[c.typeId] || { name: "Chưa phân loại", priceDay: 100000, priceNight: 100000 };
+                const branch = branches[c.branchId] || { name: "Cơ Sở chung", address: "" };
+                const sportName = sports[type.sportId] || "Thể thao";
+                
+                let imgSrc = c.image;
+                if (!imgSrc || imgSrc.trim() === "") {
+                    imgSrc = sportDefaultImages[type.sportId] || "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?q=80&w=800&auto=format&fit=crop";
+                }
+
+                const isNotAvailable = c.status === "Bảo trì" || c.status === "Đang bảo trì" || c.status === "Tạm đóng";
+                const priceText = type.priceDay.toLocaleString('vi-VN') + 'đ';
+
+                const cardHtml = `
+                    <div class="court-card flex flex-col sm:flex-row bg-white rounded-2xl border border-slate-200 overflow-hidden ${isNotAvailable ? 'opacity-60 grayscale' : ''}">
+                        <!-- Court Image -->
+                        <div class="w-full sm:w-56 md:w-64 shrink-0 relative aspect-video sm:aspect-auto">
+                            <img src="${imgSrc}" alt="${c.name}" class="w-full h-full object-cover">
+                            <div class="absolute top-3 left-3 flex gap-2">
+                                <span class="px-2.5 py-1 rounded-lg bg-white/90 text-slate-800 text-[10px] font-bold uppercase tracking-wider shadow-sm">${sportName}</span>
+                                ${isNotAvailable ? \`<span class="px-2.5 py-1 rounded-lg bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">${c.status}</span>\` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Court Details -->
+                        <div class="p-5 flex flex-col flex-grow justify-between gap-4">
+                            <div>
+                                <div class="flex justify-between items-start gap-2">
+                                    <h3 class="text-xl font-bold text-slate-800 leading-tight">${c.name}</h3>
+                                </div>
+                                <p class="text-[13px] text-slate-500 mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px]">location_on</span>
+                                    ${branch.name} <span class="text-slate-300 mx-1">•</span> ${type.name}
+                                </p>
+                                <p class="text-[13.5px] text-slate-600 mt-3 line-clamp-2">${c.desc || 'Sân tiêu chuẩn chất lượng cao.'}</p>
+                            </div>
+                            
+                            <div class="flex items-end justify-between border-t border-slate-100 pt-4 mt-auto">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Giá thuê từ</span>
+                                    <span class="text-[18px] font-bold text-green-600">${priceText}<span class="text-sm font-normal text-slate-500">/h</span></span>
+                                </div>
+                                <button type="button" 
+                                    onclick="${isNotAvailable ? '' : 'openBookingModal(' + c.id + ')'}" 
+                                    ${isNotAvailable ? 'disabled' : ''}
+                                    class="px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/30 disabled:bg-slate-300 disabled:shadow-none flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+                                    ${isNotAvailable ? 'Bảo trì' : 'Đặt sân'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", cardHtml);
+            });
+        }
+
+        // 4. Filters Interaction
+        function filterBranch(branchId) {
+            selectedBranchId = branchId;
+            document.querySelectorAll(".branch-filter-btn").forEach(btn => {
+                btn.classList.remove("active");
+                btn.style.backgroundColor = '';
+                btn.style.color = '';
+            });
+            const activeBtn = document.getElementById(`btn-branch-`);
+            if (activeBtn) {
+                activeBtn.classList.add("active");
+                activeBtn.style.backgroundColor = '#16a34a';
+                activeBtn.style.color = '#ffffff';
+            }
+            renderCourts();
+        }
+
+        function filterSport(sportId) {
+            selectedSportId = sportId;
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                btn.classList.remove("active");
+                btn.style.backgroundColor = '';
+                btn.style.color = '';
+            });
+            const activeBtn = document.getElementById(`btn-sport-`);
+            if (activeBtn) {
+                activeBtn.classList.add("active");
+                activeBtn.style.backgroundColor = '#16a34a';
+                activeBtn.style.color = '#ffffff';
+            }
+            renderCourts();
+        }
+
+        // 5. Booking Flow & Modal
+        function openBookingModal(courtId) {
+            selectedCourtId = courtId;
+            document.getElementById("input-san-id").value = courtId;
+            
+            const court = courts.find(c => c.id === courtId);
+            if (!court) return;
+
+            const type = courtTypes[court.typeId];
+            const branch = branches[court.branchId];
+
+            // Setup Modal Header
+            document.getElementById("modal-court-name").textContent = court.name;
+            document.getElementById("modal-court-branch").innerHTML = `<span class="material-symbols-outlined text-[16px]">location_on</span> ${branch.name}`;
+            document.getElementById("modal-court-type").textContent = type.name;
+            
+            const imgEl = document.getElementById("modal-court-img");
+            let imgSrc = court.image || sportDefaultImages[type.sportId] || "";
+            imgEl.src = imgSrc;
+            imgEl.classList.remove("hidden");
+
+            // Reset inputs
+            document.getElementById("gioBatDau").value = "";
+            document.getElementById("gioKetThuc").value = "";
+            document.getElementById("timetable-block").classList.add("hidden");
+            document.getElementById("overlap-warning").classList.add("hidden");
+            const btnNext = document.getElementById("next-checkout-btn");
+            if (btnNext) btnNext.disabled = true;
+
+            // Show Overlay & Form Panel
+            const overlay = document.getElementById("bookingModalOverlay");
+            const formPanel = document.getElementById("bookingFormPanel");
+            const checkoutPanel = document.getElementById("checkoutPanel");
+
+            overlay.classList.remove("hidden");
+            checkoutPanel.classList.add("hidden");
+            formPanel.classList.remove("hidden");
+
+            // Trigger animation
+            setTimeout(() => {
+                overlay.classList.remove("opacity-0");
+                formPanel.classList.remove("scale-95");
+            }, 10);
+            
+            checkScheduleAndPrice();
+        }
+
+        function closeBookingModal() {
+            const overlay = document.getElementById("bookingModalOverlay");
+            const panels = document.querySelectorAll("#bookingFormPanel, #checkoutPanel");
+            
+            overlay.classList.add("opacity-0");
+            panels.forEach(p => p.classList.add("scale-95"));
+
+            setTimeout(() => {
+                overlay.classList.add("hidden");
+            }, 300);
+        }
+
+        function checkScheduleAndPrice() {
+            const courtId = selectedCourtId;
+            const dateVal = document.getElementById("ngayDat").value;
+            const startVal = document.getElementById("gioBatDau").value;
+            const endVal = document.getElementById("gioKetThuc").value;
+
+            if (!courtId || !dateVal) return;
+
+            const btnNext = document.getElementById("next-checkout-btn");
+            const timetableBlock = document.getElementById("timetable-block");
+            const timelineSlots = document.getElementById("timeline-slots");
+            const warningBox = document.getElementById("overlap-warning");
+            const warningText = document.getElementById("overlap-warning-text");
+
+            // Show conflicts for selected date
+            const conflicts = activeBookings.filter(b => b.sanId === courtId && b.date === dateVal && b.status !== "Đã hủy");
+            
+            if (conflicts.length > 0) {
+                timetableBlock.classList.remove("hidden");
+                timelineSlots.innerHTML = "";
+                conflicts.forEach(b => {
+                    const formatTime = (timeStr) => timeStr.substring(0, 5);
+                    const slotHtml = `
+                        <div class="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold shadow-sm">
+                            ${formatTime(b.start)} - ${formatTime(b.end)}
+                        </div>
+                    `;
+                    timelineSlots.insertAdjacentHTML("beforeend", slotHtml);
+                });
+            } else {
+                timetableBlock.classList.add("hidden");
+            }
+
+            if (!startVal || !endVal) {
+                if (btnNext) btnNext.disabled = true;
+                warningBox.classList.add("hidden");
+                return;
+            }
+
+            const startMin = timeToMinutes(startVal);
+            const endMin = timeToMinutes(endVal);
+
+            // Logic validations
+            if (endMin <= startMin) {
+                warningText.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
+                warningBox.classList.remove("hidden");
+                if (btnNext) btnNext.disabled = true;
+                return;
+            }
+
+            let isOverlapping = false;
+            conflicts.forEach(b => {
+                const bStart = timeToMinutes(b.start);
+                const bEnd = timeToMinutes(b.end);
+                if (!(endMin <= bStart || startMin >= bEnd)) {
+                    isOverlapping = true;
+                }
+            });
+
+            if (isOverlapping) {
+                warningText.textContent = "Khung giờ bạn chọn đã bị trùng lịch với đơn đặt khác.";
+                warningBox.classList.remove("hidden");
+                if (btnNext) btnNext.disabled = true;
+                return;
+            }
+
+            warningBox.classList.add("hidden");
+            if (btnNext) btnNext.disabled = false;
+
+            // Calculate cost silently to prepare for checkout
+            const court = courts.find(c => c.id === courtId);
+            const type = courtTypes[court.typeId];
+            if (type) {
+                const lightMin = timeToMinutes(type.lightTime);
+                let hourlyRate = type.priceDay;
+                let applyLights = false;
+
+                if (startMin >= lightMin) {
+                    hourlyRate = type.priceNight;
+                    applyLights = type.priceNight !== type.priceDay;
+                }
+
+                const durationHours = (endMin - startMin) / 60.0;
+                currentTotalCost = Math.round(durationHours * hourlyRate);
+
+                // Populate Checkout Panel data
+                document.getElementById("summary-duration").textContent = `${durationHours.toFixed(1)} giờ (${formatDurationText(endMin - startMin)})`;
+                document.getElementById("summary-rate").textContent = `${hourlyRate.toLocaleString('vi-VN')} đ/giờ`;
+                
+                const lightsRow = document.getElementById("summary-lights-row");
+                if (applyLights) {
+                    lightsRow.classList.remove("hidden");
+                } else {
+                    lightsRow.classList.add("hidden");
+                }
+
+                document.getElementById("summary-total").textContent = `${currentTotalCost.toLocaleString('vi-VN')} đ`;
+                document.getElementById("qrPrice").textContent = `${currentTotalCost.toLocaleString('vi-VN')} đ`;
+                
+                // Fetch QR
+                const qrImg = document.getElementById('vietqrCode');
+                const loading = document.getElementById('qrLoading');
+                if (loading) loading.classList.remove('hidden');
+                qrImg.src = `https://img.vietqr.io/image/MB-0909123456-compact2.jpg?amount=${currentTotalCost}&addInfo=ThanhToanDatSan`;
+                qrImg.onload = () => { if (loading) loading.classList.add('hidden'); };
+            }
+        }
+
+        function goToCheckout() {
+            const form = document.getElementById('booking-form');
+            if (!form.reportValidity()) return;
+
+            const formPanel = document.getElementById("bookingFormPanel");
+            const checkoutPanel = document.getElementById("checkoutPanel");
+
+            formPanel.classList.add("scale-95", "opacity-0");
+            setTimeout(() => {
+                formPanel.classList.add("hidden");
+                formPanel.classList.remove("opacity-0"); // Reset for later
+                
+                checkoutPanel.classList.remove("hidden");
+                // slight delay for rendering
+                setTimeout(() => {
+                    checkoutPanel.classList.remove("scale-95");
+                }, 10);
+            }, 200);
+        }
+
+        function backToBookingForm() {
+            const formPanel = document.getElementById("bookingFormPanel");
+            const checkoutPanel = document.getElementById("checkoutPanel");
+
+            checkoutPanel.classList.add("scale-95", "opacity-0");
+            setTimeout(() => {
+                checkoutPanel.classList.add("hidden");
+                checkoutPanel.classList.remove("opacity-0");
+                
+                formPanel.classList.remove("hidden");
+                setTimeout(() => {
+                    formPanel.classList.remove("scale-95");
+                }, 10);
+            }, 200);
+        }
+
+        function setPaymentMethod(method) {
+            document.getElementById('input-payment-method').value = method;
+            
+            const btnQR = document.getElementById('btnPayQR');
+            const btnSau = document.getElementById('btnPaySau');
+            const qrPanel = document.getElementById('qrPanel');
+            const sauPanel = document.getElementById('sauPanel');
+            
+            if (method === 'qr') {
+                btnQR.className = "border-2 border-green-500 bg-green-50 p-3 rounded-xl text-left flex flex-col gap-1 transition-all";
+                btnSau.className = "border border-slate-200 bg-white hover:bg-slate-50 p-3 rounded-xl text-left flex flex-col gap-1 transition-all";
+                qrPanel.classList.remove('hidden');
+                sauPanel.classList.add('hidden');
+            } else {
+                btnSau.className = "border-2 border-green-500 bg-green-50 p-3 rounded-xl text-left flex flex-col gap-1 transition-all";
+                btnQR.className = "border border-slate-200 bg-white hover:bg-slate-50 p-3 rounded-xl text-left flex flex-col gap-1 transition-all";
+                sauPanel.classList.remove('hidden');
+                qrPanel.classList.add('hidden');
+            }
+        }
+
+        function confirmBooking() {
+            document.getElementById('booking-form').submit();
+        }
+
+        function timeToMinutes(timeStr) {
+            const parts = timeStr.split(":");
+            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        }
+
+        function formatDurationText(totalMinutes) {
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            let res = "";
+            if (h > 0) res += h + ' tiếng ';
+            if (m > 0) res += m + ' phút';
+            return res.trim();
+        }
+
+        // Init - Debug logging
+        console.log('[DatSan] courts loaded from server:', courts.length, courts);
+        console.log('[DatSan] courtTypes:', courtTypes);
+        console.log('[DatSan] branches:', branches);
+        console.log('[DatSan] sports:', sports);
+        
+        // Render courts first, then apply filters
+        renderCourts();
+        filterBranch(selectedBranchId);
+        filterSport(selectedSportId);
+    </script>
+</body>
+</html>

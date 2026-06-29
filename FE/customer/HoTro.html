@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BIGSIZE SPORT - Trợ Giúp & Hỗ Trợ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+            },
+            background: "#fafaf9",
+            surface: "#ffffff",
+            "on-surface": "#1c1917",
+            "on-surface-variant": "#78716c",
+            outline: "#e7e5e4",
+            success: "#10b981",
+            error: "#ef4444",
+          },
+          fontFamily: { sans: ["Plus Jakarta Sans", "sans-serif"] },
+          boxShadow: {
+            'soft': '0 4px 30px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 12px 30px rgba(234, 179, 8, 0.12)',
+          }
+        }
+      }
+    }
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafaf9; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e7e5e4; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ca8a04; }
+
+    .glass-nav {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    /* FAQ transition custom heights */
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+    }
+    .faq-active .faq-answer {
+        max-height: 200px;
+        transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
+    }
+    .faq-active .faq-icon {
+        transform: rotate(180deg);
+        color: #ca8a04;
+    }
+</style>
+</head>
+<body class="text-on-surface pb-28 min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-outline px-4 py-3 flex items-center justify-between shadow-soft">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-white text-[22px] filled">forum</span>
+            </div>
+            <div>
+                <h1 class="text-sm font-extrabold text-stone-850">Trung Tâm Trợ Giúp</h1>
+                <p class="text-[10px] text-on-surface-variant font-medium mt-0.5 font-sans">Giải đáp câu hỏi & Chat trực tiếp</p>
+            </div>
+        </div>
+        <button onclick="showToast('Liên hệ', 'Tổng đài Hotline: 0909 123 456')" class="p-2 text-stone-500 hover:text-primary-600 rounded-full hover:bg-stone-50 transition-colors">
+            <span class="material-symbols-outlined">call</span>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto px-4 mt-5 flex flex-col gap-6">
+
+        <!-- FAQ Collapsible Section -->
+        <section class="flex flex-col gap-3">
+            <h3 class="text-xs font-extrabold uppercase text-stone-400 tracking-wider">Câu hỏi thường gặp (FAQs)</h3>
+            
+            <div class="flex flex-col gap-2.5">
+                <!-- FAQ Item 1 -->
+                <div onclick="toggleFAQ(this)" class="bg-white border border-outline rounded-2xl p-4 cursor-pointer shadow-soft transition-all duration-300">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs font-extrabold text-stone-800">Làm thế nào để hủy đặt sân và hoàn tiền?</span>
+                        <span class="material-symbols-outlined text-stone-400 text-sm faq-icon transition-transform">expand_more</span>
+                    </div>
+                    <div class="faq-answer mt-2.5 pt-2.5 border-t border-stone-50 text-[11px] text-stone-500 leading-relaxed">
+                        Bạn có thể hủy sân trong phần <strong>Lịch Sử</strong> trước giờ bắt đầu ít nhất 24 giờ. Hệ thống sẽ hoàn tiền tự động 100% về tài khoản liên kết hoặc điểm ví V-Points trong 24 giờ làm việc.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div onclick="toggleFAQ(this)" class="bg-white border border-outline rounded-2xl p-4 cursor-pointer shadow-soft transition-all duration-300">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs font-extrabold text-stone-800">Tôi có thể dời lịch đặt sân sang giờ khác?</span>
+                        <span class="material-symbols-outlined text-stone-400 text-sm faq-icon transition-transform">expand_more</span>
+                    </div>
+                    <div class="faq-answer mt-2.5 pt-2.5 border-t border-stone-50 text-[11px] text-stone-500 leading-relaxed">
+                        Theo chính sách của BIGSIZE SPORT, bạn có thể dời lịch đặt trước 12 tiếng nếu khung giờ mới còn trống. Để dời nhanh, vui lòng nhấn chat với Lễ tân bên dưới hoặc liên hệ số Hotline của chi nhánh để được dời giờ thủ công.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div onclick="toggleFAQ(this)" class="bg-white border border-outline rounded-2xl p-4 cursor-pointer shadow-soft transition-all duration-300">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs font-extrabold text-stone-800">V-Points là gì và tích lũy ra sao?</span>
+                        <span class="material-symbols-outlined text-stone-400 text-sm faq-icon transition-transform">expand_more</span>
+                    </div>
+                    <div class="faq-answer mt-2.5 pt-2.5 border-t border-stone-50 text-[11px] text-stone-500 leading-relaxed">
+                        V-Points là điểm thành viên tích lũy dựa trên số tiền đặt sân (100,000 ₫ = 10 V-Points). Bạn có thể dùng điểm đổi các mã giảm giá và quà tặng hấp dẫn ở mục <strong>Cá nhân &gt; Đổi thưởng V-Points</strong>.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Chat Simulator -->
+        <section class="flex flex-col gap-3">
+            <h3 class="text-xs font-extrabold uppercase text-stone-400 tracking-wider">Hỗ Trợ Trực Tuyến</h3>
+            
+            <div class="bg-white border border-outline rounded-3xl overflow-hidden shadow-soft flex flex-col h-[320px]">
+                <!-- Chat Header -->
+                <div class="bg-stone-900 px-4 py-3 flex items-center justify-between text-white shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=Lễ+Tân&background=ca8a04&color=fff&bold=true" class="w-8 h-8 rounded-full object-cover" alt="Support agent">
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-stone-900"></span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold leading-none">Lễ Tân CS01 (Online)</p>
+                            <p class="text-[9px] text-stone-400 mt-0.5">Phản hồi trung bình: 1 phút</p>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-bold bg-primary-500 text-stone-900 px-2 py-0.5 rounded">HỖ TRỢ KHÁCH HÀNG</span>
+                </div>
+
+                <!-- Chat Body (Message stream) -->
+                <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-stone-50/50" id="chatStream">
+                    <div class="text-center">
+                        <span class="text-[9px] text-stone-400 font-semibold bg-stone-200/50 px-2.5 py-0.5 rounded-full">Hôm nay</span>
+                    </div>
+
+                    <!-- Bot Msg -->
+                    <div class="flex items-start gap-2.5 max-w-[85%]">
+                        <img src="https://ui-avatars.com/api/?name=Lễ+Tân&background=ca8a04&color=fff&bold=true" class="w-6 h-6 rounded-full" alt="Bot avatar">
+                        <div class="flex flex-col gap-1">
+                            <div class="bg-white border border-stone-150 px-3.5 py-2 rounded-2xl rounded-tl-sm text-[11px] leading-relaxed text-stone-800 shadow-sm">
+                                Chào anh/chị Nhân! BIGSIZE SPORT có thể hỗ trợ gì cho anh/chị hôm nay ạ?
+                            </div>
+                            <span class="text-[8px] text-stone-400 ml-1">Vừa xong</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input area -->
+                <div class="p-3 border-t border-outline bg-white shrink-0">
+                    <form onsubmit="sendMessage(event)" class="flex gap-2 relative">
+                        <input type="text" id="messageInput" class="flex-1 bg-stone-50 border border-outline rounded-2xl px-4 py-2.5 text-xs focus:ring-1 focus:ring-primary-500 focus:outline-none" placeholder="Nhập tin nhắn hỗ trợ...">
+                        <button type="submit" class="w-9 h-9 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center shrink-0 shadow-md shadow-primary-50 active:scale-90 transition-all">
+                            <span class="material-symbols-outlined text-sm">send</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FLOATING BOTTOM NAVIGATION HEADER/DOCK -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-40">
+        <nav class="glass-nav rounded-2xl py-3 px-4 flex justify-between items-center shadow-lg border border-white/60">
+            <a href="Dashboard.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">home</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Trang Chủ</span>
+            </a>
+            <a href="DatSan.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">event_seat</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Đặt Sân</span>
+            </a>
+            <a href="LichSuDat.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Hoạt Động</span>
+            </a>
+            <a href="HoTro.html" class="flex flex-col items-center gap-1 flex-1 nav-active transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 text-primary-600 bg-primary-100 shadow-sm shadow-primary-200">
+                    <span class="material-symbols-outlined filled">forum</span>
+                </div>
+                <span class="text-[9px] font-extrabold tracking-wide uppercase">Hỗ Trợ</span>
+            </a>
+            <a href="TaiKhoan.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Tài Khoản</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Active Toast Alert System -->
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // Collapsible FAQ logic
+        function toggleFAQ(element) {
+            const isActive = element.classList.contains('faq-active');
+            
+            // Close all
+            const items = document.querySelectorAll('.faq-active');
+            items.forEach(item => item.classList.remove('faq-active'));
+
+            if (!isActive) {
+                element.classList.add('faq-active');
+            }
+        }
+
+        // Live Chat Simulation Logic
+        function sendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('messageInput');
+            const msgText = input.value.trim();
+            if (!msgText) return;
+
+            const chatStream = document.getElementById('chatStream');
+            const now = new Date();
+            const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+            // 1. Append User Message
+            const userMsgHTML = `
+                <div class="flex items-start gap-2.5 max-w-[85%] self-end flex-row-reverse animate__animated animate__fadeInUp animate__faster">
+                    <img src="https://ui-avatars.com/api/?name=Khach+Hang&background=ca8a04&color=fff&bold=true" class="w-6 h-6 rounded-full" alt="User avatar">
+                    <div class="flex flex-col gap-1 items-end">
+                        <div class="bg-primary-500 text-stone-900 px-3.5 py-2 rounded-2xl rounded-tr-sm text-[11px] leading-relaxed shadow-sm font-semibold">
+                            ${msgText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                        </div>
+                        <span class="text-[8px] text-stone-400 mr-1">${timeStr}</span>
+                    </div>
+                </div>
+            `;
+            chatStream.insertAdjacentHTML('beforeend', userMsgHTML);
+            input.value = "";
+            chatStream.scrollTop = chatStream.scrollHeight;
+
+            // 2. Add Typing indicator
+            const typingId = 'typing_' + Date.now();
+            const typingHTML = `
+                <div id="${typingId}" class="flex items-start gap-2.5 max-w-[85%] animate__animated animate__fadeInUp animate__faster">
+                    <img src="https://ui-avatars.com/api/?name=Lễ+Tân&background=ca8a04&color=fff&bold=true" class="w-6 h-6 rounded-full" alt="Bot avatar">
+                    <div class="flex flex-col gap-1">
+                        <div class="bg-white border border-stone-150 px-3.5 py-2 rounded-2xl rounded-tl-sm text-[11px] leading-relaxed text-stone-400 italic">
+                            Lễ Tân đang nhập...
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                chatStream.insertAdjacentHTML('beforeend', typingHTML);
+                chatStream.scrollTop = chatStream.scrollHeight;
+            }, 600);
+
+            // 3. Auto Reply matching keywords
+            setTimeout(() => {
+                const typingIndicator = document.getElementById(typingId);
+                if (typingIndicator) typingIndicator.remove();
+
+                let reply = "";
+                const lowerText = msgText.toLowerCase();
+
+                if (lowerText.includes('hủy') || lowerText.includes('hoàn tiền')) {
+                    reply = "Dạ, anh/chị có thể tự hủy đặt sân trước 24h trong phần Lịch Sử. Tiền sẽ được hoàn tự động về Tài khoản Ví tích lũy của anh/chị ngay lập tức ạ.";
+                } else if (lowerText.includes('dời') || lowerText.includes('đổi') || lowerText.includes('lịch')) {
+                    reply = "Dạ, để dời lịch đặt, anh/chị vui lòng cung cấp Mã đặt sân (BKxxxxx) và Khung giờ muốn dời qua ạ. Hoặc anh/chị có thể gọi số hotline chi nhánh 0909 123 456 để lễ tân chuyển giờ nhanh nhất nhé.";
+                } else if (lowerText.includes('giá') || lowerText.includes('tiền sân') || lowerText.includes('bao nhiêu')) {
+                    reply = "Dạ, giá thuê sân dao động từ 80k - 150k/h cho cầu lông, 150k - 200k/h cho Pickleball và từ 250k - 420k/h đối với sân bóng đá tùy theo khung giờ thường hay giờ vàng cao điểm ạ.";
+                } else {
+                    reply = "Dạ, lễ tân BIGSIZE SPORT đã tiếp nhận thông tin yêu cầu của anh/chị. Em đang kiểm tra hệ thống và sẽ phản hồi chi tiết hỗ trợ anh/chị ngay bây giờ nhé ạ!";
+                }
+
+                const botReplyHTML = `
+                    <div class="flex items-start gap-2.5 max-w-[85%] animate__animated animate__fadeInUp animate__faster">
+                        <img src="https://ui-avatars.com/api/?name=Lễ+Tân&background=ca8a04&color=fff&bold=true" class="w-6 h-6 rounded-full" alt="Bot avatar">
+                        <div class="flex flex-col gap-1">
+                            <div class="bg-white border border-stone-150 px-3.5 py-2 rounded-2xl rounded-tl-sm text-[11px] leading-relaxed text-stone-800 shadow-sm">
+                                ${reply}
+                            </div>
+                            <span class="text-[8px] text-stone-400 ml-1">${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+                chatStream.insertAdjacentHTML('beforeend', botReplyHTML);
+                chatStream.scrollTop = chatStream.scrollHeight;
+            }, 1800);
+        }
+
+        // Universal Toast function
+        function showToast(title, message) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast_' + Date.now();
+            
+            const toastHTML = `
+                <div id="${toastId}" class="bg-stone-900/95 backdrop-blur-md text-white border border-stone-850 px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 animate__animated animate__fadeInUp animate__faster">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-primary-500/20 text-primary-400 flex items-center justify-center shrink-0 mt-0.5">
+                            <span class="material-symbols-outlined text-[16px] filled">sports_tennis</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-extrabold text-primary-400">${title}</p>
+                            <p class="text-[11px] text-stone-300 mt-0.5 leading-snug">${message}</p>
+                        </div>
+                    </div>
+                    <button onclick="closeToast('${toastId}')" class="text-stone-400 hover:text-white transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHTML);
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 3500);
+        }
+
+        function closeToast(id) {
+            const toast = document.getElementById(id);
+            if (toast) {
+                toast.classList.remove('animate__fadeInUp');
+                toast.classList.add('animate__fadeOutDown');
+                setTimeout(() => { toast.remove(); }, 300);
+            }
+        }
+    </script>
+</body>
+</html>

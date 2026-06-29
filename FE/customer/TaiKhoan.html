@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BIGSIZE SPORT - Tài Khoản Khách Hàng</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+            },
+            background: "#fafaf9",
+            surface: "#ffffff",
+            "on-surface": "#1c1917",
+            "on-surface-variant": "#78716c",
+            outline: "#e7e5e4",
+            success: "#10b981",
+            error: "#ef4444",
+          },
+          fontFamily: { sans: ["Plus Jakarta Sans", "sans-serif"] },
+          boxShadow: {
+            'soft': '0 4px 30px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 12px 30px rgba(234, 179, 8, 0.12)',
+            'gold-glow': '0 0 20px rgba(234, 179, 8, 0.3)',
+          }
+        }
+      }
+    }
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafaf9; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e7e5e4; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ca8a04; }
+
+    .glass-nav {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+</style>
+</head>
+<body class="text-on-surface pb-28 min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-outline px-4 py-3 flex items-center justify-between shadow-soft">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-white text-[22px] filled">person</span>
+            </div>
+            <div>
+                <h1 class="text-sm font-extrabold text-stone-850">Hồ Sơ Cá Nhân</h1>
+                <p class="text-[10px] text-on-surface-variant font-medium mt-0.5">Thành viên & điểm thưởng</p>
+            </div>
+        </div>
+        <button onclick="logout()" class="p-2 text-stone-400 hover:text-error rounded-full hover:bg-stone-50 transition-colors">
+            <span class="material-symbols-outlined">logout</span>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto px-4 mt-5 flex flex-col gap-6">
+
+        <!-- User Profile & Gold Rank Card -->
+        <section class="bg-gradient-to-br from-stone-900 to-stone-800 text-white rounded-3xl p-6 relative overflow-hidden shadow-lg animate__animated animate__fadeIn">
+            <!-- Glow background overlay -->
+            <div class="absolute -right-20 -bottom-20 w-52 h-52 bg-primary-500/10 rounded-full blur-3xl"></div>
+            
+            <div class="flex items-center gap-4 relative z-10">
+                <img src="https://ui-avatars.com/api/?name=Khach+Hang&background=ca8a04&color=fff&bold=true" class="w-16 h-16 rounded-full object-cover ring-4 ring-primary-500 shadow-lg" alt="Profile">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-base font-extrabold" id="profileName">Nguyễn Thiện Nhân</h2>
+                        <span class="bg-primary-500 text-stone-900 font-extrabold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                            <span class="material-symbols-outlined text-[10px] filled">stars</span> HẠNG VÀNG
+                        </span>
+                    </div>
+                    <p class="text-xs text-stone-400 mt-1 font-semibold" id="profilePhone">+84 909 123 456</p>
+                    <p class="text-[10px] text-stone-500 mt-0.5 font-mono">ID: VS-CUST-9029</p>
+                </div>
+            </div>
+
+            <!-- Loyalty points slider tracker -->
+            <div class="mt-6 pt-5 border-t border-stone-700/60 relative z-10 flex flex-col gap-2">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <span class="text-[10px] text-stone-400 font-medium block uppercase tracking-wider">Điểm tích lũy (V-Points)</span>
+                        <span class="text-2xl font-black text-primary-400 font-mono mt-1 block" id="currentPoints">1,250 <span class="text-xs text-stone-400 font-normal">points</span></span>
+                    </div>
+                    <span class="text-[9px] font-semibold text-stone-400 bg-stone-700/40 px-2 py-1 rounded-lg">Cấp tiếp theo: Bạch Kim</span>
+                </div>
+                <!-- Progress bar -->
+                <div class="w-full h-2 bg-stone-700 rounded-full overflow-hidden mt-1">
+                    <div class="h-full bg-primary-500" style="width: 80%"></div>
+                </div>
+                <span class="text-[9px] text-stone-400">Bạn còn <span class="font-bold text-white">250 V-Points</span> để thăng hạng và nhận ưu đãi giảm 30%.</span>
+            </div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="grid grid-cols-3 gap-3">
+            <div class="bg-white border border-outline rounded-2xl p-4 text-center shadow-soft">
+                <span class="material-symbols-outlined text-primary-500 text-lg filled">event_seat</span>
+                <span class="text-lg font-black text-stone-850 block mt-1 font-mono">18</span>
+                <span class="text-[9px] font-bold text-stone-400 uppercase tracking-wider block mt-0.5">Lượt Đặt</span>
+            </div>
+            <div class="bg-white border border-outline rounded-2xl p-4 text-center shadow-soft">
+                <span class="material-symbols-outlined text-primary-500 text-lg">timer</span>
+                <span class="text-lg font-black text-stone-850 block mt-1 font-mono">32.5h</span>
+                <span class="text-[9px] font-bold text-stone-400 uppercase tracking-wider block mt-0.5">Giờ Chơi</span>
+            </div>
+            <div class="bg-white border border-outline rounded-2xl p-4 text-center shadow-soft">
+                <span class="material-symbols-outlined text-primary-500 text-lg">workspace_premium</span>
+                <span class="text-lg font-black text-stone-850 block mt-1 font-mono">4.8M</span>
+                <span class="text-[9px] font-bold text-stone-400 uppercase tracking-wider block mt-0.5">Chi Tiêu</span>
+            </div>
+        </section>
+
+        <!-- Editable Profile Fields -->
+        <section class="bg-white border border-outline rounded-3xl p-5 shadow-soft flex flex-col gap-4">
+            <h3 class="text-xs font-extrabold uppercase text-stone-400 tracking-wider">Thông Tin Cá Nhân</h3>
+            
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-extrabold text-stone-500 uppercase">Họ và tên</label>
+                    <input type="text" id="inputName" class="w-full bg-stone-50 border border-outline rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-primary-500 focus:outline-none" value="Nguyễn Thiện Nhân">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-extrabold text-stone-500 uppercase">Số điện thoại</label>
+                    <input type="text" id="inputPhone" class="w-full bg-stone-50 border border-outline rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-primary-500 focus:outline-none" value="0909 123 456">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-extrabold text-stone-500 uppercase">Địa chỉ Email</label>
+                    <input type="email" id="inputEmail" class="w-full bg-stone-50 border border-outline rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-primary-500 focus:outline-none" value="thiennhan.dev@gmail.com">
+                </div>
+            </div>
+
+            <button onclick="saveProfile()" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 rounded-2xl text-xs shadow-md shadow-primary-50 active:scale-95 transition-all">Lưu thay đổi</button>
+        </section>
+
+        <!-- V-Points Reward Shop (Interactive redemption) -->
+        <section class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary-500 filled text-lg">military_tech</span>Đổi Thưởng V-Points</h3>
+                <span class="text-[10px] text-stone-400 font-semibold" id="shopPointBalance">Số dư: 1,250 pts</span>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <!-- Shop Item 1 -->
+                <div class="bg-white border border-outline rounded-2xl p-4 flex items-center justify-between shadow-soft hover:shadow-card-hover transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-xl">confirmation_number</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-850">Voucher giảm 20,000 ₫</p>
+                            <p class="text-[9px] text-primary-600 font-extrabold flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-xs">savings</span> 200 Points
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="redeemGift(200, 'Voucher 20K', 'REDEEM20K')" class="bg-stone-900 hover:bg-stone-850 text-white font-bold px-4 py-2 rounded-xl text-[10px] active:scale-95 transition-all shadow-sm">Đổi Quà</button>
+                </div>
+
+                <!-- Shop Item 2 -->
+                <div class="bg-white border border-outline rounded-2xl p-4 flex items-center justify-between shadow-soft hover:shadow-card-hover transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-xl">local_drink</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-850">Tặng 1 Chai Nước Aquafina</p>
+                            <p class="text-[9px] text-primary-600 font-extrabold flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-xs">savings</span> 80 Points
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="redeemGift(80, 'Chai nước Aquafina', 'REDEEMWATER')" class="bg-stone-900 hover:bg-stone-850 text-white font-bold px-4 py-2 rounded-xl text-[10px] active:scale-95 transition-all shadow-sm">Đổi Quà</button>
+                </div>
+
+                <!-- Shop Item 3 -->
+                <div class="bg-white border border-outline rounded-2xl p-4 flex items-center justify-between shadow-soft hover:shadow-card-hover transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-xl">workspace_premium</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-850">Mã giảm 50k Pickleball</p>
+                            <p class="text-[9px] text-primary-600 font-extrabold flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-xs">savings</span> 450 Points
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="redeemGift(450, 'Voucher Pickleball 50K', 'REDEEMPB50')" class="bg-stone-900 hover:bg-stone-850 text-white font-bold px-4 py-2 rounded-xl text-[10px] active:scale-95 transition-all shadow-sm">Đổi Quà</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FLOATING BOTTOM NAVIGATION HEADER/DOCK -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-40">
+        <nav class="glass-nav rounded-2xl py-3 px-4 flex justify-between items-center shadow-lg border border-white/60">
+            <a href="Dashboard.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">home</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Trang Chủ</span>
+            </a>
+            <a href="DatSan.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">event_seat</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Đặt Sân</span>
+            </a>
+            <a href="LichSuDat.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Hoạt Động</span>
+            </a>
+            <a href="HoTro.html" class="flex flex-col items-center gap-1 flex-1 text-on-surface-variant hover:text-primary-600 transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300">
+                    <span class="material-symbols-outlined">forum</span>
+                </div>
+                <span class="text-[9px] font-bold tracking-wide">Hỗ Trợ</span>
+            </a>
+            <a href="TaiKhoan.html" class="flex flex-col items-center gap-1 flex-1 nav-active transition-all active:scale-95 duration-200">
+                <div class="icon-container w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 text-primary-600 bg-primary-100 shadow-sm shadow-primary-200">
+                    <span class="material-symbols-outlined filled">person</span>
+                </div>
+                <span class="text-[9px] font-extrabold tracking-wide uppercase">Tài Khoản</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Active Toast Alert System -->
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-50 flex flex-col gap-2"></div>
+
+    <script>
+        let currentPts = 1250;
+
+        function initPoints() {
+            const savedPoints = localStorage.getItem('vsport_customer_points');
+            if (savedPoints) {
+                currentPts = parseInt(savedPoints);
+            } else {
+                localStorage.setItem('vsport_customer_points', currentPts);
+            }
+            updatePointsDisplay();
+        }
+
+        function updatePointsDisplay() {
+            document.getElementById('currentPoints').innerHTML = `${currentPts.toLocaleString()} <span class="text-xs text-stone-400 font-normal">points</span>`;
+            document.getElementById('shopPointBalance').textContent = `Số dư: ${currentPts.toLocaleString()} pts`;
+            localStorage.setItem('vsport_customer_points', currentPts);
+        }
+
+        // Save profile simulation
+        function saveProfile() {
+            const newName = document.getElementById('inputName').value.trim();
+            const newPhone = document.getElementById('inputPhone').value.trim();
+            const newEmail = document.getElementById('inputEmail').value.trim();
+
+            if (!newName || !newPhone || !newEmail) {
+                showToast('Hồ sơ', 'Vui lòng không để trống thông tin cá nhân!');
+                return;
+            }
+
+            document.getElementById('profileName').textContent = newName;
+            document.getElementById('profilePhone').textContent = newPhone;
+            showToast('Hồ sơ', 'Cập nhật thông tin cá nhân thành công!');
+        }
+
+        // Redeem gift points simulation
+        function redeemGift(cost, name, promoCode) {
+            if (currentPts < cost) {
+                showToast('Điểm thưởng', `Số dư điểm của bạn không đủ để đổi món quà này (Thiếu ${cost - currentPts} points).`);
+                return;
+            }
+
+            const isConfirm = confirm(`Đổi "${name}" với giá ${cost} V-Points?`);
+            if (isConfirm) {
+                currentPts -= cost;
+                updatePointsDisplay();
+                showToast('Đổi thưởng', `Đổi quà thành công! Mã ưu đãi của bạn là: ${promoCode} (Đã sao chép vào khay nhớ tạm)`);
+                
+                // Copy to clipboard mock
+                navigator.clipboard.writeText(promoCode).catch(err => {});
+            }
+        }
+
+        // Logout mock
+        function logout() {
+            if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+                showToast('Đăng xuất', 'Đăng xuất tài khoản thành công!');
+                setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+                }, 1000);
+            }
+        }
+
+        // Universal Toast function
+        function showToast(title, message) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast_' + Date.now();
+            
+            const toastHTML = `
+                <div id="${toastId}" class="bg-stone-900/95 backdrop-blur-md text-white border border-stone-850 px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 animate__animated animate__fadeInUp animate__faster">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-primary-500/20 text-primary-400 flex items-center justify-center shrink-0 mt-0.5">
+                            <span class="material-symbols-outlined text-[16px] filled">sports_tennis</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-extrabold text-primary-400">${title}</p>
+                            <p class="text-[11px] text-stone-300 mt-0.5 leading-snug">${message}</p>
+                        </div>
+                    </div>
+                    <button onclick="closeToast('${toastId}')" class="text-stone-400 hover:text-white transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHTML);
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 3500);
+        }
+
+        function closeToast(id) {
+            const toast = document.getElementById(id);
+            if (toast) {
+                toast.classList.remove('animate__fadeInUp');
+                toast.classList.add('animate__fadeOutDown');
+                setTimeout(() => { toast.remove(); }, 300);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPoints();
+        });
+    </script>
+</body>
+</html>
