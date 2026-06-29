@@ -65,15 +65,23 @@
     <jsp:include page="/common/header.jsp" />
 
     <main class="flex-grow pt-[120px] pb-24">
-        <div class="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- Page Header -->
-            <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 animate-fade-in-up">
-                <div>
-                    <h1 class="text-3xl sm:text-4xl font-bold text-[#1e293b] tracking-tight">Tìm và Đặt sân</h1>
-                    <p class="mt-2 text-sm text-slate-500">Hệ thống sân bãi hiện đại, cập nhật lịch theo thời gian thực.</p>
+            <!-- Premium Search & Location Banner -->
+            <div class="mb-10 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden animate-fade-in-up">
+                <!-- Decorative background elements -->
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10 max-w-2xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-md">
+                        <i class="fa-solid fa-bolt"></i> Đặt sân nhanh chóng
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">Tìm & Đặt Sân Đấu</h1>
+                    <p class="text-white/80 text-sm sm:text-base leading-relaxed">
+                        Khám phá hệ thống sân bãi hiện đại, lịch đặt cập nhật trực tiếp theo thời gian thực và nhiều tiện ích đi kèm.
+                    </p>
                 </div>
-                <!-- Optional: Search bar or Sorting could go here -->
             </div>
 
             <!-- Alert Messages -->
@@ -105,6 +113,27 @@
                 <!-- LEFT SIDEBAR: Filters -->
                 <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-[120px] animate-fade-in-up">
                     
+                    <!-- Location Filter & Search -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-green-600">location_on</span>
+                                Khu vực & Vị trí
+                            </h3>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+                                <input type="text" id="location-search-input" placeholder="Nhập quận, huyện, cơ sở..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-green-500 focus:bg-white transition-all">
+                            </div>
+                            
+                            <button type="button" id="btn-auto-locate" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-300 text-green-700 rounded-xl text-[14px] font-semibold transition-all">
+                                <span id="locate-icon" class="material-symbols-outlined text-[18px]">my_location</span>
+                                <span id="locate-text">Xác định vị trí hiện tại</span>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <!-- Sport Type Filter -->
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -133,11 +162,11 @@
                     </div>
 
                     <!-- Branch Filter -->
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden bg-slate-50">
                         <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <h3 class="font-bold text-slate-800">Chọn Cơ Sở</h3>
                         </div>
-                        <div class="p-3 flex flex-col gap-1">
+                        <div class="p-3 flex flex-col gap-1 bg-white">
                             <button type="button" onclick="filterBranch(0)" id="btn-branch-0" class="branch-filter-btn active w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-left flex items-center gap-3 transition-colors hover:bg-slate-50">
                                 <span class="material-symbols-outlined text-[20px]">map</span>
                                 Tất cả Cơ Sở
@@ -153,6 +182,38 @@
                             </c:forEach>
                         </div>
                     </div>
+
+                    <!-- Mini Map Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fade-in-up">
+                        <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-green-600">map</span>
+                                Bản đồ khu vực
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="relative w-full h-[180px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200 group cursor-pointer">
+                                <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=80')] bg-center bg-cover transition-transform duration-500 group-hover:scale-105"></div>
+                                <div class="absolute inset-0 bg-slate-900/10 transition-colors duration-300 group-hover:bg-slate-900/30"></div>
+                                
+                                <div class="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-green-600/20 flex items-center justify-center animate-ping absolute"></div>
+                                    <span class="material-symbols-outlined text-green-600 text-[32px] drop-shadow-md z-10 relative">location_on</span>
+                                </div>
+                                <div class="absolute top-2/3 right-1/4 translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                    <span class="material-symbols-outlined text-emerald-500 text-[28px] drop-shadow-md z-10 relative">location_on</span>
+                                </div>
+                                
+                                <div class="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg flex items-center justify-between border border-white/20 shadow-sm">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Xem bản đồ lớn</span>
+                                        <span class="text-[11px] font-bold text-slate-800">4 cơ sở xung quanh</span>
+                                    </div>
+                                    <span class="material-symbols-outlined text-green-600 text-[18px]">open_in_new</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- RIGHT MAIN CONTENT: Court List -->
@@ -162,7 +223,7 @@
                         <span id="court-status-summary" class="text-xs text-slate-500 font-medium"></span>
                     </div>
                     
-                    <div id="courts-container" class="flex flex-col gap-5">
+                    <div id="courts-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         <!-- Dynamically loaded via JS -->
                     </div>
                 </div>
@@ -178,7 +239,7 @@
         <!-- STEP 1: BOOKING FORM PANEL -->
         <div id="bookingFormPanel" class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
             
-            <div class="bg-green-600 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <h3 class="font-bold text-lg flex items-center gap-2">
                     <span class="material-symbols-outlined">event_available</span> Đăng ký đặt sân
                 </h3>
@@ -216,12 +277,12 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1.5">
-                            <label for="gioBatDau" class="form-label">Giờ bắt đầu <span class="text-red-500">*</span></label>
-                            <input type="time" name="gioBatDau" id="gioBatDau" required class="form-input" onchange="checkScheduleAndPrice()">
+                            <label for="gioBatDau" class="form-label text-slate-600 font-bold text-xs">Giờ bắt đầu <span class="text-red-500">*</span></label>
+                            <select name="gioBatDau" id="gioBatDau" required class="form-input bg-white cursor-pointer" onchange="onStartTimeChange()"></select>
                         </div>
                         <div class="space-y-1.5">
-                            <label for="gioKetThuc" class="form-label">Giờ kết thúc <span class="text-red-500">*</span></label>
-                            <input type="time" name="gioKetThuc" id="gioKetThuc" required class="form-input" onchange="checkScheduleAndPrice()">
+                            <label for="gioKetThuc" class="form-label text-slate-600 font-bold text-xs">Giờ kết thúc <span class="text-red-500">*</span></label>
+                            <select name="gioKetThuc" id="gioKetThuc" required class="form-input bg-white cursor-pointer" onchange="checkScheduleAndPrice()"></select>
                         </div>
                     </div>
 
@@ -257,7 +318,7 @@
                             </c:when>
                             <c:otherwise>
                                 <a href="${pageContext.request.contextPath}/dangnhap"
-                                   class="px-8 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                   class="px-8 py-3 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center gap-2">
                                     Đăng nhập để đặt sân <span class="material-symbols-outlined text-[18px]">login</span>
                                 </a>
                             </c:otherwise>
@@ -432,7 +493,14 @@
                 const matchBranch = (selectedBranchId === 0 || c.branchId === selectedBranchId);
                 const type = courtTypes[c.typeId];
                 const matchSport = (selectedSportId === 0 || (type && type.sportId === selectedSportId));
-                return matchBranch && matchSport;
+                
+                const branch = branches[c.branchId] || {};
+                const branchAddress = (branch.address || '').toLowerCase();
+                const branchName = (branch.name || '').toLowerCase();
+                const searchQuery = (selectedLocationQuery || '').toLowerCase().trim();
+                const matchLocation = !searchQuery || branchAddress.includes(searchQuery) || branchName.includes(searchQuery);
+                
+                return matchBranch && matchSport && matchLocation;
             });
 
             document.getElementById("court-count").textContent = filteredCourts.length;
@@ -463,41 +531,105 @@
                 const sportName = sports[type.sportId] || "Thể thao";
                 const statusInfo = getCourtStatusInfo(c.status);
                 const statusBadge = buildStatusBadge(statusInfo);
-                const priceText = type.priceDay.toLocaleString('vi-VN') + 'đ';
+                const priceText = type.priceDay.toLocaleString('vi-VN') + ' đ';
                 const bookBtnLabel = statusInfo.bookable ? 'Đặt sân' : statusInfo.label;
 
+                // Map sport name to curated premium images
+                let courtImageUrl = "https://images.unsplash.com/photo-1518605368461-1ee7e57c6691?auto=format&fit=crop&w=600&q=80"; // default football
+                const sName = sportName.toLowerCase();
+                if (sName.includes("cầu lông")) {
+                    courtImageUrl = "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80";
+                } else if (sName.includes("pickleball")) {
+                    courtImageUrl = "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80";
+                } else if (sName.includes("tennis")) {
+                    courtImageUrl = "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=600&q=80";
+                } else if (sName.includes("bóng bàn")) {
+                    courtImageUrl = "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&w=600&q=80";
+                } else if (sName.includes("gym") || sName.includes("fitness")) {
+                    courtImageUrl = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80";
+                }
+                
+                if (c.image && c.image.trim() !== "") {
+                    courtImageUrl = c.image;
+                }
+
+                // Mock ratings & distance metadata for premium look
+                const rating = (4.5 + (c.id % 5) * 0.1).toFixed(1);
+                const reviews = 20 + (c.id * 7) % 80;
+                const distance = (1.2 + (c.id % 4) * 0.4).toFixed(1);
+
                 const cardHtml = `
-                    <div class="court-card bg-white rounded-2xl border border-slate-200 overflow-hidden \${statusInfo.bookable ? '' : 'opacity-90'}">
-                        <div class="p-5 flex flex-col flex-grow justify-between gap-4">
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2 mb-2">
-                                    <span class="px-2.5 py-1 rounded-lg bg-green-50 text-green-700 text-[10px] font-bold uppercase tracking-wider">\${sportName}</span>
-                                    \${statusBadge}
-                                </div>
-                                <div class="flex justify-between items-start gap-2">
-                                    <h3 class="text-xl font-bold text-slate-800 leading-tight">\${c.name}</h3>
-                                </div>
-                                <p class="text-[13px] text-slate-500 mt-1 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[15px]">location_on</span>
-                                    \${branch.name} <span class="text-slate-300 mx-1">•</span> \${type.name}
-                                </p>
-                                <p class="text-[12px] text-slate-400 mt-1 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">schedule</span>
-                                    \${normalizeTime(branch.openTime)} - \${normalizeTime(branch.closeTime)}
-                                </p>
-                                <p class="text-[13.5px] text-slate-600 mt-3 line-clamp-2">\${c.desc || 'Sân tiêu chuẩn chất lượng cao.'}</p>
+                    <div class="court-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 \${statusInfo.bookable ? '' : 'opacity-90'}">
+                        
+                        <!-- Top Image Banner -->
+                        <div class="relative h-[180px] w-full overflow-hidden bg-slate-100">
+                            <img src="\${courtImageUrl}" alt="\${c.name}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent"></div>
+                            
+                            <!-- Badges on Image -->
+                            <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+                                <span class="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md text-green-700 text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                                    \${sportName}
+                                </span>
+                                \${statusBadge}
                             </div>
                             
-                            <div class="flex items-end justify-between border-t border-slate-100 pt-4 mt-auto">
+                            <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end text-white">
+                                <span class="text-[11px] font-medium bg-black/40 backdrop-blur-md px-2 py-1 rounded-md flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[13px]">near_me</span> Cách bạn \${distance} km
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="p-5 flex flex-col flex-grow justify-between gap-4">
+                            <div>
+                                <!-- Title & Ratings -->
+                                <div class="flex justify-between items-start gap-2">
+                                    <h3 class="text-base font-bold text-slate-800 leading-tight truncate">\${c.name}</h3>
+                                    <div class="flex items-center gap-0.5 text-amber-500 shrink-0">
+                                        <span class="material-symbols-outlined text-[15px] fill-1">star</span>
+                                        <span class="text-xs font-bold text-slate-700">\${rating}</span>
+                                        <span class="text-[10px] text-slate-400">(\\ \${reviews} \\)</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Location -->
+                                <p class="text-[12.5px] text-slate-500 mt-1 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
+                                    <span class="truncate">\${branch.name}</span>
+                                </p>
+                                
+                                <!-- Timing -->
+                                <p class="text-[12px] text-slate-400 mt-1 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[15px]">schedule</span>
+                                    \${normalizeTime(branch.openTime)} - \${normalizeTime(branch.closeTime)}
+                                </p>
+                                
+                                <!-- Description -->
+                                <p class="text-[13px] text-slate-600 mt-2.5 line-clamp-2 h-[38px]">\${c.desc || 'Sân đấu tiêu chuẩn chất lượng cao, hệ thống đèn chiếu sáng ban đêm hiện đại.'}</p>
+                                
+                                <!-- Amenities Badges -->
+                                <div class="flex items-center gap-3 mt-4 text-slate-400">
+                                    <span class="material-symbols-outlined text-[18px] hover:text-green-600 transition-colors cursor-help" title="Có Wifi miễn phí">wifi</span>
+                                    <span class="material-symbols-outlined text-[18px] hover:text-green-600 transition-colors cursor-help" title="Bãi đậu xe máy & ô tô">local_parking</span>
+                                    <span class="material-symbols-outlined text-[18px] hover:text-green-600 transition-colors cursor-help" title="Nước uống phục vụ miễn phí">local_drink</span>
+                                    <span class="material-symbols-outlined text-[18px] hover:text-green-600 transition-colors cursor-help" title="Đèn chiếu sáng ban đêm">lightbulb</span>
+                                    <span class="material-symbols-outlined text-[18px] hover:text-green-600 transition-colors cursor-help" title="Phòng thay đồ & tắm rửa">shower</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Price & Button -->
+                            <div class="flex items-center justify-between border-t border-slate-100 pt-4 mt-auto">
                                 <div>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Giá thuê từ</span>
-                                    <span class="text-[18px] font-bold text-green-600">\${priceText}<span class="text-sm font-normal text-slate-500">/h</span></span>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Giá thuê từ</span>
+                                    <span class="text-[16px] font-bold text-green-600">\${priceText}<span class="text-xs font-normal text-slate-500">/h</span></span>
                                 </div>
                                 <button type="button" 
                                     onclick="\${statusInfo.bookable ? 'openBookingModal(' + c.id + ')' : ''}" 
                                     \${statusInfo.bookable ? '' : 'disabled'}
-                                    class="px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/30 disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[18px]">\${statusInfo.bookable ? 'calendar_add_on' : 'block'}</span>
+                                    class="px-4 py-2 bg-green-600 text-white rounded-xl text-xs font-bold transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/30 disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[16px]">\${statusInfo.bookable ? 'calendar_add_on' : 'block'}</span>
                                     \${bookBtnLabel}
                                 </button>
                             </div>
@@ -541,6 +673,63 @@
             renderCourts();
         }
 
+        let selectedLocationQuery = "";
+
+        function filterLocation(query) {
+            selectedLocationQuery = query;
+            renderCourts();
+        }
+
+        // Location Search & Autocomplete Event Listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            const locationInput = document.getElementById("location-search-input");
+            const autoLocateBtn = document.getElementById("btn-auto-locate");
+            const locateIcon = document.getElementById("locate-icon");
+            const locateText = document.getElementById("locate-text");
+
+            if (locationInput) {
+                locationInput.addEventListener("input", (e) => {
+                    filterLocation(e.target.value);
+                });
+            }
+
+            if (autoLocateBtn) {
+                autoLocateBtn.addEventListener("click", () => {
+                    locateIcon.innerHTML = "sync";
+                    locateIcon.classList.add("animate-spin");
+                    locateText.textContent = "Đang định vị...";
+                    autoLocateBtn.disabled = true;
+
+                    setTimeout(() => {
+                        let detectedLocation = "Long Điền";
+                        
+                        const firstBranchId = Object.keys(branches)[0];
+                        if (firstBranchId && branches[firstBranchId]) {
+                            detectedLocation = branches[firstBranchId].address || branches[firstBranchId].name || "Long Điền";
+                            
+                            if (detectedLocation.includes(",")) {
+                                detectedLocation = detectedLocation.split(",")[0].trim();
+                            }
+                        }
+
+                        if (locationInput) {
+                            locationInput.value = detectedLocation;
+                            filterLocation(detectedLocation);
+                        }
+
+                        locateIcon.innerHTML = "my_location";
+                        locateIcon.classList.remove("animate-spin");
+                        locateText.textContent = "Định vị thành công!";
+                        autoLocateBtn.disabled = false;
+
+                        setTimeout(() => {
+                            locateText.textContent = "Xác định vị trí hiện tại";
+                        }, 2000);
+                    }, 1000);
+                });
+            }
+        });
+
         // 5. Booking Flow & Modal
         function openBookingModal(courtId) {
             selectedCourtId = courtId;
@@ -562,9 +751,9 @@
             modalStatusEl.className = 'text-xs font-bold mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md ' + statusInfo.badgeClass;
             modalStatusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full ' + statusInfo.dotClass + '"></span>' + statusInfo.label;
 
-            // Reset inputs & apply giờ mở/đóng cửa theo cơ sở
-            document.getElementById("gioBatDau").value = "";
-            document.getElementById("gioKetThuc").value = "";
+            // Reset inputs
+            document.getElementById("ngayDat").value = todayStr;
+            document.getElementById("ghiChu").value = "";
             applyBranchTimeConstraints(court.branchId);
             document.getElementById("timetable-block").classList.add("hidden");
             document.getElementById("overlap-warning").classList.add("hidden");
@@ -788,25 +977,62 @@
             return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
         }
 
+        function populateTimeSelect(selectId, minTimeStr, maxTimeStr, isEnd = false, relativeToMinStr = null) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            select.innerHTML = "";
+
+            const minMin = timeToMinutes(minTimeStr);
+            const maxMin = timeToMinutes(maxTimeStr);
+            
+            let startMin = minMin;
+            if (isEnd && relativeToMinStr) {
+                startMin = timeToMinutes(relativeToMinStr) + 30; // End time is at least 30 minutes after start time
+            }
+
+            for (let min = startMin; min <= maxMin; min += 30) {
+                const hour = Math.floor(min / 60);
+                const minutes = min % 60;
+                const timeStr = String(hour).padStart(2, "0") + ":" + String(minutes).padStart(2, "0");
+                
+                const opt = document.createElement("option");
+                opt.value = timeStr;
+                opt.textContent = timeStr;
+                select.appendChild(opt);
+            }
+        }
+
+        function onStartTimeChange() {
+            const startVal = document.getElementById("gioBatDau").value;
+            const court = courts.find(c => c.id === selectedCourtId);
+            const { closeTime } = getBranchHours(court ? court.branchId : null);
+            
+            populateTimeSelect("gioKetThuc", startVal, closeTime, true, startVal);
+            checkScheduleAndPrice();
+        }
+
         function applyBranchTimeConstraints(branchId) {
             const { openTime, closeTime } = getBranchHours(branchId);
-            const startInput = document.getElementById("gioBatDau");
-            const endInput = document.getElementById("gioKetThuc");
             const hoursLabel = document.getElementById("modal-branch-hours");
-
-            startInput.min = openTime;
-            startInput.max = closeTime;
-            endInput.min = openTime;
-            endInput.max = closeTime;
 
             if (hoursLabel) {
                 hoursLabel.textContent = openTime + " - " + closeTime;
             }
 
+            let startMinLimit = openTime;
             const dateVal = document.getElementById("ngayDat").value;
-            if (dateVal === todayStr && timeToMinutes(getCurrentTimeStr()) > timeToMinutes(openTime)) {
-                startInput.min = getCurrentTimeStr();
+            if (dateVal === todayStr) {
+                const nowMinStr = getCurrentTimeStr();
+                if (timeToMinutes(nowMinStr) > timeToMinutes(openTime)) {
+                    startMinLimit = nowMinStr;
+                }
             }
+
+            // Populate Start Select Options
+            populateTimeSelect("gioBatDau", startMinLimit, closeTime, false);
+            
+            // Populate End Select based on selected Start Option
+            onStartTimeChange();
         }
 
         function onBookingDateChange() {

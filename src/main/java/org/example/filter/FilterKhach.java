@@ -40,7 +40,7 @@ public class FilterKhach implements Filter {
                     } else if (user.getRoleId() == 2) { // Manager
                         redirectUrl = httpRequest.getContextPath() + "/manager/nhan-su";
                     } else {
-                        redirectUrl = httpRequest.getContextPath() + "/customer/TrangChu.jsp";
+                        redirectUrl = httpRequest.getContextPath() + "/index.jsp";
                     }
                     httpResponse.setContentType("application/json;charset=UTF-8");
                     httpResponse.getWriter().write("{\"success\": true, \"redirectUrl\": \"" + redirectUrl + "\"}");

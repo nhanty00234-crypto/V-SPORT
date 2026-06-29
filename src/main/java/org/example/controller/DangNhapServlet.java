@@ -70,7 +70,7 @@ public class DangNhapServlet extends HttpServlet {
             } else if (taiKhoan.getRoleId() == 4 || taiKhoan.getRoleId() == 5) { // Lễ tân & Bảo vệ (Staff)
                 redirectUrl = req.getContextPath() + "/staff/dashboard";
             } else { // Khách hàng
-                redirectUrl = req.getContextPath() + "/customer/TrangChu.jsp";
+                redirectUrl = req.getContextPath() + "/index.jsp";
             }
 
             // Phản hồi kết quả đăng nhập thành công

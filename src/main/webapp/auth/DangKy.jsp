@@ -8,7 +8,7 @@
     <title>Đăng ký - V-SPORT</title>
     <c:if test="${empty loi}">
         <script>
-            window.location.replace("${pageContext.request.contextPath}/customer/TrangChu.jsp?auth=register");
+            window.location.replace("${pageContext.request.contextPath}/index.jsp?auth=register");
         </script>
     </c:if>
     <script src="https://cdn.tailwindcss.com"></script>

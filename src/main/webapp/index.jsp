@@ -89,42 +89,8 @@
             color: var(--primary);
         }
 
-        /* Navigation */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 8%;
-            background: var(--bg-light);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 30px;
-        }
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--primary);
-            font-weight: 600;
-        }
+        /* Navigation styles removed as they are loaded via header.jsp */
+
 
         /* Hero Section */
         .hero {
@@ -431,29 +397,15 @@
 </head>
 <body>
 
-    <nav class="navbar fade-down">
-        <div class="logo">
-            <i class="fa-solid fa-futbol"></i> V-SPORT
-        </div>
-        <ul class="nav-links">
-            <li><a href="#" class="active">Trang Chủ</a></li>
-            <li><a href="#">Tìm Sân</a></li>
-            <li><a href="#">Giải Đấu</a></li>
-            <li><a href="#">Cộng Đồng</a></li>
-            <li><a href="#">Bảng Giá</a></li>
-        </ul>
-        <button onclick="openAuthModal('login')" class="btn-register-shimmer">
-            Đăng ký / Đăng nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
-        </button>
-    </nav>
+    <jsp:include page="/common/header.jsp" />
 
     <section class="hero reveal">
         <div class="hero-content">
             <h1>Đặt Sân Nhanh, <br><span class="highlight">Thỏa Đam Mê</span> Thể Thao</h1>
             <p>Khám phá và đặt ngay các sân bóng đá, tennis, cầu lông chất lượng nhất khu vực. Dễ dàng tìm đối thủ, ghép kèo và tạo giải đấu của riêng bạn!</p>
             <div class="store-buttons">
-                <a href="#" class="store-btn"><i class="fa-solid fa-calendar-check"></i> Đặt Sân Ngay</a>
-                <a href="#" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px;">
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="store-btn"><i class="fa-solid fa-calendar-check"></i> Đặt Sân Ngay</a>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-compass"></i> Khám phá
                 </a>
             </div>
@@ -540,7 +492,7 @@
                     <li><i class="fa-solid fa-circle-check"></i> Miễn phí gửi xe</li>
                     <li><i class="fa-solid fa-circle-check"></i> Mượn bóng miễn phí</li>
                 </ul>
-                <a href="#" class="btn btn-outline">Đặt Giờ Này <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn btn-outline">Đặt Giờ Này <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             <div class="price-card active-card">
                 <h3>550K <span>/giờ</span></h3>
@@ -552,7 +504,7 @@
                     <li><i class="fa-solid fa-circle-check"></i> Có trà đá phục vụ sân</li>
                     <li><i class="fa-solid fa-star"></i> Ưu tiên giữ lịch cố định</li>
                 </ul>
-                <a href="#" class="btn btn-primary">Đặt Giờ Này <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn btn-primary">Đặt Giờ Này <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             <div class="price-card">
                 <h3>400K <span>/giờ</span></h3>
@@ -563,7 +515,7 @@
                     <li><i class="fa-solid fa-circle-check"></i> Trà đá miễn phí</li>
                     <li><i class="fa-solid fa-circle-check"></i> Có khu vực nghỉ ngơi VIP</li>
                 </ul>
-                <a href="#" class="btn btn-outline">Đặt Giờ Này <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn btn-outline">Đặt Giờ Này <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
     </section>
@@ -601,6 +553,5 @@
         revealOnScroll();
     </script>
 
-    <jsp:include page="/auth/AuthModal.jsp" />
 </body>
 </html>
