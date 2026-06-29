@@ -275,14 +275,22 @@
                         <input type="date" name="ngayDat" id="ngayDat" required class="form-input" onchange="onBookingDateChange()">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-4">
+                        <input type="hidden" name="gioBatDau" id="gioBatDau" required>
+                        <input type="hidden" name="gioKetThuc" id="gioKetThuc" required>
+                        
                         <div class="space-y-1.5">
-                            <label for="gioBatDau" class="form-label text-slate-600 font-bold text-xs">Giờ bắt đầu <span class="text-red-500">*</span></label>
-                            <select name="gioBatDau" id="gioBatDau" required class="form-input bg-white cursor-pointer" onchange="onStartTimeChange()"></select>
+                            <label class="form-label text-slate-600 font-bold text-xs">Chọn giờ bắt đầu <span class="text-red-500">*</span></label>
+                            <div id="start-time-slots" class="grid grid-cols-4 sm:grid-cols-6 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 max-h-[160px] overflow-y-auto">
+                                <!-- Populated dynamically -->
+                            </div>
                         </div>
+
                         <div class="space-y-1.5">
-                            <label for="gioKetThuc" class="form-label text-slate-600 font-bold text-xs">Giờ kết thúc <span class="text-red-500">*</span></label>
-                            <select name="gioKetThuc" id="gioKetThuc" required class="form-input bg-white cursor-pointer" onchange="checkScheduleAndPrice()"></select>
+                            <label class="form-label text-slate-600 font-bold text-xs">Chọn giờ kết thúc <span class="text-red-500">*</span></label>
+                            <div id="end-time-slots" class="grid grid-cols-4 sm:grid-cols-6 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 max-h-[160px] overflow-y-auto">
+                                <div class="col-span-full text-center text-xs text-slate-400 py-2">Vui lòng chọn giờ bắt đầu trước</div>
+                            </div>
                         </div>
                     </div>
 
@@ -977,37 +985,74 @@
             return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
         }
 
-        function populateTimeSelect(selectId, minTimeStr, maxTimeStr, isEnd = false, relativeToMinStr = null) {
-            const select = document.getElementById(selectId);
-            if (!select) return;
-            select.innerHTML = "";
+        function selectStartHour(startHour, startTimeStr) {
+            // Update active styling in start container
+            const startContainer = document.getElementById("start-time-slots");
+            startContainer.querySelectorAll("button").forEach(btn => {
+                if (parseInt(btn.dataset.hour) === startHour) {
+                    btn.className = "px-3 py-2 bg-green-600 border border-green-600 text-white text-xs font-bold rounded-xl text-center shadow-md transition-all";
+                } else {
+                    const isPast = parseInt(btn.dataset.hour) <= (document.getElementById("ngayDat").value === todayStr ? new Date().getHours() : -1);
+                    if (btn.disabled) {
+                        btn.className = "px-3 py-2 bg-slate-100 border border-slate-100 text-slate-300 text-xs font-bold rounded-xl text-center cursor-not-allowed";
+                    } else {
+                        btn.className = "px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl text-center hover:bg-slate-100 hover:border-slate-300 transition-all";
+                    }
+                }
+            });
 
-            const minMin = timeToMinutes(minTimeStr);
-            const maxMin = timeToMinutes(maxTimeStr);
-            
-            let startMin = minMin;
-            if (isEnd && relativeToMinStr) {
-                startMin = timeToMinutes(relativeToMinStr) + 30; // End time is at least 30 minutes after start time
-            }
+            document.getElementById("gioBatDau").value = startTimeStr;
+            document.getElementById("gioKetThuc").value = "";
 
-            for (let min = startMin; min <= maxMin; min += 30) {
-                const hour = Math.floor(min / 60);
-                const minutes = min % 60;
-                const timeStr = String(hour).padStart(2, "0") + ":" + String(minutes).padStart(2, "0");
-                
-                const opt = document.createElement("option");
-                opt.value = timeStr;
-                opt.textContent = timeStr;
-                select.appendChild(opt);
-            }
-        }
-
-        function onStartTimeChange() {
-            const startVal = document.getElementById("gioBatDau").value;
+            // Populate End Slots
             const court = courts.find(c => c.id === selectedCourtId);
             const { closeTime } = getBranchHours(court ? court.branchId : null);
+            const closeHour = parseInt(closeTime.split(":")[0]);
             
-            populateTimeSelect("gioKetThuc", startVal, closeTime, true, startVal);
+            const dateVal = document.getElementById("ngayDat").value;
+            const conflicts = activeBookings.filter(b => b.sanId === selectedCourtId && b.date === dateVal && b.status !== "Đã hủy");
+
+            const endContainer = document.getElementById("end-time-slots");
+            endContainer.innerHTML = "";
+
+            // Prevent selecting across an existing reservation
+            let maxAvailableHour = closeHour;
+            conflicts.forEach(b => {
+                const bStartHour = parseInt(b.start.split(":")[0]);
+                if (bStartHour > startHour && bStartHour < maxAvailableHour) {
+                    maxAvailableHour = bStartHour;
+                }
+            });
+
+            for (let hour = startHour + 1; hour <= maxAvailableHour; hour++) {
+                const timeStr = String(hour).padStart(2, "0") + ":00";
+                
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl text-center hover:bg-slate-100 hover:border-slate-300 transition-all";
+                btn.textContent = `${hour}h`;
+                btn.dataset.time = timeStr;
+                btn.dataset.hour = hour;
+                
+                btn.addEventListener("click", () => selectEndHour(hour, timeStr));
+                endContainer.appendChild(btn);
+            }
+            
+            checkScheduleAndPrice();
+        }
+
+        function selectEndHour(endHour, endTimeStr) {
+            // Update active styling in end container
+            const endContainer = document.getElementById("end-time-slots");
+            endContainer.querySelectorAll("button").forEach(btn => {
+                if (parseInt(btn.dataset.hour) === endHour) {
+                    btn.className = "px-3 py-2 bg-green-600 border border-green-600 text-white text-xs font-bold rounded-xl text-center shadow-md transition-all";
+                } else {
+                    btn.className = "px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl text-center hover:bg-slate-100 hover:border-slate-300 transition-all";
+                }
+            });
+
+            document.getElementById("gioKetThuc").value = endTimeStr;
             checkScheduleAndPrice();
         }
 
@@ -1016,23 +1061,57 @@
             const hoursLabel = document.getElementById("modal-branch-hours");
 
             if (hoursLabel) {
-                hoursLabel.textContent = openTime + " - " + closeTime;
+                hoursLabel.textContent = openTime.substring(0, 5) + " - " + closeTime.substring(0, 5);
             }
 
-            let startMinLimit = openTime;
+            const openHour = parseInt(openTime.split(":")[0]);
+            const closeHour = parseInt(closeTime.split(":")[0]);
             const dateVal = document.getElementById("ngayDat").value;
+            
+            const courtId = selectedCourtId;
+            const conflicts = activeBookings.filter(b => b.sanId === courtId && b.date === dateVal && b.status !== "Đã hủy");
+
+            const startContainer = document.getElementById("start-time-slots");
+            startContainer.innerHTML = "";
+            
+            let currentHour = -1;
             if (dateVal === todayStr) {
-                const nowMinStr = getCurrentTimeStr();
-                if (timeToMinutes(nowMinStr) > timeToMinutes(openTime)) {
-                    startMinLimit = nowMinStr;
-                }
+                const now = new Date();
+                currentHour = now.getHours();
             }
 
-            // Populate Start Select Options
-            populateTimeSelect("gioBatDau", startMinLimit, closeTime, false);
+            for (let hour = openHour; hour < closeHour; hour++) {
+                const isPast = hour <= currentHour;
+                const timeStr = String(hour).padStart(2, "0") + ":00";
+                
+                const isBooked = conflicts.some(b => {
+                    const startMin = timeToMinutes(b.start);
+                    const endMin = timeToMinutes(b.end);
+                    const slotMin = hour * 60;
+                    return slotMin >= startMin && slotMin < endMin;
+                });
+
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = `px-3 py-2 border rounded-xl text-xs font-bold text-center transition-all ${isPast || isBooked ? 'bg-slate-100 border-slate-100 text-slate-300 cursor-not-allowed' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'}`;
+                btn.textContent = `${hour}h`;
+                btn.dataset.time = timeStr;
+                btn.dataset.hour = hour;
+                
+                if (isPast || isBooked) {
+                    btn.disabled = true;
+                } else {
+                    btn.addEventListener("click", () => selectStartHour(hour, timeStr));
+                }
+                startContainer.appendChild(btn);
+            }
+
+            // Reset values
+            document.getElementById("gioBatDau").value = "";
+            document.getElementById("gioKetThuc").value = "";
             
-            // Populate End Select based on selected Start Option
-            onStartTimeChange();
+            const endContainer = document.getElementById("end-time-slots");
+            endContainer.innerHTML = `<div class="col-span-full text-center text-xs text-slate-400 py-2">Vui lòng chọn giờ bắt đầu trước</div>`;
         }
 
         function onBookingDateChange() {
