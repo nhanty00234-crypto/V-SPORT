@@ -59,6 +59,7 @@ public class OwnerRegisterServlet extends HttpServlet {
     // ────────────────────────────────────────
     private void handleSendOtp(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter out = resp.getWriter();
+        String email = req.getParameter("email");
         if (email != null) {
             email = email.trim();
         }
