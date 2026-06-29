@@ -64,6 +64,20 @@ public class NhanSuManagerServlet extends HttpServlet {
             }
             return;
         }
+        if ("deletedList".equals(action)) {
+            try {
+                List<NhanSuDTO> staffList = nhanSuService.getDeletedStaffListByBranch(managerCoSoId);
+                resp.setContentType("application/json");
+                resp.setCharacterEncoding("UTF-8");
+                String json = buildStaffListJson(staffList);
+                resp.getWriter().write(json);
+            } catch (Exception e) {
+                logger.error("Error listing deleted staff: {}", e.getMessage(), e);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                resp.getWriter().write("Lỗi tải danh sách nhân viên trong thùng rác: " + e.getMessage());
+            }
+            return;
+        }
         
         // Forward tới trang nhân sự
         req.getRequestDispatcher("/manager/NhanSu.jsp").forward(req, resp);
@@ -134,6 +148,18 @@ public class NhanSuManagerServlet extends HttpServlet {
                 session.setAttribute("message", "Xóa nhân viên thành công!");
                 resp.setStatus(HttpServletResponse.SC_OK);
             } 
+            else if ("restore".equals(action)) {
+                int accountId = Integer.parseInt(req.getParameter("id"));
+                nhanSuService.restoreStaff(accountId, managerCoSoId);
+                session.setAttribute("message", "Khôi phục nhân viên thành công!");
+                resp.setStatus(HttpServletResponse.SC_OK);
+            }
+            else if ("permanentDelete".equals(action)) {
+                int accountId = Integer.parseInt(req.getParameter("id"));
+                nhanSuService.permanentlyDeleteStaff(accountId, managerCoSoId);
+                session.setAttribute("message", "Xóa vĩnh viễn nhân viên thành công!");
+                resp.setStatus(HttpServletResponse.SC_OK);
+            }
             else if ("addShift".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("accountId"));
                 int thu = Integer.parseInt(req.getParameter("thu"));

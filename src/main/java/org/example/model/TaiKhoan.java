@@ -89,6 +89,17 @@ public class TaiKhoan {
     @Transient // Not directly in the Accounts table (mapped via many-to-many usually)
     private String monTheThaoYeuThich;
 
+    @Column(name = "IsDeleted", columnDefinition = "bit default 0")
+    private Boolean isDeleted = false;
+
+    public Boolean isDeleted() {
+        return isDeleted != null && isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
     public boolean isLocked() {
         return isLocked;
     }

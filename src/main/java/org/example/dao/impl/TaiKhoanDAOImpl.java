@@ -204,7 +204,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     public TaiKhoan dangNhapKhachHang(String usernameOrEmail, String password) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            List<TaiKhoan> accounts = em.createQuery("SELECT a FROM TaiKhoan a WHERE (a.username = :val OR a.email = :val) AND a.isLocked = false", TaiKhoan.class)
+            List<TaiKhoan> accounts = em.createQuery("SELECT a FROM TaiKhoan a WHERE (a.username = :val OR a.email = :val) AND a.isLocked = false AND (a.isDeleted = false OR a.isDeleted IS NULL)", TaiKhoan.class)
                                        .setParameter("val", usernameOrEmail)
                                        .getResultList();
             if (!accounts.isEmpty()) {
@@ -281,7 +281,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     public List<TaiKhoan> getAccountsByCoSoAndRoleNotIn(int coSoId, List<Integer> excludedRoleIds) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT a FROM TaiKhoan a WHERE a.coSoId = :coSoId";
+            String jpql = "SELECT a FROM TaiKhoan a WHERE a.coSoId = :coSoId AND (a.isDeleted = false OR a.isDeleted IS NULL)";
             if (excludedRoleIds != null && !excludedRoleIds.isEmpty()) {
                 jpql += " AND a.roleId NOT IN :excludedRoles";
             }
@@ -293,6 +293,28 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             return query.getResultList();
         } catch (Exception e) {
             logger.error("Lỗi lấy tài khoản theo cơ sở {} và role: {}", coSoId, e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<TaiKhoan> getDeletedAccountsByCoSoAndRoleNotIn(int coSoId, List<Integer> excludedRoleIds) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            String jpql = "SELECT a FROM TaiKhoan a WHERE a.coSoId = :coSoId AND a.isDeleted = true";
+            if (excludedRoleIds != null && !excludedRoleIds.isEmpty()) {
+                jpql += " AND a.roleId NOT IN :excludedRoles";
+            }
+            jakarta.persistence.Query query = em.createQuery(jpql, TaiKhoan.class)
+                .setParameter("coSoId", coSoId);
+            if (excludedRoleIds != null && !excludedRoleIds.isEmpty()) {
+                query.setParameter("excludedRoles", excludedRoleIds);
+            }
+            return query.getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi lấy tài khoản đã xóa theo cơ sở {} và role: {}", coSoId, e.getMessage(), e);
             return null;
         } finally {
             em.close();

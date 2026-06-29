@@ -334,7 +334,7 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Tên loại hình sân *</label>
+          <label class="text-xs font-semibold text-purple-900">Tên loại hình sân *</label>
         <input type="text" name="tenLoai" id="typeName" required placeholder="VD: Sân cỏ nhân tạo 5 người" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
       </div>
 

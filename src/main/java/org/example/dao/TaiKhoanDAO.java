@@ -31,6 +31,7 @@ public interface TaiKhoanDAO {
     // Manager operations
     List<TaiKhoan> getAccountsByCoSoAndRoleNotIn(int coSoId, List<Integer> excludedRoleIds);
     List<TaiKhoan> getAccountsByCoSoAndRoleIn(int coSoId, List<Integer> roleIds);
+    List<TaiKhoan> getDeletedAccountsByCoSoAndRoleNotIn(int coSoId, List<Integer> excludedRoleIds);
 
     // Dashboard statistics
     long getTotalStaff();

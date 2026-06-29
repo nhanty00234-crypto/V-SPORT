@@ -456,7 +456,82 @@ public class NhanSuService {
             throw new IllegalArgumentException("Không thể xóa tài khoản có quyền Quản trị hoặc Quản lý!");
         }
 
-        taiKhoanDAO.deleteAccount(accountId);
+        account.setDeleted(true);
+        if (!taiKhoanDAO.updateAccount(account)) {
+            throw new RuntimeException("Lỗi cập nhật trạng thái xóa nhân viên vào cơ sở dữ liệu");
+        }
+    }
+
+    /**
+     * Xóa vĩnh viễn nhân viên khỏi cơ sở dữ liệu (Hard Delete)
+     */
+    public void permanentlyDeleteStaff(int accountId, int managerCoSoId) {
+        TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
+        BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
+
+        // Check branch access
+        BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
+
+        // Cannot delete Admin/Manager
+        if (!isStaff(account.getRoleId())) {
+            throw new IllegalArgumentException("Không thể xóa tài khoản có quyền Quản trị hoặc Quản lý!");
+        }
+
+        if (!taiKhoanDAO.deleteAccount(accountId)) {
+            throw new RuntimeException("Lỗi xóa vĩnh viễn nhân viên trong cơ sở dữ liệu");
+        }
+    }
+
+    /**
+     * Lấy danh sách nhân viên đã bị xóa mềm của cơ sở
+     */
+    public List<NhanSuDTO> getDeletedStaffListByBranch(int coSoId) {
+        List<TaiKhoan> accounts = taiKhoanDAO.getDeletedAccountsByCoSoAndRoleNotIn(
+            coSoId,
+            List.of(Constants.ROLE_ADMIN, Constants.ROLE_MANAGER)
+        );
+
+        List<VaiTro> allRoles = vaiTroDAO.getAllRoles();
+
+        return accounts.stream()
+            .map(acc -> {
+                VaiTro role = allRoles.stream()
+                    .filter(r -> r.getRoleId() == acc.getRoleId())
+                    .findFirst()
+                    .orElse(new VaiTro(acc.getRoleId(), "Không xác định"));
+                return new NhanSuDTO(
+                    acc.getAccountId(),
+                    acc.getUsername(),
+                    acc.getFullName(),
+                    acc.getEmail(),
+                    acc.getPhoneNumber(),
+                    acc.getRoleId(),
+                    role.getRoleName(),
+                    acc.isLocked()
+                );
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Khôi phục nhân viên từ thùng rác
+     */
+    public void restoreStaff(int accountId, int managerCoSoId) {
+        TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
+        BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
+
+        // Check branch access
+        BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
+
+        // Cannot restore Admin/Manager
+        if (!isStaff(account.getRoleId())) {
+            throw new IllegalArgumentException("Không thể khôi phục tài khoản có quyền Quản trị hoặc Quản lý!");
+        }
+
+        account.setDeleted(false);
+        if (!taiKhoanDAO.updateAccount(account)) {
+            throw new RuntimeException("Lỗi khôi phục nhân viên trong cơ sở dữ liệu");
+        }
     }
 
     // ==================== SHIFT MANAGEMENT ====================
