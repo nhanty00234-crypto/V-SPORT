@@ -239,6 +239,19 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
 
+        // --- Bước 2c: Validate thời lượng đặt sân (tối thiểu 30 phút, tối đa 4 giờ) ---
+        long durationMinutes = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
+        if (durationMinutes < 30) {
+            session.setAttribute("error", "Thời lượng đặt sân tối thiểu cho mỗi lượt là 30 phút.");
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+            return;
+        }
+        if (durationMinutes > 240) {
+            session.setAttribute("error", "Thời lượng đặt sân tối đa cho mỗi lượt là 4 giờ (240 phút).");
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+            return;
+        }
+
         // --- Bước 2b: Validate ngày/giờ không được trong quá khứ ---
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();

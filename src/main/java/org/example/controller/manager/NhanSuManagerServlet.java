@@ -240,43 +240,32 @@ public class NhanSuManagerServlet extends HttpServlet {
             logger.warn("Validation/Business error in NhanSuManagerServlet: {}", msg);
             session.setAttribute("error", msg);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.setContentType("text/plain;charset=UTF-8");
             resp.getWriter().write(msg != null ? msg : "Yêu cầu không hợp lệ.");
         } catch (Exception e) {
             logger.error("Unexpected error in NhanSuManagerServlet doPost: {}", e.getMessage(), e);
             session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.setContentType("text/plain;charset=UTF-8");
             resp.getWriter().write("Lỗi hệ thống: " + e.getMessage());
         }
     }
 
     private String buildStaffListJson(List<NhanSuDTO> staffList) {
-        StringBuilder json = new StringBuilder();
-        json.append("[");
-        for (int i = 0; i < staffList.size(); i++) {
-            NhanSuDTO s = staffList.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"id\":\"").append(s.getAccountId()).append("\",");
-            json.append("\"username\":\"").append(escapeJson(s.getUsername())).append("\",");
-            json.append("\"name\":\"").append(escapeJson(s.getFullName() != null ? s.getFullName() : s.getUsername())).append("\",");
-            json.append("\"email\":\"").append(escapeJson(s.getEmail() != null ? s.getEmail() : "")).append("\",");
-            json.append("\"phone\":\"").append(escapeJson(s.getPhoneNumber() != null ? s.getPhoneNumber() : "")).append("\",");
-            json.append("\"roleId\":").append(s.getRoleId()).append(",");
-            json.append("\"VaiTro\":\"").append(escapeJson(s.getRoleName())).append("\",");
-            json.append("\"status\":\"").append(s.isLocked() ? "Bị khóa" : "Đang làm").append("\",");
-            json.append("\"initial\":\"").append(escapeJson(s.getInitial())).append("\"");
-            json.append("}");
+        java.util.List<java.util.Map<String, Object>> mappedList = new java.util.ArrayList<>();
+        for (NhanSuDTO s : staffList) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", String.valueOf(s.getAccountId()));
+            map.put("username", s.getUsername());
+            map.put("name", s.getFullName() != null ? s.getFullName() : s.getUsername());
+            map.put("email", s.getEmail() != null ? s.getEmail() : "");
+            map.put("phone", s.getPhoneNumber() != null ? s.getPhoneNumber() : "");
+            map.put("roleId", s.getRoleId());
+            map.put("VaiTro", s.getRoleName());
+            map.put("status", s.isLocked() ? "Bị khóa" : "Đang làm");
+            map.put("initial", s.getInitial());
+            mappedList.add(map);
         }
-        json.append("]");
-        return json.toString();
-    }
-
-    private String escapeJson(String input) {
-        if (input == null) return "";
-        return input.replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
+        return new com.google.code.gson.Gson().toJson(mappedList);
     }
 }

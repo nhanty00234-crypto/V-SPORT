@@ -309,7 +309,7 @@ public class NhanSuService {
         // Validate password if provided, otherwise use default
         String rawPassword = request.getPassword();
         if (rawPassword == null || rawPassword.trim().isEmpty()) {
-            rawPassword = "123"; // Default weak password - TODO: Force change on first login
+            rawPassword = generateRandomPassword();
         } else {
             ValidationUtils.validateStrongPassword(rawPassword);
         }
@@ -350,11 +350,25 @@ public class NhanSuService {
         }
         int newAccountId = newAcc.getAccountId();
 
-        // Send OTP for email verification (existing flow)
-        String otpString = taiKhoanDAO.sendRegistrationOTP(
-            request.getEmail(),
-            request.getFullName()
-        );
+        // Generate OTP manually so we can send both OTP and password in one email
+        java.util.Random random = new java.util.Random();
+        int otp = random.nextInt(900000) + 100000;
+        String otpString = String.valueOf(otp);
+        final String finalPassword = rawPassword;
+        final String finalEmail = request.getEmail();
+        final String finalName = request.getFullName();
+        
+        new Thread(() -> {
+            try {
+                org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT", 
+                    "Chào " + finalName + ",\n\n" +
+                    "Tài khoản nhân viên của bạn đã được khởi tạo bởi Quản lý.\n" +
+                    "Mật khẩu của bạn là: " + finalPassword + "\n\n" +
+                    "Mã OTP kích hoạt tài khoản của bạn là: " + otpString);
+            } catch (Exception e) {
+                logger.error("Lỗi gửi email kích hoạt đến: " + finalEmail, e);
+            }
+        }).start();
 
         // Return newAccountId, caller should store OTP in session
         return newAccountId;
@@ -569,18 +583,25 @@ public class NhanSuService {
 
         // Kiểm tra xung đột với các ca định kỳ khác của nhân viên
         // (Cùng thứ và thời gian trùng lặp)
-        List<CaLamViec> existingShifts = caLamViecDAO.getRecurringShiftsByAccountID(accountId);
-        for (CaLamViec shift : existingShifts) {
-            if (shift.getThu() == thu) {
-                boolean overlap = gioBatDau.isBefore(shift.getGioKetThuc()) &&
-                                  gioKetThuc.isAfter(shift.getGioBatDau());
-                if (overlap) {
-                    throw new IllegalArgumentException(String.format(
-                        "Ca làm vào thứ %d (%s - %s) bị trùng với ca đã có (%s - %s)",
-                        thu, gioBatDau, gioKetThuc, shift.getGioBatDau(), shift.getGioKetThuc()
-                    ));
-                }
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            List<CaLamViec> conflicts = em.createQuery(
+                "SELECT c FROM CaLamViec c WHERE c.accountId = :accountId AND c.thu = :thu " +
+                "AND c.gioBatDau < :end AND c.gioKetThuc > :start AND c.ngayLam IS NULL", CaLamViec.class)
+                .setParameter("accountId", accountId)
+                .setParameter("thu", thu)
+                .setParameter("start", gioBatDau)
+                .setParameter("end", gioKetThuc)
+                .getResultList();
+            if (!conflicts.isEmpty()) {
+                CaLamViec conflict = conflicts.get(0);
+                throw new IllegalArgumentException(String.format(
+                    "Ca làm vào thứ %d (%s - %s) bị trùng với ca đã có (%s - %s)",
+                    thu, gioBatDau, gioKetThuc, conflict.getGioBatDau(), conflict.getGioKetThuc()
+                ));
             }
+        } finally {
+            em.close();
         }
 
         CaLamViec newShift = new CaLamViec();
@@ -619,5 +640,15 @@ public class NhanSuService {
     public List<CaLamViec> getShiftPatternsByStaff(int accountId) {
         if (accountId <= 0) throw new IllegalArgumentException("AccountID không hợp lệ");
         return caLamViecDAO.getRecurringShiftsByAccountID(accountId);
+    }
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }

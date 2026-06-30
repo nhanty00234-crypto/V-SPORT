@@ -15,13 +15,17 @@ import org.example.model.SanPham_DichVu;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import org.example.util.JPAUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @WebServlet("/manager/kho-dich-vu")
-public class KhoDichVuManagerServlet extends HttpServlet {
-
+    private static final Logger logger = LogManager.getLogger(KhoDichVuManagerServlet.class);
     private final SanPhamDichVuDAO sanPhamDAO = new SanPhamDichVuDAOImpl();
     private final DanhMucSanPhamDAO categoryDAO = new DanhMucSanPhamDAOImpl();
 
@@ -342,24 +346,35 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
-                SanPham_DichVu sp = sanPhamDAO.findById(id);
-                if (sp == null || sp.getCoSoID() != coSoId) {
-                    session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
-                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
-                    return;
-                }
+                EntityManager em = JPAUtil.getEntityManager();
+                EntityTransaction trans = em.getTransaction();
+                try {
+                    trans.begin();
+                    SanPham_DichVu sp = em.find(SanPham_DichVu.class, id);
+                    if (sp == null || sp.getCoSoID() != coSoId) {
+                        session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
+                        trans.rollback();
+                        resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                        return;
+                    }
 
-                sp.setSoLuongTon(sp.getSoLuongTon() + qty);
-                // If it was temporarily out of stock, change status to Active
-                if (Constants.TRANG_THAI_SP_TAM_HET_HANG.equals(sp.getTrangThai())) {
-                    sp.setTrangThai(Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
-                }
+                    sp.setSoLuongTon(sp.getSoLuongTon() + qty);
+                    if (Constants.TRANG_THAI_SP_TAM_HET_HANG.equals(sp.getTrangThai())) {
+                        sp.setTrangThai(Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                    }
+                    em.merge(sp);
+                    trans.commit();
 
-                boolean success = sanPhamDAO.update(sp);
-                if (success) {
+                    logger.info("AUDIT - KHO HÀNG (NHẬP): User ID " + user.getAccountId() + " đã nhập " + qty + " sản phẩm ID " + id + " (SKU: " + sp.getSkuCode() + ")");
+                    writeKhoAuditLog(user.getAccountId(), id, sp.getSkuCode(), qty, "NHAP", sp.getSoLuongTon());
+
                     session.setAttribute("successMsg", "Nhập kho thêm " + qty + " " + sp.getDonViTinh() + " cho '" + sp.getTenSanPham() + "' thành công.");
-                } else {
-                    session.setAttribute("errorMsg", "Lỗi khi cập nhật số lượng nhập kho.");
+                } catch (Exception e) {
+                    if (trans.isActive()) trans.rollback();
+                    logger.error("Lỗi giao dịch nhập kho: ", e);
+                    session.setAttribute("errorMsg", "Lỗi nhập kho: " + e.getMessage());
+                } finally {
+                    em.close();
                 }
 
             } else if ("xuat-kho".equals(action)) {
@@ -375,30 +390,42 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
-                SanPham_DichVu sp = sanPhamDAO.findById(id);
-                if (sp == null || sp.getCoSoID() != coSoId) {
-                    session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
-                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
-                    return;
-                }
+                EntityManager em = JPAUtil.getEntityManager();
+                EntityTransaction trans = em.getTransaction();
+                try {
+                    trans.begin();
+                    SanPham_DichVu sp = em.find(SanPham_DichVu.class, id);
+                    if (sp == null || sp.getCoSoID() != coSoId) {
+                        session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
+                        trans.rollback();
+                        resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                        return;
+                    }
 
-                if (sp.getSoLuongTon() < qty) {
-                    session.setAttribute("errorMsg", "Lỗi: Số lượng xuất kho vượt quá số lượng tồn hiện có (" + sp.getSoLuongTon() + ").");
-                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
-                    return;
-                }
+                    if (sp.getSoLuongTon() < qty) {
+                        session.setAttribute("errorMsg", "Lỗi: Số lượng xuất kho vượt quá số lượng tồn hiện có (" + sp.getSoLuongTon() + ").");
+                        trans.rollback();
+                        resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                        return;
+                    }
 
-                sp.setSoLuongTon(sp.getSoLuongTon() - qty);
-                // If stock reaches 0, set status to out of stock
-                if (sp.getSoLuongTon() == 0 && Constants.TRANG_THAI_SP_DANG_KINH_DOANH.equals(sp.getTrangThai())) {
-                    sp.setTrangThai(Constants.TRANG_THAI_SP_TAM_HET_HANG);
-                }
+                    sp.setSoLuongTon(sp.getSoLuongTon() - qty);
+                    if (sp.getSoLuongTon() == 0 && Constants.TRANG_THAI_SP_DANG_KINH_DOANH.equals(sp.getTrangThai())) {
+                        sp.setTrangThai(Constants.TRANG_THAI_SP_TAM_HET_HANG);
+                    }
+                    em.merge(sp);
+                    trans.commit();
 
-                boolean success = sanPhamDAO.update(sp);
-                if (success) {
+                    logger.info("AUDIT - KHO HÀNG (XUẤT): User ID " + user.getAccountId() + " đã xuất " + qty + " sản phẩm ID " + id + " (SKU: " + sp.getSkuCode() + ")");
+                    writeKhoAuditLog(user.getAccountId(), id, sp.getSkuCode(), qty, "XUAT", sp.getSoLuongTon());
+
                     session.setAttribute("successMsg", "Xuất kho giảm " + qty + " " + sp.getDonViTinh() + " cho '" + sp.getTenSanPham() + "' thành công.");
-                } else {
-                    session.setAttribute("errorMsg", "Lỗi khi cập nhật số lượng xuất kho.");
+                } catch (Exception e) {
+                    if (trans.isActive()) trans.rollback();
+                    logger.error("Lỗi giao dịch xuất kho: ", e);
+                    session.setAttribute("errorMsg", "Lỗi xuất kho: " + e.getMessage());
+                } finally {
+                    em.close();
                 }
 
             } else if ("add-category".equals(action)) {
@@ -529,5 +556,19 @@ public class KhoDichVuManagerServlet extends HttpServlet {
         }
 
         resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+    }
+
+    private void writeKhoAuditLog(int actorId, int spId, String sku, int qty, String type, int newStock) {
+        String logFilePath = "d:/New folder/V-SPORT/logs/kho_audit.log";
+        java.io.File logFile = new java.io.File(logFilePath);
+        logFile.getParentFile().mkdirs();
+        try (java.io.FileWriter fw = new java.io.FileWriter(logFile, true);
+             java.io.PrintWriter pw = new java.io.PrintWriter(fw)) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            pw.printf("[%s] TYPE: %s | Actor ID: %d | Product ID: %d | SKU: %s | Qty Changed: %d | New Stock: %d%n",
+                    now, type, actorId, spId, sku, qty, newStock);
+        } catch (java.io.IOException e) {
+            logger.error("Lỗi ghi log audit kho: ", e);
+        }
     }
 }

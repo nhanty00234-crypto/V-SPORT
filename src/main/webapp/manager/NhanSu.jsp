@@ -190,6 +190,9 @@ body { font-family: 'Inter', sans-serif; }
         <p class="text-xs text-zinc-500">Xem và điều hành lịch làm việc của nhân sự tại chi nhánh</p>
       </div>
       <div class="flex items-center gap-3">
+        <button onclick="triggerAutoSchedule()" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>Tự động ghép ca
+        </button>
         <button onclick="switchView('leave')" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
           <span class="material-symbols-outlined text-[18px]">assignment</span>
           Quản lý yêu cầu nghỉ
@@ -1491,6 +1494,47 @@ function switchView(viewName) {
 }
 
 // ==================== SCHEDULE VIEW (Quản lý ca làm) ====================
+
+function triggerAutoSchedule() {
+    const startDate = prompt("Nhập ngày bắt đầu (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+    if (!startDate) return;
+    
+    let startLocalDate = new Date(startDate);
+    let endLocalDate = new Date(startLocalDate.getTime() + 6 * 24 * 60 * 60 * 1000);
+    const defaultEndDate = endLocalDate.toISOString().split('T')[0];
+    
+    const endDate = prompt("Nhập ngày kết thúc (YYYY-MM-DD):", defaultEndDate);
+    if (!endDate) return;
+
+    if (confirm(`Bạn có chắc chắn muốn tự động ghép ca cho cơ sở từ ngày ${startDate} đến ngày ${endDate}? Các ca nháp hoặc chưa công bố sẽ được tự động gán cho nhân viên rảnh phù hợp.`)) {
+        const params = new URLSearchParams();
+        params.append('action', 'autoSchedule');
+        params.append('startDate', startDate);
+        params.append('endDate', endDate);
+        params.append('format', 'json');
+
+        fetch('${pageContext.request.contextPath}/manager/ca-lam', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: params.toString()
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', data.message || 'Tự động phân lịch thành công!');
+                loadScheduleData();
+            } else {
+                showNotification('error', data.error || 'Lỗi tự động phân lịch.');
+            }
+        })
+        .catch(error => {
+            console.error('Error auto-scheduling:', error);
+            showNotification('error', 'Lỗi kết nối mạng khi tự động phân lịch.');
+        });
+    }
+}
 
 async function loadScheduleData() {
     try {

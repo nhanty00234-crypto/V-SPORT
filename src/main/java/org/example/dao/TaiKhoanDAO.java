@@ -23,9 +23,13 @@ public interface TaiKhoanDAO {
 
     // Admin CRUD
     List<TaiKhoan> getAllAccounts();
+    List<TaiKhoan> getDeletedAccounts();
     TaiKhoan getAccountById(int id);
     boolean updateAccount(TaiKhoan TaiKhoan);
     boolean deleteAccount(int id);
+    boolean softDeleteAccount(int id);
+    boolean restoreAccount(int id);
+    boolean permanentDeleteAccount(int id);
     boolean addAccountByAdmin(TaiKhoan TaiKhoan);
 
     // Manager operations

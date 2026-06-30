@@ -129,6 +129,11 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     LocalDate toWeek = LocalDate.parse(req.getParameter("toWeek"));
                     caLamService.cloneWeekShifts(fromWeek, toWeek, managerCoSoId, manager.getAccountId());
                     successMsg = "Nhân bản lịch tuần thành công!";
+                } else if ("autoSchedule".equals(action)) {
+                    LocalDate startDate = LocalDate.parse(req.getParameter("startDate"));
+                    LocalDate endDate = LocalDate.parse(req.getParameter("endDate"));
+                    caLamService.autoScheduleShifts(startDate, endDate, managerCoSoId, manager.getAccountId());
+                    successMsg = "Tự động sắp lịch thành công dựa trên nguyện vọng của nhân viên!";
                 } else if ("publishWeek".equals(action)) {
                     LocalDate weekStart = LocalDate.parse(req.getParameter("weekStart"));
                     caLamService.publishWeekShifts(weekStart, managerCoSoId, manager.getAccountId());
@@ -150,7 +155,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 if (isJson) {
                     resp.setContentType("application/json");
                     resp.setCharacterEncoding("UTF-8");
-                    resp.getWriter().write("{\"success\":true,\"message\":\"" + escapeJson(successMsg) + "\"}");
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("success", true);
+                    map.put("message", successMsg);
+                    resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
                 } else {
                     session.setAttribute("message", successMsg);
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
@@ -162,7 +170,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("success", false);
+                map.put("error", e.getMessage());
+                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
@@ -173,7 +184,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"Lỗi hệ thống: " + escapeJson(e.getMessage()) + "\"}");
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("success", false);
+                map.put("error", "Lỗi hệ thống: " + e.getMessage());
+                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
@@ -216,11 +230,15 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         if (isJson) {
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
             if (errorMsg != null) {
-                resp.getWriter().write("{\"success\":false,\"error\":\"" + escapeJson(errorMsg) + "\"}");
+                map.put("success", false);
+                map.put("error", errorMsg);
             } else {
-                resp.getWriter().write("{\"success\":true,\"message\":\"" + escapeJson(successMsg) + "\"}");
+                map.put("success", true);
+                map.put("message", successMsg);
             }
+            resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
         } else {
             if (errorMsg != null) {
                 session.setAttribute("error", errorMsg);
@@ -241,17 +259,30 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         try {
             CaLamService.CaLamRequest caLamReq = parseCaLamRequest(req);
 
+            Integer targetCaLamViecId = null;
+            if (!"add".equals(action)) {
+                String caLamViecIdParam = req.getParameter("caLamViecId");
+                if (caLamViecIdParam != null && !caLamViecIdParam.trim().isEmpty()) {
+                    targetCaLamViecId = Integer.parseInt(caLamViecIdParam);
+                }
+            }
+
+            org.example.util.CaLamValidationEngine.ValidationResult valRes = caLamService.validateShiftAssignment(
+                caLamReq.getAccountId(), caLamReq.getNgayLam(), caLamReq.getGioBatDau(), caLamReq.getGioKetThuc(), caLamReq.getGioNghi(), targetCaLamViecId
+            );
+            if (!valRes.isValid()) {
+                throw new IllegalArgumentException("Lỗi xung đột lịch: " + String.join(", ", valRes.getErrors()));
+            }
+
             if ("add".equals(action)) {
                 caLamService.createShift(caLamReq, managerCoSoId, manager.getAccountId());
                 successMsg = "Thêm ca làm việc thành công!";
             } else {
-                String caLamViecIdParam = req.getParameter("caLamViecId");
                 String reason = req.getParameter("reason");
-                if (caLamViecIdParam == null || caLamViecIdParam.trim().isEmpty()) {
+                if (targetCaLamViecId == null) {
                     throw new IllegalArgumentException("ID ca làm việc không hợp lệ.");
                 }
-                int caLamViecId = Integer.parseInt(caLamViecIdParam);
-                caLamService.updateShift(caLamViecId, caLamReq, managerCoSoId, manager.getAccountId(), reason);
+                caLamService.updateShift(targetCaLamViecId, caLamReq, managerCoSoId, manager.getAccountId(), reason);
                 successMsg = "Cập nhật ca làm việc thành công!";
             }
         } catch (IllegalArgumentException e) {
@@ -263,11 +294,15 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         if (isJson) {
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
             if (errorMsg != null) {
-                resp.getWriter().write("{\"success\":false,\"error\":\"" + escapeJson(errorMsg) + "\"}");
+                map.put("success", false);
+                map.put("error", errorMsg);
             } else {
-                resp.getWriter().write("{\"success\":true,\"message\":\"" + escapeJson(successMsg) + "\"}");
+                map.put("success", true);
+                map.put("message", successMsg);
             }
+            resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
         } else {
             if (errorMsg != null) {
                 session.setAttribute("error", errorMsg);
@@ -352,28 +387,18 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             org.example.util.CaLamValidationEngine.ValidationResult result = 
                 caLamService.validateShiftAssignment(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, caLamViecId);
             
-            StringBuilder json = new StringBuilder();
-            json.append("{");
-            json.append("\"valid\":").append(result.isValid()).append(",");
+            java.util.Map<String, Object> responseData = new java.util.HashMap<>();
+            responseData.put("valid", result.isValid());
+            responseData.put("errors", result.getErrors());
+            responseData.put("warnings", result.getWarnings());
             
-            json.append("\"errors\":[");
-            for (int i = 0; i < result.getErrors().size(); i++) {
-                if (i > 0) json.append(",");
-                json.append("\"").append(escapeJson(result.getErrors().get(i))).append("\"");
-            }
-            json.append("],");
-            
-            json.append("\"warnings\":[");
-            for (int i = 0; i < result.getWarnings().size(); i++) {
-                if (i > 0) json.append(",");
-                json.append("\"").append(escapeJson(result.getWarnings().get(i))).append("\"");
-            }
-            json.append("]");
-            json.append("}");
-            
-            resp.getWriter().write(json.toString());
+            resp.getWriter().write(new com.google.code.gson.Gson().toJson(responseData));
         } catch (Exception e) {
-            resp.getWriter().write("{\"valid\":false,\"errors\":[\"Lỗi tham số validation: " + escapeJson(e.getMessage()) + "\"],\"warnings\":[]}");
+            java.util.Map<String, Object> errData = new java.util.HashMap<>();
+            errData.put("valid", false);
+            errData.put("errors", java.util.Collections.singletonList("Lỗi tham số validation: " + e.getMessage()));
+            errData.put("warnings", java.util.Collections.emptyList());
+            resp.getWriter().write(new com.google.code.gson.Gson().toJson(errData));
         }
     }
 
@@ -382,108 +407,4 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                                       List<org.example.model.CaLamViecAvailability> avails,
                                       List<org.example.model.CaLamViecSwapRequest> swaps,
                                       List<org.example.model.CoSo> branches) throws Exception {
-        StringBuilder json = new StringBuilder();
-        json.append("{\"shifts\":[");
-
-        for (int i = 0; i < shifts.size(); i++) {
-            CaLamViec s = shifts.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"caLamViecId\":").append(s.getCaLamViecId()).append(",");
-            json.append("\"accountId\":").append(s.getAccountId()).append(",");
-            json.append("\"coSoId\":").append(s.getCoSoId()).append(",");
-            json.append("\"ngayLam\":\"").append(s.getNgayLam()).append("\",");
-            json.append("\"gioBatDau\":\"").append(s.getGioBatDau()).append("\",");
-            json.append("\"gioKetThuc\":\"").append(s.getGioKetThuc()).append("\",");
-            json.append("\"isPublished\":").append(s.isPublished() ? "true" : "false").append(",");
-            json.append("\"tenCa\":\"").append(escapeJson(s.getTenCa())).append("\",");
-            json.append("\"viTri\":\"").append(escapeJson(s.getViTri())).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(s.getTrangThai())).append("\",");
-            json.append("\"gioNghi\":").append(s.getGioNghi());
-            if (s.getGhiChu() != null) {
-                json.append(",\"ghiChu\":\"").append(escapeJson(s.getGhiChu())).append("\"");
-            }
-            json.append("}");
-        }
-
-        json.append("],\"staffs\":[");
-
-        for (int i = 0; i < staffs.size(); i++) {
-            TaiKhoan st = staffs.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"accountId\":").append(st.getAccountId()).append(",");
-            json.append("\"username\":\"").append(escapeJson(st.getUsername())).append("\",");
-            json.append("\"fullName\":\"").append(escapeJson(st.getFullName() != null ? st.getFullName() : st.getUsername())).append("\",");
-            json.append("\"roleId\":").append(st.getRoleId());
-            json.append("}");
-        }
-
-        json.append("],\"audits\":[");
-        for (int i = 0; i < audits.size(); i++) {
-            org.example.model.CaLamViecAudit au = audits.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"auditId\":").append(au.getAuditId()).append(",");
-            json.append("\"caLamViecId\":").append(au.getCaLamViecId()).append(",");
-            json.append("\"thaoTac\":\"").append(escapeJson(au.getThaoTac())).append("\",");
-            json.append("\"tenNguoiThucHien\":\"").append(escapeJson(au.getTenNguoiThucHien())).append("\",");
-            json.append("\"thoiGian\":\"").append(au.getThoiGian()).append("\",");
-            json.append("\"lyDo\":\"").append(escapeJson(au.getLyDo())).append("\"");
-            json.append("}");
-        }
-
-        json.append("],\"avails\":[");
-        for (int i = 0; i < avails.size(); i++) {
-            org.example.model.CaLamViecAvailability av = avails.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"availabilityId\":").append(av.getAvailabilityId()).append(",");
-            json.append("\"accountId\":").append(av.getAccountId()).append(",");
-            json.append("\"tenNhanVien\":\"").append(escapeJson(av.getTenNhanVien())).append("\",");
-            json.append("\"ngay\":\"").append(av.getNgay()).append("\",");
-            json.append("\"gioBatDau\":\"").append(av.getGioBatDau()).append("\",");
-            json.append("\"gioKetThuc\":\"").append(av.getGioKetThuc()).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(av.getTrangThai())).append("\",");
-            json.append("\"ghiChu\":\"").append(escapeJson(av.getGhiChu())).append("\"");
-            json.append("}");
-        }
-
-        json.append("],\"swaps\":[");
-        for (int i = 0; i < swaps.size(); i++) {
-            org.example.model.CaLamViecSwapRequest sw = swaps.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"swapRequestId\":").append(sw.getSwapRequestId()).append(",");
-            json.append("\"tenNguoiGui\":\"").append(escapeJson(sw.getTenNguoiGui())).append("\",");
-            json.append("\"tenNguoiNhan\":\"").append(escapeJson(sw.getTenNguoiNhan())).append("\",");
-            json.append("\"caGuiInfo\":\"").append(escapeJson(sw.getCaGuiInfo())).append("\",");
-            json.append("\"caNhanInfo\":\"").append(escapeJson(sw.getCaNhanInfo())).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(sw.getTrangThai())).append("\",");
-            json.append("\"lyDo\":\"").append(escapeJson(sw.getLyDo())).append("\"");
-            json.append("}");
-        }
-
-        json.append("],\"branches\":[");
-        for (int i = 0; i < branches.size(); i++) {
-            org.example.model.CoSo b = branches.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"coSoId\":").append(b.getCoSoID()).append(",");
-            json.append("\"tenCoSo\":\"").append(escapeJson(b.getTenCoSo())).append("\"");
-            json.append("}");
-        }
-
-        json.append("]}");
-        return json.toString();
-    }
-
-    private String escapeJson(String input) {
-        if (input == null) return "";
-        return input.replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
-    }
 }

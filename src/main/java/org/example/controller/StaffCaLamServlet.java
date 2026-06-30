@@ -132,78 +132,69 @@ public class StaffCaLamServlet extends HttpServlet {
 
     private String buildJsonResponse(List<CaLamViec> shifts, List<TaiKhoan> coworkers,
                                       List<CaLamViecAvailability> avails, List<CaLamViecSwapRequest> swaps) {
-        StringBuilder json = new StringBuilder();
-        json.append("{\"shifts\":[");
-        for (int i = 0; i < shifts.size(); i++) {
-            CaLamViec s = shifts.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"caLamViecId\":").append(s.getCaLamViecId()).append(",");
-            json.append("\"accountId\":").append(s.getAccountId()).append(",");
-            json.append("\"coSoId\":").append(s.getCoSoId()).append(",");
-            json.append("\"ngayLam\":\"").append(s.getNgayLam()).append("\",");
-            json.append("\"gioBatDau\":\"").append(s.getGioBatDau()).append("\",");
-            json.append("\"gioKetThuc\":\"").append(s.getGioKetThuc()).append("\",");
-            json.append("\"isPublished\":").append(s.isPublished() ? "true" : "false").append(",");
-            json.append("\"tenCa\":\"").append(escapeJson(s.getTenCa())).append("\",");
-            json.append("\"viTri\":\"").append(escapeJson(s.getViTri())).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(s.getTrangThai())).append("\",");
-            json.append("\"gioNghi\":").append(s.getGioNghi()).append(",");
-            json.append("\"ghiChu\":\"").append(escapeJson(s.getGhiChu())).append("\"");
-            json.append("}");
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        
+        java.util.List<java.util.Map<String, Object>> shiftsList = new java.util.ArrayList<>();
+        for (CaLamViec s : shifts) {
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("caLamViecId", s.getCaLamViecId());
+            m.put("accountId", s.getAccountId());
+            m.put("coSoId", s.getCoSoId());
+            m.put("ngayLam", s.getNgayLam() != null ? s.getNgayLam().toString() : "");
+            m.put("gioBatDau", s.getGioBatDau() != null ? s.getGioBatDau().toString() : "");
+            m.put("gioKetThuc", s.getGioKetThuc() != null ? s.getGioKetThuc().toString() : "");
+            m.put("isPublished", s.isPublished());
+            m.put("tenCa", s.getTenCa());
+            m.put("viTri", s.getViTri());
+            m.put("trangThai", s.getTrangThai());
+            m.put("gioNghi", s.getGioNghi());
+            m.put("ghiChu", s.getGhiChu());
+            shiftsList.add(m);
         }
-        json.append("],\"coworkers\":[");
-        for (int i = 0; i < coworkers.size(); i++) {
-            TaiKhoan c = coworkers.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"accountId\":").append(c.getAccountId()).append(",");
-            json.append("\"username\":\"").append(escapeJson(c.getUsername())).append("\",");
-            json.append("\"fullName\":\"").append(escapeJson(c.getFullName() != null ? c.getFullName() : c.getUsername())).append("\",");
-            json.append("\"roleName\":\"").append(c.getRoleId() == 4 ? "Lễ tân" : "Bảo vệ").append("\"");
-            json.append("}");
-        }
-        json.append("],\"avails\":[");
-        for (int i = 0; i < avails.size(); i++) {
-            CaLamViecAvailability av = avails.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"availabilityId\":").append(av.getAvailabilityId()).append(",");
-            json.append("\"ngay\":\"").append(av.getNgay()).append("\",");
-            json.append("\"gioBatDau\":\"").append(av.getGioBatDau()).append("\",");
-            json.append("\"gioKetThuc\":\"").append(av.getGioKetThuc()).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(av.getTrangThai())).append("\",");
-            json.append("\"ghiChu\":\"").append(escapeJson(av.getGhiChu())).append("\",");
-            json.append("\"duyetTrangThai\":\"").append(escapeJson(av.getDuyetTrangThai())).append("\",");
-            json.append("\"phanHoi\":\"").append(escapeJson(av.getPhanHoi())).append("\"");
-            json.append("}");
-        }
-        json.append("],\"swaps\":[");
-        for (int i = 0; i < swaps.size(); i++) {
-            CaLamViecSwapRequest sw = swaps.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"swapRequestId\":").append(sw.getSwapRequestId()).append(",");
-            json.append("\"accountIdGui\":").append(sw.getAccountIdGui()).append(",");
-            json.append("\"accountIdNhan\":").append(sw.getAccountIdNhan()).append(",");
-            json.append("\"tenNguoiGui\":\"").append(escapeJson(sw.getTenNguoiGui())).append("\",");
-            json.append("\"tenNguoiNhan\":\"").append(escapeJson(sw.getTenNguoiNhan())).append("\",");
-            json.append("\"caGuiInfo\":\"").append(escapeJson(sw.getCaGuiInfo())).append("\",");
-            json.append("\"caNhanInfo\":\"").append(escapeJson(sw.getCaNhanInfo())).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(sw.getTrangThai())).append("\",");
-            json.append("\"lyDo\":\"").append(escapeJson(sw.getLyDo())).append("\"");
-            json.append("}");
-        }
-        json.append("]}");
-        return json.toString();
-    }
+        data.put("shifts", shiftsList);
 
-    private String escapeJson(String input) {
-        if (input == null) return "";
-        return input.replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
+        java.util.List<java.util.Map<String, Object>> coworkersList = new java.util.ArrayList<>();
+        for (TaiKhoan c : coworkers) {
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("accountId", c.getAccountId());
+            m.put("username", c.getUsername());
+            m.put("fullName", c.getFullName() != null ? c.getFullName() : c.getUsername());
+            m.put("roleName", c.getRoleId() == 4 ? "Lễ tân" : "Bảo vệ");
+            coworkersList.add(m);
+        }
+        data.put("coworkers", coworkersList);
+
+        java.util.List<java.util.Map<String, Object>> availsList = new java.util.ArrayList<>();
+        for (CaLamViecAvailability av : avails) {
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("availabilityId", av.getAvailabilityId());
+            m.put("ngay", av.getNgay() != null ? av.getNgay().toString() : "");
+            m.put("gioBatDau", av.getGioBatDau() != null ? av.getGioBatDau().toString() : "");
+            m.put("gioKetThuc", av.getGioKetThuc() != null ? av.getGioKetThuc().toString() : "");
+            m.put("trangThai", av.getTrangThai());
+            m.put("ghiChu", av.getGhiChu());
+            m.put("duyetTrangThai", av.getDuyetTrangThai());
+            m.put("phanHoi", av.getPhanHoi());
+            availsList.add(m);
+        }
+        data.put("avails", availsList);
+
+        java.util.List<java.util.Map<String, Object>> swapsList = new java.util.ArrayList<>();
+        for (CaLamViecSwapRequest sw : swaps) {
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("swapRequestId", sw.getSwapRequestId());
+            m.put("accountIdGui", sw.getAccountIdGui());
+            m.put("accountIdNhan", sw.getAccountIdNhan());
+            m.put("tenNguoiGui", sw.getTenNguoiGui());
+            m.put("tenNguoiNhan", sw.getTenNguoiNhan());
+            m.put("caGuiInfo", sw.getCaGuiInfo());
+            m.put("caNhanInfo", sw.getCaNhanInfo());
+            m.put("trangThai", sw.getTrangThai());
+            m.put("lyDo", sw.getLyDo());
+            swapsList.add(m);
+        }
+        data.put("swaps", swapsList);
+
+        return new com.google.code.gson.Gson().toJson(data);
     }
 }

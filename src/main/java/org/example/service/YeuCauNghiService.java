@@ -65,11 +65,56 @@ public class YeuCauNghiService {
             throw new IllegalArgumentException("Bạn đã có yêu cầu nghỉ vào ngày này rồi");
         }
 
+        // Kiểm tra xem nhân viên có ca làm vào ngày nghỉ xin phép không
+        List<org.example.model.CaLamViec> activeShifts = caLamViecDAO.getCaByAccountIDAndDateRange(yeuCauNghi.getAccountID(), yeuCauNghi.getNgayNghi(), yeuCauNghi.getNgayNghi());
+        if (activeShifts != null && !activeShifts.isEmpty()) {
+            throw new IllegalArgumentException("Không thể gửi yêu cầu nghỉ vì bạn đã có ca làm việc được phân vào ngày " + yeuCauNghi.getNgayNghi() + ". Vui lòng đổi ca hoặc xin quản lý hủy lịch làm trước.");
+        }
+
+        // Kiểm tra hạn mức nghỉ phép (quota check): tối đa 4 ngày nghỉ/tháng
+        int targetMonth = yeuCauNghi.getNgayNghi().getMonthValue();
+        int targetYear = yeuCauNghi.getNgayNghi().getYear();
+        
+        List<YeuCauNghi> existingLeaves = yeuCauNghiDAO.findByAccountID(yeuCauNghi.getAccountID());
+        long leaveDaysInMonth = 0;
+        if (existingLeaves != null) {
+            leaveDaysInMonth = existingLeaves.stream()
+                .filter(y -> !"DaHuy".equals(y.getTrangThai()) && !"TuChoi".equals(y.getTrangThai()))
+                .filter(y -> y.getNgayNghi().getMonthValue() == targetMonth && y.getNgayNghi().getYear() == targetYear)
+                .count();
+        }
+                
+        if (leaveDaysInMonth >= 4) {
+            throw new IllegalArgumentException("Hạn mức nghỉ phép vượt quá quy định (tối đa 4 ngày/tháng). Bạn đã đăng ký/nghỉ " + leaveDaysInMonth + " ngày trong tháng " + targetMonth + "/" + targetYear + ".");
+        }
+
         // Đặt trạng thái mặc định là "ChoDuyet"
         yeuCauNghi.setTrangThai("ChoDuyet");
         yeuCauNghi.setNgayGui(java.time.LocalDateTime.now());
 
-        return yeuCauNghiDAO.insert(yeuCauNghi) > 0;
+        boolean inserted = yeuCauNghiDAO.insert(yeuCauNghi) > 0;
+        if (inserted) {
+            // Gửi thông báo cho quản lý chi nhánh
+            jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+            try {
+                List<TaiKhoan> managers = em.createQuery(
+                    "SELECT t FROM TaiKhoan t WHERE t.coSoId = :coSoId AND t.roleId = 2", TaiKhoan.class)
+                    .setParameter("coSoId", yeuCauNghi.getCoSoID())
+                    .getResultList();
+                for (TaiKhoan manager : managers) {
+                    String tieuDe = "Yêu cầu nghỉ phép mới";
+                    String noiDung = String.format("Nhân viên ID %d đã gửi yêu cầu nghỉ %s ngày %s.",
+                                                  yeuCauNghi.getAccountID(), yeuCauNghi.getLoaiNghi(), yeuCauNghi.getNgayNghi().toString());
+                    ThongBao thongBao = new ThongBao(manager.getAccountId(), tieuDe, noiDung, "YeuCauNghi");
+                    thongBaoDAO.insert(thongBao);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                em.close();
+            }
+        }
+        return inserted;
     }
 
     /**
@@ -173,6 +218,12 @@ public class YeuCauNghiService {
 
         if (!"ChoDuyet".equals(ycn.getTrangThai())) {
             throw new IllegalArgumentException("Yêu cầu đã được xử lý trước đó");
+        }
+
+        // Kiểm tra xung đột lịch ca làm việc trong ngày nghỉ phép
+        List<org.example.model.CaLamViec> activeShifts = caLamViecDAO.getCaByAccountIDAndDateRange(ycn.getAccountID(), ycn.getNgayNghi(), ycn.getNgayNghi());
+        if (activeShifts != null && !activeShifts.isEmpty()) {
+            throw new IllegalArgumentException("Nhân viên có ca làm việc được lên lịch trong ngày nghỉ phép này. Vui lòng chuyển ca hoặc xóa lịch làm trước khi duyệt.");
         }
 
         // Cập nhật trạng thái

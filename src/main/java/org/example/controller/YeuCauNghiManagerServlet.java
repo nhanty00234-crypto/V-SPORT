@@ -152,11 +152,15 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
                 if (errorMsg != null) {
-                    resp.getWriter().write("{\"success\":false,\"error\":\"" + escapeJson(errorMsg) + "\"}");
+                    map.put("success", false);
+                    map.put("error", errorMsg);
                 } else {
-                    resp.getWriter().write("{\"success\":true,\"message\":\"" + escapeJson(successMsg) + "\"}");
+                    map.put("success", true);
+                    map.put("message", successMsg);
                 }
+                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
             } else {
                 if (errorMsg != null) {
                     session.setAttribute("error", errorMsg);
@@ -171,7 +175,10 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"ID yêu cầu không hợp lệ\"}");
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("success", false);
+                map.put("error", "ID yêu cầu không hợp lệ");
+                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", "ID yêu cầu không hợp lệ");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
@@ -181,7 +188,10 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("success", false);
+                map.put("error", e.getMessage());
+                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
@@ -191,7 +201,10 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"Lỗi hệ thống: " + escapeJson(e.getMessage()) + "\"}");
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("success", false);
+                map.put("error", "Lỗi hệ thống: " + e.getMessage());
+                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
@@ -230,39 +243,22 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
         return true;
     }
 
-    // ==================== JSON HELPER ====================
-
     private String buildYeuCauNghiJson(List<YeuCauNghi> requests) throws Exception {
-        StringBuilder json = new StringBuilder();
-        json.append("[");
-
-        for (int i = 0; i < requests.size(); i++) {
-            YeuCauNghi r = requests.get(i);
-            if (i > 0) json.append(",");
-            json.append("{");
-            json.append("\"yeuCauNghiID\":").append(r.getYeuCauNghiID()).append(",");
-            json.append("\"accountId\":").append(r.getAccountID()).append(",");
-            json.append("\"tenNhanVien\":\"").append(escapeJson(r.getTenNhanVien() != null ? r.getTenNhanVien() : "")).append("\",");
-            json.append("\"username\":\"").append(escapeJson(r.getUsername() != null ? r.getUsername() : "")).append("\",");
-            json.append("\"roleName\":\"").append(escapeJson(r.getRoleName() != null ? r.getRoleName() : "")).append("\",");
-            json.append("\"ngayNghi\":\"").append(r.getNgayNghi()).append("\",");
-            json.append("\"loaiNghi\":\"").append(escapeJson(r.getLoaiNghi())).append("\",");
-            json.append("\"lyDo\":\"").append(escapeJson(r.getLyDo())).append("\",");
-            json.append("\"trangThai\":\"").append(escapeJson(r.getTrangThai())).append("\",");
-            json.append("\"ngayGui\":\"").append(r.getNgayGui()).append("\"");
-            json.append("}");
+        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+        for (YeuCauNghi r : requests) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("yeuCauNghiID", r.getYeuCauNghiID());
+            map.put("accountId", r.getAccountID());
+            map.put("tenNhanVien", r.getTenNhanVien() != null ? r.getTenNhanVien() : "");
+            map.put("username", r.getUsername() != null ? r.getUsername() : "");
+            map.put("roleName", r.getRoleName() != null ? r.getRoleName() : "");
+            map.put("ngayNghi", r.getNgayNghi() != null ? r.getNgayNghi().toString() : "");
+            map.put("loaiNghi", r.getLoaiNghi());
+            map.put("lyDo", r.getLyDo());
+            map.put("trangThai", r.getTrangThai());
+            map.put("ngayGui", r.getNgayGui() != null ? r.getNgayGui().toString() : "");
+            list.add(map);
         }
-
-        json.append("]");
-        return json.toString();
-    }
-
-    private String escapeJson(String input) {
-        if (input == null) return "";
-        return input.replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
+        return new com.google.code.gson.Gson().toJson(list);
     }
 }

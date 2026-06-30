@@ -38,47 +38,11 @@ public class CheckInServlet extends HttpServlet {
         String isAjax = req.getParameter("ajax");
         if ("true".equals(isAjax)) {
             resp.setContentType("application/json;charset=UTF-8");
-            StringBuilder json = new StringBuilder();
-            json.append("{");
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("danhSachSan", checkInDAO.getDanhSachSan());
+            data.put("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay());
             
-            // 1. Danh sách Sân
-            json.append("\"danhSachSan\": [");
-            java.util.List<org.example.model.San> dsSan = checkInDAO.getDanhSachSan();
-            for (int i = 0; i < dsSan.size(); i++) {
-                org.example.model.San s = dsSan.get(i);
-                json.append("{");
-                json.append("\"sanID\": ").append(s.getSanID()).append(",");
-                json.append("\"tenSan\": \"").append(s.getTenSan().replace("\"", "\\\"")).append("\",");
-                json.append("\"trangThai\": \"").append(s.getTrangThai().replace("\"", "\\\"")).append("\"");
-                json.append("}");
-                if (i < dsSan.size() - 1) json.append(",");
-            }
-            json.append("],");
-            
-            // 2. Danh sách Lịch đặt
-            json.append("\"danhSachLich\": [");
-            java.util.List<CheckInDAO.BookingViewDTO> dsLich = checkInDAO.getDanhSachLichCheckInHomNay();
-            for (int i = 0; i < dsLich.size(); i++) {
-                CheckInDAO.BookingViewDTO b = dsLich.get(i);
-                json.append("{");
-                json.append("\"datSanId\": ").append(b.getDatSanId()).append(",");
-                json.append("\"sanId\": ").append(b.getSanId()).append(",");
-                json.append("\"tenSan\": \"").append(b.getTenSan().replace("\"", "\\\"")).append("\",");
-                json.append("\"tenKhachHang\": \"").append(b.getTenKhachHang().replace("\"", "\\\"")).append("\",");
-                json.append("\"gioBatDau\": \"").append(b.getGioBatDau().toString()).append("\",");
-                json.append("\"gioKetThuc\": \"").append(b.getGioKetThuc().toString()).append("\",");
-                json.append("\"tongTien\": ").append(b.getTongTien()).append(",");
-                json.append("\"nguonDatSan\": \"").append(b.getNguonDatSan().replace("\"", "\\\"")).append("\",");
-                json.append("\"trangThai\": \"").append(b.getTrangThai().replace("\"", "\\\"")).append("\",");
-                json.append("\"trangThaiThanhToan\": \"").append(b.getTrangThaiThanhToan().replace("\"", "\\\"")).append("\",");
-                json.append("\"ghiChu\": \"").append(b.getGhiChu() != null ? b.getGhiChu().replace("\"", "\\\"") : "").append("\"");
-                json.append("}");
-                if (i < dsLich.size() - 1) json.append(",");
-            }
-            json.append("]");
-            
-            json.append("}");
-            resp.getWriter().write(json.toString());
+            resp.getWriter().write(new com.google.code.gson.Gson().toJson(data));
             return;
         }
 
@@ -118,9 +82,18 @@ public class CheckInServlet extends HttpServlet {
                 int datSanId = Integer.parseInt(datSanIdStr);
                 boolean daThuTienMat = "true".equals(daThuTienMatStr);
 
-                // Gọi DAO xử lý nghiệp vụ check-in khách đặt trước
-                // Luôn kiểm tra tiền cọc/thanh toán (forcePaymentCheck = true)
-                checkInDAO.checkInKhachDatTruoc(datSanId, user.getAccountId(), true, daThuTienMat);
+                String lockKey = "checkin_lock_" + datSanId;
+                if (session.getAttribute(lockKey) != null) {
+                    throw new CheckInException("Yêu cầu check-in cho đơn đặt sân này đang được xử lý, vui lòng không bấm lại.");
+                }
+                session.setAttribute(lockKey, true);
+                try {
+                    // Gọi DAO xử lý nghiệp vụ check-in khách đặt trước
+                    // Luôn kiểm tra tiền cọc/thanh toán (forcePaymentCheck = true)
+                    checkInDAO.checkInKhachDatTruoc(datSanId, user.getAccountId(), true, daThuTienMat);
+                } finally {
+                    session.removeAttribute(lockKey);
+                }
                 successMsg = "Check-in thành công cho đơn đặt sân #" + datSanId + "!";
 
             } else if ("checkInWalkIn".equals(action)) {
@@ -145,8 +118,17 @@ public class CheckInServlet extends HttpServlet {
                     throw new CheckInException("Đơn giá sân không hợp lệ.");
                 }
 
-                // Gọi DAO xử lý mở sân khách vãng lai
-                checkInDAO.checkInKhachVangLai(sanId, duration, user.getAccountId(), donGia);
+                String lockKey = "walkin_lock_" + sanId;
+                if (session.getAttribute(lockKey) != null) {
+                    throw new CheckInException("Yêu cầu mở sân cho sân này đang được xử lý, vui lòng không bấm lại.");
+                }
+                session.setAttribute(lockKey, true);
+                try {
+                    // Gọi DAO xử lý mở sân khách vãng lai
+                    checkInDAO.checkInKhachVangLai(sanId, duration, user.getAccountId(), donGia);
+                } finally {
+                    session.removeAttribute(lockKey);
+                }
                 successMsg = "Đã mở sân thành công cho khách vãng lai!";
             } else if ("cancelNoShow".equals(action)) {
                 // Hủy đơn đặt sân do khách bùng

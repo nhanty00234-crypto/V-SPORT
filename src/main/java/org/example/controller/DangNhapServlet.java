@@ -64,7 +64,7 @@ public class DangNhapServlet extends HttpServlet {
             // Xác định đường dẫn điều hướng sau đăng nhập dựa vào Role ID
             String redirectUrl;
             if (taiKhoan.getRoleId() == 1) { // Admin
-                redirectUrl = req.getContextPath() + "/admin/NhanSu.jsp";
+                redirectUrl = req.getContextPath() + "/admin/nhan-su";
             } else if (taiKhoan.getRoleId() == 2) { // Manager (Quản lý)
                 redirectUrl = req.getContextPath() + "/manager/nhan-su";
             } else if (taiKhoan.getRoleId() == 4 || taiKhoan.getRoleId() == 5) { // Lễ tân & Bảo vệ (Staff)

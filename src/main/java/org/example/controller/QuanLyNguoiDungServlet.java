@@ -37,11 +37,8 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         TaiKhoan user = (TaiKhoan) req.getSession().getAttribute("user");
         if (user == null) {
-            user = new TaiKhoan();
-            user.setRoleId(1);
-            user.setUsername("nhan111");
-            user.setFullName("Nhân Nguyễn Thiện");
-            req.getSession().setAttribute("user", user);
+            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            return;
         }
         if (user.getRoleId() != 1) {
             resp.sendRedirect(req.getContextPath() + "/dangnhap");
@@ -53,19 +50,21 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             int id = Integer.parseInt(req.getParameter("id"));
             TaiKhoan accToDelete = TaiKhoanDAO.getAccountById(id);
             if (accToDelete != null && accToDelete.getRoleId() != 1) {
-                TaiKhoanDAO.deleteAccount(id);
+                TaiKhoanDAO.softDeleteAccount(id);
             }
             resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
             return;
         }
 
         List<TaiKhoan> accounts = TaiKhoanDAO.getAllAccounts();
+        List<TaiKhoan> deletedAccounts = TaiKhoanDAO.getDeletedAccounts();
         List<CoSo> branches = coSoDAO.getAllCoSo();
         List<VaiTro> roles = VaiTroDAO.getAllRoles();
         List<CaLamViec> shifts = caLamViecDAO.getAllCaLamViec();
 
         req.setAttribute("accounts", accounts);
         req.setAttribute("staffs", accounts);
+        req.setAttribute("deletedAccounts", deletedAccounts);
         req.setAttribute("branches", branches);
         req.setAttribute("roles", roles);
         req.setAttribute("shifts", shifts);
@@ -77,14 +76,11 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         TaiKhoan user = (TaiKhoan) req.getSession().getAttribute("user");
         if (user == null) {
-            user = new TaiKhoan();
-            user.setRoleId(1);
-            user.setUsername("nhan111");
-            user.setFullName("Nhân Nguyễn Thiện");
-            req.getSession().setAttribute("user", user);
+            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            return;
         }
         if (user.getRoleId() != 1) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            resp.sendRedirect(req.getContextPath() + "/dangnhap");
             return;
         }
 
@@ -296,7 +292,7 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             String rawPassword = req.getParameter("password");
             if (rawPassword != null) rawPassword = rawPassword.trim();
             if (rawPassword == null || rawPassword.isEmpty()) {
-                rawPassword = "123";
+                rawPassword = generateRandomPassword();
             } else {
                 if (!org.example.util.ValidationUtil.isStrongPassword(rawPassword)) {
                     req.getSession().setAttribute("error", "Mật khẩu do admin tạo phải có tối thiểu 8 ký tự, bao gồm cả chữ hoa, chữ thường, số và ký tự đặc biệt!");
@@ -306,7 +302,26 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             }
             newAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12)));
             
-            String otpString = TaiKhoanDAO.sendRegistrationOTP(email, newAcc.getFullName());
+            // Generate OTP manually so we can send both OTP and password in one email
+            java.util.Random random = new java.util.Random();
+            int otp = random.nextInt(900000) + 100000;
+            String otpString = String.valueOf(otp);
+            final String finalPassword = rawPassword;
+            final String finalEmail = email;
+            final String finalName = newAcc.getFullName();
+            
+            new Thread(() -> {
+                try {
+                    org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT", 
+                        "Chào " + finalName + ",\n\n" +
+                        "Tài khoản nhân viên của bạn đã được khởi tạo bởi Quản trị viên.\n" +
+                        "Mật khẩu của bạn là: " + finalPassword + "\n\n" +
+                        "Mã OTP kích hoạt tài khoản của bạn là: " + otpString);
+                } catch (Exception e) {
+                    logger.error("Lỗi gửi email kích hoạt đến: " + finalEmail, e);
+                }
+            }).start();
+            
             req.getSession().setAttribute("otp", otpString);
             req.getSession().setAttribute("tempAccount", newAcc);
             req.getSession().setAttribute("authType", "ADMIN_ADD");
@@ -316,8 +331,36 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             req.setAttribute("email", email);
             req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
             return;
+        } else if ("softDelete".equals(action)) {
+            int id = Integer.parseInt(req.getParameter("id"));
+            TaiKhoan accToDelete = TaiKhoanDAO.getAccountById(id);
+            if (accToDelete != null && accToDelete.getRoleId() != 1) {
+                TaiKhoanDAO.softDeleteAccount(id);
+            }
+            resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+            return;
+        } else if ("restore".equals(action)) {
+            int id = Integer.parseInt(req.getParameter("id"));
+            TaiKhoanDAO.restoreAccount(id);
+            resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+            return;
+        } else if ("permanentDelete".equals(action)) {
+            int id = Integer.parseInt(req.getParameter("id"));
+            TaiKhoanDAO.permanentDeleteAccount(id);
+            resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+            return;
         }
         resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+    }
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }
 

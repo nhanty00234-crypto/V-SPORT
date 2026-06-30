@@ -62,6 +62,17 @@ public class CaLamValidationEngine {
             return new ValidationResult(errors, warnings);
         }
 
+        // Validate gioNghi boundary
+        if (gioNghi < 0) {
+            errors.add("Giờ nghỉ giữa ca không được là số âm.");
+        } else if (gioBatDau != null && gioKetThuc != null) {
+            long duration = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
+            if (duration < 0) duration += 24 * 60;
+            if (gioNghi >= duration) {
+                errors.add("Giờ nghỉ giữa ca phải nhỏ hơn thời lượng ca làm việc (" + duration + " phút).");
+            }
+        }
+
         // 1. Check double-booking (System-wide overlap check)
         List<CaLamViec> allShifts = caLamViecDAO.getAllCaLamViec(); // Simple lookup for demo or customized search
         for (CaLamViec shift : allShifts) {

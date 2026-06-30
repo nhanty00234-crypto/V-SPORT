@@ -427,6 +427,16 @@ public class CaLamService {
             errors.put("gioBatDau", ve.getMessage());
         }
 
+        if (request.getGioNghi() < 0) {
+            errors.put("gioNghi", "Giờ nghỉ không được là số âm");
+        } else if (request.getGioBatDau() != null && request.getGioKetThuc() != null) {
+            long shiftDuration = java.time.Duration.between(request.getGioBatDau(), request.getGioKetThuc()).toMinutes();
+            if (shiftDuration < 0) shiftDuration += 24 * 60;
+            if (request.getGioNghi() >= shiftDuration) {
+                errors.put("gioNghi", "Giờ nghỉ phải nhỏ hơn thời lượng ca làm việc");
+            }
+        }
+
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(errors.toString());
         }
@@ -629,6 +639,15 @@ public class CaLamService {
         }
         if (shift.getAccountId() != sr.getAccountIdGui()) {
             throw new IllegalArgumentException("Ca làm việc này không thuộc về bạn.");
+        }
+
+        TaiKhoan guiAcc = taiKhoanDAO.getAccountById(sr.getAccountIdGui());
+        TaiKhoan nhanAcc = taiKhoanDAO.getAccountById(sr.getAccountIdNhan());
+        if (guiAcc == null || nhanAcc == null) {
+            throw new IllegalArgumentException("Thông tin tài khoản không tồn tại.");
+        }
+        if (guiAcc.getCoSoId() == null || nhanAcc.getCoSoId() == null || !guiAcc.getCoSoId().equals(nhanAcc.getCoSoId())) {
+            throw new IllegalArgumentException("Chỉ có thể hoán đổi ca làm với đồng nghiệp cùng chi nhánh.");
         }
 
         // Validate receiver conflict for this shift
@@ -873,5 +892,92 @@ public class CaLamService {
         audit.setGiaTriMoi("CheckedOut");
         audit.setLyDo("Nhân viên kết thúc ca");
         auditDAO.insert(audit);
+    }
+
+    /**
+     * Tự động ghép ca cho các ca làm việc trong khoảng thời gian dựa trên nguyện vọng rảnh/bận của nhân viên
+     */
+    public void autoScheduleShifts(LocalDate startDate, LocalDate endDate, int coSoId, int actorId) {
+        // 1. Lấy tất cả ca làm việc trong khoảng ngày của cơ sở
+        List<CaLamViec> shifts = caLamViecDAO.getShiftsByCoSoAndDateRange(coSoId, startDate, endDate);
+        if (shifts.isEmpty()) {
+            throw new IllegalArgumentException("Không tìm thấy ca làm việc nào trong khoảng thời gian này để sắp lịch.");
+        }
+
+        // 2. Lấy tất cả nguyện vọng Ranh đã được duyệt của nhân viên trong cơ sở
+        List<CaLamViecAvailability> avails = availabilityDAO.getByCoSoAndDateRange(coSoId, startDate, endDate);
+        // Lọc các nguyện vọng 'Ranh' và đã 'DaDuyet'
+        List<CaLamViecAvailability> freeAvails = avails.stream()
+                .filter(a -> "Ranh".equalsIgnoreCase(a.getTrangThai()) && "DaDuyet".equalsIgnoreCase(a.getDuyetTrangThai()))
+                .toList();
+
+        // 3. Lấy danh sách nhân viên của cơ sở
+        List<TaiKhoan> staffs = getStaffAvailableForShift(coSoId);
+
+        // Duyệt qua từng ca làm việc để tìm nhân viên phù hợp
+        for (CaLamViec shift : shifts) {
+            // Chỉ phân lịch tự động cho ca ở trạng thái Draft hoặc chưa được Confirmed/CheckedIn/CheckedOut
+            if (!"Draft".equals(shift.getTrangThai()) && !"Unpublished".equals(shift.getTrangThai())) {
+                continue;
+            }
+
+            // Tìm các nhân viên có nguyện vọng rảnh bao phủ khung giờ của ca này
+            List<TaiKhoan> candidateStaffs = new ArrayList<>();
+            for (TaiKhoan staff : staffs) {
+                // Kiểm tra xem nhân viên có đăng ký rảnh vào ngày này và bao phủ khung giờ của ca làm không
+                boolean isAvailable = freeAvails.stream().anyMatch(a -> 
+                    a.getAccountId() == staff.getAccountId() && 
+                    a.getNgay().equals(shift.getNgayLam()) &&
+                    !shift.getGioBatDau().isBefore(a.getGioBatDau()) &&
+                    !shift.getGioKetThuc().isAfter(a.getGioKetThuc())
+                );
+                
+                if (isAvailable) {
+                    // Kiểm tra xem có xung đột ca làm khác không (loại trừ chính ca đang xét nếu staff đang được gán ca này)
+                    CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
+                            staff.getAccountId(), shift.getNgayLam(), shift.getGioBatDau(), shift.getGioKetThuc(), shift.getGioNghi(), shift.getCaLamViecId()
+                    );
+                    if (valRes.isValid()) {
+                        candidateStaffs.add(staff);
+                    }
+                }
+            }
+
+            if (!candidateStaffs.isEmpty()) {
+                // Chọn nhân viên có ít giờ làm nhất trong tuần để công bằng
+                TaiKhoan bestStaff = null;
+                double minHours = Double.MAX_VALUE;
+                for (TaiKhoan staff : candidateStaffs) {
+                    // Tính tổng số giờ đã được gán cho nhân viên này trong khoảng ngày
+                    double assignedHours = 0;
+                    for (CaLamViec s : shifts) {
+                        if (s.getAccountId() == staff.getAccountId() && s.getCaLamViecId() != shift.getCaLamViecId()) {
+                            long minutes = java.time.Duration.between(s.getGioBatDau(), s.getGioKetThuc()).toMinutes();
+                            assignedHours += (minutes - s.getGioNghi()) / 60.0;
+                        }
+                    }
+                    if (assignedHours < minHours) {
+                        minHours = assignedHours;
+                        bestStaff = staff;
+                    }
+                }
+
+                if (bestStaff != null && bestStaff.getAccountId() != shift.getAccountId()) {
+                    int oldStaffId = shift.getAccountId();
+                    shift.setAccountId(bestStaff.getAccountId());
+                    caLamViecDAO.updateCaLamViec(shift);
+
+                    // Ghi log thay đổi
+                    CaLamViecAudit audit = new CaLamViecAudit();
+                    audit.setCaLamViecId(shift.getCaLamViecId());
+                    audit.setThaoTac("AUTO_SCHEDULE");
+                    audit.setNguoiThucHien(actorId);
+                    audit.setGiaTriCu("Nhân viên ID: " + oldStaffId);
+                    audit.setGiaTriMoi("Nhân viên ID: " + bestStaff.getAccountId());
+                    audit.setLyDo("Tự động sắp lịch dựa trên nguyện vọng rảnh");
+                    auditDAO.insert(audit);
+                }
+            }
+        }
     }
 }

@@ -44,9 +44,22 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     public List<TaiKhoan> getAllAccounts() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT a FROM TaiKhoan a", TaiKhoan.class).getResultList();
+            return em.createQuery("SELECT a FROM TaiKhoan a WHERE a.isDeleted = false OR a.isDeleted IS NULL", TaiKhoan.class).getResultList();
         } catch (Exception e) {
             logger.error("Lỗi lấy danh sách tài khoản: {}", e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<TaiKhoan> getDeletedAccounts() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT a FROM TaiKhoan a WHERE a.isDeleted = true", TaiKhoan.class).getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi lấy danh sách tài khoản đã xóa: {}", e.getMessage(), e);
             return null;
         } finally {
             em.close();
@@ -85,7 +98,57 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     }
 
     @Override
-    public boolean deleteAccount(int id) {
+    public boolean softDeleteAccount(int id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            TaiKhoan acc = em.find(TaiKhoan.class, id);
+            if (acc != null) {
+                acc.setDeleted(true);
+                acc.setIsLocked(true);
+                em.merge(acc);
+                trans.commit();
+                return true;
+            }
+            trans.rollback();
+            return false;
+        } catch (Exception e) {
+            logger.error("Lỗi xóa mềm tài khoản ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean restoreAccount(int id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            TaiKhoan acc = em.find(TaiKhoan.class, id);
+            if (acc != null) {
+                acc.setDeleted(false);
+                acc.setIsLocked(false);
+                em.merge(acc);
+                trans.commit();
+                return true;
+            }
+            trans.rollback();
+            return false;
+        } catch (Exception e) {
+            logger.error("Lỗi khôi phục tài khoản ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean permanentDeleteAccount(int id) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         try {
@@ -99,12 +162,17 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             trans.rollback();
             return false;
         } catch (Exception e) {
-            logger.error("Lỗi xóa tài khoản ID {}: {}", id, e.getMessage(), e);
+            logger.error("Lỗi xóa vĩnh viễn tài khoản ID {}: {}", id, e.getMessage(), e);
             if (trans.isActive()) trans.rollback();
             return false;
         } finally {
             em.close();
         }
+    }
+
+    @Override
+    public boolean deleteAccount(int id) {
+        return softDeleteAccount(id);
     }
 
     @Override

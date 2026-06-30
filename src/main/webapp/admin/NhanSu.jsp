@@ -68,9 +68,18 @@ body { font-family: 'Inter', sans-serif; }
 </header>
 
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
-  <div class="flex items-center justify-between gap-4 mb-2">
-    <h2 class="text-lg font-bold text-zinc-900">Danh sách tài khoản <span class="text-xs bg-zinc-100 px-1.5 py-0.5 rounded font-medium text-zinc-600" id="staffCountDisplay">0</span></h2>
-    <button onclick="openAddStaff()" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all">
+  <div class="flex items-center justify-between gap-4 mb-2 flex-wrap">
+    <div class="flex gap-1 bg-zinc-100 p-1 rounded-xl">
+      <button id="tabNhanSu" onclick="switchTab('nhansu')" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all">
+        <span class="material-symbols-outlined text-[16px]">people</span>Nhân sự
+        <span class="text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium" id="staffCountDisplay">0</span>
+      </button>
+      <button id="tabThungRac" onclick="switchTab('thungrac')" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">delete</span>Thùng rác
+        <span id="trashCountBadge" class="hidden text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">0</span>
+      </button>
+    </div>
+    <button id="addStaffBtn" onclick="openAddStaff()" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all">
       <span class="material-symbols-outlined text-[18px]">person_add</span>Thêm nhân sự
     </button>
   </div>
@@ -97,7 +106,8 @@ body { font-family: 'Inter', sans-serif; }
     </div>
   </c:if>
 
-  <div class="card overflow-hidden">
+  <!-- Bảng nhân sự đang làm việc -->
+  <div id="sectionNhanSu" class="card overflow-hidden">
     <table class="w-full text-sm">
       <thead class="bg-zinc-50 border-b border-zinc-200">
         <tr>
@@ -111,7 +121,66 @@ body { font-family: 'Inter', sans-serif; }
       <tbody class="divide-y divide-zinc-100" id="staffBody"></tbody>
     </table>
   </div>
+
+  <!-- Bảng thùng rác (ẩn mặc định) -->
+  <div id="sectionThungRac" class="hidden">
+    <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-medium flex items-center gap-2 mb-3">
+      <span class="material-symbols-outlined text-[16px]">info</span>
+      Các tài khoản trong thùng rác đã bị vô hiệu hóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn.
+    </div>
+    <div class="card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-red-50 border-b border-red-100">
+          <tr>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Thành viên</th>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Vai trò</th>
+            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Email</th>
+            <th class="px-4 py-3 text-right font-semibold text-zinc-600 text-xs">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100" id="trashBody"></tbody>
+      </table>
+    </div>
+  </div>
 </main>
+
+<!-- Modal xác nhận chuyển vào thùng rác -->
+<div id="softDeleteModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeSoftDeleteModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6">
+    <div class="flex flex-col items-center text-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[24px] text-blue-600">delete</span>
+      </div>
+      <h3 class="text-base font-bold text-zinc-900">Chuyển vào Thùng rác?</h3>
+      <p class="text-sm text-zinc-500">Tài khoản <span id="softDeleteName" class="font-semibold text-zinc-800"></span> sẽ bị vô hiệu hóa và chuyển vào Thùng rác. Bạn có thể khôi phục sau.</p>
+    </div>
+    <input type="hidden" id="softDeleteId" value="">
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeSoftDeleteModal()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Hủy</button>
+      <button onclick="confirmSoftDelete()" class="flex-1 h-10 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">Chuyển vào thùng rác</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal xác nhận xóa vĩnh viễn -->
+<div id="permanentDeleteModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePermanentDeleteModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6">
+    <div class="flex flex-col items-center text-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[24px] text-red-600">delete_forever</span>
+      </div>
+      <h3 class="text-base font-bold text-zinc-900">Xóa vĩnh viễn?</h3>
+      <p class="text-sm text-zinc-500">Tài khoản <span id="permanentDeleteName" class="font-semibold text-zinc-800"></span> sẽ bị <strong class="text-red-600">xóa vĩnh viễn</strong> khỏi hệ thống. Hành động này <strong class="text-red-600">KHÔNG THỂ hoàn tác</strong>.</p>
+    </div>
+    <input type="hidden" id="permanentDeleteId" value="">
+    <div class="flex gap-3 mt-6">
+      <button onclick="closePermanentDeleteModal()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Hủy</button>
+      <button onclick="confirmPermanentDelete()" class="flex-1 h-10 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700">Xóa vĩnh viễn</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modals -->
 <div id="staffModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
@@ -226,6 +295,19 @@ let staffList = [
   </c:forEach>
 ];
 
+let deletedList = [
+  <c:forEach items="${deletedAccounts}" var="acc" varStatus="loop">
+    {
+      id: '${acc.accountId}',
+      username: '${acc.username}',
+      name: '<c:out value="${acc.fullName != null && !acc.fullName.trim().isEmpty() ? acc.fullName : acc.username}" />',
+      VaiTro: '<c:choose><c:when test="${acc.roleId == 1}">Quản trị viên</c:when><c:when test="${acc.roleId == 2}">Quản lý</c:when><c:when test="${acc.roleId == 3}">Khách hàng</c:when><c:when test="${acc.roleId == 4}">Lễ tân</c:when><c:when test="${acc.roleId == 5}">Bảo vệ</c:when><c:otherwise>Nhân viên</c:otherwise></c:choose>',
+      email: '${acc.email}',
+      initial: '${(acc.fullName != null && acc.fullName.length() > 0) ? acc.fullName.substring(0, 1).toUpperCase() : acc.username.substring(0, 1).toUpperCase()}'
+    }${!loop.last ? ',' : ''}
+  </c:forEach>
+];
+
 function renderStaff() {
   const staffBody = document.getElementById('staffBody');
   if (!staffBody) return;
@@ -249,17 +331,17 @@ function renderStaff() {
       actionsHtml = `
         <button onclick="approveBranch('\${s.coSoId}')" title="Duyệt" class="p-1.5 rounded-lg hover:bg-green-50 text-green-600"><span class="material-symbols-outlined text-[18px]">check_circle</span></button>
         <button onclick="rejectBranch('\${s.coSoId}')" title="Không duyệt" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">cancel</span></button>
-        <button onclick="deleteStaff('\${s.id}')" title="Xóa" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
+        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
       `;
     } else if (s.roleId === 2 && s.coSoStatus === 'Từ chối') {
       actionsHtml = `
         <button onclick="approveBranch('\${s.coSoId}')" title="Duyệt lại" class="p-1.5 rounded-lg hover:bg-green-50 text-green-600"><span class="material-symbols-outlined text-[18px]">check_circle</span></button>
-        <button onclick="deleteStaff('\${s.id}')" title="Xóa" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
+        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
       `;
     } else {
       actionsHtml = `
         <button onclick="toggleLock('\${s.id}', \${s.status === 'Đang làm'})" title="\${s.status === 'Đang làm' ? 'Khóa' : 'Mở khóa'}" class="p-1.5 rounded-lg hover:bg-zinc-100 \${s.status === 'Đang làm' ? 'text-amber-600' : 'text-green-600'}"><span class="material-symbols-outlined text-[18px]">\${s.status === 'Đang làm' ? 'lock' : 'lock_open'}</span></button>
-        <button onclick="deleteStaff('\${s.id}')" title="Xóa" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
+        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
       `;
     }
 
@@ -287,7 +369,99 @@ function toggleLock(id, currentlyActive) {
   }
 }
 
-function deleteStaff(id) { if (confirm("Xóa vĩnh viễn tài khoản này?")) location.href = '${pageContext.request.contextPath}/admin/nhan-su?action=delete&id=' + id; }
+// ---- Soft delete (chuyển vào thùng rác) ----
+function promptSoftDelete(id, name) {
+  document.getElementById('softDeleteId').value = id;
+  document.getElementById('softDeleteName').innerText = name;
+  document.getElementById('softDeleteModal').classList.remove('hidden');
+}
+function closeSoftDeleteModal() {
+  document.getElementById('softDeleteModal').classList.add('hidden');
+}
+function confirmSoftDelete() {
+  const id = document.getElementById('softDeleteId').value;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '${pageContext.request.contextPath}/admin/nhan-su';
+  const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+  add('action', 'softDelete'); add('id', id);
+  document.body.appendChild(form); form.submit();
+}
+
+// ---- Xóa vĩnh viễn ----
+function promptPermanentDelete(id, name) {
+  document.getElementById('permanentDeleteId').value = id;
+  document.getElementById('permanentDeleteName').innerText = name;
+  document.getElementById('permanentDeleteModal').classList.remove('hidden');
+}
+function closePermanentDeleteModal() {
+  document.getElementById('permanentDeleteModal').classList.add('hidden');
+}
+function confirmPermanentDelete() {
+  const id = document.getElementById('permanentDeleteId').value;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '${pageContext.request.contextPath}/admin/nhan-su';
+  const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+  add('action', 'permanentDelete'); add('id', id);
+  document.body.appendChild(form); form.submit();
+}
+
+// ---- Khôi phục từ thùng rác ----
+function restoreStaff(id) {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '${pageContext.request.contextPath}/admin/nhan-su';
+  const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+  add('action', 'restore'); add('id', id);
+  document.body.appendChild(form); form.submit();
+}
+
+// ---- Render thùng rác ----
+function renderTrash() {
+  const trashBody = document.getElementById('trashBody');
+  if (!trashBody) return;
+  if (deletedList.length === 0) {
+    trashBody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-zinc-400">Thùng rác trống</td></tr>';
+    return;
+  }
+  trashBody.innerHTML = deletedList.map(s => `
+    <tr class="hover:bg-zinc-50 transition-colors">
+      <td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center shrink-0 font-bold text-xs">\${s.initial}</div><div><p class="font-bold text-zinc-500">\${s.name}</p><p class="text-[10px] text-zinc-400">\${s.username}</p></div></div></td>
+      <td class="px-4 py-4 text-xs font-medium text-zinc-400">\${s.VaiTro}</td>
+      <td class="px-4 py-4 text-xs text-zinc-400">\${s.email}</td>
+      <td class="px-4 py-4 text-right flex items-center justify-end gap-1.5">
+        <button onclick="restoreStaff('\${s.id}')" title="Khôi phục" class="flex items-center gap-1 px-3 h-8 rounded-lg bg-green-50 text-green-600 text-xs font-semibold hover:bg-green-100"><span class="material-symbols-outlined text-[16px]">restore</span>Khôi phục</button>
+        <button onclick="promptPermanentDelete('\${s.id}', '\${s.name}')" title="Xóa vĩnh viễn" class="flex items-center gap-1 px-3 h-8 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100"><span class="material-symbols-outlined text-[16px]">delete_forever</span>Xóa vĩnh viễn</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ---- Chuyển tab ----
+function switchTab(tab) {
+  const nhansuSection = document.getElementById('sectionNhanSu');
+  const trashSection = document.getElementById('sectionThungRac');
+  const tabNhanSu = document.getElementById('tabNhanSu');
+  const tabThungRac = document.getElementById('tabThungRac');
+  const addBtn = document.getElementById('addStaffBtn');
+
+  if (tab === 'nhansu') {
+    nhansuSection.classList.remove('hidden');
+    trashSection.classList.add('hidden');
+    tabNhanSu.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all';
+    tabNhanSu.querySelector('#staffCountDisplay').className = 'text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium';
+    tabThungRac.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-all';
+    addBtn.classList.remove('hidden');
+  } else {
+    nhansuSection.classList.add('hidden');
+    trashSection.classList.remove('hidden');
+    tabThungRac.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all';
+    tabNhanSu.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-all';
+    tabNhanSu.querySelector('#staffCountDisplay').className = 'text-xs bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded font-medium';
+    addBtn.classList.add('hidden');
+  }
+}
 
 function approveBranch(coSoId) {
   if (confirm("Phê duyệt cơ sở này và kích hoạt tài khoản quản lý?")) {
@@ -585,6 +759,13 @@ async function submitOtpVerification() {
 // Profile Dropdown Toggle
 document.addEventListener('DOMContentLoaded', () => {
     renderStaff();
+    renderTrash();
+    // Hiện badge thùng rác nếu có
+    const badge = document.getElementById('trashCountBadge');
+    if (deletedList.length > 0) {
+      badge.innerText = deletedList.length;
+      badge.classList.remove('hidden');
+    }
 
 
     // Password strength check listener

@@ -84,7 +84,7 @@ public class CheckInDAO {
             conn.setAutoCommit(false);
 
             // 1. Lấy thông tin đơn đặt lịch
-            String sqlSelectBooking = "SELECT SanID, NgayDat, GioBatDau, GioKetThuc, TrangThai, TongTienDuKien, GhiChu FROM LichDatSan WHERE DatSanID = ?";
+            String sqlSelectBooking = "SELECT SanID, NgayDat, GioBatDau, GioKetThuc, TrangThai, TongTienDuKien, GhiChu FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?";
             psSelectBooking = conn.prepareStatement(sqlSelectBooking);
             psSelectBooking.setInt(1, datSanId);
             rsBooking = psSelectBooking.executeQuery();
