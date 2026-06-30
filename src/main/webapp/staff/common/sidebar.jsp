@@ -24,6 +24,9 @@
     <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
       <span class="material-symbols-outlined text-[19px]">assignment</span>Đăng ký nghỉ phép
     </a>
+    <a href="${pageContext.request.contextPath}/staff/checkin" class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
+      <span class="material-symbols-outlined text-[19px]">power_settings_new</span>Mở sân / Check-in
+    </a>
   </nav>
   
   <div class="px-3 py-3 border-t border-orange-50">

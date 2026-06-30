@@ -29,6 +29,10 @@
           class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
           <span class="material-symbols-outlined text-[19px]">inventory_2</span>Kho & Dịch Vụ
         </a>
+        <a href="${pageContext.request.contextPath}/staff/checkin"
+          class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
+          <span class="material-symbols-outlined text-[19px]">power_settings_new</span>Mở sân / Check-in
+        </a>
 
         <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-5 mb-1.5">Nhân sự & Khách hàng
         </p>

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "LichDatSan")
@@ -42,6 +43,9 @@ public class Lichdatsan {
 
     @Column(name = "NguonDatSan", length = 50)
     private String nguonDatSan;
+
+    @Column(name = "CreatedTime", insertable = false, updatable = false)
+    private LocalDateTime createdTime;
 
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
@@ -171,6 +175,14 @@ public class Lichdatsan {
 
     public void setAccount(TaiKhoan account) {
         this.account = account;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
     }
 
     @Override

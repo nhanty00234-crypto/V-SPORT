@@ -1,177 +1,229 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi" class="scroll-smooth">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch Sử Đặt Sân - V-SPORT Elite Arena</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <jsp:include page="/common/head.jsp" />
     <style>
-        .history-card {
-            background: white;
-            border: 1px solid white;
-            border-radius: 32px;
-            box-shadow: 0 20px 50px rgba(42, 42, 42, 0.03);
-            overflow: hidden;
+        /* Ghi đè triệt để màu nền ấm (beige) và màu chữ mặc định từ head.jsp */
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+            background-color: #f8fafc !important; /* Force slate-50 background */
+            color: #0f172a !important; /* Force slate-900 text */
         }
-        .status-badge {
-            padding: 4px 14px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        .status-pending { background-color: #fef3c7; color: #b45309; }
-        .status-confirmed { background-color: #dcfce7; color: #15803d; }
-        .status-cancelled { background-color: #fee2e2; color: #b91c1c; }
-        
-        .table-th {
-            padding: 1.5rem 2rem;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: rgba(42, 42, 42, 0.3);
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
         }
     </style>
 </head>
-<body class="bg-[#f4f4ef] text-[#2a2a2a] min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased">
 
+    <!-- Header Navigation -->
     <jsp:include page="/common/header.jsp" />
 
-    <main class="flex-grow pt-[160px] pb-24">
-        <div class="max-w-[1300px] mx-auto px-6">
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-[120px] pb-24">
+        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- Page Header -->
-            <div class="mb-12 animate-fade-in-up">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#2a2a2a]/5 bg-white/50 backdrop-blur-sm mb-6">
-                    <div class="w-1 h-1 rounded-full bg-[#2563eb]"></div>
-                    <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-[#2a2a2a]/40">Your Activity</span>
+            <!-- 1. Green Hero Banner matching DatSan.jsp -->
+            <div class="mb-10 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden animate-fade-in-up">
+                <!-- Decorative background elements -->
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10 max-w-2xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-md">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Hoạt động của bạn
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">Lịch Sử Đặt Sân</h1>
+                    <p class="text-white/80 text-sm sm:text-base leading-relaxed">
+                        Theo dõi danh sách ca chơi, quản lý các yêu cầu đặt sân trực tuyến và kiểm tra trạng thái duyệt lịch của bạn.
+                    </p>
                 </div>
-                <h1 class="text-[56px] lg:text-[72px] font-serif leading-[1.1] text-[#2a2a2a]">
-                    Lịch sử <br/>
-                    <i class="italic text-[#2563eb]">đặt sân của bạn.</i>
-                </h1>
-
-                <c:if test="${not empty sessionScope.message}">
-                    <div class="mt-8 p-5 bg-[#dcfce7] border border-[#dcfce7] rounded-[20px] text-[#15803d] text-[14px] flex items-center gap-4 animate-fade-in-up">
-                        <span class="material-symbols-outlined text-[20px]">check_circle</span>
-                        <span class="font-medium">${sessionScope.message}</span>
-                        <% session.removeAttribute("message"); %>
-                    </div>
-                </c:if>
             </div>
 
-            <!-- Table Section -->
-            <div class="history-card animate-fade-in-up" style="animation-delay: 0.1s">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-[#fcfcf9] border-b border-[#2a2a2a]/5">
-                                <th class="px-8 py-6 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2a2a2a]/30">Chi tiết sân</th>
-                                <th class="px-8 py-6 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2a2a2a]/30">Thời gian</th>
-                                <th class="px-8 py-6 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2a2a2a]/30">Chi phí</th>
-                                <th class="px-8 py-6 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2a2a2a]/30">Trạng thái</th>
-                                <th class="px-8 py-6 text-right text-[10px] font-bold uppercase tracking-[0.2em] text-[#2a2a2a]/30">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#2a2a2a]/5">
-                            <c:forEach var="lich" items="${dsLich}">
-                                <%-- Tìm tên sân và Cơ Sở tương ứng với mỗi lịch đặt --%>
-                                <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
-                                <c:set var="branchHienThi" value="" />
-                                <c:forEach var="s" items="${dsSan}">
-                                    <c:if test="${s.sanID == lich.sanId}">
-                                        <c:set var="tenSanHienThi" value="${s.tenSan}" />
-                                        <c:forEach var="cs" items="${dsCoSo}">
-                                            <c:if test="${cs.coSoID == s.coSoID}">
-                                                <c:set var="branchHienThi" value="${cs.tenCoSo}" />
+            <!-- Success Alert Message -->
+            <c:if test="${not empty sessionScope.message}">
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-xs font-bold flex items-center gap-3 shadow-sm max-w-xl animate-fade-in-up">
+                    <span class="material-symbols-outlined text-emerald-600 text-[20px]">check_circle</span>
+                    <span>${sessionScope.message}</span>
+                    <% session.removeAttribute("message"); %>
+                </div>
+            </c:if>
+
+            <!-- 2. Responsive 2-Column Dashboard Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                
+                <!-- Sidebar: User Stats & Quick Links (1 Column) -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="premium-card p-6 flex flex-col items-center text-center">
+                        <!-- User Initial Avatar -->
+                        <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-extrabold text-2xl shadow-inner mb-4">
+                            <c:choose>
+                                <c:when test="${not empty user.fullName}">
+                                    ${fn:substring(user.fullName, 0, 1).toUpperCase()}
+                                </c:when>
+                                <c:otherwise>
+                                    ${fn:substring(user.username, 0, 1).toUpperCase()}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <h3 class="font-extrabold text-slate-800 text-base leading-tight">${user.fullName}</h3>
+                        <p class="text-slate-450 text-xs mt-1 font-medium">${user.email}</p>
+                        
+                        <div class="w-full border-t border-slate-100 my-5"></div>
+                        
+                        <!-- Simple stats -->
+                        <div class="w-full grid grid-cols-2 gap-4">
+                            <div class="text-center bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">Đặt Sân</span>
+                                <span class="text-lg font-black text-emerald-600 mt-1 block">${dsLich.size()}</span>
+                            </div>
+                            <div class="text-center bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">Điểm Uy Tín</span>
+                                <span class="text-lg font-black text-slate-700 mt-1 block">${user.diemUyTin != null ? user.diemUyTin : 100}</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-emerald-600/10 active:scale-95 duration-200">
+                            <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                            Đặt sân mới ngay
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main Content: History Table Card (3 Columns) -->
+                <div class="lg:col-span-3">
+                    <div class="premium-card p-6 overflow-hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                                <span class="material-symbols-outlined text-emerald-600 text-[20px]">calendar_month</span>
+                                Danh sách đơn đặt sân hôm nay & trước đó
+                            </h2>
+                        </div>
+                        
+                        <div class="overflow-x-auto rounded-2xl border border-slate-100">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-500 font-bold">
+                                        <th class="p-4">Sân & Địa điểm</th>
+                                        <th class="p-4 text-center">Thời gian thi đấu</th>
+                                        <th class="p-4 text-right">Chi phí</th>
+                                        <th class="p-4 text-center">Trạng thái</th>
+                                        <th class="p-4 text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 bg-white">
+                                    <c:forEach var="lich" items="${dsLich}">
+                                        <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
+                                        <c:set var="branchHienThi" value="" />
+                                        <c:forEach var="s" items="${dsSan}">
+                                            <c:if test="${s.sanID == lich.sanId}">
+                                                <c:set var="tenSanHienThi" value="${s.tenSan}" />
+                                                <c:forEach var="cs" items="${dsCoSo}">
+                                                    <c:if test="${cs.coSoID == s.coSoID}">
+                                                        <c:set var="branchHienThi" value="${cs.tenCoSo}" />
+                                                    </c:if>
+                                                </c:forEach>
                                             </c:if>
                                         </c:forEach>
-                                    </c:if>
-                                </c:forEach>
 
-                                <tr class="group hover:bg-[#fcfcf9] transition-colors">
-                                    <td class="px-8 py-8">
-                                        <div class="flex flex-col gap-1">
-                                            <span class="text-[15px] font-bold text-[#2a2a2a]">${tenSanHienThi}</span>
-                                            <span class="text-[12px] text-[#2a2a2a]/40 font-medium flex items-center gap-1">
-                                                <c:if test="${not empty branchHienThi}">
-                                                    <span class="material-symbols-outlined text-[13px]">location_on</span>
-                                                    ${branchHienThi} &middot;
+                                        <tr class="hover:bg-slate-50/30 transition-colors">
+                                            <td class="p-4">
+                                                <div class="flex flex-col gap-0.5">
+                                                    <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
+                                                    <span class="text-[10px] text-slate-450 font-bold flex items-center gap-1">
+                                                        <c:if test="${not empty branchHienThi}">
+                                                            <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span>
+                                                            ${branchHienThi} &middot;
+                                                        </c:if>
+                                                        Mã: #${lich.datSanId}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="p-4 text-center">
+                                                <div class="flex flex-col gap-0.5">
+                                                    <span class="font-bold text-slate-700">${lich.ngayDat}</span>
+                                                    <span class="text-xs text-emerald-600 font-extrabold font-mono">${lich.gioBatDau.toString().substring(0,5)} — ${lich.gioKetThuc.toString().substring(0,5)}</span>
+                                                </div>
+                                            </td>
+                                            <td class="p-4 text-right font-extrabold text-slate-900 text-sm">
+                                                <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
+                                            </td>
+                                            <td class="p-4 text-center">
+                                                <c:choose>
+                                                    <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
+                                                        <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Chờ duyệt</span>
+                                                    </c:when>
+                                                    <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
+                                                        <span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã duyệt</span>
+                                                    </c:when>
+                                                    <c:when test="${lich.trangThai == 'Đang sử dụng'}">
+                                                        <span class="bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đang đá</span>
+                                                    </c:when>
+                                                    <c:when test="${lich.trangThai == 'Đã hủy'}">
+                                                        <span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã hủy</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">${lich.trangThai}</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td class="p-4 text-center">
+                                                <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
+                                                    <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt sân này?');" class="inline-block">
+                                                        <input type="hidden" name="id" value="${lich.datSanId}">
+                                                        <button type="submit" class="px-3.5 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
+                                                            Hủy yêu cầu
+                                                        </button>
+                                                    </form>
                                                 </c:if>
-                                                Mã ĐS: #${lich.datSanId}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="px-8 py-8">
-                                        <div class="flex flex-col gap-1">
-                                            <span class="text-[15px] text-[#2a2a2a]/80">${lich.ngayDat}</span>
-                                            <span class="text-[13px] text-[#2563eb] font-bold">${lich.gioBatDau} — ${lich.gioKetThuc}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-8 py-8">
-                                        <span class="text-[15px] font-bold text-[#2a2a2a]">
-                                            <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" />
-                                        </span>
-                                    </td>
-                                    <td class="px-8 py-8">
-                                        <c:choose>
-                                            <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
-                                                <span class="status-badge status-pending">Đang chờ</span>
-                                            </c:when>
-                                            <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
-                                                <span class="status-badge status-confirmed">Đã duyệt</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="status-badge status-cancelled">${lich.trangThai}</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="px-8 py-8 text-right">
-                                        <c:if test="${lich.trangThai == 'Chờ xác nhận'}">
-                                            <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Xác nhận hủy yêu cầu đặt sân này?')">
-                                                <input type="hidden" name="id" value="${lich.datSanId}">
-                                                <button type="submit" class="h-10 px-6 rounded-xl border border-red-100 text-red-500 text-[11px] font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                                                    Hủy yêu cầu
-                                                </button>
-                                            </form>
-                                        </c:if>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                            <c:if test="${empty dsLich}">
-                                <tr>
-                                    <td colspan="5" class="px-8 py-32 text-center">
-                                        <span class="material-symbols-outlined text-[48px] text-[#2a2a2a]/5 block mb-6">event_busy</span>
-                                        <p class="text-[#2a2a2a]/20 text-[12px] font-bold uppercase tracking-[0.3em]">Chưa có dữ liệu lịch sử</p>
-                                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="inline-flex items-center gap-2 mt-8 text-[#2563eb] text-[13px] font-bold uppercase tracking-widest hover:underline">
-                                            Đặt sân ngay bây giờ <span class="material-symbols-outlined text-[18px]">arrow_right_alt</span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </tbody>
-                    </table>
+                                                <c:if test="${lich.trangThai == 'Đang sử dụng'}">
+                                                    <span class="text-slate-400 font-semibold text-[10px]">Đang sử dụng</span>
+                                                </c:if>
+                                                <c:if test="${lich.trangThai == 'Đã hủy'}">
+                                                    <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
+                                                </c:if>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    <c:if test="${empty dsLich}">
+                                        <tr>
+                                            <td colspan="5" class="p-16 text-center">
+                                                <span class="material-symbols-outlined text-[40px] text-slate-200 block mb-4">event_busy</span>
+                                                <p class="text-slate-400 text-[11px] font-extrabold uppercase tracking-widest">Chưa có dữ liệu lịch sử đặt sân</p>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </main>
 
-    <footer class="py-12 px-6 border-t border-[#2a2a2a]/5 mt-20">
-        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex flex-col md:flex-row items-center gap-4">
-                <span class="text-[14px] font-bold text-[#2a2a2a] tracking-widest uppercase">Hệ thống V-Sport</span>
-                <span class="hidden md:block w-[1px] h-4 bg-[#2a2a2a]/10"></span>
-                <span class="text-[11px] font-medium text-[#2a2a2a]/40 uppercase tracking-widest">&copy; 2026 Elite Management Hub.</span>
-            </div>
-            <div class="flex gap-8 text-[11px] font-bold uppercase tracking-widest text-[#2a2a2a]/40">
-                <a href="#" class="hover:text-[#2a2a2a] transition-colors">Bảo mật</a>
-                <a href="#" class="hover:text-[#2a2a2a] transition-colors">Điều khoản</a>
-            </div>
-        </div>
-    </footer>
+    <!-- Footer -->
+    <jsp:include page="/common/footer.jsp" />
 
+    <script>
+        // Active link highlight
+        const navHistory = document.getElementById('nav-history');
+        if (navHistory) {
+            navHistory.classList.add('active');
+        }
+    </script>
 </body>
 </html>

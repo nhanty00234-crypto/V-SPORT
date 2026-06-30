@@ -143,6 +143,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         lich.setGhiChu(rs.getNString("GhiChu"));
         lich.setNguonDatSan(rs.getNString("NguonDatSan"));
 
+        Timestamp createdTs = rs.getTimestamp("CreatedTime");
+        if (createdTs != null) {
+            lich.setCreatedTime(createdTs.toLocalDateTime());
+        }
+
         try {
             String tenSan = rs.getNString("TenSan");
             if (tenSan != null) {

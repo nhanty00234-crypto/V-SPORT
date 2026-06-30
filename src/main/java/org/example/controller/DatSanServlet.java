@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,7 +93,7 @@ public class DatSanServlet extends HttpServlet {
         if (isBookingPage(path)) {
             loadBookingPage(req, resp);
         } else if (path.equals("/customer/lich-su-dat-san")) {
-            loadHistoryPage(req, resp, user);
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
         }
     }
 
@@ -118,6 +119,23 @@ public class DatSanServlet extends HttpServlet {
 
         // Lấy toàn bộ lịch đặt hiện tại để hiển thị timetable xung đột trên frontend
         List<Lichdatsan> activeBookings = lichDatSanDAO.getAllLichDatSan();
+        if (activeBookings != null) {
+            activeBookings.removeIf(b -> "Chờ thanh toán".equals(b.getTrangThai()) &&
+                    b.getCreatedTime() != null &&
+                    b.getCreatedTime().plusMinutes(10).isBefore(LocalDateTime.now()));
+        }
+
+        // Lấy lịch sử đặt sân của cá nhân khách hàng nếu đã đăng nhập
+        HttpSession session = req.getSession();
+        TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+        if (user != null) {
+            try {
+                List<Lichdatsan> dsLich = lichDatSanDAO.getLichByAccountId(user.getAccountId());
+                req.setAttribute("dsLich", dsLich);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Lỗi khi tải lịch sử đặt sân cho khách hàng", e);
+            }
+        }
 
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
@@ -195,6 +213,7 @@ public class DatSanServlet extends HttpServlet {
         LocalDate ngayDat;
         LocalTime gioBatDau, gioKetThuc;
         String ghiChu;
+        String paymentMethod;
 
         try {
             sanId = Integer.parseInt(req.getParameter("sanId"));
@@ -202,6 +221,10 @@ public class DatSanServlet extends HttpServlet {
             gioBatDau = LocalTime.parse(req.getParameter("gioBatDau"));
             gioKetThuc = LocalTime.parse(req.getParameter("gioKetThuc"));
             ghiChu = req.getParameter("ghiChu");
+            paymentMethod = req.getParameter("paymentMethod");
+            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+                paymentMethod = "sau";
+            }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Dữ liệu đặt sân không hợp lệ", e);
             session.setAttribute("error", "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.");
@@ -326,15 +349,15 @@ public class DatSanServlet extends HttpServlet {
                     // Công thức overlap: NOT (KetThuc <= BatDau_Khac OR BatDau >= KetThuc_Khac)
                     String checkSql = "SELECT COUNT(*) FROM LichDatSan " +
                             "WHERE SanID = ? AND NgayDat = ? " +
-                            "AND TrangThai != N'Đã hủy' " +
-                            "AND NOT (GioKetThuc <= ? OR GioBatDau >= ?)";
+                            "AND (TrangThai != N'Đã hủy' AND NOT (TrangThai = N'Chờ thanh toán' AND DATEDIFF(minute, CreatedTime, GETDATE()) > 10)) " +
+                            "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
 
                     boolean hasOverlap;
                     try (java.sql.PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
                         checkPs.setInt(1, sanId);
                         checkPs.setDate(2, java.sql.Date.valueOf(ngayDat));
-                        checkPs.setTime(3, java.sql.Time.valueOf(gioBatDau)); // KetThuc <= BatDauNew => không overlap
-                        checkPs.setTime(4, java.sql.Time.valueOf(gioKetThuc)); // BatDau >= KetThucNew => không overlap
+                        checkPs.setString(3, gioBatDau.toString()); // KetThuc <= BatDauNew => không overlap
+                        checkPs.setString(4, gioKetThuc.toString()); // BatDau >= KetThucNew => không overlap
                         try (java.sql.ResultSet rs = checkPs.executeQuery()) {
                             hasOverlap = rs.next() && rs.getInt(1) > 0;
                         }
@@ -400,7 +423,8 @@ public class DatSanServlet extends HttpServlet {
                         insertPs.setBoolean(6, applyLights);
                         insertPs.setBigDecimal(7,
                                 BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP));
-                        insertPs.setString(8, "Chờ xác nhận");
+                        String initialStatus = "payos".equalsIgnoreCase(paymentMethod) ? "Chờ thanh toán" : "Chờ xác nhận";
+                        insertPs.setString(8, initialStatus);
                         insertPs.setString(9, ghiChu != null ? ghiChu.trim() : "");
                         insertPs.setString(10, "Web");
                         insertPs.executeUpdate();
@@ -410,11 +434,16 @@ public class DatSanServlet extends HttpServlet {
                     conn.commit();
 
                     LOGGER.info(String.format(
-                            "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ",
-                            user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien));
+                            "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s",
+                            user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod));
 
-                    session.setAttribute("message",
-                            "Đặt sân thành công! Chúng tôi sẽ xác nhận yêu cầu của bạn sớm nhất có thể.");
+                    if ("payos".equalsIgnoreCase(paymentMethod)) {
+                        session.setAttribute("message",
+                                "Đăng ký đặt sân thành công! Vui lòng tiến hành quét mã QR thanh toán trong vòng 10 phút để giữ chỗ.");
+                    } else {
+                        session.setAttribute("message",
+                                "Đặt sân thành công! Lịch đặt bằng tiền mặt chỉ được giữ chỗ tạm thời. Vui lòng đến sớm 15 phút để làm thủ tục nhận sân.");
+                    }
                     resp.sendRedirect(req.getContextPath() + "/customer/lich-su-dat-san");
                     return;
 

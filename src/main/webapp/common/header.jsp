@@ -288,7 +288,7 @@
                             <span class="material-symbols-outlined text-[18px]">account_circle</span>
                             Hồ sơ cá nhân
                         </a>
-                        <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="user-dropdown-item">
+                        <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="user-dropdown-item">
                             <span class="material-symbols-outlined text-[18px]">history</span>
                             Lịch sử đặt sân
                         </a>

@@ -81,6 +81,14 @@
                     <p class="text-white/80 text-sm sm:text-base leading-relaxed">
                         Khám phá hệ thống sân bãi hiện đại, lịch đặt cập nhật trực tiếp theo thời gian thực và nhiều tiện ích đi kèm.
                     </p>
+                    <c:if test="${sessionScope.user != null}">
+                        <div class="mt-5">
+                            <button type="button" onclick="openHistoryModal()" class="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white text-emerald-700 font-bold text-xs shadow-md hover:bg-emerald-50 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 duration-250">
+                                <span class="material-symbols-outlined text-[18px]">history</span>
+                                Lịch sử đặt sân của tôi
+                            </button>
+                        </div>
+                    </c:if>
                 </div>
             </div>
 
@@ -232,6 +240,151 @@
         </div>
     </main>
 
+    <!-- BOOKING HISTORY MODAL -->
+    <div id="historyModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+        <div id="historyPanel" class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 flex items-center justify-between text-white">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined">history</span> Lịch sử đặt sân của bạn
+                </h3>
+                <button onclick="closeHistoryModal()" class="text-white/80 hover:text-white transition-colors p-1">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <!-- User Stats Sub-header inside Modal -->
+            <c:if test="${sessionScope.user != null}">
+                <div class="px-6 py-4 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-extrabold text-sm shadow-inner border border-emerald-100/50">
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.user.fullName}">
+                                    ${fn:substring(sessionScope.user.fullName, 0, 1).toUpperCase()}
+                                </c:when>
+                                <c:otherwise>
+                                    ${fn:substring(sessionScope.user.username, 0, 1).toUpperCase()}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-sm leading-tight">${sessionScope.user.fullName}</h4>
+                            <p class="text-[10px] text-slate-400 font-bold mt-0.5">${sessionScope.user.email}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="text-center px-4 py-1.5 bg-white rounded-xl border border-slate-100 shadow-sm">
+                            <span class="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">ĐÃ ĐẶT</span>
+                            <span class="text-sm font-black text-emerald-600 block mt-0.5">${fn:length(dsLich)} ca</span>
+                        </div>
+                        <div class="text-center px-4 py-1.5 bg-white rounded-xl border border-slate-100 shadow-sm">
+                            <span class="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">UY TÍN</span>
+                            <span class="text-sm font-black text-slate-700 block mt-0.5">${sessionScope.user.diemUyTin != null ? sessionScope.user.diemUyTin : 100}</span>
+                        </div>
+                    </div>
+                </div>
+            </c:if>
+            
+            <div class="p-6">
+                <div class="overflow-x-auto rounded-2xl border border-slate-100 max-h-[400px] overflow-y-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold sticky top-0 z-10">
+                                <th class="p-4 bg-slate-50">Chi tiết sân</th>
+                                <th class="p-4 bg-slate-50 text-center">Thời gian</th>
+                                <th class="p-4 bg-slate-50 text-right">Chi phí</th>
+                                <th class="p-4 bg-slate-50 text-center">Trạng thái</th>
+                                <th class="p-4 bg-slate-50 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            <c:forEach var="lich" items="${dsLich}">
+                                <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
+                                <c:set var="branchHienThi" value="" />
+                                <c:forEach var="s" items="${dsSan}">
+                                    <c:if test="${s.sanID == lich.sanId}">
+                                        <c:set var="tenSanHienThi" value="${s.tenSan}" />
+                                        <c:forEach var="cs" items="${dsCoSo}">
+                                            <c:if test="${cs.coSoID == s.coSoID}">
+                                                <c:set var="branchHienThi" value="${cs.tenCoSo}" />
+                                            </c:if>
+                                        </c:forEach>
+                                    </c:if>
+                                </c:forEach>
+
+                                <tr class="hover:bg-slate-50/40 transition-colors">
+                                    <td class="p-4">
+                                        <div class="flex flex-col gap-0.5">
+                                            <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
+                                            <span class="text-[10px] text-slate-450 font-bold flex items-center gap-1">
+                                                <c:if test="${not empty branchHienThi}">
+                                                    <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span>
+                                                    ${branchHienThi} &middot;
+                                                </c:if>
+                                                Mã ĐS: #${lich.datSanId}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex flex-col gap-0.5">
+                                            <span class="font-bold text-slate-700">${lich.ngayDat}</span>
+                                            <span class="text-xs text-emerald-600 font-extrabold font-mono">${lich.gioBatDau.toString().substring(0,5)} — ${lich.gioKetThuc.toString().substring(0,5)}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-right font-extrabold text-slate-900 text-sm">
+                                        <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <c:choose>
+                                            <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
+                                                <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Chờ duyệt</span>
+                                            </c:when>
+                                            <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
+                                                <span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã duyệt</span>
+                                            </c:when>
+                                            <c:when test="${lich.trangThai == 'Đang sử dụng'}">
+                                                <span class="bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đang đá</span>
+                                            </c:when>
+                                            <c:when test="${lich.trangThai == 'Đã hủy'}">
+                                                <span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã hủy</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">${lich.trangThai}</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
+                                            <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt sân này?');" class="inline-block">
+                                                <input type="hidden" name="id" value="${lich.datSanId}">
+                                                <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
+                                                    Hủy yêu cầu
+                                                </button>
+                                            </form>
+                                        </c:if>
+                                        <c:if test="${lich.trangThai == 'Đang sử dụng'}">
+                                            <span class="text-slate-400 font-semibold text-[10px]">Đang đá</span>
+                                        </c:if>
+                                        <c:if test="${lich.trangThai == 'Đã hủy'}">
+                                            <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
+                                        </c:if>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            <c:if test="${empty dsLich}">
+                                <tr>
+                                    <td colspan="5" class="p-16 text-center">
+                                        <span class="material-symbols-outlined text-[40px] text-slate-200 block mb-4">event_busy</span>
+                                        <p class="text-slate-400 text-[11px] font-extrabold uppercase tracking-widest">Chưa có dữ liệu lịch sử đặt sân</p>
+                                    </td>
+                                </tr>
+                            </c:if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BOOKING & CHECKOUT MODAL FLOW -->
     <!-- OVERLAY -->
     <div id="bookingModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
@@ -366,12 +519,42 @@
                     </div>
                 </div>
 
-                <!-- Pay Later Panel -->
-                <div id="sauPanel" class="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center flex flex-col items-center justify-center gap-3">
-                    <div class="w-12 h-12 bg-white text-slate-600 rounded-full flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-[24px]">schedule</span></div>
+                <!-- Payment Method Selector -->
+                <div class="mb-5 space-y-2">
+                    <label class="form-label text-slate-500 font-bold text-[10px]">Phương thức thanh toán</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- PayOS (Online) Option -->
+                        <button type="button" onclick="selectPaymentMethod('payos')" id="payment-opt-payos"
+                                class="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-slate-100 hover:border-slate-200 transition-all text-center gap-1.5 active:scale-95 duration-200">
+                            <span class="material-symbols-outlined text-[22px] text-emerald-600">qr_code_2</span>
+                            <span class="text-xs font-extrabold text-slate-850">Chuyển khoản (PayOS)</span>
+                            <span class="text-[9px] text-slate-400 font-bold leading-none">Giữ sân 10 phút</span>
+                        </button>
+                        <!-- Cash (Pay Later) Option -->
+                        <button type="button" onclick="selectPaymentMethod('sau')" id="payment-opt-sau"
+                                class="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/20 text-center gap-1.5 active:scale-95 duration-200">
+                            <span class="material-symbols-outlined text-[22px] text-slate-500">payments</span>
+                            <span class="text-xs font-extrabold text-slate-850">Thanh toán tại quầy</span>
+                            <span class="text-[9px] text-slate-400 font-bold leading-none">Đặt cọc tiền mặt</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cash Info Panel -->
+                <div id="payment-info-sau" class="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-2">
+                    <div class="w-9 h-9 bg-white text-slate-550 rounded-full flex items-center justify-center shadow-inner border border-slate-100/50"><span class="material-symbols-outlined text-[18px]">schedule</span></div>
                     <div>
-                        <p class="text-sm font-bold text-slate-800">Chờ duyệt yêu cầu</p>
-                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">Admin sẽ duyệt yêu cầu của bạn. Vui lòng thanh toán tại quầy khi đến sân.</p>
+                        <p class="text-xs font-bold text-slate-800">Thanh toán sau (Tiền mặt)</p>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-normal max-w-[280px] mx-auto">Lịch đặt bằng tiền mặt chỉ được giữ chỗ tạm thời. Quý khách vui lòng đến trước 15 phút để làm thủ tục nhận sân.</p>
+                    </div>
+                </div>
+
+                <!-- PayOS Info Panel (Hidden by default) -->
+                <div id="payment-info-payos" class="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-2 hidden">
+                    <div class="w-9 h-9 bg-white text-emerald-600 rounded-full flex items-center justify-center shadow-inner border border-emerald-100/50"><span class="material-symbols-outlined text-[18px]">bolt</span></div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">Giữ sân tức thì trong 10 phút</p>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-normal max-w-[280px] mx-auto">Hệ thống sẽ tạm khóa sân và tạo mã chuyển khoản tự động. Bạn cần hoàn tất thanh toán trong vòng 10 phút.</p>
                     </div>
                 </div>
 
@@ -762,6 +945,7 @@
             // Reset inputs
             document.getElementById("ngayDat").value = todayStr;
             document.getElementById("ghiChu").value = "";
+            selectPaymentMethod('sau');
             applyBranchTimeConstraints(court.branchId);
             document.getElementById("timetable-block").classList.add("hidden");
             document.getElementById("overlap-warning").classList.add("hidden");
@@ -796,6 +980,55 @@
             setTimeout(() => {
                 overlay.classList.add("hidden");
             }, 300);
+        }
+
+        function openHistoryModal() {
+            const overlay = document.getElementById("historyModalOverlay");
+            const panel = document.getElementById("historyPanel");
+            if (overlay && panel) {
+                overlay.classList.remove("hidden");
+                overlay.classList.add("flex");
+                setTimeout(() => {
+                    overlay.classList.remove("opacity-0");
+                    panel.classList.remove("scale-95");
+                }, 10);
+            }
+        }
+
+        function closeHistoryModal() {
+            const overlay = document.getElementById("historyModalOverlay");
+            const panel = document.getElementById("historyPanel");
+            if (overlay && panel) {
+                overlay.classList.add("opacity-0");
+                panel.classList.add("scale-95");
+                setTimeout(() => {
+                    overlay.classList.add("hidden");
+                    overlay.classList.remove("flex");
+                }, 300);
+            }
+        }
+
+        function selectPaymentMethod(method) {
+            document.getElementById("input-payment-method").value = method;
+            
+            const btnPayOS = document.getElementById("payment-opt-payos");
+            const btnSau = document.getElementById("payment-opt-sau");
+            const infoPayOS = document.getElementById("payment-info-payos");
+            const infoSau = document.getElementById("payment-info-sau");
+            
+            if (!btnPayOS || !btnSau || !infoPayOS || !infoSau) return;
+            
+            if (method === 'payos') {
+                btnPayOS.className = "flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/20 text-center gap-1.5 active:scale-95 duration-200";
+                btnSau.className = "flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-slate-100 hover:border-slate-200 transition-all text-center gap-1.5 active:scale-95 duration-200";
+                infoPayOS.classList.remove("hidden");
+                infoSau.classList.add("hidden");
+            } else {
+                btnSau.className = "flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/20 text-center gap-1.5 active:scale-95 duration-200";
+                btnPayOS.className = "flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-slate-100 hover:border-slate-200 transition-all text-center gap-1.5 active:scale-95 duration-200";
+                infoSau.classList.remove("hidden");
+                infoPayOS.classList.add("hidden");
+            }
         }
 
         function checkScheduleAndPrice() {
@@ -1030,7 +1263,7 @@
                 const btn = document.createElement("button");
                 btn.type = "button";
                 btn.className = "px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl text-center hover:bg-slate-100 hover:border-slate-300 transition-all";
-                btn.textContent = `${hour}h`;
+                btn.textContent = hour + "h";
                 btn.dataset.time = timeStr;
                 btn.dataset.hour = hour;
                 
@@ -1094,7 +1327,7 @@
                 const btn = document.createElement("button");
                 btn.type = "button";
                 btn.className = `px-3 py-2 border rounded-xl text-xs font-bold text-center transition-all ${isPast || isBooked ? 'bg-slate-100 border-slate-100 text-slate-300 cursor-not-allowed' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'}`;
-                btn.textContent = `${hour}h`;
+                btn.textContent = hour + "h";
                 btn.dataset.time = timeStr;
                 btn.dataset.hour = hour;
                 
@@ -1146,6 +1379,14 @@
         renderCourts();
         filterBranch(selectedBranchId);
         filterSport(selectedSportId);
+
+        // Auto open history modal if requested in URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openHistory') === 'true') {
+                openHistoryModal();
+            }
+        });
     </script>
 </body>
 </html>
