@@ -49,14 +49,15 @@ public class XacThucOTPServlet extends HttpServlet {
         boolean isAjax = "XMLHttpRequest".equals(requestedWith);
 
         Boolean needResend = (Boolean) session.getAttribute("needResend");
-        if ("ADMIN_ADD".equals(authType) && needResend != null && needResend) {
+        boolean isAdminOrManagerFlow = "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType);
+        if (isAdminOrManagerFlow && needResend != null && needResend) {
             req.setAttribute("loi", "Bạn đã nhập sai 5 lần. Vui lòng nhấn 'Gửi lại ngay' để nhận mã OTP mới.");
             req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
             return;
         }
 
         if (sessionOtp == null || userOtp == null || !userOtp.equals(sessionOtp)) {
-            if ("ADMIN_ADD".equals(authType)) {
+            if (isAdminOrManagerFlow) {
                 Integer attempts = (Integer) session.getAttribute("otpAttempts");
                 if (attempts == null) {
                     attempts = 0;
@@ -90,7 +91,10 @@ public class XacThucOTPServlet extends HttpServlet {
                         session.removeAttribute("otpAttempts");
                         session.removeAttribute("resendCount");
                         session.removeAttribute("needResend");
-                        session.setAttribute("error", "Tạo tài khoản thất bại vì không nhập đúng OTP!");
+                        String errorMsg = ("ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType))
+                            ? "Cập nhật tài khoản thất bại vì không nhập đúng OTP!"
+                            : "Tạo tài khoản thất bại vì không nhập đúng OTP!";
+                        session.setAttribute("error", errorMsg);
                         TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
                         if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
                             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
@@ -122,19 +126,16 @@ public class XacThucOTPServlet extends HttpServlet {
         session.removeAttribute("resendCount");
         session.removeAttribute("needResend");
 
-        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType)) {
+        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
             // Xử lý hoàn tất đăng ký hoặc admin thêm tài khoản
             TaiKhoan tempAccount = (TaiKhoan) session.getAttribute("tempAccount");
             String[] tempSports = (String[]) session.getAttribute("tempSports");
 
             if (tempAccount == null) {
-                if ("ADMIN_ADD".equals(authType)) {
-                    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
-                    if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
-                        resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
-                    } else {
-                        resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
-                    }
+                if ("ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType)) {
+                    resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+                } else if ("MANAGER_EDIT".equals(authType)) {
+                    resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
                 } else {
                     if (isAjax) {
                         resp.setContentType("application/json;charset=UTF-8");
@@ -171,6 +172,41 @@ public class XacThucOTPServlet extends HttpServlet {
                 session.setAttribute("message", "Thêm tài khoản thành công!");
                 TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
                 if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
+                    resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+                }
+            } else if ("ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
+                // Double check email uniqueness right before updating
+                if (tempAccount.getEmail() != null && !tempAccount.getEmail().trim().isEmpty()) {
+                    TaiKhoan oldAcc = TaiKhoanDAO.getAccountById(tempAccount.getAccountId());
+                    if (oldAcc != null && !tempAccount.getEmail().equalsIgnoreCase(oldAcc.getEmail())) {
+                        if (TaiKhoanDAO.kiemtraEmail(tempAccount.getEmail().trim())) {
+                            session.setAttribute("error", "Email đã tồn tại trên hệ thống!");
+                            if ("MANAGER_EDIT".equals(authType)) {
+                                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                            } else {
+                                resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+                            }
+                            return;
+                        }
+                    }
+                }
+
+                // Cập nhật tài khoản sau khi xác thực OTP thành công
+                TaiKhoanDAO.updateAccount(tempAccount);
+
+                session.removeAttribute("tempAccount");
+                session.removeAttribute("tempSports");
+                session.removeAttribute("authType");
+
+                session.setAttribute("message", "Cập nhật thông tin tài khoản thành công!");
+                if (isAjax) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\": true, \"message\": \"Cập nhật thông tin tài khoản thành công!\"}");
+                    return;
+                }
+                if ("MANAGER_EDIT".equals(authType)) {
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
@@ -238,7 +274,7 @@ public class XacThucOTPServlet extends HttpServlet {
         String email = null;
         String fullName = "";
         
-        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType)) {
+        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
             TaiKhoan tempAccount = (TaiKhoan) session.getAttribute("tempAccount");
             if (tempAccount != null) {
                 email = tempAccount.getEmail();

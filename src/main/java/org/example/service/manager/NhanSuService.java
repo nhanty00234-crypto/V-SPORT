@@ -170,6 +170,7 @@ public class NhanSuService {
         private String viTriSoTruong;
         private String gioiTinh;
         private String ngaySinh;
+        private String password;
 
         // Getters and setters
         public String getFullName() { return fullName; }
@@ -196,6 +197,8 @@ public class NhanSuService {
         public void setGioiTinh(String gioiTinh) { this.gioiTinh = gioiTinh; }
         public String getNgaySinh() { return ngaySinh; }
         public void setNgaySinh(String ngaySinh) { this.ngaySinh = ngaySinh; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
     }
 
     // ==================== READ OPERATIONS ====================
@@ -250,6 +253,13 @@ public class NhanSuService {
             throw new IllegalArgumentException("Nhân viên không tồn tại");
         }
         return account;
+    }
+
+    /**
+     * Kiểm tra email đã tồn tại trong hệ thống chưa
+     */
+    public boolean isEmailTaken(String email) {
+        return taiKhoanDAO.kiemtraEmail(email);
     }
 
     /**
@@ -433,6 +443,14 @@ public class NhanSuService {
         }
         if (request.getNgaySinh() != null && !request.getNgaySinh().isEmpty()) {
             account.setNgaySinh(ValidationUtils.parseDate(request.getNgaySinh(), "yyyy-MM-dd"));
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            ValidationUtils.validateStrongPassword(request.getPassword());
+            String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(
+                request.getPassword(),
+                org.mindrot.jbcrypt.BCrypt.gensalt(12)
+            );
+            account.setPassword(hashedPassword);
         }
 
         taiKhoanDAO.updateAccount(account);

@@ -689,48 +689,85 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <form id="staffForm" onsubmit="handleStaffSubmit(event)" class="px-6 py-4 flex flex-col gap-4">
       <input type="hidden" id="staffEditId" value="">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-violet-900">Họ và tên <span class="text-red-500">*</span></label>
-          <input type="text" id="staffName" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-violet-900">Tên đăng nhập <span class="text-red-500">*</span></label>
-          <input type="text" id="staffUsername" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
-        </div>
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-violet-900">Vai trò <span class="text-red-500">*</span></label>
-        <select id="staffRole" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
-          <option value="4">Lễ tân</option>
-          <option value="5">Bảo vệ</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-violet-900">Email <span class="text-red-500">*</span></label>
-        <input type="email" id="staffEmail" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-violet-900">Điện thoại</label>
-          <input type="tel" id="staffPhone" class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-violet-900">Mật khẩu <span class="text-red-500">*</span></label>
-          <div class="relative flex items-center">
-            <input type="password" id="staffPassword" placeholder="••••••••" required class="h-9 pl-3 pr-10 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none w-full">
-            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-zinc-400 hover:text-zinc-650 focus:outline-none flex items-center">
-              <span id="passwordEyeIcon" class="material-symbols-outlined text-[18px]">visibility</span>
-            </button>
+      
+      <!-- Container for staff fields -->
+      <div id="staffFieldsContainer" class="flex flex-col gap-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-violet-900">Họ và tên <span class="text-red-500">*</span></label>
+              <input type="text" id="staffName" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-violet-900">Tên đăng nhập <span class="text-red-500">*</span></label>
+              <input type="text" id="staffUsername" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+            </div>
           </div>
-        </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-violet-900">Vai trò <span class="text-red-500">*</span></label>
+            <select id="staffRole" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+              <option value="4">Lễ tân</option>
+              <option value="5">Bảo vệ</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-violet-900">Email <span class="text-red-500">*</span></label>
+            <input type="email" id="staffEmail" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-violet-900">Điện thoại</label>
+              <input type="tel" id="staffPhone" class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-violet-900">Mật khẩu <span class="text-red-500">*</span></label>
+              <div class="relative flex items-center">
+                <input type="password" id="staffPassword" placeholder="••••••••" required class="h-9 pl-3 pr-10 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none w-full">
+                <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-zinc-400 hover:text-zinc-650 focus:outline-none flex items-center">
+                  <span id="passwordEyeIcon" class="material-symbols-outlined text-[18px]">visibility</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 mt-3 pt-4 border-t border-violet-50">
+            <button type="button" onclick="closeStaffModal()"
+                    class="h-9 px-4 rounded-lg border border-violet-100 text-sm font-semibold hover:bg-violet-50 text-zinc-650 transition-colors">Hủy</button>
+            <button type="submit"
+                    class="h-9 px-5 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 shadow shadow-violet-200 transition-colors">Lưu thông tin</button>
+          </div>
       </div>
 
-      <div class="flex justify-end gap-2 mt-3 pt-4 border-t border-violet-50">
-        <button type="button" onclick="closeScheduleShiftModal()"
-                class="h-9 px-4 rounded-lg border border-violet-100 text-sm font-semibold hover:bg-violet-50 text-zinc-650 transition-colors">Hủy</button>
-        <button type="submit"
-                class="h-9 px-5 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 shadow shadow-violet-200 transition-colors">Lưu thông tin</button>
+      <!-- Container for OTP Verification (Hidden by default) -->
+      <div id="otpVerificationSection" class="hidden flex flex-col gap-4 text-center py-4">
+          <div class="inline-flex mx-auto items-center justify-center w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mb-2">
+              <span class="material-symbols-outlined text-[24px]">mark_email_read</span>
+          </div>
+          <div>
+              <h3 class="text-sm font-bold text-violet-950">Xác thực OTP thay đổi Email</h3>
+              <p class="text-xs text-violet-500 mt-1">Một mã xác thực gồm 6 chữ số đã được gửi tới <span class="font-bold text-violet-900" id="otpTargetEmail"></span>.</p>
+          </div>
+          
+          <div class="flex gap-2 justify-center my-3" id="otpBoxesContainer">
+              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+          </div>
+          
+          <div id="otpErrorBanner" class="hidden p-2.5 bg-red-50 border border-red-100 text-red-650 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">error</span>
+              <span id="otpErrorMsgText">Mã OTP không hợp lệ.</span>
+          </div>
+
+          <div class="flex gap-2 justify-end mt-4 pt-4 border-t border-violet-50">
+              <button type="button" onclick="cancelOtpVerification()" class="h-9 px-4 rounded-lg border border-violet-100 text-sm font-semibold hover:bg-violet-50 text-zinc-650">Quay lại</button>
+              <button type="button" id="otpConfirmBtn" onclick="submitOtpVerification()" class="h-9 px-5 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 shadow shadow-violet-200 flex items-center gap-1.5">
+                  Xác nhận
+                  <span class="material-symbols-outlined text-[16px]">check</span>
+              </button>
+          </div>
       </div>
     </form>
   </div>
@@ -1057,6 +1094,13 @@ function openAddStaff() {
     document.getElementById('staffEditId').value = '';
     document.getElementById('staffUsername').disabled = false;
     document.getElementById('staffPassword').required = true;
+    
+    // Reset OTP containers
+    document.getElementById('staffFieldsContainer').classList.remove('hidden');
+    document.getElementById('otpVerificationSection').classList.add('hidden');
+    document.querySelectorAll('.otp-box').forEach(b => b.value = '');
+    document.getElementById('otpErrorBanner').classList.add('hidden');
+    
     document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -1070,6 +1114,13 @@ function editStaff(id) {
     document.getElementById('staffUsername').disabled = true;
     document.getElementById('staffEmail').value = s.email;
     document.getElementById('staffPhone').value = s.phone;
+    
+    // Reset OTP containers
+    document.getElementById('staffFieldsContainer').classList.remove('hidden');
+    document.getElementById('otpVerificationSection').classList.add('hidden');
+    document.querySelectorAll('.otp-box').forEach(b => b.value = '');
+    document.getElementById('otpErrorBanner').classList.add('hidden');
+    
     document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -1084,6 +1135,49 @@ function togglePasswordVisibility() {
     }
 }
 
+// Setup input events for 6 OTP boxes
+document.addEventListener('DOMContentLoaded', () => {
+    const boxes = document.querySelectorAll('.otp-box');
+    boxes.forEach((box, idx, arr) => {
+        box.addEventListener('input', (e) => {
+            const val = e.target.value;
+            // Allow only numbers
+            if (val && !/^[0-9]$/.test(val)) {
+                e.target.value = '';
+                return;
+            }
+            if (val && idx < arr.length - 1) {
+                arr[idx + 1].focus();
+            }
+        });
+        box.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                arr[idx - 1].focus();
+            }
+        });
+        box.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData('text').trim();
+            if (/^\d{6}$/.test(text)) {
+                text.split('').forEach((char, i) => {
+                    arr[i].value = char;
+                });
+                arr[5].focus();
+            }
+        });
+    });
+});
+
+let pendingStaffParams = null;
+
+function cancelOtpVerification() {
+    document.getElementById('otpVerificationSection').classList.add('hidden');
+    document.getElementById('staffFieldsContainer').classList.remove('hidden');
+    // Clear boxes
+    document.querySelectorAll('.otp-box').forEach(box => box.value = '');
+    document.getElementById('otpErrorBanner').classList.add('hidden');
+}
+
 async function handleStaffSubmit(e) {
     e.preventDefault();
     const editId = document.getElementById('staffEditId').value;
@@ -1091,7 +1185,6 @@ async function handleStaffSubmit(e) {
     params.append('action', editId ? 'update' : 'add');
     if (editId) {
         params.append('accountId', editId);
-        params.append('isLocked', 'false'); // placeholder
     } else {
         params.append('username', document.getElementById('staffUsername').value);
     }
@@ -1105,21 +1198,82 @@ async function handleStaffSubmit(e) {
         const response = await fetch(_ctxPath + '/manager/nhan-su', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: params
         });
 
-        if (response.redirected) {
-            window.location.href = response.url;
+        if (!response.ok) {
+            const text = await response.text();
+            alert(text || 'Đã xảy ra lỗi khi cập nhật thông tin.');
             return;
         }
 
-        const result = await response.text();
-        console.log('Submit result:', result);
-        window.location.reload();
+        const data = await response.json();
+        if (data.requiresOtp) {
+            // Show inline OTP block smoothly
+            document.getElementById('otpTargetEmail').innerText = data.email;
+            document.getElementById('staffFieldsContainer').classList.add('hidden');
+            document.getElementById('otpVerificationSection').classList.remove('hidden');
+            document.querySelectorAll('.otp-box')[0].focus();
+            pendingStaffParams = params;
+        } else {
+            // Success directly
+            alert(data.message || 'Cập nhật tài khoản thành công!');
+            window.location.reload();
+        }
     } catch (error) {
         console.error('Error submitting staff:', error);
+        alert('Lỗi kết nối máy chủ.');
+    }
+}
+
+async function submitOtpVerification() {
+    const boxes = document.querySelectorAll('.otp-box');
+    let otp = '';
+    boxes.forEach(b => otp += b.value.trim());
+    if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+        document.getElementById('otpErrorMsgText').innerText = 'Vui lòng nhập đầy đủ mã OTP 6 chữ số.';
+        document.getElementById('otpErrorBanner').classList.remove('hidden');
+        return;
+    }
+
+    const btn = document.getElementById('otpConfirmBtn');
+    const oldText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Đang xác thực...';
+
+    const params = new URLSearchParams();
+    params.append('otp', otp);
+    params.append('email', document.getElementById('otpTargetEmail').innerText);
+
+    try {
+        const response = await fetch(_ctxPath + '/nhapma', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert(data.message || 'Thay đổi Email và thông tin thành công!');
+            window.location.reload();
+        } else {
+            document.getElementById('otpErrorMsgText').innerText = data.loi || 'Mã OTP không đúng. Vui lòng nhập lại.';
+            document.getElementById('otpErrorBanner').classList.remove('hidden');
+            boxes.forEach(b => b.value = '');
+            boxes[0].focus();
+        }
+    } catch(err) {
+        console.error(err);
+        document.getElementById('otpErrorMsgText').innerText = 'Lỗi kết nối. Vui lòng thử lại.';
+        document.getElementById('otpErrorBanner').classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldText;
     }
 }
 

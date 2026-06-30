@@ -52,6 +52,51 @@ public class KhoDichVuManagerServlet extends HttpServlet {
             categories = categoryDAO.findAll();
         }
 
+        // Merge duplicate categories in database (System-wide Category cleanup)
+        java.util.Map<String, DanhMucSanPham> uniqueCats = new java.util.HashMap<>();
+        boolean duplicatesFound = false;
+        for (DanhMucSanPham cat : categories) {
+            String name = cat.getTenDanhMuc().trim().toLowerCase();
+            if (uniqueCats.containsKey(name)) {
+                duplicatesFound = true;
+                DanhMucSanPham primaryCat = uniqueCats.get(name);
+                
+                jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+                jakarta.persistence.EntityTransaction trans = em.getTransaction();
+                try {
+                    trans.begin();
+                    
+                    // Update SanPham_DichVu that use the duplicate category
+                    List<SanPham_DichVu> products = em.createQuery(
+                        "SELECT p FROM SanPham_DichVu p WHERE p.DanhMucID = :oldCatId", SanPham_DichVu.class)
+                        .setParameter("oldCatId", cat.getDanhMucID())
+                        .getResultList();
+                    for (SanPham_DichVu sp : products) {
+                        sp.setDanhMucID(primaryCat.getDanhMucID());
+                        em.merge(sp);
+                    }
+                    
+                    // Delete duplicate category
+                    DanhMucSanPham catToRemove = em.find(DanhMucSanPham.class, cat.getDanhMucID());
+                    if (catToRemove != null) {
+                        em.remove(catToRemove);
+                    }
+                    
+                    trans.commit();
+                } catch (Exception e) {
+                    if (trans.isActive()) trans.rollback();
+                    e.printStackTrace();
+                } finally {
+                    em.close();
+                }
+            } else {
+                uniqueCats.put(name, cat);
+            }
+        }
+        if (duplicatesFound) {
+            categories = categoryDAO.findAll();
+        }
+
         // Get filter inputs
         String search = req.getParameter("search");
         String categoryIdStr = req.getParameter("category");
@@ -174,6 +219,12 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 double giaNhap = Double.parseDouble(giaNhapStr);
                 int stock = Integer.parseInt(stockStr);
 
+                if (donGia < 0 || giaNhap < 0 || stock < 0) {
+                    session.setAttribute("errorMsg", "Giá bán lẻ, giá nhập và số lượng tồn không được là số âm.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
                 SanPham_DichVu sp = new SanPham_DichVu();
                 sp.setSkuCode(sku.trim());
                 sp.setTenSanPham(name.trim());
@@ -225,12 +276,22 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     sp.setSkuCode(sku.trim());
                 }
 
+                double donGia = Double.parseDouble(donGiaStr);
+                double giaNhap = Double.parseDouble(giaNhapStr);
+                int stock = Integer.parseInt(stockStr);
+
+                if (donGia < 0 || giaNhap < 0 || stock < 0) {
+                    session.setAttribute("errorMsg", "Giá bán lẻ, giá nhập và số lượng tồn không được là số âm.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
                 sp.setTenSanPham(name.trim());
                 sp.setDanhMucID(Integer.parseInt(categoryIdStr));
-                sp.setDonGia(Double.parseDouble(donGiaStr));
-                sp.setGiaNhap(Double.parseDouble(giaNhapStr));
+                sp.setDonGia(donGia);
+                sp.setGiaNhap(giaNhap);
                 sp.setDonViTinh(unit);
-                sp.setSoLuongTon(Integer.parseInt(stockStr));
+                sp.setSoLuongTon(stock);
                 sp.setTrangThai(status);
                 sp.setMoTa(desc);
 
@@ -348,14 +409,28 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
-                DanhMucSanPham dm = new DanhMucSanPham();
-                dm.setTenDanhMuc(catName.trim());
+                String trimmedCatName = catName.trim();
+                List<DanhMucSanPham> allCats = categoryDAO.findAll();
+                boolean exists = false;
+                for (DanhMucSanPham dm : allCats) {
+                    if (dm.getTenDanhMuc().trim().equalsIgnoreCase(trimmedCatName)) {
+                        exists = true;
+                        break;
+                    }
+                }
 
-                boolean success = categoryDAO.insert(dm);
-                if (success) {
-                    session.setAttribute("successMsg", "Thêm danh mục '" + catName + "' thành công.");
+                if (exists) {
+                    session.setAttribute("errorMsg", "Danh mục '" + trimmedCatName + "' đã tồn tại.");
                 } else {
-                    session.setAttribute("errorMsg", "Lỗi khi thêm danh mục mới.");
+                    DanhMucSanPham dm = new DanhMucSanPham();
+                    dm.setTenDanhMuc(trimmedCatName);
+
+                    boolean success = categoryDAO.insert(dm);
+                    if (success) {
+                        session.setAttribute("successMsg", "Thêm danh mục '" + trimmedCatName + "' thành công.");
+                    } else {
+                        session.setAttribute("errorMsg", "Lỗi khi thêm danh mục mới.");
+                    }
                 }
             } else if ("add-presets".equals(action)) {
                 String[] presetNames = req.getParameterValues("presetNames");

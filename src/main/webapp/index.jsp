@@ -1,4 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%
+    org.example.model.TaiKhoan loggedInUser = (org.example.model.TaiKhoan) session.getAttribute("user");
+    if (loggedInUser != null) {
+        if (loggedInUser.getRoleId() == 1) {
+            response.sendRedirect(request.getContextPath() + "/admin/nhan-su");
+            return;
+        } else if (loggedInUser.getRoleId() == 2) {
+            response.sendRedirect(request.getContextPath() + "/manager/nhan-su");
+            return;
+        } else if (loggedInUser.getRoleId() == 4 || loggedInUser.getRoleId() == 5) {
+            response.sendRedirect(request.getContextPath() + "/staff/dashboard");
+            return;
+        }
+    }
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>

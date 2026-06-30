@@ -338,11 +338,11 @@
       <div class="grid grid-cols-3 gap-3">
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Giá nhập (đ) *</label>
-          <input type="number" step="any" name="giaNhap" required placeholder="Giá vốn" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="number" step="any" name="giaNhap" min="0" required placeholder="Giá vốn" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Giá bán lẻ (đ) *</label>
-          <input type="number" step="any" name="donGia" required placeholder="Giá bán lẻ" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="number" step="any" name="donGia" min="0" required placeholder="Giá bán lẻ" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Số lượng ban đầu</label>
@@ -413,15 +413,15 @@
       <div class="grid grid-cols-3 gap-3">
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Giá nhập (đ) *</label>
-          <input type="number" step="any" id="editGiaNhap" name="giaNhap" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="number" step="any" id="editGiaNhap" name="giaNhap" min="0" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Giá bán lẻ (đ) *</label>
-          <input type="number" step="any" id="editDonGia" name="donGia" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="number" step="any" id="editDonGia" name="donGia" min="0" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Số lượng tồn kho</label>
-          <input type="number" id="editSoLuongTon" name="soLuongTon" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="number" id="editSoLuongTon" name="soLuongTon" min="0" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
       </div>
 
@@ -510,21 +510,26 @@
     <div class="p-5 flex flex-col gap-4 text-xs">
       <div>
         <p class="font-semibold text-zinc-700 mb-2">Danh sách danh mục hiện tại:</p>
-        <div class="max-h-36 overflow-y-auto border border-purple-50 rounded-lg p-2 flex flex-wrap gap-1.5 bg-zinc-50/50">
+        <div class="max-h-48 overflow-y-auto border border-purple-100 rounded-xl p-3 bg-zinc-50/50 space-y-2">
           <c:forEach items="${categories}" var="cat">
-            <span class="badge badge-purple px-2.5 py-1 text-[10px]">${cat.tenDanhMuc}</span>
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-white border border-purple-100/40 hover:border-purple-300 hover:shadow-sm transition-all group">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-purple-650">label</span>
+                <span class="font-medium text-zinc-700">${cat.tenDanhMuc}</span>
+              </div>
+            </div>
           </c:forEach>
         </div>
       </div>
 
       <div class="border-t border-purple-50 pt-4">
-        <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="flex flex-col gap-3">
+        <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" onsubmit="return handleAddCategory(event)" class="flex flex-col gap-3">
           <input type="hidden" name="action" value="add-category">
           <div>
             <label class="block font-semibold text-zinc-700 mb-1">Thêm danh mục mới *</label>
-            <input type="text" name="tenDanhMuc" required placeholder="Ví dụ: Thuê giày" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+            <input type="text" name="tenDanhMuc" id="newCatName" required placeholder="Ví dụ: Thuê giày" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
           </div>
-          <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg shadow-sm">
+          <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
             Tạo danh mục
           </button>
         </form>
@@ -786,6 +791,22 @@
       btnSubmit.innerText = "Xác nhận xuất kho";
       btnSubmit.className = "px-5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg font-bold shadow-sm";
     }
+  }
+
+  const existingCategories = [
+    <c:forEach items="${categories}" var="cat" varStatus="loop">
+      '${cat.tenDanhMuc.trim().toLowerCase()}'${!loop.last ? ',' : ''}
+    </c:forEach>
+  ];
+
+  function handleAddCategory(event) {
+    const input = event.target.querySelector('input[name="tenDanhMuc"]');
+    const catName = input.value.trim().toLowerCase();
+    if (existingCategories.includes(catName)) {
+      alert('Danh mục "' + input.value.trim() + '" này đã tồn tại!');
+      return false;
+    }
+    return true;
   }
 
   function openCategoryModal() {

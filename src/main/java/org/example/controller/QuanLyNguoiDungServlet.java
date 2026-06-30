@@ -95,6 +95,7 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                 String isLockedParam = req.getParameter("isLocked");
                 if (isLockedParam != null) {
                     acc.setIsLocked("true".equals(isLockedParam) || "1".equals(isLockedParam));
+                    TaiKhoanDAO.updateAccount(acc);
                 } else {
                     String email = req.getParameter("email");
                     String phone = req.getParameter("phoneNumber");
@@ -116,15 +117,17 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                         }
                     }
 
-                    // Check if email is already used by another account
-                    if (email != null && !email.equalsIgnoreCase(acc.getEmail()) && TaiKhoanDAO.kiemtraEmail(email)) {
-                        req.getSession().setAttribute("error", "Email đã tồn tại trên hệ thống!");
-                        resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
-                        return;
+                    // Check if email has changed
+                    boolean isEmailChanged = (email != null && !email.equalsIgnoreCase(acc.getEmail()));
+                    if (isEmailChanged) {
+                        if (TaiKhoanDAO.kiemtraEmail(email)) {
+                            req.getSession().setAttribute("error", "Email đã tồn tại trên hệ thống!");
+                            resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+                            return;
+                        }
                     }
                     
                     acc.setFullName(fullName);
-                    acc.setEmail(email);
                     acc.setPhoneNumber(phone);
                     
                     // Only update role and branch if the account is NOT a Manager (roleId != 2)
@@ -169,8 +172,37 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                             acc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12)));
                         }
                     }
+                    
+                    if (isEmailChanged) {
+                        acc.setEmail(email);
+                        String otpString = TaiKhoanDAO.sendRegistrationOTP(email, acc.getFullName());
+                        req.getSession().setAttribute("otp", otpString);
+                        req.getSession().setAttribute("tempAccount", acc);
+                        req.getSession().setAttribute("authType", "ADMIN_EDIT");
+                        req.getSession().setAttribute("otpAttempts", 0);
+                        req.getSession().setAttribute("resendCount", 0);
+                        req.getSession().setAttribute("needResend", false);
+                        
+                        String requestedWith = req.getHeader("X-Requested-With");
+                        if ("XMLHttpRequest".equals(requestedWith)) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"requiresOtp\": true, \"email\": \"" + email + "\"}");
+                            return;
+                        }
+
+                        req.setAttribute("email", email);
+                        req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
+                        return;
+                    } else {
+                        TaiKhoanDAO.updateAccount(acc);
+                        String requestedWith = req.getHeader("X-Requested-With");
+                        if ("XMLHttpRequest".equals(requestedWith)) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"success\": true, \"message\": \"Cập nhật tài khoản thành công!\"}");
+                            return;
+                        }
+                    }
                 }
-                TaiKhoanDAO.updateAccount(acc);
             }
         } else if ("add".equals(action)) {
             String username = req.getParameter("username");

@@ -100,6 +100,9 @@ public final class ValidationUtils {
         if (password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Mật khẩu không được để trống");
         }
+        if (password.contains(" ") || password.contains("\t")) {
+            throw new IllegalArgumentException("Mật khẩu không được chứa khoảng trắng");
+        }
         if (password.trim().isEmpty()) {
             throw new IllegalArgumentException("Mật khẩu không được chỉ chứa khoảng trắng");
         }

@@ -228,10 +228,50 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
+    .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        color: var(--text-dark);
+        font-size: 1.4rem;
+        line-height: 1;
+    }
+    .mobile-nav {
+        display: none;
+        position: fixed;
+        top: 69px;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        z-index: 99;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+        flex-direction: column;
+        padding: 12px 16px 16px;
+        gap: 2px;
+        border-top: 1px solid #e2e8f0;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 10px;
+        color: var(--text-dark);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+    .mobile-nav-link:hover, .mobile-nav-link.active {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        font-weight: 600;
+    }
     @media (max-width: 768px) {
-        .nav-links {
-            display: none;
-        }
+        .nav-links { display: none; }
+        .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
     }
 </style>
 
@@ -249,6 +289,11 @@
         <li><a href="${pageContext.request.contextPath}/index.jsp#pricing" id="nav-pricing">Bảng Giá</a></li>
     </ul>
     
+    <!-- Mobile Hamburger Button -->
+    <button id="mobileNavBtn" class="mobile-menu-btn" aria-label="Mở menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
     <c:choose>
         <c:when test="${user != null}">
             <!-- User Profile Dropdown -->
@@ -308,6 +353,15 @@
     </c:choose>
 </nav>
 
+<!-- Mobile Navigation Drawer -->
+<div id="mobileNav" class="mobile-nav">
+    <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-nav-link" id="mnav-home"><i class="fa-solid fa-house" style="width:20px;margin-right:10px;color:var(--primary)"></i>Trang Chủ</a>
+    <a href="${pageContext.request.contextPath}/customer/dat-san" class="mobile-nav-link" id="mnav-booking"><i class="fa-solid fa-magnifying-glass" style="width:20px;margin-right:10px;color:var(--primary)"></i>Tìm Sân</a>
+    <a href="#" class="mobile-nav-link"><i class="fa-solid fa-trophy" style="width:20px;margin-right:10px;color:var(--primary)"></i>Giải Đấu</a>
+    <a href="#" class="mobile-nav-link"><i class="fa-solid fa-users" style="width:20px;margin-right:10px;color:var(--primary)"></i>Cộng Đồng</a>
+    <a href="${pageContext.request.contextPath}/index.jsp#pricing" class="mobile-nav-link" id="mnav-pricing"><i class="fa-solid fa-tag" style="width:20px;margin-right:10px;color:var(--primary)"></i>Bảng Giá</a>
+</div>
+
 <script>
     // User Dropdown Toggle
     (function() {
@@ -327,6 +381,30 @@
             });
         }
         
+        // Mobile nav toggle
+        const mobileNavBtn = document.getElementById('mobileNavBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        if (mobileNavBtn && mobileNav) {
+            mobileNavBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mobileNav.classList.toggle('open');
+                mobileNavBtn.querySelector('i').className =
+                    mobileNav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+            });
+            document.addEventListener('click', (e) => {
+                if (!mobileNav.contains(e.target) && !mobileNavBtn.contains(e.target)) {
+                    mobileNav.classList.remove('open');
+                    mobileNavBtn.querySelector('i').className = 'fa-solid fa-bars';
+                }
+            });
+            mobileNav.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', () => {
+                    mobileNav.classList.remove('open');
+                    mobileNavBtn.querySelector('i').className = 'fa-solid fa-bars';
+                });
+            });
+        }
+
         // Auto active link based on URL
         const currentPath = window.location.pathname;
         const currentHash = window.location.hash;
@@ -339,7 +417,7 @@
             navHome.classList.remove('active');
             navBooking.classList.remove('active');
             navPricing.classList.remove('active');
-            
+
             if (currentPath.includes('dat-san')) {
                 navBooking.classList.add('active');
             } else if (currentHash.includes('pricing') || currentPath.includes('pricing')) {
@@ -347,6 +425,15 @@
             } else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/') || currentPath.includes('TrangChu')) {
                 navHome.classList.add('active');
             }
+        }
+        // Sync mobile nav active state
+        const mnavHome = document.getElementById('mnav-home');
+        const mnavBooking = document.getElementById('mnav-booking');
+        const mnavPricing = document.getElementById('mnav-pricing');
+        if (mnavHome && mnavBooking && mnavPricing) {
+            if (currentPath.includes('dat-san')) mnavBooking.classList.add('active');
+            else if (currentHash.includes('pricing') || currentPath.includes('pricing')) mnavPricing.classList.add('active');
+            else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) mnavHome.classList.add('active');
         }
     })();
 </script>

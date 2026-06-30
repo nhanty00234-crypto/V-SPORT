@@ -122,7 +122,8 @@ public class NhanSuManagerServlet extends HttpServlet {
                 
                 nhanSuService.createStaff(createReq, managerCoSoId, user.getAccountId());
                 session.setAttribute("message", "Thêm nhân viên thành công!");
-                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                return;
             } 
             else if ("update".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("accountId"));
@@ -131,16 +132,64 @@ public class NhanSuManagerServlet extends HttpServlet {
                 StaffUpdateRequest updateReq = new StaffUpdateRequest();
                 if (isLockedParam != null) {
                     updateReq.setIsLocked(Boolean.parseBoolean(isLockedParam));
+                    nhanSuService.updateStaff(accountId, updateReq, managerCoSoId);
+                    session.setAttribute("message", "Cập nhật trạng thái khóa thành công!");
+                    resp.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     updateReq.setFullName(req.getParameter("fullName"));
                     updateReq.setEmail(req.getParameter("email"));
                     updateReq.setPhoneNumber(req.getParameter("phoneNumber"));
                     updateReq.setRoleId(Integer.parseInt(req.getParameter("roleId")));
+                    updateReq.setPassword(req.getParameter("password"));
+
+                    TaiKhoan account = nhanSuService.getStaffById(accountId);
+                    String newEmail = updateReq.getEmail();
+                    if (newEmail != null) newEmail = newEmail.trim();
+
+                    boolean isEmailChanged = (newEmail != null && !newEmail.equalsIgnoreCase(account.getEmail()));
+                    if (isEmailChanged) {
+                        org.example.util.ValidationUtils.validateEmail(newEmail);
+                        if (new org.example.dao.impl.TaiKhoanDAOImpl().kiemtraEmail(newEmail)) {
+                            throw new IllegalArgumentException("Email đã tồn tại trên hệ thống!");
+                        }
+
+                        account.setFullName(updateReq.getFullName());
+                        account.setEmail(newEmail);
+                        account.setPhoneNumber(updateReq.getPhoneNumber());
+                        account.setRoleId(updateReq.getRoleId());
+                        if (updateReq.getPassword() != null && !updateReq.getPassword().isEmpty()) {
+                            org.example.util.ValidationUtils.validateStrongPassword(updateReq.getPassword());
+                            account.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(updateReq.getPassword(), org.mindrot.jbcrypt.BCrypt.gensalt(12)));
+                        }
+
+                        String otpString = new org.example.dao.impl.TaiKhoanDAOImpl().sendRegistrationOTP(newEmail, account.getFullName());
+                        session.setAttribute("otp", otpString);
+                        session.setAttribute("tempAccount", account);
+                        session.setAttribute("authType", "MANAGER_EDIT");
+                        session.setAttribute("otpAttempts", 0);
+                        session.setAttribute("resendCount", 0);
+                        session.setAttribute("needResend", false);
+
+                        String requestedWith = req.getHeader("X-Requested-With");
+                        if ("XMLHttpRequest".equals(requestedWith)) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"requiresOtp\": true, \"email\": \"" + newEmail + "\"}");
+                            return;
+                        }
+
+                        resp.sendRedirect(req.getContextPath() + "/auth/NhapMa.jsp");
+                    } else {
+                        nhanSuService.updateStaff(accountId, updateReq, managerCoSoId);
+                        session.setAttribute("message", "Cập nhật thông tin nhân viên thành công!");
+                        String requestedWith = req.getHeader("X-Requested-With");
+                        if ("XMLHttpRequest".equals(requestedWith)) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"success\": true, \"message\": \"Cập nhật thông tin nhân viên thành công!\"}");
+                            return;
+                        }
+                        resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                    }
                 }
-                
-                nhanSuService.updateStaff(accountId, updateReq, managerCoSoId);
-                session.setAttribute("message", isLockedParam != null ? "Cập nhật trạng thái khóa thành công!" : "Cập nhật thông tin nhân viên thành công!");
-                resp.setStatus(HttpServletResponse.SC_OK);
             } 
             else if ("delete".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("id"));

@@ -28,8 +28,10 @@ public class FilterLuong implements Filter {
             // Phải có OTP trong session hoặc đang cần resend OTP
             if (session == null || (session.getAttribute("otp") == null && session.getAttribute("needResend") == null)) {
                 String authType = (session != null) ? (String) session.getAttribute("authType") : null;
-                if ("ADMIN_ADD".equals(authType)) {
+                if ("ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType)) {
                     httpResponse.sendRedirect(httpRequest.getContextPath() + "/admin/nhan-su");
+                } else if ("MANAGER_EDIT".equals(authType)) {
+                    httpResponse.sendRedirect(httpRequest.getContextPath() + "/manager/nhan-su");
                 } else if ("REGISTER".equals(authType)) {
                     httpResponse.sendRedirect(httpRequest.getContextPath() + "/dangky");
                 } else {
