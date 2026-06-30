@@ -223,6 +223,28 @@ Sau khi chạy thành công, file `Backend_java-1.0-SNAPSHOT.war` sẽ được 
     *   Sử dụng cột `TrangThai` hiện có trong bảng `CaLamViec` lưu giá trị `'CheckedIn'` và `'CheckedOut'` để tránh thay đổi cấu trúc bảng database.
     *   Thêm nghiệp vụ kiểm tra logic tại [CaLamService.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/service/manager/CaLamService.java): Nhân viên chỉ được phép điểm danh (check-in) các ca làm việc của ngày hôm nay.
     *   Tự động ghi nhận log hệ thống (`CHECK_IN` và `CHECK_OUT` audit log) khi nhân viên thao tác.
-*   **Hiển thị trực quan (Frontend)**:
-    *   **Giao diện Nhân viên ([CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/staff/CaLamViec.jsp))**: Hiển thị nút **[Điểm danh vào ca]** (màu xanh lá) cho các ca hôm nay đã xác nhận. Khi đã check-in, nút chuyển thành **[Kết thúc ca]** (màu đỏ).
-    *   **Giao diện Quản lý ([NhanSu.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/NhanSu.jsp) và [CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/CaLamViec.jsp))**: Trạng thái `CheckedIn` hiển thị huy hiệu xanh lá kèm theo chấm đỏ nhấp nháy chuyển động (pulsing live-dot) để quản lý nhận biết trực quan nhân viên nào đang làm việc tại sân. Trạng thái `CheckedOut` đổi sang huy hiệu xám "Đã hoàn thành".
+    *   **Hiển thị trực quan (Frontend)**:
+        *   **Giao diện Nhân viên ([CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/staff/CaLamViec.jsp))**: Hiển thị nút **[Điểm danh vào ca]** (màu xanh lá) cho các ca hôm nay đã xác nhận. Khi đã check-in, nút chuyển thành **[Kết thúc ca]** (màu đỏ).
+        *   **Giao diện Quản lý ([NhanSu.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/NhanSu.jsp) và [CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/CaLamViec.jsp))**: Trạng thái `CheckedIn` hiển thị huy hiệu xanh lá kèm theo chấm đỏ nhấp nháy chuyển động (pulsing live-dot) để quản lý nhận biết trực quan nhân viên nào đang làm việc tại sân. Trạng thái `CheckedOut` đổi sang huy hiệu xám "Đã hoàn thành".
+
+### Cập nhật ngày 29/06/2026: Đồng bộ hóa quy trình Đặt Sân Online & Quầy và Cơ chế Tạm khóa 10 phút chống Race Condition
+
+#### 1. Hợp nhất giao diện Lịch sử đặt sân của Khách hàng (Single-page UX)
+*   **Loại bỏ trang lịch sử độc lập**: Loại bỏ tệp `LichSuDatSan.jsp` riêng biệt. Tích hợp toàn diện phần quản lý ca chơi trực tiếp vào trang Tìm & Đặt sân chính ([DatSan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/customer/DatSan.jsp)) dưới dạng **Modal Lịch sử** có thiết kế cao cấp đồng bộ.
+*   **Định tuyến thông minh và tự động mở (Auto-open)**:
+    *   Tất cả các liên kết lịch sử trên Header ([header.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/common/header.jsp)) chuyển sang `/customer/dat-san?openHistory=true`.
+    *   Servlet ([DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java)) thực hiện redirect tự động từ `/customer/lich-su-dat-san` sang trang tìm sân kèm tham số.
+    *   Frontend tự động bắt tham số URL để kích hoạt mở modal lịch sử mà không cần tải lại trang.
+*   **Tích hợp Thống kê (User Stats Sub-header)**: Đầu modal hiển thị Avatar viết hoa, email, tổng số ca chơi đã đặt và điểm uy tín cá nhân của khách hàng.
+
+#### 2. Cơ chế Tạm khóa 10 phút (PayOS Timeout) & Giải phóng sân tự phục hồi (Self-healing)
+*   **Bổ sung cột CSDL**: Thực thi SQL Alter thêm cột `CreatedTime DATETIME DEFAULT GETDATE()` vào bảng `LichDatSan` phục vụ ghi nhận thời điểm tạo đơn.
+*   **Bộ chọn hình thức thanh toán**: Tích hợp bộ chọn hình thức thanh toán (PayOS quét mã cọc trực tuyến vs Tiền mặt tại quầy) có giao diện thẻ card hiện đại và các cảnh báo động trên checkout panel của khách hàng.
+*   **Kiểm tra trùng lịch tự giải phóng**:
+    *   Nếu chọn PayOS, ca đặt được khởi tạo ở trạng thái `Chờ thanh toán`.
+    *   Truy vấn kiểm tra trùng lịch tại [DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java) và [CheckInDAO.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/CheckInDAO.java) tự động bỏ qua (loại trừ) các ca `Chờ thanh toán` đã quá 10 phút. Thiết kế này giúp sân bóng tự giải phóng và mở lại cho người dưới đặt mà không cần viết các tác vụ cron job ngầm phức tạp.
+    *   Walk-in check-in của lễ tân sẽ chặn (block) nếu có ca thanh toán PayOS dưới 10 phút, và tự động bỏ qua nếu ca đó hết hạn.
+
+#### 3. Khóa bi quan chống Race Condition khi Check-in Vãng lai
+*   **Nghiệp vụ khóa dòng**: Bổ sung gợi ý khóa `WITH (UPDLOCK, ROWLOCK)` khi SELECT kiểm tra trạng thái Sân trong luồng mở sân cho khách vãng lai ([CheckInDAO.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/CheckInDAO.java)).
+*   **Tác dụng**: Ngăn chặn triệt để xung đột tranh chấp dữ liệu khi Lễ tân mở sân tại quầy trùng khớp thời điểm mili-giây khách hàng bấm đặt trực tuyến trên Web.
