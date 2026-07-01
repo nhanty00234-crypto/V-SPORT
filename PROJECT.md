@@ -1,5 +1,7 @@
 # V-SPORT — Hệ thống số hóa quản lý vận hành cơ sở thể thao & đặt sân trực tuyến
 
+![Giao diện trang chủ V-SPORT](file:///C:/Users/nhan/.gemini/antigravity-ide/brain/9f89f7d0-3dc8-4233-9c52-f8a0b81b49a1/media__1782881116992.png)
+
 **V-SPORT** là một nền tảng Web App toàn diện được xây dựng trên nền tảng **Java Servlet/JSP (Jakarta EE)** kết hợp với **JPA/Hibernate** và cơ sở dữ liệu **Microsoft SQL Server**. Hệ thống được thiết kế nhằm số hóa quy trình quản lý, vận hành các trung tâm/cơ sở thể thao đa năng (Bóng đá, Cầu lông, Tennis, Bóng rổ, v.v.), hỗ trợ đặt sân trực tuyến tích hợp thanh toán QR, tối ưu hóa phân lịch ca làm việc nhân sự, đồng thời kết nối cộng đồng thông qua mô hình ghép kèo tính điểm ELO độc đáo.
 
 ---
@@ -94,6 +96,26 @@ DATN/ (Thư mục gốc dự án)
     *   *Nhà xe*: Quản lý thẻ xe (`TheGiuXe`) gắn với mã vạch/RFID, lưu vết giờ vào/ra của các phương tiện (`LichXeRaVao`) nâng cao an toàn tài sản cơ sở.
 *   **Thành phần chính**:
     *   *Thực thể*: `TheGiuXe`, `LichXeRaVao`, `YeuCauSOS`, `NhatKySOSGui`.
+
+### Phân hệ 5: Quản lý Kho hàng & Dịch vụ đi kèm (Inventory & Add-on Services)
+*   **Chức năng**: Quản lý danh mục hàng hóa (`DanhMucSanPham`), sản phẩm và dịch vụ cho thuê/bán lẻ tại quầy (`SanPham_DichVu`), quản lý số lượng tồn kho của chi nhánh, theo dõi nhập/xuất kho. Áp dụng cơ chế khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi xuất/nhập kho để tránh race condition và đảm bảo tính toàn vẹn dữ liệu.
+*   **Thành phần chính**:
+    *   *Frontend*: `webapp/manager/KhoDichVu.jsp`
+    *   *Backend*: [KhoDichVuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java)
+    *   *Thực thể*: `SanPham_DichVu`, `DanhMucSanPham`.
+
+### Phân hệ 6: Quản lý Sân bãi & Loại sân (Facility & Court Management)
+*   **Chức năng**: Cấu hình và quản lý danh mục loại sân (`LoaiSan`), các sân bóng, cầu lông, tennis cụ thể (`San`) trực thuộc chi nhánh; theo dõi trực quan trạng thái sân (Sẵn sàng, Đang hoạt động, Bảo trì) theo thời gian thực.
+*   **Thành phần chính**:
+    *   *Frontend*: `webapp/manager/QuanLySan.jsp`
+    *   *Backend*: [QuanLySanManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLySanManagerServlet.java), [QuanLySanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLySanServlet.java)
+    *   *Thực thể*: `San`, `LoaiSan`, `CoSo`.
+
+### Phân hệ 7: Quản lý Khách hàng & Đánh giá dịch vụ (Customer & Feedback Management)
+*   **Chức năng**: Theo dõi danh sách khách hàng hoạt động tại chi nhánh, xem thông tin giao dịch, số ca đã chơi, điểm tích lũy uy tín và thống kê mức độ tương tác. Xem danh sách phản hồi/đánh giá sao (`DanhGia`) của khách hàng để nâng cấp chất lượng phục vụ.
+*   **Thành phần chính**:
+    *   *Backend*: [CustomerManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/CustomerManagerServlet.java)
+    *   *Thực thể*: `TaiKhoan`, `DanhGia`.
 
 ---
 
