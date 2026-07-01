@@ -14,8 +14,8 @@ import org.example.model.TaiKhoan;
 import java.io.IOException;
 
 /**
- * Servlet điều phối luồng nghiệp vụ Mở Sân và Check-in.
- * Tiếp nhận yêu cầu, kiểm tra phân quyền và bắt lỗi chi tiết từng kịch bản nghiệp vụ.
+ * Servlet Ä‘iá»u phá»‘i luá»“ng nghiá»‡p vá»¥ Má»Ÿ SÃ¢n vÃ  Check-in.
+ * Tiáº¿p nháº­n yÃªu cáº§u, kiá»ƒm tra phÃ¢n quyá»n vÃ  báº¯t lá»—i chi tiáº¿t tá»«ng ká»‹ch báº£n nghiá»‡p vá»¥.
  */
 @WebServlet("/staff/checkin")
 public class CheckInServlet extends HttpServlet {
@@ -24,17 +24,17 @@ public class CheckInServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 1. Phân quyền (Authorization): Kiểm tra Role qua Session
+        // 1. PhÃ¢n quyá»n (Authorization): Kiá»ƒm tra Role qua Session
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
         if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 4)) {
-            // Không phải Manager (Role 2) hoặc Staff/Receptionist (Role 4)
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            // KhÃ´ng pháº£i Manager (Role 2) hoáº·c Staff/Receptionist (Role 4)
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p chá»©c nÄƒng nÃ y!");
             return;
         }
 
-        // Kiểm tra nếu là yêu cầu cập nhật ngầm AJAX (Polling)
+        // Kiá»ƒm tra náº¿u lÃ  yÃªu cáº§u cáº­p nháº­t ngáº§m AJAX (Polling)
         String isAjax = req.getParameter("ajax");
         if ("true".equals(isAjax)) {
             resp.setContentType("application/json;charset=UTF-8");
@@ -42,26 +42,26 @@ public class CheckInServlet extends HttpServlet {
             data.put("danhSachSan", checkInDAO.getDanhSachSan());
             data.put("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay());
             
-            resp.getWriter().write(new com.google.code.gson.Gson().toJson(data));
+            resp.getWriter().write(new com.google.gson.Gson().toJson(data));
             return;
         }
 
-        // 2. Lấy dữ liệu hiển thị lên Dashboard
+        // 2. Láº¥y dá»¯ liá»‡u hiá»ƒn thá»‹ lÃªn Dashboard
         req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan());
         req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay());
 
-        // 3. Forward tới giao diện JSP
+        // 3. Forward tá»›i giao diá»‡n JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 1. Phân quyền (Authorization)
+        // 1. PhÃ¢n quyá»n (Authorization)
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
         if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 4)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p chá»©c nÄƒng nÃ y!");
             return;
         }
 
@@ -71,12 +71,12 @@ public class CheckInServlet extends HttpServlet {
 
         try {
             if ("checkInPreBooked".equals(action)) {
-                // Nhận thông tin check-in khách đặt trước
+                // Nháº­n thÃ´ng tin check-in khÃ¡ch Ä‘áº·t trÆ°á»›c
                 String datSanIdStr = req.getParameter("datSanId");
                 String daThuTienMatStr = req.getParameter("daThuTienMat");
                 
                 if (datSanIdStr == null || datSanIdStr.isEmpty()) {
-                    throw new CheckInException("Thiếu ID đơn đặt sân.");
+                    throw new CheckInException("Thiáº¿u ID Ä‘Æ¡n Ä‘áº·t sÃ¢n.");
                 }
 
                 int datSanId = Integer.parseInt(datSanIdStr);
@@ -84,27 +84,27 @@ public class CheckInServlet extends HttpServlet {
 
                 String lockKey = "checkin_lock_" + datSanId;
                 if (session.getAttribute(lockKey) != null) {
-                    throw new CheckInException("Yêu cầu check-in cho đơn đặt sân này đang được xử lý, vui lòng không bấm lại.");
+                    throw new CheckInException("YÃªu cáº§u check-in cho Ä‘Æ¡n Ä‘áº·t sÃ¢n nÃ y Ä‘ang Ä‘Æ°á»£c xá»­ lÃ½, vui lÃ²ng khÃ´ng báº¥m láº¡i.");
                 }
                 session.setAttribute(lockKey, true);
                 try {
-                    // Gọi DAO xử lý nghiệp vụ check-in khách đặt trước
-                    // Luôn kiểm tra tiền cọc/thanh toán (forcePaymentCheck = true)
+                    // Gá»i DAO xá»­ lÃ½ nghiá»‡p vá»¥ check-in khÃ¡ch Ä‘áº·t trÆ°á»›c
+                    // LuÃ´n kiá»ƒm tra tiá»n cá»c/thanh toÃ¡n (forcePaymentCheck = true)
                     checkInDAO.checkInKhachDatTruoc(datSanId, user.getAccountId(), true, daThuTienMat);
                 } finally {
                     session.removeAttribute(lockKey);
                 }
-                successMsg = "Check-in thành công cho đơn đặt sân #" + datSanId + "!";
+                successMsg = "Check-in thÃ nh cÃ´ng cho Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + "!";
 
             } else if ("checkInWalkIn".equals(action)) {
-                // Nhận thông tin mở sân cho khách vãng lai
+                // Nháº­n thÃ´ng tin má»Ÿ sÃ¢n cho khÃ¡ch vÃ£ng lai
                 String sanIdStr = req.getParameter("sanId");
                 String durationStr = req.getParameter("duration");
                 String donGiaStr = req.getParameter("donGia");
 
                 if (sanIdStr == null || durationStr == null || donGiaStr == null ||
                         sanIdStr.isEmpty() || durationStr.isEmpty() || donGiaStr.isEmpty()) {
-                    throw new CheckInException("Vui lòng nhập đầy đủ thông tin mở sân vãng lai.");
+                    throw new CheckInException("Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ thÃ´ng tin má»Ÿ sÃ¢n vÃ£ng lai.");
                 }
 
                 int sanId = Integer.parseInt(sanIdStr);
@@ -112,52 +112,52 @@ public class CheckInServlet extends HttpServlet {
                 double donGia = Double.parseDouble(donGiaStr);
 
                 if (duration <= 0) {
-                    throw new CheckInException("Thời gian chơi phải lớn hơn 0 phút.");
+                    throw new CheckInException("Thá»i gian chÆ¡i pháº£i lá»›n hÆ¡n 0 phÃºt.");
                 }
                 if (donGia < 0) {
-                    throw new CheckInException("Đơn giá sân không hợp lệ.");
+                    throw new CheckInException("ÄÆ¡n giÃ¡ sÃ¢n khÃ´ng há»£p lá»‡.");
                 }
 
                 String lockKey = "walkin_lock_" + sanId;
                 if (session.getAttribute(lockKey) != null) {
-                    throw new CheckInException("Yêu cầu mở sân cho sân này đang được xử lý, vui lòng không bấm lại.");
+                    throw new CheckInException("YÃªu cáº§u má»Ÿ sÃ¢n cho sÃ¢n nÃ y Ä‘ang Ä‘Æ°á»£c xá»­ lÃ½, vui lÃ²ng khÃ´ng báº¥m láº¡i.");
                 }
                 session.setAttribute(lockKey, true);
                 try {
-                    // Gọi DAO xử lý mở sân khách vãng lai
+                    // Gá»i DAO xá»­ lÃ½ má»Ÿ sÃ¢n khÃ¡ch vÃ£ng lai
                     checkInDAO.checkInKhachVangLai(sanId, duration, user.getAccountId(), donGia);
                 } finally {
                     session.removeAttribute(lockKey);
                 }
-                successMsg = "Đã mở sân thành công cho khách vãng lai!";
+                successMsg = "ÄÃ£ má»Ÿ sÃ¢n thÃ nh cÃ´ng cho khÃ¡ch vÃ£ng lai!";
             } else if ("cancelNoShow".equals(action)) {
-                // Hủy đơn đặt sân do khách bùng
+                // Há»§y Ä‘Æ¡n Ä‘áº·t sÃ¢n do khÃ¡ch bÃ¹ng
                 String datSanIdStr = req.getParameter("datSanId");
                 if (datSanIdStr == null || datSanIdStr.isEmpty()) {
-                    throw new CheckInException("Thiếu ID đơn đặt sân để hủy.");
+                    throw new CheckInException("Thiáº¿u ID Ä‘Æ¡n Ä‘áº·t sÃ¢n Ä‘á»ƒ há»§y.");
                 }
                 int datSanId = Integer.parseInt(datSanIdStr);
                 checkInDAO.huyLichKhachBung(datSanId, user.getAccountId());
-                successMsg = "Đã hủy thành công đơn đặt sân #" + datSanId + " (Khách bùng)!";
+                successMsg = "ÄÃ£ há»§y thÃ nh cÃ´ng Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + " (KhÃ¡ch bÃ¹ng)!";
             } else {
-                throw new CheckInException("Hành động không hợp lệ.");
+                throw new CheckInException("HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡.");
             }
         } catch (PaymentRequiredException e) {
-            // Trường hợp lỗi yêu cầu thanh toán/cọc:
-            // Đánh dấu để hiển thị hộp thoại xác nhận thu tiền mặt cho Lễ tân
+            // TrÆ°á»ng há»£p lá»—i yÃªu cáº§u thanh toÃ¡n/cá»c:
+            // ÄÃ¡nh dáº¥u Ä‘á»ƒ hiá»ƒn thá»‹ há»™p thoáº¡i xÃ¡c nháº­n thu tiá»n máº·t cho Lá»… tÃ¢n
             errorMsg = e.getMessage();
             req.setAttribute("paymentRequired", true);
             req.setAttribute("datSanIdPending", req.getParameter("datSanId"));
         } catch (NumberFormatException e) {
-            errorMsg = "Lỗi định dạng dữ liệu đầu vào.";
+            errorMsg = "Lá»—i Ä‘á»‹nh dáº¡ng dá»¯ liá»‡u Ä‘áº§u vÃ o.";
         } catch (CheckInException e) {
-            // Các kịch bản lỗi nghiệp vụ (trùng lịch, sân bận, xung đột ghi dữ liệu đồng thời...)
+            // CÃ¡c ká»‹ch báº£n lá»—i nghiá»‡p vá»¥ (trÃ¹ng lá»‹ch, sÃ¢n báº­n, xung Ä‘á»™t ghi dá»¯ liá»‡u Ä‘á»“ng thá»i...)
             errorMsg = e.getMessage();
         } catch (Exception e) {
-            errorMsg = "Lỗi hệ thống bất ngờ: " + e.getMessage();
+            errorMsg = "Lá»—i há»‡ thá»‘ng báº¥t ngá»: " + e.getMessage();
         }
 
-        // Thiết lập thông điệp thông báo
+        // Thiáº¿t láº­p thÃ´ng Ä‘iá»‡p thÃ´ng bÃ¡o
         if (successMsg != null) {
             req.setAttribute("successMsg", successMsg);
         }
@@ -165,11 +165,11 @@ public class CheckInServlet extends HttpServlet {
             req.setAttribute("errorMsg", errorMsg);
         }
 
-        // Tải lại dữ liệu lên trang dashboard
+        // Táº£i láº¡i dá»¯ liá»‡u lÃªn trang dashboard
         req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan());
         req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay());
 
-        // Forward lại trang JSP
+        // Forward láº¡i trang JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
     }
 }

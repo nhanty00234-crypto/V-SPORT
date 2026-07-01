@@ -35,7 +35,7 @@ public class StaffCaLamServlet extends HttpServlet {
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
         if (user == null || (user.getRoleId() != 4 && user.getRoleId() != 5)) {
-            session.setAttribute("error", "Bạn không có quyền truy cập trang này.");
+            session.setAttribute("error", "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p trang nÃ y.");
             resp.sendRedirect(req.getContextPath() + "/dangnhap");
             return;
         }
@@ -101,30 +101,30 @@ public class StaffCaLamServlet extends HttpServlet {
                 
                 sr.setLyDo(req.getParameter("lyDo"));
                 caLamService.createSwapRequest(sr);
-                session.setAttribute("message", "Đã gửi yêu cầu hoán đổi ca làm!");
+                session.setAttribute("message", "ÄÃ£ gá»­i yÃªu cáº§u hoÃ¡n Ä‘á»•i ca lÃ m!");
             } else if ("respondSwap".equals(action)) {
                 int swapId = Integer.parseInt(req.getParameter("id"));
                 boolean accept = Boolean.parseBoolean(req.getParameter("accept"));
                 caLamService.respondToSwapRequest(swapId, accept, user.getAccountId());
-                session.setAttribute("message", accept ? "Đã đồng ý hoán đổi. Chờ quản lý phê duyệt." : "Đã từ chối hoán đổi.");
+                session.setAttribute("message", accept ? "ÄÃ£ Ä‘á»“ng Ã½ hoÃ¡n Ä‘á»•i. Chá» quáº£n lÃ½ phÃª duyá»‡t." : "ÄÃ£ tá»« chá»‘i hoÃ¡n Ä‘á»•i.");
             } else if ("confirmShift".equals(action)) {
                 int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
                 caLamService.confirmShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "Đã xác nhận ca làm việc thành công!");
+                session.setAttribute("message", "ÄÃ£ xÃ¡c nháº­n ca lÃ m viá»‡c thÃ nh cÃ´ng!");
             } else if ("checkIn".equals(action)) {
                 int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
                 caLamService.checkInShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "Điểm danh ca làm thành công!");
+                session.setAttribute("message", "Äiá»ƒm danh ca lÃ m thÃ nh cÃ´ng!");
             } else if ("checkOut".equals(action)) {
                 int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
                 caLamService.checkOutShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "Kết thúc ca làm thành công!");
+                session.setAttribute("message", "Káº¿t thÃºc ca lÃ m thÃ nh cÃ´ng!");
             }
         } catch (IllegalArgumentException e) {
             session.setAttribute("error", e.getMessage());
         } catch (Exception e) {
             logger.error("Error processing staff ca-lam request: {}", e.getMessage(), e);
-            session.setAttribute("error", "Lỗi xử lý yêu cầu.");
+            session.setAttribute("error", "Lá»—i xá»­ lÃ½ yÃªu cáº§u.");
         }
 
         resp.sendRedirect(req.getContextPath() + "/staff/ca-lam");
@@ -159,7 +159,7 @@ public class StaffCaLamServlet extends HttpServlet {
             m.put("accountId", c.getAccountId());
             m.put("username", c.getUsername());
             m.put("fullName", c.getFullName() != null ? c.getFullName() : c.getUsername());
-            m.put("roleName", c.getRoleId() == 4 ? "Lễ tân" : "Bảo vệ");
+            m.put("roleName", c.getRoleId() == 4 ? "Lá»… tÃ¢n" : "Báº£o vá»‡");
             coworkersList.add(m);
         }
         data.put("coworkers", coworkersList);
@@ -195,6 +195,6 @@ public class StaffCaLamServlet extends HttpServlet {
         }
         data.put("swaps", swapsList);
 
-        return new com.google.code.gson.Gson().toJson(data);
+        return new com.google.gson.Gson().toJson(data);
     }
 }

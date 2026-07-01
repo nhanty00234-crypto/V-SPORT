@@ -20,7 +20,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Servlet quản lý ca làm việc dành cho Manager
+ * Servlet quáº£n lÃ½ ca lÃ m viá»‡c dÃ nh cho Manager
  */
 @WebServlet("/manager/ca-lam")
 public class QuanLyCaLamManagerServlet extends HttpServlet {
@@ -56,7 +56,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
 
         Integer managerCoSoId = manager.getCoSoId();
         if (managerCoSoId == null) {
-            session.setAttribute("error", "Không tìm thấy thông tin cơ sở của quản lý.");
+            session.setAttribute("error", "KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin cÆ¡ sá»Ÿ cá»§a quáº£n lÃ½.");
             resp.sendRedirect(req.getContextPath() + "/dangnhap");
             return;
         }
@@ -83,7 +83,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
         } catch (Exception e) {
             logger.error("Error in doGet: {}", e.getMessage(), e);
-            session.setAttribute("error", "Lỗi khi tải dữ liệu: " + e.getMessage());
+            session.setAttribute("error", "Lá»—i khi táº£i dá»¯ liá»‡u: " + e.getMessage());
             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
         }
     }
@@ -105,9 +105,9 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"Tài khoản quản lý chưa được liên kết với cơ sở nào.\"}");
+                resp.getWriter().write("{\"success\":false,\"error\":\"TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.\"}");
             } else {
-                session.setAttribute("error", "Tài khoản quản lý chưa được liên kết với cơ sở nào.");
+                session.setAttribute("error", "TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
             }
             return;
@@ -128,28 +128,28 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     LocalDate fromWeek = LocalDate.parse(req.getParameter("fromWeek"));
                     LocalDate toWeek = LocalDate.parse(req.getParameter("toWeek"));
                     caLamService.cloneWeekShifts(fromWeek, toWeek, managerCoSoId, manager.getAccountId());
-                    successMsg = "Nhân bản lịch tuần thành công!";
+                    successMsg = "NhÃ¢n báº£n lá»‹ch tuáº§n thÃ nh cÃ´ng!";
                 } else if ("autoSchedule".equals(action)) {
                     LocalDate startDate = LocalDate.parse(req.getParameter("startDate"));
                     LocalDate endDate = LocalDate.parse(req.getParameter("endDate"));
                     caLamService.autoScheduleShifts(startDate, endDate, managerCoSoId, manager.getAccountId());
-                    successMsg = "Tự động sắp lịch thành công dựa trên nguyện vọng của nhân viên!";
+                    successMsg = "Tá»± Ä‘á»™ng sáº¯p lá»‹ch thÃ nh cÃ´ng dá»±a trÃªn nguyá»‡n vá»ng cá»§a nhÃ¢n viÃªn!";
                 } else if ("publishWeek".equals(action)) {
                     LocalDate weekStart = LocalDate.parse(req.getParameter("weekStart"));
                     caLamService.publishWeekShifts(weekStart, managerCoSoId, manager.getAccountId());
-                    successMsg = "Công bố lịch làm việc thành công!";
+                    successMsg = "CÃ´ng bá»‘ lá»‹ch lÃ m viá»‡c thÃ nh cÃ´ng!";
                 } else if ("approveSwap".equals(action)) {
                     int swapId = Integer.parseInt(req.getParameter("id"));
                     String notes = req.getParameter("notes");
                     caLamService.approveSwapRequest(swapId, manager.getAccountId(), notes);
-                    successMsg = "Đã phê duyệt yêu cầu đổi ca!";
+                    successMsg = "ÄÃ£ phÃª duyá»‡t yÃªu cáº§u Ä‘á»•i ca!";
                 } else if ("rejectSwap".equals(action)) {
                     int swapId = Integer.parseInt(req.getParameter("id"));
                     String notes = req.getParameter("notes");
                     caLamService.rejectSwapRequest(swapId, manager.getAccountId(), notes);
-                    successMsg = "Đã từ chối yêu cầu đổi ca!";
+                    successMsg = "ÄÃ£ tá»« chá»‘i yÃªu cáº§u Ä‘á»•i ca!";
                 } else {
-                    throw new IllegalArgumentException("Hành động không hợp lệ: " + action);
+                    throw new IllegalArgumentException("HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡: " + action);
                 }
 
                 if (isJson) {
@@ -158,14 +158,14 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     java.util.Map<String, Object> map = new java.util.HashMap<>();
                     map.put("success", true);
                     map.put("message", successMsg);
-                    resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                    resp.getWriter().write(new com.google.gson.Gson().toJson(map));
                 } else {
                     session.setAttribute("message", successMsg);
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
                 }
             }
         } catch (IllegalArgumentException e) {
-            logger.warn("Lỗi xử lý ca làm: {}", e.getMessage(), e);
+            logger.warn("Lá»—i xá»­ lÃ½ ca lÃ m: {}", e.getMessage(), e);
             boolean isJson = "json".equals(req.getParameter("format"));
             if (isJson) {
                 resp.setContentType("application/json");
@@ -173,7 +173,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 java.util.Map<String, Object> map = new java.util.HashMap<>();
                 map.put("success", false);
                 map.put("error", e.getMessage());
-                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
@@ -186,10 +186,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 java.util.Map<String, Object> map = new java.util.HashMap<>();
                 map.put("success", false);
-                map.put("error", "Lỗi hệ thống: " + e.getMessage());
-                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                map.put("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
+                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
             } else {
-                session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+                session.setAttribute("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
             }
         }
@@ -214,14 +214,14 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         String successMsg = null;
 
         if (idParam == null || idParam.trim().isEmpty()) {
-            errorMsg = "ID ca làm việc không hợp lệ.";
+            errorMsg = "ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.";
         } else {
             try {
                 int id = Integer.parseInt(idParam);
                 caLamService.deleteShift(id, managerCoSoId, manager.getAccountId(), reason);
-                successMsg = "Xóa ca làm việc thành công!";
+                successMsg = "XÃ³a ca lÃ m viá»‡c thÃ nh cÃ´ng!";
             } catch (NumberFormatException e) {
-                errorMsg = "ID ca làm việc không hợp lệ.";
+                errorMsg = "ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.";
             } catch (Exception e) {
                 errorMsg = e.getMessage();
             }
@@ -238,7 +238,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 map.put("success", true);
                 map.put("message", successMsg);
             }
-            resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+            resp.getWriter().write(new com.google.gson.Gson().toJson(map));
         } else {
             if (errorMsg != null) {
                 session.setAttribute("error", errorMsg);
@@ -271,24 +271,24 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 caLamReq.getAccountId(), caLamReq.getNgayLam(), caLamReq.getGioBatDau(), caLamReq.getGioKetThuc(), caLamReq.getGioNghi(), targetCaLamViecId
             );
             if (!valRes.isValid()) {
-                throw new IllegalArgumentException("Lỗi xung đột lịch: " + String.join(", ", valRes.getErrors()));
+                throw new IllegalArgumentException("Lá»—i xung Ä‘á»™t lá»‹ch: " + String.join(", ", valRes.getErrors()));
             }
 
             if ("add".equals(action)) {
                 caLamService.createShift(caLamReq, managerCoSoId, manager.getAccountId());
-                successMsg = "Thêm ca làm việc thành công!";
+                successMsg = "ThÃªm ca lÃ m viá»‡c thÃ nh cÃ´ng!";
             } else {
                 String reason = req.getParameter("reason");
                 if (targetCaLamViecId == null) {
-                    throw new IllegalArgumentException("ID ca làm việc không hợp lệ.");
+                    throw new IllegalArgumentException("ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.");
                 }
                 caLamService.updateShift(targetCaLamViecId, caLamReq, managerCoSoId, manager.getAccountId(), reason);
-                successMsg = "Cập nhật ca làm việc thành công!";
+                successMsg = "Cáº­p nháº­t ca lÃ m viá»‡c thÃ nh cÃ´ng!";
             }
         } catch (IllegalArgumentException e) {
             errorMsg = e.getMessage();
         } catch (Exception e) {
-            errorMsg = "Lỗi hệ thống: " + e.getMessage();
+            errorMsg = "Lá»—i há»‡ thá»‘ng: " + e.getMessage();
         }
 
         if (isJson) {
@@ -302,7 +302,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 map.put("success", true);
                 map.put("message", successMsg);
             }
-            resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+            resp.getWriter().write(new com.google.gson.Gson().toJson(map));
         } else {
             if (errorMsg != null) {
                 session.setAttribute("error", errorMsg);
@@ -323,7 +323,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
 
         if (accountIdParam == null || ngayLamParam == null ||
             gioBatDauParam == null || gioKetThucParam == null) {
-            throw new IllegalArgumentException("Thiếu thông tin bắt buộc từ form");
+            throw new IllegalArgumentException("Thiáº¿u thÃ´ng tin báº¯t buá»™c tá»« form");
         }
 
         request.setAccountId(Integer.parseInt(accountIdParam));
@@ -391,14 +391,14 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             responseData.put("valid", result.isValid());
             responseData.put("errors", result.getErrors());
             responseData.put("warnings", result.getWarnings());
-            
-            resp.getWriter().write(new com.google.code.gson.Gson().toJson(responseData));
+
+            resp.getWriter().write(new com.google.gson.Gson().toJson(responseData));
         } catch (Exception e) {
             java.util.Map<String, Object> errData = new java.util.HashMap<>();
             errData.put("valid", false);
-            errData.put("errors", java.util.Collections.singletonList("Lỗi tham số validation: " + e.getMessage()));
+            errData.put("errors", java.util.Collections.singletonList("Lá»—i tham sá»‘ validation: " + e.getMessage()));
             errData.put("warnings", java.util.Collections.emptyList());
-            resp.getWriter().write(new com.google.code.gson.Gson().toJson(errData));
+            resp.getWriter().write(new com.google.gson.Gson().toJson(errData));
         }
     }
 
@@ -407,4 +407,13 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                                       List<org.example.model.CaLamViecAvailability> avails,
                                       List<org.example.model.CaLamViecSwapRequest> swaps,
                                       List<org.example.model.CoSo> branches) throws Exception {
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("shifts", shifts);
+        data.put("staffs", staffs);
+        data.put("audits", audits);
+        data.put("avails", avails);
+        data.put("swaps", swaps);
+        data.put("branches", branches);
+        return new com.google.gson.Gson().toJson(data);
+    }
 }

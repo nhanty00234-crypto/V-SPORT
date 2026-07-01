@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -11,10 +11,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 <style>
 body { font-family: 'Inter', sans-serif; }
-  .nav-link { display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;color:#52525b;font-size:14px;font-weight:500;text-decoration:none;transition:all .15s;white-space:nowrap;position:relative; }
-  .nav-link:hover { background:#f4f4f5;color:#18181b; }
-  .nav-link.active { background:#f4f4f5;color:#18181b;font-weight:600; }
-  .nav-link.active::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; background:#27272a; border-radius:0 3px 3px 0; }
   .card { background:#fff;border:1px solid #e4e4e7;border-radius:16px; transition:box-shadow .2s, transform .2s; }
   .badge { display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600; }
   .badge-green { background:#dcfce7;color:#15803d; }
@@ -45,7 +41,7 @@ body { font-family: 'Inter', sans-serif; }
 <jsp:include page="/admin/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
+<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
   <div class="flex items-center gap-3">
     <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
     <div>
@@ -67,7 +63,7 @@ body { font-family: 'Inter', sans-serif; }
   </div>
 </header>
 
-<main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
+<main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
   <div class="flex items-center justify-between gap-4 mb-2 flex-wrap">
     <div class="flex gap-1 bg-zinc-100 p-1 rounded-xl">
       <button id="tabNhanSu" onclick="switchTab('nhansu')" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all">
@@ -327,15 +323,9 @@ function renderStaff() {
 
     if (s.roleId === 1) {
       actionsHtml = '';
-    } else if (s.roleId === 2 && s.coSoStatus === 'Chờ duyệt') {
+    } else if (s.roleId === 2) {
+      // Manager/Owner – chỉ xem, việc duyệt/khóa ở trang Quản lý Owner
       actionsHtml = `
-        <button onclick="approveBranch('\${s.coSoId}')" title="Duyệt" class="p-1.5 rounded-lg hover:bg-green-50 text-green-600"><span class="material-symbols-outlined text-[18px]">check_circle</span></button>
-        <button onclick="rejectBranch('\${s.coSoId}')" title="Không duyệt" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">cancel</span></button>
-        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
-      `;
-    } else if (s.roleId === 2 && s.coSoStatus === 'Từ chối') {
-      actionsHtml = `
-        <button onclick="approveBranch('\${s.coSoId}')" title="Duyệt lại" class="p-1.5 rounded-lg hover:bg-green-50 text-green-600"><span class="material-symbols-outlined text-[18px]">check_circle</span></button>
         <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
       `;
     } else {
@@ -463,17 +453,6 @@ function switchTab(tab) {
   }
 }
 
-function approveBranch(coSoId) {
-  if (confirm("Phê duyệt cơ sở này và kích hoạt tài khoản quản lý?")) {
-    location.href = '${pageContext.request.contextPath}/admin/chi-nhanh?action=duyet&id=' + coSoId + '&from=nhan-su';
-  }
-}
-
-function rejectBranch(coSoId) {
-  if (confirm("Từ chối phê duyệt cơ sở này?")) {
-    location.href = '${pageContext.request.contextPath}/admin/chi-nhanh?action=khong-duyet&id=' + coSoId + '&from=nhan-su';
-  }
-}
 
 function updateRoleDropdown(isEdit, currentRoleId) {
   const staffRoleSelect = document.getElementById('staffRole');

@@ -1,5 +1,7 @@
 package org.example.controller;
 
+
+
 import org.example.model.TaiKhoan;
 import org.example.model.YeuCauNghi;
 import org.example.service.YeuCauNghiService;
@@ -20,8 +22,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Servlet quản lý yêu cầu nghỉ dành cho Manager
- * Cho phép xem, duyệt, từ chối yêu cầu nghỉ của nhân viên
+ * Servlet quáº£n lÃ½ yÃªu cáº§u nghá»‰ dÃ nh cho Manager
+ * Cho phÃ©p xem, duyá»‡t, tá»« chá»‘i yÃªu cáº§u nghá»‰ cá»§a nhÃ¢n viÃªn
  */
 @WebServlet("/manager/yeu-cau-nghi")
 public class YeuCauNghiManagerServlet extends HttpServlet {
@@ -51,7 +53,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
 
         Integer managerCoSoId = manager.getCoSoId();
         if (managerCoSoId == null) {
-            session.setAttribute("error", "Không tìm thấy thông tin cơ sở của quản lý. Vui lòng đăng nhập lại.");
+            session.setAttribute("error", "KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin cÆ¡ sá»Ÿ cá»§a quáº£n lÃ½. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.");
             try {
                 req.getRequestDispatcher("/dangnhap").forward(req, resp);
             } catch (Exception e) {
@@ -61,7 +63,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
         }
 
         try {
-            // Lấy parameter filter
+            // Láº¥y parameter filter
             String status = req.getParameter("status");
             List<YeuCauNghi> allRequests = yeuCauNghiService.getYeuCauNghiByCoSo(managerCoSoId, status);
 
@@ -78,7 +80,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
         } catch (Exception e) {
             logger.error("Error in YeuCauNghiManagerServlet doGet: {}", e.getMessage(), e);
-            session.setAttribute("error", "Lỗi khi tải dữ liệu: " + e.getMessage());
+            session.setAttribute("error", "Lá»—i khi táº£i dá»¯ liá»‡u: " + e.getMessage());
             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
         }
     }
@@ -100,9 +102,9 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"Tài khoản quản lý chưa được liên kết với cơ sở nào.\"}");
+                resp.getWriter().write("{\"success\":false,\"error\":\"TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.\"}");
             } else {
-                session.setAttribute("error", "Tài khoản quản lý chưa được liên kết với cơ sở nào.");
+                session.setAttribute("error", "TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
             }
             return;
@@ -117,9 +119,9 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if (isJson) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"Thiếu thông tin yêu cầu nghỉ\"}");
+                resp.getWriter().write("{\"success\":false,\"error\":\"Thiáº¿u thÃ´ng tin yÃªu cáº§u nghá»‰\"}");
             } else {
-                session.setAttribute("error", "Thiếu thông tin yêu cầu nghỉ");
+                session.setAttribute("error", "Thiáº¿u thÃ´ng tin yÃªu cáº§u nghá»‰");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
             }
             return;
@@ -134,19 +136,19 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             if ("approve".equals(action)) {
                 boolean success = yeuCauNghiService.approveYeuCauNghi(yeuCauNghiID, managerID, ghiChu);
                 if (success) {
-                    successMsg = "Đã phê duyệt yêu cầu nghỉ";
+                    successMsg = "ÄÃ£ phÃª duyá»‡t yÃªu cáº§u nghá»‰";
                 } else {
-                    errorMsg = "Không thể phê duyệt yêu cầu";
+                    errorMsg = "KhÃ´ng thá»ƒ phÃª duyá»‡t yÃªu cáº§u";
                 }
             } else if ("reject".equals(action)) {
                 boolean success = yeuCauNghiService.rejectYeuCauNghi(yeuCauNghiID, managerID, ghiChu);
                 if (success) {
-                    successMsg = "Đã từ chối yêu cầu nghỉ";
+                    successMsg = "ÄÃ£ tá»« chá»‘i yÃªu cáº§u nghá»‰";
                 } else {
-                    errorMsg = "Không thể từ chối yêu cầu";
+                    errorMsg = "KhÃ´ng thá»ƒ tá»« chá»‘i yÃªu cáº§u";
                 }
             } else {
-                errorMsg = "Hành động không hợp lệ";
+                errorMsg = "HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡";
             }
 
             if (isJson) {
@@ -160,7 +162,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                     map.put("success", true);
                     map.put("message", successMsg);
                 }
-                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
             } else {
                 if (errorMsg != null) {
                     session.setAttribute("error", errorMsg);
@@ -177,10 +179,10 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 java.util.Map<String, Object> map = new java.util.HashMap<>();
                 map.put("success", false);
-                map.put("error", "ID yêu cầu không hợp lệ");
-                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                map.put("error", "ID yÃªu cáº§u khÃ´ng há»£p lá»‡");
+                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
             } else {
-                session.setAttribute("error", "ID yêu cầu không hợp lệ");
+                session.setAttribute("error", "ID yÃªu cáº§u khÃ´ng há»£p lá»‡");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
             }
         } catch (IllegalArgumentException e) {
@@ -191,7 +193,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                 java.util.Map<String, Object> map = new java.util.HashMap<>();
                 map.put("success", false);
                 map.put("error", e.getMessage());
-                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
             } else {
                 session.setAttribute("error", e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
@@ -203,39 +205,39 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 java.util.Map<String, Object> map = new java.util.HashMap<>();
                 map.put("success", false);
-                map.put("error", "Lỗi hệ thống: " + e.getMessage());
-                resp.getWriter().write(new com.google.code.gson.Gson().toJson(map));
+                map.put("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
+                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
             } else {
-                session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+                session.setAttribute("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=leave");
             }
         }
     }
 
     /**
-     * Kiểm tra xem user có quyền truy cập trang Manager không
+     * Kiá»ƒm tra xem user cÃ³ quyá»n truy cáº­p trang Manager khÃ´ng
      */
     private boolean isAuthorizedManager(TaiKhoan user, HttpServletRequest req, HttpServletResponse resp, HttpSession session)
             throws IOException {
         if (user == null) {
-            session.setAttribute("error", "Vui lòng đăng nhập để tiếp tục");
+            session.setAttribute("error", "Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ tiáº¿p tá»¥c");
             resp.sendRedirect(req.getContextPath() + "/dangnhap");
             return false;
         }
 
         int roleId = user.getRoleId();
-        // Admin (1) và Manager (2) đều có thể truy cập
+        // Admin (1) vÃ  Manager (2) Ä‘á»u cÃ³ thá»ƒ truy cáº­p
         if (roleId != 1 && roleId != 2) {
             logger.warn("Unauthorized access attempt by user ID: {}, role: {}", user.getAccountId(), roleId);
-            session.setAttribute("error", "Bạn không có quyền truy cập trang này");
+            session.setAttribute("error", "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p trang nÃ y");
             resp.sendRedirect(req.getContextPath() + "/home");
             return false;
         }
 
-        // Nếu là Manager, kiểm tra coSoId
+        // Náº¿u lÃ  Manager, kiá»ƒm tra coSoId
         if (roleId == 2 && user.getCoSoId() == null) {
             logger.warn("Manager without CoSoID: {}", user.getAccountId());
-            session.setAttribute("error", "Tài khoản quản lý chưa được liên kết với cơ sở nào");
+            session.setAttribute("error", "TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o");
             resp.sendRedirect(req.getContextPath() + "/home");
             return false;
         }
@@ -259,6 +261,6 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
             map.put("ngayGui", r.getNgayGui() != null ? r.getNgayGui().toString() : "");
             list.add(map);
         }
-        return new com.google.code.gson.Gson().toJson(list);
+        return new com.google.gson.Gson().toJson(list);
     }
 }

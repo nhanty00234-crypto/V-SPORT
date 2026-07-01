@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @WebServlet("/manager/kho-dich-vu")
+public class KhoDichVuManagerServlet extends HttpServlet {
+
     private static final Logger logger = LogManager.getLogger(KhoDichVuManagerServlet.class);
     private final SanPhamDichVuDAO sanPhamDAO = new SanPhamDichVuDAOImpl();
     private final DanhMucSanPhamDAO categoryDAO = new DanhMucSanPhamDAOImpl();

@@ -14,6 +14,8 @@ import org.example.util.BranchSecurityUtils;
 import org.example.util.Constants;
 import org.example.util.ValidationUtils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
  * Business logic tập trung, dễ test và maintain
  */
 public class NhanSuService {
+
+    private static final Logger logger = LogManager.getLogger(NhanSuService.class);
 
     private final TaiKhoanDAO taiKhoanDAO;
     private final VaiTroDAO vaiTroDAO;

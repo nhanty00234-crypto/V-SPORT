@@ -417,7 +417,7 @@ public class DatSanServlet extends HttpServlet {
                     }
 
                     // Tính tổng tiền dự kiến
-                    long durationMinutes = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
+                    durationMinutes = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
                     double durationHours = durationMinutes / 60.0;
                     double tongTien = durationHours * hourlyPrice;
 

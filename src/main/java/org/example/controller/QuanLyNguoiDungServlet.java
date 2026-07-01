@@ -21,6 +21,8 @@ import org.example.dao.CaLamViecDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.model.CaLamViec;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.List;
 
 @WebServlet("/admin/nhan-su")
 public class QuanLyNguoiDungServlet extends HttpServlet {
+    private static final Logger logger = LogManager.getLogger(QuanLyNguoiDungServlet.class);
     private TaiKhoanDAO TaiKhoanDAO = new TaiKhoanDAOImpl();
     private CoSoDAO coSoDAO = new CoSoDAOImpl();
     private VaiTroDAO VaiTroDAO = new VaiTroDAOImpl();
