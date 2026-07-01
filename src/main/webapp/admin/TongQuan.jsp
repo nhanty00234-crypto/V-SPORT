@@ -36,6 +36,8 @@ body{font-family:'Inter',sans-serif}
       <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot shrink-0"></span>
       <span class="text-xs font-semibold text-emerald-700">Hệ thống hoạt động</span>
     </div>
+    <div class="w-px h-6 bg-slate-200 mx-1"></div>
+    <jsp:include page="/admin/common/profile_dropdown.jsp"/>
   </div>
 </header>
 

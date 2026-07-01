@@ -16,15 +16,21 @@
 <jsp:include page="common/sidebar.jsp"/>
 
 <!-- ── TOP BAR ── -->
-<header class="fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-10 flex items-center px-4 lg:px-8 xl:px-10 gap-3"
+<header class="fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-10 flex items-center justify-between px-4 lg:px-8 xl:px-10"
         style="height:60px">
-  <button data-sidebar-toggle class="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
-    <span class="material-symbols-outlined text-[20px]">menu</span>
-  </button>
-  <span class="material-symbols-outlined text-blue-500 text-[18px]" style="font-variation-settings:'FILL' 1">manage_accounts</span>
-  <div>
-    <h1 class="text-sm font-bold text-slate-900 leading-tight">Quản lý Owner / Đối tác</h1>
-    <p class="text-[11px] text-slate-400 leading-tight">Admin · V-Sport</p>
+  <div class="flex items-center gap-3">
+    <button data-sidebar-toggle class="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
+      <span class="material-symbols-outlined text-[20px]">menu</span>
+    </button>
+    <span class="material-symbols-outlined text-blue-500 text-[18px]" style="font-variation-settings:'FILL' 1">manage_accounts</span>
+    <div>
+      <h1 class="text-sm font-bold text-slate-900 leading-tight">Quản lý Owner / Đối tác</h1>
+      <p class="text-[11px] text-slate-400 leading-tight">Admin · V-Sport</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="w-px h-6 bg-slate-200 mx-1"></div>
+    <jsp:include page="common/profile_dropdown.jsp"/>
   </div>
 </header>
 

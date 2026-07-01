@@ -136,25 +136,8 @@
     </a>
   </nav>
 
-  <!-- User profile & logout -->
-  <div class="px-3 pb-4 pt-3 border-t border-slate-100 shrink-0 flex flex-col gap-1">
-    <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 mb-1">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700
-                  flex items-center justify-center text-white text-xs font-black shrink-0">
-        <c:choose>
-          <c:when test="${sessionScope.user.fullName != null && sessionScope.user.fullName.length() > 0}">
-            ${sessionScope.user.fullName.substring(0,1).toUpperCase()}
-          </c:when>
-          <c:otherwise>A</c:otherwise>
-        </c:choose>
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-[12px] font-semibold text-slate-800 truncate leading-tight">
-          <c:out value="${sessionScope.user.fullName != null && sessionScope.user.fullName.length() > 0 ? sessionScope.user.fullName : sessionScope.user.username}"/>
-        </p>
-        <p class="text-[10px] text-slate-400 leading-tight">Quản trị viên</p>
-      </div>
-    </div>
+  <!-- Logout -->
+  <div class="px-3 pb-4 pt-3 border-t border-slate-100 shrink-0">
     <a href="${pageContext.request.contextPath}/logout"
        class="nav-link text-red-500 hover:bg-red-50 hover:text-red-600 text-[13px] font-semibold">
       <span class="material-symbols-outlined text-red-400" style="font-size:17px">logout</span>
