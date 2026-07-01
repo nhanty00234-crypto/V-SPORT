@@ -30,6 +30,9 @@
     <a href="${pageContext.request.contextPath}/staff/checkin" class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
       <span class="material-symbols-outlined text-[19px]">power_settings_new</span>Mở sân / Check-in
     </a>
+    <a href="${pageContext.request.contextPath}/staff/dat-san" class="nav-link ${uri.contains('/staff/dat-san') || uri.contains('/QuanLyDatSan.jsp') ? 'active' : ''}">
+      <span class="material-symbols-outlined text-[19px]">event_available</span>Duyệt đặt sân
+    </a>
   </nav>
   
   <div class="px-3 py-3 border-t border-orange-50">

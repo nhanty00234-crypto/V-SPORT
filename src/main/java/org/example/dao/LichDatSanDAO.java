@@ -12,4 +12,9 @@ public interface LichDatSanDAO {
     boolean updateGhiChu(int id, String ghiChu);
     boolean deleteLichDatSan(int id);
     List<Lichdatsan> getLichDatSanTodayByCoSo(int coSoId);
+    List<Lichdatsan> getLichDatSanByCoSo(int coSoId);
+    boolean duyetLichDatSan(int datSanId, int approvedByAccountId, int coSoId) throws Exception;
+    boolean tuChoiLichDatSan(int datSanId, String ghiChu, int coSoId) throws Exception;
+    boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities) throws Exception;
+    boolean thanhToanHoaDonDatSan(int datSanId, int staffAccountId, String phuongThucThanhToan) throws Exception;
 }

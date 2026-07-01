@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author DatN (Senior refactor)
  * @version 2.0
  */
-@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san" })
+@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu" })
 public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
@@ -94,6 +94,8 @@ public class DatSanServlet extends HttpServlet {
             loadBookingPage(req, resp);
         } else if (path.equals("/customer/lich-su-dat-san")) {
             resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+        } else if (path.equals("/customer/dat-dich-vu")) {
+            handleGetDichVu(req, resp, user);
         }
     }
 
@@ -122,7 +124,7 @@ public class DatSanServlet extends HttpServlet {
         if (activeBookings != null) {
             activeBookings.removeIf(b -> "Chờ thanh toán".equals(b.getTrangThai()) &&
                     b.getCreatedTime() != null &&
-                    b.getCreatedTime().plusMinutes(10).isBefore(LocalDateTime.now()));
+                    b.getCreatedTime().plusMinutes(org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES).isBefore(LocalDateTime.now()));
         }
 
         // Lấy lịch sử đặt sân của cá nhân khách hàng nếu đã đăng nhập
@@ -184,6 +186,8 @@ public class DatSanServlet extends HttpServlet {
             handleDatSan(req, resp, session, user);
         } else if (path.equals("/customer/huy-dat-san")) {
             handleHuyDatSan(req, resp, session, user);
+        } else if (path.equals("/customer/dat-dich-vu")) {
+            handlePostDatDichVu(req, resp, session, user);
         }
     }
 
@@ -362,7 +366,8 @@ public class DatSanServlet extends HttpServlet {
                     // Công thức overlap: NOT (KetThuc <= BatDau_Khac OR BatDau >= KetThuc_Khac)
                     String checkSql = "SELECT COUNT(*) FROM LichDatSan " +
                             "WHERE SanID = ? AND NgayDat = ? " +
-                            "AND (TrangThai != N'Đã hủy' AND NOT (TrangThai = N'Chờ thanh toán' AND DATEDIFF(minute, CreatedTime, GETDATE()) > 10)) " +
+                            "AND (TrangThai IN (N'Đã xác nhận', N'Đang sử dụng', N'Đã hoàn thành') " +
+                            "     OR (TrangThai = N'Chờ thanh toán' AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
                             "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
 
                     boolean hasOverlap;
@@ -532,8 +537,13 @@ public class DatSanServlet extends HttpServlet {
                 LOGGER.warning(String.format("IDOR attempt: AccountID=%d cố hủy đơn ID=%d của AccountID=%d",
                         user.getAccountId(), id, lich.getAccountId()));
             } else if ("Chờ xác nhận".equals(lich.getTrangThai())) {
-                lichDatSanDAO.updateTrangThai(id, "Đã hủy");
-                session.setAttribute("message", "Đã hủy yêu cầu đặt sân #" + id + " thành công.");
+                LocalDateTime startDateTime = LocalDateTime.of(lich.getNgayDat(), lich.getGioBatDau());
+                if (LocalDateTime.now().plusHours(6).isAfter(startDateTime)) {
+                    session.setAttribute("error", "Không thể hủy đơn đặt sân. Khách hàng chỉ được phép hủy trước giờ bắt đầu tối thiểu 6 tiếng.");
+                } else {
+                    lichDatSanDAO.updateTrangThai(id, "Đã hủy");
+                    session.setAttribute("message", "Đã hủy yêu cầu đặt sân #" + id + " thành công.");
+                }
             } else {
                 session.setAttribute("error",
                         "Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận'. " +
@@ -586,5 +596,90 @@ public class DatSanServlet extends HttpServlet {
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt(); // Khôi phục trạng thái interrupt
         }
+    }
+
+    private void handleGetDichVu(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws ServletException, IOException {
+        try {
+            int datSanId = Integer.parseInt(req.getParameter("datSanId"));
+            Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
+            if (lich == null || lich.getAccountId() != user.getAccountId()) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập đơn đặt này.");
+                return;
+            }
+
+            San san = sanDAO.getSanById(lich.getSanId());
+            int coSoId = san.getCoSoID();
+
+            org.example.dao.SanPhamDichVuDAO spDao = new org.example.dao.impl.SanPhamDichVuDAOImpl();
+            List<org.example.model.SanPham_DichVu> allSp = spDao.findByCoSo(coSoId);
+            List<org.example.model.SanPham_DichVu> products = allSp.stream()
+                .filter(sp -> "Đang kinh doanh".equals(sp.getTrangThai()))
+                .collect(java.util.stream.Collectors.toList());
+
+            org.example.dao.HoaDonDAO hdDao = new org.example.dao.impl.HoaDonDAOImpl();
+            int hoaDonId = -1;
+            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID FROM HoaDon WHERE DatSanID = ?")) {
+                ps.setInt(1, datSanId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        hoaDonId = rs.getInt("HoaDonID");
+                    }
+                }
+            }
+
+            List<org.example.model.ChiTietHoaDon> ordered = new java.util.ArrayList<>();
+            if (hoaDonId != -1) {
+                ordered = hdDao.getChiTietByHoaDonId(hoaDonId);
+            }
+
+            resp.setContentType("application/json;charset=UTF-8");
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("products", products);
+            data.put("ordered", ordered);
+            resp.getWriter().write(new com.google.gson.Gson().toJson(data));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách dịch vụ", e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    private void handlePostDatDichVu(HttpServletRequest req, HttpServletResponse resp, HttpSession session, TaiKhoan user)
+            throws ServletException, IOException {
+        try {
+            int datSanId = Integer.parseInt(req.getParameter("datSanId"));
+            Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
+            if (lich == null || lich.getAccountId() != user.getAccountId()) {
+                session.setAttribute("error", "Bạn không có quyền truy cập đơn đặt này.");
+                resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+                return;
+            }
+
+            // Parse selected services
+            String[] spIdsStr = req.getParameterValues("productId");
+            String[] qtysStr = req.getParameterValues("quantity");
+
+            int[] productIds = new int[0];
+            int[] quantities = new int[0];
+
+            if (spIdsStr != null && qtysStr != null) {
+                int count = spIdsStr.length;
+                productIds = new int[count];
+                quantities = new int[count];
+                for (int i = 0; i < count; i++) {
+                    productIds[i] = Integer.parseInt(spIdsStr[i]);
+                    quantities[i] = Integer.parseInt(qtysStr[i]);
+                }
+            }
+
+            // Update services
+            lichDatSanDAO.updateDichVuDatSan(datSanId, productIds, quantities);
+            session.setAttribute("message", "Cập nhật dịch vụ đặt thêm thành công!");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật dịch vụ đặt thêm", e);
+            session.setAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
     }
 }

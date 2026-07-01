@@ -414,6 +414,17 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         data.put("avails", avails);
         data.put("swaps", swaps);
         data.put("branches", branches);
-        return new com.google.gson.Gson().toJson(data);
+        return createGson().toJson(data);
+    }
+
+    private static com.google.gson.Gson createGson() {
+        return new com.google.gson.GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, (com.google.gson.JsonSerializer<LocalDate>)
+                        (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+                .registerTypeAdapter(LocalTime.class, (com.google.gson.JsonSerializer<LocalTime>)
+                        (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+                .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>)
+                        (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+                .create();
     }
 }

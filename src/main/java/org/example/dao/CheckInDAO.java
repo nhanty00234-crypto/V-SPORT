@@ -320,7 +320,7 @@ public class CheckInDAO {
             // Công thức: GioBatDau < endTime AND GioKetThuc > now
             String sqlCheckConflict = "SELECT DatSanID, GioBatDau, GioKetThuc, TrangThai FROM LichDatSan " +
                                       "WHERE SanID = ? AND NgayDat = ? " +
-                                      "AND (TrangThai IN (?, ?) OR (TrangThai = ? AND DATEDIFF(minute, CreatedTime, GETDATE()) <= 10)) " +
+                                      "AND (TrangThai IN (?, ?) OR (TrangThai = ? AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
                                       "AND GioBatDau < CAST(? AS time) AND GioKetThuc > CAST(? AS time)";
             psCheckConflict = conn.prepareStatement(sqlCheckConflict);
             psCheckConflict.setInt(1, sanId);
@@ -527,6 +527,7 @@ public class CheckInDAO {
      * Lấy danh sách toàn bộ sân để hiển thị trên giao diện Lễ tân
      */
     public List<San> getDanhSachSan() {
+        org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
         List<San> list = new ArrayList<>();
         String sql = "SELECT SanID, TenSan, LoaiSanID, CoSoID, TrangThai, MoTa, HinhAnh FROM San ORDER BY SanID";
         try (Connection conn = DBUtil.getConnection();
@@ -553,6 +554,7 @@ public class CheckInDAO {
      * Lấy danh sách lịch đặt sân trong ngày hôm nay phục vụ check-in
      */
     public List<BookingViewDTO> getDanhSachLichCheckInHomNay() {
+        org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
         List<BookingViewDTO> list = new ArrayList<>();
         String sql = "SELECT lds.DatSanID, s.SanID, s.TenSan, acc.FullName AS TenKhachHang, " +
                      "lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.TongTienDuKien, " +

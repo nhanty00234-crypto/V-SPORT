@@ -24,13 +24,19 @@ public class CheckInServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 1. PhÃ¢n quyá»n (Authorization): Kiá»ƒm tra Role qua Session
+        // 1. PhÃ¢n quyá» n (Authorization): Kiá»ƒm tra Role qua Session
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
         if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 4)) {
-            // KhÃ´ng pháº£i Manager (Role 2) hoáº·c Staff/Receptionist (Role 4)
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p chá»©c nÄƒng nÃ y!");
+            // Không phải Manager (Role 2) hoặc Staff/Receptionist (Role 4)
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            return;
+        }
+
+        String action = req.getParameter("action");
+        if ("getInvoiceDetails".equals(action)) {
+            handleGetInvoiceDetails(req, resp, user);
             return;
         }
 
@@ -138,13 +144,53 @@ public class CheckInServlet extends HttpServlet {
                 }
                 int datSanId = Integer.parseInt(datSanIdStr);
                 checkInDAO.huyLichKhachBung(datSanId, user.getAccountId());
-                successMsg = "ÄÃ£ há»§y thÃ nh cÃ´ng Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + " (KhÃ¡ch bÃ¹ng)!";
+                successMsg = "Ä Ã£ há»§y thÃ nh cÃ´ng Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + " (KhÃ¡ch bÃ¹ng)!";
+            } else if ("addServices".equals(action)) {
+                String datSanIdStr = req.getParameter("datSanId");
+                if (datSanIdStr == null || datSanIdStr.isEmpty()) {
+                    throw new CheckInException("Thiếu ID đơn đặt sân.");
+                }
+                int datSanId = Integer.parseInt(datSanIdStr);
+
+                String[] spIdsStr = req.getParameterValues("productId");
+                String[] qtysStr = req.getParameterValues("quantity");
+
+                int[] productIds = new int[0];
+                int[] quantities = new int[0];
+
+                if (spIdsStr != null && qtysStr != null) {
+                    int count = spIdsStr.length;
+                    productIds = new int[count];
+                    quantities = new int[count];
+                    for (int i = 0; i < count; i++) {
+                        productIds[i] = Integer.parseInt(spIdsStr[i]);
+                        quantities[i] = Integer.parseInt(qtysStr[i]);
+                    }
+                }
+
+                LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
+                lichDAO.updateDichVuDatSan(datSanId, productIds, quantities);
+                successMsg = "Đã cập nhật dịch vụ thành công cho đơn đặt sân #" + datSanId + "!";
+            } else if ("processPayment".equals(action)) {
+                String datSanIdStr = req.getParameter("datSanId");
+                String paymentMethod = req.getParameter("phuongThucThanhToan");
+                if (datSanIdStr == null || datSanIdStr.isEmpty()) {
+                    throw new CheckInException("Thiếu ID đơn đặt sân để thanh toán.");
+                }
+                if (paymentMethod == null || paymentMethod.isEmpty()) {
+                    paymentMethod = "Tiền mặt";
+                }
+                int datSanId = Integer.parseInt(datSanIdStr);
+
+                LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
+                lichDAO.thanhToanHoaDonDatSan(datSanId, user.getAccountId(), paymentMethod);
+                successMsg = "Đã hoàn thành thanh toán hóa đơn cho đơn đặt sân #" + datSanId + "!";
             } else {
                 throw new CheckInException("HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡.");
             }
         } catch (PaymentRequiredException e) {
-            // TrÆ°á»ng há»£p lá»—i yÃªu cáº§u thanh toÃ¡n/cá»c:
-            // ÄÃ¡nh dáº¥u Ä‘á»ƒ hiá»ƒn thá»‹ há»™p thoáº¡i xÃ¡c nháº­n thu tiá»n máº·t cho Lá»… tÃ¢n
+            // TrÆ°á» ng há»£p lá»—i yÃªu cáº§u thanh toÃ¡n/cá» c:
+            // Ä Ã¡nh dáº¥u Ä‘á»ƒ hiá»ƒn thá»‹ há»™p thoáº¡i xÃ¡c nháº­n thu tiá» n máº·t cho Lá»… tÃ¢n
             errorMsg = e.getMessage();
             req.setAttribute("paymentRequired", true);
             req.setAttribute("datSanIdPending", req.getParameter("datSanId"));

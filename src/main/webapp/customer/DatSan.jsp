@@ -409,8 +409,10 @@
                         <p id="modal-court-branch" class="text-sm text-slate-500 flex items-center gap-1 mt-1">
                             <span class="material-symbols-outlined text-[16px]">location_on</span> Cơ sở
                         </p>
-                        <p id="modal-court-type" class="text-xs font-semibold text-green-600 mt-2 bg-green-50 px-2 py-1 rounded-md inline-block">Loại sân</p>
-                        <p id="modal-court-status" class="text-xs font-bold mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md"></p>
+                        <div class="flex items-center gap-2 mt-2.5">
+                            <span id="modal-court-type" class="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">Loại sân</span>
+                            <span id="modal-court-status" class="text-[10px] font-bold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg"></span>
+                        </div>
                     </div>
                 </div>
 
@@ -430,7 +432,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
-                            <label for="gioBatDau" class="form-label text-slate-600 font-bold text-xs">Chọn giờ bắt đầu <span class="text-red-500">*</span></label>
+                            <label for="gioBatDau" class="form-label">Chọn giờ bắt đầu <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <select name="gioBatDau" id="gioBatDau" required class="form-input pr-10 cursor-pointer appearance-none" onchange="onStartTimeSelectChange()">
                                     <!-- Populated dynamically -->
@@ -440,7 +442,7 @@
                         </div>
 
                         <div class="space-y-1.5">
-                            <label for="gioKetThuc" class="form-label text-slate-600 font-bold text-xs">Chọn giờ kết thúc <span class="text-red-500">*</span></label>
+                            <label for="gioKetThuc" class="form-label">Chọn giờ kết thúc <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <select name="gioKetThuc" id="gioKetThuc" required class="form-input pr-10 cursor-pointer appearance-none" onchange="onEndTimeSelectChange()">
                                     <option value="">Vui lòng chọn giờ bắt đầu trước</option>
@@ -942,7 +944,7 @@
 
             const statusInfo = getCourtStatusInfo(court.status);
             const modalStatusEl = document.getElementById("modal-court-status");
-            modalStatusEl.className = 'text-xs font-bold mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md ' + statusInfo.badgeClass;
+            modalStatusEl.className = 'text-[10px] font-bold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ' + statusInfo.badgeClass;
             modalStatusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full ' + statusInfo.dotClass + '"></span>' + statusInfo.label;
 
             // Reset inputs

@@ -198,7 +198,7 @@ public class HoaDonDAOImpl implements HoaDonDAO {
     public List<HoaDon> getRecentInvoicesByCoSo(int coSoId, int limit) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT h FROM HoaDon h JOIN FETCH h.datSan d JOIN FETCH d.san s WHERE s.coSoID = :coSoId ORDER BY h.ngayLap DESC", HoaDon.class)
+            return em.createQuery("SELECT h FROM HoaDon h JOIN FETCH h.datSan d JOIN FETCH d.san s LEFT JOIN FETCH h.khachHang WHERE s.coSoID = :coSoId ORDER BY h.ngayLap DESC", HoaDon.class)
                     .setParameter("coSoId", coSoId)
                     .setMaxResults(limit)
                     .getResultList();

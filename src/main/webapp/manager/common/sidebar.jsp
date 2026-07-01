@@ -36,6 +36,10 @@
           class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
           <span class="material-symbols-outlined text-[19px]">power_settings_new</span>Mở sân / Check-in
         </a>
+        <a href="${pageContext.request.contextPath}/manager/dat-san"
+          class="nav-link ${uri.contains('/manager/dat-san') || uri.contains('/QuanLyDatSan.jsp') ? 'active' : ''}">
+          <span class="material-symbols-outlined text-[19px]">event_available</span>Duyệt đặt sân
+        </a>
 
         <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-5 mb-1.5">Nhân sự & Khách hàng
         </p>

@@ -20,6 +20,9 @@ public final class Constants {
     public static final String TRANG_THAI_DAT_SAN_DANG_CHOI = "Đang chơi";
     public static final String TRANG_THAI_DAT_SAN_DA_HOAN_THANH = "Đã hoàn thành";
 
+    // ========== TIMEOUT ==========
+    public static final int PENDING_PAYMENT_TIMEOUT_MINUTES = 10;
+
     // ========== INVOICE (HoaDon) STATUS ==========
     public static final String TRANG_THAI_HOA_DON_CHUA_TT = "Chưa thanh toán";
     public static final String TRANG_THAI_HOA_DON_DA_TT = "Đã thanh toán";

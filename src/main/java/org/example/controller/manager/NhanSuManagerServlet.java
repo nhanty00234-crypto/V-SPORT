@@ -38,15 +38,15 @@ public class NhanSuManagerServlet extends HttpServlet {
         
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
         
-        // Kiá»ƒm tra quyá»n Manager (role 2)
+        // Kiểm tra quyền Manager (role 2)
         if (user.getRoleId() != 2) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p.");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập.");
             return;
         }
         
         Integer managerCoSoId = user.getCoSoId();
         if (managerCoSoId == null) {
-            session.setAttribute("error", "TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.");
+            session.setAttribute("error", "Tài khoản quản lý chưa được liên kết với cơ sở nào.");
             resp.sendRedirect(req.getContextPath() + "/home");
             return;
         }
@@ -81,7 +81,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             return;
         }
         
-        // Forward tá»›i trang nhÃ¢n sá»±
+        // Forward tới trang nhân sự
         req.getRequestDispatcher("/manager/NhanSu.jsp").forward(req, resp);
     }
     
@@ -100,13 +100,13 @@ public class NhanSuManagerServlet extends HttpServlet {
         
         // Kiá»ƒm tra quyá»n Manager (role 2)
         if (user.getRoleId() != 2) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p.");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập.");
             return;
         }
         
         Integer managerCoSoId = user.getCoSoId();
         if (managerCoSoId == null) {
-            session.setAttribute("error", "TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.");
+            session.setAttribute("error", "Tài khoản quản lý chưa được liên kết với cơ sở nào.");
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -244,7 +244,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             session.setAttribute("error", msg);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.setContentType("text/plain;charset=UTF-8");
-            resp.getWriter().write(msg != null ? msg : "YÃªu cáº§u khÃ´ng há»£p lá»‡.");
+            resp.getWriter().write(msg != null ? msg : "Yêu cầu không hợp lệ.");
         } catch (Exception e) {
             logger.error("Unexpected error in NhanSuManagerServlet doPost: {}", e.getMessage(), e);
             session.setAttribute("error", "Lỗi hệ thống. Vui lòng liên hệ quản trị viên.");
@@ -265,7 +265,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             map.put("phone", s.getPhoneNumber() != null ? s.getPhoneNumber() : "");
             map.put("roleId", s.getRoleId());
             map.put("VaiTro", s.getRoleName());
-            map.put("status", s.isLocked() ? "Bá»‹ khÃ³a" : "Äang lÃ m");
+            map.put("status", s.isLocked() ? "Bị khóa" : "Đang làm");
             map.put("initial", s.getInitial());
             mappedList.add(map);
         }
