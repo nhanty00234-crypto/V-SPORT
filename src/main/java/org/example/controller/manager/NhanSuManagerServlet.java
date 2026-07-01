@@ -62,7 +62,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             } catch (Exception e) {
                 logger.error("Error listing staff: {}", e.getMessage(), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                resp.getWriter().write("Lá»—i táº£i danh sÃ¡ch nhÃ¢n viÃªn: " + e.getMessage());
+                resp.getWriter().write("Có lỗi xảy ra khi tải danh sách nhân viên.");
             }
             return;
         }
@@ -76,7 +76,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             } catch (Exception e) {
                 logger.error("Error listing deleted staff: {}", e.getMessage(), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                resp.getWriter().write("Lá»—i táº£i danh sÃ¡ch nhÃ¢n viÃªn trong thÃ¹ng rÃ¡c: " + e.getMessage());
+                resp.getWriter().write("Có lỗi xảy ra khi tải danh sách nhân viên trong thùng rác.");
             }
             return;
         }
@@ -123,7 +123,7 @@ public class NhanSuManagerServlet extends HttpServlet {
                 createReq.setPassword(req.getParameter("password"));
                 
                 nhanSuService.createStaff(createReq, managerCoSoId, user.getAccountId());
-                session.setAttribute("message", "ThÃªm nhÃ¢n viÃªn thÃ nh cÃ´ng!");
+                session.setAttribute("message", "Thêm nhân viên thành công!");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
                 return;
             } 
@@ -135,7 +135,7 @@ public class NhanSuManagerServlet extends HttpServlet {
                 if (isLockedParam != null) {
                     updateReq.setIsLocked(Boolean.parseBoolean(isLockedParam));
                     nhanSuService.updateStaff(accountId, updateReq, managerCoSoId);
-                    session.setAttribute("message", "Cáº­p nháº­t tráº¡ng thÃ¡i khÃ³a thÃ nh cÃ´ng!");
+                    session.setAttribute("message", "Cập nhật trạng thái khóa thành công!");
                     resp.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     updateReq.setFullName(req.getParameter("fullName"));
@@ -144,7 +144,8 @@ public class NhanSuManagerServlet extends HttpServlet {
                     updateReq.setRoleId(Integer.parseInt(req.getParameter("roleId")));
                     updateReq.setPassword(req.getParameter("password"));
 
-                    TaiKhoan account = nhanSuService.getStaffById(accountId);
+                    TaiKhoan account = nhanSuService.getStaffById(accountId, managerCoSoId);
+                    org.example.util.BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
                     String newEmail = updateReq.getEmail();
                     if (newEmail != null) newEmail = newEmail.trim();
 
@@ -152,7 +153,7 @@ public class NhanSuManagerServlet extends HttpServlet {
                     if (isEmailChanged) {
                         org.example.util.ValidationUtils.validateEmail(newEmail);
                         if (new org.example.dao.impl.TaiKhoanDAOImpl().kiemtraEmail(newEmail)) {
-                            throw new IllegalArgumentException("Email Ä‘Ã£ tá»“n táº¡i trÃªn há»‡ thá»‘ng!");
+                            throw new IllegalArgumentException("Email đã tồn tại trên hệ thống!");
                         }
 
                         account.setFullName(updateReq.getFullName());
@@ -182,11 +183,11 @@ public class NhanSuManagerServlet extends HttpServlet {
                         resp.sendRedirect(req.getContextPath() + "/auth/NhapMa.jsp");
                     } else {
                         nhanSuService.updateStaff(accountId, updateReq, managerCoSoId);
-                        session.setAttribute("message", "Cáº­p nháº­t thÃ´ng tin nhÃ¢n viÃªn thÃ nh cÃ´ng!");
+                        session.setAttribute("message", "Cập nhật thông tin nhân viên thành công!");
                         String requestedWith = req.getHeader("X-Requested-With");
                         if ("XMLHttpRequest".equals(requestedWith)) {
                             resp.setContentType("application/json;charset=UTF-8");
-                            resp.getWriter().write("{\"success\": true, \"message\": \"Cáº­p nháº­t thÃ´ng tin nhÃ¢n viÃªn thÃ nh cÃ´ng!\"}");
+                            resp.getWriter().write("{\"success\": true, \"message\": \"Cập nhật thông tin nhân viên thành công!\"}");
                             return;
                         }
                         resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
@@ -196,19 +197,19 @@ public class NhanSuManagerServlet extends HttpServlet {
             else if ("delete".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("id"));
                 nhanSuService.deleteStaff(accountId, managerCoSoId);
-                session.setAttribute("message", "XÃ³a nhÃ¢n viÃªn thÃ nh cÃ´ng!");
+                session.setAttribute("message", "Xóa nhân viên thành công!");
                 resp.setStatus(HttpServletResponse.SC_OK);
             } 
             else if ("restore".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("id"));
                 nhanSuService.restoreStaff(accountId, managerCoSoId);
-                session.setAttribute("message", "KhÃ´i phá»¥c nhÃ¢n viÃªn thÃ nh cÃ´ng!");
+                session.setAttribute("message", "Khôi phục nhân viên thành công!");
                 resp.setStatus(HttpServletResponse.SC_OK);
             }
             else if ("permanentDelete".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("id"));
                 nhanSuService.permanentlyDeleteStaff(accountId, managerCoSoId);
-                session.setAttribute("message", "XÃ³a vÄ©nh viá»…n nhÃ¢n viÃªn thÃ nh cÃ´ng!");
+                session.setAttribute("message", "Xóa vĩnh viễn nhân viên thành công!");
                 resp.setStatus(HttpServletResponse.SC_OK);
             }
             else if ("addShift".equals(action)) {
@@ -219,19 +220,19 @@ public class NhanSuManagerServlet extends HttpServlet {
                 String ghiChu = req.getParameter("ghiChu");
                 
                 nhanSuService.addShiftPattern(accountId, managerCoSoId, thu, gioBatDau, gioKetThuc, ghiChu);
-                session.setAttribute("message", "ThÃªm ca lÃ m Ä‘á»‹nh ká»³ thÃ nh cÃ´ng!");
+                session.setAttribute("message", "Thêm ca làm định kỳ thành công!");
                 resp.setStatus(HttpServletResponse.SC_OK);
             } 
             else if ("deleteShift".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("accountId"));
                 int thu = Integer.parseInt(req.getParameter("thu"));
                 
-                nhanSuService.deleteShiftPattern(accountId, thu);
-                session.setAttribute("message", "XÃ³a ca lÃ m Ä‘á»‹nh ká»³ thÃ nh cÃ´ng!");
+                nhanSuService.deleteShiftPattern(accountId, thu, managerCoSoId);
+                session.setAttribute("message", "Xóa ca làm định kỳ thành công!");
                 resp.setStatus(HttpServletResponse.SC_OK);
             } 
             else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡.");
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ.");
             }
         } catch (IllegalArgumentException e) {
             String msg = e.getMessage();
@@ -246,10 +247,10 @@ public class NhanSuManagerServlet extends HttpServlet {
             resp.getWriter().write(msg != null ? msg : "YÃªu cáº§u khÃ´ng há»£p lá»‡.");
         } catch (Exception e) {
             logger.error("Unexpected error in NhanSuManagerServlet doPost: {}", e.getMessage(), e);
-            session.setAttribute("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
+            session.setAttribute("error", "Lỗi hệ thống. Vui lòng liên hệ quản trị viên.");
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.setContentType("text/plain;charset=UTF-8");
-            resp.getWriter().write("Lá»—i há»‡ thá»‘ng: " + e.getMessage());
+            resp.getWriter().write("Lỗi hệ thống. Vui lòng liên hệ quản trị viên.");
         }
     }
 

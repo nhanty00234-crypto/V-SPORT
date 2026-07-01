@@ -74,7 +74,7 @@
         color: #ffffff;
         font-size: 0.95rem;
         font-weight: 600;
-        border-radius: 30px;
+        border-radius: 12px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;

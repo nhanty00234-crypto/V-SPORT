@@ -1221,6 +1221,13 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenuBtn.addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); });
   }
 });
+
+// Reload page when navigated back/forward via bfcache
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
 </script>
 
 </body>

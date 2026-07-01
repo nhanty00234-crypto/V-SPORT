@@ -4,10 +4,10 @@ set "CATALINA_HOME=D:\BiKipVoCong\TaiNguyenIntelliji\apache-tomcat-10.1.54"
 set "MAVEN_PATH=D:\CNTT\netbeans-28-bin\netbeans\java\maven\bin\mvn.cmd"
 
 echo Building project...
-call "%MAVEN_PATH%" clean package -f BACKEND/Backend_java/pom.xml -DskipTests
+call "%MAVEN_PATH%" clean package -DskipTests
 
 echo Deploying to Tomcat...
-copy /Y "BACKEND\Backend_java\target\Backend_java-1.0-SNAPSHOT.war" "%CATALINA_HOME%\webapps\Backend_java.war"
+copy /Y "target\Backend_java-1.0-SNAPSHOT.war" "%CATALINA_HOME%\webapps\Backend_java.war"
 
 echo Starting Tomcat...
 call "%CATALINA_HOME%\bin\catalina.bat" start

@@ -62,6 +62,7 @@ public class CustomerManagerServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error fetching customer data: " + e.getMessage());
+            req.setAttribute("errorMessage", "Không thể tải dữ liệu khách hàng do lỗi kết nối cơ sở dữ liệu.");
         }
 
         req.getRequestDispatcher("/manager/KhachHang.jsp").forward(req, resp);

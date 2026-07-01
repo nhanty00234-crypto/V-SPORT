@@ -96,6 +96,11 @@ public class XacThucOTPServlet extends HttpServlet {
                             : "Tạo tài khoản thất bại vì không nhập đúng OTP!";
                         session.setAttribute("error", errorMsg);
                         TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
+                        if (isAjax) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"success\": false, \"loi\": \"" + errorMsg + "\", \"redirect\": \"" + (loggedInUser != null && loggedInUser.getRoleId() == 2 ? "/manager/nhan-su" : "/admin/nhan-su") + "\"}");
+                            return;
+                        }
                         if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
                             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
                         } else {
@@ -152,6 +157,11 @@ public class XacThucOTPServlet extends HttpServlet {
                 if (tempAccount.getEmail() != null && !tempAccount.getEmail().trim().isEmpty()) {
                     if (TaiKhoanDAO.kiemtraEmail(tempAccount.getEmail().trim())) {
                         session.setAttribute("error", "Email đã tồn tại trên hệ thống!");
+                        if (isAjax) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"success\": false, \"loi\": \"Email đã tồn tại trên hệ thống!\"}");
+                            return;
+                        }
                         TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
                         if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
                             resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
@@ -170,6 +180,11 @@ public class XacThucOTPServlet extends HttpServlet {
                 session.removeAttribute("authType");
 
                 session.setAttribute("message", "Thêm tài khoản thành công!");
+                if (isAjax) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\": true, \"message\": \"Thêm tài khoản thành công!\"}");
+                    return;
+                }
                 TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
                 if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");

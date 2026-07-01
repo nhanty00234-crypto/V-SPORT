@@ -729,14 +729,18 @@ public class CaLamService {
         }
     }
 
-    /**
-     * Manager duyệt yêu cầu đổi ca
-     */
     public void approveSwapRequest(int swapId, int managerId, String notes) {
         CaLamViecSwapRequest sr = swapRequestDAO.getById(swapId);
         if (sr == null || !"ChoQuanLyDuyet".equals(sr.getTrangThai())) {
             throw new IllegalArgumentException("Yêu cầu không hợp lệ hoặc không ở trạng thái chờ duyệt.");
         }
+
+        TaiKhoan manager = taiKhoanDAO.getAccountById(managerId);
+        BranchSecurityUtils.getEntityOrThrow(manager, "Người duyệt");
+        
+        TaiKhoan requester = taiKhoanDAO.getAccountById(sr.getAccountIdGui());
+        BranchSecurityUtils.getEntityOrThrow(requester, "Nhân viên gửi yêu cầu");
+        BranchSecurityUtils.checkBranchAccess(requester.getCoSoId(), manager.getCoSoId());
 
         CaLamViec caGui = caLamViecDAO.getCaById(sr.getCaLamViecIdGui());
         CaLamViec caNhan = sr.getCaLamViecIdNhan() != null ? caLamViecDAO.getCaById(sr.getCaLamViecIdNhan()) : null;
@@ -797,14 +801,18 @@ public class CaLamService {
         }
     }
 
-    /**
-     * Manager từ chối yêu cầu đổi ca
-     */
     public void rejectSwapRequest(int swapId, int managerId, String notes) {
         CaLamViecSwapRequest sr = swapRequestDAO.getById(swapId);
         if (sr == null || !"ChoQuanLyDuyet".equals(sr.getTrangThai())) {
             throw new IllegalArgumentException("Yêu cầu không hợp lệ hoặc không ở trạng thái chờ duyệt.");
         }
+
+        TaiKhoan manager = taiKhoanDAO.getAccountById(managerId);
+        BranchSecurityUtils.getEntityOrThrow(manager, "Người từ chối");
+
+        TaiKhoan requester = taiKhoanDAO.getAccountById(sr.getAccountIdGui());
+        BranchSecurityUtils.getEntityOrThrow(requester, "Nhân viên gửi yêu cầu");
+        BranchSecurityUtils.checkBranchAccess(requester.getCoSoId(), manager.getCoSoId());
 
         sr.setTrangThai("TuChoi");
         sr.setNguoiDuyet(managerId);

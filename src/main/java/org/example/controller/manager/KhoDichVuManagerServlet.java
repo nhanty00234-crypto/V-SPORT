@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 public class KhoDichVuManagerServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(KhoDichVuManagerServlet.class);
+    private static final Object categoryLock = new Object();
+    private static volatile boolean categoryCleaned = false;
     private final SanPhamDichVuDAO sanPhamDAO = new SanPhamDichVuDAOImpl();
     private final DanhMucSanPhamDAO categoryDAO = new DanhMucSanPhamDAOImpl();
 
@@ -48,60 +50,60 @@ public class KhoDichVuManagerServlet extends HttpServlet {
 
         int coSoId = user.getCoSoId();
 
-        // Seed default categories if empty
-        List<DanhMucSanPham> categories = categoryDAO.findAll();
-        if (categories.isEmpty()) {
-            categoryDAO.insert(new DanhMucSanPham(0, "Nước uống"));
-            categoryDAO.insert(new DanhMucSanPham(0, "Đồ ăn nhanh"));
-            categoryDAO.insert(new DanhMucSanPham(0, "Thuê dụng cụ"));
-            categoryDAO.insert(new DanhMucSanPham(0, "Phụ kiện thể thao"));
-            categories = categoryDAO.findAll();
-        }
+        if (!categoryCleaned) {
+            synchronized (categoryLock) {
+                if (!categoryCleaned) {
+                    List<DanhMucSanPham> cats = categoryDAO.findAll();
+                    if (cats.isEmpty()) {
+                        categoryDAO.insert(new DanhMucSanPham(0, "Nước uống"));
+                        categoryDAO.insert(new DanhMucSanPham(0, "Đồ ăn nhanh"));
+                        categoryDAO.insert(new DanhMucSanPham(0, "Thuê dụng cụ"));
+                        categoryDAO.insert(new DanhMucSanPham(0, "Phụ kiện thể thao"));
+                        cats = categoryDAO.findAll();
+                    }
 
-        // Merge duplicate categories in database (System-wide Category cleanup)
-        java.util.Map<String, DanhMucSanPham> uniqueCats = new java.util.HashMap<>();
-        boolean duplicatesFound = false;
-        for (DanhMucSanPham cat : categories) {
-            String name = cat.getTenDanhMuc().trim().toLowerCase();
-            if (uniqueCats.containsKey(name)) {
-                duplicatesFound = true;
-                DanhMucSanPham primaryCat = uniqueCats.get(name);
-                
-                jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
-                jakarta.persistence.EntityTransaction trans = em.getTransaction();
-                try {
-                    trans.begin();
-                    
-                    // Update SanPham_DichVu that use the duplicate category
-                    List<SanPham_DichVu> products = em.createQuery(
-                        "SELECT p FROM SanPham_DichVu p WHERE p.DanhMucID = :oldCatId", SanPham_DichVu.class)
-                        .setParameter("oldCatId", cat.getDanhMucID())
-                        .getResultList();
-                    for (SanPham_DichVu sp : products) {
-                        sp.setDanhMucID(primaryCat.getDanhMucID());
-                        em.merge(sp);
+                    java.util.Map<String, DanhMucSanPham> uniqueCats = new java.util.HashMap<>();
+                    for (DanhMucSanPham cat : cats) {
+                        String name = cat.getTenDanhMuc().trim().toLowerCase();
+                        if (uniqueCats.containsKey(name)) {
+                            DanhMucSanPham primaryCat = uniqueCats.get(name);
+                            
+                            jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+                            jakarta.persistence.EntityTransaction trans = em.getTransaction();
+                            try {
+                                trans.begin();
+                                
+                                List<SanPham_DichVu> products = em.createQuery(
+                                    "SELECT p FROM SanPham_DichVu p WHERE p.DanhMucID = :oldCatId", SanPham_DichVu.class)
+                                    .setParameter("oldCatId", cat.getDanhMucID())
+                                    .getResultList();
+                                for (SanPham_DichVu sp : products) {
+                                    sp.setDanhMucID(primaryCat.getDanhMucID());
+                                    em.merge(sp);
+                                }
+                                
+                                DanhMucSanPham catToRemove = em.find(DanhMucSanPham.class, cat.getDanhMucID());
+                                if (catToRemove != null) {
+                                    em.remove(catToRemove);
+                                }
+                                
+                                trans.commit();
+                            } catch (Exception e) {
+                                if (trans.isActive()) trans.rollback();
+                                e.printStackTrace();
+                            } finally {
+                                em.close();
+                            }
+                        } else {
+                            uniqueCats.put(name, cat);
+                        }
                     }
-                    
-                    // Delete duplicate category
-                    DanhMucSanPham catToRemove = em.find(DanhMucSanPham.class, cat.getDanhMucID());
-                    if (catToRemove != null) {
-                        em.remove(catToRemove);
-                    }
-                    
-                    trans.commit();
-                } catch (Exception e) {
-                    if (trans.isActive()) trans.rollback();
-                    e.printStackTrace();
-                } finally {
-                    em.close();
+                    categoryCleaned = true;
                 }
-            } else {
-                uniqueCats.put(name, cat);
             }
         }
-        if (duplicatesFound) {
-            categories = categoryDAO.findAll();
-        }
+
+        List<DanhMucSanPham> categories = categoryDAO.findAll();
 
         // Get filter inputs
         String search = req.getParameter("search");
@@ -352,7 +354,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 EntityTransaction trans = em.getTransaction();
                 try {
                     trans.begin();
-                    SanPham_DichVu sp = em.find(SanPham_DichVu.class, id);
+                    SanPham_DichVu sp = em.find(SanPham_DichVu.class, id, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
                     if (sp == null || sp.getCoSoID() != coSoId) {
                         session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
                         trans.rollback();
@@ -396,7 +398,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 EntityTransaction trans = em.getTransaction();
                 try {
                     trans.begin();
-                    SanPham_DichVu sp = em.find(SanPham_DichVu.class, id);
+                    SanPham_DichVu sp = em.find(SanPham_DichVu.class, id, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
                     if (sp == null || sp.getCoSoID() != coSoId) {
                         session.setAttribute("errorMsg", "Sản phẩm không hợp lệ.");
                         trans.rollback();
@@ -471,75 +473,86 @@ public class KhoDichVuManagerServlet extends HttpServlet {
 
                 if (presetNames != null) {
                     int addedCount = 0;
-                    List<DanhMucSanPham> allCats = categoryDAO.findAll();
-                    List<SanPham_DichVu> currentList = sanPhamDAO.findByCoSo(coSoId);
+                    jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+                    jakarta.persistence.EntityTransaction trans = em.getTransaction();
+                    try {
+                        trans.begin();
+                        List<DanhMucSanPham> allCats = em.createQuery("SELECT d FROM DanhMucSanPham d", DanhMucSanPham.class).getResultList();
+                        List<SanPham_DichVu> currentList = em.createQuery("SELECT s FROM SanPham_DichVu s WHERE s.CoSoID = :coSoId", SanPham_DichVu.class)
+                            .setParameter("coSoId", coSoId)
+                            .getResultList();
 
-                    for (int i = 0; i < presetNames.length; i++) {
-                        String name = presetNames[i];
-                        String catName = presetCatNames[i];
-                        double donGia = Double.parseDouble(presetDonGias[i]);
-                        double giaNhap = Double.parseDouble(presetGiaNhaps[i]);
-                        String unit = presetUnits[i];
-                        int stock = Integer.parseInt(presetStocks[i]);
+                        for (int i = 0; i < presetNames.length; i++) {
+                            String name = presetNames[i];
+                            String catName = presetCatNames[i];
+                            double donGia = Double.parseDouble(presetDonGias[i]);
+                            double giaNhap = Double.parseDouble(presetGiaNhaps[i]);
+                            String unit = presetUnits[i];
+                            int stock = Integer.parseInt(presetStocks[i]);
 
-                        if (stock <= 0) continue;
+                            if (stock <= 0) continue;
 
-                        boolean exists = false;
-                        for (SanPham_DichVu spExisting : currentList) {
-                            if (spExisting.getTenSanPham() != null && spExisting.getTenSanPham().trim().equalsIgnoreCase(name.trim())) {
-                                exists = true;
-                                spExisting.setSoLuongTon(spExisting.getSoLuongTon() + stock);
-                                if (org.example.util.Constants.TRANG_THAI_SP_TAM_HET_HANG.equals(spExisting.getTrangThai())) {
-                                    spExisting.setTrangThai(org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                            boolean exists = false;
+                            for (SanPham_DichVu spExisting : currentList) {
+                                if (spExisting.getTenSanPham() != null && spExisting.getTenSanPham().trim().equalsIgnoreCase(name.trim())) {
+                                    exists = true;
+                                    spExisting.setSoLuongTon(spExisting.getSoLuongTon() + stock);
+                                    if (org.example.util.Constants.TRANG_THAI_SP_TAM_HET_HANG.equals(spExisting.getTrangThai())) {
+                                        spExisting.setTrangThai(org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                                    }
+                                    em.merge(spExisting);
+                                    addedCount++;
+                                    break;
                                 }
-                                sanPhamDAO.update(spExisting);
-                                addedCount++;
-                                break;
                             }
-                        }
-                        if (exists) {
-                            continue;
-                        }
+                            if (exists) {
+                                continue;
+                            }
 
-                        int catId = -1;
-                        for (DanhMucSanPham dm : allCats) {
-                            if (dm.getTenDanhMuc().trim().equalsIgnoreCase(catName.trim())) {
-                                catId = dm.getDanhMucID();
-                                break;
-                            }
-                        }
-                        if (catId == -1) {
-                            DanhMucSanPham newCat = new DanhMucSanPham();
-                            newCat.setTenDanhMuc(catName.trim());
-                            categoryDAO.insert(newCat);
-                            allCats = categoryDAO.findAll();
+                            int catId = -1;
                             for (DanhMucSanPham dm : allCats) {
                                 if (dm.getTenDanhMuc().trim().equalsIgnoreCase(catName.trim())) {
                                     catId = dm.getDanhMucID();
                                     break;
                                 }
                             }
-                        }
+                            if (catId == -1) {
+                                DanhMucSanPham newCat = new DanhMucSanPham();
+                                newCat.setTenDanhMuc(catName.trim());
+                                em.persist(newCat);
+                                allCats = em.createQuery("SELECT d FROM DanhMucSanPham d", DanhMucSanPham.class).getResultList();
+                                for (DanhMucSanPham dm : allCats) {
+                                    if (dm.getTenDanhMuc().trim().equalsIgnoreCase(catName.trim())) {
+                                        catId = dm.getDanhMucID();
+                                        break;
+                                    }
+                                }
+                            }
 
-                        String nanoHex = Long.toHexString(System.nanoTime() + i).toUpperCase();
-                        String sku = "SKU-" + (nanoHex.length() > 6 ? nanoHex.substring(nanoHex.length() - 6) : nanoHex);
+                            String nanoHex = Long.toHexString(System.nanoTime() + i).toUpperCase();
+                            String sku = "SKU-" + (nanoHex.length() > 6 ? nanoHex.substring(nanoHex.length() - 6) : nanoHex);
 
-                        SanPham_DichVu sp = new SanPham_DichVu();
-                        sp.setSkuCode(sku);
-                        sp.setTenSanPham(name.trim());
-                        sp.setDanhMucID(catId);
-                        sp.setCoSoID(coSoId);
-                        sp.setDonGia(donGia);
-                        sp.setGiaNhap(giaNhap);
-                        sp.setDonViTinh(unit);
-                        sp.setSoLuongTon(stock);
-                        sp.setTrangThai(org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
-                        sp.setMoTa(name.trim() + " chất lượng cao");
+                            SanPham_DichVu sp = new SanPham_DichVu();
+                            sp.setSkuCode(sku);
+                            sp.setTenSanPham(name.trim());
+                            sp.setDanhMucID(catId);
+                            sp.setCoSoID(coSoId);
+                            sp.setDonGia(donGia);
+                            sp.setGiaNhap(giaNhap);
+                            sp.setDonViTinh(unit);
+                            sp.setSoLuongTon(stock);
+                            sp.setTrangThai(org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH);
+                            sp.setMoTa(name.trim() + " chất lượng cao");
 
-                        boolean successInsert = sanPhamDAO.insert(sp);
-                        if (successInsert) {
+                            em.persist(sp);
                             addedCount++;
                         }
+                        trans.commit();
+                    } catch (Exception e) {
+                        if (trans.isActive()) trans.rollback();
+                        throw e;
+                    } finally {
+                        em.close();
                     }
                     if (addedCount > 0) {
                         session.setAttribute("successMsg", "Đã thêm/cập nhật thành công " + addedCount + " sản phẩm vào kho.");
@@ -554,7 +567,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("errorMsg", "Đã xảy ra lỗi hệ thống: " + e.getMessage());
+            session.setAttribute("errorMsg", "Đã xảy ra lỗi hệ thống. Vui lòng liên hệ quản trị viên.");
         }
 
         resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");

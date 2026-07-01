@@ -317,4 +317,11 @@
     const lbl = document.getElementById('pwStrengthLabel');
     if (lbl) lbl.textContent = v.length ? labs[s] : '';
   }
+
+  // Reload page when navigated back/forward via bfcache
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
 </script>

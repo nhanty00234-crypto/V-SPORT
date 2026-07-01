@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -720,6 +720,11 @@ async function submitOtpVerification() {
             alert(data.message || 'Thay đổi Email và thông tin thành công!');
             window.location.reload();
         } else {
+            if (data.redirect) {
+                alert(data.loi || 'Thao tác không thành công.');
+                window.location.href = '${pageContext.request.contextPath}' + data.redirect;
+                return;
+            }
             document.getElementById('otpErrorMsgText').innerText = data.loi || 'Mã OTP không đúng. Vui lòng nhập lại.';
             document.getElementById('otpErrorBanner').classList.remove('hidden');
             boxes.forEach(b => b.value = '');
@@ -735,11 +740,10 @@ async function submitOtpVerification() {
     }
 }
 
-// Profile Dropdown Toggle
-document.addEventListener('DOMContentLoaded', () => {
+// Scripts run at end of <body>, DOM is already ready — call directly
+(function initNhanSu() {
     renderStaff();
     renderTrash();
-    // Hiện badge thùng rác nếu có
     const badge = document.getElementById('trashCountBadge');
     if (deletedList.length > 0) {
       badge.innerText = deletedList.length;
@@ -787,6 +791,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 txt.className = 'text-[9px] font-bold text-emerald-500 uppercase tracking-wider block mt-1';
             }
         });
+    }
+})();
+
+// Bfcache restore (browser back/forward): re-render data
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        renderStaff();
+        renderTrash();
     }
 });
 </script>

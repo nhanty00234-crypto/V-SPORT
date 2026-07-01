@@ -251,11 +251,12 @@ public class NhanSuService {
     /**
      * Lấy thông tin nhân viên theo ID
      */
-    public TaiKhoan getStaffById(int accountId) {
+    public TaiKhoan getStaffById(int accountId, int managerCoSoId) {
         TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
         if (account == null) {
             throw new IllegalArgumentException("Nhân viên không tồn tại");
         }
+        BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
         return account;
     }
 
@@ -579,6 +580,11 @@ public class NhanSuService {
     public void addShiftPattern(int accountId, int coSoId, int thu, java.time.LocalTime gioBatDau, java.time.LocalTime gioKetThuc, String ghiChu) {
         if (accountId <= 0) throw new IllegalArgumentException("AccountID không hợp lệ");
         if (coSoId <= 0) throw new IllegalArgumentException("CoSoID không hợp lệ");
+        
+        TaiKhoan staff = taiKhoanDAO.getAccountById(accountId);
+        BranchSecurityUtils.getEntityOrThrow(staff, "Nhân viên");
+        BranchSecurityUtils.checkBranchAccess(staff.getCoSoId(), coSoId);
+
         if (thu < 2 || thu > 8) throw new IllegalArgumentException("Thứ không hợp lệ (2-8)");
         if (gioBatDau == null || gioKetThuc == null) throw new IllegalArgumentException("Giờ làm không được để trống");
         if (gioKetThuc.isBefore(gioBatDau) || gioKetThuc.equals(gioBatDau)) {
@@ -626,9 +632,13 @@ public class NhanSuService {
     /**
      * Xóa ca làm định kỳ của nhân viên theo thứ
      */
-    public void deleteShiftPattern(int accountId, int thu) {
+    public void deleteShiftPattern(int accountId, int thu, int managerCoSoId) {
         if (accountId <= 0) throw new IllegalArgumentException("AccountID không hợp lệ");
         if (thu < 2 || thu > 8) throw new IllegalArgumentException("Thứ không hợp lệ");
+
+        TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
+        BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
+        BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
 
         List<CaLamViec> shifts = caLamViecDAO.getRecurringShiftsByAccountID(accountId);
         for (CaLamViec shift : shifts) {
@@ -641,8 +651,11 @@ public class NhanSuService {
     /**
      * Lấy danh sách ca làm định kỳ của một nhân viên
      */
-    public List<CaLamViec> getShiftPatternsByStaff(int accountId) {
+    public List<CaLamViec> getShiftPatternsByStaff(int accountId, int managerCoSoId) {
         if (accountId <= 0) throw new IllegalArgumentException("AccountID không hợp lệ");
+        TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
+        BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
+        BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
         return caLamViecDAO.getRecurringShiftsByAccountID(accountId);
     }
 

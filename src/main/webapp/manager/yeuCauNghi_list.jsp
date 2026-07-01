@@ -113,15 +113,15 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <c:if test="${req.trangThai == 'ChoDuyet'}">
-                            <form method="post" action="${pageContext.request.contextPath}/manager/yeu-cau-nghi" style="display:inline;" onsubmit="return confirm('Phê duyệt yêu cầu này?');">
+                            <form id="form-approve-${req.yeuCauNghiID}" method="post" action="${pageContext.request.contextPath}/manager/yeu-cau-nghi" style="display:inline;">
                                 <input type="hidden" name="action" value="approve"/>
                                 <input type="hidden" name="id" value="${req.yeuCauNghiID}"/>
-                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 text-xs font-bold transition-all shadow-sm cursor-pointer mr-2">Phê duyệt</button>
+                                <button type="button" onclick="confirmApprove(${req.yeuCauNghiID})" class="px-2.5 py-1 rounded-lg bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 text-xs font-bold transition-all shadow-sm cursor-pointer mr-2">Phê duyệt</button>
                             </form>
-                            <form method="post" action="${pageContext.request.contextPath}/manager/yeu-cau-nghi" style="display:inline;" onsubmit="return confirm('Từ chối yêu cầu này?');">
+                            <form id="form-reject-${req.yeuCauNghiID}" method="post" action="${pageContext.request.contextPath}/manager/yeu-cau-nghi" style="display:inline;">
                                 <input type="hidden" name="action" value="reject"/>
                                 <input type="hidden" name="id" value="${req.yeuCauNghiID}"/>
-                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-650 hover:bg-red-100 text-xs font-bold transition-all shadow-sm cursor-pointer">Từ chối</button>
+                                <button type="button" onclick="confirmReject(${req.yeuCauNghiID})" class="px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-650 hover:bg-red-100 text-xs font-bold transition-all shadow-sm cursor-pointer">Từ chối</button>
                             </form>
                         </c:if>
                     </td>
@@ -145,11 +145,18 @@ function confirmApprove(id) {
         document.getElementById('form-approve-' + id).submit();
     }
 }
-function confirmReject(id) {
+var confirmReject = function(id) {
     if (confirm('Bạn có chắc muốn từ chối yêu cầu này?')) {
         document.getElementById('form-reject-' + id).submit();
     }
 }
+
+// Reload page when navigated back/forward via bfcache
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
 </script>
 </body>
 </html>

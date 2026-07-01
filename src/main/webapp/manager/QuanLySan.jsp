@@ -915,9 +915,15 @@
     initCurrencyFormatter('typePriceNoLight');
     initCurrencyFormatter('typePriceWithLight');
     initCurrencyFormatter('priceConfigPriceNoLight');
-    initCurrencyFormatter('priceConfigPriceWithLight');
     populateSportDropdowns();
     switchTab('courts'); // sets default view and triggers rendering
+  });
+
+  // Reload page when navigated back/forward via bfcache
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
   });
 </script>
 </body>
