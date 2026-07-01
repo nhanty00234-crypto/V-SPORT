@@ -118,7 +118,12 @@ public class QuanLyDatSanServlet extends HttpServlet {
                 }
             } else if ("reject".equals(action)) {
                 String reason = req.getParameter("reason");
-                boolean result = lichDatSanDAO.tuChoiLichDatSan(datSanId, reason, user.getCoSoId());
+                if (reason == null || reason.trim().isEmpty()) {
+                    session.setAttribute("error", "Vui lòng nhập lý do từ chối để khách hàng được thông báo rõ ràng.");
+                    resp.sendRedirect(req.getContextPath() + path);
+                    return;
+                }
+                boolean result = lichDatSanDAO.tuChoiLichDatSan(datSanId, reason.trim(), user.getCoSoId());
                 if (result) {
                     session.setAttribute("message", "Đã từ chối đơn đặt sân #" + datSanId + ".");
                 } else {

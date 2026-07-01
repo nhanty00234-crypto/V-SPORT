@@ -321,9 +321,201 @@
           </div>
       </div>
   </div>
+
+  <!-- =========== ADVANCED ACTIONS PANEL =========== -->
+  <div class="card p-6 bg-white border border-purple-100 shadow-md">
+    <div class="flex items-center gap-2 mb-5 pb-4 border-b border-purple-100">
+      <span class="material-symbols-outlined text-purple-600 text-[22px]">tune</span>
+      <h3 class="text-base font-bold text-purple-900">Tác vụ nâng cao</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Clone Week -->
+      <div class="flex flex-col gap-3 p-4 bg-purple-50/40 rounded-xl border border-purple-100">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-purple-600 text-[20px]">content_copy</span>
+          <h4 class="text-sm font-bold text-purple-900">Nhân bản lịch tuần</h4>
+        </div>
+        <p class="text-xs text-zinc-500">Sao chép toàn bộ ca làm từ tuần nguồn sang tuần đích</p>
+        <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-purple-700">Ngày bất kỳ trong tuần nguồn</label>
+            <input type="date" id="cloneFromWeek" class="h-9 px-3 rounded-lg border border-purple-200 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-purple-700">Ngày bất kỳ trong tuần đích</label>
+            <input type="date" id="cloneToWeek" class="h-9 px-3 rounded-lg border border-purple-200 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white">
+          </div>
+          <button onclick="cloneWeekShifts()" class="h-9 px-4 rounded-lg bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">content_copy</span> Nhân bản
+          </button>
+        </div>
+      </div>
+      <!-- Publish Week -->
+      <div class="flex flex-col gap-3 p-4 bg-emerald-50/40 rounded-xl border border-emerald-100">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-emerald-600 text-[20px]">send</span>
+          <h4 class="text-sm font-bold text-emerald-900">Công bố lịch tuần</h4>
+        </div>
+        <p class="text-xs text-zinc-500">Chuyển tất cả ca Draft của tuần sang Published để nhân viên thấy</p>
+        <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-emerald-700">Ngày bất kỳ trong tuần cần công bố</label>
+            <input type="date" id="publishWeekDate" class="h-9 px-3 rounded-lg border border-emerald-200 text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none bg-white">
+          </div>
+          <button onclick="publishWeekShifts()" class="h-9 px-4 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 mt-auto">
+            <span class="material-symbols-outlined text-[16px]">send</span> Công bố
+          </button>
+        </div>
+      </div>
+      <!-- Auto Schedule -->
+      <div class="flex flex-col gap-3 p-4 bg-blue-50/40 rounded-xl border border-blue-100">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-blue-600 text-[20px]">auto_fix_high</span>
+          <h4 class="text-sm font-bold text-blue-900">Sắp lịch tự động</h4>
+        </div>
+        <p class="text-xs text-zinc-500">Tự động phân công nhân viên rảnh vào ca trống (tối đa 30 ngày)</p>
+        <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-blue-700">Từ ngày</label>
+            <input type="date" id="autoStartDate" class="h-9 px-3 rounded-lg border border-blue-200 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-blue-700">Đến ngày</label>
+            <input type="date" id="autoEndDate" class="h-9 px-3 rounded-lg border border-blue-200 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white">
+          </div>
+          <button onclick="autoScheduleShifts()" class="h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">auto_fix_high</span> Sắp lịch
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Warnings/result area for advanced actions -->
+    <div id="advancedActionsWarnings" class="hidden mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+      <div class="flex items-center gap-2 text-sm font-bold text-amber-800 mb-2">
+        <span class="material-symbols-outlined text-[18px]">warning</span>Kết quả / Cảnh báo:
+      </div>
+      <ul id="advancedWarningsList" class="list-disc pl-5 space-y-0.5 text-sm text-amber-700"></ul>
+    </div>
+  </div>
+
+  <!-- =========== SWAP REQUESTS PANEL =========== -->
+  <div class="card p-6 bg-white border border-purple-100 shadow-md">
+    <div class="flex items-center justify-between mb-5 pb-4 border-b border-purple-100">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-purple-600 text-[22px]">swap_horiz</span>
+        <h3 class="text-base font-bold text-purple-900">Yêu cầu đổi ca chờ duyệt</h3>
+        <span id="swapBadge" class="hidden ml-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-bold"></span>
+      </div>
+      <button onclick="loadSwapRequests()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-100 hover:bg-purple-50 text-purple-700 text-xs font-semibold transition-colors">
+        <span class="material-symbols-outlined text-[14px]">refresh</span> Tải lại
+      </button>
+    </div>
+    <div id="swapRequestsContainer">
+      <div class="text-center py-8 text-zinc-400 text-sm flex flex-col items-center gap-2">
+        <span class="material-symbols-outlined text-[36px] text-zinc-200">swap_horiz</span>
+        Đang tải yêu cầu đổi ca...
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <!-- Modal removed since shift configuration form is now inline -->
+
+<!-- ===== DELETE REASON MODAL ===== -->
+<div id="deleteReasonModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-red-600 text-[22px]">delete_forever</span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-zinc-900">Xác nhận xóa ca làm việc</h3>
+        <p class="text-xs text-zinc-500 mt-0.5">Ca đang ở trạng thái <strong id="deleteShiftStatus" class="text-red-600"></strong> — bắt buộc nhập lý do</p>
+      </div>
+    </div>
+    <input type="hidden" id="deleteShiftId">
+    <div class="flex flex-col gap-1.5 mb-5">
+      <label class="text-sm font-semibold text-zinc-700">Lý do xóa <span class="text-red-500">*</span></label>
+      <textarea id="deleteReasonInput" rows="3"
+                placeholder="Ví dụ: Nhân viên xin nghỉ đột xuất, cơ sở đóng cửa ngày này..."
+                class="px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-red-400 focus:border-red-400 outline-none resize-none text-zinc-700"></textarea>
+    </div>
+    <div class="flex items-center justify-end gap-3">
+      <button onclick="document.getElementById('deleteReasonModal').classList.add('hidden')"
+              class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 transition-colors">
+        Hủy
+      </button>
+      <button onclick="confirmDeleteWithReason()"
+              class="h-10 px-6 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">delete_forever</span> Xác nhận xóa
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIRMED OVERRIDE MODAL ===== -->
+<div id="confirmedOverrideModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-amber-600 text-[22px]">warning</span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-zinc-900">Ca đã được nhân viên xác nhận</h3>
+        <p class="text-xs text-zinc-500 mt-0.5">Thay đổi sẽ gửi thông báo tự động đến nhân viên</p>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5 mb-5">
+      <label class="text-sm font-semibold text-zinc-700">Lý do thay đổi <span class="text-red-500">*</span></label>
+      <textarea id="overrideReasonInput" rows="3"
+                placeholder="Ví dụ: Điều chỉnh giờ làm do cơ sở có sự kiện đặc biệt..."
+                class="px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none resize-none text-zinc-700"></textarea>
+    </div>
+    <div class="flex items-center justify-end gap-3">
+      <button onclick="document.getElementById('confirmedOverrideModal').classList.add('hidden')"
+              class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 transition-colors">
+        Hủy
+      </button>
+      <button onclick="confirmOverrideAndSave()"
+              class="h-10 px-6 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">edit_note</span> Xác nhận thay đổi
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SWAP APPROVE/REJECT MODAL ===== -->
+<div id="swapActionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div id="swapModalIconWrap" class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+        <span id="swapModalIconSymbol" class="material-symbols-outlined text-emerald-600 text-[22px]">check_circle</span>
+      </div>
+      <div>
+        <h3 id="swapModalTitle" class="text-base font-bold text-zinc-900">Phê duyệt đổi ca</h3>
+        <p id="swapModalSub" class="text-xs text-zinc-500 mt-0.5"></p>
+      </div>
+    </div>
+    <input type="hidden" id="swapActionId">
+    <input type="hidden" id="swapActionType">
+    <div class="flex flex-col gap-1.5 mb-5">
+      <label class="text-sm font-semibold text-zinc-700">Ghi chú (tùy chọn)</label>
+      <textarea id="swapNotesInput" rows="2" placeholder="Ghi chú cho nhân viên..."
+                class="px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-400 outline-none resize-none text-zinc-700"></textarea>
+    </div>
+    <div class="flex items-center justify-end gap-3">
+      <button onclick="document.getElementById('swapActionModal').classList.add('hidden')"
+              class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 transition-colors">
+        Hủy
+      </button>
+      <button id="swapConfirmBtn" onclick="confirmSwapAction()"
+              class="h-10 px-6 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">check_circle</span> Phê duyệt
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
 // Context Path
@@ -855,24 +1047,46 @@ function editShift(id) {
 }
 
 async function deleteShift(id) {
-  if (confirm("Xóa ca làm việc này? Hành động này không thể hoàn tác.")) {
-    try {
-      const response = await fetch(`\${_ctxPath}/manager/ca-lam?action=delete&id=\${id}&format=json`, {
-        method: 'POST'
-      });
-      if (response.ok) {
-        const res = await response.json();
-        if (res.success) {
-          showToast('success', 'Đã xóa ca làm việc thành công!');
-          await loadScheduleData();
-        } else {
-          showToast('error', res.error || 'Không thể xóa ca làm việc.');
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      showToast('error', 'Lỗi kết nối hệ thống.');
+  const s = shiftList.find(x => x.caLamViecId === id);
+  const isPublishedOrConfirmed = s && (s.trangThai === 'Published' || s.trangThai === 'Confirmed');
+  if (isPublishedOrConfirmed) {
+    document.getElementById('deleteShiftId').value = id;
+    document.getElementById('deleteShiftStatus').textContent = s.trangThai === 'Confirmed' ? 'Đã xác nhận' : 'Đã công bố';
+    document.getElementById('deleteReasonInput').value = '';
+    document.getElementById('deleteReasonModal').classList.remove('hidden');
+  } else {
+    if (confirm('Xóa ca làm việc này? Hành động này không thể hoàn tác.')) {
+      await performDelete(id, '');
     }
+  }
+}
+
+async function confirmDeleteWithReason() {
+  const id = document.getElementById('deleteShiftId').value;
+  const reason = document.getElementById('deleteReasonInput').value.trim();
+  if (!reason) { showToast('error', 'Vui lòng nhập lý do xóa'); return; }
+  document.getElementById('deleteReasonModal').classList.add('hidden');
+  await performDelete(id, reason);
+}
+
+async function performDelete(id, reason) {
+  try {
+    const params = new URLSearchParams({ action: 'delete', format: 'json', id });
+    if (reason) params.append('reason', reason);
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(r => r.json());
+    if (res.success) {
+      showToast('success', 'Đã xóa ca làm việc thành công!');
+      await loadScheduleData();
+    } else {
+      showToast('error', res.error || 'Không thể xóa ca làm việc.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Lỗi kết nối hệ thống.');
   }
 }
 
@@ -889,6 +1103,10 @@ async function loadScheduleData() {
       if (!document.getElementById('calendarView').classList.contains('hidden')) {
         renderCalendar();
       }
+      // Update swap requests from same payload
+      const pending = (data.swaps || []).filter(s => s.trangThai === 'ChoQuanLyDuyet');
+      _swapList = pending;
+      renderSwapRequests();
     }
   } catch (error) {
     console.error("Lỗi khi tải lại lịch làm việc:", error);
@@ -1036,24 +1254,34 @@ async function handleInlineShiftSubmit(e) {
       params.append('gioNghi', document.getElementById('shiftBreakTime').value || '0');
       params.append('ghiChu', document.getElementById('shiftNotes').value);
       params.append('reason', 'Cập nhật ca làm việc');
-      
+
       const response = await fetch(`\${_ctxPath}/manager/ca-lam`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()
       });
-      
+
       if (response.ok) {
         const res = await response.json();
         if (res.success) {
           showToast('success', 'Đã cập nhật ca làm việc thành công!');
-          
+          if (res.warnings && res.warnings.length > 0) {
+            res.warnings.forEach(w => showToast('warning', w));
+          }
           const weekdayAndDateStr = getWeekdayAndDateStr(dateToSave);
           showSuccessBanner(staffName, startTime, endTime, weekdayAndDateStr);
-          
           await loadScheduleData();
           resetForm();
           scrollToCalendar();
+        } else if (res.error && res.error.startsWith('CONFIRMED_OVERRIDE_REQUIRED')) {
+          // Ca đã confirmed — mở modal xác nhận override
+          document.getElementById('overrideReasonInput').value = '';
+          _pendingUpdateParams = params;
+          _pendingUpdateStaffName = staffName;
+          _pendingUpdateStartTime = startTime;
+          _pendingUpdateEndTime = endTime;
+          _pendingUpdateDateToSave = dateToSave;
+          document.getElementById('confirmedOverrideModal').classList.remove('hidden');
         } else {
           showToast('error', res.error || 'Cập nhật thất bại');
         }
@@ -1092,12 +1320,14 @@ async function handleInlineShiftSubmit(e) {
       
       if (successes.length > 0) {
         showToast('success', `Đã phân ca thành công cho \${successes.length} ngày!`);
-        
+        // Collect and show warnings from all successful responses
+        const allWarnings = successes.flatMap(r => r.warnings || []);
+        if (allWarnings.length > 0) {
+          [...new Set(allWarnings)].forEach(w => showToast('warning', w));
+        }
         const dateStrings = checkedCheckboxes.map(cb => getWeekdayAndDateStr(cb.value));
         const datesFormattedText = dateStrings.join(', ');
-        
         showSuccessBanner(staffName, startTime, endTime, datesFormattedText);
-        
         await loadScheduleData();
         resetForm();
         scrollToCalendar();
@@ -1205,22 +1435,297 @@ function renderCalendar() {
 document.addEventListener('DOMContentLoaded', () => {
   // Populate staff dropdown
   populateStaffDropdown(null);
-  
+
   // Set date picker to today and build weekdays
   const shiftDateInput = document.getElementById('shiftDate');
   if (shiftDateInput) {
     shiftDateInput.value = new Date().toISOString().split('T')[0];
     updateWeekDays();
   }
-  
+
   // Default to Calendar view to see the weekly schedule diagram directly under the form
   switchScheduleView('calendar');
-  
+
+  // Load pending swap requests on page load
+  loadSwapRequests();
+
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   if (mobileMenuBtn) {
     mobileMenuBtn.addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); });
   }
 });
+
+// ============================================================
+// ADVANCED ACTIONS: state + helpers
+// ============================================================
+let _pendingUpdateParams = null;
+let _pendingUpdateStaffName = '';
+let _pendingUpdateStartTime = '';
+let _pendingUpdateEndTime = '';
+let _pendingUpdateDateToSave = '';
+
+function getMondayStr(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  const monday = new Date(dateStr);
+  monday.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+  return monday.toISOString().split('T')[0];
+}
+
+function showAdvancedWarnings(items) {
+  const panel = document.getElementById('advancedActionsWarnings');
+  const list = document.getElementById('advancedWarningsList');
+  list.innerHTML = items.map(w => `<li>\${w}</li>`).join('');
+  panel.classList.remove('hidden');
+}
+
+async function cloneWeekShifts() {
+  const fromDate = document.getElementById('cloneFromWeek').value;
+  const toDate = document.getElementById('cloneToWeek').value;
+  if (!fromDate || !toDate) { showToast('error', 'Vui lòng chọn ngày thuộc tuần nguồn và tuần đích'); return; }
+  const fromMonday = getMondayStr(fromDate);
+  const toMonday = getMondayStr(toDate);
+  if (fromMonday === toMonday) { showToast('error', 'Tuần nguồn và tuần đích không được trùng nhau'); return; }
+  const params = new URLSearchParams({ action: 'cloneWeek', format: 'json', fromWeek: fromMonday, toWeek: toMonday });
+  try {
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(r => r.json());
+    if (res.success) {
+      showToast('success', res.message || 'Nhân bản lịch tuần thành công!');
+      if (res.warnings && res.warnings.length > 0) showAdvancedWarnings(res.warnings);
+      else document.getElementById('advancedActionsWarnings').classList.add('hidden');
+      await loadScheduleData();
+    } else {
+      showToast('error', res.error || 'Nhân bản thất bại');
+    }
+  } catch (e) { showToast('error', 'Lỗi kết nối'); }
+}
+
+async function publishWeekShifts() {
+  const weekDate = document.getElementById('publishWeekDate').value;
+  if (!weekDate) { showToast('error', 'Vui lòng chọn ngày thuộc tuần cần công bố'); return; }
+  const weekMonday = getMondayStr(weekDate);
+  if (!confirm(`Công bố lịch làm việc tuần bắt đầu từ \${weekMonday}?\nNhân viên sẽ nhận thông báo.`)) return;
+  const params = new URLSearchParams({ action: 'publishWeek', format: 'json', weekStart: weekMonday });
+  try {
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(r => r.json());
+    if (res.success) {
+      showToast('success', 'Công bố lịch tuần thành công!');
+      if (res.warnings && res.warnings.length > 0) showAdvancedWarnings(res.warnings);
+      else document.getElementById('advancedActionsWarnings').classList.add('hidden');
+      await loadScheduleData();
+    } else {
+      showToast('error', res.error || 'Công bố thất bại');
+    }
+  } catch (e) { showToast('error', 'Lỗi kết nối'); }
+}
+
+async function autoScheduleShifts() {
+  const start = document.getElementById('autoStartDate').value;
+  const end = document.getElementById('autoEndDate').value;
+  if (!start || !end) { showToast('error', 'Vui lòng chọn khoảng ngày'); return; }
+  const params = new URLSearchParams({ action: 'autoSchedule', format: 'json', startDate: start, endDate: end });
+  try {
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(r => r.json());
+    if (res.success) { showToast('success', res.message || 'Sắp lịch tự động hoàn tất!'); await loadScheduleData(); }
+    else { showToast('error', res.error || 'Sắp lịch thất bại'); }
+  } catch (e) { showToast('error', 'Lỗi kết nối'); }
+}
+
+// ============================================================
+// CONFIRMED OVERRIDE HANDLING
+// ============================================================
+async function confirmOverrideAndSave() {
+  const reason = document.getElementById('overrideReasonInput').value.trim();
+  if (!reason) { showToast('error', 'Vui lòng nhập lý do thay đổi'); return; }
+  document.getElementById('confirmedOverrideModal').classList.add('hidden');
+  if (!_pendingUpdateParams) return;
+
+  _pendingUpdateParams.set('overrideConfirm', 'true');
+  _pendingUpdateParams.set('reason', reason);
+
+  const submitBtn = document.getElementById('btnSubmitShift');
+  submitBtn.disabled = true;
+  try {
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: _pendingUpdateParams.toString()
+    }).then(r => r.json());
+
+    if (res.success) {
+      showToast('success', 'Đã cập nhật ca làm việc thành công!');
+      if (res.warnings && res.warnings.length > 0) res.warnings.forEach(w => showToast('warning', w));
+      showSuccessBanner(_pendingUpdateStaffName, _pendingUpdateStartTime, _pendingUpdateEndTime, getWeekdayAndDateStr(_pendingUpdateDateToSave));
+      await loadScheduleData();
+      resetForm();
+      scrollToCalendar();
+    } else {
+      showToast('error', res.error || 'Cập nhật thất bại');
+    }
+  } catch (e) {
+    showToast('error', 'Lỗi kết nối');
+  } finally {
+    submitBtn.disabled = false;
+    _pendingUpdateParams = null;
+  }
+}
+
+// ============================================================
+// SWAP REQUESTS
+// ============================================================
+let _swapList = [];
+
+async function loadSwapRequests() {
+  try {
+    const data = await fetch(`\${_ctxPath}/manager/ca-lam?format=json`).then(r => r.json());
+    _swapList = (data.swaps || []).filter(s => s.trangThai === 'ChoQuanLyDuyet');
+    renderSwapRequests();
+  } catch (e) { console.error('loadSwapRequests error', e); }
+}
+
+function renderSwapRequests() {
+  const container = document.getElementById('swapRequestsContainer');
+  const badge = document.getElementById('swapBadge');
+
+  if (_swapList.length === 0) {
+    badge.classList.add('hidden');
+    container.innerHTML = `<div class="text-center py-8 text-zinc-400 text-sm flex flex-col items-center gap-2">
+      <span class="material-symbols-outlined text-[36px] text-zinc-200">swap_horiz</span>
+      Không có yêu cầu đổi ca nào đang chờ duyệt
+    </div>`;
+    return;
+  }
+
+  badge.textContent = _swapList.length;
+  badge.classList.remove('hidden');
+
+  const rows = _swapList.map(sr => {
+    const guiShift = shiftList.find(s => s.caLamViecId === sr.caLamViecIdGui);
+    const nhanShift = sr.caLamViecIdNhan ? shiftList.find(s => s.caLamViecId === sr.caLamViecIdNhan) : null;
+    const fmtShift = s => s ? `\${formatDate(s.ngayLam)} \${formatTime(s.gioBatDau)}-\${formatTime(s.gioKetThuc)}` : 'N/A';
+    const nhanInfo = nhanShift ? fmtShift(nhanShift) : '<span class="text-zinc-400 italic">Nhường ca</span>';
+    const swapId = sr.swapId || sr.id || 0;
+    const labelSafe = `\${(sr.tenNguoiGui || 'N/A')} ↔ \${(sr.tenNguoiNhan || 'N/A')}`;
+
+    return `<tr class="hover:bg-purple-50/30 transition-colors">
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-bold">\${(sr.tenNguoiGui || 'N')[0].toUpperCase()}</div>
+          <span class="text-xs font-semibold text-purple-950">\${sr.tenNguoiGui || 'N/A'}</span>
+        </div>
+      </td>
+      <td class="px-4 py-3 text-xs font-medium text-zinc-700">\${fmtShift(guiShift)}</td>
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">\${(sr.tenNguoiNhan || 'N')[0].toUpperCase()}</div>
+          <span class="text-xs font-semibold text-blue-950">\${sr.tenNguoiNhan || 'N/A'}</span>
+        </div>
+      </td>
+      <td class="px-4 py-3 text-xs text-zinc-700">\${nhanInfo}</td>
+      <td class="px-4 py-3 text-xs text-zinc-500 max-w-[120px] truncate" title="\${sr.lyDo || ''}">\${sr.lyDo || '-'}</td>
+      <td class="px-4 py-3">
+        <div class="flex items-center justify-end gap-1.5">
+          <button onclick="openSwapAction(\${swapId}, 'approve', \`\${labelSafe}\`)"
+                  class="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-700 text-xs font-semibold transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">check_circle</span> Duyệt
+          </button>
+          <button onclick="openSwapAction(\${swapId}, 'reject', \`\${labelSafe}\`)"
+                  class="px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-xs font-semibold transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">cancel</span> Từ chối
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-purple-50/50 border-b border-purple-100">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-purple-900">Người gửi</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-purple-900">Ca của người gửi</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-purple-900">Người nhận</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-purple-900">Ca của người nhận</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-purple-900">Lý do</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-purple-900">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-purple-50/70">\${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function openSwapAction(swapId, type, label) {
+  document.getElementById('swapActionId').value = swapId;
+  document.getElementById('swapActionType').value = type;
+  document.getElementById('swapNotesInput').value = '';
+  document.getElementById('swapModalSub').textContent = label;
+
+  const iconWrap = document.getElementById('swapModalIconWrap');
+  const iconSym = document.getElementById('swapModalIconSymbol');
+  const title = document.getElementById('swapModalTitle');
+  const btn = document.getElementById('swapConfirmBtn');
+
+  if (type === 'approve') {
+    iconWrap.className = 'w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0';
+    iconSym.className = 'material-symbols-outlined text-emerald-600 text-[22px]';
+    iconSym.textContent = 'check_circle';
+    title.textContent = 'Phê duyệt đổi ca';
+    btn.className = 'h-10 px-6 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2';
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Phê duyệt';
+  } else {
+    iconWrap.className = 'w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0';
+    iconSym.className = 'material-symbols-outlined text-red-600 text-[22px]';
+    iconSym.textContent = 'cancel';
+    title.textContent = 'Từ chối yêu cầu đổi ca';
+    btn.className = 'h-10 px-6 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors flex items-center gap-2';
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">cancel</span> Từ chối';
+  }
+  document.getElementById('swapActionModal').classList.remove('hidden');
+}
+
+async function confirmSwapAction() {
+  const swapId = document.getElementById('swapActionId').value;
+  const type = document.getElementById('swapActionType').value;
+  const notes = document.getElementById('swapNotesInput').value.trim();
+  document.getElementById('swapActionModal').classList.add('hidden');
+
+  const params = new URLSearchParams({
+    action: type === 'approve' ? 'approveSwap' : 'rejectSwap',
+    format: 'json',
+    id: swapId,
+    notes
+  });
+
+  try {
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(r => r.json());
+
+    if (res.success) {
+      showToast('success', type === 'approve' ? 'Đã phê duyệt yêu cầu đổi ca!' : 'Đã từ chối yêu cầu đổi ca!');
+      await loadScheduleData();
+    } else {
+      showToast('error', res.error || 'Thao tác thất bại');
+    }
+  } catch (e) {
+    showToast('error', 'Lỗi kết nối');
+  }
+}
 
 // Reload page when navigated back/forward via bfcache
 window.addEventListener('pageshow', function(event) {

@@ -49,6 +49,11 @@ public interface CaLamViecDAO {
     List<CaLamViec> getCaByAccountIDAndDateRange(int accountId, LocalDate startDate, LocalDate endDate);
 
     /**
+     * Lấy danh sách ca làm của một nhân viên theo khoảng ngày (alias)
+     */
+    List<CaLamViec> getShiftsByAccountAndDateRange(int accountId, LocalDate startDate, LocalDate endDate);
+
+    /**
      * Lấy danh sách ca làm định kỳ (theo thứ) của một nhân viên
      */
     List<CaLamViec> getRecurringShiftsByAccountID(int accountId);

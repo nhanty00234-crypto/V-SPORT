@@ -12,6 +12,7 @@ public final class Constants {
     public static final int ROLE_KHACH_HANG = 3;
     public static final int ROLE_LE_TAN = 4;
     public static final int ROLE_BAO_VE = 5;
+    public static final int ROLE_STAFF = 4; // Staff role
 
     // ========== BOOKING (LichDatSan) STATUS ==========
     public static final String TRANG_THAI_DAT_SAN_CHO_XAC_NHAN = "Chờ xác nhận";

@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -123,33 +124,40 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             } else {
                 boolean isJson = "json".equals(req.getParameter("format"));
                 String successMsg = null;
+                List<String> warnings = new ArrayList<>();
                 
                 if ("cloneWeek".equals(action)) {
                     LocalDate fromWeek = LocalDate.parse(req.getParameter("fromWeek"));
                     LocalDate toWeek = LocalDate.parse(req.getParameter("toWeek"));
-                    caLamService.cloneWeekShifts(fromWeek, toWeek, managerCoSoId, manager.getAccountId());
-                    successMsg = "NhÃ¢n báº£n lá»‹ch tuáº§n thÃ nh cÃ´ng!";
+                    List<String> reports = caLamService.cloneWeekShifts(fromWeek, toWeek, managerCoSoId, manager.getAccountId());
+                    successMsg = "Nhân bản lịch tuần thành công!";
+                    if (reports != null && !reports.isEmpty()) {
+                        warnings.addAll(reports);
+                    }
                 } else if ("autoSchedule".equals(action)) {
                     LocalDate startDate = LocalDate.parse(req.getParameter("startDate"));
                     LocalDate endDate = LocalDate.parse(req.getParameter("endDate"));
-                    caLamService.autoScheduleShifts(startDate, endDate, managerCoSoId, manager.getAccountId());
-                    successMsg = "Tá»± Ä‘á»™ng sáº¯p lá»‹ch thÃ nh cÃ´ng dá»±a trÃªn nguyá»‡n vá»ng cá»§a nhÃ¢n viÃªn!";
+                    String report = caLamService.autoScheduleShifts(startDate, endDate, managerCoSoId, manager.getAccountId());
+                    successMsg = report;
                 } else if ("publishWeek".equals(action)) {
                     LocalDate weekStart = LocalDate.parse(req.getParameter("weekStart"));
-                    caLamService.publishWeekShifts(weekStart, managerCoSoId, manager.getAccountId());
-                    successMsg = "CÃ´ng bá»‘ lá»‹ch lÃ m viá»‡c thÃ nh cÃ´ng!";
+                    List<String> publishWarns = caLamService.publishWeekShifts(weekStart, managerCoSoId, manager.getAccountId());
+                    successMsg = "Công bố lịch làm việc thành công!";
+                    if (publishWarns != null && !publishWarns.isEmpty()) {
+                        warnings.addAll(publishWarns);
+                    }
                 } else if ("approveSwap".equals(action)) {
                     int swapId = Integer.parseInt(req.getParameter("id"));
                     String notes = req.getParameter("notes");
                     caLamService.approveSwapRequest(swapId, manager.getAccountId(), notes);
-                    successMsg = "ÄÃ£ phÃª duyá»‡t yÃªu cáº§u Ä‘á»•i ca!";
+                    successMsg = "Đã phê duyệt yêu cầu đổi ca!";
                 } else if ("rejectSwap".equals(action)) {
                     int swapId = Integer.parseInt(req.getParameter("id"));
                     String notes = req.getParameter("notes");
                     caLamService.rejectSwapRequest(swapId, manager.getAccountId(), notes);
-                    successMsg = "ÄÃ£ tá»« chá»‘i yÃªu cáº§u Ä‘á»•i ca!";
+                    successMsg = "Đã từ chối yêu cầu đổi ca!";
                 } else {
-                    throw new IllegalArgumentException("HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡: " + action);
+                    throw new IllegalArgumentException("Hành động không hợp lệ: " + action);
                 }
 
                 if (isJson) {
@@ -158,9 +166,15 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     java.util.Map<String, Object> map = new java.util.HashMap<>();
                     map.put("success", true);
                     map.put("message", successMsg);
+                    if (!warnings.isEmpty()) {
+                        map.put("warnings", warnings);
+                    }
                     resp.getWriter().write(new com.google.gson.Gson().toJson(map));
                 } else {
                     session.setAttribute("message", successMsg);
+                    if (!warnings.isEmpty()) {
+                        session.setAttribute("warnings", warnings);
+                    }
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
                 }
             }
@@ -357,6 +371,11 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         String repeatUntilParam = req.getParameter("repeatUntil");
         if (repeatUntilParam != null && !repeatUntilParam.trim().isEmpty()) {
             request.setRepeatUntil(LocalDate.parse(repeatUntilParam));
+        }
+
+        String overrideConfirmParam = req.getParameter("overrideConfirm");
+        if (overrideConfirmParam != null && !overrideConfirmParam.trim().isEmpty()) {
+            request.setOverrideConfirm(Boolean.parseBoolean(overrideConfirmParam));
         }
 
         return request;

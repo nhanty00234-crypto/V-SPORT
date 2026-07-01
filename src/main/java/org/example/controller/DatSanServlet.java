@@ -275,6 +275,15 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
 
+        // --- Bước 2d: Validate không đặt quá xa trong tương lai (tối đa 30 ngày) ---
+        LocalDate maxDate = today.plusDays(30);
+        if (ngayDat.isAfter(maxDate)) {
+            session.setAttribute("error",
+                    "Chỉ có thể đặt sân trong vòng 30 ngày tới (tối đa đến ngày " + maxDate + "). Vui lòng chọn ngày khác.");
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+            return;
+        }
+
         // --- Bước 3: Vòng lặp retry deadlock ---
         for (int attempt = 1; attempt <= MAX_DEADLOCK_RETRIES; attempt++) {
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {

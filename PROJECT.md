@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Kiến trúc hệ thống & Công nghệ sử dụng (Tech Stack)
+## 1. Kiến trúc hệ thống & Công nghệ (System Architecture & Tech Stack)
 
 Hệ thống tuân thủ mô hình kiến trúc **MVC (Model-View-Controller)** truyền thống, chia thành các phân lớp rõ rệt:
 
@@ -34,7 +34,7 @@ graph TD
 
 ---
 
-## 2. Bản đồ cấu trúc thư mục dự án
+## 2. Bản đồ cấu trúc thư mục dự án (Directory Structure)
 
 ```text
 DATN/ (Thư mục gốc dự án)
@@ -61,18 +61,19 @@ DATN/ (Thư mục gốc dự án)
 │   │       ├── customer/        # Trang đặt sân, lịch sử giao dịch dành cho Khách hàng
 │   │       ├── staff/           # Trang dành cho nhân viên trực ca
 │   │       └── auth/            # Trang đăng nhập, đăng ký, xác thực OTP
+│   └── test/                    # Các kịch bản kiểm thử tự động (Unit Tests)
 └── pom.xml                      # Quản lý thư viện phụ thuộc của Maven
 ```
 
 ---
 
-## 3. Các phân hệ chức năng chính
+## 3. Các phân hệ chức năng chính (Core Functional Modules)
 
 ### Phân hệ 1: Quản lý đặt sân & Hóa đơn (Booking & POS)
 *   **Chức năng**: Khách hàng tra cứu danh sách sân trống theo thời gian thực, đặt sân theo khung giờ mong muốn, áp dụng mã khuyến mãi (`KhuyenMai`), nhận hóa đơn thanh toán trực tiếp qua mã QR tĩnh/động (`MaQR`), chia hóa đơn cho nhóm chơi (`ChiaHoaDon`), và yêu cầu hoàn tiền nếu hủy lịch hợp lệ (`Hoantien`).
 *   **Thành phần chính**:
     *   *Frontend*: `webapp/customer/dat-san.jsp`, `webapp/customer/history.jsp`
-    *   *Backend*: [DatSanServlet.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/controller/DatSanServlet.java)
+    *   *Backend*: [DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java)
     *   *Thực thể*: `DatSan`, `Lichdatsan`, `HoaDon`, `ChiTietHoaDon`, `ChiaHoaDon`, `Hoantien`, `MaQR`.
 
 ### Phân hệ 2: Quản lý nhân sự, Xếp lịch làm việc (Staff Scheduling) & Điểm danh (Attendance)
@@ -81,8 +82,8 @@ DATN/ (Thư mục gốc dự án)
     *   **Quy trình điểm danh (Check-in/Check-out)**: Nhân viên trực ca thực hiện điểm danh vào ca (Check-in) và kết thúc ca (Check-out) trực quan ngay trên lịch làm việc. Trạng thái đi làm thực tế được ghi nhận tức thời lên màn hình giám sát của Quản lý.
     *   **Đơn xin nghỉ & Nguyện vọng**: Nhân viên gửi nguyện vọng rảnh/bận (`CaLamViecAvailability`) hoặc đơn xin nghỉ phép (`YeuCauNghi`). Tất cả quy trình duyệt từ Quản lý đều thực hiện qua AJAX thời gian thực.
 *   **Thành phần chính**:
-    *   *Frontend*: `webapp/manager/NhanSu.jsp`, `webapp/manager/CaLamViec.jsp` (Dành cho Quản lý); `webapp/staff/CaLamViec.jsp` (Dành cho Nhân viên)
-    *   *Backend*: [QuanLyCaLamManagerServlet.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java), [YeuCauNghiManagerServlet.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/controller/YeuCauNghiManagerServlet.java), [StaffCaLamServlet.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/controller/StaffCaLamServlet.java), [CaLamService.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/service/manager/CaLamService.java)
+    *   *Frontend*: [NhanSu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/NhanSu.jsp), [CaLamViec.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/CaLamViec.jsp) (Dành cho Quản lý); [CaLamViec.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/staff/CaLamViec.jsp) (Dành cho Nhân viên)
+    *   *Backend*: [QuanLyCaLamManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java), [YeuCauNghiManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/YeuCauNghiManagerServlet.java), [StaffCaLamServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/StaffCaLamServlet.java), [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java)
     *   *Thực thể*: `CaLamViec`, `CaLamViecAudit`, `CaLamViecAvailability`, `CaLamViecSwapRequest`, `YeuCauNghi`.
 
 ### Phân hệ 3: Ghép kèo cộng đồng & Xếp hạng ELO (Matchmaking)
@@ -100,14 +101,14 @@ DATN/ (Thư mục gốc dự án)
 ### Phân hệ 5: Quản lý Kho hàng & Dịch vụ đi kèm (Inventory & Add-on Services)
 *   **Chức năng**: Quản lý danh mục hàng hóa (`DanhMucSanPham`), sản phẩm và dịch vụ cho thuê/bán lẻ tại quầy (`SanPham_DichVu`), quản lý số lượng tồn kho của chi nhánh, theo dõi nhập/xuất kho. Áp dụng cơ chế khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi xuất/nhập kho để tránh race condition và đảm bảo tính toàn vẹn dữ liệu.
 *   **Thành phần chính**:
-    *   *Frontend*: `webapp/manager/KhoDichVu.jsp`
+    *   *Frontend*: [KhoDichVu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/KhoDichVu.jsp)
     *   *Backend*: [KhoDichVuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java)
     *   *Thực thể*: `SanPham_DichVu`, `DanhMucSanPham`.
 
 ### Phân hệ 6: Quản lý Sân bãi & Loại sân (Facility & Court Management)
 *   **Chức năng**: Cấu hình và quản lý danh mục loại sân (`LoaiSan`), các sân bóng, cầu lông, tennis cụ thể (`San`) trực thuộc chi nhánh; theo dõi trực quan trạng thái sân (Sẵn sàng, Đang hoạt động, Bảo trì) theo thời gian thực.
 *   **Thành phần chính**:
-    *   *Frontend*: `webapp/manager/QuanLySan.jsp`
+    *   *Frontend*: [QuanLySan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp)
     *   *Backend*: [QuanLySanManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLySanManagerServlet.java), [QuanLySanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLySanServlet.java)
     *   *Thực thể*: `San`, `LoaiSan`, `CoSo`.
 
@@ -129,7 +130,7 @@ Hệ thống quản lý thông tin thông qua **32 JPA Entities** chính dưới
 | 2 | **VaiTro** | Định nghĩa các quyền của tài khoản (Admin, Manager, Staff, Customer, Owner). |
 | 3 | **CoSo** | Lưu trữ thông tin các chi nhánh / cơ sở thể thao trong hệ thống chuỗi. |
 | 4 | **MonTheThao** | Định nghĩa môn thể thao được cung cấp (Bóng đá, Cầu lông, Bóng rổ...). |
-| 5 | **LoaiSan** | Phân loại sân theo chất lượng / kích thước (Sân 5 người, Sân 7 người, Sân cỏ nhân tạo, Sân đất nện...). |
+| 5 | **LoaiSan** | Phân loại sân theo chất lượng / kích thước (Sân 5 người, Sân 7 người, Sân cỏ nhân tạo...). |
 | 6 | **San** | Các sân cụ thể trực thuộc một chi nhánh cơ sở nhất định. |
 | 7 | **DatSan** | Ghi nhận yêu cầu đặt lịch sân của khách hàng (Ngày, giờ, tổng tiền, trạng thái). |
 | 8 | **Lichdatsan** | Lịch chi tiết đã được giữ chỗ theo khung giờ cụ thể để tránh đặt trùng. |
@@ -166,29 +167,25 @@ Hệ thống quản lý chặt chẽ theo 5 vai trò tài khoản cốt lõi:
 
 *   **1. Admin (Quản trị viên tối cao)**:
     *   Quản lý toàn bộ cơ sở dữ liệu hệ thống chuỗi.
-    *   Thêm mới, sửa thông tin chi nhánh cơ sở (`CoSo`).
-    *   Cấu hình loại sân (`LoaiSan`), môn thể thao (`MonTheThao`), cấu hình phân hạng ELO hệ thống.
-    *   Xem báo cáo tổng thể doanh thu toàn chuỗi.
+    *   Thêm mới, sửa thông tin chi nhánh cơ sở (`MonTheThao`, `LoaiSan`, `CoSo`).
+    *   Cấu hình phân hạng ELO và xem báo cáo tổng doanh thu toàn chuỗi.
 *   **2. Manager (Quản lý chi nhánh cơ sở)**:
-    *   Quản lý trực tiếp các sân (`San`) thuộc cơ sở được chỉ định.
-    *   Tạo, khóa tài khoản, phân bổ ca làm việc (`CaLamViec`) cho nhân viên trực thuộc chi nhánh.
+    *   Quản lý trực tiếp các sân (`San`) và phân bổ ca làm việc (`CaLamViec`) cho nhân viên thuộc chi nhánh.
     *   Phê duyệt đơn xin nghỉ phép (`YeuCauNghi`), yêu cầu đổi ca (`CaLamViecSwapRequest`).
-    *   Xem biểu đồ thống kê doanh thu, tần suất sử dụng sân, dịch vụ của chi nhánh.
+    *   Xem biểu đồ thống kê doanh thu, tần suất sử dụng sân, dịch vụ kho hàng của chi nhánh.
 *   **3. Staff (Nhân viên trực ca: Lễ tân, Bảo vệ)**:
-    *   *Lễ tân*: Tiếp đón khách, bán dịch vụ tại quầy, kích hoạt QR thanh toán hóa đơn, tiếp nhận yêu cầu hỗ trợ SOS khẩn cấp.
-    *   *Bảo vệ*: Check-in/check-out xe ra vào bãi đỗ thông qua quét mã thẻ xe.
-    *   Xem ca làm việc cá nhân, đăng ký nguyện vọng rảnh/bận, gửi đơn nghỉ phép.
+    *   *Lễ tân*: Bán dịch vụ tại quầy, kích hoạt QR hóa đơn, tiếp nhận yêu cầu SOS khẩn cấp.
+    *   *Bảo vệ*: Check-in/check-out xe ra vào bãi đỗ thông qua thẻ xe thông minh.
+    *   Xem ca làm cá nhân, báo cáo nguyện vọng rảnh, gửi đơn nghỉ phép.
 *   **4. Customer (Khách hàng sử dụng dịch vụ)**:
-    *   Tìm kiếm chi nhánh, loại sân thể thao trống.
-    *   Tiến hành đặt sân, thanh toán chuyển khoản QR, quản lý lịch sử đặt sân của mình.
-    *   Tạo phòng chờ ghép kèo, tìm đối thủ có cùng trình độ (hệ thống tự động lọc theo điểm ELO), chat nhóm, gửi nhận xét đánh giá dịch vụ.
-*   **5. Owner (Chủ sở hữu thương hiệu - Tùy chọn mở rộng)**:
+    *   Tìm kiếm sân trống, đặt lịch chơi, thanh toán trực tuyến qua cổng QR (PayOS).
+    *   Tham gia ghép kèo ELO, chat nhóm, gửi đánh giá phản hồi.
+*   **5. Owner (Chủ thương hiệu)**:
     *   Đăng ký tạo thương hiệu chuỗi thể thao mới trên nền tảng.
-    *   Đăng ký tài khoản quản lý và liên kết cơ sở.
 
 ---
 
-## 6. Hướng dẫn thiết lập & Vận hành dự án (Installation Guide)
+## 6. Hướng dẫn thiết lập & Vận hành dự án (Installation & Deployment)
 
 ### Yêu cầu hệ thống tối thiểu:
 *   Java Development Kit (JDK) 17 hoặc cao hơn.
@@ -199,13 +196,13 @@ Hệ thống quản lý chặt chẽ theo 5 vai trò tài khoản cốt lõi:
 ### Bước 1: Khởi tạo Cơ sở dữ liệu
 1.  Cài đặt MS SQL Server và khởi chạy SQL Server Agent.
 2.  Tạo một cơ sở dữ liệu trống tên là `QuanLiSport`.
-3.  Thực hiện chạy các script SQL để tạo bảng hoặc chạy script khởi tạo dữ liệu mẫu nếu có.
+3.  Thực hiện chạy các script SQL khởi tạo schema.
 
 ### Bước 2: Cấu hình kết nối Database
 Mở file cấu hình JPA tại đường dẫn: `src/main/resources/META-INF/persistence.xml` và cập nhật thông tin tài khoản SQL Server của bạn:
 ```xml
 <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;"/>
-<property name="jakarta.persistence.jdbc.user" value="Tên_đăng_nhập_của_bạn (Ví dụ: sa)"/>
+<property name="jakarta.persistence.jdbc.user" value="sa"/>
 <property name="jakarta.persistence.jdbc.password" value="Mật_khẩu_của_bạn"/>
 ```
 
@@ -217,98 +214,231 @@ mvn clean package
 Sau khi chạy thành công, file `Backend_java-1.0-SNAPSHOT.war` sẽ được tạo ra trong thư mục `target/`.
 
 ### Bước 4: Chạy trên Apache Tomcat 10.1
-1.  Copy file `.war` vừa tạo vào thư mục `webapps/` của Tomcat hoặc cấu hình trực tiếp deployment trong IDE (IntelliJ IDEA / Eclipse) sử dụng plugin **SmartTomcat** (chỉ định context path là `/`).
-2.  Bật Tomcat Server.
-3.  Truy cập hệ thống thông qua địa chỉ: `http://localhost:8080/` (hoặc cổng cấu hình tương ứng).
+1.  Copy file `.war` vào thư mục `webapps/` của Tomcat hoặc cấu hình trực tiếp deployment trong IDE sử dụng plugin **SmartTomcat** (chỉ định context path là `/`).
+2.  Truy cập hệ thống thông qua địa chỉ: `http://localhost:8080/`.
 
 ---
 
-## 7. Nhật ký cập nhật hệ thống (System Update Log)
+## 7. Quy trình phát triển & Quy chuẩn Nghiệp vụ (Standard Operating Procedures)
 
-### Cập nhật ngày 22/06/2026: Nâng cấp Quy trình Đổi ca & Điểm danh Ca làm việc
+### A. Quy trình Đặt sân & Khóa chỗ Tạm thời (Soft-Hold vs PayOS Timeout)
+Để tối ưu hóa trải nghiệm khách hàng và tránh tranh chấp sân, hệ thống áp dụng cơ chế khóa 2 lớp:
+1.  **Soft-Hold 2 phút**: Ngay khi khách chọn xong khung giờ hợp lệ, hệ thống tạo bản ghi tạm trong bảng `SoftHold` để giữ chỗ trong 2 phút (do `SOFT_HOLD_TIMEOUT_MINUTES` quy định). Nếu quá 2 phút khách không thanh toán, sân tự động mở lại cho người khác. Khách hàng không bị chính mình khóa (`AccountID <> ?`).
+2.  **PayOS Timeout 10 phút**: Khi chuyển đến trang thanh toán trực tuyến, trạng thái lịch đặt chuyển thành `Chờ thanh toán`. CSDL lưu thời điểm tạo qua cột `CreatedTime`. Sau 10 phút nếu không nhận được webhook thanh toán thành công, hệ thống coi ca đặt này đã hết hạn và tự động bỏ qua khi quét trùng lịch (self-healing), không cần cron job dọn dẹp.
+3.  **Khóa dòng bi quan**: Khi ghi nhận đặt sân hoặc Check-in vãng lai của Lễ tân, hệ thống sử dụng `WITH (UPDLOCK, ROWLOCK)` trên bảng `San` để loại bỏ hoàn toàn race condition ở mức độ mili-giây.
 
-#### 1. Quy trình hoán đổi ca làm việc (2 Bước Bảo mật & Minh bạch)
-*   **Tách biệt tab điều hướng trên giao diện Nhân viên**: Chia nhỏ phần đổi ca làm việc trong [CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/staff/CaLamViec.jsp) thành 3 sub-tab: **Cần xác nhận** (yêu cầu đổi ca do đồng nghiệp gửi đến), **Tôi đã gửi** (các yêu cầu do bản thân khởi tạo), và **Lịch sử** (lưu vết tất cả các yêu cầu cũ). Có badge số lượng màu đỏ thông báo tại tab "Cần xác nhận".
-*   **Xác nhận 2 bước**: 
-    1.  Nhân viên A gửi yêu cầu đổi ca cho Nhân viên B -> Yêu cầu ở trạng thái `ChoXacNhan`.
-    2.  Nhân viên B bấm **[Đồng ý]** -> Yêu cầu chuyển thành `ChoQuanLyDuyet`. (Nếu B bấm **[Từ chối]** -> Yêu cầu kết thúc ở trạng thái `TuChoi`).
-    3.  Quản lý (Manager) sử dụng bộ lọc tìm các yêu cầu chờ duyệt trên giao diện [NhanSu.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/NhanSu.jsp) để bấm **[Duyệt]** (hoán đổi ca trực tiếp trong CSDL) hoặc **[Từ chối]** (giữ nguyên ca làm việc).
+### B. Quy trình Xếp ca & Hoán đổi lịch (Scheduling & Swapping Flow)
+Quy trình phân ca và chấm công được vận hành chặt chẽ để đảm bảo tính minh bạch:
+1.  **Hệ thống trạng thái ca làm**: `Draft` (Nháp) $\rightarrow$ `Published` (Công bố) $\rightarrow$ `Confirmed` (Xác nhận đi làm) $\rightarrow$ `CheckedIn` (Đang làm việc) $\rightarrow$ `CheckedOut` (Đã hoàn thành).
+2.  **Quy trình đổi ca 2 bước**:
+    *   **Bước 1 (Nhân viên $\rightarrow$ Nhân viên)**: Nhân viên A gửi yêu cầu đổi ca cho nhân viên B $\rightarrow$ Yêu cầu ở trạng thái `ChoXacNhan`. B nhận thông báo và bấm Đồng ý $\rightarrow$ Yêu cầu đổi thành `ChoQuanLyDuyet`.
+    *   **Bước 2 (Quản lý duyệt)**: Manager kiểm tra yêu cầu trên màn hình điều phối. Khi duyệt, hệ thống tự động chạy kiểm tra xung đột chéo 2 chiều. Nếu hợp lệ, hệ thống hoán đổi `AccountId` trực tiếp trong CSDL và ghi log audit. Nếu không hợp lệ, hệ thống tự chuyển trạng thái sang `TuChoi` kèm lý do chi tiết và thông báo lại cho 2 nhân sự.
+3.  **Điểm danh thời gian thực**: Nhân viên chỉ được bấm check-in/check-out ca làm việc trong ngày hôm nay. Trạng thái `CheckedIn` hiển thị pulsing live-dot trên màn hình giám sát của Manager giúp quản lý trực quan nhân sự thực tế tại chi nhánh.
 
-#### 2. Tính năng Điểm danh (Chấm công) thời gian thực
-*   **Hệ thống trạng thái ca làm việc mở rộng**:
-    *   `Draft`: Ca nháp (Chỉ quản lý thấy).
-    *   `Published`: Ca đã công bố (Nhân viên thấy nhưng chưa xác nhận).
-    *   `Confirmed`: Ca đã xác nhận (Nhân viên đã đồng ý đi làm).
-    *   `CheckedIn`: Đang làm việc (Nhân viên đã bấm điểm danh vào ca).
-    *   `CheckedOut`: Đã hoàn thành (Nhân viên đã bấm kết thúc ca).
-*   **Nhiệp vụ kiểm soát (Backend & CSDL)**:
-    *   Sử dụng cột `TrangThai` hiện có trong bảng `CaLamViec` lưu giá trị `'CheckedIn'` và `'CheckedOut'` để tránh thay đổi cấu trúc bảng database.
-    *   Thêm nghiệp vụ kiểm tra logic tại [CaLamService.java](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/java/org/example/service/manager/CaLamService.java): Nhân viên chỉ được phép điểm danh (check-in) các ca làm việc của ngày hôm nay.
-    *   Tự động ghi nhận log hệ thống (`CHECK_IN` và `CHECK_OUT` audit log) khi nhân viên thao tác.
-    *   **Hiển thị trực quan (Frontend)**:
-        *   **Giao diện Nhân viên ([CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/staff/CaLamViec.jsp))**: Hiển thị nút **[Điểm danh vào ca]** (màu xanh lá) cho các ca hôm nay đã xác nhận. Khi đã check-in, nút chuyển thành **[Kết thúc ca]** (màu đỏ).
-        *   **Giao diện Quản lý ([NhanSu.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/NhanSu.jsp) và [CaLamViec.jsp](file:///c:/Users/nhan/Downloads/DATN/DATN/src/main/webapp/manager/CaLamViec.jsp))**: Trạng thái `CheckedIn` hiển thị huy hiệu xanh lá kèm theo chấm đỏ nhấp nháy chuyển động (pulsing live-dot) để quản lý nhận biết trực quan nhân viên nào đang làm việc tại sân. Trạng thái `CheckedOut` đổi sang huy hiệu xám "Đã hoàn thành".
+### C. Quy trình An toàn kho hàng & Dọn dẹp bộ nhớ đệm
+1.  **Khóa ghi bi quan kho hàng**: Mọi hoạt động nhập/xuất kho đều áp dụng khóa `LockModeType.PESSIMISTIC_WRITE` khi tải thông tin sản phẩm nhằm loại bỏ lỗi lost update khi nhiều nhân viên bán hàng cùng lúc.
+2.  **Giao dịch nguyên tử (Presets)**: Hoạt động nạp sản phẩm mẫu mặc định được bọc trong một transaction duy nhất để đảm bảo rollback sạch sẽ nếu lỗi.
+3.  **Dọn dẹp danh mục trùng lặp**: Sử dụng static lock (`categoryLock`) và cờ volatile `categoryCleaned` trong `KhoDichVuManagerServlet` giúp tiến trình dọn dẹp chỉ kích hoạt duy nhất một lần khi hệ thống startup, tránh tải lại chậm.
 
-### Cập nhật ngày 29/06/2026: Đồng bộ hóa quy trình Đặt Sân Online & Quầy và Cơ chế Tạm khóa 10 phút chống Race Condition
+### D. Quy trình Bảo mật & Kiểm soát chéo (IDOR Prevention & Branch Isolation)
+1.  **Bảo vệ dữ liệu chi nhánh**: Tuyệt đối không tin tưởng chi nhánh từ client truyền lên. Tất cả API của Manager đều lấy `CoSoId` trực tiếp từ session của Manager đã đăng nhập.
+2.  **Chống IDOR**: Trước khi cập nhật thông tin nhân viên, duyệt đơn nghỉ phép, hoặc hoán đổi ca làm, Service Layer bắt buộc phải gọi `BranchSecurityUtils.checkBranchAccess(targetCoSoId, managerCoSoId)` để ngăn quản lý chi nhánh A thao tác dữ liệu chi nhánh B.
+3.  **Giấu chi tiết lỗi**: Cấm kết xuất lỗi thô (`e.getMessage()`) ra client đối với các lỗi CSDL. Thay thế bằng mã lỗi/thông báo an toàn để bảo mật cấu trúc hệ thống.
 
-#### 1. Hợp nhất giao diện Lịch sử đặt sân của Khách hàng (Single-page UX)
-*   **Loại bỏ trang lịch sử độc lập**: Loại bỏ tệp `LichSuDatSan.jsp` riêng biệt. Tích hợp toàn diện phần quản lý ca chơi trực tiếp vào trang Tìm & Đặt sân chính ([DatSan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/customer/DatSan.jsp)) dưới dạng **Modal Lịch sử** có thiết kế cao cấp đồng bộ.
-*   **Định tuyến thông minh và tự động mở (Auto-open)**:
-    *   Tất cả các liên kết lịch sử trên Header ([header.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/common/header.jsp)) chuyển sang `/customer/dat-san?openHistory=true`.
-    *   Servlet ([DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java)) thực hiện redirect tự động từ `/customer/lich-su-dat-san` sang trang tìm sân kèm tham số.
-    *   Frontend tự động bắt tham số URL để kích hoạt mở modal lịch sử mà không cần tải lại trang.
-*   **Tích hợp Thống kê (User Stats Sub-header)**: Đầu modal hiển thị Avatar viết hoa, email, tổng số ca chơi đã đặt và điểm uy tín cá nhân của khách hàng.
+---
 
-#### 2. Cơ chế Tạm khóa 10 phút (PayOS Timeout) & Giải phóng sân tự phục hồi (Self-healing)
-*   **Bổ sung cột CSDL**: Thực thi SQL Alter thêm cột `CreatedTime DATETIME DEFAULT GETDATE()` vào bảng `LichDatSan` phục vụ ghi nhận thời điểm tạo đơn.
-*   **Bộ chọn hình thức thanh toán**: Tích hợp bộ chọn hình thức thanh toán (PayOS quét mã cọc trực tuyến vs Tiền mặt tại quầy) có giao diện thẻ card hiện đại và các cảnh báo động trên checkout panel của khách hàng.
-*   **Kiểm tra trùng lịch tự giải phóng**:
-    *   Nếu chọn PayOS, ca đặt được khởi tạo ở trạng thái `Chờ thanh toán`.
-    *   Truy vấn kiểm tra trùng lịch tại [DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java) và [CheckInDAO.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/CheckInDAO.java) tự động bỏ qua (loại trừ) các ca `Chờ thanh toán` đã quá 10 phút. Thiết kế này giúp sân bóng tự giải phóng và mở lại cho người dưới đặt mà không cần viết các tác vụ cron job ngầm phức tạp.
-    *   Walk-in check-in của lễ tân sẽ chặn (block) nếu có ca thanh toán PayOS dưới 10 phút, và tự động bỏ qua nếu ca đó hết hạn.
+## 8. Ma trận Validation Hệ thống Đặt Sân (Booking Validation)
 
-#### 3. Khóa bi quan chống Race Condition khi Check-in Vãng lai
-*   **Nghiệp vụ khóa dòng**: Bổ sung gợi ý khóa `WITH (UPDLOCK, ROWLOCK)` khi SELECT kiểm tra trạng thái Sân trong luồng mở sân cho khách vãng lai ([CheckInDAO.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/CheckInDAO.java)).
-*   **Tác dụng**: Ngăn chặn triệt để xung đột tranh chấp dữ liệu khi Lễ tân mở sân tại quầy trùng khớp thời điểm mili-giây khách hàng bấm đặt trực tuyến trên Web.
+Tất cả validation đều thực hiện **server-side** (không tin tưởng client). Được chia thành 4 nhóm theo luồng nghiệp vụ.
 
-### Cập nhật ngày 01/07/2026: Vá Lỗ hổng Bảo mật IDOR, Đồng bộ hóa Giao dịch Kho Hàng & Sửa lỗi JSP / bfcache
+### Nhóm 1: Validation Ngày/Giờ (Khách hàng đặt sân)
+Vị trí: [`DatSanServlet.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java) — phương thức `handleDatSan()`.
 
-#### 1. Khắc phục triệt để các lỗ hổng IDOR & Cô lập dữ liệu chi nhánh
-*   **Quản lý lịch ca làm định kỳ**: Vá lỗi IDOR trong `addShiftPattern` và `deleteShiftPattern` (ở [NhanSuService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/NhanSuService.java) và [NhanSuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/NhanSuManagerServlet.java)) bằng cách nạp thông tin nhân sự và xác thực phân quyền chi nhánh (`BranchSecurityUtils.checkBranchAccess(staff.getCoSoId(), coSoId)`) trước khi ghi nhận thay đổi, ngăn quản lý cơ sở A thao tác ca làm của nhân viên cơ sở B.
-*   **Xem chi tiết hồ sơ nhân viên**: Chuyển đổi phương thức sang `getStaffById(accountId, managerCoSoId)` trong [NhanSuService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/NhanSuService.java) để thực thi kiểm tra bảo mật cô lập chi nhánh trực tiếp tại tầng Service layer trước khi kết xuất dữ liệu PII nhạy cảm và thông tin tài khoản ngân hàng.
-*   **Phê duyệt và từ chối yêu cầu đổi ca**: Bổ sung kiểm tra branch chéo chi nhánh trong các phương thức `approveSwapRequest` và `rejectSwapRequest` ở [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java) đối chiếu chi nhánh của người gửi yêu cầu đổi ca (`requester`) với chi nhánh của quản lý đang duyệt (`manager`).
-*   **Cập nhật thông tin nhân viên**: Thêm bước kiểm tra quyền chi nhánh trước khi gửi mã xác thực OTP cập nhật email trong servlet nhân sự.
+| # | Rule | Điều kiện chặn | Thông báo lỗi |
+|---|------|---------------|---------------|
+| T1 | Không đặt ngày quá khứ | `ngayDat < today` | "Không thể đặt sân cho ngày đã qua." |
+| T2 | Không đặt giờ đã qua (hôm nay) | `ngayDat == today && gioBatDau < now` | "Không thể đặt sân cho giờ đã qua trong ngày hôm nay." |
+| T3 | Không đặt quá xa tương lai | `ngayDat > today + 30 ngày` | "Chỉ có thể đặt sân trong vòng 30 ngày tới (tối đa đến ngày X)." |
+| T4 | Giờ kết thúc phải sau giờ bắt đầu | `gioKetThuc <= gioBatDau` | "Giờ kết thúc phải sau giờ bắt đầu." |
+| T5 | Thời lượng tối thiểu 30 phút | `duration < 30 phút` | "Thời lượng đặt sân tối thiểu cho mỗi lượt là 30 phút." |
+| T6 | Thời lượng tối đa 4 giờ | `duration > 240 phút` | "Thời lượng đặt sân tối đa cho mỗi lượt là 4 giờ (240 phút)." |
+| T7 | Giờ trong khung hoạt động cơ sở | `gioBatDau < GioMoCua` hoặc `gioKetThuc > GioDongCua` | "Cơ sở mở cửa lúc X. Giờ của bạn quá sớm/muộn." |
 
-#### 2. Đồng bộ hóa an toàn giao dịch & Ngăn ngừa Race Condition Kho hàng
-*   **Khóa ghi bi quan khi thay đổi số lượng**: Áp dụng khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi tải thông tin sản phẩm phục vụ hoạt động nhập/xuất kho tại [KhoDichVuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java), loại bỏ hoàn toàn khả năng cập nhật đè dữ liệu (lost update) khi nhiều người thao tác hoặc bấm đúp.
-*   **Giao dịch nguyên tử cho sản phẩm mẫu (Presets)**: Đóng gói tiến trình chèn loạt sản phẩm mẫu vào một JPA transaction duy nhất, đảm bảo tính toàn vẹn rollback nếu phát sinh lỗi giữa chừng.
-*   **Dọn dẹp danh mục trùng lặp tối ưu**: Triển khai static lock (`categoryLock`) và cờ volatile `categoryCleaned` trong [KhoDichVuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java) để tiến trình kiểm tra dọn dẹp chỉ kích hoạt duy nhất một lần khi khởi chạy hệ thống, tăng đáng kể tốc độ tải trang.
+### Nhóm 2: Validation Trùng lịch & Trạng thái Sân
+Vị trí: [`DatSanServlet.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java) — bên trong transaction (sau khi khóa dòng `San`).
 
-#### 3. Loại bỏ rò rỉ thông tin lỗi & Sửa lỗi im lặng (Silent failure)
-*   **Rò rỉ lỗi hệ thống**: Loại bỏ các chỗ ghi đè `e.getMessage()` trực tiếp ra client tại `NhanSuManagerServlet.java` và `KhoDichVuManagerServlet.java`, thay bằng thông báo lỗi an toàn để bảo vệ cấu trúc hệ thống.
-*   **Khắc phục lỗi im lặng**: Bổ sung tham số thuộc tính `errorMessage` lên request scope trong catch block của `CustomerManagerServlet.java` giúp giao diện JSP của quản lý thông báo lỗi kết nối rõ ràng thay vì hiển thị bảng trống không lý do.
+| # | Rule | Điều kiện chặn | Ghi chú |
+|---|------|---------------|---------|
+| C1 | Sân phải ở trạng thái "Sẵn sàng" | `TrangThai != 'Sẵn sàng'` | Chặn đặt sân đang bảo trì/đang dùng |
+| C2 | Không trùng booking đã confirm/đang dùng | Overlap với `Đã xác nhận`, `Đang sử dụng`, `Đã hoàn thành` | Công thức: `NOT (end1 <= start2 OR start1 >= end2)` |
+| C3 | Không trùng PayOS chưa hết 10 phút | Overlap với `Chờ thanh toán` trong 10 phút | Tự giải phóng sau 10 phút — không cần cron job |
+| C4 | Không trùng SoftHold của người khác | Overlap với `SoftHold` active (< 2 phút) từ `AccountID` khác | Self-hold không bị chặn chính mình |
 
-#### 4. Sửa lỗi hiển thị Tiếng Việt (Mojibake Encoding)
-*   Dọn dẹp và chuẩn hóa toàn bộ các chuỗi tiếng Việt bị lỗi hiển thị/vỡ font mã hóa ký tự UTF-8 (ví dụ: `ThÃªm nhÃ¢n viÃªn thÃ nh cÃ´ng!` -> `Thêm nhân viên thành công!`) trong servlet điều hành [NhanSuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/NhanSuManagerServlet.java).
+### Nhóm 3: Validation Duyệt / Từ chối (Manager & Staff)
+Vị trí: [`LichDatSanDAOImpl.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/impl/LichDatSanDAOImpl.java) — `duyetLichDatSan()` và `tuChoiLichDatSan()`.
 
-#### 5. Sửa lỗi chức năng JSP & Vá lỗi bfcache (History Back/Forward)
-*   **Sửa hàm Javascript chết (Dead functions)**: Cấu hình `id` động cho các form (`form-approve-${req.yeuCauNghiID}`) và chuyển các nút submit thành nút gọi hàm xác nhận `confirmApprove(id)` / `confirmReject(id)` trong [yeuCauNghi_list.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/yeuCauNghi_list.jsp).
-*   **Vá lỗi bfcache**: Tích hợp trình lắng nghe sự kiện `pageshow` ở các trang manager ([KhoDichVu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/KhoDichVu.jsp), [QuanLySan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp), [CaLamViec.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/CaLamViec.jsp), [NhanSu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/NhanSu.jsp), [yeuCauNghi_list.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/yeuCauNghi_list.jsp), [profile_dropdown.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/common/profile_dropdown.jsp)) để buộc tải lại dữ liệu mới nhất từ máy chủ khi bấm Back/Forward trên trình duyệt.
+| # | Rule | Điều kiện chặn | Ghi chú |
+|---|------|---------------|---------|
+| D1 | Không duyệt booking đã quá giờ | `NgayDat < today` hoặc `(NgayDat == today && GioBatDau < now)` | Chống duyệt lịch lỗi thời |
+| D2 | Chỉ duyệt trạng thái "Chờ xác nhận" | `TrangThai != 'Chờ xác nhận'` | Tránh duyệt 2 lần gây xung đột |
+| D3 | Không duyệt nếu có conflict mới | Booking khác đã confirm trùng khung giờ trong race condition | Kiểm tra lại thời điểm duyệt |
+| D4 | Nhân sự chỉ duyệt sân cơ sở mình | `San.CoSoID != coSoId` của người duyệt | Phân quyền chi nhánh nghiêm ngặt |
+| D5 | Lý do từ chối bắt buộc | `reason == null \|\| reason.trim().isEmpty()` | Bắt buộc đối với hành động từ chối |
+| D6 | Tự động hủy đơn chờ trùng lịch | Khi một đơn được duyệt, các đơn chờ xác nhận trùng khung giờ | Chuyển sang trạng thái `Đã hủy` tự động |
 
-### Cập nhật ngày 01/07/2026: Cơ chế Giữ chỗ Tạm thời (Soft-Hold) chống trùng lịch sớm khi khách chọn khung giờ
+### Nhóm 4: Validation Hủy Booking (Khách hàng)
+Vị trí: [`DatSanServlet.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java) — phương thức `handleHuyDatSan()`.
 
-#### 1. Vấn đề trải nghiệm cần giải quyết
-*   Trước đây, nhiều khách hàng có thể cùng chọn 1 sân/khung giờ và chỉ phát hiện bị trùng lịch khi bấm "Đặt sân" ở bước cuối cùng — lúc đó khách đã điền hết form, chọn phương thức thanh toán. Cơ chế **Soft-Hold 2 phút** được bổ sung để cảnh báo sớm ngay khi khách chọn xong sân + ngày + giờ hợp lệ, trước khi tiến đến bước thanh toán.
-*   Cơ chế khóa dòng `San` (`WITH (UPDLOCK, ROWLOCK)`) và kiểm tra trùng lịch gốc trong `DatSanServlet.handleDatSan()` vẫn là nguồn đúng đắn cuối cùng (authoritative); Soft-Hold chỉ là lớp cảnh báo sớm phía UX, không thay thế logic chống trùng lịch hiện có.
+| # | Rule | Điều kiện chặn | Ghi chú |
+|---|------|---------------|---------|
+| H1 | Chỉ hủy đơn của chính mình | `lich.getAccountId() != user.getAccountId()` | Chống IDOR |
+| H2 | Chỉ hủy trạng thái "Chờ xác nhận" | `TrangThai != 'Chờ xác nhận'` | Đơn đã thanh toán/xác nhận không tự ý hủy |
+| H3 | Phải hủy trước 6 tiếng | `now + 6h > GioBatDau` | Tránh hủy sát giờ làm trống sân |
 
-#### 2. Thiết kế & Cơ chế hoạt động
-*   **Bảng CSDL mới `SoftHold`**: Lưu độc lập với `LichDatSan` (`AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, CreatedTime`). Không dùng cột `TrangThai` — trạng thái "còn hiệu lực" được suy ra bằng `DATEDIFF(minute, CreatedTime, GETDATE()) <= 2`, cùng pattern lazy-expiry với `PENDING_PAYMENT_TIMEOUT_MINUTES` (10 phút) đang áp dụng cho trạng thái "Chờ thanh toán" của `LichDatSan`.
-*   **Thời hạn giữ chỗ**: 2 phút (hằng số `SOFT_HOLD_TIMEOUT_MINUTES` tại [Constants.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/util/Constants.java)).
-*   **Cơ chế giải phóng**: Chỉ auto-expire theo timeout — không có active release, không JS `beforeunload`, không nút hủy thủ công. Hold "rác" (khách đóng tab giữa chừng) tự động hết hiệu lực và được dọn vật lý ở lần gọi `createHold()` kế tiếp bất kỳ.
-*   **Self-hold không tự chặn chính mình**: Khi kiểm tra trùng trong `DatSanServlet.handleDatSan()`, chỉ chặn nếu `SoftHold` đang active thuộc về tài khoản **khác** (`AccountID <> ?`) — khách có thể đổi qua đổi lại giữa các khung giờ trong 2 phút mà không bị chính mình khóa.
+---
 
-#### 3. Thành phần triển khai
-*   **Model & DAO mới**: [SoftHold.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/model/SoftHold.java) (POJO thuần), [SoftHoldDAO.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/SoftHoldDAO.java) / [SoftHoldDAOImpl.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/impl/SoftHoldDAOImpl.java) — raw JDBC qua `DBUtil`, transaction đầy đủ: khóa dòng `San`, kiểm tra chồng lấn với `SoftHold` của tài khoản khác, kiểm tra chồng lấn với `LichDatSan` đã đặt/đang chờ thanh toán, rồi mới `INSERT`.
-*   **Servlet mới** [GiuChoTamServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/GiuChoTamServlet.java): `POST /customer/giu-cho-tam`, trả JSON qua Gson (`success`, `expiresAt`, `holdSeconds` hoặc `message` lỗi).
-*   **Tích hợp vào luồng đặt sân chính** ([DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java) `handleDatSan()`): Thêm bước kiểm tra `SoftHold` đang active từ tài khoản khác ngay sau overlap-check `LichDatSan` hiện có (cùng transaction đã khóa dòng `San`, không tạo race window mới); và dọn `SoftHold` của chính khách hàng đó ngay sau khi `INSERT LichDatSan` thành công, trước khi commit.
-*   **Frontend** ([DatSan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/customer/DatSan.jsp)): Hàm `requestSoftHold()` gọi `fetch()` POST đến `/customer/giu-cho-tam` ngay khi `checkScheduleAndPrice()` xác nhận khách đã chọn sân/ngày/giờ hợp lệ, dùng biến `lastHoldKey` để tránh gọi lặp. Nếu bị chặn, hiển thị cảnh báo qua khối `#overlap-warning` sẵn có và disable nút "Tiếp theo"; lỗi mạng sẽ fail-open (không chặn UI) vì kiểm tra phía server ở bước đặt cuối cùng vẫn là chốt chặn thật sự.
+## 9. Ma trận Validation Hệ thống Phân ca làm việc (Staff Scheduling)
+
+Hệ thống điều phối nhân sự áp dụng mô hình validation 2 tầng (Tầng Engine xác thực luật lao động/xung đột và Tầng Nghiệp vụ điều phối luồng thao tác) để đảm bảo tuân thủ nghiêm ngặt Luật Lao Động Việt Nam và tối ưu hóa vận hành chi nhánh.
+
+### Tầng 1: Động cơ luật & Xung đột lịch (`CaLamValidationEngine`)
+Được thiết kế để kiểm tra các xung đột thời gian thực cho một ca đơn cụ thể, trả về đối tượng `ValidationResult` chứa danh sách các `ValidationItem` (`code`, `message`, `field`, `context`).
+
+| Mã Rule | Tên Luật / Nghiệp vụ | Loại | Điều kiện kiểm tra / Xử lý |
+|:---:|---|:---:|---|
+| **R1** | Chặn xếp ca trong quá khứ | ERROR | Không cho phép tạo ca mới có ngày làm việc trước hôm nay (`excludeId == null && ngayLam < today`). |
+| **R2** | Thời lượng ca tối thiểu | ERROR | Thời lượng ca thực tế (đã trừ thời gian nghỉ giữa ca) phải từ 30 phút trở lên. |
+| **R3** | Cảnh báo ca quá dài | WARNING | Một ca đơn kéo dài trên 10 tiếng liên tục (cảnh báo nguy cơ quá tải/burnout). |
+| **R4** | Giờ nghỉ bắt buộc giữa ca | WARNING | Ca làm việc thực tế trên 6 tiếng yêu cầu thời gian nghỉ giữa ca ít nhất 30 phút (Bộ Luật Lao Động). |
+| **R5** | Xác thực vai trò phân công | ERROR | Chỉ phân công ca làm việc cho nhân sự có vai trò Staff (`roleId == ROLE_STAFF`). Chặn phân ca cho Manager/Admin. |
+| **R6** | Phân quyền chi nhánh | ERROR | Chỉ gán ca làm việc của chi nhánh X cho nhân viên trực thuộc chi nhánh X (`staff.coSoId == coSoId`). |
+| **R7** | Ngày nghỉ hàng tuần | WARNING | Quét trong 7 ngày liên tiếp xung quanh ca; cảnh báo nếu nhân viên làm việc liên tục 7 ngày không có ngày nghỉ (Điều 111 BLLĐ). |
+| **R8** | Trạng thái đang hoạt động | ERROR | Chặn chỉnh sửa hoặc xóa ca làm việc khi nhân viên đã check-in thực tế (`TrangThai == 'CheckedIn'`). |
+| **R9** | Trạng thái đã hoàn thành | ERROR | Chặn chỉnh sửa hoặc xóa ca làm việc đã hoàn thành check-out (`TrangThai == 'CheckedOut'`). |
+| **R10** | Ca làm việc đã xác nhận | WARNING | Đưa ra cảnh báo gửi thông báo khi cập nhật một ca làm việc đã được nhân viên bấm xác nhận (`Confirmed`). |
+| **R11** | Đơn nghỉ phép chờ duyệt | WARNING | Cảnh báo nếu nhân viên có yêu cầu nghỉ phép (`YeuCauNghi`) ở trạng thái `ChoDuyet` trùng vào ngày đó. |
+| **L_FULL** | Trùng lịch nghỉ cả ngày | ERROR | Chặn xếp ca trùng ngày với lịch nghỉ phép cả ngày đã được phê duyệt (`DaDuyet`). |
+| **L_MOR** | Trùng lịch nghỉ buổi sáng | ERROR | Chặn xếp ca có giờ bắt đầu trước 12:00 trùng ngày nghỉ buổi sáng của nhân viên. |
+| **L_AFT** | Trùng lịch nghỉ buổi chiều | ERROR | Chặn xếp ca có thời gian giao thoa với buổi chiều (sau 12:00) trùng ngày nghỉ buổi chiều của nhân viên. |
+| **OVERLAP**| Trùng ca làm việc khác | ERROR | Sử dụng phép so sánh số phút tuyệt đối trên epoch day để phát hiện chính xác mọi ca trùng lặp (kể cả ca qua đêm). |
+| **REST** | Thời gian nghỉ giữa 2 ca | WARNING | Khoảng cách nghỉ giữa ca làm liền trước hoặc ca làm liền sau với ca đang xét phải từ 12 tiếng trở lên. |
+| **LIMIT** | Giới hạn giờ làm ngày/tuần | ERROR/WARN| - ERROR: Tổng giờ làm > 12h/ngày hoặc > 48h/tuần.<br>- WARNING: Tổng giờ làm > 8h/ngày hoặc > 40h/tuần. |
+
+### Tầng 2: Kiểm soát luồng nghiệp vụ (`CaLamService` / Controllers)
+Đảm bảo tính nhất quán dữ liệu trước và sau các thao tác ghi nhận vào Cơ sở dữ liệu.
+
+*   **3.1 Luồng Tạo Ca (`createShift`)**:
+    *   *Input Validate*: Kiểm tra cứng `accountId > 0`, các trường ngày giờ không null.
+    *   *Repeat limits*: Loại lặp phải thuộc `{none, daily, weekly}`. Hạn chế lặp tối đa 3 tháng và tổng số ca tạo mới một lần không quá `90` ca để bảo vệ CSDL.
+    *   *Engine Validate*: Chạy kiểm tra luật cho từng ngày trong dãy lặp. Nếu xuất hiện bất kỳ `ERROR` nào $\rightarrow$ Rollback toàn bộ danh sách.
+    *   *Post-create*: Tự động gửi thông báo `ThongBao` cho nhân viên nếu ca tạo mới ở trạng thái đã công bố (`Published` hoặc `Confirmed`).
+*   **3.2 Luồng Sửa Ca (`updateShift`)**:
+    *   *Status guard*: Chặn sửa ca đã `CheckedIn` hoặc `CheckedOut`. Đối với ca `Confirmed`, yêu cầu truyền cờ `overrideConfirm` từ quản lý.
+    *   *Date check*: Chặn thay đổi ngày làm việc của ca đã công bố về quá khứ.
+    *   *Engine validate*: Kiểm tra luật của nhân viên mới với tùy chọn loại trừ chính ID ca đang chỉnh sửa (`excludeCaLamViecId`).
+*   **3.3 Luồng Xóa Ca (`deleteShift`)**:
+    *   *Status guard*: Chặn xóa cứng ca đã `CheckedIn` hoặc `CheckedOut`.
+    *   *Reason check*: Ca đã `Published` hoặc `Confirmed` bắt buộc phải nhập lý do xóa (`deleteReason` không rỗng) phục vụ audit. Ca `Draft` được xóa tự do.
+*   **3.5 Luồng Công Bố Tuần (`publishWeekShifts`)**:
+    *   *Date check*: Chỉ cho phép công bố tuần bắt đầu từ thứ Hai.
+    *   *Data check*: Phải có ít nhất 1 ca ở trạng thái `Draft`/`Unpublished` trong tuần đích (tránh công bố tuần rỗng).
+    *   *Cảnh báo trống*: Cảnh báo nếu có ca chưa gán người hoặc có ngày làm việc không có bất kỳ ca trực nào.
+    *   *Thông báo thông minh*: Chỉ gửi thông báo công bố lịch cho nhân sự tối đa 1 lần/ngày đối với loại thông báo này để tránh spam.
+*   **3.6 Luồng Duyệt Đổi Ca (`approveSwapRequest`)**:
+    *   *Ca nguồn check*: Ca hoán đổi phải còn ở trạng thái `Published` hoặc `Confirmed` (chưa check-in).
+    *   *Re-validate 2 chiều*: Chạy động cơ kiểm tra chéo: gán nhân viên nhận vào ca của người gửi, và gán nhân viên gửi vào ca của người nhận (nếu có đổi ca 2 chiều).
+    *   *Auto reject*: Nếu phát sinh bất kỳ xung đột lịch mới nào, hệ thống tự chuyển trạng thái yêu cầu đổi ca sang `TuChoi` kèm lý do chi tiết và gửi thông báo cho cả 2 nhân viên.
+*   **3.7 Luồng Tự Động Sắp Lịch (`autoScheduleShifts`)**:
+    *   *Date validation*: Khoảng thời gian sắp lịch không vượt quá 30 ngày.
+    *   *Availability check*: Chỉ gán lịch dựa trên nguyện vọng rảnh (`Ranh` - `DaDuyet`) có ngày bằng hoặc sau hôm nay.
+    *   *Report*: Tổng hợp số ca được gán thành công và số ca không có nhân sự phù hợp. Thao tác sẽ báo lỗi nếu không gán được ca nào (`scheduledCount == 0`).
+
+---
+
+## 10. Nhật ký cập nhật & Đặc tả UI (Changelog & UI Specifications)
+
+### Cập nhật ngày 01/07/2026 — Nâng cấp giao diện Quản lý Ca làm việc (`CaLamViec.jsp`)
+Vị trí file: [CaLamViec.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/CaLamViec.jsp)
+
+#### UI-1: Modal xác nhận lý do xóa ca (`deleteReasonModal`)
+*   **Khi nào hiển thị**: Khi manager bấm nút Xóa trên một ca có trạng thái `Published` hoặc `Confirmed`.
+*   **Các field cần điền**:
+    *   *Lý do xóa* (`#deleteReasonInput`): Textarea, bắt buộc, không được để trống.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Xóa ca `Draft` $\rightarrow$ không hiện modal, chỉ hiện `confirm()` thông thường $\rightarrow$ xóa thành công.
+    - [ ] Xóa ca `Published` $\rightarrow$ modal mở, label hiển thị "Đã công bố".
+    - [ ] Xóa ca `Confirmed` $\rightarrow$ modal mở, label hiển thị "Đã xác nhận".
+    - [ ] Bấm "Xác nhận xóa" khi `#deleteReasonInput` rỗng $\rightarrow$ hiển thị toast lỗi "Vui lòng nhập lý do xóa", không đóng modal.
+    - [ ] Nhập lý do và bấm "Xác nhận xóa" $\rightarrow$ modal đóng, toast success "Đã xóa ca làm việc thành công!", lịch reload.
+    - [ ] Bấm "Hủy" $\rightarrow$ modal đóng, không thực hiện hành động xóa.
+*   *Backend validation tương ứng*: Luồng 3.3 — `reason` bắt buộc khi trạng thái là `Published` hoặc `Confirmed`.
+
+#### UI-2: Modal ghi đè ca đã xác nhận (`confirmedOverrideModal`)
+*   **Khi nào hiển thị**: Khi manager chỉnh sửa ca có trạng thái `Confirmed` và backend trả về mã lỗi `CONFIRMED_OVERRIDE_REQUIRED`.
+*   **Các field cần điền**:
+    *   *Lý do ghi đè* (`#overrideReasonInput`): Textarea, bắt buộc.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Sửa ca `Draft`/`Published` $\rightarrow$ modal không xuất hiện.
+    - [ ] Sửa ca `Confirmed` lần đầu $\rightarrow$ backend trả về `CONFIRMED_OVERRIDE_REQUIRED` $\rightarrow$ modal mở.
+    - [ ] Bấm "Xác nhận & Lưu" khi `#overrideReasonInput` rỗng $\rightarrow$ hiển thị toast lỗi, không gửi request.
+    - [ ] Nhập lý do và bấm "Xác nhận & Lưu" $\rightarrow$ request gửi lại với cờ `overrideConfirm=true` kèm lý do $\rightarrow$ toast success, lịch reload.
+    - [ ] Bấm "Hủy" $\rightarrow$ modal đóng, ca giữ nguyên.
+    - [ ] Sửa ca `CheckedIn` hoặc `CheckedOut` $\rightarrow$ backend chặn cứng (modal ghi đè không xuất hiện).
+*   *Backend validation tương ứng*: Luồng 3.2 — kiểm tra cờ `overrideConfirm` + cảnh báo R10.
+
+#### UI-3: Panel hành động nâng cao — Nhân bản tuần (`cloneWeekShifts`)
+*   **Vị trí**: Section "Hành động nâng cao" $\rightarrow$ card "Nhân bản tuần".
+*   **Các field cần chọn**:
+    *   *Tuần nguồn* (`#cloneFromWeek`): Date picker, hệ thống tự động lấy thứ Hai của tuần chứa ngày đã chọn.
+    *   *Tuần đích* (`#cloneToWeek`): Date picker, tương tự.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Để trống một trong hai ngày $\rightarrow$ hiển thị toast lỗi "Vui lòng chọn tuần nguồn và tuần đích".
+    - [ ] Chọn cùng một tuần cho cả nguồn và đích $\rightarrow$ backend kiểm tra và báo lỗi.
+    - [ ] Chọn tuần nguồn có ca, tuần đích chưa có ca $\rightarrow$ nhân bản thành công, lịch reload.
+    - [ ] Nếu backend trả về danh sách `warnings[]` $\rightarrow$ hiển thị từng toast cảnh báo tương ứng.
+
+#### UI-4: Panel hành động nâng cao — Công bố tuần (`publishWeekShifts`)
+*   **Vị trí**: Section "Hành động nâng cao" $\rightarrow$ card "Công bố tuần".
+*   **Các field cần chọn**:
+    *   *Ngày trong tuần* (`#publishWeekDate`): Date picker.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Để trống `#publishWeekDate` $\rightarrow$ hiển thị toast lỗi "Vui lòng chọn tuần cần công bố".
+    - [ ] Chọn ngày hợp lệ $\rightarrow$ hộp thoại `confirm()` xác nhận công bố xuất hiện.
+    - [ ] Bấm "Hủy" $\rightarrow$ không gửi request.
+    - [ ] Bấm "OK" $\rightarrow$ gửi request `action=publishWeek`, hiển thị toast success kèm số ca công bố.
+    - [ ] Tuần không có ca `Draft` $\rightarrow$ hiển thị toast lỗi từ backend.
+    - [ ] Backend trả về `warnings[]` $\rightarrow$ hiển thị từng toast cảnh báo.
+
+#### UI-5: Panel hành động nâng cao — Tự động sắp lịch (`autoScheduleShifts`)
+*   **Vị trí**: Section "Hành động nâng cao" $\rightarrow$ card "Tự động sắp lịch".
+*   **Các field cần chọn**:
+    *   *Từ ngày* (`#autoStartDate`): Date picker.
+    *   *Đến ngày* (`#autoEndDate`): Date picker.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Để trống một trong hai field $\rightarrow$ hiển thị toast lỗi "Vui lòng chọn khoảng thời gian sắp lịch".
+    - [ ] Khoảng thời gian chọn vượt quá 30 ngày $\rightarrow$ hiển thị toast lỗi của hệ thống.
+    - [ ] Khoảng thời gian hợp lệ $\rightarrow$ hiển thị toast success kèm báo cáo số lượng ca được gán.
+    - [ ] Không xếp được ca nào $\rightarrow$ hiển thị toast lỗi của backend.
+
+#### UI-6: Panel Yêu cầu đổi ca + Modal duyệt/từ chối (`swapActionModal`)
+*   **Vị trí**: Section "Yêu cầu đổi ca".
+*   **Đặc tả UI**:
+    *   Huy hiệu số lượng (`#swapBadge`): Hiển thị số lượng đơn chờ duyệt, tự động ẩn khi không có đơn nào.
+    *   Bảng yêu cầu (`#swapRequestsContainer`): Hiển thị danh sách yêu cầu có trạng thái `ChoQuanLyDuyet`.
+*   **Modal Duyệt/Từ chối (`#swapActionModal`)**:
+    *   *Ghi chú* (`#swapNotesInput`): Textarea, không bắt buộc.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Khi load trang $\rightarrow$ `loadSwapRequests()` tự động gọi tải dữ liệu.
+    - [ ] Bấm "Duyệt" $\rightarrow$ Modal mở với tiêu đề màu xanh emerald "Duyệt đổi ca".
+    - [ ] Bấm "Từ chối" $\rightarrow$ Modal mở với tiêu đề màu đỏ "Từ chối đổi ca".
+    - [ ] Bấm "Xác nhận" trong modal Duyệt $\rightarrow$ POST `action=approveSwap`, hiển thị toast success, reload danh sách.
+    - [ ] Bấm "Xác nhận" trong modal Từ chối $\rightarrow$ POST `action=rejectSwap`, hiển thị toast success, reload danh sách.
+
+#### UI-7: Hiển thị cảnh báo sau khi lưu ca (Toast Warnings System)
+*   **Áp dụng**: Tất cả các thao tác tạo ca và cập nhật ca của quản lý.
+*   **Kịch bản kiểm thử (Test cases)**:
+    - [ ] Lưu ca hợp lệ, không vi phạm $\rightarrow$ Chỉ hiển thị duy nhất toast success màu xanh.
+    - [ ] Tạo ca vi phạm R3 (dài hơn 10 tiếng) $\rightarrow$ Xuất hiện thêm toast warning màu vàng "Ca làm việc dài hơn 10 tiếng...".
+    - [ ] Tạo ca vi phạm R4 (thiếu giờ nghỉ) $\rightarrow$ Xuất hiện toast warning nhắc nhở thời gian nghỉ giữa ca.
+    - [ ] Tạo ca vi phạm R7 (làm việc liên tục 7 ngày) $\rightarrow$ Xuất hiện toast warning về ngày nghỉ hàng tuần.
+    - [ ] Tạo ca vi phạm R11 (trùng lịch nghỉ chờ duyệt) $\rightarrow$ Xuất hiện toast warning về đơn xin nghỉ phép.

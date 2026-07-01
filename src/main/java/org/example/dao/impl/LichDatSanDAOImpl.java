@@ -298,6 +298,17 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 throw new Exception("Đơn đặt sân đã được xử lý từ trước (Trạng thái hiện tại: " + trangThai + ").");
             }
 
+            // Kiểm tra ngày/giờ booking đã qua - không duyệt đơn hết hạn
+            java.time.LocalDate bookingDate = ngayDat.toLocalDate();
+            java.time.LocalTime bookingStart = gioBatDau.toLocalTime();
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalTime now = java.time.LocalTime.now();
+            if (bookingDate.isBefore(today) || (bookingDate.equals(today) && bookingStart.isBefore(now))) {
+                throw new Exception("Không thể duyệt đơn này vì thời gian đặt sân (" +
+                        bookingDate + " " + bookingStart.toString().substring(0, 5) +
+                        ") đã qua. Vui lòng hủy đơn thay vì duyệt.");
+            }
+
             // 2. Vá lỗi IDOR & Tránh Race Condition bằng cách khóa hàng Sân (row lock)
             String sqlLockSan = "SELECT CoSoID FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
             psLockSan = conn.prepareStatement(sqlLockSan);

@@ -5,301 +5,313 @@
 <!DOCTYPE html>
 <html lang="vi" class="scroll-smooth">
 <head>
-    <title>${san.tenSan} - Chi Tiết Sân V-SPORT</title>
+    <title>${san.tenSan} - V-SPORT</title>
     <jsp:include page="/common/head.jsp" />
     <style>
-        .form-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            color: #1e293b;
-            transition: all 0.2s ease;
-            font-size: 0.9375rem;
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .form-input:focus {
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-            outline: none;
-            background-color: white;
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .form-label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-        }
-        .amenity-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-        }
-        .amenity-card:hover .amenity-icon {
-            background-color: #dcfce7;
-            color: #16a34a;
-            transform: translateY(-2px);
-        }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-[#f4f6f8] text-[#1e293b] min-h-screen flex flex-col antialiased">
+<body class="bg-[#f7f9fb] text-[#191c1e] font-sans antialiased min-h-screen flex flex-col">
 
     <jsp:include page="/common/header.jsp" />
 
-    <main class="flex-grow pt-[120px] pb-24">
-        <div class="w-full px-4 sm:px-6 lg:px-10 xl:px-16 animate-fade-in-up">
-            
+    <main class="flex-grow pt-[80px] pb-16">
+        <div class="w-full max-w-7xl mx-auto px-4 md:px-12 py-10">
+
             <!-- Breadcrumbs -->
-            <nav class="flex mb-8 text-xs font-semibold text-slate-500 gap-2 items-center">
-                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-green-600 transition-colors">Tìm Sân</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-400">Chi tiết sân</span>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-green-600 font-bold">${san.tenSan}</span>
-            </nav>
+            <div class="flex items-center gap-2 text-[#3d4a3d] text-xs font-semibold mb-10">
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors">Tìm Sân</a>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors">Danh sách sân</a>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                <span class="text-[#191c1e] font-bold">${san.tenSan}</span>
+            </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                
-                <!-- LEFT COLUMN: Court Details (2/3 width) -->
-                <div class="lg:col-span-2 space-y-6">
-                    
-                    <!-- Main Gallery / Banner -->
-                    <div class="relative rounded-3xl overflow-hidden shadow-md aspect-[16/9] bg-slate-200 group">
-                        <img src="${not empty san.hinhAnh ? san.hinhAnh : 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=1200'}" 
-                             alt="${san.tenSan}" 
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        
-                        <!-- Status Badge overlay -->
-                        <div class="absolute top-4 left-4">
-                            <span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-md backdrop-blur-md flex items-center gap-1.5 
-                                  ${san.trangThai == 'Sẵn sàng' ? 'bg-green-500/90 text-white' : 'bg-amber-500/90 text-white'}">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                ${san.trangThai == 'Sẵn sàng' ? 'Trống sân' : 'Đang dùng'}
+            <!-- Hero Gallery Bento -->
+            <section class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 md:gap-3 h-[340px] md:h-[480px] mb-16 rounded-xl overflow-hidden">
+                <!-- Main large image (col-span-3, row-span-2) -->
+                <div class="md:col-span-3 md:row-span-2 relative group cursor-pointer">
+                    <img src="${not empty san.hinhAnh ? san.hinhAnh : 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1400'}"
+                         alt="${san.tenSan}"
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                    <!-- Status badge -->
+                    <div class="absolute top-4 left-4">
+                        <span class="px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider shadow backdrop-blur-md flex items-center gap-1.5
+                              ${san.trangThai == 'Sẵn sàng' ? 'bg-green-600/90 text-white' : 'bg-amber-500/90 text-white'}">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                            ${san.trangThai == 'Sẵn sàng' ? 'Trống sân' : 'Đang dùng'}
+                        </span>
+                    </div>
+                    <button class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-white transition-colors shadow-sm text-[#191c1e]">
+                        <span class="material-symbols-outlined text-[16px]">photo_library</span>
+                        Xem tất cả ảnh
+                    </button>
+                </div>
+                <!-- Thumbnail 1 -->
+                <div class="hidden md:block relative overflow-hidden group cursor-pointer">
+                    <img src="${not empty san.hinhAnh ? san.hinhAnh : 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=600'}"
+                         alt="${san.tenSan} - ảnh 2"
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-90">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                </div>
+                <!-- Thumbnail 2 -->
+                <div class="hidden md:block relative overflow-hidden group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1528972042015-f4b8a57c5c3c?q=80&w=600"
+                         alt="${san.tenSan} - ảnh 3"
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-90">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                </div>
+            </section>
+
+            <!-- Main Content: Left + Right -->
+            <div class="flex flex-col lg:flex-row gap-16">
+
+                <!-- LEFT COLUMN: Details (2/3) -->
+                <div class="w-full lg:w-2/3 flex flex-col gap-10">
+
+                    <!-- Header Info -->
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <h1 class="text-2xl md:text-3xl font-bold text-[#191c1e] leading-tight">${san.tenSan}</h1>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[#3d4a3d] text-sm font-medium mb-4">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-[#006e2f] filled">star</span>
+                                <span class="text-[#6d7b6c]">${coSo.tenCoSo}</span>
+                            </div>
+                            <span class="text-[#bccbb9]">•</span>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                <span>${coSo.diaChi}</span>
+                            </div>
+                        </div>
+                        <!-- Sport / Type tags -->
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${tenMon}</span>
+                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${loai.tenLoai}</span>
+                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">
+                                ${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}
                             </span>
-                        </div>
-                        
-                        <!-- Sport Category overlay -->
-                        <div class="absolute top-4 right-4">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/60 text-white backdrop-blur-sm">
-                                ${tenMon}
-                            </span>
+                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${totalSimilarCourts} sân tương tự</span>
                         </div>
                     </div>
 
-                    <!-- Court Title & Branch -->
-                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-                        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-5">
-                            <div>
-                                <h1 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">${san.tenSan}</h1>
-                                <p class="text-sm text-slate-500 flex items-center gap-1.5 mt-2 font-medium">
-                                    <span class="material-symbols-outlined text-[18px] text-green-600">location_on</span>
-                                    Cơ sở: <strong class="text-slate-700">${coSo.tenCoSo}</strong>
-                                </p>
-                                <p class="text-xs text-slate-400 mt-1 italic pl-6">${coSo.diaChi}</p>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Giá thuê chỉ từ</span>
-                                <span class="text-2xl font-black text-green-600"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ<span class="text-xs font-normal text-slate-500">/h</span></span>
-                            </div>
-                        </div>
+                    <hr class="border-[#e6e8ea]">
 
-                        <!-- Highlights info -->
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-                            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100/50">
-                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Loại hình sân</span>
-                                <span class="text-xs font-bold text-slate-800">${loai.tenLoai}</span>
-                            </div>
-                            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100/50">
-                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Giờ hoạt động</span>
-                                <span class="text-xs font-bold text-slate-800">${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} - ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}</span>
-                            </div>
-                            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100/50 col-span-2 sm:col-span-1">
-                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Sân tương tự</span>
-                                <span class="text-xs font-bold text-slate-800">${totalSimilarCourts} sân tại chi nhánh</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Amenities Services -->
-                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm">
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-5 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[20px] text-green-600">sports_soccer</span>
-                            Tiện ích sân đấu
-                        </h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                            <div class="amenity-card flex flex-col items-center text-center p-3 rounded-2xl border border-slate-100 transition-all hover:bg-slate-50">
-                                <div class="amenity-icon mb-2">
-                                    <span class="material-symbols-outlined text-[22px]">wifi</span>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">Wifi miễn phí</span>
-                            </div>
-                            <div class="amenity-card flex flex-col items-center text-center p-3 rounded-2xl border border-slate-100 transition-all hover:bg-slate-50">
-                                <div class="amenity-icon mb-2">
-                                    <span class="material-symbols-outlined text-[22px]">local_parking</span>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">Bãi đỗ xe</span>
-                            </div>
-                            <div class="amenity-card flex flex-col items-center text-center p-3 rounded-2xl border border-slate-100 transition-all hover:bg-slate-50">
-                                <div class="amenity-icon mb-2">
-                                    <span class="material-symbols-outlined text-[22px]">local_drink</span>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">Nước mát</span>
-                            </div>
-                            <div class="amenity-card flex flex-col items-center text-center p-3 rounded-2xl border border-slate-100 transition-all hover:bg-slate-50">
-                                <div class="amenity-icon mb-2">
-                                    <span class="material-symbols-outlined text-[22px]">lightbulb</span>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">Đèn đêm</span>
-                            </div>
-                            <div class="amenity-card flex flex-col items-center text-center p-3 rounded-2xl border border-slate-100 transition-all hover:bg-slate-50">
-                                <div class="amenity-icon mb-2">
-                                    <span class="material-symbols-outlined text-[22px]">shower</span>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">Phòng tắm</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Description Block -->
-                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm">
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[20px] text-green-600">description</span>
-                            Mô tả chi tiết
-                        </h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            ${not empty san.moTa ? san.moTa : 'Hệ thống sân đấu tiêu chuẩn quốc tế với lớp cỏ/sàn cao cấp, hệ thống thoát nước tối ưu đảm bảo sân luôn khô ráo và bám tốt. Sân được trang bị hệ thống chiếu sáng LED chuyên nghiệp phục vụ thi đấu vào ban đêm không lo bóng mờ. Thích hợp cho cả tập luyện phong trào và tổ chức các giải đấu quy mô vừa.'}
+                    <!-- Description -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-[#191c1e] mb-3">Giới thiệu sân</h2>
+                        <p class="text-base text-[#3d4a3d] leading-relaxed">
+                            ${not empty san.moTa ? san.moTa : 'Hệ thống sân đấu tiêu chuẩn với mặt sân cao cấp, hệ thống thoát nước tối ưu đảm bảo sân luôn khô ráo và bám tốt. Sân được trang bị hệ thống chiếu sáng LED chuyên nghiệp phục vụ thi đấu vào ban đêm. Thích hợp cho cả tập luyện phong trào và tổ chức các giải đấu quy mô vừa.'}
                         </p>
+                    </div>
+
+                    <hr class="border-[#e6e8ea]">
+
+                    <!-- Amenities -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-[#191c1e] mb-6">Tiện ích</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
+                            <div class="flex items-center gap-3 text-[#3d4a3d]">
+                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">wifi</span>
+                                <span class="text-base">Wifi miễn phí</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-[#3d4a3d]">
+                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">local_parking</span>
+                                <span class="text-base">Bãi đỗ xe</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-[#3d4a3d]">
+                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">lightbulb</span>
+                                <span class="text-base">Đèn chiếu sáng</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-[#3d4a3d]">
+                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">shower</span>
+                                <span class="text-base">Phòng tắm</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-[#3d4a3d]">
+                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">local_drink</span>
+                                <span class="text-base">Nước uống</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-[#3d4a3d]">
+                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">security</span>
+                                <span class="text-base">Bảo vệ 24/7</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-[#e6e8ea]">
+
+                    <!-- Location / Map -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-[#191c1e] mb-2">Vị trí</h2>
+                        <p class="text-base text-[#3d4a3d] mb-4 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px] text-[#006e2f]">location_on</span>
+                            ${coSo.diaChi}
+                        </p>
+                        <div class="w-full h-56 bg-[#eceef0] rounded-xl overflow-hidden border border-[#e0e3e5] shadow-sm">
+                            <iframe
+                                src="https://maps.google.com/maps?q=${fn:replace(coSo.diaChi, ' ', '+')}&output=embed&z=15"
+                                class="w-full h-full border-0"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                title="Bản đồ ${coSo.tenCoSo}">
+                            </iframe>
+                        </div>
                     </div>
 
                 </div>
 
-                <!-- RIGHT COLUMN: Booking Form Widget (1/3 width) -->
-                <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-[120px]">
-                    
-                    <!-- Quick booking card -->
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-md">
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-5 flex items-center gap-2 border-b border-slate-100 pb-3">
-                            <span class="material-symbols-outlined text-[20px] text-green-600">calendar_month</span>
-                            Đặt Sân Nhanh
-                        </h3>
+                <!-- RIGHT COLUMN: Booking Widget (1/3) -->
+                <div class="w-full lg:w-1/3">
+                    <div class="sticky top-24 bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[#e0e3e5] p-6 flex flex-col gap-5">
+
+                        <!-- Price Header -->
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <span class="text-2xl font-bold text-[#191c1e]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ</span>
+                                <span class="text-sm text-[#6d7b6c]">/giờ</span>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                  ${san.trangThai == 'Sẵn sàng' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+                                ${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}
+                            </span>
+                        </div>
 
                         <!-- Alert messages -->
                         <c:if test="${not empty sessionScope.error}">
-                            <div class="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl flex items-start gap-2 shadow-inner">
-                                <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                            <div class="p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">error</span>
                                 <span>${sessionScope.error}</span>
                             </div>
                             <% session.removeAttribute("error"); %>
                         </c:if>
-                        
-                        <form id="quick-booking-form" action="${pageContext.request.contextPath}/customer/dat-san" method="post" class="space-y-5">
+                        <c:if test="${not empty sessionScope.message}">
+                            <div class="p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-lg flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">check_circle</span>
+                                <span>${sessionScope.message}</span>
+                            </div>
+                            <% session.removeAttribute("message"); %>
+                        </c:if>
+
+                        <form id="quick-booking-form" action="${pageContext.request.contextPath}/customer/dat-san" method="post" class="flex flex-col gap-5">
                             <input type="hidden" name="sanId" value="${san.sanID}">
                             <input type="hidden" name="gioBatDau" id="gioBatDau">
                             <input type="hidden" name="gioKetThuc" id="gioKetThuc">
 
-                            <!-- GROUP 1: Thời gian -->
-                            <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 space-y-3">
-                                <span class="text-[11px] font-black text-green-700 uppercase tracking-wider">1. Chọn thời gian</span>
-
-                                <div class="space-y-1.5">
-                                    <label for="ngayDat" class="form-label">Ngày thi đấu <span class="text-red-500">*</span></label>
-                                    <input type="date" name="ngayDat" id="ngayDat" required class="form-input" onchange="onDateChange()">
-                                </div>
-
-                                <div class="space-y-1.5">
-                                    <label class="form-label">Chọn khung giờ <span class="text-red-500">*</span></label>
-                                    <div id="time-grid" class="flex flex-wrap gap-1.5 max-h-[220px] overflow-y-auto pr-1">
-                                        <!-- Dynamic chips -->
-                                    </div>
-                                    <div id="time-summary" class="hidden text-xs font-bold text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2 mt-1">
-                                        <!-- Dynamic -->
-                                    </div>
-                                </div>
-
-                                <div id="overlap-warning" class="bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-xs hidden flex gap-2 items-start shadow-sm">
-                                    <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span>
-                                    <span id="overlap-warning-text">Trùng lịch!</span>
+                            <!-- Date Picker -->
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ngayDat" class="text-sm font-semibold text-[#191c1e]">Chọn ngày</label>
+                                <div class="flex items-center border border-[#bccbb9] rounded-lg px-3 py-2.5 bg-[#f7f9fb] hover:border-[#006e2f] focus-within:border-[#006e2f] focus-within:ring-2 focus-within:ring-[#006e2f]/20 transition-all">
+                                    <input type="date" name="ngayDat" id="ngayDat" required
+                                           class="bg-transparent border-none p-0 w-full text-sm text-[#191c1e] outline-none"
+                                           onchange="onDateChange()">
                                 </div>
                             </div>
 
-                            <!-- GROUP 2: Ghi chú -->
-                            <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 space-y-1.5">
-                                <span class="text-[11px] font-black text-green-700 uppercase tracking-wider">2. Ghi chú yêu cầu</span>
-                                <textarea name="ghiChu" id="ghiChu" rows="2" class="form-input resize-none" placeholder="Thuê bóng, mượn áo tập..."></textarea>
+                            <!-- Time Slots Grid -->
+                            <div class="flex flex-col gap-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-semibold text-[#191c1e]">Chọn khung giờ</label>
+                                    <span class="text-xs text-[#006e2f] font-medium">
+                                        ${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}
+                                    </span>
+                                </div>
+                                <div id="time-grid" class="grid grid-cols-3 gap-1.5 max-h-[200px] overflow-y-auto hide-scroll">
+                                    <!-- Dynamic chips rendered by JS -->
+                                </div>
+                                <div id="time-summary" class="hidden text-xs font-semibold text-[#006e2f] bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                                </div>
+                                <div id="overlap-warning" class="hidden bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-xs flex gap-2 items-start">
+                                    <span class="material-symbols-outlined text-[15px] mt-0.5 shrink-0">warning</span>
+                                    <span id="overlap-warning-text">Trùng lịch đặt sân!</span>
+                                </div>
                             </div>
 
-                            <!-- GROUP 3: Thanh toán & Xác nhận -->
-                            <div class="border-t-2 border-slate-100 pt-4 space-y-3">
-                                <span class="text-[11px] font-black text-green-700 uppercase tracking-wider">3. Thanh toán &amp; Xác nhận</span>
-
-                                <div class="grid grid-cols-2 gap-2">
-                                    <label class="border-2 border-green-600 bg-green-50/10 rounded-xl p-2.5 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-green-700 active:scale-95 transition-all" id="lbl-opt-sau">
-                                        <input type="radio" name="paymentMethod" value="sau" checked class="hidden" onchange="changePayMethod('sau')">
-                                        Trả sau tại quầy
-                                    </label>
-                                    <label class="border-2 border-slate-100 rounded-xl p-2.5 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-slate-600 hover:border-slate-300 active:scale-95 transition-all" id="lbl-opt-payos">
-                                        <input type="radio" name="paymentMethod" value="payos" class="hidden" onchange="changePayMethod('payos')">
-                                        PayOS Online
-                                    </label>
-                                </div>
-
-                                <div id="estimated-price-row" class="hidden items-center justify-between bg-green-50 border border-green-100 rounded-xl px-4 py-2.5">
-                                    <span class="text-xs font-bold text-slate-600">Tạm tính</span>
-                                    <span id="estimated-price-value" class="text-base font-black text-green-700"></span>
-                                </div>
-
-                                <c:choose>
-                                    <c:when test="${sessionScope.user != null}">
-                                        <button type="submit" id="btn-submit-booking" disabled
-                                                class="w-full py-3.5 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 transition-all shadow-md hover:shadow-green-600/20 active:scale-95 duration-250 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            Đặt Sân Đấu Ngay
-                                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                                        </button>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/dangnhap"
-                                           class="w-full py-3.5 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 transition-all text-center flex items-center justify-center gap-2 active:scale-95">
-                                            Đăng Nhập Để Đặt Sân
-                                            <span class="material-symbols-outlined text-[18px]">login</span>
-                                        </a>
-                                    </c:otherwise>
-                                </c:choose>
+                            <!-- Notes -->
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ghiChu" class="text-sm font-semibold text-[#191c1e]">Ghi chú</label>
+                                <textarea name="ghiChu" id="ghiChu" rows="2"
+                                          class="border border-[#bccbb9] rounded-lg px-3 py-2.5 text-sm bg-[#f7f9fb] text-[#191c1e] placeholder-[#6d7b6c] resize-none outline-none hover:border-[#006e2f] focus:border-[#006e2f] focus:ring-2 focus:ring-[#006e2f]/20 transition-all"
+                                          placeholder="Thuê bóng, mượn áo tập..."></textarea>
                             </div>
+
+                            <!-- Payment Method -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all" id="lbl-opt-sau">
+                                    <input type="radio" name="paymentMethod" value="sau" checked class="hidden" onchange="changePayMethod('sau')">
+                                    Trả tại quầy
+                                </label>
+                                <label class="pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all" id="lbl-opt-payos">
+                                    <input type="radio" name="paymentMethod" value="payos" class="hidden" onchange="changePayMethod('payos')">
+                                    PayOS Online
+                                </label>
+                            </div>
+
+                            <hr class="border-[#e6e8ea]">
+
+                            <!-- Price Breakdown -->
+                            <div id="price-breakdown" class="hidden flex-col gap-2">
+                                <div class="flex justify-between text-sm text-[#6d7b6c]">
+                                    <span id="price-line-desc"></span>
+                                    <span id="price-line-amount"></span>
+                                </div>
+                                <div class="flex justify-between font-bold text-base text-[#191c1e] pt-2 border-t border-[#e6e8ea] mt-1">
+                                    <span>Tổng cộng</span>
+                                    <span id="price-total" class="text-[#006e2f]"></span>
+                                </div>
+                            </div>
+
+                            <!-- Submit / Login CTA -->
+                            <c:choose>
+                                <c:when test="${sessionScope.user != null}">
+                                    <button type="submit" id="btn-submit-booking" disabled
+                                            class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                                        Đặt Sân Ngay
+                                    </button>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/dangnhap"
+                                       class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 text-center">
+                                        Đăng Nhập Để Đặt Sân
+                                        <span class="material-symbols-outlined text-[18px]">login</span>
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <p class="text-center text-xs text-[#6d7b6c]">Chưa tính phí cho đến khi đặt thành công</p>
                         </form>
                     </div>
-
                 </div>
 
-            </div>
+            </div><!-- end main content -->
 
-            <!-- OTHER COURTS SECTION -->
-            <div class="mt-16 bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
-                <h2 class="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[24px] text-green-600">sports_tennis</span>
+        </div><!-- end container -->
+
+        <!-- OTHER COURTS SECTION -->
+        <div class="w-full max-w-7xl mx-auto px-4 md:px-12 mt-16">
+            <div class="bg-white p-8 rounded-xl border border-[#e0e3e5] shadow-sm">
+                <h2 class="text-xl font-bold text-[#191c1e] mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[24px] text-[#006e2f]">sports_tennis</span>
                     Các sân đấu khác dành cho bạn
                 </h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                     <c:forEach var="os" items="${otherSans}" varStatus="loop">
                         <c:if test="${loop.index < 4}">
-                            <!-- Find facility name -->
                             <c:set var="osCoSoName" value="Cơ Sở" />
                             <c:forEach var="cs" items="${dsCoSo}">
                                 <c:if test="${cs.coSoID == os.coSoID}">
                                     <c:set var="osCoSoName" value="${cs.tenCoSo}" />
                                 </c:if>
                             </c:forEach>
-                            
-                            <!-- Find LoaiSan name and price -->
                             <c:set var="osTypeName" value="Chưa phân loại" />
                             <c:set var="osPrice" value="0" />
                             <c:set var="osSportId" value="0" />
@@ -310,8 +322,6 @@
                                     <c:set var="osSportId" value="${ls.monTheThaoID}" />
                                 </c:if>
                             </c:forEach>
-                            
-                            <!-- Find Sport Name -->
                             <c:set var="osSportName" value="Khác" />
                             <c:forEach var="m" items="${dsMon}">
                                 <c:if test="${m.monTheThaoID == osSportId}">
@@ -319,30 +329,27 @@
                                 </c:if>
                             </c:forEach>
 
-                            <!-- Render card -->
-                            <div class="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                            <div class="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                                 <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=${os.sanID}" class="block group hover:no-underline">
-                                    <div class="relative h-[130px] w-full overflow-hidden bg-slate-200">
-                                        <img src="${not empty os.hinhAnh ? os.hinhAnh : 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=600'}" 
-                                             alt="${os.tenSan}" 
+                                    <div class="relative h-[130px] overflow-hidden bg-[#eceef0]">
+                                        <img src="${not empty os.hinhAnh ? os.hinhAnh : 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=600'}"
+                                             alt="${os.tenSan}"
                                              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                        <span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm">
-                                            ${osSportName}
-                                        </span>
+                                        <span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm">${osSportName}</span>
                                     </div>
-                                    <div class="p-4 space-y-2">
-                                        <h4 class="font-bold text-slate-800 text-sm truncate group-hover:text-green-600 transition-colors">${os.tenSan}</h4>
-                                        <p class="text-xs text-slate-500 flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[14px] text-slate-400">location_on</span>
+                                    <div class="p-4 space-y-1.5">
+                                        <h4 class="font-bold text-[#191c1e] text-sm truncate group-hover:text-[#006e2f] transition-colors">${os.tenSan}</h4>
+                                        <p class="text-xs text-[#6d7b6c] flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[13px]">location_on</span>
                                             ${osCoSoName}
                                         </p>
-                                        <p class="text-[11px] text-slate-450 italic truncate">${osTypeName}</p>
+                                        <p class="text-[11px] text-[#6d7b6c] italic truncate">${osTypeName}</p>
                                     </div>
                                 </a>
-                                <div class="p-4 pt-0 flex items-center justify-between border-t border-slate-100/50 mt-auto bg-white/50">
-                                    <span class="text-xs font-black text-green-600"><fmt:formatNumber value="${osPrice}" pattern="#,##0"/> đ<span class="text-[10px] font-normal text-slate-400">/h</span></span>
-                                    <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=${os.sanID}" 
-                                       class="px-3 py-1 bg-green-600 text-white rounded-lg text-[10px] font-bold hover:bg-green-700 hover:no-underline transition-all">
+                                <div class="px-4 pb-4 pt-0 flex items-center justify-between border-t border-[#e6e8ea] mt-auto">
+                                    <span class="text-sm font-bold text-[#006e2f]"><fmt:formatNumber value="${osPrice}" pattern="#,##0"/> đ<span class="text-[10px] font-normal text-[#6d7b6c]">/h</span></span>
+                                    <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=${os.sanID}"
+                                       class="px-3 py-1.5 bg-[#006e2f] text-white rounded-lg text-[11px] font-semibold hover:bg-[#005321] hover:no-underline transition-all">
                                         Xem sân
                                     </a>
                                 </div>
@@ -351,103 +358,70 @@
                     </c:forEach>
                 </div>
             </div>
-
         </div>
+
     </main>
 
     <jsp:include page="/common/footer.jsp" />
 
     <script>
-        const courtId = parseInt("${san.sanID}");
         const branchOpenTime = "${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'}";
         const branchCloseTime = "${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}";
         const pricePerHour = parseFloat("${loai.giaKhongDen != null ? loai.giaKhongDen : 0}");
 
         let selectedStartMin = null;
         let selectedEndMin = null;
-        
-        // Active bookings of this court
+
         const activeBookings = [
             <c:forEach var="b" items="${activeBookings}">
                 <c:if test="${b.sanId == san.sanID && b.trangThai != 'Đã hủy'}">
-                    {
-                        id: ${b.datSanId},
-                        date: "${b.ngayDat}",
-                        start: "${b.gioBatDau}",
-                        end: "${b.gioKetThuc}",
-                        status: "${b.trangThai}"
-                    },
+                    { id: ${b.datSanId}, date: "${b.ngayDat}", start: "${b.gioBatDau}", end: "${b.gioKetThuc}", status: "${b.trangThai}" },
                 </c:if>
             </c:forEach>
         ];
 
-        // Format dates
         const today = new Date();
         const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
         document.getElementById("ngayDat").min = todayStr;
         document.getElementById("ngayDat").value = todayStr;
 
         function changePayMethod(method) {
-            const lblSau = document.getElementById("lbl-opt-sau");
-            const lblPayOS = document.getElementById("lbl-opt-payos");
-            if (method === 'sau') {
-                lblSau.className = "border-2 border-green-600 bg-green-50/10 rounded-xl p-2.5 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-green-700 active:scale-95 transition-all";
-                lblPayOS.className = "border-2 border-slate-100 rounded-xl p-2.5 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-slate-600 hover:border-slate-300 active:scale-95 transition-all";
-            } else {
-                lblPayOS.className = "border-2 border-green-600 bg-green-50/10 rounded-xl p-2.5 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-green-700 active:scale-95 transition-all";
-                lblSau.className = "border-2 border-slate-100 rounded-xl p-2.5 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-slate-600 hover:border-slate-300 active:scale-95 transition-all";
-            }
+            const activeClass = "pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all";
+            const inactiveClass = "pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all";
+            document.getElementById("lbl-opt-sau").className = method === 'sau' ? activeClass : inactiveClass;
+            document.getElementById("lbl-opt-payos").className = method === 'payos' ? activeClass : inactiveClass;
         }
 
-        function timeToMinutes(timeStr) {
-            const parts = timeStr.split(":");
-            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        function timeToMinutes(t) {
+            const p = t.split(":");
+            return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
         }
 
-        function formatDurationText(totalMinutes) {
-            const h = Math.floor(totalMinutes / 60);
-            const m = totalMinutes % 60;
-            let res = "";
-            if (h > 0) res += h + ' tiếng ';
-            if (m > 0) res += m + ' phút';
-            return res.trim();
+        function minToStr(m) {
+            return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+        }
+
+        function formatDuration(mins) {
+            const h = Math.floor(mins / 60), m = mins % 60;
+            return (h > 0 ? h + " tiếng " : "") + (m > 0 ? m + " phút" : "");
         }
 
         function onDateChange() {
-            applyTimeConstraints();
-            checkSchedule();
-        }
-
-        function getSlotStatus(m, conflicts, currentTotalMin) {
-            const isPast = m <= currentTotalMin;
-            const isBooked = conflicts.some(b => {
-                const startB = timeToMinutes(b.start);
-                const endB = timeToMinutes(b.end);
-                return m >= startB && m < endB;
-            });
-            if (isPast) return "past";
-            if (isBooked) return "booked";
-            return "available";
-        }
-
-        function findNextBlockedMin(startMin, closeMin, conflicts, currentTotalMin) {
-            let limit = closeMin;
-            conflicts.forEach(b => {
-                const bStartMin = timeToMinutes(b.start);
-                if (bStartMin > startMin && bStartMin < limit) {
-                    limit = bStartMin;
-                }
-            });
-            return limit;
-        }
-
-        function applyTimeConstraints() {
             selectedStartMin = null;
             selectedEndMin = null;
             document.getElementById("gioBatDau").value = "";
             document.getElementById("gioKetThuc").value = "";
             renderTimeGrid();
-            updateEstimatedPrice();
+            updatePriceBreakdown();
+        }
+
+        function findNextBlockedMin(startMin, closeMin, conflicts) {
+            let limit = closeMin;
+            conflicts.forEach(b => {
+                const bs = timeToMinutes(b.start);
+                if (bs > startMin && bs < limit) limit = bs;
+            });
+            return limit;
         }
 
         function renderTimeGrid() {
@@ -459,62 +433,52 @@
             grid.innerHTML = "";
 
             const conflicts = activeBookings.filter(b => b.date === dateVal);
-
-            let currentTotalMin = -1;
+            let nowMin = -1;
             if (dateVal === todayStr) {
-                const now = new Date();
-                currentTotalMin = now.getHours() * 60 + now.getMinutes();
+                const n = new Date();
+                nowMin = n.getHours() * 60 + n.getMinutes();
             }
 
             let rangeLimit = null;
             if (selectedStartMin !== null && selectedEndMin === null) {
-                rangeLimit = findNextBlockedMin(selectedStartMin, closeMin, conflicts, currentTotalMin);
+                rangeLimit = findNextBlockedMin(selectedStartMin, closeMin, conflicts);
             }
 
             for (let m = openMin; m <= closeMin - 30; m += 30) {
-                const hour = Math.floor(m / 60);
-                const min = m % 60;
-                const timeStr = String(hour).padStart(2, "0") + ":" + String(min).padStart(2, "0");
-                const status = getSlotStatus(m, conflicts, currentTotalMin);
+                const isPast = m <= nowMin;
+                const isBooked = conflicts.some(b => m >= timeToMinutes(b.start) && m < timeToMinutes(b.end));
+                const isStart = m === selectedStartMin;
+                const isEnd = m === selectedEndMin;
+                const isInRange = selectedStartMin !== null && selectedEndMin !== null && m > selectedStartMin && m < selectedEndMin;
+                const isExtendable = selectedStartMin !== null && selectedEndMin === null && m > selectedStartMin && rangeLimit !== null && m <= rangeLimit;
 
                 const chip = document.createElement("button");
                 chip.type = "button";
-                chip.textContent = timeStr;
+                chip.textContent = minToStr(m);
 
-                const isSelectedStart = (m === selectedStartMin);
-                const isSelectedEnd = (m === selectedEndMin);
-                const isInRange = (selectedStartMin !== null && selectedEndMin !== null && m > selectedStartMin && m < selectedEndMin);
-                const isExtendable = (selectedStartMin !== null && selectedEndMin === null && m > selectedStartMin && rangeLimit !== null && m <= rangeLimit);
-
-                let cls = "px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all ";
-                if (status === "past") {
+                let cls = "py-2 rounded-lg text-xs font-semibold border transition-colors text-center ";
+                if (isPast) {
                     chip.disabled = true;
-                    cls += "bg-slate-100 text-slate-300 border-slate-100 cursor-not-allowed";
-                } else if (status === "booked") {
+                    cls += "bg-[#f2f4f6] text-[#bccbb9] border-[#e0e3e5] cursor-not-allowed";
+                } else if (isBooked) {
                     chip.disabled = true;
-                    cls += "bg-red-50 text-red-300 border-red-100 cursor-not-allowed line-through";
-                } else if (isSelectedStart || isSelectedEnd) {
-                    cls += "bg-green-600 text-white border-green-600 shadow-sm";
+                    cls += "bg-red-50 text-red-300 border-red-200 cursor-not-allowed line-through";
+                } else if (isStart || isEnd) {
+                    cls += "border-2 border-[#006e2f] bg-[#006e2f] text-white shadow-sm";
                 } else if (isInRange) {
-                    cls += "bg-green-50 text-green-700 border-green-200";
+                    cls += "border-[#006e2f]/40 bg-[#006e2f]/10 text-[#006e2f]";
                 } else if (isExtendable) {
-                    cls += "bg-white text-green-700 border-green-300 hover:bg-green-50 cursor-pointer";
+                    cls += "border-[#bccbb9] text-[#006e2f] hover:border-[#006e2f] hover:bg-green-50 cursor-pointer";
                 } else {
-                    cls += "bg-white text-slate-600 border-slate-200 hover:border-green-300 hover:bg-green-50 cursor-pointer";
+                    cls += "border-[#bccbb9] text-[#3d4a3d] hover:border-[#006e2f] hover:text-[#006e2f] hover:bg-green-50 cursor-pointer";
                 }
                 chip.className = cls;
-
-                if (!chip.disabled) {
-                    chip.addEventListener("click", () => onChipClick(m));
-                }
+                if (!chip.disabled) chip.addEventListener("click", () => onChipClick(m));
                 grid.appendChild(chip);
             }
 
             if (selectedStartMin !== null && selectedEndMin !== null) {
-                const startStr = String(Math.floor(selectedStartMin / 60)).padStart(2, "0") + ":" + String(selectedStartMin % 60).padStart(2, "0");
-                const endStr = String(Math.floor(selectedEndMin / 60)).padStart(2, "0") + ":" + String(selectedEndMin % 60).padStart(2, "0");
-                const durationText = formatDurationText(selectedEndMin - selectedStartMin);
-                summary.textContent = `Bạn chọn: ${startStr} - ${endStr} (${durationText})`;
+                summary.textContent = "Đã chọn: " + minToStr(selectedStartMin) + " – " + minToStr(selectedEndMin) + " (" + formatDuration(selectedEndMin - selectedStartMin) + ")";
                 summary.classList.remove("hidden");
             } else {
                 summary.classList.add("hidden");
@@ -537,44 +501,37 @@
                 selectedEndMin = null;
             }
 
-            const startStr = selectedStartMin !== null
-                ? String(Math.floor(selectedStartMin / 60)).padStart(2, "0") + ":" + String(selectedStartMin % 60).padStart(2, "0")
-                : "";
-            const endStr = selectedEndMin !== null
-                ? String(Math.floor(selectedEndMin / 60)).padStart(2, "0") + ":" + String(selectedEndMin % 60).padStart(2, "0")
-                : "";
-            document.getElementById("gioBatDau").value = startStr;
-            document.getElementById("gioKetThuc").value = endStr;
+            document.getElementById("gioBatDau").value = selectedStartMin !== null ? minToStr(selectedStartMin) : "";
+            document.getElementById("gioKetThuc").value = selectedEndMin !== null ? minToStr(selectedEndMin) : "";
 
             renderTimeGrid();
-            updateEstimatedPrice();
+            updatePriceBreakdown();
             checkSchedule();
         }
 
-        function updateEstimatedPrice() {
-            const row = document.getElementById("estimated-price-row");
-            const valueEl = document.getElementById("estimated-price-value");
+        function updatePriceBreakdown() {
+            const breakdown = document.getElementById("price-breakdown");
             if (selectedStartMin === null || selectedEndMin === null || !pricePerHour) {
-                row.classList.add("hidden");
-                row.classList.remove("flex");
+                breakdown.classList.add("hidden");
+                breakdown.classList.remove("flex");
                 return;
             }
             const hours = (selectedEndMin - selectedStartMin) / 60;
             const total = Math.round(pricePerHour * hours);
-            valueEl.textContent = total.toLocaleString("vi-VN") + " đ";
-            row.classList.remove("hidden");
-            row.classList.add("flex");
+            document.getElementById("price-line-desc").textContent =
+                pricePerHour.toLocaleString("vi-VN") + " đ × " + (hours % 1 === 0 ? hours : hours.toFixed(1)) + " giờ";
+            document.getElementById("price-line-amount").textContent = total.toLocaleString("vi-VN") + " đ";
+            document.getElementById("price-total").textContent = total.toLocaleString("vi-VN") + " đ";
+            breakdown.classList.remove("hidden");
+            breakdown.classList.add("flex");
         }
 
         function checkSchedule() {
             const dateVal = document.getElementById("ngayDat").value;
             const startVal = document.getElementById("gioBatDau").value;
             const endVal = document.getElementById("gioKetThuc").value;
-
             const btnSubmit = document.getElementById("btn-submit-booking");
             const warningBox = document.getElementById("overlap-warning");
-
-            const conflicts = activeBookings.filter(b => b.date === dateVal);
 
             if (!startVal || !endVal) {
                 if (btnSubmit) btnSubmit.disabled = true;
@@ -584,17 +541,12 @@
 
             const startMin = timeToMinutes(startVal);
             const endMin = timeToMinutes(endVal);
+            if (endMin <= startMin) { if (btnSubmit) btnSubmit.disabled = true; return; }
 
-            // Validations
-            if (endMin <= startMin) {
-                if (btnSubmit) btnSubmit.disabled = true;
-                return;
-            }
-
+            const conflicts = activeBookings.filter(b => b.date === dateVal);
             const hasOverlap = conflicts.some(b => {
-                const bStart = timeToMinutes(b.start);
-                const bEnd = timeToMinutes(b.end);
-                return (startMin < bEnd && endMin > bStart);
+                const bs = timeToMinutes(b.start), be = timeToMinutes(b.end);
+                return startMin < be && endMin > bs;
             });
 
             if (hasOverlap) {
@@ -606,8 +558,8 @@
             }
         }
 
-        // Initialize constraints on load
-        applyTimeConstraints();
+        // Init
+        renderTimeGrid();
     </script>
 </body>
 </html>

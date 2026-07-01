@@ -243,6 +243,11 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     }
 
     @Override
+    public List<CaLamViec> getShiftsByAccountAndDateRange(int accountId, LocalDate startDate, LocalDate endDate) {
+        return getCaByAccountIDAndDateRange(accountId, startDate, endDate);
+    }
+
+    @Override
     public List<CaLamViec> getRecurringShiftsByAccountID(int accountId) {
         List<CaLamViec> list = new ArrayList<>();
         String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND Thu IS NOT NULL ORDER BY Thu, GioBatDau";
