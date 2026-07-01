@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author DatN (Senior refactor)
  * @version 2.0
  */
-@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu" })
+@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san" })
 public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
@@ -90,7 +90,9 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
 
-        if (isBookingPage(path)) {
+        if (path.equals("/customer/chi-tiet-san")) {
+            handleGetChiTietSan(req, resp);
+        } else if (isBookingPage(path)) {
             loadBookingPage(req, resp);
         } else if (path.equals("/customer/lich-su-dat-san")) {
             resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
@@ -391,6 +393,36 @@ public class DatSanServlet extends HttpServlet {
                         return;
                     }
 
+                    // ── 3d-2. Kiểm tra SoftHold đang hoạt động từ tài khoản KHÁC ──
+                    // Không chặn nếu hold đó là của chính tài khoản hiện tại (self-hold).
+                    String checkHoldSql = "SELECT COUNT(*) FROM SoftHold " +
+                            "WHERE SanID = ? AND NgayDat = ? AND AccountID <> ? " +
+                            "AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " +
+                            org.example.util.Constants.SOFT_HOLD_TIMEOUT_MINUTES + " " +
+                            "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+
+                    boolean hasActiveHoldFromOther;
+                    try (java.sql.PreparedStatement holdPs = conn.prepareStatement(checkHoldSql)) {
+                        holdPs.setInt(1, sanId);
+                        holdPs.setDate(2, java.sql.Date.valueOf(ngayDat));
+                        holdPs.setInt(3, user.getAccountId());
+                        holdPs.setString(4, gioBatDau.toString());
+                        holdPs.setString(5, gioKetThuc.toString());
+                        try (java.sql.ResultSet rsHold = holdPs.executeQuery()) {
+                            hasActiveHoldFromOther = rsHold.next() && rsHold.getInt(1) > 0;
+                        }
+                    }
+
+                    if (hasActiveHoldFromOther) {
+                        conn.rollback();
+                        session.setAttribute("error",
+                                "Khung giờ " + gioBatDau.toString().substring(0, 5) + " - " +
+                                        gioKetThuc.toString().substring(0, 5) +
+                                        " hiện đang được người khác giữ chỗ tạm thời. Vui lòng thử lại sau ít phút hoặc chọn khung giờ khác.");
+                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                        return;
+                    }
+
                     // ── 3e. Tính giá theo loại sân và giờ đèn ──
                     double hourlyPrice = 100_000; // Fallback mặc định
                     boolean applyLights = false;
@@ -446,6 +478,17 @@ public class DatSanServlet extends HttpServlet {
                         insertPs.setString(9, ghiChu != null ? ghiChu.trim() : "");
                         insertPs.setString(10, "Web");
                         insertPs.executeUpdate();
+                    }
+
+                    // ── 3f-2. Dọn SoftHold của chính tài khoản này cho San+Ngày này ──
+                    // (không bắt buộc cho tính đúng đắn - hold sẽ tự hết hạn sau 2 phút -
+                    //  nhưng dọn ngay giúp tránh soft-hold "rác" không cần thiết)
+                    String cleanupHoldSql = "DELETE FROM SoftHold WHERE AccountID = ? AND SanID = ? AND NgayDat = ?";
+                    try (java.sql.PreparedStatement cleanupPs = conn.prepareStatement(cleanupHoldSql)) {
+                        cleanupPs.setInt(1, user.getAccountId());
+                        cleanupPs.setInt(2, sanId);
+                        cleanupPs.setDate(3, java.sql.Date.valueOf(ngayDat));
+                        cleanupPs.executeUpdate();
                     }
 
                     // ── 3g. Commit toàn bộ transaction ──
@@ -567,7 +610,7 @@ public class DatSanServlet extends HttpServlet {
      * Phương thức kiểm tra cả chuỗi cause chain để bắt wrapped exceptions.
      */
     private boolean isBookingPage(String path) {
-        return "/customer/dat-san".equals(path) || "/customer/dat_san".equals(path);
+        return "/customer/dat-san".equals(path) || "/customer/dat_san".equals(path) || "/customer/chi-tiet-san".equals(path);
     }
 
     private boolean isDeadlockException(SQLException ex) {
@@ -681,5 +724,55 @@ public class DatSanServlet extends HttpServlet {
             session.setAttribute("error", "Lỗi: " + e.getMessage());
         }
         resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+    }
+
+    private void handleGetChiTietSan(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            int sanId = Integer.parseInt(req.getParameter("id"));
+            San san = sanDAO.getSanById(sanId);
+            if (san == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy sân đấu.");
+                return;
+            }
+            
+            LoaiSan loai = loaiSanDAO.getLoaiSanById(san.getLoaiSanID());
+            org.example.model.CoSo coSo = coSoDAO.getCoSoById(san.getCoSoID());
+            
+            List<org.example.model.CoSo> allCoSo = coSoDAO.getAllCoSo();
+            List<LoaiSan> allLoaiSan = loaiSanDAO.getAllLoaiSan();
+            List<MonTheThao> dsMon = loaiSanDAO.getAllMonTheThao();
+            
+            String tenMon = dsMon.stream()
+                    .filter(m -> m.getMonTheThaoID() == loai.getMonTheThaoID())
+                    .map(MonTheThao::getTenMon)
+                    .findFirst()
+                    .orElse("Khác");
+            
+            long totalSimilarCourts = sanDAO.countSansByLoaiSanId(san.getLoaiSanID());
+            
+            // Get other courts (excluding the current one)
+            List<San> otherSans = sanDAO.getAllSan().stream()
+                    .filter(s -> s.getSanID() != sanId)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            req.setAttribute("san", san);
+            req.setAttribute("loai", loai);
+            req.setAttribute("coSo", coSo);
+            req.setAttribute("tenMon", tenMon);
+            req.setAttribute("totalSimilarCourts", totalSimilarCourts);
+            req.setAttribute("dsCoSo", allCoSo);
+            req.setAttribute("dsLoaiSan", allLoaiSan);
+            req.setAttribute("dsMon", dsMon);
+            req.setAttribute("otherSans", otherSans);
+            
+            List<Lichdatsan> activeBookings = lichDatSanDAO.getAllLichDatSan();
+            req.setAttribute("activeBookings", activeBookings);
+            
+            req.getRequestDispatcher("/customer/ChiTietSan.jsp").forward(req, resp);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy chi tiết sân", e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 }

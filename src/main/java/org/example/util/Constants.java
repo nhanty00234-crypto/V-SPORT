@@ -22,6 +22,7 @@ public final class Constants {
 
     // ========== TIMEOUT ==========
     public static final int PENDING_PAYMENT_TIMEOUT_MINUTES = 10;
+    public static final int SOFT_HOLD_TIMEOUT_MINUTES = 2;
 
     // ========== INVOICE (HoaDon) STATUS ==========
     public static final String TRANG_THAI_HOA_DON_CHUA_TT = "Chưa thanh toán";

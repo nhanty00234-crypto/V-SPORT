@@ -346,7 +346,9 @@
                                                     </div>
                                                 </c:if>
                                                 <c:if test="${booking.trangThai == 'Đang sử dụng'}">
-                                                    <span class="text-green-600 font-semibold flex items-center justify-center gap-0.5 text-[10px]"><span class="material-symbols-outlined text-[13px]">check</span> Đã nhận</span>
+                                                    <button type="button" onclick="openStaffInvoiceModal(${booking.datSanId})" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
+                                                        Dịch vụ & Thanh toán
+                                                    </button>
                                                 </c:if>
                                             </td>
                                         </tr>
@@ -489,7 +491,11 @@
                                 </div>
                             `;
                         } else if (booking.trangThai === 'Đang sử dụng') {
-                            actionButtons = `<span class="text-green-600 font-semibold flex items-center justify-center gap-0.5 text-[10px]"><span class="material-symbols-outlined text-[13px]">check</span> Đã nhận</span>`;
+                            actionButtons = `
+                                <button type="button" onclick="openStaffInvoiceModal(\${booking.datSanId})" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
+                                    Dịch vụ & Thanh toán
+                                </button>
+                            `;
                         }
 
                         htmlTable += `
@@ -526,6 +532,369 @@
 
     // Chạy cập nhật ngay khi tải trang và thiết lập chu kỳ 30 giây
     setInterval(pollUpdates, 30000);
+</script>
+
+<!-- STAFF INVOICE & SERVICE MODAL -->
+<div id="staffInvoiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
+        
+        <div class="bg-gradient-to-r from-indigo-700 to-purple-800 px-6 py-4 flex items-center justify-between text-white">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+                <span class="material-symbols-outlined">receipt_long</span> Thanh toán & Quản lý Dịch vụ
+            </h3>
+            <button onclick="closeStaffInvoiceModal()" class="text-white/80 hover:text-white transition-colors p-1">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="p-6 md:p-8 max-h-[75vh] overflow-y-auto">
+            <div id="staff-invoice-loading" class="text-center py-12 text-zinc-500">
+                <span class="material-symbols-outlined animate-spin text-[32px] text-indigo-600 mb-2">sync</span>
+                <p class="text-sm font-medium">Đang tải chi tiết hóa đơn...</p>
+            </div>
+            
+            <div id="staff-invoice-content" class="hidden space-y-6">
+                <!-- General details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs">
+                    <div>
+                        <p class="text-zinc-500 font-semibold uppercase">Thông tin ca đấu</p>
+                        <h4 class="font-bold text-zinc-800 text-sm mt-1" id="staff-invoice-court-name">Tên sân</h4>
+                        <p class="text-zinc-600 mt-0.5" id="staff-invoice-time-slot">00:00 - 00:00 (01/01/2026)</p>
+                    </div>
+                    <div>
+                        <p class="text-zinc-500 font-semibold uppercase">Trạng thái thanh toán</p>
+                        <span class="badge badge-amber mt-1.5" id="staff-invoice-payment-status">Chưa thanh toán</span>
+                    </div>
+                </div>
+                
+                <!-- Services management -->
+                <div>
+                    <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-3">Dịch vụ đi kèm / Nước uống</h4>
+                    
+                    <!-- Add service inline form -->
+                    <div class="flex gap-2 mb-4 items-end bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                        <div class="flex-grow">
+                            <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Chọn sản phẩm</label>
+                            <select id="staff-product-select" class="w-full text-xs p-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:border-indigo-600">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="w-20">
+                            <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Số lượng</label>
+                            <input type="number" id="staff-product-qty" value="1" min="1" class="w-full text-xs p-2 bg-white border border-zinc-200 rounded-lg text-center font-bold focus:outline-none focus:border-indigo-600">
+                        </div>
+                        <button type="button" onclick="addServiceToInvoiceList()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-4 py-2 rounded-lg transition-all active:scale-95 h-[34px] flex items-center justify-center">
+                            Thêm
+                        </button>
+                    </div>
+                    
+                    <!-- Invoice detail table -->
+                    <div class="border border-zinc-100 rounded-xl overflow-hidden">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-zinc-50 border-b border-zinc-100 text-zinc-500 font-bold">
+                                    <th class="p-3">Tên sản phẩm</th>
+                                    <th class="p-3 text-center">Đơn giá</th>
+                                    <th class="p-3 text-center">Số lượng</th>
+                                    <th class="p-3 text-right">Thành tiền</th>
+                                    <th class="p-3 text-center">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-invoice-details-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Pricing summary & payment method -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-zinc-100">
+                    <div class="space-y-3">
+                        <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider">Phương thức thanh toán</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="border-2 border-indigo-600 bg-indigo-50/10 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-indigo-700 hover:bg-indigo-50/20 active:scale-95 transition-all" id="lbl-pay-cash">
+                                <input type="radio" name="staffPaymentMethod" value="Tiền mặt" checked class="hidden" onchange="changeStaffPayMethod('Tiền mặt')">
+                                <span class="material-symbols-outlined text-[18px]">payments</span> Tiền mặt
+                            </label>
+                            <label class="border-2 border-zinc-150 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all" id="lbl-pay-transfer">
+                                <input type="radio" name="staffPaymentMethod" value="Chuyển khoản" class="hidden" onchange="changeStaffPayMethod('Chuyển khoản')">
+                                <span class="material-symbols-outlined text-[18px]">qr_code_2</span> Chuyển khoản
+                            </label>
+                        </div>
+                    </div>
+                    <div class="bg-zinc-50 border border-zinc-100 p-4 rounded-2xl space-y-2 text-xs">
+                        <div class="flex justify-between text-zinc-650">
+                            <span>Tiền sân:</span>
+                            <span class="font-bold text-zinc-800" id="staff-summary-court-price" data-val="0">0 đ</span>
+                        </div>
+                        <div class="flex justify-between text-zinc-650">
+                            <span>Tiền dịch vụ:</span>
+                            <span class="font-bold text-zinc-800" id="staff-summary-services-price">0 đ</span>
+                        </div>
+                        <div class="pt-2.5 mt-1 border-t border-zinc-200 flex justify-between items-end">
+                            <span class="font-extrabold text-zinc-800 uppercase text-[10px]">Tổng thanh toán:</span>
+                            <span class="text-lg font-black text-indigo-600" id="staff-summary-total">0 đ</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="pt-4 flex justify-between gap-3">
+                    <div class="flex gap-2">
+                        <form id="staff-save-services-form" action="${pageContext.request.contextPath}/staff/checkin" method="post">
+                            <input type="hidden" name="action" value="addServices">
+                            <input type="hidden" name="datSanId" id="staff-save-datsan-id">
+                            <div id="staff-save-hidden-inputs" class="hidden"></div>
+                            <button type="submit" class="px-6 py-3 rounded-xl font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs active:scale-95">
+                                Lưu thay đổi dịch vụ
+                            </button>
+                        </form>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeStaffInvoiceModal()" class="px-6 py-3 rounded-xl font-bold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 text-xs active:scale-95 transition-colors">
+                            Đóng
+                        </button>
+                        <form id="staff-payment-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return confirmPaymentSubmit()">
+                            <input type="hidden" name="action" value="processPayment">
+                            <input type="hidden" name="datSanId" id="staff-pay-datsan-id">
+                            <input type="hidden" name="phuongThucThanhToan" id="staff-pay-method-input" value="Tiền mặt">
+                            <button type="submit" class="px-8 py-3 rounded-xl font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md hover:shadow-indigo-600/20 text-xs active:scale-95 duration-200 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">print</span>
+                                Thanh toán & Xuất hóa đơn (Bill)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let staffProducts = [];
+    let staffOrdered = [];
+    let currentStaffDatSanId = -1;
+
+    function openStaffInvoiceModal(datSanId) {
+        currentStaffDatSanId = datSanId;
+        document.getElementById("staff-save-datsan-id").value = datSanId;
+        document.getElementById("staff-pay-datsan-id").value = datSanId;
+        
+        const modal = document.getElementById("staffInvoiceModal");
+        const loading = document.getElementById("staff-invoice-loading");
+        const content = document.getElementById("staff-invoice-content");
+        
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        loading.classList.remove("hidden");
+        content.classList.add("hidden");
+        
+        setTimeout(() => {
+            modal.classList.remove("opacity-0");
+            modal.querySelector(".bg-white").classList.remove("scale-95");
+        }, 10);
+
+        // Fetch invoice detail
+        fetch(`${pageContext.request.contextPath}/staff/checkin?action=getInvoiceDetails&datSanId=${datSanId}`)
+            .then(res => res.json())
+            .then(data => {
+                staffProducts = data.products || [];
+                staffOrdered = data.ordered || [];
+                
+                document.getElementById("staff-invoice-court-name").textContent = data.tenSan;
+                document.getElementById("staff-invoice-time-slot").textContent = `${data.gioBatDau} - ${data.gioKetThuc} (${data.ngayDat})`;
+                
+                const statusBadge = document.getElementById("staff-invoice-payment-status");
+                statusBadge.textContent = data.trangThaiThanhToan;
+                if (data.trangThaiThanhToan === 'Đã thanh toán') {
+                    statusBadge.className = "badge badge-green mt-1.5";
+                } else {
+                    statusBadge.className = "badge badge-amber mt-1.5";
+                }
+
+                // Populate court price
+                const summaryCourtPriceEl = document.getElementById("staff-summary-court-price");
+                summaryCourtPriceEl.textContent = data.tongTienSan.toLocaleString('vi-VN') + " đ";
+                summaryCourtPriceEl.setAttribute("data-val", data.tongTienSan);
+
+                // Populate products select
+                const select = document.getElementById("staff-product-select");
+                select.innerHTML = '<option value="">-- Chọn sản phẩm thêm --</option>';
+                staffProducts.forEach(prod => {
+                    select.insertAdjacentHTML("beforeend", `<option value="${prod.SanPhamID}">${prod.TenSanPham} (${prod.DonGia.toLocaleString('vi-VN')} đ / ${prod.DonViTinh || 'cái'} - Kho: ${prod.SoLuongTon})</option>`);
+                });
+
+                renderStaffOrderedTable();
+                
+                loading.classList.add("hidden");
+                content.classList.remove("hidden");
+            })
+            .catch(err => {
+                alert('Lỗi khi tải chi tiết hóa đơn: ' + err.message);
+                closeStaffInvoiceModal();
+            });
+    }
+
+    function renderStaffOrderedTable() {
+        const tbody = document.getElementById("staff-invoice-details-body");
+        tbody.innerHTML = "";
+        
+        if (staffOrdered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-zinc-400 italic">Chưa có dịch vụ nào được thêm.</td></tr>`;
+        } else {
+            staffOrdered.forEach(item => {
+                const prod = staffProducts.find(p => p.SanPhamID === item.SanPhamID);
+                const prodName = prod ? prod.TenSanPham : `Sản phẩm #${item.SanPhamID}`;
+                const unit = prod ? (prod.DonViTinh || 'cái') : 'cái';
+                
+                tbody.insertAdjacentHTML("beforeend", `
+                    <tr class="border-b border-zinc-100 hover:bg-zinc-50/50">
+                        <td class="p-3 font-semibold text-zinc-850">${prodName}</td>
+                        <td class="p-3 text-center text-zinc-600">${item.DonGiaTaiThoiDiemBan.toLocaleString('vi-VN')} đ</td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button type="button" onclick="adjustStaffItemQty(${item.SanPhamID}, -1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">-</button>
+                                <span class="font-bold text-sm w-8 text-center">${item.SoLuong}</span>
+                                <button type="button" onclick="adjustStaffItemQty(${item.SanPhamID}, 1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">+</button>
+                            </div>
+                        </td>
+                        <td class="p-3 text-right font-bold text-zinc-800">${item.ThanhTien.toLocaleString('vi-VN')} đ</td>
+                        <td class="p-3 text-center">
+                            <button type="button" onclick="removeStaffItem(${item.SanPhamID})" class="p-1 rounded text-red-500 hover:bg-red-50 flex items-center justify-center mx-auto transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        recalculateStaffTotals();
+    }
+
+    function adjustStaffItemQty(spId, delta) {
+        const prod = staffProducts.find(p => p.SanPhamID === spId);
+        if (!prod) return;
+        
+        const item = staffOrdered.find(o => o.SanPhamID === spId);
+        if (!item) return;
+
+        let newQty = item.SoLuong + delta;
+        if (newQty <= 0) {
+            removeStaffItem(spId);
+            return;
+        }
+
+        if (newQty > prod.SoLuongTon) {
+            alert(`Không thể chọn vượt quá số lượng tồn kho (${prod.SoLuongTon})`);
+            newQty = prod.SoLuongTon;
+        }
+
+        item.SoLuong = newQty;
+        item.ThanhTien = newQty * item.DonGiaTaiThoiDiemBan;
+        renderStaffOrderedTable();
+    }
+
+    function removeStaffItem(spId) {
+        staffOrdered = staffOrdered.filter(o => o.SanPhamID !== spId);
+        renderStaffOrderedTable();
+    }
+
+    function addServiceToInvoiceList() {
+        const select = document.getElementById("staff-product-select");
+        const qtyInput = document.getElementById("staff-product-qty");
+        
+        const spId = parseInt(select.value);
+        const qty = parseInt(qtyInput.value) || 1;
+        
+        if (!spId) {
+            alert("Vui lòng chọn sản phẩm.");
+            return;
+        }
+
+        const prod = staffProducts.find(p => p.SanPhamID === spId);
+        if (!prod) return;
+
+        if (qty > prod.SoLuongTon) {
+            alert(`Sản phẩm này chỉ còn tồn kho: ${prod.SoLuongTon}`);
+            return;
+        }
+
+        // Check if already ordered
+        const existing = staffOrdered.find(o => o.SanPhamID === spId);
+        if (existing) {
+            const newQty = existing.SoLuong + qty;
+            if (newQty > prod.SoLuongTon) {
+                alert(`Không thể thêm vì tổng số lượng vượt quá tồn kho (${prod.SoLuongTon})`);
+                return;
+            }
+            existing.SoLuong = newQty;
+            existing.ThanhTien = newQty * existing.DonGiaTaiThoiDiemBan;
+        } else {
+            staffOrdered.push({
+                SanPhamID: spId,
+                SoLuong: qty,
+                DonGiaTaiThoiDiemBan: prod.DonGia,
+                ThanhTien: qty * prod.DonGia
+            });
+        }
+
+        select.value = "";
+        qtyInput.value = "1";
+        renderStaffOrderedTable();
+    }
+
+    function recalculateStaffTotals() {
+        let serviceTotal = 0;
+        staffOrdered.forEach(item => {
+            serviceTotal += item.ThanhTien;
+        });
+
+        const summaryCourtPriceEl = document.getElementById("staff-summary-court-price");
+        const courtPriceVal = parseFloat(summaryCourtPriceEl.getAttribute("data-val")) || 0;
+        
+        const totalVal = courtPriceVal + serviceTotal;
+        
+        document.getElementById("staff-summary-services-price").textContent = serviceTotal.toLocaleString('vi-VN') + " đ";
+        document.getElementById("staff-summary-total").textContent = totalVal.toLocaleString('vi-VN') + " đ";
+
+        // Update hidden inputs for saving
+        const hiddenContainer = document.getElementById("staff-save-hidden-inputs");
+        hiddenContainer.innerHTML = "";
+        staffOrdered.forEach(item => {
+            hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="productId" value="${item.SanPhamID}">`);
+            hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="quantity" value="${item.SoLuong}">`);
+        });
+    }
+
+    function changeStaffPayMethod(method) {
+        document.getElementById("staff-pay-method-input").value = method;
+        
+        const lblCash = document.getElementById("lbl-pay-cash");
+        const lblTransfer = document.getElementById("lbl-pay-transfer");
+        
+        if (method === 'Tiền mặt') {
+            lblCash.className = "border-2 border-indigo-600 bg-indigo-50/10 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-indigo-700 hover:bg-indigo-50/20 active:scale-95 transition-all";
+            lblTransfer.className = "border-2 border-zinc-150 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all";
+        } else {
+            lblTransfer.className = "border-2 border-indigo-600 bg-indigo-50/10 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-indigo-700 hover:bg-indigo-50/20 active:scale-95 transition-all";
+            lblCash.className = "border-2 border-zinc-150 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all";
+        }
+    }
+
+    function confirmPaymentSubmit() {
+        return confirm("Xác nhận khách đã thanh toán đơn này? Sân bóng sẽ được giải phóng về trạng thái Sẵn sàng.");
+    }
+
+    function closeStaffInvoiceModal() {
+        const modal = document.getElementById("staffInvoiceModal");
+        modal.classList.add("opacity-0");
+        modal.querySelector(".bg-white").classList.add("scale-95");
+        setTimeout(() => {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }, 300);
+    }
 </script>
 </body>
 </html>

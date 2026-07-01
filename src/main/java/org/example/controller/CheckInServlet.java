@@ -9,7 +9,14 @@ import jakarta.servlet.http.HttpSession;
 import org.example.dao.CheckInDAO;
 import org.example.dao.CheckInDAO.CheckInException;
 import org.example.dao.CheckInDAO.PaymentRequiredException;
+import org.example.dao.LichDatSanDAO;
+import org.example.dao.impl.LichDatSanDAOImpl;
+import org.example.dao.SanDAO;
+import org.example.dao.impl.SanDAOImpl;
+import org.example.model.Lichdatsan;
+import org.example.model.San;
 import org.example.model.TaiKhoan;
+import java.util.List;
 
 import java.io.IOException;
 
@@ -217,5 +224,75 @@ public class CheckInServlet extends HttpServlet {
 
         // Forward láº¡i trang JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
+    }
+
+    private void handleGetInvoiceDetails(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws ServletException, IOException {
+        try {
+            int datSanId = Integer.parseInt(req.getParameter("datSanId"));
+            LichDatSanDAO lichDatSanDAO = new LichDatSanDAOImpl();
+            Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
+            if (lich == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn đặt sân.");
+                return;
+            }
+
+            SanDAO sanDAO = new SanDAOImpl();
+            San san = sanDAO.getSanById(lich.getSanId());
+            if (user.getRoleId() == 4 && san.getCoSoID() != user.getCoSoId()) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập đơn đặt sân thuộc cơ sở khác.");
+                return;
+            }
+
+            int coSoId = san.getCoSoID();
+
+            org.example.dao.SanPhamDichVuDAO spDao = new org.example.dao.impl.SanPhamDichVuDAOImpl();
+            List<org.example.model.SanPham_DichVu> allSp = spDao.findByCoSo(coSoId);
+            List<org.example.model.SanPham_DichVu> products = allSp.stream()
+                .filter(sp -> "Đang kinh doanh".equals(sp.getTrangThai()))
+                .collect(java.util.stream.Collectors.toList());
+
+            org.example.dao.HoaDonDAO hdDao = new org.example.dao.impl.HoaDonDAOImpl();
+            int hoaDonId = -1;
+            double tongTienSan = lich.getTongTienDuKien() != null ? lich.getTongTienDuKien().doubleValue() : 0.0;
+            double tongTienDichVu = 0.0;
+            double tongThanhToan = tongTienSan;
+            String trangThaiThanhToan = "Chưa thanh toán";
+
+            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?")) {
+                ps.setInt(1, datSanId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        hoaDonId = rs.getInt("HoaDonID");
+                        tongTienSan = rs.getDouble("TongTienSan");
+                        tongTienDichVu = rs.getDouble("TongTienDichVu");
+                        tongThanhToan = rs.getDouble("TongThanhToan");
+                        trangThaiThanhToan = rs.getString("TrangThaiThanhToan");
+                    }
+                }
+            }
+
+            List<org.example.model.ChiTietHoaDon> ordered = new java.util.ArrayList<>();
+            if (hoaDonId != -1) {
+                ordered = hdDao.getChiTietByHoaDonId(hoaDonId);
+            }
+
+            resp.setContentType("application/json;charset=UTF-8");
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("products", products);
+            data.put("ordered", ordered);
+            data.put("tongTienSan", tongTienSan);
+            data.put("tongTienDichVu", tongTienDichVu);
+            data.put("tongThanhToan", tongThanhToan);
+            data.put("trangThaiThanhToan", trangThaiThanhToan);
+            data.put("tenSan", san.getTenSan());
+            data.put("ngayDat", lich.getNgayDat().toString());
+            data.put("gioBatDau", lich.getGioBatDau().toString().substring(0, 5));
+            data.put("gioKetThuc", lich.getGioKetThuc().toString().substring(0, 5));
+            resp.getWriter().write(new com.google.gson.Gson().toJson(data));
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 }

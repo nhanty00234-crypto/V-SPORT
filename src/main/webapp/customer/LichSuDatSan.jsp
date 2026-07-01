@@ -180,20 +180,27 @@
                                                 </c:choose>
                                             </td>
                                             <td class="p-4 text-center">
-                                                <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
-                                                    <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt sân này?');" class="inline-block">
-                                                        <input type="hidden" name="id" value="${lich.datSanId}">
-                                                        <button type="submit" class="px-3.5 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
-                                                            Hủy yêu cầu
+                                                <div class="flex items-center justify-center gap-1.5">
+                                                    <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
+                                                        <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt sân này?');" class="inline-block">
+                                                            <input type="hidden" name="id" value="${lich.datSanId}">
+                                                            <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
+                                                                Hủy
+                                                            </button>
+                                                        </form>
+                                                    </c:if>
+                                                    <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
+                                                        <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-all active:scale-95 text-[10px]">
+                                                            Dịch vụ
                                                         </button>
-                                                    </form>
-                                                </c:if>
-                                                <c:if test="${lich.trangThai == 'Đang sử dụng'}">
-                                                    <span class="text-slate-400 font-semibold text-[10px]">Đang sử dụng</span>
-                                                </c:if>
-                                                <c:if test="${lich.trangThai == 'Đã hủy'}">
-                                                    <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
-                                                </c:if>
+                                                    </c:if>
+                                                    <c:if test="${lich.trangThai == 'Đã hủy'}">
+                                                        <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
+                                                    </c:if>
+                                                    <c:if test="${lich.trangThai == 'Đã hoàn thành'}">
+                                                        <span class="text-green-600 text-[10px] font-bold">Hoàn thành</span>
+                                                    </c:if>
+                                                </div>
                                             </td>
                                         </tr>
                                     </c:forEach>
@@ -223,6 +230,163 @@
         const navHistory = document.getElementById('nav-history');
         if (navHistory) {
             navHistory.classList.add('active');
+        }
+    </script>
+
+    <!-- CUSTOMER SERVICE BOOKING MODAL -->
+    <div id="customerServiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 flex items-center justify-between text-white">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined">coffee</span> Đặt thêm Dịch vụ / Nước uống
+                </h3>
+                <button onclick="closeCustomerServiceModal()" class="text-white/80 hover:text-white transition-colors p-1">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="p-6 md:p-8 max-h-[70vh] overflow-y-auto">
+                <form id="customer-service-form" action="${pageContext.request.contextPath}/customer/dat-dich-vu" method="post" class="space-y-6">
+                    <input type="hidden" name="datSanId" id="customer-service-datsan-id">
+                    
+                    <div id="customer-service-loading" class="text-center py-10 text-slate-500">
+                        <span class="material-symbols-outlined animate-spin text-[32px] text-emerald-600 mb-2">sync</span>
+                        <p class="text-sm font-medium">Đang tải danh sách dịch vụ...</p>
+                    </div>
+                    
+                    <div id="customer-service-container" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="customer-products-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase block">Tổng tiền dịch vụ thêm</span>
+                            <span class="text-xl font-bold text-emerald-600" id="customer-service-total">0 đ</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="closeCustomerServiceModal()" class="px-6 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                Hủy
+                            </button>
+                            <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md hover:shadow-emerald-600/20 active:scale-95 duration-200">
+                                Xác nhận đặt
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customerProducts = [];
+        let customerOrdered = [];
+
+        function openCustomerServiceModal(datSanId) {
+            document.getElementById("customer-service-datsan-id").value = datSanId;
+            
+            const modal = document.getElementById("customerServiceModal");
+            const loading = document.getElementById("customer-service-loading");
+            const container = document.getElementById("customer-service-container");
+            const grid = document.getElementById("customer-products-grid");
+            
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            loading.classList.remove("hidden");
+            container.classList.add("hidden");
+            
+            setTimeout(() => {
+                modal.classList.remove("opacity-0");
+                modal.querySelector(".bg-white").classList.remove("scale-95");
+            }, 10);
+
+            // Fetch data
+            fetch(`${pageContext.request.contextPath}/customer/dat-dich-vu?datSanId=${datSanId}`)
+                .then(res => res.json())
+                .then(data => {
+                    customerProducts = data.products || [];
+                    customerOrdered = data.ordered || [];
+                    
+                    loading.classList.add("hidden");
+                    container.classList.remove("hidden");
+                    
+                    grid.innerHTML = "";
+                    if (customerProducts.length === 0) {
+                        grid.innerHTML = `<div class="col-span-2 text-center text-slate-400 py-8 italic">Cơ sở này hiện không có sản phẩm/dịch vụ nào đang kinh doanh.</div>`;
+                        return;
+                    }
+
+                    customerProducts.forEach(prod => {
+                        const ord = customerOrdered.find(o => o.SanPhamID === prod.SanPhamID);
+                        const qty = ord ? ord.SoLuong : 0;
+                        
+                        const itemHtml = `
+                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm">
+                                <div class="flex-grow min-w-0 pr-4">
+                                    <h4 class="font-bold text-slate-800 text-sm truncate">${prod.TenSanPham}</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">${prod.DonGia.toLocaleString('vi-VN')} đ / ${prod.DonViTinh || 'cái'}</p>
+                                    <p class="text-[10px] text-slate-400 italic mt-0.5 truncate">${prod.MoTa || 'Sản phẩm phục vụ tại sân'}</p>
+                                    <p class="text-[10px] text-slate-500 font-semibold mt-1">Còn lại: ${prod.SoLuongTon} ${prod.DonViTinh || 'cái'}</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <input type="hidden" name="productId" value="${prod.SanPhamID}">
+                                    <button type="button" onclick="adjustCustomerQty(${prod.SanPhamID}, -1)" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center transition-colors select-none">-</button>
+                                    <input type="number" name="quantity" id="cust-qty-${prod.SanPhamID}" value="${qty}" min="0" max="${prod.SoLuongTon}" class="w-12 text-center bg-white border border-slate-200 rounded-lg py-1 text-sm font-bold" readonly>
+                                    <button type="button" onclick="adjustCustomerQty(${prod.SanPhamID}, 1)" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center transition-colors select-none">+</button>
+                                </div>
+                            </div>
+                        `;
+                        grid.insertAdjacentHTML("beforeend", itemHtml);
+                    });
+                    
+                    recalculateCustomerTotal();
+                })
+                .catch(err => {
+                    grid.innerHTML = `<div class="col-span-2 text-center text-red-500 py-8 italic">Có lỗi xảy ra khi tải dữ liệu: ${err.message}</div>`;
+                    loading.classList.add("hidden");
+                    container.classList.remove("hidden");
+                });
+        }
+
+        function adjustCustomerQty(spId, delta) {
+            const input = document.getElementById(`cust-qty-${spId}`);
+            if (!input) return;
+            
+            const prod = customerProducts.find(p => p.SanPhamID === spId);
+            if (!prod) return;
+            
+            let val = parseInt(input.value) || 0;
+            val += delta;
+            
+            if (val < 0) val = 0;
+            if (val > prod.SoLuongTon) {
+                alert(`Không thể chọn vượt quá số lượng tồn kho (${prod.SoLuongTon})`);
+                val = prod.SoLuongTon;
+            }
+            
+            input.value = val;
+            recalculateCustomerTotal();
+        }
+
+        function recalculateCustomerTotal() {
+            let total = 0;
+            customerProducts.forEach(prod => {
+                const input = document.getElementById(`cust-qty-${prod.SanPhamID}`);
+                const qty = input ? (parseInt(input.value) || 0) : 0;
+                total += qty * prod.DonGia;
+            });
+            document.getElementById("customer-service-total").textContent = total.toLocaleString('vi-VN') + " đ";
+        }
+
+        function closeCustomerServiceModal() {
+            const modal = document.getElementById("customerServiceModal");
+            modal.classList.add("opacity-0");
+            modal.querySelector(".bg-white").classList.add("scale-95");
+            setTimeout(() => {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }, 300);
         }
     </script>
 </body>

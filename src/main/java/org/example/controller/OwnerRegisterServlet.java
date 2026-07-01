@@ -144,7 +144,7 @@ public class OwnerRegisterServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
         HttpSession session = req.getSession(false);
 
-        // Check that email was verified
+        // Check that email was verified777777777
         Boolean verified = (session != null) ? (Boolean) session.getAttribute("ownerEmailVerified") : null;
         if (verified == null || !verified) {
             out.print("{\"success\":false,\"message\":\"Email chưa được xác thực.\"}");
