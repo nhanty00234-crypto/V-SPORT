@@ -248,3 +248,27 @@ Sau khi chạy thành công, file `Backend_java-1.0-SNAPSHOT.war` sẽ được 
 #### 3. Khóa bi quan chống Race Condition khi Check-in Vãng lai
 *   **Nghiệp vụ khóa dòng**: Bổ sung gợi ý khóa `WITH (UPDLOCK, ROWLOCK)` khi SELECT kiểm tra trạng thái Sân trong luồng mở sân cho khách vãng lai ([CheckInDAO.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/dao/CheckInDAO.java)).
 *   **Tác dụng**: Ngăn chặn triệt để xung đột tranh chấp dữ liệu khi Lễ tân mở sân tại quầy trùng khớp thời điểm mili-giây khách hàng bấm đặt trực tuyến trên Web.
+
+### Cập nhật ngày 01/07/2026: Vá Lỗ hổng Bảo mật IDOR, Đồng bộ hóa Giao dịch Kho Hàng & Sửa lỗi JSP / bfcache
+
+#### 1. Khắc phục triệt để các lỗ hổng IDOR & Cô lập dữ liệu chi nhánh
+*   **Quản lý lịch ca làm định kỳ**: Vá lỗi IDOR trong `addShiftPattern` và `deleteShiftPattern` (ở [NhanSuService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/NhanSuService.java) và [NhanSuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/NhanSuManagerServlet.java)) bằng cách nạp thông tin nhân sự và xác thực phân quyền chi nhánh (`BranchSecurityUtils.checkBranchAccess(staff.getCoSoId(), coSoId)`) trước khi ghi nhận thay đổi, ngăn quản lý cơ sở A thao tác ca làm của nhân viên cơ sở B.
+*   **Xem chi tiết hồ sơ nhân viên**: Chuyển đổi phương thức sang `getStaffById(accountId, managerCoSoId)` trong [NhanSuService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/NhanSuService.java) để thực thi kiểm tra bảo mật cô lập chi nhánh trực tiếp tại tầng Service layer trước khi kết xuất dữ liệu PII nhạy cảm và thông tin tài khoản ngân hàng.
+*   **Phê duyệt và từ chối yêu cầu đổi ca**: Bổ sung kiểm tra branch chéo chi nhánh trong các phương thức `approveSwapRequest` và `rejectSwapRequest` ở [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java) đối chiếu chi nhánh của người gửi yêu cầu đổi ca (`requester`) với chi nhánh của quản lý đang duyệt (`manager`).
+*   **Cập nhật thông tin nhân viên**: Thêm bước kiểm tra quyền chi nhánh trước khi gửi mã xác thực OTP cập nhật email trong servlet nhân sự.
+
+#### 2. Đồng bộ hóa an toàn giao dịch & Ngăn ngừa Race Condition Kho hàng
+*   **Khóa ghi bi quan khi thay đổi số lượng**: Áp dụng khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi tải thông tin sản phẩm phục vụ hoạt động nhập/xuất kho tại [KhoDichVuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java), loại bỏ hoàn toàn khả năng cập nhật đè dữ liệu (lost update) khi nhiều người thao tác hoặc bấm đúp.
+*   **Giao dịch nguyên tử cho sản phẩm mẫu (Presets)**: Đóng gói tiến trình chèn loạt sản phẩm mẫu vào một JPA transaction duy nhất, đảm bảo tính toàn vẹn rollback nếu phát sinh lỗi giữa chừng.
+*   **Dọn dẹp danh mục trùng lặp tối ưu**: Triển khai static lock (`categoryLock`) và cờ volatile `categoryCleaned` trong [KhoDichVuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java) để tiến trình kiểm tra dọn dẹp chỉ kích hoạt duy nhất một lần khi khởi chạy hệ thống, tăng đáng kể tốc độ tải trang.
+
+#### 3. Loại bỏ rò rỉ thông tin lỗi & Sửa lỗi im lặng (Silent failure)
+*   **Rò rỉ lỗi hệ thống**: Loại bỏ các chỗ ghi đè `e.getMessage()` trực tiếp ra client tại `NhanSuManagerServlet.java` và `KhoDichVuManagerServlet.java`, thay bằng thông báo lỗi an toàn để bảo vệ cấu trúc hệ thống.
+*   **Khắc phục lỗi im lặng**: Bổ sung tham số thuộc tính `errorMessage` lên request scope trong catch block của `CustomerManagerServlet.java` giúp giao diện JSP của quản lý thông báo lỗi kết nối rõ ràng thay vì hiển thị bảng trống không lý do.
+
+#### 4. Sửa lỗi hiển thị Tiếng Việt (Mojibake Encoding)
+*   Dọn dẹp và chuẩn hóa toàn bộ các chuỗi tiếng Việt bị lỗi hiển thị/vỡ font mã hóa ký tự UTF-8 (ví dụ: `ThÃªm nhÃ¢n viÃªn thÃ nh cÃ´ng!` -> `Thêm nhân viên thành công!`) trong servlet điều hành [NhanSuManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/NhanSuManagerServlet.java).
+
+#### 5. Sửa lỗi chức năng JSP & Vá lỗi bfcache (History Back/Forward)
+*   **Sửa hàm Javascript chết (Dead functions)**: Cấu hình `id` động cho các form (`form-approve-${req.yeuCauNghiID}`) và chuyển các nút submit thành nút gọi hàm xác nhận `confirmApprove(id)` / `confirmReject(id)` trong [yeuCauNghi_list.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/yeuCauNghi_list.jsp).
+*   **Vá lỗi bfcache**: Tích hợp trình lắng nghe sự kiện `pageshow` ở các trang manager ([KhoDichVu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/KhoDichVu.jsp), [QuanLySan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp), [CaLamViec.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/CaLamViec.jsp), [NhanSu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/NhanSu.jsp), [yeuCauNghi_list.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/yeuCauNghi_list.jsp), [profile_dropdown.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/common/profile_dropdown.jsp)) để buộc tải lại dữ liệu mới nhất từ máy chủ khi bấm Back/Forward trên trình duyệt.
