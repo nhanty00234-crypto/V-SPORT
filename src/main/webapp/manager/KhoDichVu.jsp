@@ -130,7 +130,7 @@
     <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-2.5 text-zinc-400 text-[18px]">search</span>
-        <input type="text" name="search" value="${search}" autocomplete="off" placeholder="Tìm theo tên, mã SKU..." class="w-full pl-9 pr-3 py-2 text-xs border border-purple-100 rounded-lg focus:outline-none focus:border-purple-500 bg-zinc-50/50">
+        <input type="search" name="search" value="${search}" autocomplete="off" placeholder="Tìm theo tên, mã SKU..." class="w-full pl-9 pr-3 py-2 text-xs border border-purple-100 rounded-lg focus:outline-none focus:border-purple-500 bg-zinc-50/50">
       </div>
       
       <div>
@@ -316,7 +316,7 @@
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Tên sản phẩm *</label>
-          <input type="text" name="tenSanPham" required placeholder="Ví dụ: Nước uống Aquafina" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="text" name="tenSanPham" maxlength="100" required placeholder="Ví dụ: Nước uống Aquafina" class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
       </div>
 
@@ -391,7 +391,7 @@
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Tên sản phẩm *</label>
-          <input type="text" id="editTenSanPham" name="tenSanPham" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
+          <input type="text" id="editTenSanPham" name="tenSanPham" maxlength="100" required class="w-full border border-purple-100 rounded-lg p-2.5 bg-zinc-50 focus:outline-none focus:border-purple-500">
         </div>
       </div>
 

@@ -83,7 +83,7 @@ body{font-family:'Inter',sans-serif}
         <a href="${pageContext.request.contextPath}/admin/nhan-su"
            class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-blue-700 text-sm font-bold
                   hover:bg-blue-50 transition-all shadow-lg shadow-blue-900/20">
-          <span class="material-symbols-outlined text-[16px]">person_add</span>Thêm nhân sự
+          <span class="material-symbols-outlined text-[16px]">groups</span>Quản lý nhân sự
         </a>
       </div>
     </div>

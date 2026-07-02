@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -143,7 +143,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="px-5 py-4 border-b border-zinc-100 flex flex-col lg:flex-row lg:items-center gap-3">
       <div class="relative flex-1 max-w-md">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
-        <input type="text" placeholder="Tìm theo tên khách, SĐT, mã đặt..." class="h-10 w-full pl-9 pr-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
+        <input type="search" autocomplete="off" placeholder="Tìm theo tên khách, SĐT, mã đặt..." class="h-10 w-full pl-9 pr-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <input type="date" value="2026-05-17" class="h-10 px-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">

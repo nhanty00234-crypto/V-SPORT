@@ -75,28 +75,30 @@
 <div id="editProfileModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('editProfileModal').classList.add('hidden')"></div>
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[520px] max-h-[90vh] overflow-y-auto z-10 border border-zinc-200 modal-animate-scale">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
-      <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-purple-700">manage_accounts</span><h3 class="text-base font-bold text-zinc-900 font-sans">Hồ sơ cá nhân</h3></div>
-      <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
-    </div>
-    <div class="flex flex-col items-center gap-3 pt-6 pb-4 border-b border-zinc-100">
-      <div class="relative">
-        <img id="editAvatarPreview" class="w-20 h-20 rounded-full object-cover ring-2 ring-purple-600/30" src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=7c3aed&color=fff&bold=true" alt="Avatar">
+    <form onsubmit="return false;" autocomplete="off" class="flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+        <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-purple-700">manage_accounts</span><h3 class="text-base font-bold text-zinc-900 font-sans">Hồ sơ cá nhân</h3></div>
+        <button type="button" onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
       </div>
-    </div>
-    <div class="px-6 py-5">
-      <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4">Thông tin chi tiết</p>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Họ và tên</label><input type="text" id="editFullName" value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
-        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mã tài khoản</label><input type="text" value="ACC-${sessionScope.user.accountId}" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none font-medium"></div>
-        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Email</label><input type="email" id="editEmail" value="${sessionScope.user.email != null ? sessionScope.user.email : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
-        <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Số điện thoại</label><input type="tel" id="editPhone" value="${sessionScope.user.phoneNumber != null ? sessionScope.user.phoneNumber : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
+      <div class="flex flex-col items-center gap-3 pt-6 pb-4 border-b border-zinc-100">
+        <div class="relative">
+          <img id="editAvatarPreview" class="w-20 h-20 rounded-full object-cover ring-2 ring-purple-600/30" src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=7c3aed&color=fff&bold=true" alt="Avatar">
+        </div>
       </div>
-    </div>
-    <div class="px-6 pb-5 flex gap-3 justify-end">
-      <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-650 hover:bg-zinc-50 transition-colors">Hủy</button>
-      <button onclick="saveProfileChanges()" class="h-10 px-5 rounded-lg bg-purple-700 text-white text-sm font-semibold hover:bg-purple-800 transition-colors active:scale-95">Lưu thay đổi</button>
-    </div>
+      <div class="px-6 py-5">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4">Thông tin chi tiết</p>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Họ và tên</label><input type="text" id="editFullName" value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
+          <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mã tài khoản</label><input type="text" value="ACC-${sessionScope.user.accountId}" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none font-medium"></div>
+          <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Email</label><input type="email" id="editEmail" value="${sessionScope.user.email != null ? sessionScope.user.email : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
+          <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Số điện thoại</label><input type="tel" id="editPhone" value="${sessionScope.user.phoneNumber != null ? sessionScope.user.phoneNumber : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
+        </div>
+      </div>
+      <div class="px-6 pb-5 flex gap-3 justify-end">
+        <button type="button" onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-650 hover:bg-zinc-50 transition-colors">Hủy</button>
+        <button type="button" onclick="saveProfileChanges()" class="h-10 px-5 rounded-lg bg-purple-700 text-white text-sm font-semibold hover:bg-purple-800 transition-colors active:scale-95">Lưu thay đổi</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -104,19 +106,21 @@
 <div id="changePwModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('changePwModal').classList.add('hidden')"></div>
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] z-10 border border-zinc-200 modal-animate-scale">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
-      <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-purple-700">lock_reset</span><h3 class="text-base font-bold text-zinc-900 font-sans">Đổi mật khẩu</h3></div>
-      <button onclick="document.getElementById('changePwModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
-    </div>
-    <div class="px-6 py-5 flex flex-col gap-4 font-sans">
-      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu hiện tại</label><div class="relative"><input type="password" id="pwCurrent" placeholder="••••••••" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwCurrent" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
-      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu mới</label><div class="relative"><input type="password" id="pwNew" placeholder="••••••••" oninput="updatePwStrength(this)" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwNew" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div><div class="flex gap-1 mt-2"><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str1"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str2"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str3"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str4"></div></div><p id="pwStrengthLabel" class="text-[11px] text-zinc-500 mt-1"></p></div>
-      <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Xác nhận mật khẩu mới</label><div class="relative"><input type="password" id="pwConfirm" placeholder="••••••••" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwConfirm" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
-    </div>
-    <div class="px-6 pb-5 flex gap-3 justify-end">
-      <button onclick="document.getElementById('changePwModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-650 hover:bg-zinc-50 transition-colors">Hủy</button>
-      <button onclick="savePassword()" class="h-10 px-5 rounded-lg bg-purple-700 text-white text-sm font-semibold hover:bg-purple-800 transition-colors active:scale-95 font-sans">Đổi mật khẩu</button>
-    </div>
+    <form onsubmit="return false;" autocomplete="off" class="flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+        <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-purple-700">lock_reset</span><h3 class="text-base font-bold text-zinc-900 font-sans">Đổi mật khẩu</h3></div>
+        <button type="button" onclick="document.getElementById('changePwModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+      </div>
+      <div class="px-6 py-5 flex flex-col gap-4 font-sans">
+        <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu hiện tại</label><div class="relative"><input type="password" id="pwCurrent" placeholder="••••••••" autocomplete="new-password" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwCurrent" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
+        <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mật khẩu mới</label><div class="relative"><input type="password" id="pwNew" placeholder="••••••••" autocomplete="new-password" oninput="updatePwStrength(this)" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwNew" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div><div class="flex gap-1 mt-2"><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str1"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str2"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str3"></div><div class="h-1 flex-1 rounded-full bg-zinc-100" id="str4"></div></div><p id="pwStrengthLabel" class="text-[11px] text-zinc-500 mt-1"></p></div>
+        <div><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Xác nhận mật khẩu mới</label><div class="relative"><input type="password" id="pwConfirm" placeholder="••••••••" autocomplete="new-password" class="w-full h-10 px-3 pr-10 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors"><button type="button" onclick="togglePw(this)" data-target="pwConfirm" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 transition-colors"><span class="material-symbols-outlined text-[18px]">visibility_off</span></button></div></div>
+      </div>
+      <div class="px-6 pb-5 flex gap-3 justify-end">
+        <button type="button" onclick="document.getElementById('changePwModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-650 hover:bg-zinc-50 transition-colors">Hủy</button>
+        <button type="button" onclick="savePassword()" class="h-10 px-5 rounded-lg bg-purple-700 text-white text-sm font-semibold hover:bg-purple-800 transition-colors active:scale-95 font-sans">Đổi mật khẩu</button>
+      </div>
+    </form>
   </div>
 </div>
 

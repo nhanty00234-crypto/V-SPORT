@@ -75,9 +75,6 @@ body { font-family: 'Inter', sans-serif; }
         <span id="trashCountBadge" class="hidden text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">0</span>
       </button>
     </div>
-    <button id="addStaffBtn" onclick="openAddStaff()" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all">
-      <span class="material-symbols-outlined text-[18px]">person_add</span>Thêm nhân sự
-    </button>
   </div>
 
   <!-- Alert Messages -->
@@ -219,7 +216,7 @@ body { font-family: 'Inter', sans-serif; }
             <div class="flex flex-col gap-1.5">
               <label id="pwdLabel" class="text-xs font-medium text-zinc-700">Mật khẩu <span class="text-red-500">*</span></label>
               <div class="relative flex items-center">
-                <input type="password" id="staffPassword" placeholder="••••••••" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none w-full">
+                <input type="password" id="staffPassword" placeholder="••••••••" autocomplete="new-password" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none w-full">
               </div>
               <!-- Strength Indicator -->
               <div id="passwordStrengthContainer" class="hidden flex flex-col gap-1 mt-1">

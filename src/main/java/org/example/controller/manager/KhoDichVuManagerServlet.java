@@ -206,6 +206,12 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
+                if (name.trim().length() > 100) {
+                    session.setAttribute("errorMsg", "Tên sản phẩm không được vượt quá 100 ký tự.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
                 // Auto-generate SKU if not provided
                 if (sku == null || sku.trim().isEmpty()) {
                     String nanoHex = Long.toHexString(System.nanoTime()).toUpperCase();
@@ -227,8 +233,8 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 double giaNhap = Double.parseDouble(giaNhapStr);
                 int stock = Integer.parseInt(stockStr);
 
-                if (donGia < 0 || giaNhap < 0 || stock < 0) {
-                    session.setAttribute("errorMsg", "Giá bán lẻ, giá nhập và số lượng tồn không được là số âm.");
+                if (donGia <= 0 || giaNhap <= 0 || stock < 0) {
+                    session.setAttribute("errorMsg", "Giá bán lẻ và giá nhập phải lớn hơn 0. Số lượng tồn không được là số âm.");
                     resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
                     return;
                 }
@@ -273,6 +279,18 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
+                if (name == null || name.trim().isEmpty()) {
+                    session.setAttribute("errorMsg", "Tên sản phẩm không được trống.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
+                if (name.trim().length() > 100) {
+                    session.setAttribute("errorMsg", "Tên sản phẩm không được vượt quá 100 ký tự.");
+                    resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
+                    return;
+                }
+
                 // Check SKU conflict
                 if (sku != null && !sku.trim().equalsIgnoreCase(sp.getSkuCode())) {
                     SanPham_DichVu other = sanPhamDAO.findBySkuAndCoSo(sku.trim(), coSoId);
@@ -288,8 +306,8 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 double giaNhap = Double.parseDouble(giaNhapStr);
                 int stock = Integer.parseInt(stockStr);
 
-                if (donGia < 0 || giaNhap < 0 || stock < 0) {
-                    session.setAttribute("errorMsg", "Giá bán lẻ, giá nhập và số lượng tồn không được là số âm.");
+                if (donGia <= 0 || giaNhap <= 0 || stock < 0) {
+                    session.setAttribute("errorMsg", "Giá bán lẻ và giá nhập phải lớn hơn 0. Số lượng tồn không được là số âm.");
                     resp.sendRedirect(req.getContextPath() + "/manager/kho-dich-vu");
                     return;
                 }

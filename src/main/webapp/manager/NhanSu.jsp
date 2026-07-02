@@ -377,7 +377,7 @@ body { font-family: 'Inter', sans-serif; }
         <!-- Search Input -->
         <div class="relative w-full sm:w-[220px]">
           <span class="material-symbols-outlined absolute left-3 top-2.5 text-zinc-400 text-[18px]">search</span>
-          <input type="text" id="scheduleSearchName" autocomplete="off" placeholder="Tìm tên nhân viên..." oninput="filterScheduleShifts()"
+          <input type="search" id="scheduleSearchName" autocomplete="off" placeholder="Tìm tên nhân viên..." oninput="filterScheduleShifts()"
                  class="h-9 w-full pl-9 pr-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
         </div>
 
@@ -724,7 +724,7 @@ body { font-family: 'Inter', sans-serif; }
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-violet-900">Mật khẩu <span class="text-red-500">*</span></label>
               <div class="relative flex items-center">
-                <input type="password" id="staffPassword" placeholder="••••••••" required class="h-9 pl-3 pr-10 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none w-full">
+                <input type="password" id="staffPassword" placeholder="••••••••" autocomplete="new-password" required class="h-9 pl-3 pr-10 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none w-full">
                 <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-zinc-400 hover:text-zinc-650 focus:outline-none flex items-center">
                   <span id="passwordEyeIcon" class="material-symbols-outlined text-[18px]">visibility</span>
                 </button>

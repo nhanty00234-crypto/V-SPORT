@@ -442,3 +442,32 @@ Vị trí file: [CaLamViec.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/
     - [ ] Tạo ca vi phạm R4 (thiếu giờ nghỉ) $\rightarrow$ Xuất hiện toast warning nhắc nhở thời gian nghỉ giữa ca.
     - [ ] Tạo ca vi phạm R7 (làm việc liên tục 7 ngày) $\rightarrow$ Xuất hiện toast warning về ngày nghỉ hàng tuần.
     - [ ] Tạo ca vi phạm R11 (trùng lịch nghỉ chờ duyệt) $\rightarrow$ Xuất hiện toast warning về đơn xin nghỉ phép.
+
+---
+
+## 10. Ma trận Validation Hệ thống Quản lý Cơ sở (Facility & Inventory Validation)
+
+Các validation mới bổ sung đảm bảo tính hợp lệ của cấu hình chi nhánh và ngăn ngừa lỗi lưu trữ CSDL.
+
+### Nhóm 1: Validation Cấu hình Loại Sân (Facility & Court Type)
+Vị trí: [`SanService.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/SanService.java) — phương thức `validateLoaiSanRequest()` và [`QuanLySan.jsp`](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp).
+
+| # | Rule | Điều kiện chặn | Ghi chú |
+|---|------|---------------|---------|
+| F1 | Giá tối có đèn >= Giá ngày không đèn | `giaCoDen < giaKhongDen` | Chặn lưu mức giá vô lý về mặt nghiệp vụ |
+| F2 | Giờ bật đèn phải trước giờ tắt đèn | `gioBatDauLenDen >= gioKetThucLenDen` | Tránh khung giờ đèn bị ngược thời gian |
+
+### Nhóm 2: Validation Kho Dịch Vụ (Inventory & Services)
+Vị trí: [`KhoDichVuManagerServlet.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java) — hành động `add` và `update`, và [`KhoDichVu.jsp`](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/KhoDichVu.jsp).
+
+| # | Rule | Điều kiện chặn | Ghi chú |
+|---|------|---------------|---------|
+| I1 | Giá bán lẻ và giá nhập phải lớn hơn 0 | `donGia <= 0` hoặc `giaNhap <= 0` | Không cho phép sản phẩm có giá bằng 0đ hoặc âm |
+| I2 | Tên sản phẩm tối đa 100 ký tự | `name.length() > 100` | Khớp với giới hạn lưu trữ cột `TenSanPham NVARCHAR(100)` |
+
+### Nhóm 3: Validation Duyệt Đơn Đặt Sân (Booking Management)
+Vị trí: [`QuanLyDatSanServlet.java`](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLyDatSanServlet.java) — hành động `reject`, và các trang JSP [`QuanLyDatSan.jsp`](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLyDatSan.jsp), [`QuanLyDatSan.jsp`](file:///d:/New%20folder/V-SPORT/src/main/webapp/staff/QuanLyDatSan.jsp).
+
+| # | Rule | Điều kiện chặn | Ghi chú |
+|---|------|---------------|---------|
+| B1 | Lý do từ chối tối đa 255 ký tự | `reason.length() > 255` | Khớp với giới hạn lưu trữ cột `LyDo NVARCHAR(255)` trong database |

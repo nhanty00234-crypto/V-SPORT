@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -193,7 +193,7 @@ body { font-family: 'Inter', sans-serif; }
       </div>
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[15px] text-zinc-400 font-bold">search</span>
-        <input id="searchPromo" type="text" autocomplete="off" placeholder="Tìm mã, tên khuyến mãi..." class="h-9 pl-8 pr-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 w-[220px]">
+        <input id="searchPromo" type="search" autocomplete="off" placeholder="Tìm mã, tên khuyến mãi..." class="h-9 pl-8 pr-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 w-[220px]">
       </div>
     </div>
     <button onclick="document.getElementById('promoModal').classList.remove('hidden'); document.getElementById('promoModalCard').classList.add('animate-scale-in');" class="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 active:scale-95 transition-all shrink-0 shadow-sm">

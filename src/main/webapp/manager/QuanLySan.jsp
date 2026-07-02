@@ -181,7 +181,7 @@
     <!-- Search Bar -->
     <div class="relative max-w-xs flex-1">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-purple-400">search</span>
-      <input type="text" id="searchInput" autocomplete="off" oninput="applyFilters()" placeholder="Tìm sân theo tên..." class="h-10 w-full pl-9 pr-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+      <input type="search" id="searchInput" autocomplete="off" oninput="applyFilters()" placeholder="Tìm sân theo tên..." class="h-10 w-full pl-9 pr-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
     </div>
   </section>
 
@@ -854,10 +854,27 @@
     }
   }
 
-  // Form submit preprocessing to remove commas from currency values
-  document.getElementById('typeForm').addEventListener('submit', function() {
+  // Form submit preprocessing to remove commas from currency values and validate fields
+  document.getElementById('typeForm').addEventListener('submit', function(e) {
     const priceNoLight = document.getElementById('typePriceNoLight');
     const priceWithLight = document.getElementById('typePriceWithLight');
+    
+    const priceNoLightVal = parseFloat(priceNoLight.value.replace(/,/g, ''));
+    const priceWithLightVal = parseFloat(priceWithLight.value.replace(/,/g, ''));
+    
+    if (priceWithLightVal < priceNoLightVal) {
+      alert('Lỗi: Giá tối (có bật đèn) không được thấp hơn giá ngày (không đèn)!');
+      e.preventDefault();
+      return false;
+    }
+    
+    const lightStart = document.getElementById('typeLightStart').value;
+    const lightEnd = document.getElementById('typeLightEnd').value;
+    if (lightStart && lightEnd && lightStart >= lightEnd) {
+      alert('Lỗi: Giờ bắt đầu bật đèn phải trước giờ kết thúc bật đèn!');
+      e.preventDefault();
+      return false;
+    }
     
     priceNoLight.value = priceNoLight.value.replace(/,/g, '');
     priceWithLight.value = priceWithLight.value.replace(/,/g, '');
@@ -902,10 +919,28 @@
     document.getElementById('priceConfigModal').classList.add('hidden');
   }
 
-  // Preprocessing for priceConfigForm submit to strip commas
-  document.getElementById('priceConfigForm').addEventListener('submit', function() {
+  // Preprocessing for priceConfigForm submit to strip commas and validate fields
+  document.getElementById('priceConfigForm').addEventListener('submit', function(e) {
     const priceNoLight = document.getElementById('priceConfigPriceNoLight');
     const priceWithLight = document.getElementById('priceConfigPriceWithLight');
+    
+    const priceNoLightVal = parseFloat(priceNoLight.value.replace(/,/g, ''));
+    const priceWithLightVal = parseFloat(priceWithLight.value.replace(/,/g, ''));
+    
+    if (priceWithLightVal < priceNoLightVal) {
+      alert('Lỗi: Giá tối (có bật đèn) không được thấp hơn giá ngày (không đèn)!');
+      e.preventDefault();
+      return false;
+    }
+    
+    const lightStart = document.getElementById('priceConfigLightStart').value;
+    const lightEnd = document.getElementById('priceConfigLightEnd').value;
+    if (lightStart && lightEnd && lightStart >= lightEnd) {
+      alert('Lỗi: Giờ bắt đầu bật đèn phải trước giờ kết thúc bật đèn!');
+      e.preventDefault();
+      return false;
+    }
+    
     priceNoLight.value = priceNoLight.value.replace(/,/g, '');
     priceWithLight.value = priceWithLight.value.replace(/,/g, '');
   });

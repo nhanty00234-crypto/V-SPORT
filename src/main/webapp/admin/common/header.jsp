@@ -9,7 +9,7 @@
             
             <div class="hidden md:flex items-center gap-3 bg-white/40 border border-white/30 rounded-2xl px-4 py-2 w-full max-w-md focus-within:bg-white/60 transition-all">
                 <span class="material-symbols-outlined text-gray-400 text-[20px]">search</span>
-                <input type="text" placeholder="Tìm kiếm dữ liệu..." class="bg-transparent border-none p-0 text-[13px] w-full focus:ring-0 placeholder:text-gray-400 text-gray-600">
+                <input type="search" autocomplete="off" placeholder="Tìm kiếm dữ liệu..." class="bg-transparent border-none p-0 text-[13px] w-full focus:ring-0 placeholder:text-gray-400 text-gray-600">
             </div>
         </div>
 

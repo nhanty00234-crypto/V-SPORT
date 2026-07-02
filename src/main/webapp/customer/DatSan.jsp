@@ -13,37 +13,107 @@
 <head>
     <title>Tìm Sân - V-SPORT Elite Arena</title>
     <jsp:include page="/common/head.jsp" />
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#3d4a3d",
+                      "outline": "#6d7b6c",
+                      "on-primary": "#ffffff",
+                      "surface-tint": "#006e2f",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#4ae176",
+                      "secondary-fixed-dim": "#c6c6c7",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#454747",
+                      "on-secondary-fixed": "#1a1c1c",
+                      "primary": "#006e2f",
+                      "secondary-fixed": "#e2e2e2",
+                      "on-secondary-container": "#616363",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#005321",
+                      "surface-variant": "#e0e3e5",
+                      "surface-dim": "#d8dadc",
+                      "inverse-on-surface": "#eff1f3",
+                      "surface-bright": "#f7f9fb",
+                      "primary-fixed-dim": "#4ae176",
+                      "secondary": "#5d5f5f",
+                      "background": "#f7f9fb",
+                      "tertiary-fixed": "#d8e3fb",
+                      "on-surface": "#191c1e",
+                      "tertiary": "#545f73",
+                      "on-primary-container": "#004b1e",
+                      "on-primary-fixed": "#002109",
+                      "inverse-surface": "#2d3133",
+                      "on-tertiary-fixed": "#111c2d",
+                      "surface-container-lowest": "#ffffff",
+                      "outline-variant": "#bccbb9",
+                      "tertiary-container": "#a1acc3",
+                      "secondary-container": "#dfe0e0",
+                      "on-background": "#191c1e",
+                      "surface": "#f7f9fb",
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-container": "#eceef0",
+                      "tertiary-fixed-dim": "#bcc7de",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-container-low": "#f2f4f6",
+                      "primary-fixed": "#6bff8f",
+                      "on-tertiary-fixed-variant": "#3c475a",
+                      "on-tertiary-container": "#354053",
+                      "error": "#ba1a1a",
+                      "primary-container": "#22c55e",
+                      "on-error": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "lg": "40px",
+                      "sm": "16px",
+                      "margin-desktop": "48px",
+                      "margin-mobile": "16px",
+                      "xl": "64px",
+                      "gutter": "24px",
+                      "base": "4px",
+                      "md": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "display": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+              }
+            },
+          }
+        }
+    </script>
     <style>
-        /* Cyber-grid background */
-        .cyber-grid {
-            background-size: 50px 50px;
-            background-image:
-                linear-gradient(to right, rgba(22,163,74,0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(22,163,74,0.05) 1px, transparent 1px);
-        }
-        /* Masonry layout */
-        .masonry-grid { column-count: 1; column-gap: 1.5rem; }
-        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
-        @media (min-width: 1600px) { .masonry-grid { column-count: 4; } }
-        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
-
-        /* Glow text */
-        .glow-text { text-shadow: 0 0 24px rgba(22,163,74,0.35); }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 7px; }
-        ::-webkit-scrollbar-track { background: #f9f9f9; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #86efac; }
-
-        /* Filter pill active */
-        .sport-pill.active, .branch-pill.active {
-            background-color: #16a34a !important;
-            color: #fff !important;
-            border-color: #16a34a !important;
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        .ambient-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+        .search-input:focus { border-color: #006e2f; box-shadow: 0 0 0 2px rgba(0, 110, 47, 0.2); }
+        
         /* Form inputs inside modals */
         .form-input {
             width: 100%; padding: 0.75rem 1rem;
@@ -52,8 +122,8 @@
             transition: all 0.2s ease; font-size: 0.9375rem;
         }
         .form-input:focus {
-            border-color: #16a34a; outline: none; background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
+            border-color: #006e2f; outline: none; background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 110, 47, 0.12);
         }
         .form-label {
             display: block; font-size: 0.75rem; font-weight: 700;
@@ -61,301 +131,151 @@
             color: #64748b; margin-bottom: 0.5rem;
         }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
-
-        /* Floating animations for side icons */
-        @keyframes float-slow {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(8deg); }
-        }
-        @keyframes float-rev {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(12px) rotate(-8deg); }
-        }
-        @keyframes pulse-soft {
-            0%, 100% { box-shadow: 0 0 12px rgba(22, 163, 74, 0.15); }
-            50% { box-shadow: 0 0 28px rgba(22, 163, 74, 0.4); }
-        }
         @keyframes slide-up-fade {
             0% { opacity: 0; transform: translateY(12px); }
             100% { opacity: 1; transform: translateY(0); }
         }
-        .animate-float { animation: float-slow 6s ease-in-out infinite; }
-        .animate-float-rev { animation: float-rev 8s ease-in-out infinite; }
-        .glow-pulse { animation: pulse-soft 3s ease-in-out infinite; }
-        
-        .feed-scroll::-webkit-scrollbar { width: 3px; }
-        .feed-scroll::-webkit-scrollbar-thumb { background: rgba(22, 163, 74, 0.2); border-radius: 2px; }
     </style>
 </head>
-<body class="bg-[#f9f9f9] text-slate-900 min-h-screen flex flex-col antialiased overflow-x-hidden">
+<body class="bg-[#f7f9fb] text-on-surface antialiased flex flex-col min-h-screen">
 
     <jsp:include page="/common/header.jsp" />
 
-    <main class="flex-grow pt-[88px] pb-24">
+    <main class="flex-grow pt-24 pb-24">
 
-        <!-- ── Hero ── -->
-        <section class="relative w-full min-h-[420px] flex flex-col justify-center px-5 md:px-16 cyber-grid overflow-hidden">
-            <!-- atmospheric blobs -->
-            <div class="absolute top-0 right-0 w-[480px] h-[480px] bg-green-200/25 rounded-full blur-[110px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
-            <div class="absolute bottom-0 left-0 w-[380px] h-[380px] bg-slate-200/30 rounded-full blur-[90px] pointer-events-none translate-y-1/2 -translate-x-1/4"></div>
-
-            <div class="relative z-10 max-w-[1800px] mx-auto w-full">
-                <div class="flex flex-col items-start gap-2 md:pl-8">
-                    <h1 class="text-[56px] sm:text-[80px] font-extrabold tracking-tighter leading-none -ml-1 text-slate-900/15 uppercase">Săn Tìm</h1>
-                    <h2 class="text-[32px] sm:text-[48px] font-extrabold tracking-tight leading-tight glow-text uppercase md:ml-24">
-                        Thánh Địa <br/><span class="text-green-600">Thể Thao</span>
-                    </h2>
-                    <p class="text-[11px] font-bold tracking-widest text-slate-500 uppercase mt-4 md:ml-24 bg-slate-100/60 border border-slate-200 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[13px] align-middle text-green-600">radar</span>
-                        Hệ thống quét sân trực tuyến
-                    </p>
-                    <c:if test="${sessionScope.user != null}">
-                        <div class="md:ml-24 mt-2">
-                            <button type="button" onclick="openHistoryModal()"
-                                class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-green-600 text-white font-bold text-xs shadow-md hover:bg-green-700 hover:-translate-y-0.5 transition-all active:scale-95">
-                                <span class="material-symbols-outlined text-[18px]">history</span>
-                                Lịch sử đặt sân của tôi
-                            </button>
-                        </div>
-                    </c:if>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── Command Bar ── -->
-        <section class="relative z-20 max-w-[1800px] mx-auto px-5 md:px-16 -mt-10 mb-12">
-            <div class="bg-white/75 backdrop-blur-2xl border border-white rounded-2xl p-6 shadow-[0_10px_40px_rgba(22,163,74,0.12)] relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none rounded-2xl"></div>
-
+        <!-- Hero Search Section -->
+        <section class="w-full bg-surface-container-low py-xl px-margin-mobile md:px-margin-desktop border-b border-surface-variant">
+            <div class="max-w-[1800px] mx-auto flex flex-col items-center text-center">
+                <h1 class="font-display text-display text-on-surface mb-sm">Tìm Kiếm Sân Đấu Hoàn Hảo</h1>
+                <p class="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-2xl">Khám phá các địa điểm thể thao hàng đầu gần bạn. Đặt sân tức thì và trải nghiệm ngay.</p>
+                
                 <!-- Alerts -->
                 <c:if test="${not empty sessionScope.error}">
-                    <div class="mb-5 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-start gap-3">
+                    <div class="mb-5 w-full max-w-3xl p-3 bg-red-50 border border-red-100 rounded-xl text-red-650 text-sm flex items-start gap-3 text-left">
                         <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
                         <span>${sessionScope.error}</span>
                         <% session.removeAttribute("error"); %>
                     </div>
                 </c:if>
                 <c:if test="${not empty sessionScope.message}">
-                    <div class="mb-5 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-start gap-3">
+                    <div class="mb-5 w-full max-w-3xl p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-start gap-3 text-left">
                         <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
                         <span>${sessionScope.message}</span>
                         <% session.removeAttribute("message"); %>
                     </div>
                 </c:if>
 
-                <!-- Search Row -->
-                <div class="relative z-10 flex flex-col md:flex-row gap-5 items-end mb-6">
-                    <!-- Location -->
-                    <div class="flex-1 w-full relative group">
-                        <label class="block text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 group-focus-within:text-green-600 transition-colors">Khu Vực</label>
-                        <div class="flex items-center border-b-2 border-slate-200 hover:border-green-400 focus-within:border-green-600 pb-2 transition-colors">
-                            <span class="material-symbols-outlined text-slate-400 mr-3 text-[20px]">my_location</span>
-                            <input id="location-search-input" type="text" placeholder="Nhập tên đường, quận, cơ sở..."
-                                class="w-full bg-transparent border-none focus:ring-0 text-slate-800 placeholder:text-slate-300 p-0 text-[15px] font-medium"/>
-                        </div>
+                <div class="w-full max-w-3xl flex flex-col md:flex-row gap-sm bg-surface-container-lowest p-2 rounded-2xl shadow-sm border border-surface-variant">
+                    <div class="relative flex-grow flex items-center">
+                        <span class="material-symbols-outlined absolute left-4 text-outline">search</span>
+                        <input id="location-search-input" class="w-full pl-12 pr-4 py-3 bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none" placeholder="Nhập tên đường, quận, cơ sở..." type="text"/>
                     </div>
-                    <!-- Date -->
-                    <div class="w-full md:w-52 relative group">
-                        <label class="block text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 group-focus-within:text-green-600 transition-colors">Thời Gian</label>
-                        <div class="flex items-center border-b-2 border-slate-200 hover:border-green-400 focus-within:border-green-600 pb-2 transition-colors">
-                            <span class="material-symbols-outlined text-slate-400 mr-3 text-[20px]">calendar_today</span>
-                            <input type="date" id="quick-date-input" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 p-0 text-[15px] font-medium"/>
-                        </div>
+                    <div class="relative w-full md:w-48 flex items-center border-t md:border-t-0 md:border-l border-surface-variant/50 pt-2 md:pt-0 md:pl-2">
+                        <span class="material-symbols-outlined absolute left-3 text-outline">calendar_today</span>
+                        <input type="date" id="quick-date-input" class="w-full pl-10 pr-2 py-3 bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none" />
                     </div>
-                    <!-- Scan button -->
-                    <button type="button" id="btn-auto-locate"
-                        class="w-full md:w-auto relative overflow-hidden bg-green-600 text-white font-bold text-[13px] px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 transition-all active:scale-95 shadow-[0_4px_15px_rgba(22,163,74,0.3)] hover:shadow-[0_4px_25px_rgba(22,163,74,0.4)] group">
-                        <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]"></span>
-                        <span id="locate-icon" class="material-symbols-outlined text-[20px]">radar</span>
-                        <span id="locate-text">QUÉT</span>
+                    <button id="btn-auto-locate" class="bg-primary text-on-primary font-label-md text-label-md px-lg py-3 rounded-xl hover:bg-opacity-90 transition-colors shrink-0 flex items-center justify-center gap-1.5 active:scale-95 duration-200">
+                        <span class="material-symbols-outlined text-[20px]" id="locate-icon">radar</span> <span id="locate-text">QUÉT SÂN</span>
                     </button>
-                </div>
-
-                <!-- Sport Quick Pills -->
-                <div class="relative z-10 flex flex-wrap gap-2 pb-4 border-b border-slate-100">
-                    <button type="button" onclick="filterSport(0)" id="btn-sport-0"
-                        class="sport-pill active font-bold text-[11px] tracking-widest uppercase px-4 py-2 rounded-full border border-green-600 text-green-600 bg-green-50 transition-all">
-                        Tất cả
-                    </button>
-                    <c:forEach var="mon" items="${dsMon}">
-                        <button type="button" onclick="filterSport(${mon.monTheThaoID})" id="btn-sport-${mon.monTheThaoID}"
-                            class="sport-pill font-bold text-[11px] tracking-widest uppercase px-4 py-2 rounded-full border border-slate-200 text-slate-500 bg-white/60 hover:border-green-400 hover:text-green-600 transition-all">
-                            ${mon.tenMon}
-                        </button>
-                    </c:forEach>
-                    <!-- Lọc thêm trigger -->
-                    <button type="button" onclick="toggleBranchBar()"
-                        class="ml-auto font-bold text-[11px] tracking-widest uppercase px-4 py-2 rounded-full border border-slate-200 text-slate-500 bg-white/60 hover:border-green-400 hover:text-green-600 transition-all flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">tune</span> Lọc Thêm
-                    </button>
-                </div>
-
-                <!-- Branch Pills (collapsible) -->
-                <div id="branch-bar" class="relative z-10 hidden flex-wrap gap-2 pt-4">
-                    <button type="button" onclick="filterBranch(0)" id="btn-branch-0"
-                        class="branch-pill active font-bold text-[11px] tracking-widest uppercase px-4 py-2 rounded-full border border-green-600 text-green-600 bg-green-50 transition-all flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[14px]">map</span> Tất cả Cơ Sở
-                    </button>
-                    <c:forEach var="cs" items="${dsCoSo}">
-                        <button type="button" onclick="filterBranch(${cs.coSoID})" id="btn-branch-${cs.coSoID}"
-                            class="branch-pill font-bold text-[11px] tracking-widest uppercase px-4 py-2 rounded-full border border-slate-200 text-slate-500 bg-white/60 hover:border-green-400 hover:text-green-600 transition-all flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px]">location_on</span>
-                            ${cs.tenCoSo}
-                        </button>
-                    </c:forEach>
                 </div>
             </div>
         </section>
 
-        <!-- ── Court Grid & Sidebar ── -->
-        <section class="max-w-[1800px] mx-auto px-5 md:px-16">
-            <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <!-- Main Content Layout -->
+        <section class="max-w-[1800px] mx-auto px-margin-mobile md:px-margin-desktop py-xl grid grid-cols-1 lg:grid-cols-4 gap-xl">
+            <!-- Filters Sidebar -->
+            <aside class="lg:col-span-1 flex flex-col gap-lg">
+                <div class="bg-surface-container-lowest rounded-xl p-md ambient-shadow border border-surface-variant">
+                    <h3 class="font-headline-md text-headline-md mb-sm">Bộ lọc tìm kiếm</h3>
+                    
+                    <!-- Sport Type -->
+                    <div class="mb-lg">
+                        <h4 class="font-label-md text-label-md text-on-surface-variant mb-sm">Môn thể thao</h4>
+                        <div class="flex flex-col gap-xs font-body-md text-body-md">
+                            <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
+                                <input type="radio" name="sportFilter" id="btn-sport-0" checked onclick="filterSport(0)" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
+                                Tất cả bộ môn
+                            </label>
+                            <c:forEach var="mon" items="${dsMon}">
+                                <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
+                                    <input type="radio" name="sportFilter" id="btn-sport-${mon.monTheThaoID}" onclick="filterSport(${mon.monTheThaoID})" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
+                                    ${mon.tenMon}
+                                </label>
+                            </c:forEach>
+                        </div>
+                    </div>
+
+                    <!-- Branches -->
+                    <div>
+                        <h4 class="font-label-md text-label-md text-on-surface-variant mb-sm">Chi nhánh / Cơ sở</h4>
+                        <div class="flex flex-col gap-xs font-body-md text-body-md">
+                            <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
+                                <input type="radio" name="branchFilter" id="btn-branch-0" checked onclick="filterBranch(0)" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
+                                Tất cả cơ sở
+                            </label>
+                            <c:forEach var="cs" items="${dsCoSo}">
+                                <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
+                                    <input type="radio" name="branchFilter" id="btn-branch-${cs.coSoID}" onclick="filterBranch(${cs.coSoID})" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
+                                    ${cs.tenCoSo}
+                                </label>
+                            </c:forEach>
+                        </div>
+                    </div>
+
+                    <!-- Lịch sử đặt sân -->
+                    <c:if test="${sessionScope.user != null}">
+                        <div class="mt-lg pt-lg border-t border-surface-variant">
+                            <button type="button" onclick="openHistoryModal()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-opacity-90 active:scale-95 transition-all shadow-md">
+                                <span class="material-symbols-outlined text-[18px]">history</span>
+                                Lịch sử đặt sân
+                            </button>
+                        </div>
+                    </c:if>
+                </div>
+            </aside>
+
+            <!-- Venue Grid -->
+            <div class="lg:col-span-3">
+                <div class="flex justify-between items-center mb-md">
+                    <h2 class="font-headline-md text-headline-md">Sân Đấu Khả Dụng</h2>
+                    <span class="font-body-md text-body-md text-on-surface-variant">
+                        Đang hiển thị <span id="court-count" class="font-bold">0</span> kết quả (<span id="court-status-summary"></span>)
+                    </span>
+                </div>
                 
-                <!-- Left Main: Court List (3/4 width) -->
-                <div class="xl:col-span-3">
-                    <div class="flex justify-between items-end mb-8">
-                        <h3 class="text-[20px] font-extrabold text-slate-800 uppercase tracking-wider">
-                            Hệ Sinh Thái <span class="text-green-600">Đang Hoạt Động</span>
-                        </h3>
-                        <span class="text-[11px] font-bold tracking-widest text-slate-400 uppercase">
-                            <strong id="court-count" class="text-slate-700">0</strong> Kết quả
-                            <span id="court-status-summary" class="ml-2"></span>
-                        </span>
-                    </div>
-
-                    <div id="courts-container" class="masonry-grid">
-                        <!-- Rendered by JS -->
-                    </div>
-
-                    <div class="w-full flex justify-center mt-12">
-                        <button class="font-bold text-[11px] tracking-widest uppercase border-2 border-slate-200 text-slate-500 px-8 py-3 rounded-full hover:border-green-500 hover:text-green-600 transition-colors flex items-center gap-2 group bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md">
-                            TẢI THÊM <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">expand_more</span>
-                        </button>
-                    </div>
+                <div id="courts-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-gutter">
+                    <!-- Rendered dynamically by JS -->
                 </div>
 
-                <!-- Right Sidebar: Live activity & Ambassador Reviews (1/4 width) -->
-                <div class="hidden xl:flex flex-col gap-6 xl:col-span-1">
-                    <!-- Live Activity Feed -->
-                    <div class="bg-white/75 backdrop-blur-md border border-white/80 rounded-2xl p-5 shadow-[0_10px_30px_rgba(22,163,74,0.05)] sticky top-[108px] transition-all">
-                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-                            <h4 class="font-extrabold text-xs text-slate-800 tracking-widest uppercase flex items-center gap-2">
-                                <span class="flex h-2.5 w-2.5 relative">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                                </span>
-                                Hoạt Động Live
-                            </h4>
-                            <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase">Realtime</span>
-                        </div>
-                        
-                        <!-- List of activities -->
-                        <div id="live-activity-list" class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
-                            <div class="flex items-start gap-3 text-xs text-slate-600 pb-2 border-b border-dashed border-slate-100">
-                                <span class="text-[18px] shrink-0">⚽</span>
-                                <div>
-                                    <p class="font-bold text-slate-700">Sân Bóng Đá 01</p>
-                                    <p class="text-slate-500">Anh Tuấn vừa đặt thành công ca đấu</p>
-                                    <span class="text-[9px] text-slate-400 font-bold">1 phút trước</span>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3 text-xs text-slate-600 pb-2 border-b border-dashed border-slate-100">
-                                <span class="text-[18px] shrink-0">🏸</span>
-                                <div>
-                                    <p class="font-bold text-slate-700">Sân Cầu Lông 03</p>
-                                    <p class="text-slate-500">Chị Linh vừa check-in trực tuyến</p>
-                                    <span class="text-[9px] text-slate-400 font-bold">3 phút trước</span>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3 text-xs text-slate-600">
-                                <span class="text-[18px] shrink-0">🎾</span>
-                                <div>
-                                    <p class="font-bold text-slate-700">Sân Tennis 02</p>
-                                    <p class="text-slate-500">Hội Sport Club vừa thanh toán ca đặt</p>
-                                    <span class="text-[9px] text-slate-400 font-bold">5 phút trước</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stars & Brand Ambassadors -->
-                    <div class="bg-white/75 backdrop-blur-md border border-white/80 rounded-2xl p-5 shadow-[0_10px_30px_rgba(22,163,74,0.05)] sticky top-[500px] transition-all">
-                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-                            <h4 class="font-extrabold text-xs text-slate-800 tracking-widest uppercase flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px] text-amber-500 filled" style="font-variation-settings: 'FILL' 1">stars</span>
-                                Ngôi Sao Tin Dùng
-                            </h4>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase">Reviews</span>
-                        </div>
-                        
-                        <!-- Testimonial List -->
-                        <div class="space-y-3.5">
-                            <!-- Testimonial 1 -->
-                            <div class="p-3 bg-white/50 border border-slate-100 rounded-xl flex flex-col gap-2 hover:-translate-y-0.5 hover:border-green-200 transition-all shadow-sm">
-                                <div class="flex items-center gap-2.5">
-                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" alt="Nguyễn Quang Hải" class="w-8 h-8 rounded-full object-cover border border-emerald-250">
-                                    <div>
-                                        <h5 class="font-bold text-slate-800 text-[11px] leading-tight">Q. Hải (Tuyển Thủ QG)</h5>
-                                        <div class="flex items-center text-[10px] text-amber-500 gap-0.5">
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-[10px] text-slate-500 italic leading-relaxed">"Mặt cỏ nhân tạo của V-SPORT rất êm, hệ thống thoát nước tốt nên đá bóng rất sướng."</p>
-                            </div>
-                            
-                            <!-- Testimonial 2 -->
-                            <div class="p-3 bg-white/50 border border-slate-100 rounded-xl flex flex-col gap-2 hover:-translate-y-0.5 hover:border-green-200 transition-all shadow-sm">
-                                <div class="flex items-center gap-2.5">
-                                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=80&q=80" alt="Nguyễn Tiến Minh" class="w-8 h-8 rounded-full object-cover border border-emerald-250">
-                                    <div>
-                                        <h5 class="font-bold text-slate-800 text-[11px] leading-tight">T. Minh (VĐV Cầu Lông)</h5>
-                                        <div class="flex items-center text-[10px] text-amber-500 gap-0.5">
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                            <span class="material-symbols-outlined text-[12px] filled" style="font-variation-settings: 'FILL' 1">star</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-[10px] text-slate-500 italic leading-relaxed">"Ánh sáng chuẩn không bị chói mắt và thảm Yonex dày êm, bảo vệ khớp gối tối đa."</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="w-full flex justify-center mt-12">
+                    <button class="font-label-md text-label-md border-2 border-surface-variant text-on-surface px-8 py-3 rounded-full hover:border-primary hover:text-primary transition-colors flex items-center gap-2 group bg-surface-container-lowest backdrop-blur-sm shadow-sm hover:shadow-md">
+                        TẢI THÊM <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">expand_more</span>
+                    </button>
                 </div>
-
             </div>
         </section>
 
     </main>
 
-    <!-- ── Floating Dynamic Icons on 2 Sides ── -->
-    <div class="fixed left-4 top-[22%] z-30 pointer-events-none hidden xl:flex flex-col gap-20">
-        <div class="w-14 h-14 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-[0_8px_32px_0_rgba(22,163,74,0.15)] flex flex-col items-center justify-center animate-float glow-pulse text-[24px]">
-            ⚽
-            <span class="text-[8px] font-black text-green-700 uppercase tracking-widest mt-1">Live</span>
+    <!-- Footer -->
+    <footer class="w-full bg-surface-container-highest dark:bg-inverse-surface grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop py-xl max-w-[1800px] mx-auto transition-all border-t border-surface-variant">
+        <div class="col-span-1 md:col-span-4 flex justify-between items-center mb-md border-b border-surface-variant pb-md">
+            <div class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">
+                V-SPORT
+            </div>
         </div>
-        <div class="w-14 h-14 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-[0_8px_32px_0_rgba(22,163,74,0.15)] flex flex-col items-center justify-center animate-float-rev glow-pulse text-[24px]">
-            🏸
-            <span class="text-[8px] font-black text-green-700 uppercase tracking-widest mt-1">Hot</span>
+        <div class="flex flex-col gap-sm">
+            <a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:underline" href="#">Về chúng tôi</a>
+            <a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:underline" href="#">Hỗ trợ kỹ thuật</a>
         </div>
-    </div>
-    
-    <div class="fixed right-4 top-[28%] z-30 pointer-events-none hidden xl:flex flex-col gap-20">
-        <div class="w-14 h-14 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-[0_8px_32px_0_rgba(22,163,74,0.15)] flex flex-col items-center justify-center animate-float-rev glow-pulse text-[24px]">
-            🎾
-            <span class="text-[8px] font-black text-green-700 uppercase tracking-widest mt-1">ITF</span>
+        <div class="flex flex-col gap-sm">
+            <a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:underline" href="#">Điều khoản dịch vụ</a>
+            <a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:underline" href="#">Chính sách bảo mật</a>
         </div>
-        <div class="w-14 h-14 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-[0_8px_32px_0_rgba(22,163,74,0.15)] flex flex-col items-center justify-center animate-float glow-pulse text-[24px]">
-            🏓
-            <span class="text-[8px] font-black text-green-700 uppercase tracking-widest mt-1">New</span>
+        <div class="col-span-1 md:col-span-2 flex items-end md:justify-end mt-sm md:mt-0 font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">
+            © 2024 V-SPORT. All rights reserved.
         </div>
-    </div>
+    </footer>
 
     <!-- ════ HISTORY MODAL ════ -->
     <div id="historyModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
@@ -782,9 +702,8 @@
             document.getElementById("court-status-summary").innerHTML = parts.join(' · ');
 
             if (filteredCourts.length === 0) {
-                container.style.columnCount = 1;
                 container.innerHTML = `
-                    <div class="text-center py-20">
+                    <div class="text-center py-20 col-span-full">
                         <span class="material-symbols-outlined text-[64px] text-slate-200 block mb-4">search_off</span>
                         <p class="text-slate-500 font-medium">Không tìm thấy sân phù hợp.</p>
                         <button onclick="filterBranch(0); filterSport(0);" class="mt-4 text-green-600 font-bold hover:underline text-sm">Xóa bộ lọc</button>
@@ -792,7 +711,6 @@
                 `;
                 return;
             }
-            container.style.columnCount = '';
 
             filteredCourts.forEach(c => {
                 const type = courtTypes[c.typeId] || { name: "Chưa phân loại", priceDay: 100000, priceNight: 100000, sportId: 0 };
@@ -808,68 +726,47 @@
                 else if (sn.includes("tennis")) imgUrl = "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=600&q=80";
                 else if (sn.includes("bóng bàn")) imgUrl = "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&w=600&q=80";
                 else if (sn.includes("gym") || sn.includes("fitness")) imgUrl = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80";
-                if (c.image && c.image.trim() !== "") imgUrl = c.image;
+                if (c.image && c.image.trim() !== "" && (c.image.startsWith("http") || c.image.includes("/") || c.image.includes("."))) {
+                    imgUrl = c.image;
+                }
 
                 const rating = (4.5 + (c.id % 5) * 0.1).toFixed(1);
-                const reviews = 20 + (c.id * 7) % 80;
-
-                // Height variation for masonry feel
-                const imgHeights = ['h-56', 'h-64', 'h-72', 'h-80'];
-                const imgH = imgHeights[c.id % imgHeights.length];
-
-                // Status badge HTML
-                const badgeHtml = statusInfo.dotClass
-                    ? `<div class="absolute top-5 right-5 backdrop-blur-md border ${statusInfo.badgeClass} font-bold text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
-                            <span class="w-2 h-2 rounded-full ${statusInfo.dotClass}"></span>${statusInfo.label}
-                       </div>`
-                    : `<div class="absolute top-5 right-5 backdrop-blur-md border ${statusInfo.badgeClass} font-bold text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm opacity-90">
-                            <span class="material-symbols-outlined text-[13px]">block</span>${statusInfo.label}
-                       </div>`;
 
                 const cardHtml = `
-                    <article class="masonry-item relative group rounded-2xl overflow-hidden bg-white/65 backdrop-blur-md border border-white/80 transition-all duration-300 hover:border-green-300 hover:shadow-[0_10px_30px_rgba(22,163,74,0.18)] cursor-pointer shadow-sm">
-                        <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}" class="block">
-                            <!-- Image -->
-                            <div class="\${imgH} w-full relative p-2">
-                                <img src="\${imgUrl}" alt="\${c.name}"
-                                    class="w-full h-full object-cover rounded-xl group-hover:scale-[1.03] transition-transform duration-700">
-                                <div class="absolute inset-2 rounded-xl bg-gradient-to-t from-slate-900/30 via-transparent to-transparent pointer-events-none"></div>
-                                \${badgeHtml}
-                                <!-- Sport tag bottom-left -->
-                                <div class="absolute bottom-6 left-6 bg-white/85 backdrop-blur-md font-bold text-[10px] tracking-widest uppercase text-green-700 border border-green-200/60 px-2.5 py-1 rounded-full shadow-sm">
-                                    \${sportName}
-                                </div>
+                    <div class="bg-surface-container-lowest rounded-xl ambient-shadow hover-lift transition-all flex flex-col overflow-hidden cursor-pointer group border border-surface-variant/30">
+                        <div class="relative h-48 w-full overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="\${imgUrl}" alt="\${c.name}"/>
+                            <div class="absolute top-sm right-sm bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded text-label-sm font-label-sm text-on-surface flex items-center gap-1 border border-surface-variant/40">
+                                <span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings:'FILL' 1">star</span>
+                                \${rating}
                             </div>
-                            <!-- Content -->
-                            <div class="w-full p-5 bg-white/45 backdrop-blur-md border-t border-white/50">
-                                <div class="flex justify-between items-start mb-1.5">
-                                    <h4 class="text-[16px] font-bold text-slate-800 group-hover:text-green-700 transition-colors leading-tight pr-2">\${c.name}</h4>
-                                    <div class="flex items-center gap-1 text-[12px] font-bold text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-lg shrink-0">
-                                        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1">star</span> \${rating}
-                                    </div>
-                                </div>
-                                <p class="text-[13px] text-slate-500 flex items-center gap-1 mb-3">
-                                    <span class="material-symbols-outlined text-[15px] text-slate-400">location_on</span>
-                                    <span class="truncate">\${branch.name}</span>
-                                </p>
-                                <p class="text-[12px] text-slate-400 flex items-center gap-1 mb-3">
-                                    <span class="material-symbols-outlined text-[14px]">schedule</span>
-                                    \${normalizeTime(branch.openTime)} – \${normalizeTime(branch.closeTime)}
-                                </p>
-                                <p class="text-[13px] text-slate-600 line-clamp-2 mb-4 min-h-[38px]">\${c.desc || 'Sân đấu tiêu chuẩn chất lượng cao, hệ thống đèn chiếu sáng ban đêm hiện đại.'}</p>
-                                <!-- Price + Arrow -->
-                                <div class="flex justify-between items-center pt-4 border-t border-slate-100">
-                                    <div>
-                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">TỪ</span>
-                                        <span class="text-[18px] font-bold text-slate-800">\${priceText}<span class="text-[11px] font-normal text-slate-400">/h</span></span>
-                                    </div>
-                                    <div class="w-9 h-9 rounded-full bg-green-50 text-green-600 flex items-center justify-center border border-green-100 group-hover:bg-green-600 group-hover:text-white group-hover:shadow-[0_0_14px_rgba(22,163,74,0.35)] transition-all">
-                                        <span class="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
-                                    </div>
-                                </div>
+                            <div class="absolute top-sm left-sm font-bold text-[10px] tracking-widest uppercase px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border \${statusInfo.badgeClass}">
+                                \${statusInfo.label}
                             </div>
-                        </a>
-                    </article>
+                        </div>
+                        <div class="p-md flex flex-col flex-grow">
+                            <div class="flex justify-between items-start mb-xs">
+                                <h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface group-hover:text-primary transition-colors">\${c.name}</h3>
+                            </div>
+                            <p class="text-[13px] text-on-surface-variant flex items-center gap-1 mb-2">
+                                <span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+                                <span class="truncate">\${branch.name}</span>
+                            </p>
+                            <div class="flex gap-2 mb-sm flex-wrap">
+                                <span class="bg-primary/10 text-on-primary-container px-2 py-1 rounded font-label-sm text-label-sm">\${sportName}</span>
+                                <span class="bg-surface-container text-on-surface-variant px-2 py-1 rounded font-label-sm text-label-sm">Đầy đủ tiện ích</span>
+                            </div>
+                            <p class="text-xs text-on-surface-variant line-clamp-2 mb-4 min-h-[2.5rem]">\${c.desc || 'Sân đấu tiêu chuẩn chất lượng cao, hệ thống đèn chiếu sáng ban đêm hiện đại.'}</p>
+                            <div class="mt-auto pt-sm border-t border-surface-variant flex justify-between items-center">
+                                <div class="font-label-md text-label-md text-on-surface">
+                                    <span class="text-primary text-lg font-bold">\${priceText}</span> / giờ
+                                </div>
+                                <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}" class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
+                                    Đặt sân ngay <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 `;
                 container.insertAdjacentHTML("beforeend", cardHtml);
             });
@@ -878,24 +775,15 @@
         // ─── Filter functions ───
         function filterSport(sportId) {
             selectedSportId = sportId;
-            document.querySelectorAll(".sport-pill").forEach(b => {
-                b.classList.remove("active");
-                b.style.backgroundColor = '';
-                b.style.color = '';
-                b.style.borderColor = '';
-            });
-            const active = document.getElementById('btn-sport-' + sportId);
-            if (active) active.classList.add("active");
+            const input = document.getElementById('btn-sport-' + sportId);
+            if (input) input.checked = true;
             renderCourts();
         }
 
         function filterBranch(branchId) {
             selectedBranchId = branchId;
-            document.querySelectorAll(".branch-pill").forEach(b => {
-                b.classList.remove("active");
-            });
-            const active = document.getElementById('btn-branch-' + branchId);
-            if (active) active.classList.add("active");
+            const input = document.getElementById('btn-branch-' + branchId);
+            if (input) input.checked = true;
             renderCourts();
         }
 

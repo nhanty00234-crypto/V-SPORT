@@ -123,6 +123,11 @@ public class QuanLyDatSanServlet extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + path);
                     return;
                 }
+                if (reason.trim().length() > 255) {
+                    session.setAttribute("error", "Lý do từ chối không được vượt quá 255 ký tự.");
+                    resp.sendRedirect(req.getContextPath() + path);
+                    return;
+                }
                 boolean result = lichDatSanDAO.tuChoiLichDatSan(datSanId, reason.trim(), user.getCoSoId());
                 if (result) {
                     session.setAttribute("message", "Đã từ chối đơn đặt sân #" + datSanId + ".");

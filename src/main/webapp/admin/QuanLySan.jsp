@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -135,7 +135,7 @@ body { font-family: 'Inter', sans-serif; }
       <div class="flex items-center gap-3 flex-wrap">
         <div class="relative w-48">
           <span class="absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[13px] text-zinc-400">search</span>
-          <input type="text" id="searchBranchInput" oninput="filterBranchCheckboxes()" placeholder="Tìm nhanh Cơ Sở..." class="h-8 w-full pl-8 pr-2.5 rounded-xl border border-zinc-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450">
+          <input type="search" id="searchBranchInput" autocomplete="off" oninput="filterBranchCheckboxes()" placeholder="Tìm nhanh Cơ Sở..." class="h-8 w-full pl-8 pr-2.5 rounded-xl border border-zinc-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450">
         </div>
         <button onclick="toggleAllBranches(true)" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">Chọn tất cả</button>
         <span class="text-zinc-350 text-xs">·</span>
@@ -215,7 +215,7 @@ body { font-family: 'Inter', sans-serif; }
     <!-- Search Bar -->
     <div class="relative max-w-xs flex-1">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
-      <input type="text" id="searchInput" autocomplete="off" oninput="applyFilters()" placeholder="Tìm theo mã sân hoặc tên..." class="h-10 w-full pl-9 pr-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
+      <input type="search" id="searchInput" autocomplete="off" oninput="applyFilters()" placeholder="Tìm theo mã sân hoặc tên..." class="h-10 w-full pl-9 pr-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
     </div>
   </section>
 

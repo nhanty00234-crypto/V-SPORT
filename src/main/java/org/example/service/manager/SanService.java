@@ -395,8 +395,23 @@ public class SanService {
         ValidationUtils.validatePositiveNumber(req.getGiaKhongDen(), "giaKhongDen");
         ValidationUtils.validatePositiveNumber(req.getGiaCoDen(), "giaCoDen");
 
+        if (req.getGiaCoDen() != null && req.getGiaKhongDen() != null) {
+            if (req.getGiaCoDen().compareTo(req.getGiaKhongDen()) < 0) {
+                errors.put("giaCoDen", "Giá tối (có bật đèn) không được thấp hơn giá ngày (không đèn)");
+            }
+        }
+
         if (req.getGioBatDauLenDen() == null) {
             errors.put("gioBatDauLenDen", "Giờ bắt đầu lên đèn không được để trống");
+        }
+        if (req.getGioKetThucLenDen() == null) {
+            errors.put("gioKetThucLenDen", "Giờ kết thúc lên đèn không được để trống");
+        }
+
+        if (req.getGioBatDauLenDen() != null && req.getGioKetThucLenDen() != null) {
+            if (!req.getGioBatDauLenDen().isBefore(req.getGioKetThucLenDen())) {
+                errors.put("gioBatDauLenDen", "Giờ bắt đầu lên đèn phải trước giờ kết thúc");
+            }
         }
 
         if (!errors.isEmpty()) {

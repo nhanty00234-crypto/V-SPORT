@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -431,7 +431,7 @@
         <div class="flex items-center gap-2">
           <div class="relative">
             <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-zinc-400">search</span>
-            <input id="bookingSearchInput" type="text" autocomplete="off" placeholder="Tìm kiếm..." oninput="filterRecentBookings()"
+            <input id="bookingSearchInput" type="search" autocomplete="off" placeholder="Tìm kiếm..." oninput="filterRecentBookings()"
               class="h-8 pl-7 pr-3 w-36 rounded-lg border border-zinc-200 bg-white text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all focus:w-44">
           </div>
           <a href="${pageContext.request.contextPath}/admin/lich-dat-san" class="text-[11px] font-semibold text-blue-700 hover:underline flex items-center gap-0.5">
