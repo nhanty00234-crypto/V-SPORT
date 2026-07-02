@@ -103,6 +103,19 @@ public class CoSoDAOImpl implements CoSoDAO {
                     .getSingleResult();
 
             if (count != null && count.intValue() > 0) {
+                // 0. Get the manager account ID first to delete it robustly later
+                Integer managerAccountId = null;
+                try {
+                    Object managerIdObj = em.createNativeQuery("SELECT AccountID_QuanLy FROM CoSo WHERE CoSoID = ?")
+                            .setParameter(1, id)
+                            .getSingleResult();
+                    if (managerIdObj != null) {
+                        managerAccountId = ((Number) managerIdObj).intValue();
+                    }
+                } catch (Exception ex) {
+                    // Ignore if no manager found or multiple/none
+                }
+
                 // 1. Break circular dependency first
                 em.createNativeQuery("UPDATE CoSo SET AccountID_QuanLy = NULL WHERE CoSoID = ?")
                         .setParameter(1, id)
@@ -233,6 +246,11 @@ public class CoSoDAOImpl implements CoSoDAO {
                 em.createNativeQuery("DELETE FROM Accounts WHERE CoSoID = ?")
                         .setParameter(1, id)
                         .executeUpdate();
+                if (managerAccountId != null) {
+                    em.createNativeQuery("DELETE FROM Accounts WHERE AccountID = ?")
+                            .setParameter(1, managerAccountId)
+                            .executeUpdate();
+                }
 
                 // 16. Finally delete the branch itself
                 em.createNativeQuery("DELETE FROM CoSo WHERE CoSoID = ?")

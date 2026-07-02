@@ -60,8 +60,12 @@ public class OwnerRegisterServlet extends HttpServlet {
     private void handleSendOtp(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter out = resp.getWriter();
         String email = req.getParameter("email");
+        String phone = req.getParameter("phone");
         if (email != null) {
             email = email.trim();
+        }
+        if (phone != null) {
+            phone = phone.trim();
         }
 
         if (email == null || email.isEmpty()) {
@@ -72,8 +76,16 @@ public class OwnerRegisterServlet extends HttpServlet {
             out.print("{\"success\":false,\"message\":\"Email không hợp lệ và không được chứa khoảng trắng.\"}");
             return;
         }
-        // Check if email already exists
-        if (taiKhoanDAO.kiemtraEmail(email)) {
+        if (phone == null || phone.isEmpty()) {
+            out.print("{\"success\":false,\"message\":\"Số điện thoại không được để trống.\"}");
+            return;
+        }
+        if (!ValidationUtil.isValidVNPhone(phone)) {
+            out.print("{\"success\":false,\"message\":\"Số điện thoại không hợp lệ.\"}");
+            return;
+        }
+        // Check if email already exists (allow re-registration if previously rejected by admin)
+        if (taiKhoanDAO.kiemtraEmail(email) && !isRejectedOwnerEmail(email)) {
             out.print("{\"success\":false,\"message\":\"Email đã tồn tại trong hệ thống.\"}");
             return;
         }
@@ -188,15 +200,20 @@ public class OwnerRegisterServlet extends HttpServlet {
         try {
             trans.begin();
 
-            // Check if email already registered
-            Long existingCount = em.createQuery("SELECT COUNT(a) FROM TaiKhoan a WHERE a.email = :email OR a.username = :username", Long.class)
+            // Check if email already registered — allow re-registration only if previously rejected
+            Long existingCount = em.createQuery(
+                    "SELECT COUNT(a) FROM TaiKhoan a WHERE a.email = :email OR a.username = :username", Long.class)
                     .setParameter("email", email)
                     .setParameter("username", email)
                     .getSingleResult();
             if (existingCount > 0) {
-                out.print("{\"success\":false,\"message\":\"Email đã được đăng ký trên hệ thống.\"}");
-                trans.rollback();
-                return;
+                if (!isRejectedOwnerEmail(email)) {
+                    out.print("{\"success\":false,\"message\":\"Email đã được đăng ký trên hệ thống.\"}");
+                    trans.rollback();
+                    return;
+                }
+                // Delete old rejected records so we can re-create cleanly
+                deleteRejectedOwnerRecords(em, email);
             }
 
             // Parse sportsData to obtain loaiHinhKinhDoanh and total count
@@ -273,6 +290,67 @@ public class OwnerRegisterServlet extends HttpServlet {
             out.print("{\"success\":false,\"message\":\"Lỗi lưu thông tin đăng ký. Vui lòng thử lại.\"}");
         } finally {
             em.close();
+        }
+    }
+
+    // ────────────────────────────────────────
+    // HELPERS
+    // ────────────────────────────────────────
+
+    /**
+     * Returns true if the email belongs to an owner registration that was rejected by admin.
+     * Rejected = TaiKhoan.isLocked=true AND linked CoSo.TrangThai='Từ chối'.
+     */
+    private boolean isRejectedOwnerEmail(String email) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            Long count = em.createQuery(
+                    "SELECT COUNT(c) FROM CoSo c WHERE c.TrangThai = 'Từ chối' " +
+                    "AND c.AccountID_QuanLy IN " +
+                    "(SELECT a.accountId FROM TaiKhoan a WHERE (a.email = :email OR a.username = :email) AND a.isLocked = true)",
+                    Long.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+            return count > 0;
+        } catch (Exception e) {
+            logger.error("[OwnerRegister] isRejectedOwnerEmail error for {}", email, e);
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Deletes the TaiKhoan and CoSo records belonging to a rejected owner registration
+     * so the email can be re-used for a fresh registration attempt.
+     */
+    private void deleteRejectedOwnerRecords(EntityManager em, String email) {
+        try {
+            // Find the locked account with this email
+            java.util.List<TaiKhoan> accounts = em.createQuery(
+                    "SELECT a FROM TaiKhoan a WHERE (a.email = :email OR a.username = :email) AND a.isLocked = true",
+                    TaiKhoan.class)
+                    .setParameter("email", email)
+                    .getResultList();
+
+            for (TaiKhoan acc : accounts) {
+                // Find rejected CoSo linked to this account
+                java.util.List<CoSo> coSoList = em.createQuery(
+                        "SELECT c FROM CoSo c WHERE c.AccountID_QuanLy = :accId AND c.TrangThai = 'Từ chối'",
+                        CoSo.class)
+                        .setParameter("accId", acc.getAccountId())
+                        .getResultList();
+
+                for (CoSo coSo : coSoList) {
+                    em.remove(em.contains(coSo) ? coSo : em.merge(coSo));
+                }
+                em.remove(em.contains(acc) ? acc : em.merge(acc));
+            }
+            em.flush();
+            logger.info("[OwnerRegister] Cleaned up rejected registration for email: {}", email);
+        } catch (Exception e) {
+            logger.error("[OwnerRegister] deleteRejectedOwnerRecords error for {}", email, e);
+            throw e;
         }
     }
 }

@@ -17,7 +17,7 @@ try {
     $reader.Close()
 
     Write-Output "--- Accounts ---"
-    $cmd.CommandText = "SELECT AccountID, Username, Email, FullName, RoleID, CoSoID FROM Accounts"
+    $cmd.CommandText = "SELECT AccountID, Username, Email, FullName, RoleID, IsLocked, IsDeleted, Password FROM Accounts"
     $reader = $cmd.ExecuteReader()
     while ($reader.Read()) {
         $id = $reader["AccountID"]
@@ -25,8 +25,10 @@ try {
         $email = $reader["Email"]
         $fullName = $reader["FullName"]
         $roleId = $reader["RoleID"]
-        $coSoId = $reader["CoSoID"]
-        Write-Output "$id | $username | $email | $fullName | $roleId | $coSoId"
+        $isLocked = $reader["IsLocked"]
+        $isDeleted = $reader["IsDeleted"]
+        $password = $reader["Password"]
+        Write-Output "$id | $username | $email | $fullName | Role:$roleId | Locked:$isLocked | Deleted:$isDeleted | Pass:$password"
     }
     $reader.Close()
 

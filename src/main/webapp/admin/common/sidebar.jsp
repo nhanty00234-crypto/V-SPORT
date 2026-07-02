@@ -174,10 +174,70 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { initSidebar(); initReveal(); });
+    document.addEventListener('DOMContentLoaded', function () { initSidebar(); initReveal(); init24hTime(); });
   } else {
     initSidebar();
     initReveal();
+    init24hTime();
+  }
+
+  /* ── Force 24h time inputs across all admin pages ── */
+  function init24hTime() {
+    document.querySelectorAll('input[type="time"]').forEach(function(inp) {
+      var val   = inp.value || '00:00';
+      var parts = val.split(':');
+      var initH = parseInt(parts[0] || 0, 10);
+      var initM = parseInt(parts[1] || 0, 10);
+      // Round minute to nearest valid step
+      var steps = [0, 15, 30, 45];
+      var closestM = steps.reduce(function(a, b) { return Math.abs(b - initM) < Math.abs(a - initM) ? b : a; });
+
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;align-items:center;gap:4px;width:100%;';
+
+      var selStyle = 'flex:1;min-width:0;height:' + (inp.offsetHeight || 38) + 'px;'
+                   + 'padding:4px 8px;border:' + getComputedStyle(inp).border + ';'
+                   + 'border-radius:' + getComputedStyle(inp).borderRadius + ';'
+                   + 'font-size:' + getComputedStyle(inp).fontSize + ';'
+                   + 'background:#fff;cursor:pointer;';
+
+      var hSel = document.createElement('select');
+      hSel.style.cssText = selStyle;
+      hSel.setAttribute('aria-label', 'Giờ');
+      for (var h = 0; h <= 23; h++) {
+        var o = document.createElement('option');
+        o.value = String(h).padStart(2, '0');
+        o.textContent = String(h).padStart(2, '0') + 'h';
+        if (h === initH) o.selected = true;
+        hSel.appendChild(o);
+      }
+
+      var mSel = document.createElement('select');
+      mSel.style.cssText = selStyle;
+      mSel.setAttribute('aria-label', 'Phút');
+      steps.forEach(function(m) {
+        var o = document.createElement('option');
+        o.value = String(m).padStart(2, '0');
+        o.textContent = String(m).padStart(2, '0');
+        if (m === closestM) o.selected = true;
+        mSel.appendChild(o);
+      });
+
+      function sync() {
+        inp.value = hSel.value + ':' + mSel.value + ':00';
+        // Fire any existing onchange / oninput
+        inp.dispatchEvent(new Event('change', { bubbles: true }));
+        inp.dispatchEvent(new Event('input',  { bubbles: true }));
+      }
+      hSel.addEventListener('change', sync);
+      mSel.addEventListener('change', sync);
+
+      wrap.appendChild(hSel);
+      wrap.appendChild(mSel);
+      inp.style.display = 'none';
+      inp.parentNode.insertBefore(wrap, inp.nextSibling);
+      sync();
+    });
   }
 })();
 </script>

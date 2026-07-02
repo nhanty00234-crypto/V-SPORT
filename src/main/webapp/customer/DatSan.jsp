@@ -733,7 +733,7 @@
                 const rating = (4.5 + (c.id % 5) * 0.1).toFixed(1);
 
                 const cardHtml = `
-                    <div class="bg-surface-container-lowest rounded-xl ambient-shadow hover-lift transition-all flex flex-col overflow-hidden cursor-pointer group border border-surface-variant/30">
+                    <div class="bg-surface-container-lowest rounded-xl ambient-shadow hover-lift transition-all flex flex-col overflow-hidden cursor-pointer group border border-surface-variant/30" onclick="window.location.href='${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}'"  >
                         <div class="relative h-48 w-full overflow-hidden">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="\${imgUrl}" alt="\${c.name}"/>
                             <div class="absolute top-sm right-sm bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded text-label-sm font-label-sm text-on-surface flex items-center gap-1 border border-surface-variant/40">

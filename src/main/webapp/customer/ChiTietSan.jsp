@@ -15,7 +15,7 @@
         }
         #tl-bar {
             position: relative;
-            height: 36px;
+            height: 44px;
             border-radius: 8px;
             background: #f0fdf4;
             border: 1.5px solid #d1fae5;
@@ -27,8 +27,8 @@
             position: absolute;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             background: white;
             border: 2.5px solid #006e2f;
             border-radius: 50%;
@@ -47,20 +47,20 @@
 
     <jsp:include page="/common/header.jsp" />
 
-    <main class="flex-grow pt-[80px] pb-16">
-        <div class="w-full max-w-7xl mx-auto px-4 md:px-12 py-8">
+    <main class="flex-grow pt-[80px] pb-24 lg:pb-16">
+        <div class="w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-8">
 
             <!-- Breadcrumbs -->
-            <div class="flex items-center gap-2 text-[#3d4a3d] text-xs font-semibold mb-6">
-                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors">Tìm Sân</a>
-                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors">Danh sách sân</a>
-                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                <span class="text-[#191c1e] font-bold">${san.tenSan}</span>
+            <div class="flex flex-wrap items-center gap-1.5 text-[#3d4a3d] text-xs font-semibold mb-5">
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors whitespace-nowrap">Tìm Sân</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors whitespace-nowrap">Danh sách sân</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-[#191c1e] font-bold truncate max-w-[160px] sm:max-w-none">${san.tenSan}</span>
             </div>
 
-            <!-- Hero Gallery Bento — reduced height so booking widget stays in viewport -->
-            <section class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 md:gap-3 h-[200px] md:h-[300px] mb-10 rounded-xl overflow-hidden">
+            <!-- Hero Gallery Bento -->
+            <section class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 md:gap-3 h-[240px] md:h-[340px] mb-8 rounded-xl overflow-hidden">
                 <div class="md:col-span-3 md:row-span-2 relative group cursor-pointer">
                     <img src="${not empty san.hinhAnh ? san.hinhAnh : 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1400'}"
                          alt="${san.tenSan}"
@@ -92,12 +92,12 @@
                 </div>
             </section>
 
-            <!-- Main Content — booking widget first on mobile (order-1), info second -->
-            <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+            <!-- Main Content — info first on mobile, booking widget second -->
+            <div class="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
-                <!-- BOOKING WIDGET — order-1 on mobile, order-2 on desktop -->
-                <div class="w-full lg:w-[38%] order-1 lg:order-2">
-                    <div class="sticky top-24 bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[#e0e3e5] p-5 flex flex-col gap-4">
+                <!-- BOOKING WIDGET — order-2 on mobile (below info), order-2 on desktop (right sidebar) -->
+                <div class="w-full lg:w-[38%] order-2 lg:order-2" id="booking-widget">
+                    <div class="lg:sticky lg:top-24 bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[#e0e3e5] p-4 md:p-5 flex flex-col gap-4">
 
                         <!-- Price Header -->
                         <div class="flex justify-between items-end">
@@ -162,7 +162,7 @@
                                 <div id="tl-bar" role="group" aria-label="Chọn khung giờ đặt sân"></div>
 
                                 <!-- Hour labels -->
-                                <div id="tl-labels" class="flex justify-between text-[10px] text-[#9ca3af] px-0.5 -mt-1"></div>
+                                <div id="tl-labels" class="flex justify-between text-[9px] sm:text-[10px] text-[#9ca3af] px-0.5 -mt-1 overflow-hidden"></div>
 
                                 <!-- Legend -->
                                 <div class="flex gap-3 text-[11px] text-[#6d7b6c]">
@@ -256,32 +256,30 @@
                     </div>
                 </div>
 
-                <!-- INFO COLUMN — order-2 on mobile, order-1 on desktop -->
-                <div class="w-full lg:w-[62%] order-2 lg:order-1 flex flex-col gap-10">
+                <!-- INFO COLUMN — order-1 on mobile (shows first), order-1 on desktop (left side) -->
+                <div class="w-full lg:w-[62%] order-1 lg:order-1 flex flex-col gap-8 lg:gap-10">
 
                     <!-- Header Info -->
                     <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <h1 class="text-2xl md:text-3xl font-bold text-[#191c1e] leading-tight">${san.tenSan}</h1>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[#3d4a3d] text-sm font-medium mb-4">
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#191c1e] leading-tight mb-3">${san.tenSan}</h1>
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[#3d4a3d] text-sm font-medium mb-4">
                             <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[18px] text-[#006e2f] filled">star</span>
-                                <span class="text-[#6d7b6c]">${coSo.tenCoSo}</span>
+                                <span class="material-symbols-outlined text-[16px] text-[#006e2f] filled">star</span>
+                                <span class="text-[#6d7b6c] text-xs sm:text-sm">${coSo.tenCoSo}</span>
                             </div>
-                            <span class="text-[#bccbb9]">•</span>
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[18px]">location_on</span>
-                                <span>${coSo.diaChi}</span>
+                            <span class="text-[#bccbb9] hidden sm:inline">•</span>
+                            <div class="flex items-center gap-1 w-full sm:w-auto">
+                                <span class="material-symbols-outlined text-[16px]">location_on</span>
+                                <span class="text-xs sm:text-sm truncate">${coSo.diaChi}</span>
                             </div>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${tenMon}</span>
-                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${loai.tenLoai}</span>
-                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">${tenMon}</span>
+                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">${loai.tenLoai}</span>
+                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">
                                 ${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}
                             </span>
-                            <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${totalSimilarCourts} sân tương tự</span>
+                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">${totalSimilarCourts} sân tương tự</span>
                         </div>
                     </div>
 
@@ -289,8 +287,8 @@
 
                     <!-- Description -->
                     <div>
-                        <h2 class="text-xl font-semibold text-[#191c1e] mb-3">Giới thiệu sân</h2>
-                        <p class="text-base text-[#3d4a3d] leading-relaxed">
+                        <h2 class="text-lg sm:text-xl font-semibold text-[#191c1e] mb-3">Giới thiệu sân</h2>
+                        <p class="text-sm sm:text-base text-[#3d4a3d] leading-relaxed">
                             ${not empty san.moTa ? san.moTa : 'Hệ thống sân đấu tiêu chuẩn với mặt sân cao cấp, hệ thống thoát nước tối ưu đảm bảo sân luôn khô ráo và bám tốt. Sân được trang bị hệ thống chiếu sáng LED chuyên nghiệp phục vụ thi đấu vào ban đêm. Thích hợp cho cả tập luyện phong trào và tổ chức các giải đấu quy mô vừa.'}
                         </p>
                     </div>
@@ -299,8 +297,8 @@
 
                     <!-- Amenities -->
                     <div>
-                        <h2 class="text-xl font-semibold text-[#191c1e] mb-6">Tiện ích</h2>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
+                        <h2 class="text-lg sm:text-xl font-semibold text-[#191c1e] mb-4 sm:mb-6">Tiện ích</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 sm:gap-y-6 gap-x-3 sm:gap-x-4">
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
                                 <span class="material-symbols-outlined text-[24px] text-[#006e2f]">wifi</span>
                                 <span class="text-base">Wifi miễn phí</span>
@@ -332,12 +330,12 @@
 
                     <!-- Location / Map -->
                     <div>
-                        <h2 class="text-xl font-semibold text-[#191c1e] mb-2">Vị trí</h2>
+                        <h2 class="text-lg sm:text-xl font-semibold text-[#191c1e] mb-2">Vị trí</h2>
                         <p class="text-base text-[#3d4a3d] mb-4 flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[18px] text-[#006e2f]">location_on</span>
                             ${coSo.diaChi}
                         </p>
-                        <div class="w-full h-56 bg-[#eceef0] rounded-xl overflow-hidden border border-[#e0e3e5] shadow-sm">
+                        <div class="w-full h-44 sm:h-56 bg-[#eceef0] rounded-xl overflow-hidden border border-[#e0e3e5] shadow-sm">
                             <iframe
                                 src="https://maps.google.com/maps?q=${coSo.diaChi}&output=embed&z=15"
                                 class="w-full h-full border-0"
@@ -356,13 +354,14 @@
         </div><!-- end container -->
 
         <!-- OTHER COURTS SECTION -->
-        <div class="w-full max-w-7xl mx-auto px-4 md:px-12 mt-16">
-            <div class="bg-white p-8 rounded-xl border border-[#e0e3e5] shadow-sm">
-                <h2 class="text-xl font-bold text-[#191c1e] mb-6 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[24px] text-[#006e2f]">sports_tennis</span>
+        <div class="w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 mt-10 md:mt-16">
+            <div class="bg-white p-4 sm:p-6 md:p-8 rounded-xl border border-[#e0e3e5] shadow-sm">
+                <h2 class="text-lg sm:text-xl font-bold text-[#191c1e] mb-4 sm:mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[22px] text-[#006e2f]">sports_tennis</span>
                     Các sân đấu khác dành cho bạn
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Horizontal scroll on mobile, grid on larger -->
+                <div class="flex gap-4 overflow-x-auto pb-2 sm:pb-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
                     <c:forEach var="os" items="${otherSans}" varStatus="loop">
                         <c:if test="${loop.index < 4}">
                             <c:set var="osCoSoName" value="Cơ Sở" />
@@ -388,7 +387,7 @@
                                 </c:if>
                             </c:forEach>
 
-                            <div class="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                            <div class="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1 shrink-0 w-[220px] sm:w-auto snap-start">
                                 <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=${os.sanID}" class="block group hover:no-underline">
                                     <div class="relative h-[130px] overflow-hidden bg-[#eceef0]">
                                         <img src="${not empty os.hinhAnh ? os.hinhAnh : 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=600'}"
@@ -420,6 +419,18 @@
         </div>
 
     </main>
+
+    <!-- Mobile sticky bottom CTA — hidden on lg+ -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#e0e3e5] px-4 py-3 flex items-center justify-between lg:hidden z-40 shadow-[0_-2px_12px_rgba(0,0,0,0.08)]">
+        <div class="flex flex-col">
+            <span class="text-base font-bold text-[#191c1e]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ<span class="text-xs font-normal text-[#6d7b6c]">/giờ</span></span>
+            <span class="text-[10px] text-[#6d7b6c]">${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}</span>
+        </div>
+        <a href="#booking-widget"
+           class="px-5 py-2.5 bg-[#006e2f] text-white font-semibold text-sm rounded-xl hover:bg-[#005321] active:scale-95 transition-all shadow-sm">
+            Đặt sân ngay
+        </a>
+    </div>
 
     <jsp:include page="/common/footer.jsp" />
 
@@ -730,12 +741,14 @@
         function renderTlLabels() {
             const container = document.getElementById("tl-labels");
             container.innerHTML = "";
-            for (let m = openMin; m <= closeMin; m += 60) {
+            const step = window.innerWidth < 480 ? 120 : window.innerWidth < 640 ? 90 : 60;
+            for (let m = openMin; m <= closeMin; m += step) {
                 const span = document.createElement("span");
                 span.textContent = minToStr(m);
                 container.appendChild(span);
             }
         }
+        window.addEventListener("resize", renderTlLabels);
 
         // ── Price breakdown ────────────────────────────────────────────
         function updatePriceBreakdown() {

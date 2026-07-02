@@ -78,9 +78,11 @@ public class AdminOwnerServlet extends HttpServlet {
 
             case "tu-choi":
                 if ("Chờ duyệt".equals(coSo.getTrangThai())) {
-                    coSo.setTrangThai("Từ chối");
-                    coSoDAO.updateCoSo(coSo);
-                    req.getSession().setAttribute("message", "Đã từ chối đăng ký cơ sở \"" + coSo.getTenCoSo() + "\".");
+                    if (coSo.getAccountID_QuanLy() != null) {
+                        notifyRejection(coSo.getAccountID_QuanLy(), coSo.getTenCoSo());
+                    }
+                    coSoDAO.deleteCoSo(coSoId);
+                    req.getSession().setAttribute("message", "Đã từ chối và xóa đăng ký cơ sở \"" + coSo.getTenCoSo() + "\" cùng tài khoản tương ứng.");
                 } else {
                     req.getSession().setAttribute("error", "Chỉ có thể từ chối cơ sở đang chờ duyệt.");
                 }
@@ -225,5 +227,24 @@ public class AdminOwnerServlet extends HttpServlet {
         } catch (Exception ex) {
             logger.error("syncCourts error coSoId={}", coSoId, ex);
         }
+    }
+
+    private void notifyRejection(int accountId, String coSoName) {
+        TaiKhoan mgr = taiKhoanDAO.getAccountById(accountId);
+        if (mgr == null) return;
+        final String email = mgr.getEmail();
+        final String name = mgr.getFullName();
+        new Thread(() -> {
+            try {
+                EmailUtil.sendEmail(email,
+                    "Yêu cầu đăng ký đối tác V-SPORT đã bị từ chối",
+                    "Chào " + name + ",\n\n" +
+                    "Chúng tôi rất tiếc phải thông báo rằng yêu cầu đăng ký cơ sở \"" + coSoName + "\" của bạn đã bị từ chối bởi ban quản trị.\n" +
+                    "Thông tin tài khoản và cơ sở của bạn đã được gỡ bỏ khỏi hệ thống. Bạn có thể tiến hành đăng ký lại với thông tin chính xác hơn.\n\n" +
+                    "Trân trọng,\nBan quản trị V-SPORT");
+            } catch (Exception e) {
+                logger.error("Lỗi gửi email từ chối tới {}", email, e);
+            }
+        }).start();
     }
 }

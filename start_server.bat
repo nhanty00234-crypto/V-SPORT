@@ -1,5 +1,5 @@
 @echo off
-set "JAVA_HOME=C:\Program Files\Java\jdk-25.0.2"
+set "JAVA_HOME=C:\Users\nhan\.jdks\ms-17.0.19"
 set "CATALINA_HOME=D:\BiKipVoCong\TaiNguyenIntelliji\apache-tomcat-10.1.54"
 set "MAVEN_PATH=D:\CNTT\netbeans-28-bin\netbeans\java\maven\bin\mvn.cmd"
 

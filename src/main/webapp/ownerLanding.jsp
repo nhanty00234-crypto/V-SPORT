@@ -93,7 +93,7 @@ display:flex;align-items:center;gap:8px;
 background:var(--accent);color:#fff;border-radius:100px;
 padding:8px 16px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
 transform:translate(-50%,-50%) scale(.4);opacity:0;transition:opacity .3s,transform .3s var(--ease);
-white-space:nowrap}
+white-space:nowrap;font-family:var(--sans)}
 .cursor.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 @media(hover:none),(pointer:coarse){.cursor{display:none}}
 /* cartographic route rail (fixed waypoint indicator, left gutter, desktop) */
@@ -309,6 +309,8 @@ font-size:.8rem;color:var(--stone-d)}
 .scrollcue .ln::after,.cue{animation:none}
 .veil{display:none}
 }
+#stepIndicators::-webkit-scrollbar { display: none; }
+#stepIndicators { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
@@ -559,17 +561,17 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         </div>
 
         <!-- Step Indicators -->
-        <div class="flex items-center justify-between gap-3 mb-8" id="stepIndicators">
-          <div class="step-dot active flex items-center gap-2 px-4 py-2 rounded-full bg-[#C9612F] text-white text-sm font-semibold transition-all" data-step="1">
-            <span>1</span> <span class="hidden sm:inline">Thông tin</span>
+        <div class="flex items-center justify-between gap-2 md:gap-3 mb-8 overflow-x-auto pb-2 scrollbar-none" id="stepIndicators">
+          <div class="step-dot active flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#C9612F] text-white text-sm font-semibold transition-all shrink-0 whitespace-nowrap" data-step="1">
+            <span class="flex items-center justify-center w-5 h-5 rounded-lg bg-white/20 text-xs">1</span> <span class="hidden sm:inline">Thông tin</span>
           </div>
-          <div class="w-8 h-px bg-white/20"></div>
-          <div class="step-dot flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/60 text-sm font-semibold transition-all" data-step="2">
-            <span>2</span> <span class="hidden sm:inline">Xác thực OTP</span>
+          <div class="flex-grow h-px bg-white/20 min-w-[8px] max-w-[32px]"></div>
+          <div class="step-dot flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 text-white/60 text-sm font-semibold transition-all shrink-0 whitespace-nowrap" data-step="2">
+            <span class="flex items-center justify-center w-5 h-5 rounded-lg bg-white/10 text-xs">2</span> <span class="hidden sm:inline">Xác thực OTP</span>
           </div>
-          <div class="w-8 h-px bg-white/20"></div>
-          <div class="step-dot flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/60 text-sm font-semibold transition-all" data-step="3">
-            <span>3</span> <span class="hidden sm:inline">Cơ sở & Sân</span>
+          <div class="flex-grow h-px bg-white/20 min-w-[8px] max-w-[32px]"></div>
+          <div class="step-dot flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 text-white/60 text-sm font-semibold transition-all shrink-0 whitespace-nowrap" data-step="3">
+            <span class="flex items-center justify-center w-5 h-5 rounded-lg bg-white/10 text-xs">3</span> <span class="hidden sm:inline">Cơ sở & Sân</span>
           </div>
         </div>
 
@@ -592,8 +594,13 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
               </div>
             </div>
             <div>
-              <label class="block text-xs font-semibold tracking-wider uppercase text-white/70 mb-2" for="regAddress">Địa chỉ cơ sở</label>
-              <input type="text" id="regAddress" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" class="w-full px-5 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all placeholder:text-white/30" />
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 sm:gap-4 mb-2">
+                <label class="block text-xs font-semibold tracking-wider uppercase text-white/70" for="regAddress" style="font-family: var(--sans);">Địa chỉ cơ sở</label>
+                <button type="button" onclick="autoFillAddress()" class="text-xs text-[#E08A4F] hover:underline flex items-center gap-1 bg-transparent border-none cursor-pointer focus:outline-none" style="font-family: var(--sans);">
+                  <span class="material-symbols-outlined text-[14px]">my_location</span> Lấy vị trí / Tọa độ GG Map
+                </button>
+              </div>
+              <input type="text" id="regAddress" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" class="w-full px-5 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all placeholder:text-white/30" style="font-family: var(--sans);" />
             </div>
             <button type="button" onclick="goToStep2()" class="pill w-full py-4 text-base mt-2 flex justify-center items-center gap-2 text-white bg-[#C9612F] hover:bg-[#E08A4F] transition-all rounded-full font-semibold border-none cursor-pointer">
               Tiếp tục — Xác thực Email <span class="material-symbols-outlined align-middle text-lg">arrow_forward</span>
@@ -650,14 +657,22 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
           </div>
 
           <!-- Operating hours -->
+          <input type="hidden" id="openTime"  value="06:00">
+          <input type="hidden" id="closeTime" value="22:00">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
             <div>
-              <label class="block text-xs font-semibold tracking-wider uppercase text-white/70 mb-2" for="openTime">Giờ mở cửa <span class="text-[#C9612F]">*</span></label>
-              <input type="time" id="openTime" value="06:00" class="w-full px-5 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all" />
+              <label class="block text-xs font-semibold tracking-wider uppercase text-white/70 mb-2">Giờ mở cửa <span class="text-[#C9612F]">*</span></label>
+              <div class="flex gap-2">
+                <select id="openTimeH" onchange="syncOwnerTime('open')" class="flex-1 px-3 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all cursor-pointer"></select>
+                <select id="openTimeM" onchange="syncOwnerTime('open')" class="w-[80px] px-3 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all cursor-pointer"></select>
+              </div>
             </div>
             <div>
-              <label class="block text-xs font-semibold tracking-wider uppercase text-white/70 mb-2" for="closeTime">Giờ đóng cửa <span class="text-[#C9612F]">*</span></label>
-              <input type="time" id="closeTime" value="22:00" class="w-full px-5 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all" />
+              <label class="block text-xs font-semibold tracking-wider uppercase text-white/70 mb-2">Giờ đóng cửa <span class="text-[#C9612F]">*</span></label>
+              <div class="flex gap-2">
+                <select id="closeTimeH" onchange="syncOwnerTime('close')" class="flex-1 px-3 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all cursor-pointer"></select>
+                <select id="closeTimeM" onchange="syncOwnerTime('close')" class="w-[80px] px-3 py-3.5 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all cursor-pointer"></select>
+              </div>
             </div>
           </div>
 
@@ -1010,12 +1025,16 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         // Update step indicators
         document.querySelectorAll('#stepIndicators .step-dot').forEach(dot => {
             const s = parseInt(dot.dataset.step);
+            const numSpan = dot.querySelector('span:first-child');
             if (s < step) {
-                dot.className = 'step-dot flex items-center gap-2 px-4 py-2 rounded-full bg-green-500 text-white text-sm font-semibold transition-all';
+                dot.className = 'step-dot flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-green-700/60 text-white text-sm font-semibold transition-all shrink-0 whitespace-nowrap';
+                if (numSpan) numSpan.className = 'flex items-center justify-center w-5 h-5 rounded-lg bg-white/20 text-xs';
             } else if (s === step) {
-                dot.className = 'step-dot active flex items-center gap-2 px-4 py-2 rounded-full bg-[#C9612F] text-white text-sm font-semibold transition-all';
+                dot.className = 'step-dot active flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#C9612F] text-white text-sm font-semibold transition-all shrink-0 whitespace-nowrap';
+                if (numSpan) numSpan.className = 'flex items-center justify-center w-5 h-5 rounded-lg bg-white/20 text-xs';
             } else {
-                dot.className = 'step-dot flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/60 text-sm font-semibold transition-all';
+                dot.className = 'step-dot flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 text-white/60 text-sm font-semibold transition-all shrink-0 whitespace-nowrap';
+                if (numSpan) numSpan.className = 'flex items-center justify-center w-5 h-5 rounded-lg bg-white/10 text-xs';
             }
         });
     }
@@ -1031,6 +1050,98 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
     // ==========================================
     // STEP 1 -> STEP 2 (Send OTP)
     // ==========================================
+    function autoFillAddress() {
+        document.getElementById('geoInput').value = "";
+        document.getElementById('geoModal').classList.remove('hidden');
+        document.getElementById('geoInput').focus();
+    }
+    window.autoFillAddress = autoFillAddress;
+
+    function closeGeoModal() {
+        document.getElementById('geoModal').classList.add('hidden');
+    }
+    window.closeGeoModal = closeGeoModal;
+
+    function submitGeoInput() {
+        const input = document.getElementById('geoInput').value.trim();
+        if (!input) {
+            alert("Vui lòng dán tọa độ hoặc link Google Map.");
+            return;
+        }
+        const match = input.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+        if (match) {
+            const lat = match[1];
+            const lon = match[2];
+            closeGeoModal();
+            fetchAddressFromCoords(lat, lon);
+        } else {
+            alert("Không tìm thấy tọa độ hợp lệ. Ví dụ định dạng: 10.7626, 106.6601");
+        }
+    }
+    window.submitGeoInput = submitGeoInput;
+
+    function useCurrentGps() {
+        if (!navigator.geolocation) {
+            alert("Trình duyệt không hỗ trợ định vị GPS tự động.");
+            return;
+        }
+        const btn = document.getElementById('btnUseGps');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Đang định vị GPS...';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                closeGeoModal();
+                fetchAddressFromCoords(pos.coords.latitude, pos.coords.longitude);
+            },
+            function(err) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                let errorMsg = "Lỗi lấy vị trí.";
+                if (err.code === err.PERMISSION_DENIED) {
+                    errorMsg = "Quyền định vị bị từ chối. Vui lòng cấp quyền hoặc nhập tọa độ thủ công.";
+                } else if (err.code === err.POSITION_UNAVAILABLE) {
+                    errorMsg = "Không tìm thấy GPS. Vui lòng dán tọa độ Google Map.";
+                } else if (err.code === err.TIMEOUT) {
+                    errorMsg = "Hết thời gian định vị GPS.";
+                }
+                alert(errorMsg);
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    }
+    window.useCurrentGps = useCurrentGps;
+
+    function fetchAddressFromCoords(lat, lon, callback) {
+        const addrInput = document.getElementById('regAddress');
+        const originalPlaceholder = addrInput.placeholder;
+        addrInput.disabled = true;
+        addrInput.value = "";
+        addrInput.placeholder = "Đang lấy địa chỉ từ tọa độ [" + parseFloat(lat).toFixed(4) + ", " + parseFloat(lon).toFixed(4) + "]...";
+        
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&accept-language=vi')
+            .then(r => r.json())
+            .then(data => {
+                addrInput.disabled = false;
+                addrInput.placeholder = originalPlaceholder;
+                if (data && data.display_name) {
+                    addrInput.value = data.display_name;
+                } else {
+                    alert("Không thể chuyển đổi tọa độ này thành địa chỉ.");
+                }
+                if (callback) callback();
+            })
+            .catch(err => {
+                addrInput.disabled = false;
+                addrInput.placeholder = originalPlaceholder;
+                alert("Lỗi kết nối dịch vụ địa chỉ. Vui lòng nhập thủ công.");
+                if (callback) callback();
+            });
+    }
+
     function goToStep1() { hideError(); showStep(1); }
 
     function goToStep2() {
@@ -1046,12 +1157,16 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         // Validate email format
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Email không hợp lệ.'); return; }
 
+        // Validate phone format
+        if (!/^(0|\+84)[35789][0-9]{8}$/.test(phone)) { showError('Số điện thoại không hợp lệ.'); return; }
+
         // Send OTP via AJAX
         document.getElementById('otpEmailDisplay').textContent = email;
         sendOtpToServer(email);
     }
 
     function sendOtpToServer(email) {
+        const phone = document.getElementById('regPhone').value.trim();
         const btn = document.querySelector('#formStep1 button');
         btn.disabled = true;
         btn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span> Đang gửi OTP...';
@@ -1059,7 +1174,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         fetch('${pageContext.request.contextPath}/owner/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'email=' + encodeURIComponent(email)
+            body: 'email=' + encodeURIComponent(email) + '&phone=' + encodeURIComponent(phone)
         })
         .then(r => r.json())
         .then(data => {
@@ -1366,6 +1481,80 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         const regSection = document.getElementById('begin');
         if (regSection) regSection.scrollIntoView({behavior:'smooth'});
     }
+
+    function syncOwnerTime(which) {
+        const hVal = document.getElementById(which + 'TimeH').value;
+        const mVal = document.getElementById(which + 'TimeM').value;
+        document.getElementById(which + 'Time').value = hVal + ':' + mVal;
+    }
+    window.syncOwnerTime = syncOwnerTime;
+
+    // Init 24h time selects for opening/closing hours
+    (function() {
+        function buildTimeSelects(prefix, defaultH, defaultM) {
+            const hSel = document.getElementById(prefix + 'H');
+            const mSel = document.getElementById(prefix + 'M');
+            if (!hSel || !mSel) return;
+            for (let h = 0; h <= 23; h++) {
+                const o = document.createElement('option');
+                o.value = String(h).padStart(2, '0');
+                o.textContent = String(h).padStart(2, '0') + 'h';
+                if (h === defaultH) o.selected = true;
+                hSel.appendChild(o);
+            }
+            [0, 15, 30, 45].forEach(function(m) {
+                const o = document.createElement('option');
+                o.value = String(m).padStart(2, '0');
+                o.textContent = String(m).padStart(2, '0');
+                if (m === defaultM) o.selected = true;
+                mSel.appendChild(o);
+            });
+        }
+        buildTimeSelects('openTime',  6, 0);
+        buildTimeSelects('closeTime', 22, 0);
+    })();
 </script>
+
+<!-- Custom Geolocation Modal -->
+<div id="geoModal" class="hidden fixed inset-0 z-[8000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 geo-animate-fade" style="font-family: var(--sans);">
+  <style>
+    @keyframes geoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes geoScaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .geo-animate-fade { animation: geoFadeIn 180ms ease-out forwards; }
+    .geo-animate-scale { animation: geoScaleUp 240ms cubic-bezier(.16, 1, .3, 1) forwards; }
+  </style>
+  <div class="bg-[#1c1812] border border-white/10 rounded-3xl p-6 md:p-8 w-full max-w-md text-white shadow-2xl relative geo-animate-scale">
+    <!-- Close button -->
+    <button type="button" onclick="closeGeoModal()" class="absolute top-4 right-4 text-white/50 hover:text-white transition-all bg-transparent border-none cursor-pointer focus:outline-none">
+      <span class="material-symbols-outlined text-2xl">close</span>
+    </button>
+    
+    <div class="flex items-center gap-3 mb-4">
+      <span class="material-symbols-outlined text-[#C9612F] text-3xl">location_on</span>
+      <h3 class="font-serif text-xl font-medium tracking-wide">Nhập vị trí cơ sở</h3>
+    </div>
+    
+    <p class="text-sm text-white/70 mb-6 leading-relaxed" style="font-family: var(--sans);">
+      Dán tọa độ Google Map (vĩ độ, kinh độ, VD: <code class="text-[#E08A4F]" style="font-family: var(--sans);">10.7626, 106.6601</code>) hoặc link bản đồ để tự động lấy địa chỉ.
+    </p>
+    
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block text-[11px] font-semibold tracking-wider uppercase text-white/50 mb-2" for="geoInput" style="font-family: var(--sans);">Tọa độ hoặc Link Google Map</label>
+        <input type="text" id="geoInput" placeholder="Dán tọa độ hoặc link tại đây..." class="w-full px-4 py-3.5 border border-white/15 rounded-xl bg-black/30 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all placeholder:text-white/20 text-sm" style="font-family: var(--sans);" />
+      </div>
+    </div>
+    
+    <div class="flex flex-col gap-3">
+      <button type="button" onclick="submitGeoInput()" class="pill w-full py-3.5 text-sm flex justify-center items-center gap-2 text-white bg-[#C9612F] hover:bg-[#E08A4F] transition-all rounded-full font-semibold border-none cursor-pointer" style="font-family: var(--sans);">
+        <span class="material-symbols-outlined text-lg">travel_explore</span> Xác nhận & Tìm địa chỉ
+      </button>
+      <button type="button" onclick="useCurrentGps()" id="btnUseGps" class="w-full py-3 text-sm flex justify-center items-center gap-2 text-white/80 hover:text-white border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all rounded-full font-semibold cursor-pointer" style="font-family: var(--sans);">
+        <span class="material-symbols-outlined text-lg">my_location</span> Sử dụng vị trí GPS hiện tại
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
