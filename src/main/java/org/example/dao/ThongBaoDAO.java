@@ -19,9 +19,9 @@ public interface ThongBaoDAO {
     boolean update(ThongBao thongBao);
 
     /**
-     * Xóa thông báo theo ID
+     * Xóa cứng thông báo theo ID (xóa khỏi DB)
      */
-    boolean delete(int thongBaoId);
+    boolean hardDelete(int thongBaoId);
 
     /**
      * Lấy thông báo theo ID
@@ -29,12 +29,12 @@ public interface ThongBaoDAO {
     ThongBao findById(int thongBaoId);
 
     /**
-     * Lấy tất cả thông báo
+     * Lấy tất cả thông báo (chỉ những bản ghi chưa bị xóa mềm)
      */
     List<ThongBao> findAll();
 
     /**
-     * Lấy danh sách thông báo theo AccountID
+     * Lấy danh sách thông báo theo AccountID (chỉ những bản ghi chưa bị xóa mềm)
      */
     List<ThongBao> findByAccountID(int accountId);
 
@@ -42,4 +42,24 @@ public interface ThongBaoDAO {
      * Đánh dấu thông báo đã đọc
      */
     boolean markAsRead(int thongBaoId);
+
+    /**
+     * Xóa mềm thông báo theo ID
+     */
+    boolean softDelete(int thongBaoId, int actorId);
+
+    /**
+     * Khôi phục thông báo đã bị xóa mềm
+     */
+    boolean restore(int thongBaoId);
+
+    /**
+     * Lấy danh sách thông báo đã bị xóa mềm theo cơ sở
+     */
+    List<ThongBao> findDeletedByCoSo(int coSoId);
+
+    /**
+     * Lấy danh sách ID thông báo đã bị xóa mềm lâu hơn N ngày
+     */
+    List<Integer> findDeletedIdsOlderThan(int days);
 }

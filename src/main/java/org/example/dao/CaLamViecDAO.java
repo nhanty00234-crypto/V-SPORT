@@ -26,11 +26,31 @@ public interface CaLamViecDAO {
     boolean updateCaLamViec(CaLamViec ca);
 
     /**
-     * Xóa ca làm việc theo ID
+     * Xóa cứng ca làm việc theo ID (xóa khỏi DB)
      * @param id ID của ca làm việc
      * @return true nếu thành công, false nếu thất bại
      */
-    boolean deleteCaLamViec(int id);
+    boolean hardDelete(int id);
+
+    /**
+     * Xóa mềm ca làm việc theo ID
+     */
+    boolean softDelete(int id, int actorId);
+
+    /**
+     * Khôi phục ca làm việc đã bị xóa mềm
+     */
+    boolean restore(int id);
+
+    /**
+     * Lấy danh sách ca làm việc đã bị xóa mềm theo cơ sở
+     */
+    List<CaLamViec> findDeletedByCoSo(int coSoId);
+
+    /**
+     * Lấy danh sách ID ca làm việc đã bị xóa mềm lâu hơn N ngày
+     */
+    List<Integer> findDeletedIdsOlderThan(int days);
 
     /**
      * Kiểm tra xem có xung đột lịch ca làm không

@@ -53,7 +53,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     public List<Lichdatsan> getAllLichDatSan() {
         updateExpiredBookingsAndFields();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT * FROM LichDatSan ORDER BY NgayDat DESC, GioBatDau DESC";
+        String sql = "SELECT * FROM LichDatSan WHERE IsDeleted = 0 ORDER BY NgayDat DESC, GioBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -70,7 +70,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     public List<Lichdatsan> getLichByAccountId(int accountId) {
         updateExpiredBookingsAndFields();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT * FROM LichDatSan WHERE AccountID = ? ORDER BY NgayDat DESC, GioBatDau DESC";
+        String sql = "SELECT * FROM LichDatSan WHERE AccountID = ? AND IsDeleted = 0 ORDER BY NgayDat DESC, GioBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -87,7 +87,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public Lichdatsan getLichById(int id) {
-        String sql = "SELECT * FROM LichDatSan WHERE DatSanID = ?";
+        String sql = "SELECT * FROM LichDatSan WHERE DatSanID = ? AND IsDeleted = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -154,7 +154,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     }
 
     @Override
-    public boolean deleteLichDatSan(int id) {
+    public boolean hardDelete(int id) {
         String sql = "DELETE FROM LichDatSan WHERE DatSanID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -164,6 +164,75 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             logger.error("Lỗi khi xóa lịch đặt sân ID {}: {}", id, e.getMessage(), e);
         }
         return false;
+    }
+
+    @Override
+    public boolean softDelete(int id, int actorId) {
+        String sql = "UPDATE LichDatSan SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
+                     "WHERE DatSanID = ? AND IsDeleted = 0";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, actorId);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi soft delete lịch đặt sân ID {}: {}", id, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restore(int id) {
+        String sql = "UPDATE LichDatSan SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
+                     "WHERE DatSanID = ? AND IsDeleted = 1";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi restore lịch đặt sân ID {}: {}", id, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<Lichdatsan> findDeletedByCoSo(int coSoId) {
+        List<Lichdatsan> list = new ArrayList<>();
+        String sql = "SELECT b.*, s.TenSan, s.CoSoID " +
+                     "FROM LichDatSan b JOIN San s ON b.SanID = s.SanID " +
+                     "WHERE s.CoSoID = ? AND b.IsDeleted = 1 " +
+                     "ORDER BY b.DeletedAt DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToLichDatSan(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedByCoSo lịch đặt sân coSoId {}: {}", coSoId, e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Integer> findDeletedIdsOlderThan(int days) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT DatSanID FROM LichDatSan " +
+                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, days);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("DatSanID"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedIdsOlderThan lịch đặt sân days {}: {}", days, e.getMessage(), e);
+        }
+        return ids;
     }
 
     private Lichdatsan mapResultSetToLichDatSan(ResultSet rs) throws SQLException {
@@ -183,6 +252,20 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         Timestamp createdTs = rs.getTimestamp("CreatedTime");
         if (createdTs != null) {
             lich.setCreatedTime(createdTs.toLocalDateTime());
+        }
+
+        try {
+            lich.setDeleted(rs.getBoolean("IsDeleted"));
+            Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
+            if (deletedAtTs != null) {
+                lich.setDeletedAt(deletedAtTs.toLocalDateTime());
+            }
+            int deletedBy = rs.getInt("DeletedBy");
+            if (!rs.wasNull()) {
+                lich.setDeletedBy(deletedBy);
+            }
+        } catch (SQLException e) {
+            // Soft-delete columns may not be present in all queries
         }
 
         try {
@@ -222,7 +305,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         String sql = "SELECT l.*, s.TenSan, s.CoSoID " +
                      "FROM LichDatSan l " +
                      "JOIN San s ON l.SanID = s.SanID " +
-                     "WHERE s.CoSoID = ? AND l.NgayDat = CAST(GETDATE() AS date) " +
+                     "WHERE s.CoSoID = ? AND l.NgayDat = CAST(GETDATE() AS date) AND l.IsDeleted = 0 " +
                      "ORDER BY l.GioBatDau ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -246,7 +329,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                      "FROM LichDatSan l " +
                      "JOIN San s ON l.SanID = s.SanID " +
                      "LEFT JOIN Accounts a ON l.AccountID = a.AccountID " +
-                     "WHERE s.CoSoID = ? " +
+                     "WHERE s.CoSoID = ? AND l.IsDeleted = 0 " +
                      "ORDER BY l.NgayDat DESC, l.GioBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

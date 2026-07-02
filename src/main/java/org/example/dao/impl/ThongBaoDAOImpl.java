@@ -73,7 +73,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     }
 
     @Override
-    public boolean delete(int thongBaoId) {
+    public boolean hardDelete(int thongBaoId) {
         String sql = "DELETE FROM ThongBao WHERE ThongBaoID = ?";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
@@ -89,7 +89,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public ThongBao findById(int thongBaoId) {
-        String sql = "SELECT * FROM ThongBao WHERE ThongBaoID = ?";
+        String sql = "SELECT * FROM ThongBao WHERE ThongBaoID = ? AND IsDeleted = 0";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -109,7 +109,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     @Override
     public List<ThongBao> findAll() {
         List<ThongBao> list = new ArrayList<>();
-        String sql = "SELECT * FROM ThongBao ORDER BY ThoiGianGui DESC";
+        String sql = "SELECT * FROM ThongBao WHERE IsDeleted = 0 ORDER BY ThoiGianGui DESC";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -127,7 +127,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     @Override
     public List<ThongBao> findByAccountID(int accountId) {
         List<ThongBao> list = new ArrayList<>();
-        String sql = "SELECT * FROM ThongBao WHERE AccountID = ? ORDER BY ThoiGianGui DESC";
+        String sql = "SELECT * FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0 ORDER BY ThoiGianGui DESC";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -170,6 +170,84 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
         tb.setThoiGianGui(rs.getTimestamp("ThoiGianGui"));
         tb.setMaBanGhi(rs.getString("MaBanGhi"));
         tb.setDuongDan(rs.getString("DuongDan"));
+        tb.setDeleted(rs.getBoolean("IsDeleted"));
+        Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
+        if (deletedAtTs != null) {
+            tb.setDeletedAt(deletedAtTs.toLocalDateTime());
+        }
+        int deletedBy = rs.getInt("DeletedBy");
+        if (!rs.wasNull()) {
+            tb.setDeletedBy(deletedBy);
+        }
         return tb;
+    }
+
+    @Override
+    public boolean softDelete(int thongBaoId, int actorId) {
+        String sql = "UPDATE ThongBao SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
+                     "WHERE ThongBaoID = ? AND IsDeleted = 0";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, actorId);
+            ps.setInt(2, thongBaoId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi soft delete thông báo ID {}: {}", thongBaoId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restore(int thongBaoId) {
+        String sql = "UPDATE ThongBao SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
+                     "WHERE ThongBaoID = ? AND IsDeleted = 1";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, thongBaoId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi restore thông báo ID {}: {}", thongBaoId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<ThongBao> findDeletedByCoSo(int coSoId) {
+        List<ThongBao> list = new ArrayList<>();
+        String sql = "SELECT t.* FROM ThongBao t " +
+                     "JOIN Accounts a ON t.AccountID = a.AccountID " +
+                     "WHERE a.CoSoID = ? AND t.IsDeleted = 1 " +
+                     "ORDER BY t.DeletedAt DESC";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToThongBao(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedByCoSo thông báo coSoId {}: {}", coSoId, e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Integer> findDeletedIdsOlderThan(int days) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT ThongBaoID FROM ThongBao " +
+                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, days);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("ThongBaoID"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedIdsOlderThan thông báo days {}: {}", days, e.getMessage(), e);
+        }
+        return ids;
     }
 }

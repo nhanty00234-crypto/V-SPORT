@@ -2,18 +2,25 @@ package org.example.dao.impl;
 
 import org.example.dao.YeuCauNghiDAO;
 import org.example.model.YeuCauNghi;
+import org.example.util.DBUtil;
 import org.example.util.JPAUtil;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Implementation của YeuCauNghiDAO sử dụng JPA/Hibernate
  */
 public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
+
+    private static final Logger logger = LogManager.getLogger(YeuCauNghiDAOImpl.class);
 
     private EntityManager getEntityManager() {
         return JPAUtil.getEntityManager();
@@ -60,15 +67,14 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
     }
 
     @Override
-    public boolean delete(int yeuCauNghiID) {
+    public boolean hardDelete(int yeuCauNghiID) {
         EntityManager em = getEntityManager();
         EntityTransaction trans = em.getTransaction();
         try {
             trans.begin();
             YeuCauNghi ycn = em.find(YeuCauNghi.class, yeuCauNghiID);
             if (ycn != null) {
-                ycn.setTrangThai("DaHuy");
-                em.merge(ycn);
+                em.remove(ycn);
                 trans.commit();
                 return true;
             }
@@ -83,6 +89,70 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
         } finally {
             em.close();
         }
+    }
+
+    @Override
+    public boolean softDelete(int yeuCauNghiID, int actorId) {
+        String sql = "UPDATE YeuCauNghi SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
+                     "WHERE YeuCauNghiID = ? AND IsDeleted = 0";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, actorId);
+            ps.setInt(2, yeuCauNghiID);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi soft delete yêu cầu nghỉ ID {}: {}", yeuCauNghiID, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restore(int yeuCauNghiID) {
+        String sql = "UPDATE YeuCauNghi SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
+                     "WHERE YeuCauNghiID = ? AND IsDeleted = 1";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, yeuCauNghiID);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi restore yêu cầu nghỉ ID {}: {}", yeuCauNghiID, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<YeuCauNghi> findDeletedByCoSo(int coSoId) {
+        EntityManager em = getEntityManager();
+        try {
+            String sql = "SELECT ycn.* FROM YeuCauNghi ycn " +
+                         "JOIN Accounts a ON ycn.AccountID = a.AccountID " +
+                         "WHERE a.CoSoID = ? AND ycn.IsDeleted = 1 " +
+                         "ORDER BY ycn.DeletedAt DESC";
+            return em.createNativeQuery(sql, YeuCauNghi.class)
+                     .setParameter(1, coSoId)
+                     .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Integer> findDeletedIdsOlderThan(int days) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT YeuCauNghiID FROM YeuCauNghi " +
+                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, days);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("YeuCauNghiID"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedIdsOlderThan yêu cầu nghỉ days {}: {}", days, e.getMessage(), e);
+        }
+        return ids;
     }
 
     @Override
@@ -190,7 +260,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
         EntityManager em = getEntityManager();
         try {
             Long count = em.createQuery(
-                "SELECT COUNT(y) FROM YeuCauNghi y WHERE y.CoSoID = :coSoID AND y.TrangThai = 'ChoDuyet'",
+                "SELECT COUNT(y) FROM YeuCauNghi y WHERE y.CoSoID = :coSoID AND y.TrangThai = 'ChoDuyet' AND y.isDeleted = false",
                 Long.class)
                 .setParameter("coSoID", coSoID)
                 .getSingleResult();
@@ -205,7 +275,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
         EntityManager em = getEntityManager();
         try {
             TypedQuery<YeuCauNghi> query = em.createQuery(
-                "SELECT y FROM YeuCauNghi y WHERE y.NgayNghi = :ngayNghi AND y.AccountID = :accountID",
+                "SELECT y FROM YeuCauNghi y WHERE y.NgayNghi = :ngayNghi AND y.AccountID = :accountID AND y.isDeleted = false",
                 YeuCauNghi.class);
             query.setParameter("ngayNghi", ngayNghi);
             query.setParameter("accountID", accountID);
@@ -220,7 +290,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
         EntityManager em = getEntityManager();
         try {
             Long count = em.createQuery(
-                "SELECT COUNT(y) FROM YeuCauNghi y WHERE y.AccountID = :accountID AND y.NgayNghi = :ngayNghi AND y.TrangThai IN ('ChoDuyet', 'DaDuyet')",
+                "SELECT COUNT(y) FROM YeuCauNghi y WHERE y.AccountID = :accountID AND y.NgayNghi = :ngayNghi AND y.TrangThai IN ('ChoDuyet', 'DaDuyet') AND y.isDeleted = false",
                 Long.class)
                 .setParameter("accountID", accountID)
                 .setParameter("ngayNghi", ngayNghi)

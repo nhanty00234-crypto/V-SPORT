@@ -643,7 +643,7 @@ public class NhanSuService {
         List<CaLamViec> shifts = caLamViecDAO.getRecurringShiftsByAccountID(accountId);
         for (CaLamViec shift : shifts) {
             if (shift.getThu() != null && shift.getThu() == thu) {
-                caLamViecDAO.deleteCaLamViec(shift.getCaLamViecId());
+                caLamViecDAO.hardDelete(shift.getCaLamViecId());
             }
         }
     }

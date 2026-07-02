@@ -468,7 +468,7 @@ public class CaLamService {
 
         String oldValue = ca.toString();
 
-        boolean success = caLamViecDAO.deleteCaLamViec(caLamViecId);
+        boolean success = caLamViecDAO.hardDelete(caLamViecId);
         if (!success) {
             throw new IllegalArgumentException("Xóa ca làm việc thất bại");
         }

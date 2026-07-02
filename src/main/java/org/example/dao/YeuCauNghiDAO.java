@@ -20,9 +20,29 @@ public interface YeuCauNghiDAO {
     boolean update(YeuCauNghi yeuCauNghi);
 
     /**
-     * Xóa yêu cầu nghỉ (soft delete bằng cách set trang thai = 'DaHuy')
+     * Xóa cứng yêu cầu nghỉ khỏi DB
      */
-    boolean delete(int yeuCauNghiID);
+    boolean hardDelete(int yeuCauNghiID);
+
+    /**
+     * Xóa mềm yêu cầu nghỉ theo ID
+     */
+    boolean softDelete(int yeuCauNghiID, int actorId);
+
+    /**
+     * Khôi phục yêu cầu nghỉ đã bị xóa mềm
+     */
+    boolean restore(int yeuCauNghiID);
+
+    /**
+     * Lấy danh sách yêu cầu nghỉ đã bị xóa mềm theo cơ sở
+     */
+    List<YeuCauNghi> findDeletedByCoSo(int coSoId);
+
+    /**
+     * Lấy danh sách ID yêu cầu nghỉ đã bị xóa mềm lâu hơn N ngày
+     */
+    List<Integer> findDeletedIdsOlderThan(int days);
 
     /**
      * Lấy yêu cầu nghỉ theo ID

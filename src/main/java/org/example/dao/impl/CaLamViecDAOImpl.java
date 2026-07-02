@@ -27,7 +27,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getAllCaLamViec() {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec";
+        String sql = "SELECT * FROM CaLamViec WHERE IsDeleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -50,7 +50,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getCaByCoSo(int coSoId) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ?";
+        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND IsDeleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -75,7 +75,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public CaLamViec getCaById(int id) {
-        String sql = "SELECT * FROM CaLamViec WHERE CaLamViecID = ?";
+        String sql = "SELECT * FROM CaLamViec WHERE CaLamViecID = ? AND IsDeleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -178,12 +178,12 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     }
 
     /**
-     * Xóa một ca làm việc theo ID
+     * Xóa cứng một ca làm việc theo ID (xóa khỏi DB)
      * @param id ID của ca làm việc cần xóa
      * @return true nếu xóa thành công, false nếu thất bại
      */
     @Override
-    public boolean deleteCaLamViec(int id) {
+    public boolean hardDelete(int id) {
         String sql = "DELETE FROM CaLamViec WHERE CaLamViecID = ?";
 
         try (Connection conn = DBUtil.getConnection();
@@ -196,6 +196,72 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
             logger.error("Lỗi khi xóa ca làm việc với ID {}: {}", id, e.getMessage(), e);
         }
         return false;
+    }
+
+    @Override
+    public boolean softDelete(int id, int actorId) {
+        String sql = "UPDATE CaLamViec SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
+                     "WHERE CaLamViecID = ? AND IsDeleted = 0";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, actorId);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi soft delete ca làm việc ID {}: {}", id, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restore(int id) {
+        String sql = "UPDATE CaLamViec SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
+                     "WHERE CaLamViecID = ? AND IsDeleted = 1";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi restore ca làm việc ID {}: {}", id, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<CaLamViec> findDeletedByCoSo(int coSoId) {
+        List<CaLamViec> list = new ArrayList<>();
+        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND IsDeleted = 1 ORDER BY DeletedAt DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToCaLamViec(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedByCoSo ca làm việc coSoId {}: {}", coSoId, e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Integer> findDeletedIdsOlderThan(int days) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT CaLamViecID FROM CaLamViec " +
+                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, days);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("CaLamViecID"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findDeletedIdsOlderThan ca làm việc days {}: {}", days, e.getMessage(), e);
+        }
+        return ids;
     }
 
     /**
@@ -222,7 +288,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getCaByAccountIDAndDateRange(int accountId, LocalDate startDate, LocalDate endDate) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND NgayLam BETWEEN ? AND ? ORDER BY NgayLam, GioBatDau";
+        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND NgayLam BETWEEN ? AND ? AND IsDeleted = 0 ORDER BY NgayLam, GioBatDau";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -250,7 +316,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getRecurringShiftsByAccountID(int accountId) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND Thu IS NOT NULL ORDER BY Thu, GioBatDau";
+        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND Thu IS NOT NULL AND IsDeleted = 0 ORDER BY Thu, GioBatDau";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -270,7 +336,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public long getTotalCaLamViec() {
-        String sql = "SELECT COUNT(*) FROM CaLamViec";
+        String sql = "SELECT COUNT(*) FROM CaLamViec WHERE IsDeleted = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -302,7 +368,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean checkShiftConflict(int accountId, LocalDate ngayLam, LocalTime gioBatDau, LocalTime gioKetThuc, Integer excludeCaLamViecId) {
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND NgayLam = ?";
+        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND NgayLam = ? AND IsDeleted = 0";
 
         // Nếu đang update, bỏ qua chính record đang update
         if (excludeCaLamViecId != null) {
@@ -381,6 +447,15 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         ca.setViTri(rs.getNString("ViTri"));
         ca.setTrangThai(rs.getString("TrangThai"));
         ca.setGioNghi(rs.getInt("GioNghi"));
+        ca.setDeleted(rs.getBoolean("IsDeleted"));
+        Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
+        if (deletedAtTs != null) {
+            ca.setDeletedAt(deletedAtTs.toLocalDateTime());
+        }
+        int deletedBy = rs.getInt("DeletedBy");
+        if (!rs.wasNull()) {
+            ca.setDeletedBy(deletedBy);
+        }
 
         return ca;
     }
@@ -403,7 +478,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getShiftsByCoSoAndDateRange(int coSoId, LocalDate start, LocalDate end) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND NgayLam BETWEEN ? AND ? ORDER BY NgayLam, GioBatDau";
+        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND NgayLam BETWEEN ? AND ? AND IsDeleted = 0 ORDER BY NgayLam, GioBatDau";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
