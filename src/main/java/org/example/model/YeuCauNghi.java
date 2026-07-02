@@ -71,6 +71,15 @@ public class YeuCauNghi {
     @Column(name = "username", insertable = false, updatable = false)
     private String username;
 
+    @Column(name = "IsDeleted")
+    private boolean isDeleted;
+
+    @Column(name = "DeletedAt")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "DeletedBy")
+    private Integer deletedBy;
+
     // Constructors
     public YeuCauNghi() {}
 
@@ -244,6 +253,18 @@ public class YeuCauNghi {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getDeletedBy() { return deletedBy; }
+
+    public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
 
     // Helper methods
     public String getLoaiNghiDisplay() {

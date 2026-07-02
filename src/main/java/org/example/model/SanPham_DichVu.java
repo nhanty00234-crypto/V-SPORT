@@ -1,6 +1,7 @@
 package org.example.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "SanPham_DichVu")
@@ -39,6 +40,15 @@ public class SanPham_DichVu {
 
     @Column(name = "MoTa", length = 255)
     private String MoTa;
+
+    @Column(name = "IsDeleted")
+    private boolean isDeleted;
+
+    @Column(name = "DeletedAt")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "DeletedBy")
+    private Integer deletedBy;
 
     public SanPham_DichVu() {}
 
@@ -143,6 +153,18 @@ public class SanPham_DichVu {
     public void setMoTa(String moTa) {
         MoTa = moTa;
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getDeletedBy() { return deletedBy; }
+
+    public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
 
     @Override
     public String toString() {

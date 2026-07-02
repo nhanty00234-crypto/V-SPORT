@@ -2,6 +2,7 @@ package org.example.model;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Accounts")
@@ -92,6 +93,12 @@ public class TaiKhoan {
     @Column(name = "IsDeleted", columnDefinition = "bit default 0")
     private Boolean isDeleted = false;
 
+    @Column(name = "DeletedAt")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "DeletedBy")
+    private Integer deletedBy;
+
     public Boolean isDeleted() {
         return isDeleted != null && isDeleted;
     }
@@ -99,6 +106,14 @@ public class TaiKhoan {
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getDeletedBy() { return deletedBy; }
+
+    public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
 
     public boolean isLocked() {
         return isLocked;

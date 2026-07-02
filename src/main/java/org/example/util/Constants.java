@@ -83,6 +83,9 @@ public final class Constants {
     public static final long MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
     public static final String[] ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
 
+    // ========== TRASH / SOFT DELETE ==========
+    public static final int TRASH_RETENTION_DAYS = 30;
+
     // ========== MESSAGES ==========
     public static final String MSG_SUCCESS_OPERATION = "Thao tác thành công";
     public static final String MSG_ERROR_DEFAULT = "Đã xảy ra lỗi, vui lòng thử lại";

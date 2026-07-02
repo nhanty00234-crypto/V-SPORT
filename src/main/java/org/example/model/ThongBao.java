@@ -1,6 +1,7 @@
 package org.example.model;
 
 import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ThongBao {
     private int thongBaoId;
@@ -12,6 +13,9 @@ public class ThongBao {
     private Date thoiGianGui;
     private String maBanGhi;
     private String duongDan;
+    private boolean isDeleted;
+    private LocalDateTime deletedAt;
+    private Integer deletedBy;
 
     public ThongBao() {
     }
@@ -108,6 +112,18 @@ public class ThongBao {
     public void setDuongDan(String duongDan) {
         this.duongDan = duongDan;
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getDeletedBy() { return deletedBy; }
+
+    public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
 
     @Override
     public String toString() {

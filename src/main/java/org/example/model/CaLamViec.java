@@ -2,6 +2,7 @@ package org.example.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public class CaLamViec {
     private int caLamViecId;
@@ -17,6 +18,9 @@ public class CaLamViec {
     private String viTri; // Vị trí trong ca (Lễ tân, Bảo vệ, ...)
     private String trangThai = "Draft"; // Draft, Published, Confirmed
     private int gioNghi; // Giờ nghỉ giữa ca (phút)
+    private boolean isDeleted;
+    private LocalDateTime deletedAt;
+    private Integer deletedBy;
 
     public CaLamViec() {
     }
@@ -174,6 +178,18 @@ public class CaLamViec {
             this.trangThai = "Draft";
         }
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getDeletedBy() { return deletedBy; }
+
+    public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
 
     @Override
     public String toString() {
