@@ -18,7 +18,7 @@ public class SanDAOImpl implements SanDAO {
     public List<San> getAllSan() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT s FROM San s", San.class).getResultList();
+            return em.createQuery("SELECT s FROM San s WHERE s.isDeleted = false", San.class).getResultList();
         } finally {
             em.close();
         }
@@ -38,7 +38,7 @@ public class SanDAOImpl implements SanDAO {
     public long countSanByTrangThai(String trangThai) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT COUNT(s) FROM San s WHERE s.trangThai = :trangThai", Long.class)
+            return em.createQuery("SELECT COUNT(s) FROM San s WHERE s.trangThai = :trangThai AND s.isDeleted = false", Long.class)
                     .setParameter("trangThai", trangThai)
                     .getSingleResult();
         } finally {
@@ -55,7 +55,7 @@ public class SanDAOImpl implements SanDAO {
     public List<San> getSansByCoSo(int coSoId) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT s FROM San s WHERE s.coSoID = :coSoId", San.class)
+            return em.createQuery("SELECT s FROM San s WHERE s.coSoID = :coSoId AND s.isDeleted = false", San.class)
                     .setParameter("coSoId", coSoId)
                     .getResultList();
         } finally {
@@ -67,7 +67,7 @@ public class SanDAOImpl implements SanDAO {
     public long countSansByLoaiSanId(int loaiSanId) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT COUNT(s) FROM San s WHERE s.loaiSanID = :loaiSanId", Long.class)
+            return em.createQuery("SELECT COUNT(s) FROM San s WHERE s.loaiSanID = :loaiSanId AND s.isDeleted = false", Long.class)
                     .setParameter("loaiSanId", loaiSanId)
                     .getSingleResult();
         } finally {
@@ -108,6 +108,101 @@ public class SanDAOImpl implements SanDAO {
                 trans.rollback();
             }
             throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean softDelete(int id, int actorId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            San s = em.find(San.class, id);
+            if (s == null || s.isDeleted()) { trans.rollback(); return false; }
+            s.setDeleted(true);
+            s.setDeletedAt(java.time.LocalDateTime.now());
+            s.setDeletedBy(actorId);
+            em.merge(s);
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            logger.error("Lỗi soft delete San ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean restore(int id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            San s = em.find(San.class, id);
+            if (s == null || !s.isDeleted()) { trans.rollback(); return false; }
+            s.setDeleted(false);
+            s.setDeletedAt(null);
+            s.setDeletedBy(null);
+            em.merge(s);
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            logger.error("Lỗi restore San ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean hardDelete(int id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            San s = em.find(San.class, id);
+            if (s != null) {
+                em.remove(s);
+                trans.commit();
+                return true;
+            }
+            trans.rollback();
+            return false;
+        } catch (Exception e) {
+            logger.error("Lỗi xóa San ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<San> findDeletedByCoSo(int coSoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT s FROM San s WHERE s.coSoID = :coSoId AND s.isDeleted = true", San.class)
+                    .setParameter("coSoId", coSoId)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<San> findDeletedOlderThan(int days) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT s FROM San s WHERE s.isDeleted = true AND s.deletedAt < :cutoff", San.class)
+                    .setParameter("cutoff", java.time.LocalDateTime.now().minusDays(days))
+                    .getResultList();
         } finally {
             em.close();
         }

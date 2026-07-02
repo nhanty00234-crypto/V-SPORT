@@ -347,7 +347,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     session.setAttribute("successMsg", "Sản phẩm đã được bán trên hóa đơn trước đây. Đã chuyển trạng thái sang 'Ngừng kinh doanh' để bảo vệ lịch sử thanh toán.");
                 } else {
                     // Hard delete
-                    boolean success = sanPhamDAO.delete(id);
+                    boolean success = sanPhamDAO.hardDelete(id);
                     if (success) {
                         session.setAttribute("successMsg", "Xóa sản phẩm vĩnh viễn thành công.");
                     } else {

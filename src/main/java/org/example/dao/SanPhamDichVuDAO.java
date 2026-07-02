@@ -10,6 +10,11 @@ public interface SanPhamDichVuDAO {
     SanPham_DichVu findBySkuAndCoSo(String sku, int coSoId);
     boolean insert(SanPham_DichVu sp);
     boolean update(SanPham_DichVu sp);
-    boolean delete(int id);
     boolean existsInInvoices(int sanPhamId);
+
+    boolean softDelete(int id, int actorId);
+    boolean restore(int id);
+    boolean hardDelete(int id);
+    List<SanPham_DichVu> findDeletedByCoSo(int coSoId);
+    List<SanPham_DichVu> findDeletedOlderThan(int days);
 }

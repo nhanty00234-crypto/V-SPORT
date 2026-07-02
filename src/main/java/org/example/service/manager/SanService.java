@@ -405,7 +405,7 @@ public class SanService {
             );
         }
 
-        loaiSanDAO.delete(loaiSanId);
+        loaiSanDAO.hardDelete(loaiSanId);
     }
 
     // ==================== VALIDATION HELPERS ====================

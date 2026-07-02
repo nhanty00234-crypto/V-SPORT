@@ -23,7 +23,7 @@ public class LoaiSanDAOImpl implements LoaiSanDAO {
     public List<LoaiSan> getAllLoaiSan() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT l FROM LoaiSan l", LoaiSan.class).getResultList();
+            return em.createQuery("SELECT l FROM LoaiSan l WHERE l.isDeleted = false", LoaiSan.class).getResultList();
         } finally {
             em.close();
         }
@@ -43,7 +43,7 @@ public class LoaiSanDAOImpl implements LoaiSanDAO {
     public List<LoaiSan> getLoaiSansByCoSo(int coSoId) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT l FROM LoaiSan l WHERE l.coSoID = :coSoId", LoaiSan.class)
+            return em.createQuery("SELECT l FROM LoaiSan l WHERE l.coSoID = :coSoId AND l.isDeleted = false", LoaiSan.class)
                     .setParameter("coSoId", coSoId)
                     .getResultList();
         } finally {
@@ -98,7 +98,7 @@ public class LoaiSanDAOImpl implements LoaiSanDAO {
     }
 
     @Override
-    public boolean delete(int id) {
+    public boolean hardDelete(int id) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         try {
@@ -115,6 +115,78 @@ public class LoaiSanDAOImpl implements LoaiSanDAO {
             logger.error("Lỗi xóa LoaiSan ID {}: {}", id, e.getMessage(), e);
             if (trans.isActive()) trans.rollback();
             return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean softDelete(int id, int actorId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            LoaiSan ls = em.find(LoaiSan.class, id);
+            if (ls == null || ls.isDeleted()) { trans.rollback(); return false; }
+            ls.setDeleted(true);
+            ls.setDeletedAt(java.time.LocalDateTime.now());
+            ls.setDeletedBy(actorId);
+            em.merge(ls);
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            logger.error("Lỗi soft delete LoaiSan ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean restore(int id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            LoaiSan ls = em.find(LoaiSan.class, id);
+            if (ls == null || !ls.isDeleted()) { trans.rollback(); return false; }
+            ls.setDeleted(false);
+            ls.setDeletedAt(null);
+            ls.setDeletedBy(null);
+            em.merge(ls);
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            logger.error("Lỗi restore LoaiSan ID {}: {}", id, e.getMessage(), e);
+            if (trans.isActive()) trans.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<LoaiSan> findDeletedByCoSo(int coSoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT l FROM LoaiSan l WHERE l.coSoID = :coSoId AND l.isDeleted = true", LoaiSan.class)
+                    .setParameter("coSoId", coSoId)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<LoaiSan> findDeletedOlderThan(int days) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT l FROM LoaiSan l WHERE l.isDeleted = true AND l.deletedAt < :cutoff", LoaiSan.class)
+                    .setParameter("cutoff", java.time.LocalDateTime.now().minusDays(days))
+                    .getResultList();
         } finally {
             em.close();
         }

@@ -13,9 +13,14 @@ public interface LoaiSanDAO {
     LoaiSan getLoaiSanById(int id);
     boolean insert(LoaiSan loaiSan);
     boolean update(LoaiSan loaiSan);
-    boolean delete(int id);
 
     // Manager operations
     List<LoaiSan> getLoaiSansByCoSo(int coSoId);
     List<MonTheThao> getAllMonTheThao();
+
+    boolean softDelete(int id, int actorId);
+    boolean restore(int id);
+    boolean hardDelete(int id);
+    List<LoaiSan> findDeletedByCoSo(int coSoId);
+    List<LoaiSan> findDeletedOlderThan(int days);
 }

@@ -15,4 +15,10 @@ public interface SanDAO {
 
     void insert(San san);
     void update(San existing);
+
+    boolean softDelete(int id, int actorId);
+    boolean restore(int id);
+    boolean hardDelete(int id);
+    List<San> findDeletedByCoSo(int coSoId);
+    List<San> findDeletedOlderThan(int days);
 }
