@@ -10,6 +10,13 @@ import org.example.model.San;
 import org.example.util.BranchSecurityUtils;
 import org.example.util.Constants;
 import org.example.util.ValidationUtils;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import org.example.util.DBUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -20,6 +27,8 @@ import java.util.Map;
  * Service layer cho quản lý sân thi đấu (Manager scope)
  */
 public class SanService {
+
+    private static final Logger logger = LogManager.getLogger(SanService.class);
 
     private final SanDAO sanDAO;
     private final LoaiSanDAO loaiSanDAO;
@@ -266,11 +275,42 @@ public class SanService {
 
         validateSanRequest(request);
 
+        if (request.getTrangThai() != null && !request.getTrangThai().equals(existing.getTrangThai())) {
+            checkActiveBookingsForStatusChange(sanId, request.getTrangThai());
+        }
+
         updateSanFromRequest(existing, request);
         // Ensure coSoId không thay đổi
         existing.setCoSoID(managerCoSoId);
 
         sanDAO.update(existing);
+    }
+
+    /**
+     * Kiểm tra xem sân có ca đặt sân hoạt động/chờ duyệt nào trong tương lai không
+     */
+    private void checkActiveBookingsForStatusChange(int sanId, String newStatus) {
+        if ("Tạm đóng".equals(newStatus) || "Bảo trì".equals(newStatus)) {
+            String sql = "SELECT COUNT(*) FROM LichDatSan " +
+                         "WHERE SanID = ? AND TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
+                         "AND (NgayDat > CAST(GETDATE() AS date) " +
+                         "     OR (NgayDat = CAST(GETDATE() AS date) AND GioKetThuc > CAST(GETDATE() AS time)))";
+            try (Connection conn = DBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, sanId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        throw new IllegalArgumentException(
+                            "Không thể đóng hoặc bảo trì sân vì đang có " + rs.getInt(1) + 
+                            " ca đặt sân hoạt động hoặc chờ duyệt trong tương lai."
+                        );
+                    }
+                }
+            } catch (SQLException e) {
+                logger.error("Lỗi khi kiểm tra lịch đặt sân hoạt động của sân ID {}: {}", sanId, e.getMessage(), e);
+                throw new RuntimeException("Lỗi hệ thống khi kiểm tra lịch đặt sân.", e);
+            }
+        }
     }
 
     /**
@@ -289,6 +329,8 @@ public class SanService {
             );
         }
 
+        checkActiveBookingsForStatusChange(sanId, Constants.TRANG_THAI_SAN_TAM_DONG);
+
         san.setTrangThai(Constants.TRANG_THAI_SAN_TAM_DONG);
         sanDAO.update(san);
     }
@@ -301,7 +343,17 @@ public class SanService {
         BranchSecurityUtils.getEntityOrThrow(san, "Sân");
         BranchSecurityUtils.checkBranchAccess(san.getCoSoID(), managerCoSoId);
 
-        san.setTrangThai(newStatus);
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Trạng thái sân không được để trống");
+        }
+        String status = newStatus.trim();
+        if (!"Sẵn sàng".equals(status) && !"Tạm đóng".equals(status) && !"Bảo trì".equals(status) && !"Đang dùng".equals(status)) {
+            throw new IllegalArgumentException("Trạng thái sân không hợp lệ. Chỉ chấp nhận: Sẵn sàng, Tạm đóng, Bảo trì, Đang dùng");
+        }
+
+        checkActiveBookingsForStatusChange(sanId, status);
+
+        san.setTrangThai(status);
         sanDAO.update(san);
     }
 
@@ -369,6 +421,13 @@ public class SanService {
             errors.put("loaiSanId", "Phải chọn loại sân");
         }
 
+        if (req.getTrangThai() != null) {
+            String status = req.getTrangThai().trim();
+            if (!"Sẵn sàng".equals(status) && !"Tạm đóng".equals(status) && !"Bảo trì".equals(status) && !"Đang dùng".equals(status)) {
+                errors.put("trangThai", "Trạng thái sân không hợp lệ. Chỉ chấp nhận: Sẵn sàng, Tạm đóng, Bảo trì, Đang dùng");
+            }
+        }
+
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(errors.toString());
         }
@@ -378,6 +437,7 @@ public class SanService {
         validateSanRequest(new SanCreateRequest() {{
             setTenSan(req.getTenSan());
             setLoaiSanId(req.getLoaiSanId());
+            setTrangThai(req.getTrangThai());
         }});
     }
 

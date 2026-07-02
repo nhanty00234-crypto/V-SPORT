@@ -90,6 +90,33 @@
       <c:remove var="error" scope="session" />
     </c:if>
 
+    <c:if test="${not empty sessionScope.priceChangeWarning}">
+      <div class="p-4 bg-amber-50 border border-amber-200 text-amber-955 rounded-2xl flex flex-col gap-3 shadow-sm animation-fade">
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined text-amber-600 mt-0.5">warning</span>
+          <div>
+            <p class="text-sm font-bold">Cảnh báo thay đổi giá</p>
+            <p class="text-xs text-amber-700 mt-0.5">${sessionScope.priceChangeWarning}</p>
+          </div>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <form action="${pageContext.request.contextPath}/staff/dat-san" method="POST" class="inline" autocomplete="off">
+            <input type="hidden" name="action" value="approve">
+            <input type="hidden" name="id" value="${sessionScope.priceChangeId}">
+            <input type="hidden" name="confirmPriceChange" value="true">
+            <button type="submit" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-95">
+              Đồng ý duyệt
+            </button>
+          </form>
+          <a href="${pageContext.request.contextPath}/staff/dat-san" class="px-3 py-1.5 rounded-lg bg-zinc-150 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold text-center transition-all active:scale-95">
+            Hủy bỏ
+          </a>
+        </div>
+      </div>
+      <c:remove var="priceChangeWarning" scope="session" />
+      <c:remove var="priceChangeId" scope="session" />
+    </c:if>
+
     <!-- Header Title section -->
     <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>

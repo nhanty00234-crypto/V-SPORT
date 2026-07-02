@@ -110,11 +110,24 @@ public class QuanLyDatSanServlet extends HttpServlet {
             int datSanId = Integer.parseInt(idStr);
 
             if ("approve".equals(action)) {
-                boolean result = lichDatSanDAO.duyetLichDatSan(datSanId, user.getAccountId(), user.getCoSoId());
-                if (result) {
-                    session.setAttribute("message", "Đã duyệt đơn đặt sân #" + datSanId + " thành công!");
-                } else {
-                    session.setAttribute("error", "Duyệt đơn đặt sân thất bại.");
+                boolean confirmPriceChange = "true".equalsIgnoreCase(req.getParameter("confirmPriceChange"));
+                try {
+                    boolean result = lichDatSanDAO.duyetLichDatSan(datSanId, user.getAccountId(), user.getCoSoId(), confirmPriceChange);
+                    if (result) {
+                        session.setAttribute("message", "Đã duyệt đơn đặt sân #" + datSanId + " thành công!");
+                    } else {
+                        session.setAttribute("error", "Duyệt đơn đặt sân thất bại.");
+                    }
+                } catch (Exception e) {
+                    if (e.getMessage() != null && e.getMessage().startsWith("PRICE_CHANGED:")) {
+                        String[] parts = e.getMessage().split(":");
+                        String oldPrice = parts[1];
+                        String newPrice = parts[2];
+                        session.setAttribute("priceChangeWarning", "Giá sân của đơn #" + datSanId + " đã thay đổi từ lúc đặt: " + Double.parseDouble(oldPrice) + "đ -> " + Double.parseDouble(newPrice) + "đ. Bạn có đồng ý duyệt với giá mới này?");
+                        session.setAttribute("priceChangeId", datSanId);
+                    } else {
+                        session.setAttribute("error", e.getMessage());
+                    }
                 }
             } else if ("reject".equals(action)) {
                 String reason = req.getParameter("reason");

@@ -25,13 +25,20 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         String sqlUpdateSan = "UPDATE San SET TrangThai = N'Sẵn sàng' " +
                              "WHERE TrangThai = N'Đang sử dụng' " +
                              "AND SanID NOT IN (SELECT DISTINCT SanID FROM LichDatSan WHERE TrangThai = N'Đang sử dụng')";
+        String sqlExpirePending = "UPDATE LichDatSan " +
+                                  "SET TrangThai = N'Đã hủy', " +
+                                  "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Tự động hủy: Hết hạn chờ xác nhận (2 giờ)]') " +
+                                  "WHERE TrangThai = N'Chờ xác nhận' " +
+                                  "AND DATEDIFF(hour, CreatedTime, GETDATE()) >= 2";
         
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement psLich = conn.prepareStatement(sqlUpdateLich);
-                 PreparedStatement psSan = conn.prepareStatement(sqlUpdateSan)) {
+                 PreparedStatement psSan = conn.prepareStatement(sqlUpdateSan);
+                 PreparedStatement psExpire = conn.prepareStatement(sqlExpirePending)) {
                 psLich.executeUpdate();
                 psSan.executeUpdate();
+                psExpire.executeUpdate();
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();
@@ -256,7 +263,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     }
 
     @Override
-    public boolean duyetLichDatSan(int datSanId, int approvedByAccountId, int coSoId) throws Exception {
+    public boolean duyetLichDatSan(int datSanId, int approvedByAccountId, int coSoId, boolean confirmPriceChange) throws Exception {
         Connection conn = null;
         PreparedStatement psLockSan = null;
         PreparedStatement psSelect = null;
@@ -350,6 +357,9 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             String priceWarning = "";
             if (currentPriceCalculated.compareTo(tongTienDuKien) != 0) {
+                if (!confirmPriceChange) {
+                    throw new Exception("PRICE_CHANGED:" + tongTienDuKien + ":" + currentPriceCalculated);
+                }
                 priceWarning = " [Cảnh báo: Giá sân thay đổi từ lúc đặt: " + tongTienDuKien + "đ -> " + currentPriceCalculated + "đ]";
                 tongTienDuKien = currentPriceCalculated;
             }
@@ -403,7 +413,48 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 }
             }
 
-            // 7. Tự động từ chối (hủy) các đơn Chờ xác nhận bị trùng lịch chéo (Sử dụng CONCAT và ISNULL an toàn)
+            // 7. Lấy danh sách các đơn trùng lịch để hủy và chuẩn bị thông báo gửi cho khách hàng
+            String selectOverlapSql = "SELECT l.DatSanID, l.AccountID, l.NgayDat, l.GioBatDau, l.GioKetThuc, s.TenSan " +
+                                      "FROM LichDatSan l " +
+                                      "JOIN San s ON l.SanID = s.SanID " +
+                                      "WHERE l.SanID = ? AND l.NgayDat = ? AND l.DatSanID != ? AND l.TrangThai = N'Chờ xác nhận' " +
+                                      "AND NOT (l.GioKetThuc <= CAST(? AS time) OR l.GioBatDau >= CAST(? AS time))";
+
+            class OverlapNotifInfo {
+                int accountId;
+                String title;
+                String content;
+            }
+            List<OverlapNotifInfo> overlapNotifs = new ArrayList<>();
+
+            try (PreparedStatement psOverlapSel = conn.prepareStatement(selectOverlapSql)) {
+                psOverlapSel.setInt(1, sanId);
+                psOverlapSel.setDate(2, ngayDat);
+                psOverlapSel.setInt(3, datSanId);
+                psOverlapSel.setString(4, gioBatDau.toString());
+                psOverlapSel.setString(5, gioKetThuc.toString());
+                try (ResultSet rsOverlap = psOverlapSel.executeQuery()) {
+                    while (rsOverlap.next()) {
+                        int overlapDatSanId = rsOverlap.getInt("DatSanID");
+                        int customerId = rsOverlap.getInt("AccountID");
+                        String tenSan = rsOverlap.getNString("TenSan");
+                        Date oNgayDat = rsOverlap.getDate("NgayDat");
+                        Time oStart = rsOverlap.getTime("GioBatDau");
+                        Time oEnd = rsOverlap.getTime("GioKetThuc");
+
+                        String title = "Đơn đặt sân #" + overlapDatSanId + " bị hủy";
+                        String content = "Đơn đặt sân " + tenSan + " ngày " + oNgayDat + " (" + oStart.toString().substring(0, 5) + " - " + oEnd.toString().substring(0, 5) + ") đã bị tự động hủy do trùng lịch với ca đặt sân #" + datSanId + " đã được phê duyệt.";
+
+                        OverlapNotifInfo info = new OverlapNotifInfo();
+                        info.accountId = customerId;
+                        info.title = title;
+                        info.content = content;
+                        overlapNotifs.add(info);
+                    }
+                }
+            }
+
+            // Tự động từ chối (hủy) các đơn Chờ xác nhận bị trùng lịch chéo (Sử dụng CONCAT và ISNULL an toàn)
             String sqlUpdateOverlap = "UPDATE LichDatSan " +
                                       "SET TrangThai = N'Đã hủy', " +
                                       "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Hệ thống tự động hủy do trùng lịch với đơn #', CAST(? AS varchar), N' đã được duyệt]') " +
@@ -417,6 +468,21 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             psUpdateOverlap.setString(5, gioBatDau.toString());
             psUpdateOverlap.setString(6, gioKetThuc.toString());
             psUpdateOverlap.executeUpdate();
+
+            // Gửi thông báo bằng cách chèn trực tiếp vào bảng ThongBao
+            if (!overlapNotifs.isEmpty()) {
+                String insertNotifSql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
+                                        "VALUES (?, ?, ?, ?, 0, GETDATE(), N'DatSan', N'/customer/dat-san?openHistory=true')";
+                try (PreparedStatement psInsNotif = conn.prepareStatement(insertNotifSql)) {
+                    for (OverlapNotifInfo tb : overlapNotifs) {
+                        psInsNotif.setInt(1, tb.accountId);
+                        psInsNotif.setNString(2, tb.title);
+                        psInsNotif.setNString(3, tb.content);
+                        psInsNotif.setNString(4, "Booking");
+                        psInsNotif.executeUpdate();
+                    }
+                }
+            }
 
             conn.commit();
             return true;

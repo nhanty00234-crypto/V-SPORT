@@ -238,6 +238,13 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
 
+        // Validate paymentMethod enum value
+        if (!"payos".equalsIgnoreCase(paymentMethod) && !"sau".equalsIgnoreCase(paymentMethod)) {
+            session.setAttribute("error", "Phương thức thanh toán không hợp lệ.");
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+            return;
+        }
+
         // --- Bước 2: Validate thứ tự giờ ---
         if (!gioKetThuc.isAfter(gioBatDau)) {
             session.setAttribute("error", "Giờ kết thúc phải sau giờ bắt đầu.");
@@ -313,6 +320,21 @@ public class DatSanServlet extends HttpServlet {
                             }
                             sanTrangThai = rsLock.getString("TrangThai");
                             sanCoSoID = rsLock.getInt("CoSoID");
+                        }
+                    }
+
+                    // ── 3a-2. Kiểm tra giới hạn số booking/ngày per customer (tối đa 3 bookings) ──
+                    String limitSql = "SELECT COUNT(*) FROM LichDatSan WHERE AccountID = ? AND NgayDat = ? AND TrangThai <> N'Đã hủy'";
+                    try (java.sql.PreparedStatement limitPs = conn.prepareStatement(limitSql)) {
+                        limitPs.setInt(1, user.getAccountId());
+                        limitPs.setDate(2, java.sql.Date.valueOf(ngayDat));
+                        try (java.sql.ResultSet rsLimit = limitPs.executeQuery()) {
+                            if (rsLimit.next() && rsLimit.getInt(1) >= 3) {
+                                conn.rollback();
+                                session.setAttribute("error", "Bạn đã đạt giới hạn đặt sân tối đa trong ngày hôm nay (tối đa 3 lượt đặt/ngày).");
+                                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                                return;
+                            }
                         }
                     }
 

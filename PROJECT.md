@@ -471,3 +471,53 @@ Vị trí: [`QuanLyDatSanServlet.java`](file:///d:/New%20folder/V-SPORT/src/main
 | # | Rule | Điều kiện chặn | Ghi chú |
 |---|------|---------------|---------|
 | B1 | Lý do từ chối tối đa 255 ký tự | `reason.length() > 255` | Khớp với giới hạn lưu trữ cột `LyDo NVARCHAR(255)` trong database |
+
+---
+
+## 11. Cải tiến và Tinh chỉnh phân quyền Admin (Admin Role Restrictions)
+
+Chúng tôi đã tinh chỉnh quyền hạn giao diện của Admin để tối ưu hóa luồng công việc (Admin chỉ quản lý cơ sở và cấp tài khoản quản lý, không tự thêm nhân sự trực tiếp ở Dashboard/Nhân sự):
+
+### Chi tiết thay đổi:
+*   **Trang Tổng quan ([TongQuan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/admin/TongQuan.jsp))**:
+    - Thay thế lối tắt hành động nhanh `Thêm nhân sự` (icon `person_add`) thành `Quản lý nhân sự` (icon `groups`) để dẫn trực tiếp sang danh sách tài khoản thay vì mở modal thêm mới.
+*   **Trang Quản lý Nhân sự ([NhanSu.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/admin/NhanSu.jsp))**:
+    - Loại bỏ nút bấm `+ Thêm nhân sự` (`#addStaffBtn`) trên thanh công cụ của grid dữ liệu.
+    - Admin giữ lại quyền xem danh sách, cập nhật thông tin tài khoản (gán chi nhánh, thay đổi vai trò), khóa/mở khóa tài khoản, nhưng không thể khởi tạo tài khoản mới từ giao diện này.
+
+---
+
+## 12. Tái thiết kế Giao diện Khách hàng Đặt Sân (Customer Venue/Court Booking Page Redesign)
+
+Tái cấu trúc bố cục và phong cách thẩm mỹ của trang đặt sân của khách hàng (`customer/DatSan.jsp`) dựa trên phong cách PitchPerfect hiện đại, chuyên nghiệp.
+
+### Chi tiết thay đổi:
+*   **Bố cục giao diện (Grid Bố cục mới)**:
+    - Chuyển đổi từ giao diện chia cột sidebar-hoạt động + masonry cũ sang bố cục 4 cột cân xứng:
+        - **Cột Trái (1/4 chiều rộng)**: Tích hợp Bộ lọc tìm kiếm (Phân loại theo môn thể thao, Chi nhánh/Cơ sở dưới dạng radio checklist trực quan) và nút tắt xem nhanh **Lịch sử đặt sân**.
+        - **Cột Phải (3/4 chiều rộng)**: Hiển thị lưới sân đấu khả dụng (`grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4`) thích ứng tốt trên các màn hình lớn (độ rộng tối đa mở rộng thành `max-w-[1800px]`).
+*   **Thiết kế Thẻ Sân đấu (Court Cards)**:
+    - Thiết kế kính mờ (glassmorphism) hiện đại, bo góc 16px, hiệu ứng đổ bóng mờ (`ambient-shadow`) và nâng nhẹ khi di chuột (`hover-lift`).
+    - Hiển thị đầy đủ thông tin: Điểm đánh giá sao (`rating`), thẻ trạng thái sân màu sắc trực quan (Sẵn sàng: Xanh lá, Đang dùng: Vàng hổ phách), tên sân đấu, chi nhánh cơ sở, các tag môn thể thao, mô tả ngắn, giá thuê theo giờ và liên kết hành động "Đặt sân ngay".
+*   **Khắc phục xung đột biểu thức ES6 & JSP**:
+    - Thực hiện escape tất cả các tham số template string client-side trong Javascript (ví dụ: `\${c.id}`, `\${c.name}`, `\${priceText}`) để tránh việc JSP compiler dịch sai thành biến server-side rỗng, giải quyết triệt để lỗi mất dữ liệu trên card và lỗi ID rỗng khi bấm đặt sân.
+*   **Cơ chế dự phòng ảnh lỗi (Image Fallback)**:
+    - Bổ sung bộ kiểm tra định dạng URL hình ảnh. Nếu trường ảnh trong database chứa text thông thường thay vì URL hợp lệ (ví dụ: "Tennis 01"), hệ thống sẽ tự động dùng ảnh chất lượng cao tương ứng từ Unsplash làm ảnh nền của thẻ.
+
+---
+
+## 13. Hệ thống Validation Nâng cao - Bổ sung đợt 2 (Advanced Booking & Status Validation)
+
+Bổ sung 7 quy tắc validation và kiểm soát nghiệp vụ nâng cao để tăng cường tính nhất quán, bảo mật và trải nghiệm người dùng.
+
+### Chi tiết các kiểm tra bổ sung:
+
+| # | Loại | Nghiệp vụ kiểm tra | Điều kiện chặn / Xử lý | Vị trí cài đặt |
+|---|------|-------------------|-----------------------|----------------|
+| V1 | 🔴 | Validate enum TrangThai của sân | Chặn các giá trị trạng thái tùy tiện. Chỉ cho phép: `Sẵn sàng`, `Tạm đóng`, `Bảo trì`, `Đang dùng`. | `SanService.java` |
+| V2 | 🔴 | Kiểm tra booking active trước khi đóng sân | Chặn đổi trạng thái sân sang `Tạm đóng` hoặc `Bảo trì` nếu sân đang có ca đặt sân được xác nhận hoặc chờ duyệt trong tương lai. | `SanService.java` |
+| V3 | 🟡 | Tự động hủy đơn chờ xác nhận hết hạn | Hủy tự động (chuyển sang `Đã hủy`) các đơn đặt sân ở trạng thái `Chờ xác nhận` sau 2 giờ không được xử lý. | `LichDatSanDAOImpl.java` |
+| V4 | 🟡 | Giới hạn số đơn đặt trong ngày của khách hàng | Một tài khoản khách hàng chỉ được phép đặt tối đa 3 ca đấu hoạt động trên toàn hệ thống trong cùng một ngày. | `DatSanServlet.java` |
+| V5 | 🟡 | Thông báo tự động khi bị hủy trùng lịch | Khi quản lý duyệt ca đấu, các đơn đặt sân trùng giờ khác sẽ tự động bị hủy và hệ thống tự động gửi bản tin thông báo (`ThongBao`) cho khách hàng. | `LichDatSanDAOImpl.java` |
+| V6 | 🟢 | Validate phương thức thanh toán | Chặn các giá trị phương thức thanh toán không hợp lệ từ client. Chỉ cho phép: `payos` hoặc `sau` (trả sau). | `DatSanServlet.java` |
+| V7 | 🟢 | Cảnh báo chênh lệch giá khi phê duyệt đơn | Nếu giá loại sân thay đổi từ lúc đặt đến lúc duyệt, yêu cầu quản lý xác nhận mức giá mới trước khi hoàn tất duyệt đơn. | `QuanLyDatSanServlet.java` & các trang JSP quản lý đặt sân |

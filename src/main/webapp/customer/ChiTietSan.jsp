@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="vi" class="scroll-smooth">
 <head>
@@ -14,8 +13,34 @@
         .material-symbols-outlined.filled {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        #tl-bar {
+            position: relative;
+            height: 36px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            border: 1.5px solid #d1fae5;
+            cursor: crosshair;
+            user-select: none;
+            overflow: visible;
+        }
+        .tl-drag-handle {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2.5px solid #006e2f;
+            border-radius: 50%;
+            cursor: ew-resize;
+            z-index: 3;
+            box-shadow: 0 1px 4px rgba(0,0,0,.2);
+            touch-action: none;
+            transition: transform 0.1s;
+        }
+        .tl-drag-handle:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
     </style>
 </head>
 <body class="bg-[#f7f9fb] text-[#191c1e] font-sans antialiased min-h-screen flex flex-col">
@@ -23,10 +48,10 @@
     <jsp:include page="/common/header.jsp" />
 
     <main class="flex-grow pt-[80px] pb-16">
-        <div class="w-full max-w-7xl mx-auto px-4 md:px-12 py-10">
+        <div class="w-full max-w-7xl mx-auto px-4 md:px-12 py-8">
 
             <!-- Breadcrumbs -->
-            <div class="flex items-center gap-2 text-[#3d4a3d] text-xs font-semibold mb-10">
+            <div class="flex items-center gap-2 text-[#3d4a3d] text-xs font-semibold mb-6">
                 <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors">Tìm Sân</a>
                 <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                 <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors">Danh sách sân</a>
@@ -34,15 +59,13 @@
                 <span class="text-[#191c1e] font-bold">${san.tenSan}</span>
             </div>
 
-            <!-- Hero Gallery Bento -->
-            <section class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 md:gap-3 h-[340px] md:h-[480px] mb-16 rounded-xl overflow-hidden">
-                <!-- Main large image (col-span-3, row-span-2) -->
+            <!-- Hero Gallery Bento — reduced height so booking widget stays in viewport -->
+            <section class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 md:gap-3 h-[200px] md:h-[300px] mb-10 rounded-xl overflow-hidden">
                 <div class="md:col-span-3 md:row-span-2 relative group cursor-pointer">
                     <img src="${not empty san.hinhAnh ? san.hinhAnh : 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1400'}"
                          alt="${san.tenSan}"
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
-                    <!-- Status badge -->
                     <div class="absolute top-4 left-4">
                         <span class="px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider shadow backdrop-blur-md flex items-center gap-1.5
                               ${san.trangThai == 'Sẵn sàng' ? 'bg-green-600/90 text-white' : 'bg-amber-500/90 text-white'}">
@@ -55,14 +78,12 @@
                         Xem tất cả ảnh
                     </button>
                 </div>
-                <!-- Thumbnail 1 -->
                 <div class="hidden md:block relative overflow-hidden group cursor-pointer">
                     <img src="${not empty san.hinhAnh ? san.hinhAnh : 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=600'}"
                          alt="${san.tenSan} - ảnh 2"
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-90">
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                 </div>
-                <!-- Thumbnail 2 -->
                 <div class="hidden md:block relative overflow-hidden group cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1528972042015-f4b8a57c5c3c?q=80&w=600"
                          alt="${san.tenSan} - ảnh 3"
@@ -71,11 +92,172 @@
                 </div>
             </section>
 
-            <!-- Main Content: Left + Right -->
-            <div class="flex flex-col lg:flex-row gap-16">
+            <!-- Main Content — booking widget first on mobile (order-1), info second -->
+            <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
 
-                <!-- LEFT COLUMN: Details (2/3) -->
-                <div class="w-full lg:w-2/3 flex flex-col gap-10">
+                <!-- BOOKING WIDGET — order-1 on mobile, order-2 on desktop -->
+                <div class="w-full lg:w-[38%] order-1 lg:order-2">
+                    <div class="sticky top-24 bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[#e0e3e5] p-5 flex flex-col gap-4">
+
+                        <!-- Price Header -->
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <span class="text-2xl font-bold text-[#191c1e]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ</span>
+                                <span class="text-sm text-[#6d7b6c]">/giờ</span>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                  ${san.trangThai == 'Sẵn sàng' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+                                ${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}
+                            </span>
+                        </div>
+
+                        <!-- Flash messages -->
+                        <c:if test="${not empty sessionScope.error}">
+                            <div class="p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">error</span>
+                                <span>${sessionScope.error}</span>
+                            </div>
+                            <% session.removeAttribute("error"); %>
+                        </c:if>
+                        <c:if test="${not empty sessionScope.message}">
+                            <div class="p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-lg flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">check_circle</span>
+                                <span>${sessionScope.message}</span>
+                            </div>
+                            <% session.removeAttribute("message"); %>
+                        </c:if>
+
+                        <form id="quick-booking-form" action="${pageContext.request.contextPath}/customer/dat-san" method="post" class="flex flex-col gap-4">
+                            <input type="hidden" name="sanId" value="${san.sanID}">
+                            <input type="hidden" name="gioBatDau" id="gioBatDau">
+                            <input type="hidden" name="gioKetThuc" id="gioKetThuc">
+                            <input type="hidden" name="ngayDat" id="ngayDat">
+
+                            <!-- Date Navigation -->
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-sm font-semibold text-[#191c1e]">Ngày đặt sân</label>
+                                <div class="flex items-center justify-between bg-green-50 border border-[#d1fae5] rounded-lg px-2 py-2">
+                                    <button type="button" id="prev-day-btn" onclick="prevDay()"
+                                            class="p-1 rounded-full hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[#006e2f]"
+                                            disabled aria-label="Ngày trước">
+                                        <span class="material-symbols-outlined text-[22px]">chevron_left</span>
+                                    </button>
+                                    <span id="date-display" class="text-sm font-semibold text-[#006e2f] select-none"></span>
+                                    <button type="button" onclick="nextDay()"
+                                            class="p-1 rounded-full hover:bg-green-100 transition-colors text-[#006e2f]"
+                                            aria-label="Ngày tiếp theo">
+                                        <span class="material-symbols-outlined text-[22px]">chevron_right</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Timeline Time Picker -->
+                            <div class="flex flex-col gap-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-semibold text-[#191c1e]">Khung giờ</label>
+                                    <span class="text-xs text-[#6d7b6c]">${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}</span>
+                                </div>
+
+                                <!-- Timeline bar -->
+                                <div id="tl-bar" role="group" aria-label="Chọn khung giờ đặt sân"></div>
+
+                                <!-- Hour labels -->
+                                <div id="tl-labels" class="flex justify-between text-[10px] text-[#9ca3af] px-0.5 -mt-1"></div>
+
+                                <!-- Legend -->
+                                <div class="flex gap-3 text-[11px] text-[#6d7b6c]">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="inline-block w-3 h-3 rounded bg-green-50 border border-green-200 flex-shrink-0"></span>Trống
+                                    </span>
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="inline-block w-3 h-3 rounded bg-red-100 border border-red-200 flex-shrink-0"></span>Đã đặt
+                                    </span>
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="inline-block w-3 h-3 rounded bg-[#006e2f] flex-shrink-0"></span>Đang chọn
+                                    </span>
+                                </div>
+
+                                <!-- Instruction hint -->
+                                <p id="tl-hint" class="text-[11px] text-[#6d7b6c] text-center italic">
+                                    Nhấn vào thanh để chọn giờ bắt đầu
+                                </p>
+
+                                <!-- Selection display -->
+                                <div id="tl-selection-display" class="hidden bg-green-50 border border-green-200 rounded-lg px-3 py-2.5 flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[16px] text-[#006e2f]">schedule</span>
+                                        <span id="tl-sel-text" class="text-sm font-semibold text-[#006e2f]"></span>
+                                    </div>
+                                    <button type="button" onclick="resetSelection()"
+                                            class="text-[11px] text-[#6d7b6c] hover:text-red-500 transition-colors">
+                                        Xóa
+                                    </button>
+                                </div>
+
+                                <div id="overlap-warning" class="hidden bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-xs flex gap-2 items-start">
+                                    <span class="material-symbols-outlined text-[15px] mt-0.5 shrink-0">warning</span>
+                                    <span id="overlap-warning-text">Trùng lịch đặt sân!</span>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ghiChu" class="text-sm font-semibold text-[#191c1e]">Ghi chú</label>
+                                <textarea name="ghiChu" id="ghiChu" rows="2"
+                                          class="border border-[#bccbb9] rounded-lg px-3 py-2.5 text-sm bg-[#f7f9fb] text-[#191c1e] placeholder-[#6d7b6c] resize-none outline-none hover:border-[#006e2f] focus:border-[#006e2f] focus:ring-2 focus:ring-[#006e2f]/20 transition-all"
+                                          placeholder="Thuê bóng, mượn áo tập..."></textarea>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all" id="lbl-opt-sau">
+                                    <input type="radio" name="paymentMethod" value="sau" checked class="hidden" onchange="changePayMethod('sau')">
+                                    Trả tại quầy
+                                </label>
+                                <label class="pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all" id="lbl-opt-payos">
+                                    <input type="radio" name="paymentMethod" value="payos" class="hidden" onchange="changePayMethod('payos')">
+                                    PayOS Online
+                                </label>
+                            </div>
+
+                            <hr class="border-[#e6e8ea]">
+
+                            <!-- Price Breakdown -->
+                            <div id="price-breakdown" class="hidden flex-col gap-2">
+                                <div class="flex justify-between text-sm text-[#6d7b6c]">
+                                    <span id="price-line-desc"></span>
+                                    <span id="price-line-amount"></span>
+                                </div>
+                                <div class="flex justify-between font-bold text-base text-[#191c1e] pt-2 border-t border-[#e6e8ea] mt-1">
+                                    <span>Tổng cộng</span>
+                                    <span id="price-total" class="text-[#006e2f]"></span>
+                                </div>
+                            </div>
+
+                            <!-- Submit / Login CTA -->
+                            <c:choose>
+                                <c:when test="${sessionScope.user != null}">
+                                    <button type="submit" id="btn-submit-booking" disabled
+                                            class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                                        Đặt Sân Ngay
+                                    </button>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/dangnhap"
+                                       class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 text-center">
+                                        Đăng Nhập Để Đặt Sân
+                                        <span class="material-symbols-outlined text-[18px]">login</span>
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <p class="text-center text-xs text-[#6d7b6c]">Chưa tính phí cho đến khi đặt thành công</p>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- INFO COLUMN — order-2 on mobile, order-1 on desktop -->
+                <div class="w-full lg:w-[62%] order-2 lg:order-1 flex flex-col gap-10">
 
                     <!-- Header Info -->
                     <div>
@@ -93,7 +275,6 @@
                                 <span>${coSo.diaChi}</span>
                             </div>
                         </div>
-                        <!-- Sport / Type tags -->
                         <div class="flex flex-wrap gap-2">
                             <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${tenMon}</span>
                             <span class="px-3 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-xs">${loai.tenLoai}</span>
@@ -158,7 +339,7 @@
                         </p>
                         <div class="w-full h-56 bg-[#eceef0] rounded-xl overflow-hidden border border-[#e0e3e5] shadow-sm">
                             <iframe
-                                src="https://maps.google.com/maps?q=${fn:replace(coSo.diaChi, ' ', '+')}&output=embed&z=15"
+                                src="https://maps.google.com/maps?q=${coSo.diaChi}&output=embed&z=15"
                                 class="w-full h-full border-0"
                                 allowfullscreen=""
                                 loading="lazy"
@@ -168,128 +349,6 @@
                         </div>
                     </div>
 
-                </div>
-
-                <!-- RIGHT COLUMN: Booking Widget (1/3) -->
-                <div class="w-full lg:w-1/3">
-                    <div class="sticky top-24 bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[#e0e3e5] p-6 flex flex-col gap-5">
-
-                        <!-- Price Header -->
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <span class="text-2xl font-bold text-[#191c1e]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ</span>
-                                <span class="text-sm text-[#6d7b6c]">/giờ</span>
-                            </div>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                  ${san.trangThai == 'Sẵn sàng' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
-                                ${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}
-                            </span>
-                        </div>
-
-                        <!-- Alert messages -->
-                        <c:if test="${not empty sessionScope.error}">
-                            <div class="p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg flex items-start gap-2">
-                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">error</span>
-                                <span>${sessionScope.error}</span>
-                            </div>
-                            <% session.removeAttribute("error"); %>
-                        </c:if>
-                        <c:if test="${not empty sessionScope.message}">
-                            <div class="p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-lg flex items-start gap-2">
-                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">check_circle</span>
-                                <span>${sessionScope.message}</span>
-                            </div>
-                            <% session.removeAttribute("message"); %>
-                        </c:if>
-
-                        <form id="quick-booking-form" action="${pageContext.request.contextPath}/customer/dat-san" method="post" class="flex flex-col gap-5">
-                            <input type="hidden" name="sanId" value="${san.sanID}">
-                            <input type="hidden" name="gioBatDau" id="gioBatDau">
-                            <input type="hidden" name="gioKetThuc" id="gioKetThuc">
-
-                            <!-- Date Picker -->
-                            <div class="flex flex-col gap-1.5">
-                                <label for="ngayDat" class="text-sm font-semibold text-[#191c1e]">Chọn ngày</label>
-                                <div class="flex items-center border border-[#bccbb9] rounded-lg px-3 py-2.5 bg-[#f7f9fb] hover:border-[#006e2f] focus-within:border-[#006e2f] focus-within:ring-2 focus-within:ring-[#006e2f]/20 transition-all">
-                                    <input type="date" name="ngayDat" id="ngayDat" required
-                                           class="bg-transparent border-none p-0 w-full text-sm text-[#191c1e] outline-none"
-                                           onchange="onDateChange()">
-                                </div>
-                            </div>
-
-                            <!-- Time Slots Grid -->
-                            <div class="flex flex-col gap-2">
-                                <div class="flex justify-between items-center">
-                                    <label class="text-sm font-semibold text-[#191c1e]">Chọn khung giờ</label>
-                                    <span class="text-xs text-[#006e2f] font-medium">
-                                        ${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}
-                                    </span>
-                                </div>
-                                <div id="time-grid" class="grid grid-cols-3 gap-1.5 max-h-[200px] overflow-y-auto hide-scroll">
-                                    <!-- Dynamic chips rendered by JS -->
-                                </div>
-                                <div id="time-summary" class="hidden text-xs font-semibold text-[#006e2f] bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                                </div>
-                                <div id="overlap-warning" class="hidden bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-xs flex gap-2 items-start">
-                                    <span class="material-symbols-outlined text-[15px] mt-0.5 shrink-0">warning</span>
-                                    <span id="overlap-warning-text">Trùng lịch đặt sân!</span>
-                                </div>
-                            </div>
-
-                            <!-- Notes -->
-                            <div class="flex flex-col gap-1.5">
-                                <label for="ghiChu" class="text-sm font-semibold text-[#191c1e]">Ghi chú</label>
-                                <textarea name="ghiChu" id="ghiChu" rows="2"
-                                          class="border border-[#bccbb9] rounded-lg px-3 py-2.5 text-sm bg-[#f7f9fb] text-[#191c1e] placeholder-[#6d7b6c] resize-none outline-none hover:border-[#006e2f] focus:border-[#006e2f] focus:ring-2 focus:ring-[#006e2f]/20 transition-all"
-                                          placeholder="Thuê bóng, mượn áo tập..."></textarea>
-                            </div>
-
-                            <!-- Payment Method -->
-                            <div class="grid grid-cols-2 gap-2">
-                                <label class="pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all" id="lbl-opt-sau">
-                                    <input type="radio" name="paymentMethod" value="sau" checked class="hidden" onchange="changePayMethod('sau')">
-                                    Trả tại quầy
-                                </label>
-                                <label class="pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all" id="lbl-opt-payos">
-                                    <input type="radio" name="paymentMethod" value="payos" class="hidden" onchange="changePayMethod('payos')">
-                                    PayOS Online
-                                </label>
-                            </div>
-
-                            <hr class="border-[#e6e8ea]">
-
-                            <!-- Price Breakdown -->
-                            <div id="price-breakdown" class="hidden flex-col gap-2">
-                                <div class="flex justify-between text-sm text-[#6d7b6c]">
-                                    <span id="price-line-desc"></span>
-                                    <span id="price-line-amount"></span>
-                                </div>
-                                <div class="flex justify-between font-bold text-base text-[#191c1e] pt-2 border-t border-[#e6e8ea] mt-1">
-                                    <span>Tổng cộng</span>
-                                    <span id="price-total" class="text-[#006e2f]"></span>
-                                </div>
-                            </div>
-
-                            <!-- Submit / Login CTA -->
-                            <c:choose>
-                                <c:when test="${sessionScope.user != null}">
-                                    <button type="submit" id="btn-submit-booking" disabled
-                                            class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                                        Đặt Sân Ngay
-                                    </button>
-                                </c:when>
-                                <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/dangnhap"
-                                       class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 text-center">
-                                        Đăng Nhập Để Đặt Sân
-                                        <span class="material-symbols-outlined text-[18px]">login</span>
-                                    </a>
-                                </c:otherwise>
-                            </c:choose>
-
-                            <p class="text-center text-xs text-[#6d7b6c]">Chưa tính phí cho đến khi đặt thành công</p>
-                        </form>
-                    </div>
                 </div>
 
             </div><!-- end main content -->
@@ -365,12 +424,9 @@
     <jsp:include page="/common/footer.jsp" />
 
     <script>
-        const branchOpenTime = "${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'}";
+        const branchOpenTime  = "${coSo.gioMoCua  != null ? coSo.gioMoCua  : '06:00'}";
         const branchCloseTime = "${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}";
-        const pricePerHour = parseFloat("${loai.giaKhongDen != null ? loai.giaKhongDen : 0}");
-
-        let selectedStartMin = null;
-        let selectedEndMin = null;
+        const pricePerHour    = parseFloat("${loai.giaKhongDen != null ? loai.giaKhongDen : 0}");
 
         const activeBookings = [
             <c:forEach var="b" items="${activeBookings}">
@@ -380,18 +436,26 @@
             </c:forEach>
         ];
 
-        const today = new Date();
-        const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-        document.getElementById("ngayDat").min = todayStr;
-        document.getElementById("ngayDat").value = todayStr;
+        // ── Constants ──────────────────────────────────────────────────
+        const openMin  = timeToMinutes(branchOpenTime);
+        const closeMin = timeToMinutes(branchCloseTime);
 
-        function changePayMethod(method) {
-            const activeClass = "pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all";
-            const inactiveClass = "pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all";
-            document.getElementById("lbl-opt-sau").className = method === 'sau' ? activeClass : inactiveClass;
-            document.getElementById("lbl-opt-payos").className = method === 'payos' ? activeClass : inactiveClass;
-        }
+        // ── Date state ─────────────────────────────────────────────────
+        const todayBase = new Date();
+        todayBase.setHours(0, 0, 0, 0);
+        const todayStr = fmtDateStr(todayBase);
 
+        let currentDate = new Date(todayBase);
+
+        // ── Time-picker state ──────────────────────────────────────────
+        let selectedStartMin = null;
+        let selectedEndMin   = null;
+
+        // ── Timeline drag state ────────────────────────────────────────
+        let tlDragging = false;
+        let tlDragSide = null; // 'start' | 'end'
+
+        // ── Helpers ────────────────────────────────────────────────────
         function timeToMinutes(t) {
             const p = t.split(":");
             return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
@@ -406,109 +470,274 @@
             return (h > 0 ? h + " tiếng " : "") + (m > 0 ? m + " phút" : "");
         }
 
-        function onDateChange() {
+        function fmtDateStr(d) {
+            return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+        }
+
+        function fmtDateDisplay(d) {
+            const days = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+            return days[d.getDay()] + ", " + String(d.getDate()).padStart(2, "0") + "/" +
+                   String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+        }
+
+        // ── Date navigation ────────────────────────────────────────────
+        function updateDateUI() {
+            document.getElementById("date-display").textContent = fmtDateDisplay(currentDate);
+            document.getElementById("ngayDat").value = fmtDateStr(currentDate);
+            document.getElementById("prev-day-btn").disabled = fmtDateStr(currentDate) === todayStr;
+        }
+
+        function prevDay() {
+            const d = new Date(currentDate);
+            d.setDate(d.getDate() - 1);
+            if (fmtDateStr(d) < todayStr) return;
+            currentDate = d;
+            resetSelection();
+            updateDateUI();
+            renderTimeline();
+        }
+
+        function nextDay() {
+            const d = new Date(currentDate);
+            d.setDate(d.getDate() + 1);
+            currentDate = d;
+            resetSelection();
+            updateDateUI();
+            renderTimeline();
+        }
+
+        // ── Selection ──────────────────────────────────────────────────
+        function resetSelection() {
             selectedStartMin = null;
-            selectedEndMin = null;
+            selectedEndMin   = null;
             document.getElementById("gioBatDau").value = "";
             document.getElementById("gioKetThuc").value = "";
-            renderTimeGrid();
-            updatePriceBreakdown();
-        }
-
-        function findNextBlockedMin(startMin, closeMin, conflicts) {
-            let limit = closeMin;
-            conflicts.forEach(b => {
-                const bs = timeToMinutes(b.start);
-                if (bs > startMin && bs < limit) limit = bs;
-            });
-            return limit;
-        }
-
-        function renderTimeGrid() {
-            const openMin = timeToMinutes(branchOpenTime);
-            const closeMin = timeToMinutes(branchCloseTime);
-            const dateVal = document.getElementById("ngayDat").value;
-            const grid = document.getElementById("time-grid");
-            const summary = document.getElementById("time-summary");
-            grid.innerHTML = "";
-
-            const conflicts = activeBookings.filter(b => b.date === dateVal);
-            let nowMin = -1;
-            if (dateVal === todayStr) {
-                const n = new Date();
-                nowMin = n.getHours() * 60 + n.getMinutes();
-            }
-
-            let rangeLimit = null;
-            if (selectedStartMin !== null && selectedEndMin === null) {
-                rangeLimit = findNextBlockedMin(selectedStartMin, closeMin, conflicts);
-            }
-
-            for (let m = openMin; m <= closeMin - 30; m += 30) {
-                const isPast = m <= nowMin;
-                const isBooked = conflicts.some(b => m >= timeToMinutes(b.start) && m < timeToMinutes(b.end));
-                const isStart = m === selectedStartMin;
-                const isEnd = m === selectedEndMin;
-                const isInRange = selectedStartMin !== null && selectedEndMin !== null && m > selectedStartMin && m < selectedEndMin;
-                const isExtendable = selectedStartMin !== null && selectedEndMin === null && m > selectedStartMin && rangeLimit !== null && m <= rangeLimit;
-
-                const chip = document.createElement("button");
-                chip.type = "button";
-                chip.textContent = minToStr(m);
-
-                let cls = "py-2 rounded-lg text-xs font-semibold border transition-colors text-center ";
-                if (isPast) {
-                    chip.disabled = true;
-                    cls += "bg-[#f2f4f6] text-[#bccbb9] border-[#e0e3e5] cursor-not-allowed";
-                } else if (isBooked) {
-                    chip.disabled = true;
-                    cls += "bg-red-50 text-red-300 border-red-200 cursor-not-allowed line-through";
-                } else if (isStart || isEnd) {
-                    cls += "border-2 border-[#006e2f] bg-[#006e2f] text-white shadow-sm";
-                } else if (isInRange) {
-                    cls += "border-[#006e2f]/40 bg-[#006e2f]/10 text-[#006e2f]";
-                } else if (isExtendable) {
-                    cls += "border-[#bccbb9] text-[#006e2f] hover:border-[#006e2f] hover:bg-green-50 cursor-pointer";
-                } else {
-                    cls += "border-[#bccbb9] text-[#3d4a3d] hover:border-[#006e2f] hover:text-[#006e2f] hover:bg-green-50 cursor-pointer";
-                }
-                chip.className = cls;
-                if (!chip.disabled) chip.addEventListener("click", () => onChipClick(m));
-                grid.appendChild(chip);
-            }
-
-            if (selectedStartMin !== null && selectedEndMin !== null) {
-                summary.textContent = "Đã chọn: " + minToStr(selectedStartMin) + " – " + minToStr(selectedEndMin) + " (" + formatDuration(selectedEndMin - selectedStartMin) + ")";
-                summary.classList.remove("hidden");
-            } else {
-                summary.classList.add("hidden");
-            }
-        }
-
-        function onChipClick(m) {
-            if (selectedStartMin === null) {
-                selectedStartMin = m;
-            } else if (selectedEndMin === null) {
-                if (m === selectedStartMin) {
-                    selectedStartMin = null;
-                } else if (m > selectedStartMin) {
-                    selectedEndMin = m;
-                } else {
-                    selectedStartMin = m;
-                }
-            } else {
-                selectedStartMin = m;
-                selectedEndMin = null;
-            }
-
-            document.getElementById("gioBatDau").value = selectedStartMin !== null ? minToStr(selectedStartMin) : "";
-            document.getElementById("gioKetThuc").value = selectedEndMin !== null ? minToStr(selectedEndMin) : "";
-
-            renderTimeGrid();
+            renderTimeline();
             updatePriceBreakdown();
             checkSchedule();
         }
 
+        function commitSelection() {
+            document.getElementById("gioBatDau").value = selectedStartMin !== null ? minToStr(selectedStartMin) : "";
+            document.getElementById("gioKetThuc").value = selectedEndMin !== null ? minToStr(selectedEndMin) : "";
+        }
+
+        // ── Timeline: coordinate ↔ minute ─────────────────────────────
+        function minToPct(min) {
+            return ((min - openMin) / (closeMin - openMin)) * 100;
+        }
+
+        function pctToMin(pct) {
+            const raw = openMin + Math.max(0, Math.min(1, pct)) * (closeMin - openMin);
+            return Math.round(raw / 30) * 30;
+        }
+
+        function getBarPct(e) {
+            const bar  = document.getElementById("tl-bar");
+            const rect = bar.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            return (clientX - rect.left) / rect.width;
+        }
+
+        function getConflicts() {
+            return activeBookings.filter(b => b.date === fmtDateStr(currentDate));
+        }
+
+        function isMinBooked(min) {
+            return getConflicts().some(b => min >= timeToMinutes(b.start) && min < timeToMinutes(b.end));
+        }
+
+        function isMinPast(min) {
+            if (fmtDateStr(currentDate) !== todayStr) return false;
+            const n = new Date();
+            return min < n.getHours() * 60 + n.getMinutes();
+        }
+
+        function hasRangeConflict(startM, endM) {
+            return getConflicts().some(b => {
+                const bs = timeToMinutes(b.start), be = timeToMinutes(b.end);
+                return startM < be && endM > bs;
+            });
+        }
+
+        // ── Timeline render ────────────────────────────────────────────
+        function renderTimeline() {
+            const bar = document.getElementById("tl-bar");
+            bar.innerHTML = "";
+
+            // Past overlay (today only)
+            if (fmtDateStr(currentDate) === todayStr) {
+                const n = new Date();
+                const nowMin = n.getHours() * 60 + n.getMinutes();
+                if (nowMin > openMin) {
+                    const w = minToPct(Math.min(nowMin, closeMin));
+                    const el = mkDiv("position:absolute;top:0;bottom:0;left:0;width:" + w + "%;background:rgba(0,0,0,0.07);border-radius:6px 0 0 6px;pointer-events:none;");
+                    bar.appendChild(el);
+                }
+            }
+
+            // Booked segments
+            getConflicts().forEach(function(b) {
+                const bs   = timeToMinutes(b.start), be = timeToMinutes(b.end);
+                const left = minToPct(bs);
+                const w    = minToPct(be) - left;
+                const el   = mkDiv("position:absolute;top:2px;bottom:2px;left:" + left + "%;width:" + w + "%;background:#fecaca;border-radius:4px;pointer-events:none;");
+                el.title   = "Đã đặt: " + b.start + " – " + b.end;
+                bar.appendChild(el);
+            });
+
+            // Hour tick marks
+            for (var m = openMin; m <= closeMin; m += 60) {
+                const tick = mkDiv("position:absolute;top:0;bottom:0;left:" + minToPct(m) + "%;width:1px;background:rgba(0,0,0,0.06);pointer-events:none;");
+                bar.appendChild(tick);
+            }
+
+            // Selection or pending-start marker
+            if (selectedStartMin !== null && selectedEndMin !== null) {
+                const left = minToPct(selectedStartMin);
+                const w    = minToPct(selectedEndMin) - left;
+
+                const sel = mkDiv("position:absolute;top:0;bottom:0;left:" + left + "%;width:" + w + "%;background:#006e2f;border-radius:6px;opacity:0.85;pointer-events:none;");
+                bar.appendChild(sel);
+
+                // Drag handles
+                [["start", left], ["end", left + w]].forEach(function(pair) {
+                    const h = document.createElement("div");
+                    h.className    = "tl-drag-handle";
+                    h.style.left   = pair[1] + "%";
+                    h.dataset.side = pair[0];
+                    bar.appendChild(h);
+                });
+
+            } else if (selectedStartMin !== null) {
+                // Pending-start: show vertical marker + tooltip
+                const left = minToPct(selectedStartMin);
+
+                const marker = mkDiv("position:absolute;top:0;bottom:0;left:" + left + "%;width:3px;background:#006e2f;border-radius:2px;transform:translateX(-50%);pointer-events:none;");
+                bar.appendChild(marker);
+
+                const tip = mkDiv("position:absolute;bottom:calc(100% + 5px);left:" + left + "%;transform:translateX(-50%);background:#006e2f;color:white;font-size:10px;padding:2px 7px;border-radius:4px;white-space:nowrap;pointer-events:none;");
+                tip.textContent = minToStr(selectedStartMin);
+                bar.appendChild(tip);
+            }
+
+            updateHint();
+            updateSelectionDisplay();
+        }
+
+        function mkDiv(css) {
+            const d = document.createElement("div");
+            d.style.cssText = css;
+            return d;
+        }
+
+        function updateHint() {
+            const hint = document.getElementById("tl-hint");
+            if (selectedStartMin === null) {
+                hint.textContent = "Nhấn vào thanh để chọn giờ bắt đầu";
+            } else if (selectedEndMin === null) {
+                hint.textContent = "Nhấn tiếp để chọn giờ kết thúc";
+            } else {
+                hint.textContent = "Kéo hai đầu để điều chỉnh";
+            }
+        }
+
+        function updateSelectionDisplay() {
+            const disp = document.getElementById("tl-selection-display");
+            if (selectedStartMin !== null && selectedEndMin !== null) {
+                const dur = selectedEndMin - selectedStartMin;
+                document.getElementById("tl-sel-text").textContent =
+                    minToStr(selectedStartMin) + " – " + minToStr(selectedEndMin) + " · " + formatDuration(dur);
+                disp.classList.remove("hidden");
+            } else {
+                disp.classList.add("hidden");
+            }
+        }
+
+        // ── Timeline interaction ───────────────────────────────────────
+        function onBarPointerDown(e) {
+            // If clicking on a drag handle, start handle drag
+            if (e.target.classList.contains("tl-drag-handle")) {
+                tlDragSide  = e.target.dataset.side;
+                tlDragging  = true;
+                if (e.cancelable) e.preventDefault();
+                return;
+            }
+
+            const clickedMin = pctToMin(getBarPct(e));
+
+            // Ignore clicks outside valid range or on blocked slots
+            if (clickedMin < openMin || clickedMin >= closeMin) return;
+            if (isMinBooked(clickedMin) || isMinPast(clickedMin)) return;
+
+            if (selectedStartMin === null || selectedEndMin !== null) {
+                // New selection: set start only
+                selectedStartMin = clickedMin;
+                selectedEndMin   = null;
+            } else {
+                // Second click: set end
+                if (clickedMin <= selectedStartMin) {
+                    // Clicked at or before start → move start
+                    selectedStartMin = clickedMin;
+                } else {
+                    // Clamp to first booked slot after start
+                    let end = clickedMin;
+                    getConflicts().forEach(b => {
+                        const bs = timeToMinutes(b.start);
+                        if (bs > selectedStartMin && bs < end) end = bs;
+                    });
+                    selectedEndMin = end;
+                }
+            }
+
+            commitSelection();
+            renderTimeline();
+            updatePriceBreakdown();
+            checkSchedule();
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function onDocPointerMove(e) {
+            if (!tlDragging) return;
+            const newMin = Math.max(openMin, Math.min(closeMin, pctToMin(getBarPct(e))));
+
+            if (tlDragSide === "start") {
+                if (selectedEndMin !== null && newMin < selectedEndMin - 30 &&
+                    !hasRangeConflict(newMin, selectedEndMin) && !isMinPast(newMin)) {
+                    selectedStartMin = newMin;
+                }
+            } else if (tlDragSide === "end") {
+                if (newMin > selectedStartMin + 30 &&
+                    !hasRangeConflict(selectedStartMin, newMin)) {
+                    selectedEndMin = newMin;
+                }
+            }
+
+            commitSelection();
+            renderTimeline();
+            updatePriceBreakdown();
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function onDocPointerUp() {
+            if (!tlDragging) return;
+            tlDragging = false;
+            tlDragSide = null;
+            checkSchedule();
+        }
+
+        // ── Hour labels ────────────────────────────────────────────────
+        function renderTlLabels() {
+            const container = document.getElementById("tl-labels");
+            container.innerHTML = "";
+            for (let m = openMin; m <= closeMin; m += 60) {
+                const span = document.createElement("span");
+                span.textContent = minToStr(m);
+                container.appendChild(span);
+            }
+        }
+
+        // ── Price breakdown ────────────────────────────────────────────
         function updatePriceBreakdown() {
             const breakdown = document.getElementById("price-breakdown");
             if (selectedStartMin === null || selectedEndMin === null || !pricePerHour) {
@@ -519,37 +748,26 @@
             const hours = (selectedEndMin - selectedStartMin) / 60;
             const total = Math.round(pricePerHour * hours);
             document.getElementById("price-line-desc").textContent =
-                pricePerHour.toLocaleString("vi-VN") + " đ × " + (hours % 1 === 0 ? hours : hours.toFixed(1)) + " giờ";
+                pricePerHour.toLocaleString("vi-VN") + " đ × " +
+                (hours % 1 === 0 ? hours : hours.toFixed(1)) + " giờ";
             document.getElementById("price-line-amount").textContent = total.toLocaleString("vi-VN") + " đ";
-            document.getElementById("price-total").textContent = total.toLocaleString("vi-VN") + " đ";
+            document.getElementById("price-total").textContent       = total.toLocaleString("vi-VN") + " đ";
             breakdown.classList.remove("hidden");
             breakdown.classList.add("flex");
         }
 
+        // ── Overlap validation ─────────────────────────────────────────
         function checkSchedule() {
-            const dateVal = document.getElementById("ngayDat").value;
-            const startVal = document.getElementById("gioBatDau").value;
-            const endVal = document.getElementById("gioKetThuc").value;
-            const btnSubmit = document.getElementById("btn-submit-booking");
+            const btnSubmit  = document.getElementById("btn-submit-booking");
             const warningBox = document.getElementById("overlap-warning");
 
-            if (!startVal || !endVal) {
+            if (selectedStartMin === null || selectedEndMin === null) {
                 if (btnSubmit) btnSubmit.disabled = true;
                 warningBox.classList.add("hidden");
                 return;
             }
 
-            const startMin = timeToMinutes(startVal);
-            const endMin = timeToMinutes(endVal);
-            if (endMin <= startMin) { if (btnSubmit) btnSubmit.disabled = true; return; }
-
-            const conflicts = activeBookings.filter(b => b.date === dateVal);
-            const hasOverlap = conflicts.some(b => {
-                const bs = timeToMinutes(b.start), be = timeToMinutes(b.end);
-                return startMin < be && endMin > bs;
-            });
-
-            if (hasOverlap) {
+            if (hasRangeConflict(selectedStartMin, selectedEndMin)) {
                 warningBox.classList.remove("hidden");
                 if (btnSubmit) btnSubmit.disabled = true;
             } else {
@@ -558,8 +776,26 @@
             }
         }
 
-        // Init
-        renderTimeGrid();
+        // ── Payment method toggle ──────────────────────────────────────
+        function changePayMethod(method) {
+            const activeClass   = "pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all";
+            const inactiveClass = "pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all";
+            document.getElementById("lbl-opt-sau").className   = method === "sau"   ? activeClass : inactiveClass;
+            document.getElementById("lbl-opt-payos").className = method === "payos" ? activeClass : inactiveClass;
+        }
+
+        // ── Init ───────────────────────────────────────────────────────
+        updateDateUI();
+        renderTlLabels();
+        renderTimeline();
+
+        const tlBar = document.getElementById("tl-bar");
+        tlBar.addEventListener("mousedown",  onBarPointerDown);
+        tlBar.addEventListener("touchstart", onBarPointerDown, { passive: false });
+        document.addEventListener("mousemove",  onDocPointerMove);
+        document.addEventListener("mouseup",    onDocPointerUp);
+        document.addEventListener("touchmove",  onDocPointerMove, { passive: false });
+        document.addEventListener("touchend",   onDocPointerUp);
     </script>
 </body>
 </html>
