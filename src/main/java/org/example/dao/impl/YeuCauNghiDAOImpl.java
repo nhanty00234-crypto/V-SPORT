@@ -192,6 +192,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
                          "r.RoleName, " +
                          "ql.FullName AS QuanLyXuLy " +
                          "FROM V_YeuCauNghi_ChiTiet ycn " +
+                         "WHERE ycn.IsDeleted = 0 " +
                          "ORDER BY ycn.NgayNghi DESC";
 
             return em.createNativeQuery(sql, YeuCauNghi.class)
@@ -205,7 +206,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
     public List<YeuCauNghi> findByAccountID(int accountID) {
         EntityManager em = getEntityManager();
         try {
-            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE AccountID = ? ORDER BY NgayNghi DESC";
+            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE AccountID = ? AND IsDeleted = 0 ORDER BY NgayNghi DESC";
             return em.createNativeQuery(sql, YeuCauNghi.class)
                      .setParameter(1, accountID)
                      .getResultList();
@@ -218,7 +219,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
     public List<YeuCauNghi> findByCoSoIDAndTrangThai(int coSoID, String trangThai) {
         EntityManager em = getEntityManager();
         try {
-            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE CoSoID = ? AND TrangThai = ? ORDER BY NgayGui DESC";
+            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE CoSoID = ? AND TrangThai = ? AND IsDeleted = 0 ORDER BY NgayGui DESC";
             return em.createNativeQuery(sql, YeuCauNghi.class)
                      .setParameter(1, coSoID)
                      .setParameter(2, trangThai)
@@ -232,7 +233,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
     public List<YeuCauNghi> findByCoSoID(int coSoID) {
         EntityManager em = getEntityManager();
         try {
-            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE CoSoID = ? ORDER BY NgayNghi DESC";
+            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE CoSoID = ? AND IsDeleted = 0 ORDER BY NgayNghi DESC";
             return em.createNativeQuery(sql, YeuCauNghi.class)
                      .setParameter(1, coSoID)
                      .getResultList();
@@ -245,7 +246,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
     public List<YeuCauNghi> findByAccountIDAndTrangThai(int accountID, String trangThai) {
         EntityManager em = getEntityManager();
         try {
-            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE AccountID = ? AND TrangThai = ? ORDER BY NgayNghi DESC";
+            String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet WHERE AccountID = ? AND TrangThai = ? AND IsDeleted = 0 ORDER BY NgayNghi DESC";
             return em.createNativeQuery(sql, YeuCauNghi.class)
                      .setParameter(1, accountID)
                      .setParameter(2, trangThai)
@@ -306,7 +307,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
         EntityManager em = getEntityManager();
         try {
             String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet " +
-                         "WHERE AccountID = ? AND NgayNghi >= CAST(GETDATE() AS DATE) " +
+                         "WHERE AccountID = ? AND NgayNghi >= CAST(GETDATE() AS DATE) AND IsDeleted = 0 " +
                          "ORDER BY NgayNghi ASC";
             return em.createNativeQuery(sql, YeuCauNghi.class)
                      .setParameter(1, accountID)
