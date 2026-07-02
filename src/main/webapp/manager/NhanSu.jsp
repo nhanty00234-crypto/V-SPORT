@@ -377,7 +377,7 @@ body { font-family: 'Inter', sans-serif; }
         <!-- Search Input -->
         <div class="relative w-full sm:w-[220px]">
           <span class="material-symbols-outlined absolute left-3 top-2.5 text-zinc-400 text-[18px]">search</span>
-          <input type="text" id="scheduleSearchName" placeholder="Tìm tên nhân viên..." oninput="filterScheduleShifts()"
+          <input type="text" id="scheduleSearchName" autocomplete="off" placeholder="Tìm tên nhân viên..." oninput="filterScheduleShifts()"
                  class="h-9 w-full pl-9 pr-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
         </div>
 
@@ -1554,6 +1554,7 @@ async function loadScheduleData() {
                 roleId: s.roleId,
                 roleName: s.roleId == 4 ? 'Lễ tân' : (s.roleId == 5 ? 'Bảo vệ' : 'Nhân viên')
             })) : [];
+            populateScheduleStaffDropdown(null);
             renderScheduleTable();
             if (currentView === 'schedule') {
                 renderCalendar();

@@ -130,7 +130,7 @@
     <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-2.5 text-zinc-400 text-[18px]">search</span>
-        <input type="text" name="search" value="${search}" placeholder="Tìm theo tên, mã SKU..." class="w-full pl-9 pr-3 py-2 text-xs border border-purple-100 rounded-lg focus:outline-none focus:border-purple-500 bg-zinc-50/50">
+        <input type="text" name="search" value="${search}" autocomplete="off" placeholder="Tìm theo tên, mã SKU..." class="w-full pl-9 pr-3 py-2 text-xs border border-purple-100 rounded-lg focus:outline-none focus:border-purple-500 bg-zinc-50/50">
       </div>
       
       <div>

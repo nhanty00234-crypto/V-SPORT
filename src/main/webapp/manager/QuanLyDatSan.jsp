@@ -163,7 +163,7 @@
       <div class="px-5 py-4 border-b border-purple-50 flex flex-col lg:flex-row lg:items-center gap-3 bg-purple-50/10">
         <div class="relative flex-1 max-w-md">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-zinc-400">search</span>
-          <input type="text" id="searchInput" name="searchDatSan" autocomplete="off" data-lpignore="true" placeholder="Tìm theo tên khách, số điện thoại, tên sân..."
+          <input type="text" id="searchInput" autocomplete="off" placeholder="Tìm theo tên khách, số điện thoại, tên sân..."
                  class="h-10 w-full pl-10 pr-3 rounded-xl border border-purple-100 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
         </div>
         <div class="flex items-center gap-2">

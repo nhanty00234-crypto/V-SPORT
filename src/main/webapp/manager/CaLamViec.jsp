@@ -236,7 +236,7 @@
     <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
       <div class="relative w-full sm:w-[220px]">
         <span class="material-symbols-outlined absolute left-3 top-2.5 text-zinc-400 text-[18px]">search</span>
-        <input type="text" id="searchName" placeholder="Tìm tên nhân viên..." oninput="filterShifts()" 
+        <input type="text" id="searchName" autocomplete="off" placeholder="Tìm tên nhân viên..." oninput="filterShifts()"
                class="h-9 w-full pl-9 pr-3 rounded-lg border border-purple-100 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none">
       </div>
       

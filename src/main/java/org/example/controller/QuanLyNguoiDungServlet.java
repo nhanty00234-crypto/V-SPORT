@@ -204,6 +204,7 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                 }
             }
         } else if ("add".equals(action)) {
+            boolean isAjax = "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
             String username = req.getParameter("username");
             String email = req.getParameter("email");
             String phoneNumber = req.getParameter("phoneNumber");
@@ -213,38 +214,50 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             if (phoneNumber != null) phoneNumber = phoneNumber.trim();
 
             if (!org.example.util.ValidationUtil.isValidUsername(username)) {
-                req.getSession().setAttribute("error", "Tên đăng nhập không hợp lệ (3-50 ký tự, chỉ gồm chữ cái, số, gạch dưới và không chứa khoảng trắng)!");
+                String msg = "Tên đăng nhập không hợp lệ (3-50 ký tự, chỉ gồm chữ cái, số, gạch dưới và không chứa khoảng trắng)!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
 
             if (TaiKhoanDAO.kiemtraUsername(username)) {
-                req.getSession().setAttribute("error", "Tên đăng nhập đã tồn tại!");
+                String msg = "Tên đăng nhập đã tồn tại!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
 
             if (email == null || email.isEmpty()) {
-                req.getSession().setAttribute("error", "Email không được để trống!");
+                String msg = "Email không được để trống!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
 
             if (!org.example.util.ValidationUtil.isValidEmail(email)) {
-                req.getSession().setAttribute("error", "Định dạng Email không hợp lệ và không được chứa khoảng trắng!");
+                String msg = "Định dạng Email không hợp lệ và không được chứa khoảng trắng!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
 
             if (TaiKhoanDAO.kiemtraEmail(email)) {
-                req.getSession().setAttribute("error", "Email đã tồn tại!");
+                String msg = "Email đã tồn tại!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
 
             if (phoneNumber != null && !phoneNumber.isEmpty()) {
                 if (!org.example.util.ValidationUtil.isValidVNPhone(phoneNumber)) {
-                    req.getSession().setAttribute("error", "Định dạng Số điện thoại không hợp lệ (Phải bắt đầu bằng 0 hoặc +84 và có 10 số)!");
+                    String msg = "Định dạng Số điện thoại không hợp lệ (Phải bắt đầu bằng 0 hoặc +84 và có 10 số)!";
+                    if (isAjax) { sendJsonError(resp, msg); return; }
+                    req.getSession().setAttribute("error", msg);
                     resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                     return;
                 }
@@ -258,53 +271,59 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             newAcc.setFullName(fullName);
             newAcc.setEmail(email);
             newAcc.setPhoneNumber(phoneNumber);
-            
+
             int newRoleId = Integer.parseInt(req.getParameter("roleId"));
             // Prevent creating new Admin accounts
             if (newRoleId == 1) {
-                req.getSession().setAttribute("error", "Không được tạo tài khoản Quản trị viên!");
+                String msg = "Không được tạo tài khoản Quản trị viên!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
             newAcc.setRoleId(newRoleId);
-            
+
             String coSoIdStr = req.getParameter("coSoId");
             if (newRoleId == 2 && (coSoIdStr == null || coSoIdStr.isEmpty())) {
-                req.getSession().setAttribute("error", "Quản lý cần phải có Cơ sở!");
+                String msg = "Quản lý cần phải có Cơ sở!";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
                 resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 return;
             }
             if (coSoIdStr != null && !coSoIdStr.isEmpty()) {
                 newAcc.setCoSoId(Integer.parseInt(coSoIdStr));
             }
-            
+
             newAcc.setZaloId(req.getParameter("zaloId"));
             newAcc.setMessengerId(req.getParameter("messengerId"));
             newAcc.setMaNganHang(req.getParameter("maNganHang"));
             newAcc.setSoTaiKhoan(req.getParameter("soTaiKhoan"));
             newAcc.setViTriSoTruong(req.getParameter("viTriSoTruong"));
             newAcc.setGioiTinh(req.getParameter("gioiTinh"));
-            
+
             String ngaySinhStr = req.getParameter("ngaySinh");
             if (ngaySinhStr != null && !ngaySinhStr.isEmpty()) {
                 newAcc.setNgaySinh(org.example.util.ValidationUtils.parseDate(ngaySinhStr, "yyyy-MM-dd"));
             }
-            
+
             newAcc.setIsLocked(false);
-            
+
             String rawPassword = req.getParameter("password");
             if (rawPassword != null) rawPassword = rawPassword.trim();
             if (rawPassword == null || rawPassword.isEmpty()) {
                 rawPassword = generateRandomPassword();
             } else {
                 if (!org.example.util.ValidationUtil.isStrongPassword(rawPassword)) {
-                    req.getSession().setAttribute("error", "Mật khẩu do admin tạo phải có tối thiểu 8 ký tự, bao gồm cả chữ hoa, chữ thường, số và ký tự đặc biệt!");
+                    String msg = "Mật khẩu do admin tạo phải có tối thiểu 8 ký tự, bao gồm cả chữ hoa, chữ thường, số và ký tự đặc biệt!";
+                    if (isAjax) { sendJsonError(resp, msg); return; }
+                    req.getSession().setAttribute("error", msg);
                     resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                     return;
                 }
             }
             newAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12)));
-            
+
             // Generate OTP manually so we can send both OTP and password in one email
             java.util.Random random = new java.util.Random();
             int otp = random.nextInt(900000) + 100000;
@@ -312,10 +331,10 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             final String finalPassword = rawPassword;
             final String finalEmail = email;
             final String finalName = newAcc.getFullName();
-            
+
             new Thread(() -> {
                 try {
-                    org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT", 
+                    org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT",
                         "Chào " + finalName + ",\n\n" +
                         "Tài khoản nhân viên của bạn đã được khởi tạo bởi Quản trị viên.\n" +
                         "Mật khẩu của bạn là: " + finalPassword + "\n\n" +
@@ -324,13 +343,19 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                     logger.error("Lỗi gửi email kích hoạt đến: " + finalEmail, e);
                 }
             }).start();
-            
+
             req.getSession().setAttribute("otp", otpString);
             req.getSession().setAttribute("tempAccount", newAcc);
             req.getSession().setAttribute("authType", "ADMIN_ADD");
             req.getSession().setAttribute("otpAttempts", 0);
             req.getSession().setAttribute("resendCount", 0);
             req.getSession().setAttribute("needResend", false);
+
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"requiresOtp\": true, \"email\": \"" + email + "\"}");
+                return;
+            }
             req.setAttribute("email", email);
             req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
             return;
@@ -354,6 +379,12 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             return;
         }
         resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+    }
+
+    private void sendJsonError(HttpServletResponse resp, String message) throws java.io.IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        String escaped = message.replace("\\", "\\\\").replace("\"", "\\\"");
+        resp.getWriter().write("{\"success\": false, \"error\": \"" + escaped + "\"}");
     }
 
     private String generateRandomPassword() {

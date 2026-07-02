@@ -676,8 +676,10 @@ async function handleStaffSubmit(e) {
           document.getElementById('otpVerificationSection').classList.remove('hidden');
           document.querySelectorAll('.otp-box')[0].focus();
           pendingStaffParams = params;
+      } else if (data.success === false || data.error) {
+          alert(data.error || 'Đã xảy ra lỗi. Vui lòng thử lại.');
       } else {
-          // Success directly
+          // Success directly (update action)
           alert(data.message || 'Cập nhật tài khoản thành công!');
           window.location.reload();
       }

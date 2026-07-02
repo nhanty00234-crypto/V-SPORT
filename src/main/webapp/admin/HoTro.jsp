@@ -150,7 +150,7 @@
     <div class="p-4 border-b border-zinc-200 flex items-center justify-between gap-3">
       <div class="relative flex-1">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-zinc-400">search</span>
-        <input type="text" id="searchTickets" oninput="filterTickets(this.value)" placeholder="Tìm kiếm yêu cầu..." class="w-full h-9 pl-9 pr-3 rounded-lg border border-zinc-200 text-xs text-zinc-800 focus:border-blue-500 focus:outline-none transition-colors">
+        <input type="text" id="searchTickets" autocomplete="off" oninput="filterTickets(this.value)" placeholder="Tìm kiếm yêu cầu..." class="w-full h-9 pl-9 pr-3 rounded-lg border border-zinc-200 text-xs text-zinc-800 focus:border-blue-500 focus:outline-none transition-colors">
       </div>
       <button onclick="openNewTicketModal()" class="h-9 px-3.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold shadow-md shadow-blue-100 hover:opacity-95 transition-opacity flex items-center gap-1">
         <span class="material-symbols-outlined text-[16px]">add_circle</span>Yêu cầu mới

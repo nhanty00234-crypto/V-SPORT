@@ -121,8 +121,9 @@ public class CaLamValidationEngine {
             return new ValidationResult(errors, warnings);
         }
 
-        if (staff.getRoleId() != org.example.util.Constants.ROLE_STAFF) {
-            errors.add(new ValidationItem("INVALID_ROLE", "Nhân viên được phân ca phải là Staff (không được phân ca cho Manager hoặc Admin).", "accountId", staff.getRoleId()));
+        int roleId = staff.getRoleId();
+        if (roleId != Constants.ROLE_LE_TAN && roleId != Constants.ROLE_BAO_VE) {
+            errors.add(new ValidationItem("INVALID_ROLE", "Chỉ được phân ca cho Lễ tân hoặc Bảo vệ (không được phân ca cho Admin, Quản lý hoặc Khách hàng).", "accountId", roleId));
         }
 
         if (coSoId != null && staff.getCoSoId() != null && !staff.getCoSoId().equals(coSoId)) {

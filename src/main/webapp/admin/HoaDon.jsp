@@ -130,7 +130,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
       <div class="relative flex-1 max-w-xs">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
-        <input id="filterSearch" type="text" placeholder="Mã hóa đơn, tên khách..." class="h-9 w-full pl-8 pr-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
+        <input id="filterSearch" type="text" autocomplete="off" placeholder="Mã hóa đơn, tên khách..." class="h-9 w-full pl-8 pr-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
       </div>
       <input id="filterDate" type="date" class="h-9 px-3 rounded-lg border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400">
       <select id="filterType" class="h-9 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-400">
