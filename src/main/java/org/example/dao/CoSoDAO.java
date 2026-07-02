@@ -9,4 +9,11 @@ public interface CoSoDAO {
     boolean addCoSo(CoSo coSo);
     boolean updateCoSo(CoSo coSo);
     boolean deleteCoSo(int id);
+
+    // Soft-delete support (Task 5)
+    boolean softDelete(int coSoId, int actorId);
+    boolean restore(int coSoId);
+    boolean hardDeleteCascade(int coSoId);
+    List<CoSo> findDeleted();
+    List<Integer> findDeletedIdsOlderThan(int days);
 }

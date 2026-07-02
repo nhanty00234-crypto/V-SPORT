@@ -21,7 +21,7 @@ public class CoSoDAOImpl implements CoSoDAO {
     public List<CoSo> getAllCoSo() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT c FROM CoSo c", CoSo.class).getResultList();
+            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false", CoSo.class).getResultList();
         } finally {
             em.close();
         }
@@ -93,6 +93,82 @@ public class CoSoDAOImpl implements CoSoDAO {
 
     @Override
     public boolean deleteCoSo(int id) {
+        return hardDeleteCascade(id);
+    }
+
+    @Override
+    public boolean softDelete(int coSoId, int actorId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            int updated = em.createQuery(
+                    "UPDATE CoSo c SET c.isDeleted = true, c.deletedAt = :now, c.deletedBy = :actor " +
+                    "WHERE c.CoSoID = :id AND c.isDeleted = false")
+                .setParameter("now", java.time.LocalDateTime.now())
+                .setParameter("actor", actorId)
+                .setParameter("id", coSoId)
+                .executeUpdate();
+            trans.commit();
+            return updated > 0;
+        } catch (Exception e) {
+            if (trans.isActive()) trans.rollback();
+            logger.error("Lỗi soft-delete cơ sở ID {}: {}", coSoId, e.getMessage(), e);
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean restore(int coSoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            int updated = em.createQuery(
+                    "UPDATE CoSo c SET c.isDeleted = false, c.deletedAt = null, c.deletedBy = null " +
+                    "WHERE c.CoSoID = :id")
+                .setParameter("id", coSoId)
+                .executeUpdate();
+            trans.commit();
+            return updated > 0;
+        } catch (Exception e) {
+            if (trans.isActive()) trans.rollback();
+            logger.error("Lỗi restore cơ sở ID {}: {}", coSoId, e.getMessage(), e);
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<CoSo> findDeleted() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = true", CoSo.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Integer> findDeletedIdsOlderThan(int days) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusDays(days);
+            return em.createQuery(
+                    "SELECT c.CoSoID FROM CoSo c WHERE c.isDeleted = true AND c.deletedAt <= :cutoff",
+                    Integer.class)
+                .setParameter("cutoff", cutoff)
+                .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean hardDeleteCascade(int id) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         try {

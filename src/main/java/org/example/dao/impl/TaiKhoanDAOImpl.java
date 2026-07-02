@@ -99,14 +99,21 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
 
     @Override
     public boolean softDeleteAccount(int id) {
+        return softDeleteAccount(id, 0);
+    }
+
+    @Override
+    public boolean softDeleteAccount(int accountId, int actorId) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();
         try {
             trans.begin();
-            TaiKhoan acc = em.find(TaiKhoan.class, id);
+            TaiKhoan acc = em.find(TaiKhoan.class, accountId);
             if (acc != null) {
                 acc.setDeleted(true);
                 acc.setIsLocked(true);
+                acc.setDeletedAt(java.time.LocalDateTime.now());
+                acc.setDeletedBy(actorId == 0 ? null : actorId);
                 em.merge(acc);
                 trans.commit();
                 return true;
@@ -114,7 +121,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             trans.rollback();
             return false;
         } catch (Exception e) {
-            logger.error("Lỗi xóa mềm tài khoản ID {}: {}", id, e.getMessage(), e);
+            logger.error("Lỗi xóa mềm tài khoản ID {}: {}", accountId, e.getMessage(), e);
             if (trans.isActive()) trans.rollback();
             return false;
         } finally {
@@ -132,6 +139,8 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             if (acc != null) {
                 acc.setDeleted(false);
                 acc.setIsLocked(false);
+                acc.setDeletedAt(null);
+                acc.setDeletedBy(null);
                 em.merge(acc);
                 trans.commit();
                 return true;
@@ -142,6 +151,41 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             logger.error("Lỗi khôi phục tài khoản ID {}: {}", id, e.getMessage(), e);
             if (trans.isActive()) trans.rollback();
             return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<TaiKhoan> findDeletedByCoSo(int coSoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT a FROM TaiKhoan a WHERE a.isDeleted = true AND a.coSoId = :coSoId",
+                    TaiKhoan.class)
+                .setParameter("coSoId", coSoId)
+                .getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi lấy tài khoản đã xóa theo cơ sở ID {}: {}", coSoId, e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Integer> findDeletedIdsOlderThan(int days) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusDays(days);
+            return em.createQuery(
+                    "SELECT a.accountId FROM TaiKhoan a WHERE a.isDeleted = true AND a.deletedAt <= :cutoff",
+                    Integer.class)
+                .setParameter("cutoff", cutoff)
+                .getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi lấy ID tài khoản đã xóa cũ hơn {} ngày: {}", days, e.getMessage(), e);
+            return null;
         } finally {
             em.close();
         }

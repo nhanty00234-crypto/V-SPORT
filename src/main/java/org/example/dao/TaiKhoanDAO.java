@@ -28,8 +28,11 @@ public interface TaiKhoanDAO {
     boolean updateAccount(TaiKhoan TaiKhoan);
     boolean deleteAccount(int id);
     boolean softDeleteAccount(int id);
+    boolean softDeleteAccount(int accountId, int actorId);
     boolean restoreAccount(int id);
     boolean permanentDeleteAccount(int id);
+    List<TaiKhoan> findDeletedByCoSo(int coSoId);
+    List<Integer> findDeletedIdsOlderThan(int days);
     boolean addAccountByAdmin(TaiKhoan TaiKhoan);
 
     // Manager operations
