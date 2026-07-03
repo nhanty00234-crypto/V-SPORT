@@ -51,6 +51,10 @@
           class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
           <span class="material-symbols-outlined text-[19px]">face</span>Quản lý khách hàng
         </a>
+        <a href="${pageContext.request.contextPath}/manager/thung-rac"
+          class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac.jsp') ? 'active' : ''}">
+          <span class="material-symbols-outlined text-[19px]">delete</span>Thùng rác
+        </a>
       </nav>
 
       <div class="px-3 py-3 border-t border-purple-50">
@@ -179,4 +183,110 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function() { initSidebar(); init24hTime(); });
   else { initSidebar(); init24hTime(); }
 })();
+</script>
+
+<!-- Reusable Custom Delete Confirmation Modal -->
+<div id="customConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300" onclick="closeCustomConfirm()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 text-center transform scale-95 transition-all duration-300 border border-purple-100">
+    <div class="w-14 h-14 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-[28px] text-purple-600">delete</span>
+    </div>
+    <h3 class="text-base font-bold text-purple-955 mb-2">Xác nhận xóa</h3>
+    <p class="text-xs text-purple-650/80 mb-6 leading-relaxed px-2" id="customConfirmMessage">Bạn có chắc chắn muốn xóa mục này?</p>
+    <div class="flex gap-3 justify-center">
+      <button onclick="closeCustomConfirm()" class="flex-1 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold transition-all">
+        Hủy bỏ
+      </button>
+      <button id="customConfirmSubmitBtn" class="flex-1 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold transition-all shadow-md shadow-purple-200">
+        Xác nhận xóa
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let customConfirmCallback = null;
+
+  function showCustomConfirm(message, callback) {
+      document.getElementById('customConfirmMessage').textContent = message;
+      customConfirmCallback = callback;
+      const modal = document.getElementById('customConfirmModal');
+      modal.classList.remove('hidden');
+      const box = modal.querySelector('.relative');
+      setTimeout(() => {
+          box.classList.remove('scale-95');
+          box.classList.add('scale-100');
+      }, 10);
+  }
+
+  function closeCustomConfirm() {
+      const modal = document.getElementById('customConfirmModal');
+      if (!modal) return;
+      const box = modal.querySelector('.relative');
+      box.classList.remove('scale-100');
+      box.classList.add('scale-95');
+      setTimeout(() => {
+          modal.classList.add('hidden');
+      }, 150);
+  }
+
+  function showToast(message, type = 'success') {
+      let container = document.getElementById('global-toast-container');
+      if (!container) {
+          container = document.createElement('div');
+          container.id = 'global-toast-container';
+          container.className = 'fixed bottom-5 right-5 z-[200] flex flex-col gap-2 max-w-sm w-full';
+          document.body.appendChild(container);
+      }
+      
+      const toast = document.createElement('div');
+      toast.className = 'p-4 rounded-xl shadow-lg border text-xs font-semibold flex items-center gap-3 transition-all duration-300 transform translate-y-2 opacity-0';
+      
+      let bg = 'bg-white border-purple-100 text-purple-900';
+      let icon = 'info';
+      let iconColor = 'text-purple-600';
+      
+      if (type === 'success') {
+          bg = 'bg-purple-50 border-purple-150 text-purple-900';
+          icon = 'check_circle';
+          iconColor = 'text-purple-600';
+      } else if (type === 'error') {
+          bg = 'bg-red-50 border-red-150 text-red-900';
+          icon = 'error';
+          iconColor = 'text-red-600';
+      }
+      
+      toast.className += ' ' + bg;
+      
+      toast.innerHTML = `
+          <span class="material-symbols-outlined ` + iconColor + ` text-[20px] shrink-0">` + icon + `</span>
+          <div class="flex-1">` + message + `</div>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+          toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+      
+      setTimeout(() => {
+          toast.classList.add('translate-y-2', 'opacity-0');
+          setTimeout(() => {
+              toast.remove();
+          }, 300);
+      }, 4000);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const submitBtn = document.getElementById('customConfirmSubmitBtn');
+      if (submitBtn) {
+          submitBtn.addEventListener('click', () => {
+              if (customConfirmCallback) {
+                  customConfirmCallback();
+              }
+              closeCustomConfirm();
+          });
+      }
+  });
 </script>

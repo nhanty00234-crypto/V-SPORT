@@ -321,19 +321,14 @@ public class SanService {
         BranchSecurityUtils.getEntityOrThrow(san, "Sân");
         BranchSecurityUtils.checkBranchAccess(san.getCoSoID(), managerCoSoId);
 
-        // Check if court type has any other courts
-        Long courtCount = sanDAO.countSansByLoaiSanId(san.getLoaiSanID());
-        if (courtCount > 0) {
-            throw new IllegalArgumentException(
-                "Không thể xóa loại sân này vì đang có " + courtCount + " sân liên kết với nó"
-            );
-        }
-
         checkActiveBookingsForStatusChange(sanId, Constants.TRANG_THAI_SAN_TAM_DONG);
 
-        san.setTrangThai(Constants.TRANG_THAI_SAN_TAM_DONG);
-        sanDAO.update(san);
+        boolean success = sanDAO.softDelete(sanId, 0);
+        if (!success) {
+            throw new RuntimeException("Không thể thực hiện xóa mềm sân thi đấu.");
+        }
     }
+
 
     /**
      * Cập nhật trạng thái sân
@@ -397,7 +392,7 @@ public class SanService {
         BranchSecurityUtils.getEntityOrThrow(ls, "Loại sân");
         BranchSecurityUtils.checkBranchAccess(ls.getCoSoID(), managerCoSoId);
 
-        // Check if any courts use this type
+        // Check if any active courts use this type
         Long courtCount = sanDAO.countSansByLoaiSanId(loaiSanId);
         if (courtCount > 0) {
             throw new IllegalArgumentException(
@@ -405,7 +400,10 @@ public class SanService {
             );
         }
 
-        loaiSanDAO.hardDelete(loaiSanId);
+        boolean success = loaiSanDAO.softDelete(loaiSanId, 0);
+        if (!success) {
+            throw new RuntimeException("Không thể thực hiện xóa mềm loại sân.");
+        }
     }
 
     // ==================== VALIDATION HELPERS ====================

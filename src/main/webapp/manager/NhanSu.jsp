@@ -131,9 +131,6 @@ body { font-family: 'Inter', sans-serif; }
     <div class="flex items-center justify-between gap-4 mb-2">
       <h2 class="text-lg font-bold text-violet-950">Danh sách nhân viên <span class="text-xs bg-violet-100 px-1.5 py-0.5 rounded font-semibold text-violet-700" id="staffCountDisplay">0</span></h2>
       <div class="flex gap-2">
-        <button onclick="openTrashBinModal()" class="flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-semibold transition-all border border-zinc-200">
-          <span class="material-symbols-outlined text-[18px]">delete</span>Thùng rác
-        </button>
         <button onclick="openAddStaff()" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all shadow-md shadow-violet-100">
           <span class="material-symbols-outlined text-[18px]">person_add</span>Thêm nhân viên
         </button>
@@ -776,38 +773,7 @@ body { font-family: 'Inter', sans-serif; }
   </div>
 </div>
 
-<!-- Trash Bin Modal -->
-<div id="trashBinModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeTrashBinModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[640px]">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-violet-50">
-      <h2 class="text-base font-semibold text-violet-950 flex items-center gap-2">
-        <span class="material-symbols-outlined text-[20px] text-zinc-500">delete</span>
-        Thùng rác nhân viên
-      </h2>
-      <button onclick="closeTrashBinModal()" class="p-1.5 rounded-lg hover:bg-violet-50"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
-    </div>
-    <div class="px-6 py-4 max-h-[400px] overflow-y-auto">
-      <table class="w-full text-sm">
-        <thead class="bg-zinc-50 border-b border-zinc-100">
-          <tr>
-            <th class="px-3 py-2.5 text-left font-semibold text-zinc-700 text-xs">Thành viên</th>
-            <th class="px-3 py-2.5 text-left font-semibold text-zinc-700 text-xs">Vai trò</th>
-            <th class="px-3 py-2.5 text-left font-semibold text-zinc-700 text-xs">Điện thoại</th>
-            <th class="px-3 py-2.5 class text-right font-semibold text-zinc-700 text-xs">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody id="trashBinBody" class="divide-y divide-zinc-50">
-          <!-- Populated by JS -->
-        </tbody>
-      </table>
-      <div id="trashBinEmptyState" class="hidden flex flex-col items-center justify-center py-8 text-center">
-        <span class="material-symbols-outlined text-[36px] text-zinc-350 mb-1">delete_outline</span>
-        <p class="text-zinc-500 text-xs font-medium">Thùng rác trống</p>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <script>
 // Context path initialized server-side (avoids JSP EL conflicts inside JS template literals)
@@ -1280,8 +1246,9 @@ async function submitOtpVerification() {
     }
 }
 
-async function deleteStaff(id) {
-    if (confirm("Xóa nhân viên này? Nhân viên sẽ bị xóa mềm và đưa vào thùng rác.")) {
+function deleteStaff(id) {
+    showCustomConfirm("Bạn có chắc chắn muốn xóa nhân viên này? Nhân viên sẽ được chuyển vào Thùng rác.", async () => {
+        showToast("Đang thực hiện xóa... Bạn có thể vào Thùng rác để khôi phục.", "success");
         const params = new URLSearchParams();
         params.append('action', 'delete');
         params.append('id', id);
@@ -1294,123 +1261,17 @@ async function deleteStaff(id) {
                 },
                 body: params
             });
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                window.location.reload();
-            }
+            setTimeout(() => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.reload();
+                }
+            }, 1200);
         } catch (error) {
             console.error('Error deleting staff:', error);
         }
-    }
-}
-
-function openTrashBinModal() {
-    document.getElementById('trashBinModal').classList.remove('hidden');
-    loadDeletedStaffList();
-}
-
-function closeTrashBinModal() {
-    document.getElementById('trashBinModal').classList.add('hidden');
-}
-
-async function loadDeletedStaffList() {
-    try {
-        const response = await fetch(_ctxPath + '/manager/nhan-su?action=deletedList');
-        if (response.ok) {
-            const list = await response.json();
-            renderDeletedStaff(list);
-        } else {
-            console.error('Failed to load deleted staff list');
-        }
-    } catch (error) {
-        console.error('Error loading deleted staff:', error);
-    }
-}
-
-function renderDeletedStaff(list) {
-    const body = document.getElementById('trashBinBody');
-    const emptyState = document.getElementById('trashBinEmptyState');
-    if (!body) return;
-
-    if (list.length === 0) {
-        body.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-    }
-    emptyState.classList.add('hidden');
-
-    body.innerHTML = list.map(s => `
-        <tr class="hover:bg-zinc-50 transition-colors">
-            <td class="px-3 py-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-full bg-zinc-100 text-zinc-650 flex items-center justify-center font-bold text-xs shrink-0">\${s.initial}</div>
-                    <div>
-                        <p class="font-semibold text-zinc-800">\${s.name}</p>
-                        <p class="text-[10px] text-zinc-400">\${s.username}</p>
-                    </div>
-                </div>
-            </td>
-            <td class="px-3 py-3 text-xs font-medium text-zinc-600">\${s.VaiTro}</td>
-            <td class="px-3 py-3 text-xs text-zinc-500">\${s.phone}</td>
-            <td class="px-3 py-3 text-right flex items-center justify-end gap-2">
-                <button onclick="restoreStaff('\${s.id}')" title="Khôi phục" class="px-2.5 py-1 text-[11px] font-bold text-green-750 bg-green-50 hover:bg-green-100 rounded-lg transition-all">
-                    Khôi phục
-                </button>
-                <button onclick="permanentDeleteStaff('\${s.id}')" title="Xác nhận xóa" class="px-2.5 py-1 text-[11px] font-bold text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-all">
-                    Xác nhận xóa
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-async function restoreStaff(id) {
-    if (!confirm("Bạn có chắc chắn muốn khôi phục nhân viên này?")) return;
-    const params = new URLSearchParams();
-    params.append('action', 'restore');
-    params.append('id', id);
-
-    try {
-        const response = await fetch(_ctxPath + '/manager/nhan-su', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: params
-        });
-        if (response.redirected) {
-            window.location.href = response.url;
-        } else {
-            window.location.reload();
-        }
-    } catch (error) {
-        console.error('Error restoring staff:', error);
-    }
-}
-
-async function permanentDeleteStaff(id) {
-    if (!confirm("Bạn có chắc chắn muốn XÓA VĨNH VIỄN nhân viên này? Lịch sử ca làm việc và các dữ liệu liên quan sẽ bị xóa sạch và không thể khôi phục.")) return;
-    const params = new URLSearchParams();
-    params.append('action', 'permanentDelete');
-    params.append('id', id);
-
-    try {
-        const response = await fetch(_ctxPath + '/manager/nhan-su', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: params
-        });
-        if (response.redirected) {
-            window.location.href = response.url;
-        } else {
-            window.location.reload();
-        }
-    } catch (error) {
-        console.error('Error permanently deleting staff:', error);
-    }
+    });
 }
 
 async function toggleLock(id, currentlyActive) {

@@ -263,49 +263,162 @@
     <div class="flex items-center justify-between px-6 py-4 border-b border-purple-50">
       <div>
         <h2 id="courtModalTitle" class="text-base font-bold text-purple-950 font-sans">Thêm sân mới</h2>
-        <p class="text-xs text-purple-500 mt-0.5">Tạo sân thi đấu mới cho chi nhánh</p>
+        <p id="courtModalSubtitle" class="text-xs text-purple-500 mt-0.5">Tạo sân thi đấu mới cho chi nhánh</p>
       </div>
       <button onclick="closeCourtModal()" class="p-1.5 rounded-lg hover:bg-purple-50"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
     </div>
-    <form id="courtForm" class="px-6 py-4 flex flex-col gap-4" method="POST" action="${pageContext.request.contextPath}/manager/quan-ly-san">
+
+    <!-- Banner: chưa có loại sân -->
+    <div id="courtNoTypesBanner" class="hidden mx-6 mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+      <span class="material-symbols-outlined text-[20px] text-amber-500 mt-0.5 shrink-0">warning</span>
+      <div>
+        <p class="text-sm font-semibold text-amber-800">Chưa có loại sân nào</p>
+        <p class="text-xs text-amber-700 mt-0.5">Cần tạo ít nhất một loại sân trước khi thêm sân thi đấu.</p>
+        <button type="button" onclick="closeCourtModal(); switchTab('types')"
+                class="mt-2 text-xs font-bold text-amber-700 underline underline-offset-2">
+          → Đến tab Cấu hình loại sân &amp; Bảng giá
+        </button>
+      </div>
+    </div>
+
+    <form id="courtForm" class="px-6 py-4 flex flex-col gap-4" method="POST" action="${pageContext.request.contextPath}/manager/quan-ly-san" novalidate>
       <input type="hidden" name="action" id="courtAction" value="add">
       <input type="hidden" name="sanID" id="courtEditId">
-      
+
+      <!-- Tên sân -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-purple-900">Tên sân *</label>
-        <input type="text" name="tenSan" id="courtName" required placeholder="Tên hiển thị (VD: Sân Bóng Đá 1)" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+        <input type="text" name="tenSan" id="courtName"
+               placeholder="Tên hiển thị (VD: Sân Bóng Đá 1)"
+               oninput="courtNameEdited = true; clearFieldError('courtName'); updateBulkNamePreview(); updateCardPreview()"
+               class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors">
+        <span id="err-courtName" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtName-msg"></span>
+        </span>
       </div>
 
+      <!-- Loại sân -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Loại cấu hình sân *</label>
-        <select name="loaiSanID" id="courtTypeSelect" required class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
-          <!-- Populated dynamically -->
+        <label class="text-xs font-semibold text-purple-900">Loại sân &amp; Bảng giá *</label>
+        <select name="loaiSanID" id="courtTypeSelect"
+                onchange="onCourtTypeChange(); clearFieldError('courtTypeSelect')"
+                class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors">
         </select>
+        <span id="err-courtTypeSelect" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtTypeSelect-msg"></span>
+        </span>
       </div>
 
+      <!-- Preview cấu hình loại sân -->
+      <div id="courtTypePreview" class="hidden flex flex-col gap-2 rounded-2xl border border-purple-100 bg-purple-50/60 px-4 py-3">
+        <p class="text-xs font-bold text-purple-800 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">info</span>
+          Cấu hình loại sân đã chọn
+        </p>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">Môn thể thao</span>
+            <span id="previewSport" class="text-sm font-semibold text-purple-900">—</span>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">Tên loại sân</span>
+            <span id="previewTypeName" class="text-sm font-semibold text-purple-900">—</span>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">Giá không đèn</span>
+            <span id="previewPriceNoLight" class="text-sm font-bold text-emerald-700">—</span>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">Giá có đèn</span>
+            <span id="previewPriceWithLight" class="text-sm font-bold text-amber-700">—</span>
+          </div>
+          <div id="previewLightWrap" class="col-span-2 flex flex-col gap-0.5">
+            <span class="text-[10px] font-semibold text-purple-500 uppercase tracking-wide">Giờ bật đèn</span>
+            <span id="previewLightHours" class="text-sm font-semibold text-purple-900">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Số lượng sân (chỉ khi tạo mới) -->
+      <div id="courtQtyWrap" class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-purple-900">Số lượng sân cần tạo</label>
+        <div class="flex items-center gap-3">
+          <input type="number" name="soLuong" id="courtQty" value="1" min="1" max="10"
+                 oninput="clearFieldError('courtQty'); updateBulkNamePreview()"
+                 class="h-10 w-20 px-3 rounded-xl border border-purple-200 text-sm text-center font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          <p class="text-xs text-zinc-500">sân (tối đa 10)</p>
+        </div>
+        <span id="err-courtQty" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtQty-msg"></span>
+        </span>
+        <p id="bulkNamePreview" class="hidden text-xs text-sky-700 bg-sky-50 border border-sky-100 rounded-xl px-3 py-2 leading-relaxed"></p>
+      </div>
+
+      <!-- Trạng thái sân -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-purple-900">Trạng thái sân *</label>
-        <select name="trangThai" id="courtStatus" required class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
-          <option value="Sẵn sàng">Sẵn sàng</option>
-          <option value="Đang dùng">Đang dùng</option>
-          <option value="Bảo trì">Bảo trì</option>
-          <option value="Tạm đóng">Tạm đóng</option>
+        <select name="trangThai" id="courtStatus" onchange="updateCardPreview()"
+                class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          <!-- Populated by JS depending on create/edit mode -->
         </select>
       </div>
 
+      <!-- Mô tả -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-purple-900">Mô tả chi tiết</label>
-        <textarea name="moTa" id="courtDesc" rows="3" placeholder="Sân cỏ nhân tạo chất lượng cao, lưới bao đầy đủ..." class="px-3 py-2 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 resize-none"></textarea>
+        <textarea name="moTa" id="courtDesc" rows="3"
+                  placeholder="Sân cỏ nhân tạo chất lượng cao, lưới bao đầy đủ..."
+                  class="px-3 py-2 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 resize-none"></textarea>
       </div>
 
+      <!-- Ảnh sân -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Link ảnh sân (Tùy chọn)</label>
-        <input type="text" name="hinhAnh" id="courtImage" placeholder="https://unsplash.com/..." class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+        <label class="text-xs font-semibold text-purple-900">
+          Link ảnh sân <span class="font-normal text-zinc-400">(Tùy chọn)</span>
+        </label>
+        <input type="text" name="hinhAnh" id="courtImage"
+               placeholder="https://unsplash.com/..."
+               oninput="updateImagePreview(); updateCardPreview()"
+               class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+        <div id="courtImagePreviewWrap" class="hidden rounded-xl overflow-hidden border border-purple-100 bg-zinc-50" style="height:130px">
+          <img id="courtImagePreview" src="" alt="preview" class="w-full h-full object-cover"
+               onload="document.getElementById('courtImageError').classList.add('hidden')"
+               onerror="document.getElementById('courtImageError').classList.remove('hidden')">
+          <div id="courtImageError" class="hidden absolute inset-0 flex items-center justify-center bg-red-50">
+            <div class="flex flex-col items-center gap-1 text-red-400">
+              <span class="material-symbols-outlined text-[28px]">broken_image</span>
+              <span class="text-[11px] font-semibold">URL ảnh không hợp lệ</span>
+            </div>
+          </div>
+        </div>
       </div>
-      
+
+      <!-- Mini-card preview: sân sẽ hiển thị như thế nào -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-purple-900 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">visibility</span>Xem trước hiển thị
+        </label>
+        <div class="rounded-2xl border border-purple-100 overflow-hidden bg-white shadow-sm">
+          <div class="relative h-24 bg-zinc-100">
+            <img id="cardPrevImg" src="" alt="" class="w-full h-full object-cover">
+            <span id="cardPrevStatus" class="absolute top-2 right-2 badge badge-green text-[10px]">Sẵn sàng</span>
+            <span id="cardPrevSport" class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-bold text-white uppercase">—</span>
+          </div>
+          <div class="p-3">
+            <h4 id="cardPrevName" class="font-bold text-purple-950 text-sm">Tên sân...</h4>
+            <p id="cardPrevType" class="text-[10px] text-purple-500 font-semibold mt-0.5">Loại sân</p>
+            <div class="flex justify-between text-[11px] text-zinc-500 mt-1.5">
+              <span>Giá ngày / tối:</span>
+              <span id="cardPrevPrice" class="font-bold text-zinc-800">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="flex justify-end gap-2 pt-3 border-t border-purple-50">
         <button type="button" onclick="closeCourtModal()" class="h-10 px-4 rounded-xl border border-purple-200 text-sm font-semibold text-purple-700 hover:bg-purple-50">Hủy</button>
-        <button type="submit" id="saveCourtBtn" class="h-10 px-5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 shadow shadow-purple-200">Lưu lại</button>
+        <button type="button" onclick="submitCourtForm()" id="saveCourtBtn"
+                class="h-10 px-5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 shadow shadow-purple-200">Lưu lại</button>
       </div>
     </form>
   </div>
@@ -506,16 +619,203 @@
     });
   }
 
-  function populateCourtTypeDropdown() {
+  function populateCourtTypeDropdown(selectedId) {
     const select = document.getElementById('courtTypeSelect');
     if (!select) return;
-    select.innerHTML = '';
+    select.innerHTML = '<option value="">-- Chọn loại sân --</option>';
     mockLoaiSan.forEach(t => {
       const opt = document.createElement('option');
       opt.value = t.id;
       opt.textContent = t.name;
       select.appendChild(opt);
     });
+    if (selectedId) {
+      select.value = selectedId;
+    } else if (mockLoaiSan.length > 0) {
+      select.value = mockLoaiSan[0].id;
+    }
+    onCourtTypeChange();
+  }
+
+  function onCourtTypeChange() {
+    const select = document.getElementById('courtTypeSelect');
+    const preview = document.getElementById('courtTypePreview');
+    const typeId = parseInt(select.value);
+    const type = mockLoaiSan.find(t => t.id === typeId);
+    if (!type) { preview.classList.add('hidden'); return; }
+
+    const sport = mockSports.find(s => s.id === type.sportId);
+    const fmt = v => Number(v).toLocaleString('vi-VN') + ' đ/giờ';
+
+    document.getElementById('previewSport').textContent = sport ? sport.name : '—';
+    document.getElementById('previewTypeName').textContent = type.name || '—';
+    document.getElementById('previewPriceNoLight').textContent = fmt(type.priceNoLight);
+    document.getElementById('previewPriceWithLight').textContent = fmt(type.priceWithLight);
+
+    const lightWrap = document.getElementById('previewLightWrap');
+    if (type.lightStart && type.lightEnd) {
+      document.getElementById('previewLightHours').textContent = type.lightStart + ' – ' + type.lightEnd;
+      lightWrap.classList.remove('hidden');
+    } else {
+      lightWrap.classList.add('hidden');
+    }
+    preview.classList.remove('hidden');
+
+    // Gợi ý tên tự động (chỉ khi tạo mới và manager chưa tự gõ tên)
+    if (document.getElementById('courtAction').value === 'add' && !courtNameEdited) {
+      document.getElementById('courtName').value = suggestCourtName(type);
+      updateBulkNamePreview();
+    }
+    updateCardPreview();
+  }
+
+  // Đề xuất tên dựa trên số sân cùng loại đang có: "Sân Bóng Đá 5 người" -> "Sân Bóng Đá 5 người - Sân 3"
+  function suggestCourtName(type) {
+    const countSameType = mockSan.filter(s => s.typeId === type.id).length;
+    return type.name + ' - Sân ' + (countSameType + 1);
+  }
+
+  // Preview danh sách tên khi tạo nhiều sân
+  let courtNameEdited = false;
+  function updateBulkNamePreview() {
+    const el = document.getElementById('bulkNamePreview');
+    const qty = parseInt(document.getElementById('courtQty').value) || 1;
+    const baseName = document.getElementById('courtName').value.trim();
+    if (qty <= 1 || !baseName || document.getElementById('courtAction').value !== 'add') {
+      el.classList.add('hidden');
+      return;
+    }
+    const shown = Math.min(qty, 3);
+    let names = [];
+    for (let i = 1; i <= shown; i++) names.push('<b>' + escapeHtml(baseName) + ' ' + i + '</b>');
+    let text = 'Sẽ tạo ' + qty + ' sân: ' + names.join(', ');
+    if (qty > shown) text += ' ... đến <b>' + escapeHtml(baseName) + ' ' + qty + '</b>';
+    el.innerHTML = text;
+    el.classList.remove('hidden');
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // Mini-card preview: mô phỏng card sân trên danh sách
+  function updateCardPreview() {
+    const name = document.getElementById('courtName').value.trim();
+    const typeId = parseInt(document.getElementById('courtTypeSelect').value);
+    const type = mockLoaiSan.find(t => t.id === typeId) || {};
+    const sport = mockSports.find(s => s.id === type.sportId) || {};
+    const status = document.getElementById('courtStatus').value || 'Sẵn sàng';
+    const imgUrl = document.getElementById('courtImage').value.trim();
+
+    document.getElementById('cardPrevName').textContent = name || 'Tên sân...';
+    document.getElementById('cardPrevType').textContent = type.name || 'Loại sân';
+    document.getElementById('cardPrevSport').textContent = sport.name || '—';
+
+    const priceEl = document.getElementById('cardPrevPrice');
+    priceEl.textContent = (type.priceNoLight != null)
+      ? formatCurrency(type.priceNoLight) + ' / ' + formatCurrency(type.priceWithLight)
+      : '—';
+
+    const statusEl = document.getElementById('cardPrevStatus');
+    statusEl.textContent = status;
+    statusEl.className = 'absolute top-2 right-2 badge text-[10px] ' +
+      (status === 'Sẵn sàng' ? 'badge-green' : status === 'Đang dùng' ? 'badge-blue' : status === 'Bảo trì' ? 'badge-amber' : 'badge-red');
+
+    const defaultImg = sportImages[type.sportId] || sportImages[1];
+    document.getElementById('cardPrevImg').src = imgUrl || defaultImg;
+  }
+
+  // Nhân bản sân: mở modal tạo mới với dữ liệu copy từ sân gốc
+  function duplicateCourt(id) {
+    const c = mockSan.find(x => x.id === id);
+    if (!c) return;
+
+    openCreateModal();
+    document.getElementById('courtModalTitle').textContent = 'Nhân bản sân thi đấu';
+    document.getElementById('courtModalSubtitle').textContent = 'Sao chép cấu hình từ "' + c.name + '" — chỉ cần đổi tên';
+
+    document.getElementById('courtTypeSelect').value = c.typeId;
+    document.getElementById('courtDesc').value = c.desc || '';
+    document.getElementById('courtImage').value = c.image || '';
+    updateImagePreview();
+
+    // Tên gợi ý theo loại sân của sân gốc, cho phép manager sửa
+    courtNameEdited = false;
+    onCourtTypeChange();
+    document.getElementById('courtName').focus();
+    document.getElementById('courtName').select();
+  }
+
+  // Inline validation helpers
+  function showFieldError(fieldId, msg) {
+    const el = document.getElementById(fieldId);
+    if (el) el.classList.add('!border-red-400');
+    const errWrap = document.getElementById('err-' + fieldId);
+    const errMsg = document.getElementById('err-' + fieldId + '-msg');
+    if (errWrap) errWrap.classList.remove('hidden');
+    if (errMsg) errMsg.textContent = msg;
+  }
+  function clearFieldError(fieldId) {
+    const el = document.getElementById(fieldId);
+    if (el) el.classList.remove('!border-red-400');
+    const errWrap = document.getElementById('err-' + fieldId);
+    if (errWrap) errWrap.classList.add('hidden');
+  }
+
+  // Image preview
+  function updateImagePreview() {
+    const url = document.getElementById('courtImage').value.trim();
+    const wrap = document.getElementById('courtImagePreviewWrap');
+    const img = document.getElementById('courtImagePreview');
+    const errDiv = document.getElementById('courtImageError');
+    if (!url) { wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    errDiv.classList.add('hidden');
+    img.src = url;
+  }
+
+  // Status options per mode
+  function setStatusOptions(isEdit, currentStatus) {
+    const sel = document.getElementById('courtStatus');
+    sel.innerHTML = '';
+    const createOpts = [{ v: 'Sẵn sàng', l: 'Sẵn sàng' }, { v: 'Tạm đóng', l: 'Tạm đóng (chưa khai thác)' }];
+    const editOpts = [
+      { v: 'Sẵn sàng', l: 'Sẵn sàng' }, { v: 'Đang dùng', l: 'Đang dùng' },
+      { v: 'Bảo trì', l: 'Bảo trì' }, { v: 'Tạm đóng', l: 'Tạm đóng' }
+    ];
+    (isEdit ? editOpts : createOpts).forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.v; opt.textContent = o.l;
+      sel.appendChild(opt);
+    });
+    if (currentStatus) sel.value = currentStatus;
+  }
+
+  // Form validation + submit
+  function submitCourtForm() {
+    let valid = true;
+    const name = document.getElementById('courtName').value.trim();
+    const typeVal = document.getElementById('courtTypeSelect').value;
+    const isAdd = document.getElementById('courtAction').value === 'add';
+
+    clearFieldError('courtName'); clearFieldError('courtTypeSelect'); clearFieldError('courtQty');
+
+    if (!name) { showFieldError('courtName', 'Tên sân không được để trống'); valid = false; }
+    if (!typeVal) { showFieldError('courtTypeSelect', 'Vui lòng chọn loại sân'); valid = false; }
+
+    if (isAdd) {
+      const qtyRaw = document.getElementById('courtQty').value.trim();
+      const qty = Number(qtyRaw);
+      if (!qtyRaw || !Number.isInteger(qty) || qty < 1 || qty > 10) {
+        showFieldError('courtQty', 'Số lượng phải là số nguyên từ 1 đến 10');
+        valid = false;
+      }
+    }
+
+    if (!valid) return;
+    document.getElementById('courtForm').submit();
   }
 
   // TAB SWITCHING
@@ -635,6 +935,9 @@
               <button onclick="openEditModal(\${c.id})" class="flex-1 h-8 text-[11px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg flex items-center justify-center gap-1 transition-colors">
                 <span class="material-symbols-outlined text-[13px]">edit</span>Sửa
               </button>
+              <button onclick="duplicateCourt(\${c.id})" class="h-8 w-8 text-sky-600 hover:bg-sky-50 rounded-lg flex items-center justify-center transition-colors" title="Nhân bản sân này">
+                <span class="material-symbols-outlined text-[15px]">content_copy</span>
+              </button>
               <button onclick="openPriceConfigModal(\${c.id})" class="flex-1 h-8 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center justify-center gap-1 transition-colors">
                 <span class="material-symbols-outlined text-[13px]">payments</span>Cấu hình giá
               </button>
@@ -680,6 +983,7 @@
             <div class="flex items-center justify-end gap-1">
               <button onclick="openPriceConfigModal(\${c.id})" class="p-1 hover:bg-emerald-50 text-emerald-700 rounded-lg transition-colors" title="Cấu hình giá"><span class="material-symbols-outlined text-[16px]">payments</span></button>
               <button onclick="openEditModal(\${c.id})" class="p-1 hover:bg-purple-50 text-purple-700 rounded-lg transition-colors" title="Chỉnh sửa"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+              <button onclick="duplicateCourt(\${c.id})" class="p-1 hover:bg-sky-50 text-sky-600 rounded-lg transition-colors" title="Nhân bản sân"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
               <button onclick="deleteCourt(\${c.id})" class="p-1 hover:bg-red-50 text-red-500 rounded-lg transition-colors" title="Xóa"><span class="material-symbols-outlined text-[16px]">delete</span></button>
             </div>
           </td>
@@ -754,10 +1058,27 @@
   // COURT MODAL ACTIONS
   function openCreateModal() {
     document.getElementById('courtForm').reset();
+    courtNameEdited = false;
+    document.getElementById('bulkNamePreview').classList.add('hidden');
+    clearFieldError('courtName'); clearFieldError('courtTypeSelect'); clearFieldError('courtQty');
     document.getElementById('courtModalTitle').textContent = 'Thêm sân thi đấu mới';
+    document.getElementById('courtModalSubtitle').textContent = 'Tạo sân thi đấu mới cho chi nhánh';
     document.getElementById('courtAction').value = 'add';
     document.getElementById('courtEditId').value = '';
-    populateCourtTypeDropdown();
+    document.getElementById('courtQtyWrap').classList.remove('hidden');
+    document.getElementById('courtQty').value = 1;
+    document.getElementById('courtImagePreviewWrap').classList.add('hidden');
+
+    // Empty state banner
+    const banner = document.getElementById('courtNoTypesBanner');
+    const form = document.getElementById('courtForm');
+    if (mockLoaiSan.length === 0) {
+      banner.classList.remove('hidden'); form.classList.add('hidden');
+    } else {
+      banner.classList.add('hidden'); form.classList.remove('hidden');
+      setStatusOptions(false, 'Sẵn sàng');
+      populateCourtTypeDropdown();
+    }
     document.getElementById('courtModal').classList.remove('hidden');
   }
 
@@ -765,17 +1086,24 @@
     const c = mockSan.find(x => x.id === id);
     if (!c) return;
 
+    courtNameEdited = true; // không gợi ý đè tên khi chỉnh sửa
+    document.getElementById('bulkNamePreview').classList.add('hidden');
+    clearFieldError('courtName'); clearFieldError('courtTypeSelect');
     document.getElementById('courtModalTitle').textContent = 'Chỉnh sửa sân thi đấu';
+    document.getElementById('courtModalSubtitle').textContent = 'Cập nhật thông tin sân #' + c.id;
     document.getElementById('courtAction').value = 'update';
     document.getElementById('courtEditId').value = c.id;
     document.getElementById('courtName').value = c.name;
-    document.getElementById('courtStatus').value = c.status;
     document.getElementById('courtDesc').value = c.desc || '';
     document.getElementById('courtImage').value = c.image || '';
+    document.getElementById('courtQtyWrap').classList.add('hidden');
 
-    populateCourtTypeDropdown();
-    document.getElementById('courtTypeSelect').value = c.typeId;
+    setStatusOptions(true, c.status);
+    populateCourtTypeDropdown(c.typeId);
+    updateImagePreview();
 
+    document.getElementById('courtNoTypesBanner').classList.add('hidden');
+    document.getElementById('courtForm').classList.remove('hidden');
     document.getElementById('courtModal').classList.remove('hidden');
   }
 
@@ -784,7 +1112,8 @@
   }
 
   function deleteCourt(id) {
-    if (confirm("Chuyển trạng thái sân này sang Tạm đóng (xóa mềm)?")) {
+    showCustomConfirm("Bạn có chắc chắn muốn xóa sân thi đấu này? Sân sẽ được chuyển vào Thùng rác.", () => {
+      showToast("Đang thực hiện xóa... Bạn có thể vào Thùng rác để khôi phục.", "success");
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = '${pageContext.request.contextPath}/manager/quan-ly-san';
@@ -795,9 +1124,12 @@
       form.appendChild(act);
       form.appendChild(sId);
       document.body.appendChild(form);
-      form.submit();
-    }
+      setTimeout(() => {
+        form.submit();
+      }, 1200);
+    });
   }
+
 
   // TYPE MODAL ACTIONS
   function openCreateTypeModal() {
@@ -839,20 +1171,24 @@
   }
 
   function deleteType(id) {
-    if (confirm("Xóa cấu hình loại sân này?")) {
+    showCustomConfirm("Bạn có chắc chắn muốn xóa cấu hình loại sân này? Loại sân sẽ được chuyển vào Thùng rác.", () => {
+      showToast("Đang thực hiện xóa... Bạn có thể vào Thùng rác để khôi phục.", "success");
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = '${pageContext.request.contextPath}/manager/quan-ly-san';
       
       const act = document.createElement('input'); act.type = 'hidden'; act.name = 'action'; act.value = 'deleteType';
-      const tId = document.createElement('input'); tId.type = 'hidden'; tId.name = 'loaiSanID'; sId = id; tId.value = id;
+      const tId = document.createElement('input'); tId.type = 'hidden'; tId.name = 'loaiSanID'; tId.value = id;
       
       form.appendChild(act);
       form.appendChild(tId);
       document.body.appendChild(form);
-      form.submit();
-    }
+      setTimeout(() => {
+        form.submit();
+      }, 1200);
+    });
   }
+
 
   // Form submit preprocessing to remove commas from currency values and validate fields
   document.getElementById('typeForm').addEventListener('submit', function(e) {

@@ -124,11 +124,25 @@ public class QuanLySanManagerServlet extends HttpServlet {
     // ==================== HANDLER METHODS ====================
 
     private void handleAddSan(HttpServletRequest req, int coSoId, HttpSession session) {
+        int soLuong = 1;
+        String soLuongParam = req.getParameter("soLuong");
+        if (soLuongParam != null && !soLuongParam.isBlank()) {
+            soLuong = Math.max(1, Math.min(10, Integer.parseInt(soLuongParam)));
+        }
+
         SanService.SanCreateRequest createReq = new SanService.SanCreateRequest();
         populateSanRequest(req, createReq);
 
-        sanService.createSan(createReq, coSoId);
-        session.setAttribute("message", "Thêm sân thành công!");
+        String baseName = createReq.getTenSan() == null ? "" : createReq.getTenSan().trim();
+        for (int i = 1; i <= soLuong; i++) {
+            if (soLuong > 1) createReq.setTenSan(baseName + " " + i);
+            sanService.createSan(createReq, coSoId);
+        }
+
+        String msg = soLuong > 1
+            ? "Đã tạo " + soLuong + " sân thành công!"
+            : "Thêm sân thành công!";
+        session.setAttribute("message", msg);
     }
 
     private void handleUpdateSan(HttpServletRequest req, int coSoId, HttpSession session) {
@@ -144,8 +158,9 @@ public class QuanLySanManagerServlet extends HttpServlet {
     private void handleDeleteSan(HttpServletRequest req, int coSoId, HttpSession session) {
         int sanId = Integer.parseInt(req.getParameter("sanID"));
         sanService.deleteSan(sanId, coSoId);
-        session.setAttribute("message", "Đã chuyển trạng thái sân sang Tạm đóng (Xóa mềm).");
+        session.setAttribute("message", "Đã chuyển sân thi đấu vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
     }
+
 
     private void handleUpdateSanStatus(HttpServletRequest req, int coSoId, HttpSession session) {
         int sanId = Integer.parseInt(req.getParameter("sanID"));
@@ -175,8 +190,9 @@ public class QuanLySanManagerServlet extends HttpServlet {
     private void handleDeleteLoaiSan(HttpServletRequest req, int coSoId, HttpSession session) {
         int loaiSanId = Integer.parseInt(req.getParameter("loaiSanID"));
         sanService.deleteLoaiSan(loaiSanId, coSoId);
-        session.setAttribute("message", "Xóa cấu hình loại sân thành công!");
+        session.setAttribute("message", "Đã chuyển cấu hình loại sân vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
     }
+
 
     // ==================== REQUEST POPULATORS ====================
 

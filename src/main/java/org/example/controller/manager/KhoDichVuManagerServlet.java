@@ -339,21 +339,13 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
-                // Check if used in invoices
-                if (sanPhamDAO.existsInInvoices(id)) {
-                    // Soft delete
-                    sp.setTrangThai(Constants.TRANG_THAI_SP_NGUNG_KINH_DOANH);
-                    sanPhamDAO.update(sp);
-                    session.setAttribute("successMsg", "Sản phẩm đã được bán trên hóa đơn trước đây. Đã chuyển trạng thái sang 'Ngừng kinh doanh' để bảo vệ lịch sử thanh toán.");
+                boolean success = sanPhamDAO.softDelete(id, user.getAccountId());
+                if (success) {
+                    session.setAttribute("successMsg", "Đã chuyển sản phẩm/dịch vụ vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
                 } else {
-                    // Hard delete
-                    boolean success = sanPhamDAO.hardDelete(id);
-                    if (success) {
-                        session.setAttribute("successMsg", "Xóa sản phẩm vĩnh viễn thành công.");
-                    } else {
-                        session.setAttribute("errorMsg", "Không thể xóa sản phẩm.");
-                    }
+                    session.setAttribute("errorMsg", "Không thể thực hiện xóa sản phẩm.");
                 }
+
 
             } else if ("nhap-kho".equals(action)) {
                 String idStr = req.getParameter("id");

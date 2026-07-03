@@ -830,7 +830,8 @@
   }
 
   function confirmDelete(id, name) {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm '" + name + "'? Nếu sản phẩm đã được thanh toán trên hóa đơn, hệ thống sẽ tự động chuyển sang trạng thái 'Ngừng kinh doanh' thay vì xóa hoàn toàn để lưu vết tài chính.")) {
+    showCustomConfirm("Bạn có chắc chắn muốn xóa sản phẩm/dịch vụ '" + name + "'? Sản phẩm sẽ được chuyển vào Thùng rác.", () => {
+      showToast("Đang thực hiện xóa... Bạn có thể vào Thùng rác để khôi phục.", "success");
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = '${pageContext.request.contextPath}/manager/kho-dich-vu';
@@ -848,8 +849,10 @@
       form.appendChild(idInput);
       
       document.body.appendChild(form);
-      form.submit();
-    }
+      setTimeout(() => {
+        form.submit();
+      }, 1200);
+    });
   }
 
   // Scroll Animation Observer

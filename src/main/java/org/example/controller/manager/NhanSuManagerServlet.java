@@ -197,7 +197,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             else if ("delete".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("id"));
                 nhanSuService.deleteStaff(accountId, managerCoSoId);
-                session.setAttribute("message", "Xóa nhân viên thành công!");
+                session.setAttribute("message", "Xóa nhân viên thành công! Bạn có thể vào trang Thùng rác để khôi phục.");
                 resp.setStatus(HttpServletResponse.SC_OK);
             } 
             else if ("restore".equals(action)) {
