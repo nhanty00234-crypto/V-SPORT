@@ -238,7 +238,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 AuditLogService.log(req, manager,
                     AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_CA_LAM,
                     String.valueOf(id), "Ca " + id,
-                    "Manager xoa ca lam viec");
+                    "Manager xóa mềm ca làm việc");
             } catch (NumberFormatException e) {
                 errorMsg = "ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.";
             } catch (Exception e) {
@@ -298,8 +298,9 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 successMsg = "ThÃªm ca lÃ m viá»‡c thÃ nh cÃ´ng!";
                 AuditLogService.log(req, manager,
                     AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_CA_LAM,
-                    String.valueOf(caLamReq.getAccountId()), "Ca " + caLamReq.getNgayLam(),
-                    "Manager tao ca lam viec");
+                    "unknown",
+                    "AccountID=" + caLamReq.getAccountId() + " ngay=" + caLamReq.getNgayLam(),
+                    "Manager tạo ca làm việc");
             } else {
                 String reason = req.getParameter("reason");
                 if (targetCaLamViecId == null) {
@@ -310,7 +311,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 AuditLogService.log(req, manager,
                     AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_CA_LAM,
                     String.valueOf(targetCaLamViecId), "Ca " + targetCaLamViecId,
-                    "Manager cap nhat ca lam viec");
+                    "Manager cập nhật ca làm việc");
             }
         } catch (IllegalArgumentException e) {
             errorMsg = e.getMessage();
