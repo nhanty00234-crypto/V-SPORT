@@ -41,7 +41,7 @@ public class AuditLogService {
             entry.setActorAccountId(actor.getAccountId());
             entry.setActorName(actor.getFullName() != null ? actor.getFullName() : actor.getUsername());
             entry.setActorRole(actor.getRoleId());
-            entry.setCoSoId(actor.getCoSoId() > 0 ? actor.getCoSoId() : null);
+            entry.setCoSoId(actor.getCoSoId() != null && actor.getCoSoId() > 0 ? actor.getCoSoId() : null);
             entry.setAction(action);
             entry.setEntityType(entityType);
             entry.setEntityId(entityId);

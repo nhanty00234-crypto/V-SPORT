@@ -29,7 +29,11 @@ public class AuditLogManagerServlet extends HttpServlet {
             return;
         }
 
-        int coSoId = user.getCoSoId();
+        Integer coSoId = user.getCoSoId();
+        if (coSoId == null) {
+            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            return;
+        }
         String entityType = req.getParameter("entityType");
         String action     = req.getParameter("action");
         String dateFrom   = req.getParameter("dateFrom");

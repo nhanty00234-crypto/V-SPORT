@@ -15,7 +15,7 @@ body { font-family: 'Inter', sans-serif; }
 </style>
 </head>
 <body class="bg-gray-50">
-<jsp:include page="/admin/sidebar.jsp"/>
+<jsp:include page="/admin/common/sidebar.jsp"/>
 <div class="ml-64 p-8">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Nhật Ký Thao Tác</h1>
