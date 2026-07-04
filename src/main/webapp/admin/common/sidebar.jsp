@@ -134,6 +134,12 @@
       <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">manage_accounts</span>
       Quản lý Owner
     </a>
+
+    <a href="${pageContext.request.contextPath}/admin/audit-log"
+       class="nav-link ${uri.contains('/admin/audit-log') ? 'active' : ''}">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">history</span>
+      Nhật Ký Thao Tác
+    </a>
   </nav>
 
   <!-- Logout -->

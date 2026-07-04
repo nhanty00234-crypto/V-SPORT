@@ -55,6 +55,11 @@
           class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac.jsp') ? 'active' : ''}">
           <span class="material-symbols-outlined text-[19px]">delete</span>Thùng rác
         </a>
+
+        <a href="${pageContext.request.contextPath}/manager/audit-log"
+          class="nav-link ${uri.contains('/manager/audit-log') ? 'active' : ''}">
+          <span class="material-symbols-outlined text-[19px]">history</span>Nhật Ký Thao Tác
+        </a>
       </nav>
 
       <div class="px-3 py-3 border-t border-purple-50">
