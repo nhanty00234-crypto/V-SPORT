@@ -5,7 +5,9 @@
              version="3.0">
     <persistence-unit name="SportPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        
+
+        <class>org.example.model.AuditLog</class>
+
         <properties>
             <!-- Database Connection -->
             <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
