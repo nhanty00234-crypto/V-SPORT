@@ -65,12 +65,12 @@ body { font-family: 'Inter', sans-serif; }
             </div>
             <div>
                 <label class="block text-xs text-gray-500 mb-1">Từ ngày</label>
-                <input type="date" name="dateFrom" value="${dateFrom}"
+                <input type="date" name="dateFrom" value="<c:out value='${dateFrom}'/>"
                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-xs text-gray-500 mb-1">Đến ngày</label>
-                <input type="date" name="dateTo" value="${dateTo}"
+                <input type="date" name="dateTo" value="<c:out value='${dateTo}'/>"
                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
             </div>
             <div class="flex gap-2">
