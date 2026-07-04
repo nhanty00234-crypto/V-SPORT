@@ -105,11 +105,16 @@
                 <!-- Main Content: History Table Card (3 Columns) -->
                 <div class="lg:col-span-3">
                     <div class="premium-card p-6 overflow-hidden">
-                        <div class="flex justify-between items-center mb-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <h2 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                                 <span class="material-symbols-outlined text-emerald-600 text-[20px]">calendar_month</span>
                                 Danh sách đơn đặt sân hôm nay & trước đó
                             </h2>
+                            <div class="relative w-full sm:max-w-xs">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-slate-400">search</span>
+                                <input type="search" id="historySearchInput" autocomplete="off" placeholder="Tìm kiếm theo mã, tên sân..." 
+                                       class="h-9 w-full pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all">
+                            </div>
                         </div>
                         
                         <div class="overflow-x-auto rounded-2xl border border-slate-100">
@@ -123,7 +128,7 @@
                                         <th class="p-4 text-center">Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-100 bg-white">
+                                <tbody id="historyTableBody" class="divide-y divide-slate-100 bg-white">
                                     <c:forEach var="lich" items="${dsLich}">
                                         <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
                                         <c:set var="branchHienThi" value="" />
@@ -138,7 +143,7 @@
                                             </c:if>
                                         </c:forEach>
 
-                                        <tr class="hover:bg-slate-50/30 transition-colors">
+                                        <tr class="hover:bg-slate-50/30 transition-colors history-row">
                                             <td class="p-4">
                                                 <div class="flex flex-col gap-0.5">
                                                     <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
@@ -183,11 +188,11 @@
                                                 <div class="flex items-center justify-center gap-1.5">
                                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
                                                         <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt sân này?');" class="inline-block">
-                                                            <input type="hidden" name="id" value="${lich.datSanId}">
-                                                            <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
-                                                                Hủy
-                                                            </button>
-                                                        </form>
+                                                                <input type="hidden" name="id" value="${lich.datSanId}">
+                                                                <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
+                                                                    Hủy
+                                                                </button>
+                                                            </form>
                                                     </c:if>
                                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
                                                         <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-all active:scale-95 text-[10px]">
@@ -215,6 +220,10 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="historyPagination" class="hidden px-5 py-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-white/50 rounded-b-2xl">
+                            <span id="historyPaginationInfo">Hiển thị...</span>
+                            <div class="flex items-center gap-1" id="historyPaginationBtns"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -231,6 +240,126 @@
         if (navHistory) {
             navHistory.classList.add('active');
         }
+
+        // Pagination & Search script
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('historyTableBody');
+            const pagPanel = document.getElementById('historyPagination');
+            const searchInput = document.getElementById('historySearchInput');
+            if (!tableBody || !pagPanel) return;
+
+            const rows = Array.from(tableBody.querySelectorAll('.history-row'));
+            if (rows.length === 0) return;
+
+            const pageSize = 5;
+            let currentPage = 1;
+
+            function applyFilters(resetPage = true) {
+                if (resetPage) {
+                    currentPage = 1;
+                }
+                const searchValue = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                const matchedRows = [];
+
+                rows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    if (text.includes(searchValue)) {
+                        matchedRows.push(row);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                const totalPages = Math.ceil(matchedRows.length / pageSize);
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+
+                matchedRows.forEach((row, index) => {
+                    if (index >= start && index < end) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Update Pagination Panel visibility
+                if (matchedRows.length === 0 || totalPages <= 1) {
+                    pagPanel.classList.add('hidden');
+                    pagPanel.classList.remove('flex');
+                } else {
+                    pagPanel.classList.remove('hidden');
+                    pagPanel.classList.add('flex');
+                }
+
+                // Update info text
+                const actualEnd = Math.min(end, matchedRows.length);
+                const infoSpan = document.getElementById('historyPaginationInfo');
+                if (infoSpan) {
+                    if (matchedRows.length > 0) {
+                        infoSpan.innerText = `Hiển thị \${start + 1}-\${actualEnd} trong \${matchedRows.length} đơn đặt sân`;
+                    } else {
+                        infoSpan.innerText = `Không tìm thấy đơn đặt sân nào`;
+                    }
+                }
+
+                renderButtons(totalPages);
+            }
+
+            function renderButtons(totalPages) {
+                const btnContainer = document.getElementById('historyPaginationBtns');
+                if (!btnContainer) return;
+                btnContainer.innerHTML = '';
+
+                if (totalPages <= 1) return;
+
+                // Left arrow button
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'px-2 py-1 rounded hover:bg-slate-100 text-slate-400 disabled:opacity-40 flex items-center justify-center transition-colors';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_left</span>';
+                prevBtn.onclick = () => {
+                    currentPage--;
+                    applyFilters(false);
+                };
+                btnContainer.appendChild(prevBtn);
+
+                // Page number buttons
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.innerText = i;
+                    if (i === currentPage) {
+                        btn.className = 'px-2.5 py-1 rounded bg-slate-900 text-white font-semibold transition-all';
+                    } else {
+                        btn.className = 'px-2.5 py-1 rounded hover:bg-slate-100 text-slate-650 transition-colors';
+                    }
+                    btn.onclick = () => {
+                        currentPage = i;
+                        applyFilters(false);
+                    };
+                    btnContainer.appendChild(btn);
+                }
+
+                // Right arrow button
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'px-2 py-1 rounded hover:bg-slate-100 text-slate-400 disabled:opacity-40 flex items-center justify-center transition-colors';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_right</span>';
+                nextBtn.onclick = () => {
+                    currentPage++;
+                    applyFilters(false);
+                };
+                btnContainer.appendChild(nextBtn);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', () => applyFilters(true));
+            }
+
+            applyFilters(true);
+        });
     </script>
 
     <!-- CUSTOMER SERVICE BOOKING MODAL -->

@@ -140,7 +140,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                     successMsg = "ÄÃ£ phÃª duyá»‡t yÃªu cáº§u nghá»‰";
                     AuditLogService.log(req, manager,
                         AuditLogService.ACTION_APPROVE, AuditLogService.ENTITY_YEU_CAU_NGHI,
-                        String.valueOf(yeuCauNghiID), "Yeu cau nghi #" + yeuCauNghiID,
+                        String.valueOf(yeuCauNghiID), "Yêu cầu nghỉ #" + yeuCauNghiID,
                         "Manager duyệt yêu cầu nghỉ phép");
                 } else {
                     errorMsg = "KhÃ´ng thá»ƒ phÃª duyá»‡t yÃªu cáº§u";
@@ -151,7 +151,7 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                     successMsg = "ÄÃ£ tá»« chá»‘i yÃªu cáº§u nghá»‰";
                     AuditLogService.log(req, manager,
                         AuditLogService.ACTION_REJECT, AuditLogService.ENTITY_YEU_CAU_NGHI,
-                        String.valueOf(yeuCauNghiID), "Yeu cau nghi #" + yeuCauNghiID,
+                        String.valueOf(yeuCauNghiID), "Yêu cầu nghỉ #" + yeuCauNghiID,
                         "Manager từ chối yêu cầu nghỉ phép");
                 } else {
                     errorMsg = "KhÃ´ng thá»ƒ tá»« chá»‘i yÃªu cáº§u";

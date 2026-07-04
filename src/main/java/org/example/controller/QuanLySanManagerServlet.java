@@ -208,11 +208,13 @@ public class QuanLySanManagerServlet extends HttpServlet {
 
     private void handleDeleteLoaiSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
         int loaiSanId = Integer.parseInt(req.getParameter("loaiSanID"));
+        LoaiSan loaiSan = sanService.getLoaiSanById(loaiSanId);
+        String loaiSanName = loaiSan != null && loaiSan.getTenLoai() != null ? loaiSan.getTenLoai() : "ID=" + loaiSanId;
         sanService.deleteLoaiSan(loaiSanId, coSoId);
         session.setAttribute("message", "Đã chuyển cấu hình loại sân vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
         AuditLogService.log(req, manager,
             AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_LOAI_SAN,
-            String.valueOf(loaiSanId), "ID=" + loaiSanId,
+            String.valueOf(loaiSanId), loaiSanName,
             "Manager xóa mềm loại sân");
     }
 

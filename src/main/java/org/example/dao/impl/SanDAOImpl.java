@@ -167,6 +167,8 @@ public class SanDAOImpl implements SanDAO {
             trans.begin();
             San s = em.find(San.class, id);
             if (s != null) {
+                em.createNativeQuery("DELETE FROM SoftHold WHERE SanID = ?").setParameter(1, id).executeUpdate();
+                em.createNativeQuery("UPDATE LichDatSan SET SanID = NULL WHERE SanID = ?").setParameter(1, id).executeUpdate();
                 em.remove(s);
                 trans.commit();
                 return true;

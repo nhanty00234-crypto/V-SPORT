@@ -330,6 +330,10 @@
           </tbody>
         </table>
       </div>
+      <div id="bookingPagination" class="px-5 py-3 border-t border-purple-50 flex items-center justify-between text-xs text-zinc-500 bg-purple-50/5">
+        <span id="bookingPaginationInfo">Hiển thị...</span>
+        <div class="flex items-center gap-1" id="bookingPaginationBtns"></div>
+      </div>
     </section>
   </main>
 
@@ -383,10 +387,18 @@
       applyFilters();
     }
 
-    // Apply Filter & Search logic
-    function applyFilters() {
+    let currentPage = 1;
+    const pageSize = 5;
+
+    // Apply Filter & Search logic with pagination support
+    function applyFilters(resetPage = true) {
+      if (resetPage) {
+        currentPage = 1;
+      }
       const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
-      const rows = document.querySelectorAll('.booking-row');
+      const rows = Array.from(document.querySelectorAll('.booking-row'));
+      
+      const matchedRows = [];
       
       rows.forEach(row => {
         const status = row.getAttribute('data-status');
@@ -406,15 +418,102 @@
         const matchSearch = customer.includes(searchValue) || phone.includes(searchValue) || court.includes(searchValue);
         
         if (matchTab && matchSearch) {
+          matchedRows.push(row);
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Paginate matched rows
+      const totalPages = Math.ceil(matchedRows.length / pageSize);
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+
+      matchedRows.forEach((row, index) => {
+        if (index >= start && index < end) {
           row.style.display = '';
         } else {
           row.style.display = 'none';
         }
       });
+
+      // Update Pagination Panel
+      const pagPanel = document.getElementById('bookingPagination');
+      if (pagPanel) {
+        if (matchedRows.length === 0 || totalPages <= 1) {
+          pagPanel.classList.add('hidden');
+        } else {
+          pagPanel.classList.remove('hidden');
+          pagPanel.classList.add('flex');
+        }
+      }
+
+      // Update Pagination Info
+      const infoSpan = document.getElementById('bookingPaginationInfo');
+      if (infoSpan) {
+        const actualEnd = Math.min(end, matchedRows.length);
+        if (matchedRows.length > 0) {
+          infoSpan.innerText = `Hiển thị \${start + 1}-\${actualEnd} trong \${matchedRows.length} yêu cầu`;
+        } else {
+          infoSpan.innerText = `Không có yêu cầu nào`;
+        }
+      }
+
+      // Render Pagination Buttons
+      renderPaginationButtons(totalPages);
+    }
+
+    function renderPaginationButtons(totalPages) {
+      const btnContainer = document.getElementById('bookingPaginationBtns');
+      if (!btnContainer) return;
+      btnContainer.innerHTML = '';
+
+      if (totalPages <= 1) return;
+
+      // Left arrow
+      const prevBtn = document.createElement('button');
+      prevBtn.type = 'button';
+      prevBtn.className = 'px-2 py-1 rounded hover:bg-orange-100 text-orange-600 disabled:opacity-40 flex items-center justify-center transition-colors';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_left</span>';
+      prevBtn.onclick = () => {
+        currentPage--;
+        applyFilters(false);
+      };
+      btnContainer.appendChild(prevBtn);
+
+      // Page buttons
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerText = i;
+        if (i === currentPage) {
+          btn.className = 'px-2.5 py-1 rounded bg-orange-600 text-white font-semibold transition-all';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded hover:bg-orange-100 text-orange-750 transition-colors';
+        }
+        btn.onclick = () => {
+          currentPage = i;
+          applyFilters(false);
+        };
+        btnContainer.appendChild(btn);
+      }
+
+      // Right arrow
+      const nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.className = 'px-2 py-1 rounded hover:bg-orange-100 text-orange-600 disabled:opacity-40 flex items-center justify-center transition-colors';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_right</span>';
+      nextBtn.onclick = () => {
+        currentPage++;
+        applyFilters(false);
+      };
+      btnContainer.appendChild(nextBtn);
     }
 
     // Real-time search listener
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('searchInput').addEventListener('input', () => applyFilters(true));
 
     // Modal Control
     function openRejectModal(id) {
@@ -460,7 +559,10 @@
     }
 
     // Run on load
-    window.addEventListener('DOMContentLoaded', calculateStats);
+    window.addEventListener('DOMContentLoaded', () => {
+      calculateStats();
+      applyFilters(true);
+    });
   </script>
 </body>
 </html>

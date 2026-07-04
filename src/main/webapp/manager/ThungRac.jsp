@@ -319,7 +319,11 @@
 
   function performAction(action, type, id) {
       if (action === 'delete') {
-          if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn mục này? Hành động này sẽ xóa dữ liệu hoàn toàn khỏi hệ thống và không thể khôi phục.')) {
+          let msg = 'Bạn có chắc chắn muốn xóa vĩnh viễn mục này? Hành động này sẽ xóa dữ liệu hoàn toàn khỏi hệ thống và không thể khôi phục.';
+          if (type === 'nhansu') {
+              msg = 'Cảnh báo về tài khoản này: Tài khoản nhân viên có thể đang liên kết với ca làm việc, yêu cầu nghỉ,... Việc xóa vĩnh viễn sẽ xóa sạch hoặc gỡ bỏ các liên kết này khỏi database. Bạn vẫn muốn tiếp tục xóa?';
+          }
+          if (!confirm(msg)) {
               return;
           }
       }

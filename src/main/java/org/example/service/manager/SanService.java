@@ -249,6 +249,13 @@ public class SanService {
         return ls;
     }
 
+    /**
+     * Lấy loại sân theo ID mà không validation branch access (cho audit log)
+     */
+    public LoaiSan getLoaiSanById(int loaiSanId) {
+        return loaiSanDAO.getLoaiSanById(loaiSanId);
+    }
+
     // ==================== SAN OPERATIONS ====================
 
     /**

@@ -75,6 +75,12 @@ body { font-family: 'Inter', sans-serif; }
         <span id="trashCountBadge" class="hidden text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">0</span>
       </button>
     </div>
+    
+    <div class="relative w-full sm:max-w-xs">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
+      <input type="search" id="adminSearchInput" autocomplete="off" placeholder="Tìm theo tên, email, sđt..." 
+             class="h-9 w-full pl-9 pr-3 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all">
+    </div>
   </div>
 
   <!-- Alert Messages -->
@@ -165,12 +171,17 @@ body { font-family: 'Inter', sans-serif; }
         <span class="material-symbols-outlined text-[24px] text-red-600">delete_forever</span>
       </div>
       <h3 class="text-base font-bold text-zinc-900">Xóa vĩnh viễn?</h3>
-      <p class="text-sm text-zinc-500">Tài khoản <span id="permanentDeleteName" class="font-semibold text-zinc-800"></span> sẽ bị <strong class="text-red-600">xóa vĩnh viễn</strong> khỏi hệ thống. Hành động này <strong class="text-red-600">KHÔNG THỂ hoàn tác</strong>.</p>
+      <p class="text-sm text-zinc-500">Tài khoản <span id="permanentDeleteName" class="font-semibold text-zinc-800"></span> sẽ bị <strong class="text-red-600">xóa vĩnh viễn</strong> khỏi hệ thống.<br><br>
+        <span class="p-2.5 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-semibold block text-left leading-normal">
+          <span class="material-symbols-outlined text-[14px] align-middle mr-1">warning</span>
+          <strong>Cảnh báo quan trọng:</strong> Tài khoản này có thể đang liên kết với các dữ liệu khác (như hóa đơn, lịch đặt sân, ca làm việc,...). Việc tiếp tục xóa sẽ gỡ bỏ hoặc làm sạch các liên kết liên quan khỏi database. Hành động này <strong>không thể hoàn tác</strong>.
+        </span>
+      </p>
     </div>
     <input type="hidden" id="permanentDeleteId" value="">
     <div class="flex gap-3 mt-6">
       <button onclick="closePermanentDeleteModal()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Hủy</button>
-      <button onclick="confirmPermanentDelete()" class="flex-1 h-10 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700">Xóa vĩnh viễn</button>
+      <button onclick="confirmPermanentDelete()" class="flex-1 h-10 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700">Vẫn tiếp tục xóa</button>
     </div>
   </div>
 </div>
@@ -301,11 +312,94 @@ let deletedList = [
   </c:forEach>
 ];
 
+let staffCurrentPage = 1;
+let trashCurrentPage = 1;
+const nhanSuPageSize = 8;
+
+function renderPaginationControls(parentSectionId, controlId, totalItems, currentPage, totalPages, onPageChange) {
+  const section = document.getElementById(parentSectionId);
+  if (!section) return;
+
+  // Remove existing pagination if any
+  const existing = section.querySelector('#' + controlId);
+  if (existing) {
+    existing.remove();
+  }
+
+  if (totalItems === 0 || totalPages <= 1) return;
+
+  const pagDiv = document.createElement('div');
+  pagDiv.id = controlId;
+  pagDiv.className = 'px-4 py-3 border-t border-zinc-200 flex items-center justify-between text-xs text-zinc-500 bg-zinc-50/50';
+
+  const start = (currentPage - 1) * nhanSuPageSize + 1;
+  const end = Math.min(currentPage * nhanSuPageSize, totalItems);
+
+  pagDiv.innerHTML = `
+    <span>Hiển thị \${start}-\${end} trong \${totalItems} tài khoản</span>
+    <div class="flex items-center gap-1" id="\${controlId}_btns"></div>
+  `;
+
+  section.appendChild(pagDiv);
+
+  const btnContainer = document.getElementById(controlId + '_btns');
+  if (!btnContainer) return;
+
+  // Left arrow
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.className = 'px-2 py-1 rounded hover:bg-zinc-150 text-zinc-400 disabled:opacity-40 flex items-center justify-center transition-colors';
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_left</span>';
+  prevBtn.onclick = () => onPageChange(currentPage - 1);
+  btnContainer.appendChild(prevBtn);
+
+  // Page buttons
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerText = i;
+    if (i === currentPage) {
+      btn.className = 'px-2.5 py-1 rounded bg-zinc-900 text-white font-semibold transition-all';
+    } else {
+      btn.className = 'px-2.5 py-1 rounded hover:bg-zinc-150 text-zinc-650 transition-colors';
+    }
+    btn.onclick = () => onPageChange(i);
+    btnContainer.appendChild(btn);
+  }
+
+  // Right arrow
+  const nextBtn = document.createElement('button');
+  nextBtn.type = 'button';
+  nextBtn.className = 'px-2 py-1 rounded hover:bg-zinc-150 text-zinc-400 disabled:opacity-40 flex items-center justify-center transition-colors';
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_right</span>';
+  nextBtn.onclick = () => onPageChange(currentPage + 1);
+  btnContainer.appendChild(nextBtn);
+}
+
 function renderStaff() {
   const staffBody = document.getElementById('staffBody');
   if (!staffBody) return;
-  document.getElementById('staffCountDisplay').innerText = staffList.length;
-  staffBody.innerHTML = staffList.map(s => {
+
+  const searchValue = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value.toLowerCase().trim() : '';
+  const filtered = staffList.filter(s => {
+    return s.name.toLowerCase().includes(searchValue) || 
+           s.username.toLowerCase().includes(searchValue) || 
+           (s.email && s.email.toLowerCase().includes(searchValue)) || 
+           (s.phone && s.phone.toLowerCase().includes(searchValue)) ||
+           s.VaiTro.toLowerCase().includes(searchValue);
+  });
+
+  document.getElementById('staffCountDisplay').innerText = filtered.length;
+
+  const totalPages = Math.ceil(filtered.length / nhanSuPageSize);
+  if (staffCurrentPage > totalPages && totalPages > 0) staffCurrentPage = totalPages;
+  if (staffCurrentPage < 1) staffCurrentPage = 1;
+
+  const pageList = filtered.slice((staffCurrentPage - 1) * nhanSuPageSize, staffCurrentPage * nhanSuPageSize);
+
+  staffBody.innerHTML = pageList.map(s => {
     let badgeClass = s.status === 'Đang làm' ? 'badge-green' : 'badge-red';
     let statusText = s.status;
     let actionsHtml = '';
@@ -345,6 +439,11 @@ function renderStaff() {
       </tr>
     `;
   }).join('');
+
+  renderPaginationControls('sectionNhanSu', 'staffPagination', filtered.length, staffCurrentPage, totalPages, (p) => {
+    staffCurrentPage = p;
+    renderStaff();
+  });
 }
 
 function toggleLock(id, currentlyActive) {
@@ -408,11 +507,29 @@ function restoreStaff(id) {
 function renderTrash() {
   const trashBody = document.getElementById('trashBody');
   if (!trashBody) return;
-  if (deletedList.length === 0) {
-    trashBody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-zinc-400">Thùng rác trống</td></tr>';
+
+  const searchValue = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value.toLowerCase().trim() : '';
+  const filtered = deletedList.filter(s => {
+    return s.name.toLowerCase().includes(searchValue) || 
+           s.username.toLowerCase().includes(searchValue) || 
+           (s.email && s.email.toLowerCase().includes(searchValue)) || 
+           s.VaiTro.toLowerCase().includes(searchValue);
+  });
+
+  if (filtered.length === 0) {
+    trashBody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-zinc-400">Thùng rác trống hoặc không tìm thấy kết quả</td></tr>';
+    const existing = document.getElementById('sectionThungRac').querySelector('#trashPagination');
+    if (existing) existing.remove();
     return;
   }
-  trashBody.innerHTML = deletedList.map(s => `
+
+  const totalPages = Math.ceil(filtered.length / nhanSuPageSize);
+  if (trashCurrentPage > totalPages && totalPages > 0) trashCurrentPage = totalPages;
+  if (trashCurrentPage < 1) trashCurrentPage = 1;
+
+  const pageList = filtered.slice((trashCurrentPage - 1) * nhanSuPageSize, trashCurrentPage * nhanSuPageSize);
+
+  trashBody.innerHTML = pageList.map(s => `
     <tr class="hover:bg-zinc-50 transition-colors">
       <td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center shrink-0 font-bold text-xs">\${s.initial}</div><div><p class="font-bold text-zinc-500">\${s.name}</p><p class="text-[10px] text-zinc-400">\${s.username}</p></div></div></td>
       <td class="px-4 py-4 text-xs font-medium text-zinc-400">\${s.VaiTro}</td>
@@ -423,6 +540,15 @@ function renderTrash() {
       </td>
     </tr>
   `).join('');
+
+  const thungRacCard = document.getElementById('sectionThungRac').querySelector('.card');
+  if (thungRacCard) {
+    if (!thungRacCard.id) thungRacCard.id = 'trashCardContainer';
+    renderPaginationControls('trashCardContainer', 'trashPagination', filtered.length, trashCurrentPage, totalPages, (p) => {
+      trashCurrentPage = p;
+      renderTrash();
+    });
+  }
 }
 
 // ---- Chuyển tab ----
@@ -747,6 +873,16 @@ async function submitOtpVerification() {
     if (deletedList.length > 0) {
       badge.innerText = deletedList.length;
       badge.classList.remove('hidden');
+    }
+
+    const searchInput = document.getElementById('adminSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            staffCurrentPage = 1;
+            trashCurrentPage = 1;
+            renderStaff();
+            renderTrash();
+        });
     }
 
 

@@ -514,7 +514,7 @@ public class NhanSuService {
             throw new IllegalArgumentException("Không thể xóa tài khoản có quyền Quản trị hoặc Quản lý!");
         }
 
-        if (!taiKhoanDAO.deleteAccount(accountId)) {
+        if (!taiKhoanDAO.permanentDeleteAccount(accountId)) {
             throw new RuntimeException("Lỗi xóa vĩnh viễn nhân viên trong cơ sở dữ liệu");
         }
     }

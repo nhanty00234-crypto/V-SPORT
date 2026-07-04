@@ -111,11 +111,12 @@ public class SanPhamDichVuDAOImpl implements SanPhamDichVuDAO {
             trans.begin();
             SanPham_DichVu sp = em.find(SanPham_DichVu.class, id);
             if (sp != null) {
+                em.createNativeQuery("UPDATE ChiTietHoaDon SET SanPhamID = NULL WHERE SanPhamID = ?").setParameter(1, id).executeUpdate();
                 em.remove(sp);
                 trans.commit();
                 return true;
             }
-            trans.commit();
+            trans.rollback();
             return false;
         } catch (Exception e) {
             if (trans.isActive()) {

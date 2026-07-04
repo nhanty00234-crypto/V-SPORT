@@ -132,7 +132,7 @@ public class OwnerRegisterServlet extends HttpServlet {
             return;
         }
 
-        // Check OTP expiry (5 minutes)
+        // Check OTP expiry (5 minutes) 
         Long otpTime = (Long) session.getAttribute("ownerOtpTime");
         if (otpTime != null && System.currentTimeMillis() - otpTime > 5 * 60 * 1000) {
             out.print("{\"success\":false,\"message\":\"Mã OTP đã hết hạn. Vui lòng gửi lại.\"}");

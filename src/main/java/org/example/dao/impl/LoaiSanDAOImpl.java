@@ -105,6 +105,7 @@ public class LoaiSanDAOImpl implements LoaiSanDAO {
             trans.begin();
             LoaiSan ls = em.find(LoaiSan.class, id);
             if (ls != null) {
+                em.createNativeQuery("UPDATE San SET LoaiSanID = NULL WHERE LoaiSanID = ?").setParameter(1, id).executeUpdate();
                 em.remove(ls);
                 trans.commit();
                 return true;
