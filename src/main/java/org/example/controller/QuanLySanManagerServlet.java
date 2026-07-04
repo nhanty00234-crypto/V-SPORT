@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.AuditLogService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -101,13 +102,13 @@ public class QuanLySanManagerServlet extends HttpServlet {
 
         try {
             switch (action) {
-                case "add" -> handleAddSan(request, coSoId, session);
-                case "update" -> handleUpdateSan(request, coSoId, session);
-                case "delete" -> handleDeleteSan(request, coSoId, session);
+                case "add" -> handleAddSan(request, coSoId, session, manager);
+                case "update" -> handleUpdateSan(request, coSoId, session, manager);
+                case "delete" -> handleDeleteSan(request, coSoId, session, manager);
                 case "updateStatus" -> handleUpdateSanStatus(request, coSoId, session);
-                case "addType" -> handleAddLoaiSan(request, coSoId, session);
+                case "addType" -> handleAddLoaiSan(request, coSoId, session, manager);
                 case "updateType" -> handleUpdateLoaiSan(request, coSoId, session);
-                case "deleteType" -> handleDeleteLoaiSan(request, coSoId, session);
+                case "deleteType" -> handleDeleteLoaiSan(request, coSoId, session, manager);
                 default -> logger.warn("Unknown action: {}", action);
             }
         } catch (IllegalArgumentException e) {
@@ -123,7 +124,7 @@ public class QuanLySanManagerServlet extends HttpServlet {
 
     // ==================== HANDLER METHODS ====================
 
-    private void handleAddSan(HttpServletRequest req, int coSoId, HttpSession session) {
+    private void handleAddSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
         int soLuong = 1;
         String soLuongParam = req.getParameter("soLuong");
         if (soLuongParam != null && !soLuongParam.isBlank()) {
@@ -136,7 +137,11 @@ public class QuanLySanManagerServlet extends HttpServlet {
         String baseName = createReq.getTenSan() == null ? "" : createReq.getTenSan().trim();
         for (int i = 1; i <= soLuong; i++) {
             if (soLuong > 1) createReq.setTenSan(baseName + " " + i);
-            sanService.createSan(createReq, coSoId);
+            San san = sanService.createSan(createReq, coSoId);
+            AuditLogService.log(req, manager,
+                AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_SAN,
+                String.valueOf(san.getSanID()), san.getTenSan(),
+                "Manager tạo sân mới");
         }
 
         String msg = soLuong > 1
@@ -145,20 +150,30 @@ public class QuanLySanManagerServlet extends HttpServlet {
         session.setAttribute("message", msg);
     }
 
-    private void handleUpdateSan(HttpServletRequest req, int coSoId, HttpSession session) {
+    private void handleUpdateSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
         int sanId = Integer.parseInt(req.getParameter("sanID"));
+        String tenSan = req.getParameter("tenSan");
 
         SanService.SanUpdateRequest updateReq = new SanService.SanUpdateRequest();
         populateSanUpdateRequest(req, updateReq);
 
         sanService.updateSan(sanId, updateReq, coSoId);
         session.setAttribute("message", "Cập nhật sân thành công!");
+        AuditLogService.log(req, manager,
+            AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_SAN,
+            String.valueOf(sanId), tenSan,
+            "Manager cập nhật thông tin sân");
     }
 
-    private void handleDeleteSan(HttpServletRequest req, int coSoId, HttpSession session) {
+    private void handleDeleteSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
         int sanId = Integer.parseInt(req.getParameter("sanID"));
+        String tenSan = req.getParameter("tenSan");
         sanService.deleteSan(sanId, coSoId);
         session.setAttribute("message", "Đã chuyển sân thi đấu vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
+        AuditLogService.log(req, manager,
+            AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_SAN,
+            String.valueOf(sanId), tenSan != null ? tenSan : "ID=" + sanId,
+            "Manager xóa mềm sân");
     }
 
 
@@ -169,12 +184,16 @@ public class QuanLySanManagerServlet extends HttpServlet {
         session.setAttribute("message", "Đã cập nhật trạng thái sân thành công!");
     }
 
-    private void handleAddLoaiSan(HttpServletRequest req, int coSoId, HttpSession session) {
+    private void handleAddLoaiSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
         SanService.LoaiSanRequest createReq = new SanService.LoaiSanRequest();
         populateLoaiSanRequest(req, createReq);
 
-        sanService.createLoaiSan(createReq, coSoId);
+        LoaiSan ls = sanService.createLoaiSan(createReq, coSoId);
         session.setAttribute("message", "Thêm cấu hình loại sân thành công!");
+        AuditLogService.log(req, manager,
+            AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_LOAI_SAN,
+            String.valueOf(ls.getLoaiSanID()), ls.getTenLoai(),
+            "Manager tạo loại sân mới");
     }
 
     private void handleUpdateLoaiSan(HttpServletRequest req, int coSoId, HttpSession session) {
@@ -187,10 +206,14 @@ public class QuanLySanManagerServlet extends HttpServlet {
         session.setAttribute("message", "Cập nhật loại sân thành công!");
     }
 
-    private void handleDeleteLoaiSan(HttpServletRequest req, int coSoId, HttpSession session) {
+    private void handleDeleteLoaiSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
         int loaiSanId = Integer.parseInt(req.getParameter("loaiSanID"));
         sanService.deleteLoaiSan(loaiSanId, coSoId);
         session.setAttribute("message", "Đã chuyển cấu hình loại sân vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
+        AuditLogService.log(req, manager,
+            AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_LOAI_SAN,
+            String.valueOf(loaiSanId), "ID=" + loaiSanId,
+            "Manager xóa mềm loại sân");
     }
 
 

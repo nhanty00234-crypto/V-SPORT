@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.service.AuditLogService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -234,6 +235,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 int id = Integer.parseInt(idParam);
                 caLamService.deleteShift(id, managerCoSoId, manager.getAccountId(), reason);
                 successMsg = "XÃ³a ca lÃ m viá»‡c thÃ nh cÃ´ng!";
+                AuditLogService.log(req, manager,
+                    AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_CA_LAM,
+                    String.valueOf(id), "Ca " + id,
+                    "Manager xoa ca lam viec");
             } catch (NumberFormatException e) {
                 errorMsg = "ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.";
             } catch (Exception e) {
@@ -291,6 +296,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             if ("add".equals(action)) {
                 caLamService.createShift(caLamReq, managerCoSoId, manager.getAccountId());
                 successMsg = "ThÃªm ca lÃ m viá»‡c thÃ nh cÃ´ng!";
+                AuditLogService.log(req, manager,
+                    AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_CA_LAM,
+                    String.valueOf(caLamReq.getAccountId()), "Ca " + caLamReq.getNgayLam(),
+                    "Manager tao ca lam viec");
             } else {
                 String reason = req.getParameter("reason");
                 if (targetCaLamViecId == null) {
@@ -298,6 +307,10 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 }
                 caLamService.updateShift(targetCaLamViecId, caLamReq, managerCoSoId, manager.getAccountId(), reason);
                 successMsg = "Cáº­p nháº­t ca lÃ m viá»‡c thÃ nh cÃ´ng!";
+                AuditLogService.log(req, manager,
+                    AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_CA_LAM,
+                    String.valueOf(targetCaLamViecId), "Ca " + targetCaLamViecId,
+                    "Manager cap nhat ca lam viec");
             }
         } catch (IllegalArgumentException e) {
             errorMsg = e.getMessage();

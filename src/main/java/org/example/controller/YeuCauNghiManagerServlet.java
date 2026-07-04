@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.service.AuditLogService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -137,6 +138,10 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                 boolean success = yeuCauNghiService.approveYeuCauNghi(yeuCauNghiID, managerID, ghiChu);
                 if (success) {
                     successMsg = "ÄÃ£ phÃª duyá»‡t yÃªu cáº§u nghá»‰";
+                    AuditLogService.log(req, manager,
+                        AuditLogService.ACTION_APPROVE, AuditLogService.ENTITY_YEU_CAU_NGHI,
+                        String.valueOf(yeuCauNghiID), "Yeu cau nghi #" + yeuCauNghiID,
+                        "Manager duyet yeu cau nghi phep");
                 } else {
                     errorMsg = "KhÃ´ng thá»ƒ phÃª duyá»‡t yÃªu cáº§u";
                 }
@@ -144,6 +149,10 @@ public class YeuCauNghiManagerServlet extends HttpServlet {
                 boolean success = yeuCauNghiService.rejectYeuCauNghi(yeuCauNghiID, managerID, ghiChu);
                 if (success) {
                     successMsg = "ÄÃ£ tá»« chá»‘i yÃªu cáº§u nghá»‰";
+                    AuditLogService.log(req, manager,
+                        AuditLogService.ACTION_REJECT, AuditLogService.ENTITY_YEU_CAU_NGHI,
+                        String.valueOf(yeuCauNghiID), "Yeu cau nghi #" + yeuCauNghiID,
+                        "Manager tu choi yeu cau nghi phep");
                 } else {
                     errorMsg = "KhÃ´ng thá»ƒ tá»« chá»‘i yÃªu cáº§u";
                 }

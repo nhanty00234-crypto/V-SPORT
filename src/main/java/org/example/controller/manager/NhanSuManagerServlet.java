@@ -15,6 +15,7 @@ import org.example.service.manager.NhanSuService.StaffCreateRequest;
 import org.example.service.manager.NhanSuService.StaffUpdateRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.AuditLogService;
 
 import java.io.IOException;
 import java.time.LocalTime;
@@ -122,8 +123,13 @@ public class NhanSuManagerServlet extends HttpServlet {
                 createReq.setRoleId(Integer.parseInt(req.getParameter("roleId")));
                 createReq.setPassword(req.getParameter("password"));
                 
-                nhanSuService.createStaff(createReq, managerCoSoId, user.getAccountId());
+                int newStaffId = nhanSuService.createStaff(createReq, managerCoSoId, user.getAccountId());
+                String newStaffName = createReq.getFullName() != null ? createReq.getFullName() : createReq.getUsername();
                 session.setAttribute("message", "Thêm nhân viên thành công!");
+                AuditLogService.log(req, user,
+                    AuditLogService.ACTION_ADD_STAFF, AuditLogService.ENTITY_ACCOUNT,
+                    String.valueOf(newStaffId), newStaffName,
+                    "Manager thêm nhân viên vào chi nhánh");
                 resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
                 return;
             } 
@@ -196,8 +202,15 @@ public class NhanSuManagerServlet extends HttpServlet {
             } 
             else if ("delete".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("id"));
+                TaiKhoan staffToDelete = null;
+                try { staffToDelete = nhanSuService.getStaffById(accountId, managerCoSoId); } catch (Exception ignored) {}
+                String staffName = (staffToDelete != null && staffToDelete.getFullName() != null) ? staffToDelete.getFullName() : "ID=" + accountId;
                 nhanSuService.deleteStaff(accountId, managerCoSoId);
                 session.setAttribute("message", "Xóa nhân viên thành công! Bạn có thể vào trang Thùng rác để khôi phục.");
+                AuditLogService.log(req, user,
+                    AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_ACCOUNT,
+                    String.valueOf(accountId), staffName,
+                    "Manager xóa mềm nhân viên");
                 resp.setStatus(HttpServletResponse.SC_OK);
             } 
             else if ("restore".equals(action)) {

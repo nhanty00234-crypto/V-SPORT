@@ -18,6 +18,7 @@ import org.example.model.SanPham_DichVu;
 import org.example.model.TaiKhoan;
 import org.example.service.manager.NhanSuService;
 import org.example.service.manager.NhanSuService.NhanSuDTO;
+import org.example.service.AuditLogService;
 import org.example.util.Constants;
 
 import java.io.IOException;
@@ -104,6 +105,12 @@ public class ThungRacManagerServlet extends HttpServlet {
                 }
                 if (success) {
                     session.setAttribute("successMsg", "Khôi phục thành công.");
+                    AuditLogService.log(req, user,
+                        AuditLogService.ACTION_RESTORE, type.equals("nhansu") ? AuditLogService.ENTITY_ACCOUNT
+                            : type.equals("san") ? AuditLogService.ENTITY_SAN
+                            : type.equals("loaisan") ? AuditLogService.ENTITY_LOAI_SAN : AuditLogService.ENTITY_SAN_PHAM,
+                        String.valueOf(id), "ID=" + id,
+                        "Manager khôi phục từ thùng rác: loại=" + type);
                 } else {
                     session.setAttribute("errorMsg", "Khôi phục thất bại.");
                 }
@@ -136,6 +143,12 @@ public class ThungRacManagerServlet extends HttpServlet {
                 }
                 if (success) {
                     session.setAttribute("successMsg", "Đã xóa vĩnh viễn dữ liệu thành công.");
+                    AuditLogService.log(req, user,
+                        AuditLogService.ACTION_PERMANENT_DELETE, type.equals("nhansu") ? AuditLogService.ENTITY_ACCOUNT
+                            : type.equals("san") ? AuditLogService.ENTITY_SAN
+                            : type.equals("loaisan") ? AuditLogService.ENTITY_LOAI_SAN : AuditLogService.ENTITY_SAN_PHAM,
+                        String.valueOf(id), "ID=" + id,
+                        "Manager xóa vĩnh viễn từ thùng rác: loại=" + type);
                 } else {
                     session.setAttribute("errorMsg", "Không thể xóa vĩnh viễn dữ liệu.");
                 }

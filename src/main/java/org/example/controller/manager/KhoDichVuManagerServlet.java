@@ -20,6 +20,7 @@ import jakarta.persistence.EntityTransaction;
 import org.example.util.JPAUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.AuditLogService;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -254,6 +255,10 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 boolean success = sanPhamDAO.insert(sp);
                 if (success) {
                     session.setAttribute("successMsg", "Thêm sản phẩm mới thành công.");
+                    AuditLogService.log(req, user,
+                        AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_SAN_PHAM,
+                        String.valueOf(sp.getSanPhamID()), sp.getTenSanPham(),
+                        "Manager thêm sản phẩm/dịch vụ");
                 } else {
                     session.setAttribute("errorMsg", "Không thể thêm sản phẩm vào cơ sở dữ liệu.");
                 }
@@ -324,6 +329,10 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                 boolean success = sanPhamDAO.update(sp);
                 if (success) {
                     session.setAttribute("successMsg", "Cập nhật sản phẩm thành công.");
+                    AuditLogService.log(req, user,
+                        AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_SAN_PHAM,
+                        String.valueOf(sp.getSanPhamID()), sp.getTenSanPham(),
+                        "Manager cập nhật sản phẩm/dịch vụ");
                 } else {
                     session.setAttribute("errorMsg", "Lỗi khi cập nhật sản phẩm.");
                 }
@@ -339,9 +348,15 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                     return;
                 }
 
+                String tenSanPham = sp.getTenSanPham();
+                int spId = sp.getSanPhamID();
                 boolean success = sanPhamDAO.softDelete(id, user.getAccountId());
                 if (success) {
                     session.setAttribute("successMsg", "Đã chuyển sản phẩm/dịch vụ vào Thùng rác. Bạn có thể vào trang Thùng rác để khôi phục.");
+                    AuditLogService.log(req, user,
+                        AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_SAN_PHAM,
+                        String.valueOf(spId), tenSanPham,
+                        "Manager xóa mềm sản phẩm/dịch vụ");
                 } else {
                     session.setAttribute("errorMsg", "Không thể thực hiện xóa sản phẩm.");
                 }
