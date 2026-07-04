@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.AuditLogService;
 import org.example.dao.CoSoDAO;
 import org.example.dao.impl.CoSoDAOImpl;
 import org.example.dao.TaiKhoanDAO;
@@ -210,16 +211,30 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
         chiNhanh.setLoaiHinhKinhDoanh(loaiHinh);
         chiNhanh.setSoLuongSanDuKien(totalCourts);
 
+        TaiKhoan user = (TaiKhoan) req.getSession().getAttribute("user");
+
         if (path.equals("/admin/chi-nhanh/them")) {
             chiNhanhDAO.addCoSo(chiNhanh);
             // Dynamic court synchronization for new branch
             syncCourtsForBranch(chiNhanh.getCoSoID(), sportCounts);
+            if (user != null) {
+                AuditLogService.log(req, user,
+                    AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_CO_SO,
+                    String.valueOf(chiNhanh.getCoSoID()), chiNhanh.getTenCoSo(),
+                    "Admin tạo chi nhánh mới");
+            }
         } else if (path.equals("/admin/chi-nhanh/sua")) {
             int id = Integer.parseInt(req.getParameter("id"));
             chiNhanh.setCoSoID(id);
             chiNhanhDAO.updateCoSo(chiNhanh);
             // Dynamic court synchronization for edited branch
             syncCourtsForBranch(id, sportCounts);
+            if (user != null) {
+                AuditLogService.log(req, user,
+                    AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_CO_SO,
+                    String.valueOf(chiNhanh.getCoSoID()), chiNhanh.getTenCoSo(),
+                    "Admin cập nhật thông tin chi nhánh");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/admin/chi-nhanh");

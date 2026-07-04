@@ -23,6 +23,7 @@ import org.example.model.CaLamViec;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.AuditLogService;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -363,18 +364,55 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             int id = Integer.parseInt(req.getParameter("id"));
             TaiKhoan accToDelete = TaiKhoanDAO.getAccountById(id);
             if (accToDelete != null && accToDelete.getRoleId() != 1) {
-                TaiKhoanDAO.softDeleteAccount(id);
+                boolean deleted = TaiKhoanDAO.softDeleteAccount(id);
+                if (deleted) {
+                    req.getSession().setAttribute("message", "Đã chuyển tài khoản vào thùng rác.");
+                    AuditLogService.log(req, (TaiKhoan) req.getSession().getAttribute("user"),
+                        AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_ACCOUNT,
+                        String.valueOf(id),
+                        accToDelete.getFullName() != null ? accToDelete.getFullName() : accToDelete.getUsername(),
+                        "Admin chuyển tài khoản vào thùng rác");
+                } else {
+                    req.getSession().setAttribute("error", "Không thể chuyển tài khoản vào thùng rác.");
+                }
+            } else {
+                req.getSession().setAttribute("error", "Không thể xóa tài khoản Quản trị viên.");
             }
             resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
             return;
         } else if ("restore".equals(action)) {
             int id = Integer.parseInt(req.getParameter("id"));
-            TaiKhoanDAO.restoreAccount(id);
+            boolean restored = TaiKhoanDAO.restoreAccount(id);
+            if (restored) {
+                req.getSession().setAttribute("message", "Đã khôi phục tài khoản thành công.");
+                TaiKhoan restoredAcc = TaiKhoanDAO.getAccountById(id);
+                AuditLogService.log(req, (TaiKhoan) req.getSession().getAttribute("user"),
+                    AuditLogService.ACTION_RESTORE, AuditLogService.ENTITY_ACCOUNT,
+                    String.valueOf(id),
+                    restoredAcc != null ? restoredAcc.getFullName() : String.valueOf(id),
+                    "Admin khôi phục tài khoản");
+            } else {
+                req.getSession().setAttribute("error", "Không thể khôi phục tài khoản.");
+            }
             resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
             return;
         } else if ("permanentDelete".equals(action)) {
-            int id = Integer.parseInt(req.getParameter("id"));
-            TaiKhoanDAO.permanentDeleteAccount(id);
+            try {
+                int id = Integer.parseInt(req.getParameter("id"));
+                boolean deleted = TaiKhoanDAO.permanentDeleteAccount(id);
+                if (deleted) {
+                    req.getSession().setAttribute("message", "Đã xóa vĩnh viễn tài khoản thành công.");
+                    AuditLogService.log(req, (TaiKhoan) req.getSession().getAttribute("user"),
+                        AuditLogService.ACTION_PERMANENT_DELETE, AuditLogService.ENTITY_ACCOUNT,
+                        String.valueOf(id), String.valueOf(id),
+                        "Admin xóa vĩnh viễn tài khoản ID=" + id);
+                } else {
+                    req.getSession().setAttribute("error", "Không thể xóa vĩnh viễn tài khoản. Tài khoản có thể đang liên kết với dữ liệu khác.");
+                }
+            } catch (Exception e) {
+                logger.error("Lỗi xóa vĩnh viễn tài khoản: {}", e.getMessage(), e);
+                req.getSession().setAttribute("error", "Lỗi khi xóa vĩnh viễn: " + e.getMessage());
+            }
             resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
             return;
         }

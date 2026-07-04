@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.AuditLogService;
 import org.example.model.CoSo;
 import org.example.model.LoaiSan;
 import org.example.model.San;
@@ -86,6 +87,10 @@ public class QuanLySanServlet extends HttpServlet {
                 em.persist(san);
                 trans.commit();
                 session.setAttribute("message", "Thêm sân thành công!");
+                AuditLogService.log(request, user,
+                    AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_SAN,
+                    String.valueOf(san.getSanID()), san.getTenSan(),
+                    "Admin tạo sân mới tại chi nhánh ID=" + san.getCoSoID());
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("sanID"));
                 trans.begin();
@@ -113,6 +118,10 @@ public class QuanLySanServlet extends HttpServlet {
                     em.merge(san);
                     trans.commit();
                     session.setAttribute("message", "Cập nhật sân thành công!");
+                    AuditLogService.log(request, user,
+                        AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_SAN,
+                        String.valueOf(san.getSanID()), san.getTenSan(),
+                        "Admin cập nhật thông tin sân");
                 } else {
                     trans.rollback();
                 }
@@ -128,10 +137,16 @@ public class QuanLySanServlet extends HttpServlet {
                         }
                     }
                     // Logical Delete: Set status to Tạm đóng instead of hard deleting
+                    String tenSan = san.getTenSan();
+                    int sanId = san.getSanID(); // capture before merge
                     san.setTrangThai("Tạm đóng");
                     em.merge(san);
                     trans.commit();
                     session.setAttribute("message", "Đã chuyển trạng thái sân sang Tạm đóng (Xóa mềm).");
+                    AuditLogService.log(request, user,
+                        AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_SAN,
+                        String.valueOf(sanId), tenSan,
+                        "Admin xóa mềm sân");
                 } else {
                     trans.rollback();
                 }
