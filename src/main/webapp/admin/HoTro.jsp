@@ -121,26 +121,9 @@
 </script>
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Hỗ trợ kỹ thuật & Vận hành</h1>
-      <p class="text-xs text-zinc-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">support_agent</span>Liên hệ trực tiếp Quản trị viên hệ thống</p>
-    </div>
-  </div>
-  <div class="flex items-center gap-1.5">
-    <button onclick="location.href='HoTro.html'" class="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs font-semibold">
-      <span class="material-symbols-outlined text-[15px]">help</span>Hỗ trợ
-    </button>
-    <button class="relative p-2 rounded-lg hover:bg-zinc-100 text-zinc-500">
-      <span class="material-symbols-outlined text-[20px]">notifications</span>
-      <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 live-dot"></span>
-    </button>
-    <div class="w-px h-6 bg-zinc-200 mx-1"></div>
-    <jsp:include page="/admin/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<jsp:include page="/admin/common/header.jsp">
+  <jsp:param name="pageTitle" value="Hỗ trợ kỹ thuật &amp; Vận hành"/>
+</jsp:include>
 
 <!-- Main -->
 <main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col lg:flex-row gap-5 h-[calc(100vh-64px)] overflow-hidden">

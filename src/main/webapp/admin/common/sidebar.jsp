@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
+<%-- Tabler Icons – custom icon set for V-SPORT (injected once via sidebar) --%>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+
 <!-- ═══════════════════════════════════════════════════════
      SHARED ADMIN CSS – included once via sidebar.jsp
 ════════════════════════════════════════════════════════ -->
@@ -29,7 +32,7 @@
     content:'';position:absolute;left:0;top:6px;bottom:6px;
     width:3px;background:#2563eb;border-radius:0 4px 4px 0;
   }
-  .nav-link .material-symbols-outlined{font-size:18px;flex-shrink:0}
+  .nav-link .ti{font-size:18px;flex-shrink:0}
 
   /* ── Cards ── */
   .adm-card{
@@ -93,7 +96,7 @@
     <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700
                 flex items-center justify-center shrink-0
                 shadow-md shadow-blue-200/60">
-      <span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings:'FILL' 1">sports_tennis</span>
+      <i class="ti ti-ball-tennis text-white text-[20px]"></i>
     </div>
     <div>
       <p class="text-[15px] font-black text-slate-900 tracking-tight leading-none">V-SPORT</p>
@@ -110,7 +113,7 @@
 
     <a href="${pageContext.request.contextPath}/admin/tong-quan"
        class="nav-link ${uri.contains('/admin/tong-quan') || uri.contains('/TongQuan') ? 'active' : ''}">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">space_dashboard</span>
+      <i class="ti ti-layout-dashboard"></i>
       Tổng quan
     </a>
 
@@ -119,25 +122,25 @@
 
     <a href="${pageContext.request.contextPath}/admin/chi-nhanh"
        class="nav-link ${uri.contains('/admin/chi-nhanh') || uri.contains('/QuanLyChiNhanh') ? 'active' : ''}">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">location_on</span>
+      <i class="ti ti-building-stadium"></i>
       Cơ Sở
     </a>
 
     <a href="${pageContext.request.contextPath}/admin/nhan-su"
        class="nav-link ${uri.contains('/admin/nhan-su') || uri.contains('/NhanSu') ? 'active' : ''}">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">groups</span>
+      <i class="ti ti-users-group"></i>
       Nhân sự
     </a>
 
     <a href="${pageContext.request.contextPath}/admin/quan-ly-owner"
        class="nav-link ${uri.contains('/admin/quan-ly-owner') || uri.contains('/QuanLyOwner') ? 'active' : ''}">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">manage_accounts</span>
+      <i class="ti ti-user-cog"></i>
       Quản lý Owner
     </a>
 
     <a href="${pageContext.request.contextPath}/admin/audit-log"
        class="nav-link ${uri.contains('/admin/audit-log') ? 'active' : ''}">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">history</span>
+      <i class="ti ti-history"></i>
       Nhật Ký Thao Tác
     </a>
   </nav>
@@ -146,7 +149,7 @@
   <div class="px-3 pb-4 pt-3 border-t border-slate-100 shrink-0">
     <a href="${pageContext.request.contextPath}/logout"
        class="nav-link text-red-500 hover:bg-red-50 hover:text-red-600 text-[13px] font-semibold">
-      <span class="material-symbols-outlined text-red-400" style="font-size:17px">logout</span>
+      <i class="ti ti-logout text-red-400 text-[17px]"></i>
       Đăng xuất
     </a>
   </div>

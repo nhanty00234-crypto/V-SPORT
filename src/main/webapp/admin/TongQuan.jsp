@@ -18,31 +18,12 @@ body{font-family:'Inter',sans-serif}
 <jsp:include page="/admin/common/sidebar.jsp"/>
 
 <!-- ── TOP BAR ── -->
-<header class="fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-10 flex items-center justify-between px-4 lg:px-8 xl:px-10" style="height:60px">
-  <div class="flex items-center gap-3">
-    <button data-sidebar-toggle class="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
-      <span class="material-symbols-outlined text-[20px]">menu</span>
-    </button>
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-blue-500 text-[18px]" style="font-variation-settings:'FILL' 1">space_dashboard</span>
-      <div>
-        <h1 class="text-sm font-bold text-slate-900 leading-tight">Tổng quan hệ thống</h1>
-        <p class="text-[11px] text-slate-400 leading-tight">Admin · V-Sport</p>
-      </div>
-    </div>
-  </div>
-  <div class="flex items-center gap-2">
-    <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
-      <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot shrink-0"></span>
-      <span class="text-xs font-semibold text-emerald-700">Hệ thống hoạt động</span>
-    </div>
-    <div class="w-px h-6 bg-slate-200 mx-1"></div>
-    <jsp:include page="/admin/common/profile_dropdown.jsp"/>
-  </div>
-</header>
+<jsp:include page="/admin/common/header.jsp">
+  <jsp:param name="pageTitle" value="Tổng quan hệ thống"/>
+</jsp:include>
 
 <!-- ── MAIN ── -->
-<main class="lg:ml-[260px] pt-[60px] px-4 lg:px-8 xl:px-10 pb-10 flex flex-col gap-5 min-h-screen">
+<main class="lg:ml-[260px] mt-[64px] px-4 lg:px-8 xl:px-10 pb-10 flex flex-col gap-5 min-h-screen">
 
   <!-- HERO BANNER -->
   <section class="reveal mt-5 rounded-2xl overflow-hidden relative"

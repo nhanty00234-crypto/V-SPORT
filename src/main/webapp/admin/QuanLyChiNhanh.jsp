@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -9,47 +9,69 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 <style>
 body { font-family: 'Inter', sans-serif; }
-  .card { background:#fff;border:1px solid #e4e4e7;border-radius:16px; transition:box-shadow .2s, transform .2s; }
-  .card-hover:hover { box-shadow:0 8px 24px -8px rgba(0,0,0,.08); transform:translateY(-2px); }
-  .badge { display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600; }
-  .badge-green { background:#dcfce7;color:#15803d; }
-  .badge-gray { background:#f4f4f5;color:#52525b; }
-  .badge-amber { background:#fef3c7;color:#b45309; }
-  .badge-red { background:#fee2e2;color:#b91c1c; }
-  
-  /* Larger Number Input Arrows */
-  input[type="number"]::-webkit-inner-spin-button, 
-  input[type="number"]::-webkit-outer-spin-button { 
-    opacity: 1;
-    height: 30px;
-    width: 30px;
-    cursor: pointer;
-  }
-  
-  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:6px}
-  ::-webkit-scrollbar-thumb:hover{background:#a1a1aa}
-  
-  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-  main > section { animation: fadeUp .4s ease both; }
-  
-  button { transition: transform .12s ease, opacity .15s ease, background-color .15s ease; }
-  button:active:not([disabled]) { transform: scale(.97); }
+  .badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em; }
+  .badge-green  { background:#dcfce7;color:#15803d; }
+  .badge-red    { background:#fee2e2;color:#b91c1c; }
+  .badge-amber  { background:#fef3c7;color:#b45309; }
 
-  @keyframes contentZoomIn {
-    from {
-      opacity: 0;
-      transform: scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  /* Card */
+  .cs-card {
+    background:#fff;border:1px solid #e4e4e7;border-radius:18px;
+    transition:box-shadow .22s,transform .22s;
+    position:relative;overflow:hidden;
   }
-  main {
-    animation: contentZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    transform-origin: center top;
+  .cs-card::before {
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,#2563eb,#60a5fa);
+    opacity:0;transition:opacity .22s;
+  }
+  .cs-card:hover { box-shadow:0 8px 32px -8px rgba(37,99,235,.15); transform:translateY(-2px); }
+  .cs-card:hover::before { opacity:1; }
+
+  /* Avatar */
+  .cs-avatar {
+    width:72px;height:72px;border-radius:16px;object-fit:cover;
+    border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.08);
+    background:#f1f5f9;flex-shrink:0;
+  }
+  .cs-avatar-placeholder {
+    width:72px;height:72px;border-radius:16px;
+    background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+    display:flex;align-items:center;justify-content:center;
+    border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.08);
+    flex-shrink:0;
+  }
+
+  /* Sport tag */
+  .sport-tag {
+    display:inline-flex;align-items:center;gap:4px;padding:3px 8px;
+    border-radius:99px;font-size:10px;font-weight:600;
+    background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;
+  }
+
+  /* Info row */
+  .info-row { display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b; }
+  .info-row .ti { font-size:14px;color:#94a3b8;flex-shrink:0; }
+
+  /* Scroll reveal */
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+  .d0{transition-delay:0ms}.d1{transition-delay:60ms}.d2{transition-delay:120ms}.d3{transition-delay:180ms}
+  .d4{transition-delay:240ms}.d5{transition-delay:300ms}
+
+  @keyframes contentZoomIn { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
+  main { animation:contentZoomIn .35s cubic-bezier(.34,1.56,.64,1) forwards; transform-origin:center top; }
+
+  ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+
+  /* Stat badge */
+  .stat-chip {
+    display:inline-flex;align-items:center;gap:5px;padding:6px 14px;
+    border-radius:99px;font-size:12px;font-weight:600;
   }
 </style>
 </head>
@@ -59,124 +81,173 @@ body { font-family: 'Inter', sans-serif; }
 <jsp:include page="/admin/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Cấu hình Cơ Sở</h1>
-     
-    </div>
-  </div>
-  
-  <div class="flex items-center gap-1.5">
-    <jsp:include page="/admin/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<jsp:include page="/admin/common/header.jsp">
+  <jsp:param name="pageTitle" value="Cấu hình Cơ Sở"/>
+</jsp:include>
 
 <!-- Main Content -->
-<main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
-  
-  <section>
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-      <div class="flex items-center gap-4">
-        <h2 class="text-lg font-bold text-zinc-900">Danh sách Cơ Sở <span class="text-xs bg-zinc-100 px-1.5 py-0.5 rounded font-medium text-zinc-600">${dsChiNhanh.size()}</span></h2>
+<main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col gap-6">
+
+  <!-- Alert Messages -->
+  <c:if test="${not empty sessionScope.error}">
+    <div class="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm">
+      <i class="ti ti-alert-circle text-xl shrink-0 mt-0.5"></i>
+      <div>
+        <span class="font-bold block text-red-700">Lỗi thao tác</span>
+        <span class="text-red-600/90 mt-0.5 block">${sessionScope.error}</span>
       </div>
-      <button onclick="document.getElementById('modalThem').classList.remove('hidden')" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-200">
-        <span class="material-symbols-outlined text-[18px]">add_location</span>Thêm Cơ Sở
-      </button>
     </div>
-
-    <!-- Alert Messages -->
-    <c:if test="${not empty sessionScope.error}">
-      <div class="mb-4 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-start gap-3">
-        <span class="material-symbols-outlined text-[20px] shrink-0">error</span>
-        <div>
-          <span class="font-bold block text-red-700">Lỗi thao tác</span>
-          <span class="text-red-600/95 leading-normal block mt-0.5">${sessionScope.error}</span>
-        </div>
-        <% session.removeAttribute("error"); %>
+    <% session.removeAttribute("error"); %>
+  </c:if>
+  <c:if test="${not empty sessionScope.message}">
+    <div class="flex items-start gap-3 p-4 bg-green-50 border border-green-100 rounded-2xl text-green-600 text-sm">
+      <i class="ti ti-circle-check text-xl shrink-0 mt-0.5"></i>
+      <div>
+        <span class="font-bold block text-green-700">Thành công</span>
+        <span class="text-green-600/90 mt-0.5 block">${sessionScope.message}</span>
       </div>
-    </c:if>
-    <c:if test="${not empty sessionScope.message}">
-      <div class="mb-4 p-4 bg-green-50 border border-green-100 rounded-xl text-green-600 text-sm flex items-start gap-3">
-        <span class="material-symbols-outlined text-[20px] shrink-0">check_circle</span>
-        <div>
-          <span class="font-bold block text-green-700">Thành công</span>
-          <span class="text-green-600/95 leading-normal block mt-0.5">${sessionScope.message}</span>
-        </div>
-        <% session.removeAttribute("message"); %>
-      </div>
-    </c:if>
+    </div>
+    <% session.removeAttribute("message"); %>
+  </c:if>
 
-    <div class="card overflow-hidden">
-      <table class="w-full text-sm">
-        <thead class="bg-zinc-50 border-b border-zinc-200">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Cơ Sở</th>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs hidden md:table-cell">Địa chỉ</th>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs hidden lg:table-cell">Liên hệ</th>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs hidden lg:table-cell">Giờ hoạt động</th>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Trạng thái</th>
-            <th class="px-4 py-3 text-right font-semibold text-zinc-600 text-xs">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-zinc-100">
-          <c:forEach var="cn" items="${dsChiNhanh}">
-            <tr class="hover:bg-zinc-50 transition-colors">
-              <td class="px-4 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0 border border-zinc-200 overflow-hidden">
-                    <img src="${cn.hinhAnh != null ? cn.hinhAnh : 'https://placehold.co/100x100?text=V'}" class="w-full h-full object-cover">
-                  </div>
-                  <div>
-                    <p class="font-bold text-zinc-900">${cn.tenCoSo}</p>
-                    <p class="text-[11px] text-zinc-500">${cn.loaiHinhKinhDoanh}</p>
-                  </div>
-                </div>
-              </td>
-              <td class="px-4 py-4 text-zinc-600 text-xs hidden md:table-cell max-w-[200px] truncate">
-                ${cn.diaChi}
-              </td>
-              <td class="px-4 py-4 text-zinc-600 text-xs hidden lg:table-cell">
-                ${cn.soDienThoai}
-              </td>
-              <td class="px-4 py-4 text-zinc-500 text-[11px] hidden lg:table-cell">
-                <div class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[14px]">schedule</span>
-                    ${cn.gioMoCua} - ${cn.gioDongCua}
-                </div>
-              </td>
-              <td class="px-4 py-4">
-                <span class="badge ${cn.trangThai == 'Đang hoạt động' ? 'badge-green' : 'badge-red'}">${cn.trangThai}</span>
-              </td>
-              <td class="px-4 py-4 text-right">
-                <div class="flex items-center justify-end gap-1.5">
-                  <a href="${pageContext.request.contextPath}/admin/chi-nhanh/sua?id=${cn.coSoID}" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                  </a>
-                  <button onclick="if(confirm('Xóa Cơ Sở này?')) location.href='${pageContext.request.contextPath}/admin/chi-nhanh/xoa?id=${cn.coSoID}'" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </c:forEach>
-        </tbody>
-      </table>
-      <div class="px-4 py-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-500 font-medium">
-        <span>Hiển thị ${dsChiNhanh.size()} Cơ Sở</span>
-        <div class="flex items-center gap-1">
-          <button class="px-2 py-1 rounded hover:bg-zinc-100 disabled:opacity-40" disabled><span class="material-symbols-outlined text-[14px]">chevron_left</span></button>
-          <button class="px-2.5 py-1 rounded bg-zinc-900 text-white font-bold">1</button>
-          <button class="px-2 py-1 rounded hover:bg-zinc-100"><span class="material-symbols-outlined text-[14px]">chevron_right</span></button>
+  <!-- ── Tiêu đề & thống kê ── -->
+  <section class="reveal d0">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-black text-zinc-900 tracking-tight">Danh sách Cơ Sở
+          <span class="ml-2 text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg font-semibold">${dsChiNhanh.size()}</span>
+        </h2>
+        <p class="text-xs text-zinc-500 mt-0.5">Quản lý tất cả chi nhánh và cơ sở thể thao</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Quick stats -->
+        <c:set var="activeCount" value="0"/>
+        <c:forEach var="cn" items="${dsChiNhanh}">
+          <c:if test="${cn.trangThai == 'Đang hoạt động'}">
+            <c:set var="activeCount" value="${activeCount + 1}"/>
+          </c:if>
+        </c:forEach>
+        <div class="stat-chip bg-green-50 text-green-700 border border-green-200">
+          <i class="ti ti-circle-check text-sm"></i> ${activeCount} hoạt động
         </div>
+        <button onclick="document.getElementById('modalThem').classList.remove('hidden')"
+                class="flex items-center gap-2 h-10 px-5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+          <i class="ti ti-map-pin-plus text-base"></i>Thêm Cơ Sở
+        </button>
       </div>
     </div>
   </section>
 
+  <!-- ── Grid Cards ── -->
+  <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    <c:forEach var="cn" items="${dsChiNhanh}" varStatus="st">
+      <c:set var="delay" value="${st.index < 6 ? st.index : 5}"/>
+      <div class="cs-card reveal d${delay} p-5 flex flex-col gap-4">
+
+        <!-- Top row: avatar + name + status -->
+        <div class="flex items-start gap-4">
+          <c:choose>
+            <c:when test="${not empty cn.hinhAnh}">
+              <img src="${cn.hinhAnh}" alt="${cn.tenCoSo}" class="cs-avatar">
+            </c:when>
+            <c:otherwise>
+              <div class="cs-avatar-placeholder">
+                <i class="ti ti-building-stadium text-blue-500 text-3xl"></i>
+              </div>
+            </c:otherwise>
+          </c:choose>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="font-bold text-zinc-900 text-base leading-tight truncate">${cn.tenCoSo}</p>
+                <c:if test="${not empty cn.loaiHinhKinhDoanh}">
+                  <div class="flex flex-wrap gap-1 mt-1.5">
+                    <c:forTokens items="${cn.loaiHinhKinhDoanh}" delims="," var="sport">
+                      <span class="sport-tag">
+                        <i class="ti ti-ball-football text-[10px]"></i>${sport.trim()}
+                      </span>
+                    </c:forTokens>
+                  </div>
+                </c:if>
+              </div>
+              <span class="badge ${cn.trangThai == 'Đang hoạt động' ? 'badge-green' : 'badge-red'} shrink-0">
+                ${cn.trangThai}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-zinc-100"></div>
+
+        <!-- Info rows -->
+        <div class="flex flex-col gap-2">
+          <c:if test="${not empty cn.diaChi}">
+            <div class="info-row">
+              <i class="ti ti-map-pin ti"></i>
+              <span class="line-clamp-2 leading-relaxed">${cn.diaChi}</span>
+            </div>
+          </c:if>
+          <c:if test="${not empty cn.soDienThoai}">
+            <div class="info-row">
+              <i class="ti ti-phone ti"></i>
+              <span>${cn.soDienThoai}</span>
+            </div>
+          </c:if>
+          <c:if test="${not empty cn.gioMoCua && not empty cn.gioDongCua}">
+            <div class="info-row">
+              <i class="ti ti-clock ti"></i>
+              <span>${cn.gioMoCua} – ${cn.gioDongCua}</span>
+            </div>
+          </c:if>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100 mt-auto">
+          <button type="button" onclick="openModalSua(${cn.coSoID})"
+             class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer">
+            <i class="ti ti-edit text-sm"></i>Chỉnh sửa
+          </button>
+          <button onclick="confirmDelete(${cn.coSoID}, '${cn.tenCoSo}')"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 transition-all">
+            <i class="ti ti-trash text-sm"></i>Xóa
+          </button>
+        </div>
+
+      </div>
+    </c:forEach>
+
+    <!-- Empty state -->
+    <c:if test="${empty dsChiNhanh}">
+      <div class="md:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-20 text-zinc-400">
+        <i class="ti ti-building-stadium text-6xl mb-4 opacity-30"></i>
+        <p class="text-base font-semibold">Chưa có cơ sở nào</p>
+        <p class="text-sm mt-1">Nhấn "Thêm Cơ Sở" để tạo chi nhánh đầu tiên</p>
+      </div>
+    </c:if>
+  </section>
+
 </main>
 
-<!-- Modal Thêm Cơ Sở (3 bước: Thông tin → OTP → Cấu hình & Lưu) -->
+<!-- ═══ Modal Xác nhận Xóa ═══ -->
+<div id="modalDelete" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeDelete()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[380px] p-6 text-center">
+    <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
+      <i class="ti ti-trash text-red-500 text-3xl"></i>
+    </div>
+    <h3 class="text-base font-bold text-zinc-900 mb-1">Xác nhận xóa cơ sở</h3>
+    <p class="text-sm text-zinc-500 mb-6" id="deleteMsg">Bạn có chắc muốn xóa cơ sở này?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDelete()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
+      <a id="deleteBtn" href="#" class="flex-1 h-10 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-red-200">
+        <i class="ti ti-trash text-sm"></i>Xóa
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal Thêm Cơ Sở (3 bước) ═══ -->
 <div id="modalThem" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModalThem()"></div>
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[560px] max-h-[92vh] flex flex-col">
@@ -194,7 +265,7 @@ body { font-family: 'Inter', sans-serif; }
         <span id="sLabel" class="text-xs text-zinc-400 font-medium">Bước 1 / 3</span>
       </div>
       <button onclick="closeModalThem()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400">
-        <span class="material-symbols-outlined text-[18px]">close</span>
+        <i class="ti ti-x text-lg"></i>
       </button>
     </div>
 
@@ -230,7 +301,12 @@ body { font-family: 'Inter', sans-serif; }
 
       <!-- Địa chỉ -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-zinc-700">Địa chỉ <span class="text-red-500">*</span></label>
+        <label class="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+          <span>Địa chỉ <span class="text-red-500">*</span></span>
+          <button type="button" onclick="autoFillAddress()" class="flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 border border-blue-150 px-2 py-0.5 rounded-lg transition-all normal-case">
+            <i class="ti ti-map-pin text-[11px]"></i> Định vị địa chỉ / Tọa độ GG Map
+          </button>
+        </label>
         <input type="text" id="adminDiaChi" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
                class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
       </div>
@@ -239,7 +315,7 @@ body { font-family: 'Inter', sans-serif; }
         <button type="button" onclick="closeModalThem()" class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
         <button type="button" onclick="adminSendOtp()" id="btnSendOtp"
                 class="h-10 px-6 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200 flex items-center gap-2">
-          <span class="material-symbols-outlined text-[15px]">send</span> Tiếp tục — Xác thực Email
+          <i class="ti ti-send text-sm"></i> Tiếp tục — Xác thực Email
         </button>
       </div>
     </div>
@@ -248,7 +324,7 @@ body { font-family: 'Inter', sans-serif; }
     <div id="aStep2" class="hidden p-6 flex flex-col gap-5">
       <div class="text-center">
         <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
-          <span class="material-symbols-outlined text-blue-600 text-3xl">mark_email_read</span>
+          <i class="ti ti-mail-check text-blue-600 text-3xl"></i>
         </div>
         <h4 class="text-base font-bold text-zinc-900 mb-1">Xác thực Email</h4>
         <p class="text-sm text-zinc-500">Mã OTP 6 chữ số đã được gửi đến</p>
@@ -269,11 +345,11 @@ body { font-family: 'Inter', sans-serif; }
 
       <button type="button" onclick="adminVerifyOtp()" id="btnVerifyOtp"
               class="w-full h-11 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-[15px]">verified</span> Xác thực OTP
+        <i class="ti ti-shield-check text-sm"></i> Xác thực OTP
       </button>
       <div class="flex items-center justify-between -mt-1">
         <button type="button" onclick="adminGoStep(1)" class="text-zinc-400 hover:text-zinc-700 text-sm flex items-center gap-1 bg-transparent border-none cursor-pointer">
-          <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
+          <i class="ti ti-arrow-left text-sm"></i> Quay lại
         </button>
         <button type="button" onclick="adminResendOtp()" id="btnResend"
                 class="text-blue-500 hover:text-blue-700 text-sm disabled:opacity-40 bg-transparent border-none cursor-pointer" disabled>
@@ -383,13 +459,13 @@ body { font-family: 'Inter', sans-serif; }
         <div class="flex justify-between gap-3 pt-3 border-t border-zinc-50">
           <button type="button" onclick="adminGoStep(1)"
                   class="h-10 px-4 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-500 hover:bg-zinc-50 transition-all flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
+            <i class="ti ti-arrow-left text-sm"></i> Quay lại
           </button>
           <div class="flex gap-3">
             <button type="button" onclick="closeModalThem()" class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
             <button type="submit" onclick="return finalValidate()"
                     class="h-10 px-7 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/10 flex items-center gap-2">
-              <span class="material-symbols-outlined text-[15px]">save</span> Lưu Cơ Sở
+              <i class="ti ti-device-floppy text-sm"></i> Lưu Cơ Sở
             </button>
           </div>
         </div>
@@ -400,250 +476,597 @@ body { font-family: 'Inter', sans-serif; }
 </div>
 
 <script>
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+  // ── Mobile menu ──
+  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('-translate-x-full');
+  });
+
+  // ── Delete confirmation ──
+  function confirmDelete(id, name) {
+    document.getElementById('deleteMsg').textContent = 'Bạn có chắc muốn xóa cơ sở "' + name + '"? Hành động này không thể hoàn tác.';
+    document.getElementById('deleteBtn').href = '${pageContext.request.contextPath}/admin/chi-nhanh/xoa?id=' + id;
+    document.getElementById('modalDelete').classList.remove('hidden');
+  }
+  function closeDelete() { document.getElementById('modalDelete').classList.add('hidden'); }
+
+  // ── Scroll reveal ──
+  (function() {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }});
+    }, { threshold: 0.06 });
+    document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+  })();
+
+  // ═══════════ ADD MODAL STATE ═══════════
+  let admOtpFails = 0, admResendCount = 0, admResendTimer = null;
+
+  function adminGoStep(n) {
+    document.getElementById('aStep1').classList.toggle('hidden', n !== 1);
+    document.getElementById('aStep2').classList.toggle('hidden', n !== 2);
+    document.getElementById('aStep3').classList.toggle('hidden', n !== 3);
+    const dots = ['sDot1','sDot2','sDot3'];
+    dots.forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.className = 'w-6 h-1.5 rounded-full transition-all ' +
+        (i < n - 1 ? 'bg-green-500' : i === n - 1 ? 'bg-blue-600' : 'bg-zinc-200');
     });
+    document.getElementById('sLabel').textContent = 'Bước ' + n + ' / 3';
+    if (n === 2) setTimeout(() => document.querySelector('.adm-otp[data-index="0"]').focus(), 100);
+  }
 
-    // ═══════════ STATE ═══════════
-    let admOtpFails = 0, admResendCount = 0, admResendTimer = null;
+  function closeModalThem() {
+    document.getElementById('modalThem').classList.add('hidden');
+    adminGoStep(1);
+    document.getElementById('formThemCoSo').reset();
+    ['adminTenCoSo','adminEmail','adminPhone','adminDiaChi'].forEach(id => document.getElementById(id).value = '');
+    updateTotalCourts();
+    admOtpFails = 0; admResendCount = 0;
+    clearInterval(admResendTimer);
+    document.getElementById('adminAddError').classList.add('hidden');
+    document.getElementById('adminOtpErr').classList.add('hidden');
+    document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
+    document.querySelectorAll('.sport-checkbox').forEach(c => {
+      c.checked = false;
+      const id = c.getAttribute('onchange').match(/'([^']+)'/)[1];
+      const inp = document.getElementById(id);
+      if (inp) { inp.setAttribute('disabled','true'); inp.value = 1; }
+    });
+  }
 
-    // ═══════════ STEP NAVIGATION ═══════════
-    function adminGoStep(n) {
-        document.getElementById('aStep1').classList.toggle('hidden', n !== 1);
-        document.getElementById('aStep2').classList.toggle('hidden', n !== 2);
-        document.getElementById('aStep3').classList.toggle('hidden', n !== 3);
-        const dots = ['sDot1','sDot2','sDot3'];
-        dots.forEach((id, i) => {
-            const el = document.getElementById(id);
-            el.className = 'w-6 h-1.5 rounded-full transition-all ' +
-                (i < n - 1 ? 'bg-green-500' : i === n - 1 ? 'bg-blue-600' : 'bg-zinc-200');
-        });
-        document.getElementById('sLabel').textContent = 'Bước ' + n + ' / 3';
-        if (n === 2) setTimeout(() => document.querySelector('.adm-otp[data-index="0"]').focus(), 100);
-    }
+  function showAdminError(msg) {
+    const el = document.getElementById('adminAddError');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
 
-    function closeModalThem() {
-        document.getElementById('modalThem').classList.add('hidden');
-        adminGoStep(1);
-        document.getElementById('formThemCoSo').reset();
-        document.getElementById('adminTenCoSo').value = '';
-        document.getElementById('adminEmail').value = '';
-        document.getElementById('adminPhone').value = '';
-        document.getElementById('adminDiaChi').value = '';
-        updateTotalCourts();
+  function adminSendOtp() {
+    document.getElementById('adminAddError').classList.add('hidden');
+    const name  = document.getElementById('adminTenCoSo').value.trim();
+    const email = document.getElementById('adminEmail').value.trim();
+    const phone = document.getElementById('adminPhone').value.trim();
+    const addr  = document.getElementById('adminDiaChi').value.trim();
+
+    if (!name)  return showAdminError('Vui lòng nhập tên cơ sở.');
+    if (!email) return showAdminError('Vui lòng nhập email liên hệ.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAdminError('Email không hợp lệ.');
+    if (!phone) return showAdminError('Vui lòng nhập số điện thoại.');
+    if (!addr)  return showAdminError('Vui lòng nhập địa chỉ.');
+
+    const btn = document.getElementById('btnSendOtp');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-1"></span> Đang gửi OTP...';
+
+    fetch('${pageContext.request.contextPath}/owner/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'email=' + encodeURIComponent(email)
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-send text-sm"></i> Tiếp tục — Xác thực Email';
+      if (data.success) {
         admOtpFails = 0; admResendCount = 0;
-        clearInterval(admResendTimer);
-        document.getElementById('adminAddError').classList.add('hidden');
+        document.getElementById('adminOtpFails').textContent = '0';
+        document.getElementById('adminOtpEmailDisplay').textContent = email;
         document.getElementById('adminOtpErr').classList.add('hidden');
         document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
-        document.querySelectorAll('.sport-checkbox').forEach(c => {
-            c.checked = false;
-            const id = c.getAttribute('onchange').match(/'([^']+)'/)[1];
-            const inp = document.getElementById(id);
-            if (inp) { inp.setAttribute('disabled','true'); inp.value = 1; }
-        });
-    }
-
-    function showAdminError(msg) {
-        const el = document.getElementById('adminAddError');
-        el.textContent = msg;
-        el.classList.remove('hidden');
-    }
-
-    // ═══════════ BƯỚC 1 → GỬI OTP ═══════════
-    function adminSendOtp() {
-        document.getElementById('adminAddError').classList.add('hidden');
-        const name  = document.getElementById('adminTenCoSo').value.trim();
-        const email = document.getElementById('adminEmail').value.trim();
-        const phone = document.getElementById('adminPhone').value.trim();
-        const addr  = document.getElementById('adminDiaChi').value.trim();
-
-        if (!name)  return showAdminError('Vui lòng nhập tên cơ sở.');
-        if (!email) return showAdminError('Vui lòng nhập email liên hệ.');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAdminError('Email không hợp lệ.');
-        if (!phone) return showAdminError('Vui lòng nhập số điện thoại.');
-        if (!addr)  return showAdminError('Vui lòng nhập địa chỉ.');
-
-        const btn = document.getElementById('btnSendOtp');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-1"></span> Đang gửi OTP...';
-
-        fetch('${pageContext.request.contextPath}/owner/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'email=' + encodeURIComponent(email)
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined text-[15px]">send</span> Tiếp tục — Xác thực Email';
-            if (data.success) {
-                admOtpFails = 0; admResendCount = 0;
-                document.getElementById('adminOtpFails').textContent = '0';
-                document.getElementById('adminOtpEmailDisplay').textContent = email;
-                document.getElementById('adminOtpErr').classList.add('hidden');
-                document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
-                adminGoStep(2);
-                admStartCountdown();
-            } else {
-                showAdminError(data.message || 'Không thể gửi OTP. Thử lại.');
-            }
-        })
-        .catch(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined text-[15px]">send</span> Tiếp tục — Xác thực Email';
-            showAdminError('Lỗi kết nối. Vui lòng thử lại.');
-        });
-    }
-
-    // ═══════════ OTP INPUTS ═══════════
-    document.querySelectorAll('.adm-otp').forEach(box => {
-        box.addEventListener('input', e => {
-            const v = e.target.value.replace(/\D/g, '');
-            e.target.value = v ? v[0] : '';
-            if (v && +e.target.dataset.index < 5)
-                document.querySelector('.adm-otp[data-index="' + (+e.target.dataset.index + 1) + '"]').focus();
-        });
-        box.addEventListener('keydown', e => {
-            if (e.key === 'Backspace' && !e.target.value) {
-                const p = document.querySelector('.adm-otp[data-index="' + (+e.target.dataset.index - 1) + '"]');
-                if (p) { p.focus(); p.value = ''; }
-            }
-            if (e.key === 'Enter') adminVerifyOtp();
-        });
-        box.addEventListener('paste', e => {
-            e.preventDefault();
-            const d = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').split('');
-            document.querySelectorAll('.adm-otp').forEach((b,i) => b.value = d[i]||'');
-            document.querySelector('.adm-otp[data-index="' + Math.min(d.length-1,5) + '"]').focus();
-        });
+        adminGoStep(2);
+        admStartCountdown();
+      } else {
+        showAdminError(data.message || 'Không thể gửi OTP. Thử lại.');
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-send text-sm"></i> Tiếp tục — Xác thực Email';
+      showAdminError('Lỗi kết nối. Vui lòng thử lại.');
     });
+  }
 
-    // ═══════════ BƯỚC 2 → XÁC THỰC OTP ═══════════
-    function adminVerifyOtp() {
-        const err = document.getElementById('adminOtpErr');
-        err.classList.add('hidden');
-        let otp = '';
-        document.querySelectorAll('.adm-otp').forEach(b => otp += b.value);
-        if (otp.length < 6) { err.textContent = 'Vui lòng nhập đủ 6 chữ số.'; err.classList.remove('hidden'); return; }
+  // OTP Inputs
+  document.querySelectorAll('.adm-otp').forEach(box => {
+    box.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v ? v[0] : '';
+      if (v && +e.target.dataset.index < 5)
+        document.querySelector('.adm-otp[data-index="' + (+e.target.dataset.index + 1) + '"]').focus();
+    });
+    box.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !e.target.value) {
+        const p = document.querySelector('.adm-otp[data-index="' + (+e.target.dataset.index - 1) + '"]');
+        if (p) { p.focus(); p.value = ''; }
+      }
+      if (e.key === 'Enter') adminVerifyOtp();
+    });
+    box.addEventListener('paste', e => {
+      e.preventDefault();
+      const d = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').split('');
+      document.querySelectorAll('.adm-otp').forEach((b,i) => b.value = d[i]||'');
+      document.querySelector('.adm-otp[data-index="' + Math.min(d.length-1,5) + '"]').focus();
+    });
+  });
 
-        const email = document.getElementById('adminEmail').value.trim();
-        const btn = document.getElementById('btnVerifyOtp');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-1"></span> Đang xác thực...';
+  function adminVerifyOtp() {
+    const err = document.getElementById('adminOtpErr');
+    err.classList.add('hidden');
+    let otp = '';
+    document.querySelectorAll('.adm-otp').forEach(b => otp += b.value);
+    if (otp.length < 6) { err.textContent = 'Vui lòng nhập đủ 6 chữ số.'; err.classList.remove('hidden'); return; }
 
-        fetch('${pageContext.request.contextPath}/owner/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'email=' + encodeURIComponent(email) + '&otp=' + encodeURIComponent(otp)
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined text-[15px]">verified</span> Xác thực OTP';
-            if (data.success) {
-                clearInterval(admResendTimer);
-                // Copy bước 1 vào hidden fields của form
-                document.getElementById('hTenCoSo').value = document.getElementById('adminTenCoSo').value.trim();
-                document.getElementById('hEmail').value   = document.getElementById('adminEmail').value.trim();
-                document.getElementById('hPhone').value   = document.getElementById('adminPhone').value.trim();
-                document.getElementById('hDiaChi').value  = document.getElementById('adminDiaChi').value.trim();
-                adminGoStep(3);
-            } else {
-                admOtpFails++;
-                document.getElementById('adminOtpFails').textContent = admOtpFails;
-                document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
-                document.querySelector('.adm-otp[data-index="0"]').focus();
-                if (admOtpFails >= 5) {
-                    err.textContent = 'Sai OTP quá 5 lần. Vui lòng thử lại từ đầu.';
-                    err.classList.remove('hidden');
-                    setTimeout(() => adminGoStep(1), 2000);
-                    admOtpFails = 0;
-                } else {
-                    err.textContent = 'Mã OTP không đúng. Còn ' + (5 - admOtpFails) + ' lần thử.';
-                    err.classList.remove('hidden');
-                }
-            }
-        })
-        .catch(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined text-[15px]">verified</span> Xác thực OTP';
-            err.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
-            err.classList.remove('hidden');
-        });
-    }
+    const email = document.getElementById('adminEmail').value.trim();
+    const btn = document.getElementById('btnVerifyOtp');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-1"></span> Đang xác thực...';
 
-    // ═══════════ RESEND ═══════════
-    function admStartCountdown() {
-        let s = 60;
-        const btn = document.getElementById('btnResend');
-        const cd  = document.getElementById('admResendCd');
-        btn.disabled = true;
+    fetch('${pageContext.request.contextPath}/owner/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'email=' + encodeURIComponent(email) + '&otp=' + encodeURIComponent(otp)
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-shield-check text-sm"></i> Xác thực OTP';
+      if (data.success) {
         clearInterval(admResendTimer);
-        admResendTimer = setInterval(() => {
-            s--; cd.textContent = s;
-            if (s <= 0) { clearInterval(admResendTimer); btn.disabled = false; }
-        }, 1000);
-    }
-
-    function adminResendOtp() {
-        if (++admResendCount >= 3) {
-            document.getElementById('adminOtpErr').textContent = 'Đã gửi lại quá 3 lần. Vui lòng thử lại từ đầu.';
-            document.getElementById('adminOtpErr').classList.remove('hidden');
-            setTimeout(() => adminGoStep(1), 2000);
-            return;
-        }
-        const email = document.getElementById('adminEmail').value.trim();
-        fetch('${pageContext.request.contextPath}/owner/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'email=' + encodeURIComponent(email)
-        }).then(r => r.json()).then(data => {
-            if (data.success) {
-                document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
-                admOtpFails = 0;
-                document.getElementById('adminOtpFails').textContent = '0';
-                document.querySelector('.adm-otp[data-index="0"]').focus();
-                admStartCountdown();
-            }
-        });
-    }
-
-    // ═══════════ BƯỚC 3: VALIDATE & SUBMIT ═══════════
-    function finalValidate() {
-        updateTotalCourts();
-        const total = parseInt(document.getElementById('soLuongSanDuKien').value) || 0;
-        if (total <= 0) {
-            alert('Vui lòng chọn ít nhất một môn thể thao và nhập số sân lớn hơn 0.');
-            return false;
-        }
-        return true;
-    }
-
-    // ═══════════ SPORT HELPERS ═══════════
-    function toggleSportCount(checkbox, inputId) {
-        const input = document.getElementById(inputId);
-        if (checkbox.checked) {
-            input.removeAttribute('disabled');
-            if (!parseInt(input.value)) input.value = 1;
+        document.getElementById('hTenCoSo').value = document.getElementById('adminTenCoSo').value.trim();
+        document.getElementById('hEmail').value   = document.getElementById('adminEmail').value.trim();
+        document.getElementById('hPhone').value   = document.getElementById('adminPhone').value.trim();
+        document.getElementById('hDiaChi').value  = document.getElementById('adminDiaChi').value.trim();
+        adminGoStep(3);
+      } else {
+        admOtpFails++;
+        document.getElementById('adminOtpFails').textContent = admOtpFails;
+        document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
+        document.querySelector('.adm-otp[data-index="0"]').focus();
+        if (admOtpFails >= 5) {
+          err.textContent = 'Sai OTP quá 5 lần. Vui lòng thử lại từ đầu.';
+          err.classList.remove('hidden');
+          setTimeout(() => adminGoStep(1), 2000);
+          admOtpFails = 0;
         } else {
-            input.setAttribute('disabled', 'true');
-            input.value = 0;
+          err.textContent = 'Mã OTP không đúng. Còn ' + (5 - admOtpFails) + ' lần thử.';
+          err.classList.remove('hidden');
         }
-        updateTotalCourts();
-    }
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-shield-check text-sm"></i> Xác thực OTP';
+      err.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+      err.classList.remove('hidden');
+    });
+  }
 
-    function updateTotalCourts() {
-        let total = 0;
-        document.querySelectorAll('.sport-count').forEach(i => {
-            if (!i.hasAttribute('disabled')) total += parseInt(i.value) || 0;
-        });
-        const d = document.getElementById('soLuongSanDuKienDisplay');
-        const h = document.getElementById('soLuongSanDuKien');
-        if (d) d.value = total;
-        if (h) h.value = total;
+  function admStartCountdown() {
+    let s = 60;
+    const btn = document.getElementById('btnResend');
+    const cd  = document.getElementById('admResendCd');
+    btn.disabled = true;
+    clearInterval(admResendTimer);
+    admResendTimer = setInterval(() => {
+      s--; cd.textContent = s;
+      if (s <= 0) { clearInterval(admResendTimer); btn.disabled = false; }
+    }, 1000);
+  }
+
+  function adminResendOtp() {
+    if (++admResendCount >= 3) {
+      document.getElementById('adminOtpErr').textContent = 'Đã gửi lại quá 3 lần. Vui lòng thử lại từ đầu.';
+      document.getElementById('adminOtpErr').classList.remove('hidden');
+      setTimeout(() => adminGoStep(1), 2000);
+      return;
     }
+    const email = document.getElementById('adminEmail').value.trim();
+    fetch('${pageContext.request.contextPath}/owner/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'email=' + encodeURIComponent(email)
+    }).then(r => r.json()).then(data => {
+      if (data.success) {
+        document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
+        admOtpFails = 0;
+        document.getElementById('adminOtpFails').textContent = '0';
+        document.querySelector('.adm-otp[data-index="0"]').focus();
+        admStartCountdown();
+      }
+    });
+  }
+
+  function finalValidate() {
+    updateTotalCourts();
+    const total = parseInt(document.getElementById('soLuongSanDuKien').value) || 0;
+    if (total <= 0) {
+      alert('Vui lòng chọn ít nhất một môn thể thao và nhập số sân lớn hơn 0.');
+      return false;
+    }
+    return true;
+  }
+
+  function toggleSportCount(checkbox, inputId) {
+    const input = document.getElementById(inputId);
+    if (checkbox.checked) {
+      input.removeAttribute('disabled');
+      if (!parseInt(input.value)) input.value = 1;
+    } else {
+      input.setAttribute('disabled', 'true');
+      input.value = 0;
+    }
+    updateTotalCourts();
+  }
+
+  function updateTotalCourts() {
+    let total = 0;
+    document.querySelectorAll('.sport-count').forEach(i => {
+      if (!i.hasAttribute('disabled')) total += parseInt(i.value) || 0;
+    });
+    const d = document.getElementById('soLuongSanDuKienDisplay');
+    const h = document.getElementById('soLuongSanDuKien');
+    if (d) d.value = total;
+    if (h) h.value = total;
+  }
+
+  // ==========================================
+  // GEOLOCATION LOOKUP SCRIPTS
+  // ==========================================
+  let activeGeoTargetId = 'adminDiaChi';
+
+  function autoFillAddress(targetId) {
+    activeGeoTargetId = targetId || 'adminDiaChi';
+    document.getElementById('geoInput').value = "";
+    document.getElementById('geoModal').classList.remove('hidden');
+    document.getElementById('geoInput').focus();
+  }
+
+  function closeGeoModal() {
+    document.getElementById('geoModal').classList.add('hidden');
+  }
+
+  function submitGeoInput() {
+    const input = document.getElementById('geoInput').value.trim();
+    if (!input) {
+      alert("Vui lòng dán tọa độ hoặc link Google Map.");
+      return;
+    }
+    const match = input.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+    if (match) {
+      const lat = match[1];
+      const lon = match[2];
+      closeGeoModal();
+      fetchAddressFromCoords(lat, lon);
+    } else {
+      alert("Không tìm thấy tọa độ hợp lệ. Ví dụ định dạng: 10.7626, 106.6601");
+    }
+  }
+
+  function useCurrentGps() {
+    if (!navigator.geolocation) {
+      alert("Trình duyệt không hỗ trợ định vị GPS tự động.");
+      return;
+    }
+    const btn = document.getElementById('btnUseGps');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-zinc-700 border-t-transparent rounded-full mr-2"></span> Đang định vị GPS...';
+    
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        closeGeoModal();
+        fetchAddressFromCoords(pos.coords.latitude, pos.coords.longitude);
+      },
+      function(err) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        let errorMsg = "Lỗi lấy vị trí.";
+        if (err.code === err.PERMISSION_DENIED) {
+          errorMsg = "Quyền định vị bị từ chối. Vui lòng cấp quyền hoặc nhập tọa độ thủ công.";
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          errorMsg = "Không tìm thấy GPS. Vui lòng dán tọa độ Google Map.";
+        } else if (err.code === err.TIMEOUT) {
+          errorMsg = "Hết thời gian định vị GPS.";
+        }
+        alert(errorMsg);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
+
+  function fetchAddressFromCoords(lat, lon) {
+    const addrInput = document.getElementById(activeGeoTargetId);
+    const originalPlaceholder = addrInput.placeholder || "";
+    addrInput.disabled = true;
+    addrInput.value = "";
+    addrInput.placeholder = "Đang lấy địa chỉ từ tọa độ [" + parseFloat(lat).toFixed(4) + ", " + parseFloat(lon).toFixed(4) + "]...";
+    
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&accept-language=vi')
+      .then(r => r.json())
+      .then(data => {
+        addrInput.disabled = false;
+        addrInput.placeholder = originalPlaceholder;
+        if (data && data.display_name) {
+          addrInput.value = data.display_name;
+        } else {
+          alert("Không thể chuyển đổi tọa độ này thành địa chỉ.");
+        }
+      })
+      .catch(err => {
+        addrInput.disabled = false;
+        addrInput.placeholder = originalPlaceholder;
+        alert("Lỗi kết nối dịch vụ địa chỉ. Vui lòng nhập thủ công.");
+      });
+  }
+
+  // ==========================================
+  // EDIT MODAL ACTIONS
+  // ==========================================
+  function openModalSua(id) {
+    fetch('${pageContext.request.contextPath}/admin/chi-nhanh/sua?format=json&id=' + id)
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('suaCoSoID').value = data.coSoID;
+        document.getElementById('suaTenCoSo').value = data.tenCoSo;
+        document.getElementById('suaTrangThai').value = data.trangThai;
+        document.getElementById('suaPhone').value = data.soDienThoai;
+        document.getElementById('suaDiaChi').value = data.diaChi;
+        document.getElementById('suaGioMoCua').value = data.gioMoCua.substring(0, 5);
+        document.getElementById('suaGioDongCua').value = data.gioDongCua.substring(0, 5);
+
+        setupSportCheckbox('sua_BongDa', 'sua_soLuongSan_BongDa', data.countBongDa);
+        setupSportCheckbox('sua_CauLong', 'sua_soLuongSan_CauLong', data.countCauLong);
+        setupSportCheckbox('sua_Tennis', 'sua_soLuongSan_Tennis', data.countTennis);
+        setupSportCheckbox('sua_Pickleball', 'sua_soLuongSan_Pickleball', data.countPickleball);
+
+        updateTotalCourtsEdit();
+
+        document.getElementById('modalSua').classList.remove('hidden');
+      })
+      .catch(err => {
+        alert('Lỗi tải thông tin chi nhánh: ' + err);
+      });
+  }
+
+  function setupSportCheckbox(checkboxId, inputId, count) {
+    const cb = document.getElementById(checkboxId);
+    const inp = document.getElementById(inputId);
+    if (count > 0) {
+      cb.checked = true;
+      inp.removeAttribute('disabled');
+      inp.value = count;
+    } else {
+      cb.checked = false;
+      inp.setAttribute('disabled', 'true');
+      inp.value = 0;
+    }
+  }
+
+  function closeModalSua() {
+    document.getElementById('modalSua').classList.add('hidden');
+    document.getElementById('formSuaCoSo').reset();
+  }
+
+  function updateTotalCourtsEdit() {
+    let total = 0;
+    document.querySelectorAll('.sport-count-edit').forEach(i => {
+      if (!i.hasAttribute('disabled')) total += parseInt(i.value) || 0;
+    });
+    const d = document.getElementById('sua_soLuongSanDuKienDisplay');
+    const h = document.getElementById('sua_soLuongSanDuKien');
+    if (d) d.value = total;
+    if (h) h.value = total;
+  }
+
+  function finalValidateEdit() {
+    updateTotalCourtsEdit();
+    const total = parseInt(document.getElementById('sua_soLuongSanDuKien').value) || 0;
+    if (total <= 0) {
+      alert('Vui lòng chọn ít nhất một môn thể thao và nhập số sân lớn hơn 0.');
+      return false;
+    }
+    return true;
+  }
 </script>
+
+<!-- ═══ Modal Sửa Cơ Sở ═══ -->
+<div id="modalSua" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModalSua()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[560px] max-h-[92vh] flex flex-col geo-animate-scale">
+
+    <!-- Header cố định -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100 shrink-0">
+      <div class="flex items-center gap-3">
+        <i class="ti ti-edit text-blue-600 text-lg"></i>
+        <h3 class="text-base font-bold text-zinc-900">Chỉnh sửa Cơ Sở</h3>
+      </div>
+      <button onclick="closeModalSua()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400">
+        <i class="ti ti-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Body cuộn được -->
+    <div class="overflow-y-auto p-6">
+      <form id="formSuaCoSo" action="${pageContext.request.contextPath}/admin/chi-nhanh/sua" method="post" class="flex flex-col gap-4">
+        <input type="hidden" name="id" id="suaCoSoID">
+
+        <!-- Tên cơ sở & Trạng thái -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-zinc-700">Tên Cơ Sở <span class="text-red-500">*</span></label>
+            <input type="text" name="tenCoSo" id="suaTenCoSo" required
+                   class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-zinc-700">Trạng thái <span class="text-red-500">*</span></label>
+            <select name="trangThai" id="suaTrangThai" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+              <option value="Đang hoạt động">Đang hoạt động</option>
+              <option value="Tạm nghỉ">Tạm nghỉ</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Môn thể thao -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700">Môn thể thao cung cấp <span class="text-red-500">*</span></label>
+          <div class="flex flex-col p-3 bg-zinc-50 rounded-xl border border-zinc-100 gap-0">
+            <div class="flex items-center justify-between py-2 border-b border-zinc-200/60">
+              <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer hover:text-zinc-900 select-none">
+                <input type="checkbox" id="sua_BongDa" name="loaiHinhKinhDoanh" value="Bóng đá" onchange="toggleSportCount(this,'sua_soLuongSan_BongDa')" class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600">
+                <span class="font-medium">Bóng đá</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500">Số sân:</span>
+                <input type="number" id="sua_soLuongSan_BongDa" name="soLuongSan_BongDa" value="0" min="1" disabled oninput="updateTotalCourtsEdit()"
+                       class="sport-count-edit w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400 focus:outline-none">
+              </div>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-zinc-200/60">
+              <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer hover:text-zinc-900 select-none">
+                <input type="checkbox" id="sua_CauLong" name="loaiHinhKinhDoanh" value="Cầu lông" onchange="toggleSportCount(this,'sua_soLuongSan_CauLong')" class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600">
+                <span class="font-medium">Cầu lông</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500">Số sân:</span>
+                <input type="number" id="sua_soLuongSan_CauLong" name="soLuongSan_CauLong" value="0" min="1" disabled oninput="updateTotalCourtsEdit()"
+                       class="sport-count-edit w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400 focus:outline-none">
+              </div>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-zinc-200/60">
+              <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer hover:text-zinc-900 select-none">
+                <input type="checkbox" id="sua_Tennis" name="loaiHinhKinhDoanh" value="Tennis" onchange="toggleSportCount(this,'sua_soLuongSan_Tennis')" class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600">
+                <span class="font-medium">Tennis</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500">Số sân:</span>
+                <input type="number" id="sua_soLuongSan_Tennis" name="soLuongSan_Tennis" value="0" min="1" disabled oninput="updateTotalCourtsEdit()"
+                       class="sport-count-edit w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400 focus:outline-none">
+              </div>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer hover:text-zinc-900 select-none">
+                <input type="checkbox" id="sua_Pickleball" name="loaiHinhKinhDoanh" value="Pickleball" onchange="toggleSportCount(this,'sua_soLuongSan_Pickleball')" class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600">
+                <span class="font-medium">Pickleball</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500">Số sân:</span>
+                <input type="number" id="sua_soLuongSan_Pickleball" name="soLuongSan_Pickleball" value="0" min="1" disabled oninput="updateTotalCourtsEdit()"
+                       class="sport-count-edit w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400 focus:outline-none">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Địa chỉ định vị GPS -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+            <span>Địa chỉ <span class="text-red-500">*</span></span>
+            <button type="button" onclick="autoFillAddress('suaDiaChi')" class="flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 border border-blue-150 px-2 py-0.5 rounded-lg transition-all normal-case">
+              <i class="ti ti-map-pin text-[11px]"></i> Định vị địa chỉ / Tọa độ GG Map
+            </button>
+          </label>
+          <input type="text" name="diaChi" id="suaDiaChi" required placeholder="Số nhà, tên đường..."
+                 class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+        </div>
+
+        <!-- Số điện thoại -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700">Số điện thoại <span class="text-red-500">*</span></label>
+          <input type="tel" name="soDienThoai" id="suaPhone" required placeholder="0912..."
+                 class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+        </div>
+
+        <!-- Giờ mở / đóng cửa -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-zinc-700">Giờ mở cửa <span class="text-red-500">*</span></label>
+            <input type="time" name="gioMoCua" id="suaGioMoCua" required
+                   class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-zinc-700">Giờ đóng cửa <span class="text-red-500">*</span></label>
+            <input type="time" name="gioDongCua" id="suaGioDongCua" required
+                   class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          </div>
+        </div>
+
+        <!-- Tổng số sân -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700">Tổng số lượng sân dự kiến</label>
+          <input type="number" id="sua_soLuongSanDuKienDisplay" readonly value="0"
+                 class="w-full h-10 px-4 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-500 bg-zinc-100 focus:outline-none select-none">
+          <input type="hidden" name="soLuongSanDuKien" id="sua_soLuongSanDuKien" value="0">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-zinc-50">
+          <button type="button" onclick="closeModalSua()" class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
+          <button type="submit" onclick="return finalValidateEdit()"
+                  class="h-10 px-7 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/10 flex items-center gap-2">
+            <i class="ti ti-device-floppy text-sm"></i> Cập nhật Cơ Sở
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Custom Geolocation Modal -->
+<div id="geoModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 geo-animate-fade">
+  <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative geo-animate-scale">
+    <!-- Close button -->
+    <button type="button" onclick="closeGeoModal()" class="absolute top-4 right-4 text-zinc-450 hover:text-zinc-800 transition-all bg-transparent border-none cursor-pointer focus:outline-none">
+      <i class="ti ti-x text-xl"></i>
+    </button>
+    
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+        <i class="ti ti-map-pin text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-black text-zinc-900">Định vị vị trí Cơ Sở</h3>
+    </div>
+    
+    <p class="text-xs text-zinc-500 mb-6 leading-relaxed">
+      Dán tọa độ Google Map (vĩ độ, kinh độ, VD: <code class="text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded">10.7626, 106.6601</code>) hoặc link bản đồ chứa tọa độ để tự động lấy địa chỉ.
+    </p>
+    
+    <div class="space-y-4 mb-6">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-zinc-700" for="geoInput">Tọa độ hoặc Link Google Map</label>
+        <input type="text" id="geoInput" placeholder="Dán tọa độ hoặc link tại đây..." class="w-full px-4 h-11 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-zinc-400 text-sm font-medium" />
+      </div>
+    </div>
+    
+    <div class="flex flex-col gap-3">
+      <button type="button" onclick="submitGeoInput()" class="w-full py-3 text-sm flex justify-center items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 transition-all rounded-xl font-bold shadow-md shadow-blue-100 border-none cursor-pointer">
+        <i class="ti ti-search text-base"></i> Xác nhận & Tìm địa chỉ
+      </button>
+      <button type="button" onclick="useCurrentGps()" id="btnUseGps" class="w-full py-3 text-sm flex justify-center items-center gap-2 text-zinc-700 hover:text-zinc-900 border border-zinc-200 hover:border-zinc-350 bg-zinc-50 hover:bg-zinc-100 transition-all rounded-xl font-bold cursor-pointer">
+        <i class="ti ti-device-gps text-base"></i> Sử dụng vị trí GPS hiện tại
+      </button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

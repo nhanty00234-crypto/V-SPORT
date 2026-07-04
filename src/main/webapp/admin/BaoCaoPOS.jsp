@@ -47,18 +47,9 @@
 <jsp:include page="/admin/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Báo cáo POS & Doanh thu</h1>
-      <p class="text-xs text-zinc-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">analytics</span>Thống kê doanh số bán hàng tại quầy</p>
-    </div>
-  </div>
-  <div class="flex items-center gap-1.5">
-    <jsp:include page="/admin/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<jsp:include page="/admin/common/header.jsp">
+  <jsp:param name="pageTitle" value="Báo cáo POS &amp; Doanh thu"/>
+</jsp:include>
 
 <!-- Main -->
 <main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">

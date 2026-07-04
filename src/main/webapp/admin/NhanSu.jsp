@@ -41,27 +41,9 @@ body { font-family: 'Inter', sans-serif; }
 <jsp:include page="/admin/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Quản lý nhân sự cấp cao</h1>
-      <p class="text-xs text-zinc-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">security</span>Quyền hạn Admin</p>
-    </div>
-  </div>
-  
-  <div class="flex items-center gap-1.5">
-    <button onclick="location.href='${pageContext.request.contextPath}/admin/HoTro.jsp'" class="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 text-xs font-medium">
-      <span class="material-symbols-outlined text-[15px]">help</span>Hỗ trợ
-    </button>
-    <button class="relative p-2 rounded-lg hover:bg-zinc-100 text-zinc-500">
-      <span class="material-symbols-outlined text-[20px]">notifications</span>
-      <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 live-dot"></span>
-    </button>
-    <div class="w-px h-6 bg-zinc-200 mx-1"></div>
-    <jsp:include page="/admin/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<jsp:include page="/admin/common/header.jsp">
+  <jsp:param name="pageTitle" value="Quản lý nhân sự cấp cao"/>
+</jsp:include>
 
 <main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
   <div class="flex items-center justify-between gap-4 mb-2 flex-wrap">
@@ -479,9 +461,6 @@ function renderStaff() {
       `;
     } else {
       actionsHtml = `
-        <button onclick="toggleLock('\${s.id}', \${s.status === 'Đang làm'})" title="\${s.status === 'Đang làm' ? 'Khóa' : 'Mở khóa'}" class="flex-1 h-8 rounded-lg border \${s.status === 'Đang làm' ? 'border-amber-200 text-amber-600 hover:bg-amber-50' : 'border-green-200 text-green-600 hover:bg-green-50'} text-[11px] font-bold transition-all flex items-center justify-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">\${s.status === 'Đang làm' ? 'lock' : 'lock_open'}</span>\${s.status === 'Đang làm' ? 'Khóa' : 'Mở'}
-        </button>
         <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="flex-1 h-8 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
           <span class="material-symbols-outlined text-[14px]">person_remove</span>Xóa
         </button>
@@ -552,15 +531,6 @@ function renderStaff() {
     staffCurrentPage = p;
     renderStaff();
   });
-}
-
-function toggleLock(id, currentlyActive) {
-  if (confirm(currentlyActive ? "Khóa tài khoản này?" : "Mở khóa tài khoản?")) {
-    const form = document.createElement('form'); form.method = 'POST'; form.action = '${pageContext.request.contextPath}/admin/nhan-su';
-    const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
-    add('action', 'update'); add('accountId', id); add('isLocked', currentlyActive ? 'true' : 'false');
-    document.body.appendChild(form); form.submit();
-  }
 }
 
 // ---- Soft delete (chuyển vào thùng rác) ----

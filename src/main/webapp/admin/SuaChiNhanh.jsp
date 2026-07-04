@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -7,10 +7,11 @@
 <title>Sửa Cơ Sở — V-SPORT</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <style>
 body { font-family: 'Inter', sans-serif; }
-  .card { background:#fff;border:1px solid #e4e4e7;border-radius:16px; }
+  .card { background:#fff;border:1px solid #e4e4e7;border-radius:18px; }
   
   /* Larger Number Input Arrows */
   input[type="number"]::-webkit-inner-spin-button, 
@@ -39,6 +40,12 @@ body { font-family: 'Inter', sans-serif; }
     animation: contentZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     transform-origin: center top;
   }
+
+  /* Modal animation */
+  @keyframes geoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes geoScaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .geo-animate-fade { animation: geoFadeIn 180ms ease-out forwards; }
+  .geo-animate-scale { animation: geoScaleUp 240ms cubic-bezier(.16, 1, .3, 1) forwards; }
 </style>
 </head>
 <body class="bg-zinc-50 text-zinc-900 min-h-screen">
@@ -47,26 +54,17 @@ body { font-family: 'Inter', sans-serif; }
 <jsp:include page="/admin/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[260px] bg-white/80 backdrop-blur-lg border-b border-zinc-200 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-zinc-900 tracking-tight">Chỉnh sửa Cơ Sở</h1>
-      <p class="text-xs text-zinc-500">Cập nhật thông tin chi tiết</p>
-    </div>
-  </div>
-  <div class="flex items-center gap-1.5">
-    <jsp:include page="/admin/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<jsp:include page="/admin/common/header.jsp">
+  <jsp:param name="pageTitle" value="Chỉnh sửa Cơ Sở"/>
+</jsp:include>
 
 <!-- Main Content -->
 <main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col items-center text-zinc-900">
   <section class="w-full max-w-[800px]">
-    <div class="mb-6 flex items-center gap-2 text-xs font-medium text-zinc-500">
-        <a href="${pageContext.request.contextPath}/admin/chi-nhanh" class="hover:text-zinc-900 transition-colors">Quản lý Cơ Sở</a>
-        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-        <span class="text-zinc-900 font-bold">${chiNhanh.tenCoSo}</span>
+    <div class="mb-6 flex items-center gap-2 text-xs font-semibold text-zinc-500">
+        <a href="${pageContext.request.contextPath}/admin/chi-nhanh" class="hover:text-zinc-950 transition-colors">Quản lý Cơ Sở</a>
+        <i class="ti ti-chevron-right text-[12px]"></i>
+        <span class="text-zinc-950 font-bold">${chiNhanh.tenCoSo}</span>
     </div>
 
     <div class="card p-8 shadow-sm">
@@ -168,9 +166,15 @@ body { font-family: 'Inter', sans-serif; }
                 </div>
             </div>
 
+            <!-- Địa chỉ + Button định vị -->
             <div class="flex flex-col gap-1.5 col-span-1 md:col-span-2">
-                <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Địa chỉ</label>
-                <input type="text" name="diaChi" value="${chiNhanh.diaChi}" required class="h-10 px-4 rounded-xl border border-zinc-200 text-sm focus:border-zinc-900 focus:outline-none transition-all font-medium">
+                <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center justify-between">
+                  <span>Địa chỉ</span>
+                  <button type="button" onclick="autoFillAddress()" class="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 border border-blue-150 px-2.5 py-1 rounded-lg transition-all normal-case">
+                    <i class="ti ti-map-pin text-sm"></i> Định vị địa chỉ / Tọa độ GG Map
+                  </button>
+                </label>
+                <input type="text" id="diaChiInput" name="diaChi" value="${chiNhanh.diaChi}" required class="h-10 px-4 rounded-xl border border-zinc-200 text-sm focus:border-zinc-900 focus:outline-none transition-all font-medium">
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -203,6 +207,43 @@ body { font-family: 'Inter', sans-serif; }
     </div>
   </section>
 </main>
+
+<!-- Custom Geolocation Modal -->
+<div id="geoModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 geo-animate-fade">
+  <div class="bg-white border border-zinc-200 rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative geo-animate-scale">
+    <!-- Close button -->
+    <button type="button" onclick="closeGeoModal()" class="absolute top-4 right-4 text-zinc-450 hover:text-zinc-800 transition-all bg-transparent border-none cursor-pointer focus:outline-none">
+      <i class="ti ti-x text-xl"></i>
+    </button>
+    
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+        <i class="ti ti-map-pin text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-black text-zinc-900">Định vị vị trí Cơ Sở</h3>
+    </div>
+    
+    <p class="text-xs text-zinc-500 mb-6 leading-relaxed">
+      Dán tọa độ Google Map (vĩ độ, kinh độ, VD: <code class="text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded">10.7626, 106.6601</code>) hoặc link bản đồ chứa tọa độ để tự động lấy địa chỉ.
+    </p>
+    
+    <div class="space-y-4 mb-6">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-zinc-700" for="geoInput">Tọa độ hoặc Link Google Map</label>
+        <input type="text" id="geoInput" placeholder="Dán tọa độ hoặc link tại đây..." class="w-full px-4 h-11 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-zinc-400 text-sm font-medium" />
+      </div>
+    </div>
+    
+    <div class="flex flex-col gap-3">
+      <button type="button" onclick="submitGeoInput()" class="w-full py-3 text-sm flex justify-center items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 transition-all rounded-xl font-bold shadow-md shadow-blue-100 border-none cursor-pointer">
+        <i class="ti ti-search text-base"></i> Xác nhận & Tìm địa chỉ
+      </button>
+      <button type="button" onclick="useCurrentGps()" id="btnUseGps" class="w-full py-3 text-sm flex justify-center items-center gap-2 text-zinc-700 hover:text-zinc-900 border border-zinc-200 hover:border-zinc-350 bg-zinc-50 hover:bg-zinc-100 transition-all rounded-xl font-bold cursor-pointer">
+        <i class="ti ti-device-gps text-base"></i> Sử dụng vị trí GPS hiện tại
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
     document.getElementById('mobileMenuBtn').addEventListener('click', () => {
@@ -252,6 +293,96 @@ body { font-family: 'Inter', sans-serif; }
     window.addEventListener('DOMContentLoaded', () => {
         updateTotalCourts();
     });
+
+    // ==========================================
+    // GEOLOCATION LOOKUP SCRIPTS
+    // ==========================================
+    function autoFillAddress() {
+        document.getElementById('geoInput').value = "";
+        document.getElementById('geoModal').classList.remove('hidden');
+        document.getElementById('geoInput').focus();
+    }
+
+    function closeGeoModal() {
+        document.getElementById('geoModal').classList.add('hidden');
+    }
+
+    function submitGeoInput() {
+        const input = document.getElementById('geoInput').value.trim();
+        if (!input) {
+            alert("Vui lòng dán tọa độ hoặc link Google Map.");
+            return;
+        }
+        // Match standard coordinate pattern "latitude, longitude"
+        const match = input.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+        if (match) {
+            const lat = match[1];
+            const lon = match[2];
+            closeGeoModal();
+            fetchAddressFromCoords(lat, lon);
+        } else {
+            alert("Không tìm thấy tọa độ hợp lệ. Ví dụ định dạng: 10.7626, 106.6601");
+        }
+    }
+
+    function useCurrentGps() {
+        if (!navigator.geolocation) {
+            alert("Trình duyệt không hỗ trợ định vị GPS tự động.");
+            return;
+        }
+        const btn = document.getElementById('btnUseGps');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-zinc-700 border-t-transparent rounded-full mr-2"></span> Đang định vị GPS...';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                closeGeoModal();
+                fetchAddressFromCoords(pos.coords.latitude, pos.coords.longitude);
+            },
+            function(err) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                let errorMsg = "Lỗi lấy vị trí.";
+                if (err.code === err.PERMISSION_DENIED) {
+                    errorMsg = "Quyền định vị bị từ chối. Vui lòng cấp quyền hoặc nhập tọa độ thủ công.";
+                } else if (err.code === err.POSITION_UNAVAILABLE) {
+                    errorMsg = "Không tìm thấy GPS. Vui lòng dán tọa độ Google Map.";
+                } else if (err.code === err.TIMEOUT) {
+                    errorMsg = "Hết thời gian định vị GPS.";
+                }
+                alert(errorMsg);
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    }
+
+    function fetchAddressFromCoords(lat, lon) {
+        const addrInput = document.getElementById('diaChiInput');
+        const originalPlaceholder = addrInput.placeholder || "";
+        addrInput.disabled = true;
+        addrInput.value = "";
+        addrInput.placeholder = "Đang lấy địa chỉ từ tọa độ [" + parseFloat(lat).toFixed(4) + ", " + parseFloat(lon).toFixed(4) + "]...";
+        
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&accept-language=vi')
+            .then(r => r.json())
+            .then(data => {
+                addrInput.disabled = false;
+                addrInput.placeholder = originalPlaceholder;
+                if (data && data.display_name) {
+                    addrInput.value = data.display_name;
+                } else {
+                    alert("Không thể chuyển đổi tọa độ này thành địa chỉ.");
+                }
+            })
+            .catch(err => {
+                addrInput.disabled = false;
+                addrInput.placeholder = originalPlaceholder;
+                alert("Lỗi kết nối dịch vụ địa chỉ. Vui lòng nhập thủ công.");
+            });
+    }
 </script>
 
 </body>

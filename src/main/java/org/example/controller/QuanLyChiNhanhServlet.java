@@ -18,6 +18,7 @@ import org.example.util.DBUtil;
 import org.example.util.EmailUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -145,6 +146,43 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             req.setAttribute("countCauLong", countCauLong);
             req.setAttribute("countTennis", countTennis);
             req.setAttribute("countPickleball", countPickleball);
+
+            if ("json".equals(req.getParameter("format"))) {
+                resp.setContentType("application/json;charset=UTF-8");
+                PrintWriter out = resp.getWriter();
+                try {
+                    if (chiNhanh == null) {
+                        out.print("{\"success\":false,\"error\":\"Chi nhánh không tồn tại với ID " + id + "\"}");
+                        return;
+                    }
+                    String ten = chiNhanh.getTenCoSo() != null ? chiNhanh.getTenCoSo().replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") : "";
+                    String diaChi = chiNhanh.getDiaChi() != null ? chiNhanh.getDiaChi().replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") : "";
+                    String sdt = chiNhanh.getSoDienThoai() != null ? chiNhanh.getSoDienThoai().replace("\"", "\\\"") : "";
+                    String trangThai = chiNhanh.getTrangThai() != null ? chiNhanh.getTrangThai().replace("\"", "\\\"") : "";
+                    String gioMo = chiNhanh.getGioMoCua() != null ? chiNhanh.getGioMoCua().toString() : "00:00";
+                    String gioDong = chiNhanh.getGioDongCua() != null ? chiNhanh.getGioDongCua().toString() : "00:00";
+                    
+                    out.print("{"
+                        + "\"success\":true,"
+                        + "\"coSoID\":" + chiNhanh.getCoSoID() + ","
+                        + "\"tenCoSo\":\"" + ten + "\","
+                        + "\"diaChi\":\"" + diaChi + "\","
+                        + "\"soDienThoai\":\"" + sdt + "\","
+                        + "\"trangThai\":\"" + trangThai + "\","
+                        + "\"gioMoCua\":\"" + gioMo + "\","
+                        + "\"gioDongCua\":\"" + gioDong + "\","
+                        + "\"soLuongSanDuKien\":" + chiNhanh.getSoLuongSanDuKien() + ","
+                        + "\"countBongDa\":" + countBongDa + ","
+                        + "\"countCauLong\":" + countCauLong + ","
+                        + "\"countTennis\":" + countTennis + ","
+                        + "\"countPickleball\":" + countPickleball
+                        + "}");
+                } catch (Exception ex) {
+                    logger.error("Error generating JSON for branch", ex);
+                    out.print("{\"success\":false,\"error\":\"" + (ex.getMessage() != null ? ex.getMessage().replace("\"", "\\\"") : "NullPointerException") + "\"}");
+                }
+                return;
+            }
 
             req.getRequestDispatcher("/admin/SuaChiNhanh.jsp").forward(req, resp);
         } else if (path.equals("/admin/chi-nhanh/xoa")) {
