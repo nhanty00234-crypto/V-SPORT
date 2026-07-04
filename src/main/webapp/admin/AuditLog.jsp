@@ -1,30 +1,34 @@
 <%-- src/main/webapp/admin/AuditLog.jsp --%>
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhật Ký Thao Tác - Admin</title>
-    <jsp:include page="/admin/admin_head.jsp"/>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhật Ký Thao Tác - Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<style>
+body { font-family: 'Inter', sans-serif; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+</style>
 </head>
 <body class="bg-gray-50">
 <jsp:include page="/admin/sidebar.jsp"/>
 <div class="ml-64 p-8">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Nhật Ký Thao Tác</h1>
-        <p class="text-gray-500 mt-1">Toàn bộ hoạt động của Admin và Manager — ${total} bản ghi</p>
+        <p class="text-gray-500 mt-1">Toàn bộ hoạt động của Admin và Manager — <c:out value="${total}"/> bản ghi</p>
     </div>
 
     <%-- Flash messages --%>
     <c:if test="${not empty sessionScope.message}">
-        <div class="mb-4 p-3 bg-green-100 text-green-800 rounded-lg">${sessionScope.message}</div>
+        <div class="mb-4 p-3 bg-green-100 text-green-800 rounded-lg"><c:out value="${sessionScope.message}"/></div>
         <c:remove var="message" scope="session"/>
     </c:if>
     <c:if test="${not empty sessionScope.error}">
-        <div class="mb-4 p-3 bg-red-100 text-red-800 rounded-lg">${sessionScope.error}</div>
+        <div class="mb-4 p-3 bg-red-100 text-red-800 rounded-lg"><c:out value="${sessionScope.error}"/></div>
         <c:remove var="error" scope="session"/>
     </c:if>
 
@@ -112,7 +116,7 @@
                                         ${log.createdAt}
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="font-medium text-gray-800">${log.actorName}</div>
+                                        <div class="font-medium text-gray-800"><c:out value="${log.actorName}"/></div>
                                         <div class="text-xs text-gray-400">
                                             <c:choose>
                                                 <c:when test="${log.actorRole == 1}">Admin</c:when>
@@ -131,15 +135,15 @@
                                                 <c:when test="${log.action == 'RESTORE'}">bg-purple-100 text-purple-700</c:when>
                                                 <c:otherwise>bg-gray-100 text-gray-600</c:otherwise>
                                             </c:choose>">
-                                            ${log.action}
+                                            <c:out value="${log.action}"/>
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="text-gray-700">${log.entityName}</div>
-                                        <div class="text-xs text-gray-400">${log.entityType} #${log.entityId}</div>
+                                        <div class="text-gray-700"><c:out value="${log.entityName}"/></div>
+                                        <div class="text-xs text-gray-400"><c:out value="${log.entityType}"/> #${log.entityId}</div>
                                     </td>
-                                    <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${log.details}</td>
-                                    <td class="px-4 py-3 text-gray-400 text-xs">${log.ipAddress}</td>
+                                    <td class="px-4 py-3 text-gray-600 max-w-xs truncate"><c:out value="${log.details}"/></td>
+                                    <td class="px-4 py-3 text-gray-400 text-xs"><c:out value="${log.ipAddress}"/></td>
                                 </tr>
                             </c:forEach>
                         </c:otherwise>
@@ -154,19 +158,40 @@
                 <span class="text-sm text-gray-500">Trang ${currentPage} / ${totalPages}</span>
                 <div class="flex gap-1">
                     <c:if test="${currentPage > 1}">
-                        <a href="?page=${currentPage - 1}&entityType=${entityType}&action=${action}&dateFrom=${dateFrom}&dateTo=${dateTo}"
+                        <c:url var="prevPageUrl" value="">
+                            <c:param name="page" value="${currentPage - 1}"/>
+                            <c:param name="entityType" value="${entityType}"/>
+                            <c:param name="action" value="${action}"/>
+                            <c:param name="dateFrom" value="${dateFrom}"/>
+                            <c:param name="dateTo" value="${dateTo}"/>
+                        </c:url>
+                        <a href="${prevPageUrl}"
                            class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Trước</a>
                     </c:if>
                     <c:forEach begin="1" end="${totalPages}" var="p">
                         <c:if test="${p >= currentPage - 2 && p <= currentPage + 2}">
-                            <a href="?page=${p}&entityType=${entityType}&action=${action}&dateFrom=${dateFrom}&dateTo=${dateTo}"
+                            <c:url var="pageUrl" value="">
+                                <c:param name="page" value="${p}"/>
+                                <c:param name="entityType" value="${entityType}"/>
+                                <c:param name="action" value="${action}"/>
+                                <c:param name="dateFrom" value="${dateFrom}"/>
+                                <c:param name="dateTo" value="${dateTo}"/>
+                            </c:url>
+                            <a href="${pageUrl}"
                                class="px-3 py-1 text-sm border rounded-lg
                                <c:choose><c:when test="${p == currentPage}">bg-purple-600 text-white border-purple-600</c:when>
                                <c:otherwise>border-gray-300 hover:bg-gray-50</c:otherwise></c:choose>">${p}</a>
                         </c:if>
                     </c:forEach>
                     <c:if test="${currentPage < totalPages}">
-                        <a href="?page=${currentPage + 1}&entityType=${entityType}&action=${action}&dateFrom=${dateFrom}&dateTo=${dateTo}"
+                        <c:url var="nextPageUrl" value="">
+                            <c:param name="page" value="${currentPage + 1}"/>
+                            <c:param name="entityType" value="${entityType}"/>
+                            <c:param name="action" value="${action}"/>
+                            <c:param name="dateFrom" value="${dateFrom}"/>
+                            <c:param name="dateTo" value="${dateTo}"/>
+                        </c:url>
+                        <a href="${nextPageUrl}"
                            class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Sau</a>
                     </c:if>
                 </div>

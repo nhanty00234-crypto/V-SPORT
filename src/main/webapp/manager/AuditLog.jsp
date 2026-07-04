@@ -1,7 +1,6 @@
 <%-- src/main/webapp/manager/AuditLog.jsp --%>
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -24,16 +23,16 @@
             <span class="material-symbols-outlined text-purple-600">history</span>
             Nhật Ký Thao Tác
         </h1>
-        <p class="text-gray-500 mt-1">${total} bản ghi tại chi nhánh của bạn</p>
+        <p class="text-gray-500 mt-1"><c:out value="${total}"/> bản ghi tại chi nhánh của bạn</p>
     </div>
 
     <%-- Flash messages --%>
     <c:if test="${not empty sessionScope.successMsg}">
-        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded-xl">${sessionScope.successMsg}</div>
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded-xl"><c:out value="${sessionScope.successMsg}"/></div>
         <c:remove var="successMsg" scope="session"/>
     </c:if>
     <c:if test="${not empty sessionScope.errorMsg}">
-        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl">${sessionScope.errorMsg}</div>
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl"><c:out value="${sessionScope.errorMsg}"/></div>
         <c:remove var="errorMsg" scope="session"/>
     </c:if>
 
@@ -120,7 +119,7 @@
                                         ${log.createdAt}
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="font-medium text-gray-800">${log.actorName}</div>
+                                        <div class="font-medium text-gray-800"><c:out value="${log.actorName}"/></div>
                                         <div class="text-xs text-gray-400">
                                             <c:choose>
                                                 <c:when test="${log.actorRole == 1}">Admin</c:when>
@@ -139,14 +138,14 @@
                                                 <c:when test="${log.action == 'RESTORE'}">bg-purple-100 text-purple-700</c:when>
                                                 <c:otherwise>bg-gray-100 text-gray-600</c:otherwise>
                                             </c:choose>">
-                                            ${log.action}
+                                            <c:out value="${log.action}"/>
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="text-gray-700">${log.entityName}</div>
-                                        <div class="text-xs text-gray-400">${log.entityType}</div>
+                                        <div class="text-gray-700"><c:out value="${log.entityName}"/></div>
+                                        <div class="text-xs text-gray-400"><c:out value="${log.entityType}"/></div>
                                     </td>
-                                    <td class="px-4 py-3 text-gray-500 max-w-xs truncate">${log.details}</td>
+                                    <td class="px-4 py-3 text-gray-500 max-w-xs truncate"><c:out value="${log.details}"/></td>
                                 </tr>
                             </c:forEach>
                         </c:otherwise>
@@ -161,19 +160,40 @@
                 <span class="text-sm text-gray-400">Trang ${currentPage} / ${totalPages}</span>
                 <div class="flex gap-1">
                     <c:if test="${currentPage > 1}">
-                        <a href="?page=${currentPage - 1}&entityType=${entityType}&action=${action}&dateFrom=${dateFrom}&dateTo=${dateTo}"
+                        <c:url var="prevPageUrl" value="">
+                            <c:param name="page" value="${currentPage - 1}"/>
+                            <c:param name="entityType" value="${entityType}"/>
+                            <c:param name="action" value="${action}"/>
+                            <c:param name="dateFrom" value="${dateFrom}"/>
+                            <c:param name="dateTo" value="${dateTo}"/>
+                        </c:url>
+                        <a href="${prevPageUrl}"
                            class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Trước</a>
                     </c:if>
                     <c:forEach begin="1" end="${totalPages}" var="p">
                         <c:if test="${p >= currentPage - 2 && p <= currentPage + 2}">
-                            <a href="?page=${p}&entityType=${entityType}&action=${action}&dateFrom=${dateFrom}&dateTo=${dateTo}"
+                            <c:url var="pageUrl" value="">
+                                <c:param name="page" value="${p}"/>
+                                <c:param name="entityType" value="${entityType}"/>
+                                <c:param name="action" value="${action}"/>
+                                <c:param name="dateFrom" value="${dateFrom}"/>
+                                <c:param name="dateTo" value="${dateTo}"/>
+                            </c:url>
+                            <a href="${pageUrl}"
                                class="px-3 py-1 text-sm border rounded-lg
                                <c:choose><c:when test="${p == currentPage}">bg-purple-600 text-white border-purple-600</c:when>
                                <c:otherwise>border-gray-200 hover:bg-gray-50</c:otherwise></c:choose>">${p}</a>
                         </c:if>
                     </c:forEach>
                     <c:if test="${currentPage < totalPages}">
-                        <a href="?page=${currentPage + 1}&entityType=${entityType}&action=${action}&dateFrom=${dateFrom}&dateTo=${dateTo}"
+                        <c:url var="nextPageUrl" value="">
+                            <c:param name="page" value="${currentPage + 1}"/>
+                            <c:param name="entityType" value="${entityType}"/>
+                            <c:param name="action" value="${action}"/>
+                            <c:param name="dateFrom" value="${dateFrom}"/>
+                            <c:param name="dateTo" value="${dateTo}"/>
+                        </c:url>
+                        <a href="${nextPageUrl}"
                            class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Sau</a>
                     </c:if>
                 </div>
