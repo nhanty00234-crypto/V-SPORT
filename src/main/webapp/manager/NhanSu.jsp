@@ -159,19 +159,8 @@ body { font-family: 'Inter', sans-serif; }
       </div>
     </c:if>
 
-    <div class="card overflow-hidden">
-      <table class="w-full text-sm">
-        <thead class="bg-violet-50/50 border-b border-violet-100">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-violet-800 text-xs">Thành viên</th>
-            <th class="px-4 py-3 text-left font-semibold text-violet-800 text-xs">Vai trò</th>
-            <th class="px-4 py-3 text-left font-semibold text-violet-800 text-xs">Điện thoại</th>
-            <th class="px-4 py-3 text-left font-semibold text-violet-800 text-xs">Trạng thái</th>
-            <th class="px-4 py-3 text-right font-semibold text-violet-800 text-xs">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-violet-50" id="staffBody"></tbody>
-      </table>
+    <div class="w-full" id="staffGridContainer">
+      <div id="staffGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </div>
   </div>
 
@@ -850,40 +839,94 @@ async function loadStaffList() {
 }
 
 function renderStaff() {
-    const staffBody = document.getElementById('staffBody');
-    if (!staffBody) return;
+    const staffGrid = document.getElementById('staffGrid');
+    if (!staffGrid) return;
     document.getElementById('staffCountDisplay').innerText = staffList.length;
 
-    staffBody.innerHTML = staffList.map(s => `
-        <tr class="hover:bg-violet-50/35 transition-colors">
-            <td class="px-4 py-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center shrink-0 font-bold text-xs">\${s.initial}</div>
-                    <div>
-                        <p class="font-bold text-violet-950">\${s.name}</p>
-                        <p class="text-[10px] text-violet-400">\${s.username}</p>
+    if (staffList.length === 0) {
+        staffGrid.innerHTML = `
+            <div class="col-span-full card py-16 text-center text-violet-400">
+                <span class="material-symbols-outlined text-4xl mb-2 text-violet-200">group_off</span>
+                <p class="text-xs font-medium">Chưa có nhân viên nào tại chi nhánh này</p>
+            </div>
+        `;
+        return;
+    }
+
+    staffGrid.innerHTML = staffList.map(s => {
+        let badgeClass = s.status === 'Đang làm' ? 'badge-green' : 'badge-red';
+        let statusText = s.status;
+
+        // Action buttons
+        const actionsHtml = `
+            <button onclick="manageShifts('\${s.id}', '\${s.name}')" title="Phân ca làm" class="h-8 px-2 rounded-lg border border-indigo-200 text-indigo-650 hover:bg-indigo-50 text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">schedule</span>Ca làm
+            </button>
+            <button onclick="toggleLock('\${s.id}', \${s.status == 'Đang làm'})" title="\text{Khóa/Mở khóa}" class="h-8 px-2 rounded-lg border \${s.status == 'Đang làm' ? 'border-amber-200 text-amber-600 hover:bg-amber-50' : 'border-green-200 text-green-650 hover:bg-green-50'} text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">\${s.status == 'Đang làm' ? 'lock' : 'lock_open'}</span>\${s.status == 'Đang làm' ? 'Khóa' : 'Mở'}
+            </button>
+            <button onclick="deleteStaff('\${s.id}')" title="Xóa nhân viên" class="h-8 px-2 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">person_remove</span>Xóa
+            </button>
+        `;
+
+        let dept = 'Phòng ban';
+        if (s.roleId === 4) dept = 'Lễ tân';
+        else if (s.roleId === 5) dept = 'Bảo vệ';
+        else dept = 'Nhân sự';
+
+        let avatarUrl = `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=7c3aed&color=fff&size=128&bold=true`;
+
+        return `
+            <div class="card p-5 border border-violet-100 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                    <!-- Card Header: Avatar, Name, Status -->
+                    <div class="flex items-start justify-between gap-2.5 mb-4">
+                        <div class="flex items-center gap-3">
+                            <img src="\${avatarUrl}" alt="\${s.name}" class="w-12 h-12 rounded-full border border-violet-100 shadow-sm shrink-0">
+                            <div>
+                                <p class="font-extrabold text-violet-950 text-sm leading-tight">\${s.name}</p>
+                                <p class="text-[11px] text-violet-600 font-semibold mt-0.5">\${s.VaiTro}</p>
+                            </div>
+                        </div>
+                        <span class="badge \${badgeClass}">\${statusText}</span>
+                    </div>
+
+                    <!-- Card Middle: Details (Department / Branch) -->
+                    <div class="grid grid-cols-2 gap-2 text-[10px] text-violet-400 font-bold uppercase tracking-wider mb-4">
+                        <div>
+                            <p class="font-medium text-violet-400">Bộ phận</p>
+                            <p class="text-violet-900 font-extrabold text-xs mt-0.5">\${dept}</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-violet-400">Nơi làm việc</p>
+                            <p class="text-violet-900 font-extrabold text-xs mt-0.5">Cơ sở CS${sessionScope.user.coSoId}</p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Container -->
+                    <div class="p-3 bg-violet-50/30 border border-violet-50/50 rounded-xl flex flex-col gap-1.5 text-xs text-zinc-650 font-medium">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="material-symbols-outlined text-[15px] text-violet-400 shrink-0">mail</span>
+                            <span class="truncate" title="\${s.email}">\${s.email}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[15px] text-violet-400 shrink-0">phone_iphone</span>
+                            <span>\${s.phone}</span>
+                        </div>
                     </div>
                 </div>
-            </td>
-            <td class="px-4 py-4 text-xs font-semibold text-violet-700">\${s.VaiTro}</td>
-            <td class="px-4 py-4 text-xs text-zinc-500">\${s.phone}</td>
-            <td class="px-4 py-4"><span class="badge \${s.status == 'Đang làm' ? 'badge-green' : 'badge-red'}">\${s.status}</span></td>
-            <td class="px-4 py-4 text-right flex items-center justify-end gap-1.5">
-                <button onclick="editStaff('\${s.id}')" title="Chỉnh sửa" class="p-1.5 rounded-lg hover:bg-violet-50 text-blue-650">
-                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                </button>
-                <button onclick="manageShifts('\${s.id}', '\${s.name}')" title="Quản lý ca làm" class="p-1.5 rounded-lg hover:bg-violet-50 text-violet-600">
-                    <span class="material-symbols-outlined text-[18px]">schedule</span>
-                </button>
-                <button onclick="toggleLock('\${s.id}', \${s.status == 'Đang làm'})" title="\${s.status == 'Đang làm' ? 'Khóa' : 'Mở khóa'}" class="p-1.5 rounded-lg hover:bg-violet-50 \${s.status == 'Đang làm' ? 'text-amber-600' : 'text-green-650'}">
-                    <span class="material-symbols-outlined text-[18px]">\${s.status == 'Đang làm' ? 'lock' : 'lock_open'}</span>
-                </button>
-                <button onclick="deleteStaff('\${s.id}')" title="Xóa" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500">
-                    <span class="material-symbols-outlined text-[18px]">person_remove</span>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+
+                <!-- Action Row -->
+                <div class="flex items-center gap-1.5 mt-4 pt-4 border-t border-violet-50 w-full justify-between">
+                    <button onclick="editStaff('\${s.id}')" title="Sửa thông tin" class="h-8 px-2 rounded-lg border border-violet-200 text-violet-700 hover:bg-violet-50 text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
+                        <span class="material-symbols-outlined text-[13px]">edit</span>Sửa
+                    </button>
+                    \${actionsHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // ==================== Shift Management ====================

@@ -105,41 +105,18 @@ body { font-family: 'Inter', sans-serif; }
     </div>
   </c:if>
 
-  <!-- Bảng nhân sự đang làm việc -->
-  <div id="sectionNhanSu" class="card overflow-hidden">
-    <table class="w-full text-sm">
-      <thead class="bg-zinc-50 border-b border-zinc-200">
-        <tr>
-          <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Thành viên</th>
-          <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Vai trò</th>
-          <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Điện thoại</th>
-          <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Trạng thái</th>
-          <th class="px-4 py-3 text-right font-semibold text-zinc-600 text-xs">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-zinc-100" id="staffBody"></tbody>
-    </table>
+  <!-- Grid nhân sự đang làm việc -->
+  <div id="sectionNhanSu" class="w-full flex flex-col gap-4">
+    <div id="staffGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </div>
 
-  <!-- Bảng thùng rác (ẩn mặc định) -->
-  <div id="sectionThungRac" class="hidden">
-    <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-medium flex items-center gap-2 mb-3">
+  <!-- Grid thùng rác (ẩn mặc định) -->
+  <div id="sectionThungRac" class="hidden w-full flex flex-col gap-4">
+    <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-medium flex items-center gap-2">
       <span class="material-symbols-outlined text-[16px]">info</span>
       Các tài khoản trong thùng rác đã bị vô hiệu hóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn.
     </div>
-    <div class="card overflow-hidden">
-      <table class="w-full text-sm">
-        <thead class="bg-red-50 border-b border-red-100">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Thành viên</th>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Vai trò</th>
-            <th class="px-4 py-3 text-left font-semibold text-zinc-600 text-xs">Email</th>
-            <th class="px-4 py-3 text-right font-semibold text-zinc-600 text-xs">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-zinc-100" id="trashBody"></tbody>
-      </table>
-    </div>
+    <div id="trashGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </div>
 </main>
 
@@ -189,45 +166,109 @@ body { font-family: 'Inter', sans-serif; }
 <!-- Modals -->
 <div id="staffModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeStaffModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px]">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-      <h2 id="staffModalTitle" class="text-base font-semibold text-zinc-900">Thêm nhân sự</h2>
-      <button onclick="closeStaffModal()" class="p-1.5 rounded-lg hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
-    </div>
-    <form id="staffForm" onsubmit="handleStaffSubmit(event)" class="px-6 py-4 flex flex-col gap-4">
-      <input type="hidden" id="staffEditId" value="">
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[760px] overflow-hidden flex flex-col md:flex-row min-h-[460px] animate-fade-in-up">
+    
+    <!-- Left Panel: Live Member Preview (Gorgeous & Interactive) -->
+    <div class="hidden md:flex md:w-[260px] bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 text-white p-6 flex-col justify-between relative overflow-hidden shrink-0">
+      <!-- Background glow effects -->
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+      <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
       
-      <!-- Container for staff fields -->
-      <div id="staffFieldsContainer" class="flex flex-col gap-4">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="flex flex-col gap-1.5"><label class="text-xs font-medium text-zinc-700">Họ và tên <span class="text-red-500">*</span></label><input type="text" id="staffName" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none"></div>
-            <div class="flex flex-col gap-1.5"><label class="text-xs font-medium text-zinc-700">Tên đăng nhập <span class="text-red-500">*</span></label><input type="text" id="staffUsername" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none"></div>
+      <div class="relative z-10 flex flex-col gap-1.5">
+        <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md mb-1">
+          <span class="material-symbols-outlined text-[18px] text-white">person_add</span>
+        </div>
+        <h3 class="text-base font-bold tracking-tight text-white/95">Hồ sơ Nhân sự</h3>
+        <p class="text-[11px] text-white/75 leading-relaxed">Xem trước thời gian thực thông tin tài khoản được cập nhật trên hệ thống V-SPORT.</p>
+      </div>
+      
+      <!-- Preview Card -->
+      <div class="relative z-10 my-4 p-4 bg-white/10 backdrop-blur-md border border-white/15 rounded-xl shadow-lg flex flex-col gap-3">
+        <div class="flex items-center gap-2.5">
+          <div id="previewAvatar" class="w-10 h-10 rounded-full bg-white text-blue-700 font-extrabold flex items-center justify-center text-xs shadow-sm transition-all uppercase">VS</div>
+          <div class="overflow-hidden">
+            <p id="previewName" class="font-extrabold text-white text-xs leading-tight truncate">Họ và Tên</p>
+            <p id="previewRole" class="text-[9px] text-blue-200 font-semibold tracking-wide uppercase mt-0.5">Vai trò</p>
           </div>
+        </div>
+        
+        <div class="h-px bg-white/10"></div>
+        
+        <div class="flex flex-col gap-1.5 text-[10px] text-white/80 font-medium">
+          <div class="flex items-center gap-2 truncate">
+            <span class="material-symbols-outlined text-[13px] text-white/60 shrink-0">mail</span>
+            <span id="previewEmail" class="truncate">email@v-sport.com</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[13px] text-white/60 shrink-0">phone_iphone</span>
+            <span id="previewPhone">09xxxxxxx</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="relative z-10 text-[9px] text-white/40 font-bold uppercase tracking-wider">
+        V-SPORT Suite
+      </div>
+    </div>
+    
+    <!-- Right Panel: Form Fields -->
+    <div class="flex-1 flex flex-col justify-between">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+        <h2 id="staffModalTitle" class="text-base font-bold text-zinc-800">Thêm nhân sự</h2>
+        <button onclick="closeStaffModal()" class="p-1.5 rounded-lg hover:bg-zinc-100"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+      </div>
+      
+      <form id="staffForm" onsubmit="handleStaffSubmit(event)" class="px-6 py-4 flex flex-col gap-3.5">
+        <input type="hidden" id="staffEditId" value="">
+        
+        <!-- Container for staff fields -->
+        <div id="staffFieldsContainer" class="flex flex-col gap-3.5">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-zinc-600">Họ và tên <span class="text-red-500">*</span></label>
+              <input type="text" id="staffName" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none transition-all">
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-zinc-600">Tên đăng nhập <span class="text-red-500">*</span></label>
+              <input type="text" id="staffUsername" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none transition-all">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-zinc-600">Vai trò <span class="text-red-500">*</span></label>
+              <select id="staffRole" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none transition-all bg-white">
+                <option value="2">Quản lý</option>
+                <option value="3">Khách hàng</option>
+                <option value="4">Lễ tân</option>
+                <option value="5">Bảo vệ</option>
+              </select>
+            </div>
+            <div id="staffCoSoContainer" class="flex flex-col gap-1.5 hidden">
+              <label class="text-xs font-semibold text-zinc-600">Cơ sở <span class="text-red-500">*</span></label>
+              <select id="staffCoSo" name="coSoId" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none transition-all bg-white">
+                <c:forEach var="branch" items="${branches}">
+                  <option value="${branch.coSoID}">${branch.tenCoSo}</option>
+                </c:forEach>
+              </select>
+            </div>
+          </div>
+          
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-medium text-zinc-700">Vai trò <span class="text-red-500">*</span></label>
-            <select id="staffRole" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none">
-              <option value="2">Quản lý</option>
-              <option value="3">Khách hàng</option>
-              <option value="4">Lễ tân</option>
-              <option value="5">Bảo vệ</option>
-            </select>
+            <label class="text-xs font-semibold text-zinc-600">Email <span class="text-red-500">*</span></label>
+            <input type="email" id="staffEmail" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none transition-all">
           </div>
-          <div id="staffCoSoContainer" class="flex flex-col gap-1.5 hidden">
-            <label class="text-xs font-medium text-zinc-700">Cơ sở <span class="text-red-500">*</span></label>
-            <select id="staffCoSo" name="coSoId" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none">
-              <c:forEach var="branch" items="${branches}">
-                <option value="${branch.coSoID}">${branch.tenCoSo}</option>
-              </c:forEach>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5"><label class="text-xs font-medium text-zinc-700">Email <span class="text-red-500">*</span></label><input type="email" id="staffEmail" required class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none"></div>
+          
           <div class="grid grid-cols-2 gap-3">
-            <div class="flex flex-col gap-1.5"><label class="text-xs font-medium text-zinc-700">Điện thoại</label><input type="tel" id="staffPhone" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none"></div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-zinc-600">Điện thoại</label>
+              <input type="tel" id="staffPhone" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none transition-all">
+            </div>
             
             <div class="flex flex-col gap-1.5">
-              <label id="pwdLabel" class="text-xs font-medium text-zinc-700">Mật khẩu <span class="text-red-500">*</span></label>
+              <label id="pwdLabel" class="text-xs font-semibold text-zinc-600">Mật khẩu <span class="text-red-500">*</span></label>
               <div class="relative flex items-center">
-                <input type="password" id="staffPassword" placeholder="••••••••" autocomplete="new-password" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-zinc-400 focus:outline-none w-full">
+                <input type="password" id="staffPassword" placeholder="••••••••" autocomplete="new-password" class="h-9 px-3 rounded-lg border border-zinc-200 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 focus:outline-none w-full transition-all">
               </div>
               <!-- Strength Indicator -->
               <div id="passwordStrengthContainer" class="hidden flex flex-col gap-1 mt-1">
@@ -238,45 +279,48 @@ body { font-family: 'Inter', sans-serif; }
               </div>
             </div>
           </div>
-          <div class="flex justify-end gap-2 mt-2">
-            <button type="button" onclick="closeStaffModal()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm">Hủy</button>
-            <button type="submit" class="h-9 px-4 rounded-lg bg-zinc-900 text-white text-sm">Lưu thông tin</button>
-          </div>
-      </div>
-
-      <!-- Container for OTP Verification (Hidden by default) -->
-      <div id="otpVerificationSection" class="hidden flex flex-col gap-4 text-center py-4">
-          <div class="inline-flex mx-auto items-center justify-center w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mb-2">
-              <span class="material-symbols-outlined text-[24px]">mark_email_read</span>
-          </div>
-          <div>
-              <h3 class="text-sm font-bold text-zinc-900">Xác thực OTP thay đổi Email</h3>
-              <p class="text-xs text-zinc-500 mt-1">Một mã xác thực gồm 6 chữ số đã được gửi tới <span class="font-bold text-zinc-850" id="otpTargetEmail"></span>.</p>
-          </div>
           
-          <div class="flex gap-2 justify-center my-3" id="otpBoxesContainer">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+          <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-zinc-100">
+            <button type="button" onclick="closeStaffModal()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm font-semibold hover:bg-zinc-50 text-zinc-650 transition-colors">Hủy</button>
+            <button type="submit" class="h-9 px-5 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-100 transition-colors">Lưu thông tin</button>
           </div>
-          
-          <div id="otpErrorBanner" class="hidden p-2.5 bg-red-50 border border-red-100 text-red-650 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
-              <span class="material-symbols-outlined text-[16px]">error</span>
-              <span id="otpErrorMsgText">Mã OTP không hợp lệ.</span>
-          </div>
+        </div>
 
-          <div class="flex gap-2 justify-end mt-4 pt-4 border-t border-zinc-150">
-              <button type="button" onclick="cancelOtpVerification()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm font-semibold hover:bg-zinc-50 text-zinc-650">Quay lại</button>
-              <button type="button" id="otpConfirmBtn" onclick="submitOtpVerification()" class="h-9 px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 shadow shadow-emerald-100 flex items-center gap-1.5">
-                  Xác nhận
-                  <span class="material-symbols-outlined text-[16px]">check</span>
-              </button>
-          </div>
-      </div>
-    </form>
+        <!-- Container for OTP Verification (Hidden by default) -->
+        <div id="otpVerificationSection" class="hidden flex flex-col gap-4 text-center py-4">
+            <div class="inline-flex mx-auto items-center justify-center w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mb-2">
+                <span class="material-symbols-outlined text-[24px]">mark_email_read</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-zinc-900">Xác thực OTP thay đổi Email</h3>
+                <p class="text-xs text-zinc-500 mt-1">Một mã xác thực gồm 6 chữ số đã được gửi tới <span class="font-bold text-zinc-850" id="otpTargetEmail"></span>.</p>
+            </div>
+            
+            <div class="flex gap-2 justify-center my-3" id="otpBoxesContainer">
+                <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+                <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+                <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+                <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+                <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+                <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-zinc-250 rounded-xl text-center font-bold text-lg focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 outline-none transition-all">
+            </div>
+            
+            <div id="otpErrorBanner" class="hidden p-2.5 bg-red-50 border border-red-100 text-red-650 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">error</span>
+                <span id="otpErrorMsgText">Mã OTP không hợp lệ.</span>
+            </div>
+
+            <div class="flex gap-2 justify-end mt-4 pt-4 border-t border-zinc-150">
+                <button type="button" onclick="cancelOtpVerification()" class="h-9 px-4 rounded-lg border border-zinc-200 text-sm font-semibold hover:bg-zinc-50 text-zinc-650">Quay lại</button>
+                <button type="button" id="otpConfirmBtn" onclick="submitOtpVerification()" class="h-9 px-5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 shadow shadow-blue-100 flex items-center gap-1.5">
+                    Xác nhận
+                    <span class="material-symbols-outlined text-[16px]">check</span>
+                </button>
+            </div>
+        </div>
+      </form>
+    </div>
+    
   </div>
 </div>
 
@@ -348,7 +392,7 @@ function renderPaginationControls(parentSectionId, controlId, totalItems, curren
   // Left arrow
   const prevBtn = document.createElement('button');
   prevBtn.type = 'button';
-  prevBtn.className = 'px-2 py-1 rounded hover:bg-zinc-150 text-zinc-400 disabled:opacity-40 flex items-center justify-center transition-colors';
+  prevBtn.className = 'px-2 py-1 rounded hover:bg-blue-50 hover:text-blue-600 text-slate-400 disabled:opacity-40 flex items-center justify-center transition-colors';
   prevBtn.disabled = currentPage === 1;
   prevBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_left</span>';
   prevBtn.onclick = () => onPageChange(currentPage - 1);
@@ -360,9 +404,9 @@ function renderPaginationControls(parentSectionId, controlId, totalItems, curren
     btn.type = 'button';
     btn.innerText = i;
     if (i === currentPage) {
-      btn.className = 'px-2.5 py-1 rounded bg-zinc-900 text-white font-semibold transition-all';
+      btn.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-semibold shadow-sm transition-all';
     } else {
-      btn.className = 'px-2.5 py-1 rounded hover:bg-zinc-150 text-zinc-650 transition-colors';
+      btn.className = 'px-2.5 py-1 rounded hover:bg-blue-50 hover:text-blue-600 text-slate-600 transition-colors';
     }
     btn.onclick = () => onPageChange(i);
     btnContainer.appendChild(btn);
@@ -371,7 +415,7 @@ function renderPaginationControls(parentSectionId, controlId, totalItems, curren
   // Right arrow
   const nextBtn = document.createElement('button');
   nextBtn.type = 'button';
-  nextBtn.className = 'px-2 py-1 rounded hover:bg-zinc-150 text-zinc-400 disabled:opacity-40 flex items-center justify-center transition-colors';
+  nextBtn.className = 'px-2 py-1 rounded hover:bg-blue-50 hover:text-blue-600 text-slate-400 disabled:opacity-40 flex items-center justify-center transition-colors';
   nextBtn.disabled = currentPage === totalPages;
   nextBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">chevron_right</span>';
   nextBtn.onclick = () => onPageChange(currentPage + 1);
@@ -379,8 +423,8 @@ function renderPaginationControls(parentSectionId, controlId, totalItems, curren
 }
 
 function renderStaff() {
-  const staffBody = document.getElementById('staffBody');
-  if (!staffBody) return;
+  const staffGrid = document.getElementById('staffGrid');
+  if (!staffGrid) return;
 
   const searchValue = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value.toLowerCase().trim() : '';
   const filtered = staffList.filter(s => {
@@ -399,7 +443,19 @@ function renderStaff() {
 
   const pageList = filtered.slice((staffCurrentPage - 1) * nhanSuPageSize, staffCurrentPage * nhanSuPageSize);
 
-  staffBody.innerHTML = pageList.map(s => {
+  if (pageList.length === 0) {
+    staffGrid.innerHTML = `
+      <div class="col-span-full card py-16 text-center text-zinc-400">
+        <span class="material-symbols-outlined text-4xl mb-2 text-zinc-300">group_off</span>
+        <p class="text-xs font-medium">Không tìm thấy thành viên nào</p>
+      </div>
+    `;
+    const existing = document.getElementById('sectionNhanSu').querySelector('#staffPagination');
+    if (existing) existing.remove();
+    return;
+  }
+
+  staffGrid.innerHTML = pageList.map(s => {
     let badgeClass = s.status === 'Đang làm' ? 'badge-green' : 'badge-red';
     let statusText = s.status;
     let actionsHtml = '';
@@ -417,26 +473,78 @@ function renderStaff() {
     } else if (s.roleId === 2) {
       // Manager/Owner – chỉ xem, việc duyệt/khóa ở trang Quản lý Owner
       actionsHtml = `
-        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
+        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="flex-1 h-8 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">person_remove</span>Xóa
+        </button>
       `;
     } else {
       actionsHtml = `
-        <button onclick="toggleLock('\${s.id}', \${s.status === 'Đang làm'})" title="\${s.status === 'Đang làm' ? 'Khóa' : 'Mở khóa'}" class="p-1.5 rounded-lg hover:bg-zinc-100 \${s.status === 'Đang làm' ? 'text-amber-600' : 'text-green-600'}"><span class="material-symbols-outlined text-[18px]">\${s.status === 'Đang làm' ? 'lock' : 'lock_open'}</span></button>
-        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>
+        <button onclick="toggleLock('\${s.id}', \${s.status === 'Đang làm'})" title="\${s.status === 'Đang làm' ? 'Khóa' : 'Mở khóa'}" class="flex-1 h-8 rounded-lg border \${s.status === 'Đang làm' ? 'border-amber-200 text-amber-600 hover:bg-amber-50' : 'border-green-200 text-green-600 hover:bg-green-50'} text-[11px] font-bold transition-all flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">\${s.status === 'Đang làm' ? 'lock' : 'lock_open'}</span>\${s.status === 'Đang làm' ? 'Khóa' : 'Mở'}
+        </button>
+        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="flex-1 h-8 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">person_remove</span>Xóa
+        </button>
       `;
     }
 
+    let dept = 'Khác';
+    if (s.roleId === 2) dept = 'Quản lý';
+    else if (s.roleId === 3) dept = 'Khách hàng';
+    else if (s.roleId === 4) dept = 'Lễ tân';
+    else if (s.roleId === 5) dept = 'Bảo vệ';
+    
+    let branchText = s.coSoId ? `Cơ sở CS\${s.coSoId}` : 'Trụ sở chính';
+    let avatarUrl = `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=3b82f6&color=fff&size=128&bold=true`;
+
     return `
-      <tr class="hover:bg-zinc-50 transition-colors">
-        <td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">\${s.initial}</div><div><p class="font-bold text-zinc-900">\${s.name}</p><p class="text-[10px] text-zinc-400">\${s.username}</p></div></div></td>
-        <td class="px-4 py-4 text-xs font-medium text-zinc-600">\${s.VaiTro}</td>
-        <td class="px-4 py-4 text-xs text-zinc-500">\${s.phone}</td>
-        <td class="px-4 py-4"><span class="badge \${badgeClass}">\${statusText}</span></td>
-        <td class="px-4 py-4 text-right flex items-center justify-end gap-1.5">
-          <button onclick="editStaff('\${s.id}')" title="Sửa" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+      <div class="card p-5 border border-slate-200 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div>
+          <!-- Card Header: Avatar, Name, Status -->
+          <div class="flex items-start justify-between gap-2.5 mb-4">
+            <div class="flex items-center gap-3">
+              <img src="\${avatarUrl}" alt="\${s.name}" class="w-12 h-12 rounded-full border border-slate-100 shadow-sm shrink-0">
+              <div>
+                <p class="font-extrabold text-slate-900 text-sm leading-tight">\${s.name}</p>
+                <p class="text-[11px] text-blue-600 font-semibold mt-0.5">\${s.VaiTro}</p>
+              </div>
+            </div>
+            <span class="badge \${badgeClass}">\${statusText}</span>
+          </div>
+
+          <!-- Card Middle: Details (Department / Branch) -->
+          <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-4">
+            <div>
+              <p class="font-medium text-slate-400">Bộ phận</p>
+              <p class="text-slate-800 font-extrabold text-xs mt-0.5">\${dept}</p>
+            </div>
+            <div>
+              <p class="font-medium text-slate-400">Nơi làm việc</p>
+              <p class="text-slate-800 font-extrabold text-xs mt-0.5">\${branchText}</p>
+            </div>
+          </div>
+
+          <!-- Contact Container -->
+          <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-1.5 text-xs text-slate-650 font-medium">
+            <div class="flex items-center gap-2 truncate">
+              <span class="material-symbols-outlined text-[15px] text-slate-400 shrink-0">mail</span>
+              <span class="truncate" title="\${s.email}">\${s.email}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[15px] text-slate-400 shrink-0">phone_iphone</span>
+              <span>\${s.phone}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 w-full justify-between">
+          <button onclick="editStaff('\${s.id}')" title="Sửa thông tin" class="flex-1 h-8 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">edit</span>Sửa
+          </button>
           \${actionsHtml}
-        </td>
-      </tr>
+        </div>
+      </div>
     `;
   }).join('');
 
@@ -505,8 +613,8 @@ function restoreStaff(id) {
 
 // ---- Render thùng rác ----
 function renderTrash() {
-  const trashBody = document.getElementById('trashBody');
-  if (!trashBody) return;
+  const trashGrid = document.getElementById('trashGrid');
+  if (!trashGrid) return;
 
   const searchValue = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value.toLowerCase().trim() : '';
   const filtered = deletedList.filter(s => {
@@ -517,7 +625,12 @@ function renderTrash() {
   });
 
   if (filtered.length === 0) {
-    trashBody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-zinc-400">Thùng rác trống hoặc không tìm thấy kết quả</td></tr>';
+    trashGrid.innerHTML = `
+      <div class="col-span-full card py-16 text-center text-zinc-400">
+        <span class="material-symbols-outlined text-4xl mb-2 text-zinc-300">group_off</span>
+        <p class="text-xs font-medium">Thùng rác trống hoặc không tìm thấy kết quả</p>
+      </div>
+    `;
     const existing = document.getElementById('sectionThungRac').querySelector('#trashPagination');
     if (existing) existing.remove();
     return;
@@ -529,22 +642,49 @@ function renderTrash() {
 
   const pageList = filtered.slice((trashCurrentPage - 1) * nhanSuPageSize, trashCurrentPage * nhanSuPageSize);
 
-  trashBody.innerHTML = pageList.map(s => `
-    <tr class="hover:bg-zinc-50 transition-colors">
-      <td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center shrink-0 font-bold text-xs">\${s.initial}</div><div><p class="font-bold text-zinc-500">\${s.name}</p><p class="text-[10px] text-zinc-400">\${s.username}</p></div></div></td>
-      <td class="px-4 py-4 text-xs font-medium text-zinc-400">\${s.VaiTro}</td>
-      <td class="px-4 py-4 text-xs text-zinc-400">\${s.email}</td>
-      <td class="px-4 py-4 text-right flex items-center justify-end gap-1.5">
-        <button onclick="restoreStaff('\${s.id}')" title="Khôi phục" class="flex items-center gap-1 px-3 h-8 rounded-lg bg-green-50 text-green-600 text-xs font-semibold hover:bg-green-100"><span class="material-symbols-outlined text-[16px]">restore</span>Khôi phục</button>
-        <button onclick="promptPermanentDelete('\${s.id}', '\${s.name}')" title="Xóa vĩnh viễn" class="flex items-center gap-1 px-3 h-8 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100"><span class="material-symbols-outlined text-[16px]">delete_forever</span>Xóa vĩnh viễn</button>
-      </td>
-    </tr>
-  `).join('');
+  trashGrid.innerHTML = pageList.map(s => {
+    let avatarUrl = `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=94a3b8&color=fff&size=128&bold=true`;
+    return `
+      <div class="card p-5 border border-slate-200 bg-white rounded-2xl shadow-sm flex flex-col justify-between">
+        <div>
+          <!-- Card Header: Avatar, Name, Status -->
+          <div class="flex items-start justify-between gap-2.5 mb-4">
+            <div class="flex items-center gap-3">
+              <img src="\${avatarUrl}" alt="\${s.name}" class="w-12 h-12 rounded-full border border-slate-100 shadow-sm shrink-0 opacity-60">
+              <div>
+                <p class="font-extrabold text-slate-500 text-sm leading-tight">\${s.name}</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-0.5">\${s.VaiTro}</p>
+              </div>
+            </div>
+            <span class="badge bg-slate-100 border border-slate-250 text-slate-600">Đã xóa</span>
+          </div>
 
-  const thungRacCard = document.getElementById('sectionThungRac').querySelector('.card');
+          <!-- Contact Container -->
+          <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-1.5 text-xs text-slate-500 font-medium mb-4">
+            <div class="flex items-center gap-2 truncate">
+              <span class="material-symbols-outlined text-[15px] text-slate-400 shrink-0">mail</span>
+              <span class="truncate" title="\${s.email}">\${s.email}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 w-full justify-between">
+          <button onclick="restoreStaff('\${s.id}')" title="Khôi phục tài khoản" class="flex-1 h-8 rounded-lg bg-green-600 text-white hover:bg-green-700 text-[11px] font-bold shadow-sm transition-all flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">restore</span>Khôi phục
+          </button>
+          <button onclick="promptPermanentDelete('\${s.id}', '\${s.name}')" title="Xóa vĩnh viễn" class="flex-1 h-8 rounded-lg bg-red-600 text-white hover:bg-red-700 text-[11px] font-bold shadow-sm transition-all flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">delete_forever</span>Xóa vĩnh viễn
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const thungRacCard = document.getElementById('sectionThungRac');
   if (thungRacCard) {
     if (!thungRacCard.id) thungRacCard.id = 'trashCardContainer';
-    renderPaginationControls('trashCardContainer', 'trashPagination', filtered.length, trashCurrentPage, totalPages, (p) => {
+    renderPaginationControls('sectionThungRac', 'trashPagination', filtered.length, trashCurrentPage, totalPages, (p) => {
       trashCurrentPage = p;
       renderTrash();
     });
@@ -628,6 +768,36 @@ function updateRoleDropdown(isEdit, currentRoleId) {
   toggleBranch();
 }
 
+function updateModalLivePreview() {
+  const name = document.getElementById('staffName').value.trim() || 'Họ và Tên';
+  const email = document.getElementById('staffEmail').value.trim() || 'email@v-sport.com';
+  const phone = document.getElementById('staffPhone').value.trim() || '09xxxxxxx';
+  
+  const roleSelect = document.getElementById('staffRole');
+  let roleText = 'Vai trò';
+  if (roleSelect && roleSelect.selectedIndex >= 0) {
+    roleText = roleSelect.options[roleSelect.selectedIndex].text;
+  }
+  
+  const nameEl = document.getElementById('previewName');
+  const emailEl = document.getElementById('previewEmail');
+  const phoneEl = document.getElementById('previewPhone');
+  const roleEl = document.getElementById('previewRole');
+  const avatarEl = document.getElementById('previewAvatar');
+  
+  if (nameEl) nameEl.innerText = name;
+  if (emailEl) emailEl.innerText = email;
+  if (phoneEl) phoneEl.innerText = phone;
+  if (roleEl) roleEl.innerText = roleText;
+  
+  let initials = 'VS';
+  const nameParts = name.trim().split(/\s+/);
+  if (nameParts.length > 0 && nameParts[0] !== 'Họ' && nameParts[0] !== 'và' && nameParts[0] !== 'Tên') {
+    initials = nameParts[nameParts.length - 1].substring(0, 2).toUpperCase();
+  }
+  if (avatarEl) avatarEl.innerText = initials;
+}
+
 function openAddStaff() {
   document.getElementById('staffForm').reset();
   document.getElementById('staffModalTitle').innerText = 'Thêm nhân sự mới';
@@ -651,10 +821,12 @@ function openAddStaff() {
   
   // Reset fields to enabled state
   document.getElementById('staffRole').disabled = false;
+  document.getElementById('staffPhone').disabled = false;
   const coSoSelect = document.getElementById('staffCoSo');
   if (coSoSelect) coSoSelect.disabled = false;
   
   updateRoleDropdown(false, null);
+  updateModalLivePreview();
   document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -668,6 +840,7 @@ function editStaff(id) {
   document.getElementById('staffUsername').disabled = true;
   document.getElementById('staffEmail').value = s.email;
   document.getElementById('staffPhone').value = s.phone;
+  document.getElementById('staffPhone').disabled = true; // Khóa số điện thoại khi chỉnh sửa
   
   // Reset OTP containers
   document.getElementById('staffFieldsContainer').classList.remove('hidden');
@@ -678,8 +851,10 @@ function editStaff(id) {
   // Set password to optional and set label
   const pwdLabel = document.getElementById('pwdLabel');
   const staffPassword = document.getElementById('staffPassword');
-  pwdLabel.innerHTML = 'Mật khẩu (Để trống nếu giữ nguyên)';
+  pwdLabel.innerHTML = 'Mật khẩu (Được giữ bảo mật)';
   staffPassword.required = false;
+  staffPassword.disabled = true; // Khóa mật khẩu khi chỉnh sửa
+  staffPassword.placeholder = "Được giữ bảo mật (không thể thay đổi)";
   staffPassword.type = 'password';
   document.getElementById('passwordStrengthContainer').classList.add('hidden');
   
@@ -690,27 +865,12 @@ function editStaff(id) {
     coSoSelect.value = s.coSoId;
   }
 
-  // Handle locks for Manager accounts (roleId === 2)
+  // Handle locks for all edit staff actions
   const staffRoleSelect = document.getElementById('staffRole');
-  if (s.roleId === 2) {
-    staffRoleSelect.disabled = true;
-    if (coSoSelect) coSoSelect.disabled = true;
-  } else {
-    staffRoleSelect.disabled = false;
-    if (coSoSelect) coSoSelect.disabled = false;
-  }
+  staffRoleSelect.disabled = true; // Khóa vai trò khi chỉnh sửa
+  if (coSoSelect) coSoSelect.disabled = true; // Khóa chi nhánh khi chỉnh sửa
 
-  // Handle password editing restriction for Manager (2), Customer (3), Receptionist (4), and Security (5) roles
-  const disablePasswordChange = [2, 3, 4, 5].includes(s.roleId);
-  if (disablePasswordChange) {
-    staffPassword.disabled = true;
-    staffPassword.placeholder = "Được giữ bảo mật (không thể thay đổi)";
-    pwdLabel.innerHTML = 'Mật khẩu (Được giữ bảo mật)';
-  } else {
-    staffPassword.disabled = false;
-    staffPassword.placeholder = "••••••••";
-  }
-
+  updateModalLivePreview();
   document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -927,6 +1087,16 @@ async function submitOtpVerification() {
             }
         });
     }
+
+    // Live preview event listeners
+    const fieldsToListen = ['staffName', 'staffEmail', 'staffPhone', 'staffRole'];
+    fieldsToListen.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updateModalLivePreview);
+        el.addEventListener('change', updateModalLivePreview);
+      }
+    });
 })();
 
 // Bfcache restore (browser back/forward): re-render data
