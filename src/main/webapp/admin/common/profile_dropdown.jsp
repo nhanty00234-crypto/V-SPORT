@@ -1,6 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<c:set var="profileAvatarName" value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}" />
+<c:set var="profileFallbackAvatarUrl" value="https://ui-avatars.com/api/?name=${profileAvatarName}&background=2563eb&color=fff&bold=true" />
+<c:set var="profileAvatarUrl" value="${profileFallbackAvatarUrl}" />
+<c:if test="${not empty sessionScope.user.avatarUrl}">
+  <c:url value="${sessionScope.user.avatarUrl}" var="profileAvatarUrl" />
+</c:if>
 
 <style>
   @keyframes modalScaleIn {
@@ -14,7 +20,7 @@
 
 <div class="relative">
   <button id="profileBtn" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-    <img src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=2563eb&color=fff&bold=true" class="w-8 h-8 rounded-full object-cover ring-2 ring-white" alt="Avatar">
+    <img src="${profileAvatarUrl}" class="profile-avatar-img w-8 h-8 rounded-full object-cover ring-2 ring-white" alt="Avatar">
     <div class="hidden sm:block text-left">
       <p class="text-sm font-semibold text-zinc-900 leading-tight">
         <c:out value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}" />
@@ -40,7 +46,7 @@
       <div class="absolute inset-0 bg-gradient-to-br from-blue-600/[0.04] to-transparent pointer-events-none"></div>
       <div class="flex items-start gap-3.5">
         <div class="relative shrink-0">
-          <img class="w-[52px] h-[52px] rounded-full object-cover ring-2 ring-blue-600/30" src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=2563eb&color=fff&bold=true" alt="Avatar">
+          <img class="profile-avatar-img w-[52px] h-[52px] rounded-full object-cover ring-2 ring-blue-600/30" src="${profileAvatarUrl}" alt="Avatar">
           <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#05cd99] border-2 border-white"></span>
         </div>
         <div class="flex-1 min-w-0">
@@ -86,7 +92,8 @@
 
 <!-- Edit Profile Modal -->
 <div id="editProfileModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[520px] max-h-[90vh] overflow-y-auto z-10 border border-zinc-200 modal-animate-scale">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('editProfileModal').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[520px] max-h-[90vh] overflow-y-auto z-10 border border-zinc-200 modal-animate-scale">
     <form onsubmit="return false;" autocomplete="off" class="flex flex-col">
       <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
         <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-[20px] text-blue-700">manage_accounts</span><h3 class="text-base font-bold text-zinc-900 font-sans">Hồ sơ cá nhân</h3></div>
@@ -94,11 +101,12 @@
       </div>
       <div class="flex flex-col items-center gap-3 pt-6 pb-4 border-b border-zinc-100">
         <div class="relative">
-          <img id="editAvatarPreview" class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-600/30" src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=2563eb&color=fff&bold=true" alt="Avatar">
+          <img id="editAvatarPreview" class="profile-avatar-img w-20 h-20 rounded-full object-cover ring-2 ring-blue-600/30" src="${profileAvatarUrl}" alt="Avatar">
           <label for="avatarUpload" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-700 text-white flex items-center justify-center cursor-pointer shadow hover:opacity-90 transition-opacity"><span class="material-symbols-outlined text-[14px]">photo_camera</span></label>
           <input id="avatarUpload" type="file" accept="image/*" class="hidden" onchange="previewAvatar(this)">
         </div>
-        <p class="text-xs text-zinc-500">Nhấn biểu tượng máy ảnh để thay ảnh đại diện</p>
+        <p class="text-xs text-zinc-500">Nhấn biểu tượng máy ảnh để thay ảnh · <span class="font-medium text-zinc-700">Tối đa 2MB</span> · JPG, PNG, WEBP, GIF</p>
+        <p id="avatarError" class="hidden mt-1 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-center w-full max-w-xs"></p>
       </div>
       <div class="px-6 py-5">
         <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4">Thông tin chi tiết — <span class="text-blue-700">Bảng Accounts</span></p>
@@ -115,6 +123,29 @@
         <button type="button" onclick="saveProfileChanges()" class="h-10 px-5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95">Lưu thay đổi</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Email OTP Modal -->
+<div id="profileEmailOtpModal" class="hidden fixed inset-0 z-[85] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('profileEmailOtpModal').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[420px] z-10 border border-zinc-200 modal-animate-scale">
+    <div class="px-6 py-4 border-b border-zinc-200 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-[20px] text-blue-700">mark_email_read</span>
+        <h3 class="text-base font-bold text-zinc-900 font-sans">Xác thực email mới</h3>
+      </div>
+      <button type="button" onclick="document.getElementById('profileEmailOtpModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-sm text-zinc-600 leading-relaxed">Mã OTP đã được gửi đến <strong id="profileOtpEmailTarget" class="text-zinc-900"></strong>. Nhập mã để hoàn tất thay đổi hồ sơ.</p>
+      <input id="profileEmailOtpInput" type="text" maxlength="6" inputmode="numeric" placeholder="••••••" class="mt-4 w-full h-12 rounded-lg border border-zinc-200 text-center text-xl font-black tracking-[0.35em] focus:border-blue-700 focus:outline-none">
+      <p id="profileEmailOtpError" class="hidden mt-3 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+    </div>
+    <div class="px-6 pb-5 flex gap-3 justify-end">
+      <button type="button" onclick="document.getElementById('profileEmailOtpModal').classList.add('hidden')" class="h-10 px-5 rounded-lg border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">Hủy</button>
+      <button type="button" onclick="verifyProfileEmailOtp()" class="h-10 px-5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95">Xác thực</button>
+    </div>
   </div>
 </div>
 
@@ -218,7 +249,7 @@
   // Profile & settings logic
   document.addEventListener('DOMContentLoaded', () => {
     // Move modals and overlays to body to avoid stacking context / clipping issues
-    const elementsToMove = ['editProfileModal', 'changePwModal', 'settingsOverlay', 'settingsDrawer', 'successToast'];
+    const elementsToMove = ['editProfileModal', 'profileEmailOtpModal', 'changePwModal', 'settingsOverlay', 'settingsDrawer', 'successToast'];
     elementsToMove.forEach(id => {
       const el = document.getElementById(id);
       if (el && el.parentElement !== document.body) {
@@ -288,7 +319,7 @@
     params.append('email', email);
     params.append('phoneNumber', phone);
     
-    fetch('${pageContext.request.contextPath}/admin/update-profile', {
+    fetch('${pageContext.request.contextPath}/account/update-profile', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -298,13 +329,18 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
+        if (data.requiresOtp) {
+          document.getElementById('profileOtpEmailTarget').textContent = data.email || email;
+          document.getElementById('profileEmailOtpInput').value = '';
+          document.getElementById('profileEmailOtpError').classList.add('hidden');
+          document.getElementById('editProfileModal').classList.add('hidden');
+          document.getElementById('profileEmailOtpModal').classList.remove('hidden');
+          setTimeout(() => document.getElementById('profileEmailOtpInput').focus(), 80);
+          showToast('Đã gửi OTP', data.message);
+          return;
+        }
         // Save to UI
-        document.querySelectorAll('#profileBtn p').forEach(el => {
-          if (el.classList.contains('text-sm')) el.textContent = name;
-        });
-        document.querySelectorAll('#profileDrop p').forEach(el => {
-          if (el.classList.contains('font-bold') && el.classList.contains('text-[15px]')) el.textContent = name;
-        });
+        syncProfileUi(data.fullName || name, data.email || email, data.phoneNumber || phone);
         
         document.getElementById('editProfileModal').classList.add('hidden');
         showToast('Thành công', data.message);
@@ -316,6 +352,61 @@
       console.error('Error:', error);
       alert("Đã xảy ra lỗi khi kết nối tới máy chủ.");
     });
+  }
+
+  function verifyProfileEmailOtp() {
+    const otp = document.getElementById('profileEmailOtpInput').value.trim();
+    const err = document.getElementById('profileEmailOtpError');
+    if (!/^\d{6}$/.test(otp)) {
+      err.textContent = 'Vui lòng nhập mã OTP gồm 6 chữ số.';
+      err.classList.remove('hidden');
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('action', 'verifyEmailOtp');
+    params.append('otp', otp);
+
+    fetch('${pageContext.request.contextPath}/account/update-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+      body: params
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        syncProfileUi(data.fullName, data.email, data.phoneNumber);
+        document.getElementById('profileEmailOtpModal').classList.add('hidden');
+        document.getElementById('editProfileModal').classList.add('hidden');
+        showToast('Thành công', data.message);
+      } else {
+        err.textContent = data.message || 'Không thể xác thực OTP.';
+        err.classList.remove('hidden');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      err.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+      err.classList.remove('hidden');
+    });
+  }
+
+  function syncProfileUi(name, email, phone) {
+    document.querySelectorAll('#profileBtn p').forEach(el => {
+      if (el.classList.contains('text-sm')) el.textContent = name || '';
+    });
+    document.querySelectorAll('#profileDrop p').forEach(el => {
+      if (el.classList.contains('font-bold') && el.classList.contains('text-[15px]')) el.textContent = name || '';
+    });
+    const detailRows = document.querySelectorAll('#profileDrop .px-4.py-3 p');
+    if (detailRows[0]) detailRows[0].textContent = email || 'Chưa cập nhật';
+    if (detailRows[1]) detailRows[1].textContent = phone || 'Chưa cập nhật';
+    const emailInput = document.getElementById('editEmail');
+    const phoneInput = document.getElementById('editPhone');
+    const nameInput = document.getElementById('editFullName');
+    if (emailInput) emailInput.value = email || '';
+    if (phoneInput) phoneInput.value = phone || '';
+    if (nameInput) nameInput.value = name || '';
   }
 
   function savePassword() {
@@ -341,7 +432,7 @@
     params.append('currentPassword', pwCurrent);
     params.append('newPassword', pw);
     
-    fetch('${pageContext.request.contextPath}/admin/update-profile', {
+    fetch('${pageContext.request.contextPath}/account/update-profile', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -404,17 +495,48 @@
   }
 
   function previewAvatar(input) {
-    if (input.files && input.files[0]) {
-      const r = new FileReader();
-      r.onload = function(e) {
-        document.getElementById('editAvatarPreview').src = e.target.result;
-        // Also update standard avatars
-        document.querySelectorAll('#profileBtn img, #profileDrop img').forEach(img => {
-          img.src = e.target.result;
-        });
-      };
-      r.readAsDataURL(input.files[0]);
+    const file = input.files && input.files[0];
+    const errEl = document.getElementById('avatarError');
+    if (errEl) errEl.classList.add('hidden');
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      if (errEl) { errEl.textContent = 'Ảnh quá lớn. Vui lòng chọn ảnh dưới 2MB.'; errEl.classList.remove('hidden'); }
+      input.value = '';
+      return;
     }
+    if (!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)) {
+      if (errEl) { errEl.textContent = 'Chỉ hỗ trợ định dạng JPG, PNG, WEBP hoặc GIF.'; errEl.classList.remove('hidden'); }
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById('editAvatarPreview').src = e.target.result; };
+    reader.readAsDataURL(file);
+
+    const preview = document.getElementById('editAvatarPreview');
+    if (preview) preview.style.opacity = '0.5';
+
+    const fd = new FormData();
+    fd.append('action', 'updateAvatar');
+    fd.append('avatar', file);
+
+    fetch('${pageContext.request.contextPath}/account/update-profile', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(data => {
+        if (preview) preview.style.opacity = '';
+        if (data.success) {
+          document.querySelectorAll('.profile-avatar-img').forEach(img => img.src = data.avatarUrl);
+          showToast('Thành công', data.message || 'Cập nhật ảnh đại diện thành công.');
+        } else {
+          if (errEl) { errEl.textContent = data.message || 'Không thể tải ảnh lên.'; errEl.classList.remove('hidden'); }
+        }
+      })
+      .catch(() => {
+        if (preview) preview.style.opacity = '';
+        if (errEl) { errEl.textContent = 'Lỗi kết nối. Vui lòng thử lại.'; errEl.classList.remove('hidden'); }
+      });
   }
 
   // Settings drawer logic

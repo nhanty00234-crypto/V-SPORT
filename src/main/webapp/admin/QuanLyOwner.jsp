@@ -46,7 +46,7 @@
     /* Tab styles */
     .tab-pill {
       display:inline-flex;align-items:center;gap:6px;
-      padding:8px 18px;border-radius:99px;font-size:13px;font-weight:600;
+      padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;
       border:none;cursor:pointer;transition:all .18s;
     }
     .tab-pill.active { background:#2563eb;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.25); }
@@ -149,21 +149,21 @@
       <i class="ti ti-clock-hour-4 text-sm"></i>
       Chờ duyệt
       <c:if test="${pending.size() > 0}">
-        <span class="ml-1 bg-amber-100 text-amber-700 rounded-full px-2 py-0.5 text-[10px] font-bold">${pending.size()}</span>
+        <span class="ml-1 bg-amber-100 text-amber-700 rounded-md px-2 py-0.5 text-[10px] font-bold">${pending.size()}</span>
       </c:if>
     </button>
     <button class="tab-pill" id="tabApproved" onclick="switchTab('approved', this)">
       <i class="ti ti-circle-check text-sm"></i>
       Đang hoạt động
       <c:if test="${approved.size() > 0}">
-        <span class="ml-1 bg-emerald-100 text-emerald-700 rounded-full px-2 py-0.5 text-[10px] font-bold">${approved.size()}</span>
+        <span class="ml-1 bg-emerald-100 text-emerald-700 rounded-md px-2 py-0.5 text-[10px] font-bold">${approved.size()}</span>
       </c:if>
     </button>
     <button class="tab-pill" id="tabRejected" onclick="switchTab('rejected', this)">
       <i class="ti ti-circle-x text-sm"></i>
       Từ chối
       <c:if test="${rejected.size() > 0}">
-        <span class="ml-1 bg-red-100 text-red-600 rounded-full px-2 py-0.5 text-[10px] font-bold">${rejected.size()}</span>
+        <span class="ml-1 bg-red-100 text-red-600 rounded-md px-2 py-0.5 text-[10px] font-bold">${rejected.size()}</span>
       </c:if>
     </button>
   </section>
@@ -236,12 +236,12 @@
             <div class="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100 mt-auto">
               <a href="?action=duyet&id=${cs.coSoID}"
                  onclick="return confirm('Duyệt cơ sở \'${cs.tenCoSo}\' và kích hoạt tài khoản quản lý?')"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">
+                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">
                 <i class="ti ti-circle-check text-sm"></i>Duyệt đăng ký
               </a>
               <a href="?action=tu-choi&id=${cs.coSoID}"
                  onclick="return confirm('Từ chối đăng ký cơ sở \'${cs.tenCoSo}\'?')"
-                 class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 hover:border-red-200 border border-transparent transition-all">
+                 class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 hover:border-red-200 border border-transparent transition-all">
                 <i class="ti ti-circle-x text-sm"></i>Từ chối
               </a>
             </div>
@@ -327,14 +327,14 @@
                 <c:when test="${mgr.isLocked}">
                   <a href="?action=mo-khoa&id=${cs.coSoID}"
                      onclick="return confirm('Mở khóa tài khoản owner \'${mgr.fullName}\'?')"
-                     class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
+                     class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
                     <i class="ti ti-lock-open text-sm"></i>Mở khóa tài khoản
                   </a>
                 </c:when>
                 <c:otherwise>
                   <a href="?action=khoa&id=${cs.coSoID}"
                      onclick="return confirm('Khóa tài khoản owner \'${mgr.fullName}\'? Owner sẽ không thể đăng nhập.')"
-                     class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 hover:border-red-200 border border-transparent transition-all">
+                     class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 hover:border-red-200 border border-transparent transition-all">
                     <i class="ti ti-lock text-sm"></i>Khóa tài khoản
                   </a>
                 </c:otherwise>
@@ -409,7 +409,7 @@
             <div class="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100 mt-auto">
               <a href="?action=duyet&id=${cs.coSoID}"
                  onclick="return confirm('Duyệt lại cơ sở \'${cs.tenCoSo}\' và kích hoạt tài khoản?')"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">
+                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">
                 <i class="ti ti-refresh text-sm"></i>Duyệt lại đơn
               </a>
             </div>

@@ -320,7 +320,8 @@ let staffList = [
       email: '${acc.email}',
       coSoId: '${acc.coSoId != null ? acc.coSoId : ""}',
       coSoStatus: '<c:forEach items="${branches}" var="b"><c:if test="${b.coSoID eq acc.coSoId}">${b.trangThai}</c:if></c:forEach>',
-      initial: '${(acc.fullName != null && acc.fullName.length() > 0) ? acc.fullName.substring(0, 1).toUpperCase() : acc.username.substring(0, 1).toUpperCase()}'
+      initial: '${(acc.fullName != null && acc.fullName.length() > 0) ? acc.fullName.substring(0, 1).toUpperCase() : acc.username.substring(0, 1).toUpperCase()}',
+      avatarUrl: '<c:choose><c:when test="${not empty acc.avatarUrl}">${pageContext.request.contextPath}<c:out value="${acc.avatarUrl}" /></c:when><c:otherwise></c:otherwise></c:choose>'
     }${!loop.last ? ',' : ''}
   </c:forEach>
 ];
@@ -474,7 +475,9 @@ function renderStaff() {
     else if (s.roleId === 5) dept = 'Bảo vệ';
     
     let branchText = s.coSoId ? `Cơ sở CS\${s.coSoId}` : 'Trụ sở chính';
-    let avatarUrl = `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=3b82f6&color=fff&size=128&bold=true`;
+    let avatarUrl = s.avatarUrl
+      ? s.avatarUrl
+      : `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=3b82f6&color=fff&size=128&bold=true`;
 
     return `
       <div class="card p-5 border border-slate-200 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">

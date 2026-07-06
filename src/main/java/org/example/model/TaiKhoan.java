@@ -46,6 +46,9 @@ public class TaiKhoan {
     @Column(name = "Email")
     private String email;
 
+    @Column(name = "AvatarUrl")
+    private String avatarUrl;
+
     @Column(name = "RoleID")
     private int roleId;
 
@@ -268,6 +271,14 @@ public class TaiKhoan {
         this.email = email;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
     public int getRoleId() {
         return roleId;
     }
@@ -387,6 +398,7 @@ public class TaiKhoan {
                 ", fullName='" + fullName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", email='" + email + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
                 ", roleId=" + roleId +
                 ", coSoId=" + coSoId +
                 ", zaloId='" + zaloId + '\'' +

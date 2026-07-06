@@ -4,13 +4,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quản lý nhân sự cơ sở — V-SPORT</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<jsp:include page="/manager/common/manager_head.jsp" />
 <style>
-body { font-family: 'Inter', sans-serif; }
   .nav-link { display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;color:#52525b;font-size:14px;font-weight:500;text-decoration:none;transition:all .15s;white-space:nowrap;position:relative; }
   .nav-link:hover { background:#f4f4f5;color:#18181b; }
   .nav-link.active { background:#f4f4f5;color:#18181b;font-weight:600; }
@@ -44,66 +40,18 @@ body { font-family: 'Inter', sans-serif; }
     font-size: 18px;
   }
 
-  .card { background:#fff;border:1px solid #e4e4e7;border-radius:16px; transition:box-shadow .2s, transform .2s; }
-  .badge { display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600; }
-  .badge-green { background:#dcfce7;color:#15803d; }
-  .badge-red { background:#fee2e2;color:#b91c1c; }
-  .badge-amber { background:#fef3c7;color:#b45309; }
-  .badge-yellow { background:#fef3c7;color:#b45309; }
-  .badge-blue { background:#dbeafe;color:#1d4ed8; }
-  .badge-zinc { background:#f4f4f5;color:#71717a; }
-  .live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
-  @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,.4);} 50%{box-shadow:0 0 0 6px rgba(139,92,246,0);} }
-
-  @keyframes contentZoomIn {
-    from { opacity: 0; transform: scale(0.97); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  main { animation: contentZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-origin: center top; }
-
-  /* Fade in up animation */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
-
-  /* Scroll Animation Styles */
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .reveal-on-scroll.revealed {
-    opacity: 1;
-    transform: translateY(0);
-  }
 </style>
 </head>
-<body class="bg-violet-50/20 text-zinc-900 min-h-screen">
+<body class="text-zinc-900 min-h-screen">
 
 <!-- Sidebar -->
 <jsp:include page="/manager/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-violet-100 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-violet-50 text-violet-700"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-violet-900 tracking-tight">Quản lý nhân sự cơ sở</h1>
-      <p class="text-xs text-violet-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">security</span>Quyền hạn Quản lý · Cơ sở CS${sessionScope.user.coSoId}</p>
-    </div>
-  </div>
-
-  <div class="flex items-center gap-1.5">
-    <button class="relative p-2 rounded-lg hover:bg-violet-50 text-violet-500">
-      <span class="material-symbols-outlined text-[20px]">notifications</span>
-      <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-violet-600 live-dot"></span>
-    </button>
-    <div class="w-px h-6 bg-violet-100 mx-1"></div>
-    <jsp:include page="/manager/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<c:set var="headerTitle" value="Quản lý nhân sự cơ sở" scope="page" />
+<c:set var="headerSubtitle" value="Quyền hạn Quản lý · Cơ sở CS${sessionScope.user.coSoId}" scope="page" />
+<c:set var="headerIcon" value="security" scope="page" />
+<jsp:include page="/manager/common/header.jsp" />
 
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
   <!-- Sub-navigation -->

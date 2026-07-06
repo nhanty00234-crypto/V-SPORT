@@ -5,56 +5,19 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nhật Ký Thao Tác — Manager Portal</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-<style>
-  body { font-family: 'Inter', sans-serif; }
-  .card { background:#fff; border:1px solid #f3e8ff; border-radius:16px; transition:box-shadow .2s, transform .2s; }
-  .badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:600; }
-  .badge-green { background:#dcfce7; border:1px solid #bbf7d0; color:#15803d; }
-  .badge-purple { background:#f3e8ff; border:1px solid #e9d5ff; color:#7e22ce; }
-  .badge-amber { background:#fef3c7; border:1px solid #fde68a; color:#b45309; }
-  .badge-red { background:#fee2e2; border:1px solid #fecaca; color:#b91c1c; }
-  .badge-gray { background:#f4f4f5; border:1px solid #e4e4e7; color:#52525b; }
-  
-  ::-webkit-scrollbar { width:6px; height:6px }
-  ::-webkit-scrollbar-track { background:transparent }
-  ::-webkit-scrollbar-thumb { background:#d8b4fe; border-radius:6px }
-  ::-webkit-scrollbar-thumb:hover { background:#c084fc }
-  
-  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-  main > section { animation: fadeUp .35s ease both; }
-</style>
+<jsp:include page="/manager/common/manager_head.jsp" />
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen">
+<body class="text-zinc-900 min-h-screen">
 
 <!-- Sidebar Manager -->
 <jsp:include page="/manager/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-purple-100 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-purple-50 text-purple-600">
-      <span class="material-symbols-outlined text-[20px]">menu</span>
-    </button>
-    <div>
-      <h1 class="text-sm font-bold text-purple-900 tracking-tight">Nhật ký thao tác chi nhánh</h1>
-      <p class="text-xs text-purple-550 flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-[12px]">schedule</span>Chi nhánh cơ sở CS${sessionScope.user.coSoId}
-      </p>
-    </div>
-  </div>
-  <div class="flex items-center gap-1.5">
-    <div class="text-xs font-semibold px-3 py-1 bg-purple-50 text-purple-700 rounded-lg">
-      Vai trò: Quản lý chi nhánh
-    </div>
-    <div class="w-px h-6 border-l border-purple-100 mx-1"></div>
-    <jsp:include page="/manager/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<c:set var="headerTitle" value="Nhật ký thao tác chi nhánh" scope="page" />
+<c:set var="headerSubtitle" value="Chi nhánh cơ sở CS${sessionScope.user.coSoId}" scope="page" />
+<c:set var="headerIcon" value="schedule" scope="page" />
+<jsp:include page="/manager/common/header.jsp" />
 
 <!-- Main Content -->
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">

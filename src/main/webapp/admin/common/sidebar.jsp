@@ -20,13 +20,18 @@
   .nav-link{
     display:flex;align-items:center;gap:10px;padding:9px 12px;
     border-radius:10px;font-size:13.5px;font-weight:500;
-    color:#475569;text-decoration:none;transition:all .17s ease;
+    color:#475569;text-decoration:none;transition:background-color .17s ease,color .17s ease,transform .17s ease,box-shadow .17s ease;
     position:relative;cursor:pointer;white-space:nowrap;
   }
-  .nav-link:hover{background:#f1f5f9;color:#0f172a}
+  .nav-link:hover{background:#f1f5f9;color:#0f172a;transform:translateX(2px)}
   .nav-link.active{
     background:linear-gradient(90deg,#eff6ff,#dbeafe);
     color:#1d4ed8;font-weight:600;
+  }
+  .nav-link.is-navigating{
+    background:linear-gradient(90deg,#dbeafe,#eff6ff);
+    color:#1d4ed8;
+    box-shadow:inset 0 0 0 1px rgba(37,99,235,.08);
   }
   .nav-link.active::before{
     content:'';position:absolute;left:0;top:6px;bottom:6px;
@@ -52,16 +57,16 @@
   .badge-zinc{background:#f1f5f9;color:#475569}
 
   /* ── Scroll reveal ── */
-  .reveal{opacity:0;transform:translateY(22px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1)}
   .reveal.visible{opacity:1;transform:translateY(0)}
-  .reveal-left{opacity:0;transform:translateX(-18px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+  .reveal-left{opacity:0;transform:translateX(-14px);transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1)}
   .reveal-left.visible{opacity:1;transform:translateX(0)}
-  .reveal-scale{opacity:0;transform:scale(.96);transition:opacity .45s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1)}
+  .reveal-scale{opacity:0;transform:scale(.98);transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1)}
   .reveal-scale.visible{opacity:1;transform:scale(1)}
 
   /* ── Stagger delays ── */
-  .d0{transition-delay:0ms}.d1{transition-delay:70ms}.d2{transition-delay:140ms}.d3{transition-delay:210ms}
-  .d4{transition-delay:280ms}.d5{transition-delay:350ms}.d6{transition-delay:420ms}
+  .d0{transition-delay:0ms}.d1{transition-delay:45ms}.d2{transition-delay:90ms}.d3{transition-delay:135ms}
+  .d4{transition-delay:180ms}.d5{transition-delay:225ms}.d6{transition-delay:270ms}
 
   /* ── Animate number counter ── */
   @keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -80,6 +85,47 @@
   .tab-pill.active{background:#2563eb;color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.3)}
   .tab-pill:not(.active){background:#fff;color:#64748b;border:1px solid #e2e8f0}
   .tab-pill:not(.active):hover{background:#f8fafc;color:#1e293b}
+
+  /* ── Page motion ── */
+  body.admin-motion main{
+    opacity:0;
+    transform:translateY(10px) scale(.995);
+    filter:blur(1px);
+    animation:none !important;
+  }
+  body.admin-motion.admin-page-ready main{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+    transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .34s cubic-bezier(.22,1,.36,1),filter .34s ease;
+  }
+  body.admin-page-exiting main{
+    opacity:0 !important;
+    transform:translateY(-8px) scale(.992) !important;
+    filter:blur(2px) !important;
+    transition:opacity .2s ease,transform .2s ease,filter .2s ease !important;
+  }
+  .admin-transition-scrim{
+    position:fixed;inset:0;z-index:60;pointer-events:none;
+    background:linear-gradient(180deg,rgba(248,250,252,.72),rgba(241,245,249,.88));
+    opacity:0;backdrop-filter:blur(0);
+    transition:opacity .2s ease,backdrop-filter .2s ease;
+  }
+  body.admin-page-exiting .admin-transition-scrim{opacity:1;backdrop-filter:blur(3px)}
+  .admin-transition-scrim::after{
+    content:'';position:absolute;left:260px;right:0;top:64px;height:2px;
+    background:linear-gradient(90deg,transparent,#2563eb,#38bdf8,transparent);
+    transform:scaleX(0);transform-origin:left;
+  }
+  body.admin-page-exiting .admin-transition-scrim::after{animation:adminRouteLine .42s cubic-bezier(.22,1,.36,1) forwards}
+  @keyframes adminRouteLine{to{transform:scaleX(1)}}
+  @media (max-width:1023px){.admin-transition-scrim::after{left:0}}
+  @media (prefers-reduced-motion:reduce){
+    body.admin-motion main,
+    body.admin-motion.admin-page-ready main,
+    body.admin-page-exiting main{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}
+    .admin-transition-scrim{display:none!important}
+  }
 </style>
 
 <!-- Mobile overlay -->
@@ -139,7 +185,7 @@
     </a>
 
     <a href="${pageContext.request.contextPath}/admin/audit-log"
-       class="nav-link ${uri.contains('/admin/audit-log') ? 'active' : ''}">
+       class="nav-link ${uri.contains('/admin/audit-log') || uri.contains('/AuditLog') ? 'active' : ''}">
       <i class="ti ti-history"></i>
       Nhật Ký Thao Tác
     </a>
@@ -158,6 +204,52 @@
 <!-- ═══ SIDEBAR JS (shared) ═══ -->
 <script>
 (function () {
+  document.body.classList.add('admin-motion');
+
+  function initPageMotion() {
+    var scrim = document.createElement('div');
+    scrim.className = 'admin-transition-scrim';
+    document.body.appendChild(scrim);
+
+    requestAnimationFrame(function () {
+      document.body.classList.add('admin-page-ready');
+    });
+
+    window.addEventListener('pageshow', function () {
+      document.body.classList.remove('admin-page-exiting');
+      requestAnimationFrame(function () {
+        document.body.classList.add('admin-page-ready');
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      var link = event.target.closest('a[href]');
+      if (!link || event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      if (link.target && link.target !== '_self') return;
+      if (link.hasAttribute('download')) return;
+
+      var href = link.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0 || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return;
+
+      var url;
+      try { url = new URL(href, window.location.href); } catch (e) { return; }
+      if (url.origin !== window.location.origin) return;
+      if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
+      if (url.href === window.location.href) return;
+
+      var appPath = '${pageContext.request.contextPath}';
+      if (appPath && url.pathname.indexOf(appPath + '/admin') !== 0 && url.pathname.indexOf(appPath + '/logout') !== 0) return;
+
+      event.preventDefault();
+      link.classList.add('is-navigating');
+      document.body.classList.add('admin-page-exiting');
+      window.setTimeout(function () {
+        window.location.href = url.href;
+      }, 170);
+    });
+  }
+
   function initSidebar() {
     var sidebar  = document.getElementById('sidebar');
     var overlay  = document.getElementById('sidebarOverlay');
@@ -183,8 +275,9 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { initSidebar(); initReveal(); init24hTime(); });
+    document.addEventListener('DOMContentLoaded', function () { initPageMotion(); initSidebar(); initReveal(); init24hTime(); });
   } else {
+    initPageMotion();
     initSidebar();
     initReveal();
     init24hTime();

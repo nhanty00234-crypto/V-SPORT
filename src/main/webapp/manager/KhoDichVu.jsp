@@ -5,67 +5,19 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${pageTitle}</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-<style>
-  body { font-family: 'Inter', sans-serif; }
-  .card { background: #fff; border: 1px solid #f3e8ff; border-radius: 16px; transition: box-shadow .2s, transform .2s; }
-  .card-hover:hover { box-shadow: 0 8px 24px -8px rgba(139, 92, 246, 0.12); transform: translateY(-2px); }
-  .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: #dcfce7; color: #15803d; }
-  .badge-amber { background: #fef3c7; color: #b45309; }
-  .badge-red { background: #fee2e2; color: #b91c1c; }
-  .badge-purple { background: #f3e8ff; color: #7e22ce; }
-  .badge-gray { background: #f4f4f5; color: #52525b; }
-  ::-webkit-scrollbar { width: 6px; height: 6px }
-  ::-webkit-scrollbar-track { background: transparent }
-  ::-webkit-scrollbar-thumb { background: #ddd6fe; border-radius: 6px }
-  ::-webkit-scrollbar-thumb:hover { background: #c084fc; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  main > section { animation: fadeUp .3s ease both; }
-  main > section:nth-child(1) { animation-delay: 0ms; }
-  main > section:nth-child(2) { animation-delay: 60ms; }
-  main > section:nth-child(3) { animation-delay: 120ms; }
-  
-  /* Scroll Animation Styles */
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .reveal-on-scroll.revealed {
-    opacity: 1;
-    transform: translateY(0);
-  }
-</style>
+<jsp:include page="/manager/common/manager_head.jsp" />
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen">
+<body class="text-zinc-900 min-h-screen">
 
 <!-- Sidebar Manager -->
 <jsp:include page="/manager/common/sidebar.jsp" />
 
 <!-- Header -->
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-purple-100 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-purple-50 text-purple-600"><span class="material-symbols-outlined text-[20px]">menu</span></button>
-    <div>
-      <h1 class="text-sm font-bold text-purple-950 tracking-tight">Kho Dịch Vụ & Sản Phẩm</h1>
-      <p class="text-xs text-purple-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[12px]">storefront</span>Chi nhánh cơ sở CS${sessionScope.user.coSoId}</p>
-    </div>
-  </div>
-  <div class="flex items-center gap-1.5">
-    <button class="relative p-2 rounded-lg hover:bg-purple-50 text-purple-600">
-      <span class="material-symbols-outlined text-[20px]">notifications</span>
-      <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-purple-600"></span>
-    </button>
-    <div class="w-px h-6 bg-purple-100 mx-1"></div>
-    <jsp:include page="/manager/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<c:set var="headerTitle" value="Kho Dịch Vụ & Sản Phẩm" scope="page" />
+<c:set var="headerSubtitle" value="Chi nhánh cơ sở CS${sessionScope.user.coSoId}" scope="page" />
+<c:set var="headerIcon" value="storefront" scope="page" />
+<jsp:include page="/manager/common/header.jsp" />
 
 <!-- Main Content -->
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">

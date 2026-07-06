@@ -41,6 +41,54 @@
     width:32px; height:32px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
   }
 
+  /* Audit filter controls */
+  .filter-panel {
+    background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+    border:1px solid #e2e8f0;
+    box-shadow:0 18px 44px -34px rgba(15,23,42,.32);
+  }
+  .filter-field { position:relative; display:flex; flex-direction:column; gap:7px; }
+  .filter-label {
+    display:flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:800; color:#475569; letter-spacing:.01em;
+  }
+  .control-shell {
+    position:relative; height:42px;
+    display:flex; align-items:center;
+    border:1px solid #dbe3ef;
+    border-radius:10px;
+    background:#f8fafc;
+    transition:border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+  }
+  .control-shell:focus-within {
+    background:#fff;
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,.10);
+  }
+  .control-icon {
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    color:#64748b; font-size:16px; pointer-events:none;
+  }
+  .control-caret {
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    color:#94a3b8; font-size:16px; pointer-events:none;
+  }
+  .audit-control {
+    width:100%; height:100%;
+    padding:0 36px 0 38px;
+    border:0; outline:0; background:transparent;
+    color:#0f172a; font-size:12px; font-weight:650;
+  }
+  select.audit-control { appearance:none; -webkit-appearance:none; cursor:pointer; }
+  input[type="date"].audit-control { cursor:pointer; }
+  input[type="date"].audit-control::-webkit-calendar-picker-indicator { opacity:0; cursor:pointer; }
+  .filter-action {
+    height:42px; border-radius:10px;
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    font-size:12px; font-weight:800; transition:transform .12s ease, background-color .15s ease, box-shadow .15s ease;
+  }
+  .filter-action:active { transform:scale(.98); }
+
   /* Scroll reveal */
   .reveal{opacity:0;transform:translateY(15px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
   .reveal.visible{opacity:1;transform:translateY(0)}
@@ -103,49 +151,65 @@
   </c:if>
 
   <!-- Filter Panel -->
-  <section class="reveal d1 bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs">
+  <section class="reveal d1 filter-panel rounded-2xl p-5">
     <form method="get" action="${pageContext.request.contextPath}/admin/audit-log" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end" autocomplete="off">
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-zinc-700">Loại đối tượng</label>
-        <select name="entityType" class="h-10 px-3 rounded-xl border border-zinc-200 bg-white text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
-          <option value="">-- Tất cả --</option>
-          <option value="TaiKhoan" <c:if test="${entityType == 'TaiKhoan'}">selected</c:if>>Tài khoản</option>
-          <option value="San" <c:if test="${entityType == 'San'}">selected</c:if>>Sân</option>
-          <option value="LoaiSan" <c:if test="${entityType == 'LoaiSan'}">selected</c:if>>Loại sân</option>
-          <option value="SanPham" <c:if test="${entityType == 'SanPham'}">selected</c:if>>Sản phẩm / Dịch vụ</option>
-          <option value="CoSo" <c:if test="${entityType == 'CoSo'}">selected</c:if>>Chi nhánh cơ sở</option>
-          <option value="CaLamViec" <c:if test="${entityType == 'CaLamViec'}">selected</c:if>>Ca làm việc</option>
-          <option value="YeuCauNghi" <c:if test="${entityType == 'YeuCauNghi'}">selected</c:if>>Yêu cầu nghỉ</option>
-        </select>
+      <div class="filter-field">
+        <label class="filter-label"><i class="ti ti-stack-2 text-blue-600"></i>Loại đối tượng</label>
+        <div class="control-shell">
+          <i class="ti ti-category-2 control-icon"></i>
+          <select name="entityType" class="audit-control">
+            <option value="">Tất cả đối tượng</option>
+            <option value="TaiKhoan" <c:if test="${entityType == 'TaiKhoan'}">selected</c:if>>Tài khoản</option>
+            <option value="San" <c:if test="${entityType == 'San'}">selected</c:if>>Sân</option>
+            <option value="LoaiSan" <c:if test="${entityType == 'LoaiSan'}">selected</c:if>>Loại sân</option>
+            <option value="SanPham" <c:if test="${entityType == 'SanPham'}">selected</c:if>>Sản phẩm / Dịch vụ</option>
+            <option value="CoSo" <c:if test="${entityType == 'CoSo'}">selected</c:if>>Chi nhánh cơ sở</option>
+            <option value="CaLamViec" <c:if test="${entityType == 'CaLamViec'}">selected</c:if>>Ca làm việc</option>
+            <option value="YeuCauNghi" <c:if test="${entityType == 'YeuCauNghi'}">selected</c:if>>Yêu cầu nghỉ</option>
+          </select>
+          <i class="ti ti-chevron-down control-caret"></i>
+        </div>
       </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-zinc-700">Hành động</label>
-        <select name="action" class="h-10 px-3 rounded-xl border border-zinc-200 bg-white text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
-          <option value="">-- Tất cả --</option>
-          <option value="CREATE" <c:if test="${action == 'CREATE'}">selected</c:if>>Tạo mới (CREATE)</option>
-          <option value="UPDATE" <c:if test="${action == 'UPDATE'}">selected</c:if>>Cập nhật (UPDATE)</option>
-          <option value="SOFT_DELETE" <c:if test="${action == 'SOFT_DELETE'}">selected</c:if>>Xóa mềm (SOFT_DELETE)</option>
-          <option value="RESTORE" <c:if test="${action == 'RESTORE'}">selected</c:if>>Khôi phục (RESTORE)</option>
-          <option value="PERMANENT_DELETE" <c:if test="${action == 'PERMANENT_DELETE'}">selected</c:if>>Xóa vĩnh viễn (PERMANENT_DELETE)</option>
-          <option value="ADD_STAFF" <c:if test="${action == 'ADD_STAFF'}">selected</c:if>>Thêm nhân sự (ADD_STAFF)</option>
-          <option value="APPROVE" <c:if test="${action == 'APPROVE'}">selected</c:if>>Phê duyệt (APPROVE)</option>
-          <option value="REJECT" <c:if test="${action == 'REJECT'}">selected</c:if>>Từ chối (REJECT)</option>
-        </select>
+      <div class="filter-field">
+        <label class="filter-label"><i class="ti ti-activity text-indigo-600"></i>Hành động</label>
+        <div class="control-shell">
+          <i class="ti ti-bolt control-icon"></i>
+          <select name="action" class="audit-control">
+            <option value="">Tất cả hành động</option>
+            <option value="CREATE" <c:if test="${action == 'CREATE'}">selected</c:if>>Tạo mới (CREATE)</option>
+            <option value="UPDATE" <c:if test="${action == 'UPDATE'}">selected</c:if>>Cập nhật (UPDATE)</option>
+            <option value="SOFT_DELETE" <c:if test="${action == 'SOFT_DELETE'}">selected</c:if>>Xóa mềm (SOFT_DELETE)</option>
+            <option value="RESTORE" <c:if test="${action == 'RESTORE'}">selected</c:if>>Khôi phục (RESTORE)</option>
+            <option value="PERMANENT_DELETE" <c:if test="${action == 'PERMANENT_DELETE'}">selected</c:if>>Xóa vĩnh viễn (PERMANENT_DELETE)</option>
+            <option value="ADD_STAFF" <c:if test="${action == 'ADD_STAFF'}">selected</c:if>>Thêm nhân sự (ADD_STAFF)</option>
+            <option value="APPROVE" <c:if test="${action == 'APPROVE'}">selected</c:if>>Phê duyệt (APPROVE)</option>
+            <option value="REJECT" <c:if test="${action == 'REJECT'}">selected</c:if>>Từ chối (REJECT)</option>
+          </select>
+          <i class="ti ti-chevron-down control-caret"></i>
+        </div>
       </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-zinc-700">Từ ngày</label>
-        <input type="date" name="dateFrom" value="<c:out value='${dateFrom}'/>" class="h-10 px-3 rounded-xl border border-zinc-200 bg-white text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
+      <div class="filter-field">
+        <label class="filter-label"><i class="ti ti-calendar-minus text-emerald-600"></i>Từ ngày</label>
+        <div class="control-shell">
+          <i class="ti ti-calendar-event control-icon"></i>
+          <input type="date" name="dateFrom" value="<c:out value='${dateFrom}'/>" class="audit-control">
+          <i class="ti ti-calendar control-caret"></i>
+        </div>
       </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-zinc-700">Đến ngày</label>
-        <input type="date" name="dateTo" value="<c:out value='${dateTo}'/>" class="h-10 px-3 rounded-xl border border-zinc-200 bg-white text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
+      <div class="filter-field">
+        <label class="filter-label"><i class="ti ti-calendar-plus text-rose-600"></i>Đến ngày</label>
+        <div class="control-shell">
+          <i class="ti ti-calendar-stats control-icon"></i>
+          <input type="date" name="dateTo" value="<c:out value='${dateTo}'/>" class="audit-control">
+          <i class="ti ti-calendar control-caret"></i>
+        </div>
       </div>
       <div class="flex gap-2">
-        <button type="submit" class="flex-1 bg-blue-600 text-white rounded-xl h-10 px-4 flex items-center justify-center gap-1.5 text-xs font-bold shadow hover:bg-blue-700 transition-all active:scale-95 cursor-pointer">
+        <button type="submit" class="filter-action flex-1 bg-blue-600 text-white px-4 shadow-md shadow-blue-200/70 hover:bg-blue-700 cursor-pointer">
           <i class="ti ti-filter text-sm"></i> Lọc
         </button>
-        <a href="${pageContext.request.contextPath}/admin/audit-log" class="flex-1 text-center bg-zinc-100 text-zinc-700 rounded-xl h-10 px-4 flex items-center justify-center gap-1.5 text-xs font-bold hover:bg-zinc-200 transition-all active:scale-95">
-          Xóa lọc
+        <a href="${pageContext.request.contextPath}/admin/audit-log" class="filter-action flex-1 text-center bg-white border border-zinc-200 text-zinc-600 px-4 hover:bg-zinc-100">
+          <i class="ti ti-eraser text-sm"></i>Xóa lọc
         </a>
       </div>
     </form>

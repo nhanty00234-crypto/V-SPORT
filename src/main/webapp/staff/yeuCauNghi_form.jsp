@@ -3,26 +3,10 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đăng ký nghỉ phép mới — V-SPORT</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-<style>
-  body { font-family: 'Inter', sans-serif; }
-  .card { background:#fff; border:1px solid #ffedd5; border-radius:16px; transition:box-shadow .2s, transform .2s; }
-  @keyframes contentZoomIn {
-    from { opacity: 0; transform: scale(0.97); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  main {
-    animation: contentZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    transform-origin: center top;
-  }
-</style>
+<jsp:include page="/staff/common/staff_head.jsp" />
 </head>
-<body class="bg-orange-50/20 text-zinc-900 min-h-screen">
+<body class="text-zinc-900 min-h-screen">
 
 <!-- Sidebar -->
 <jsp:include page="/staff/common/sidebar.jsp" />

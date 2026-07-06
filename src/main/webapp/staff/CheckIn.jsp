@@ -4,14 +4,8 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Mở Sân / Check-in | V-SPORT</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts & Material Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <jsp:include page="/staff/common/staff_head.jsp" />
     
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -52,7 +46,7 @@
         }
     </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen">
+<body class="text-zinc-900 min-h-screen">
 
 <!-- Khai báo các biến theme động dựa theo Role (Quản lý - Tím | Lễ tân - Cam) -->
 <c:set var="isManager" value="${sessionScope.user.roleId == 2}" />
@@ -95,7 +89,7 @@
     </div>
     <div class="flex items-center gap-1.5">
         <div class="text-xs font-semibold px-3 py-1 ${isManager ? 'bg-purple-50 text-purple-750' : 'bg-orange-50 text-orange-700'} rounded-lg">
-            Role: ${isManager ? "Quản lý" : "Lễ tân trực ca"}
+            Vai trò: ${isManager ? "Quản lý" : "Lễ tân trực ca"}
         </div>
         <div class="w-px h-6 ${themeBorder} mx-1"></div>
         <jsp:include page="/manager/common/profile_dropdown.jsp" />
