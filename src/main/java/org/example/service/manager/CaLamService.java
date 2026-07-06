@@ -12,6 +12,7 @@ import org.example.dao.impl.CaLamViecSwapRequestDAOImpl;
 import org.example.dao.impl.CaLamViecAuditDAOImpl;
 import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;
+import org.example.exception.*;
 import org.example.model.CaLamViecAvailability;
 import org.example.model.CaLamViecSwapRequest;
 import org.example.model.CaLamViecAudit;
@@ -129,6 +130,9 @@ public class CaLamService {
         private String repeatType = "none"; // none, daily, weekly
         private LocalDate repeatUntil;
         private boolean overrideConfirm;
+        private boolean isCustomTime;
+        private String customTimeReason;
+        private String shiftTemplateId;
 
         // Getters and setters
         public int getAccountId() { return accountId; }
@@ -157,6 +161,12 @@ public class CaLamService {
         public void setRepeatUntil(LocalDate repeatUntil) { this.repeatUntil = repeatUntil; }
         public boolean isOverrideConfirm() { return overrideConfirm; }
         public void setOverrideConfirm(boolean overrideConfirm) { this.overrideConfirm = overrideConfirm; }
+        public boolean isCustomTime() { return isCustomTime; }
+        public void setCustomTime(boolean customTime) { isCustomTime = customTime; }
+        public String getCustomTimeReason() { return customTimeReason; }
+        public void setCustomTimeReason(String customTimeReason) { this.customTimeReason = customTimeReason; }
+        public String getShiftTemplateId() { return shiftTemplateId; }
+        public void setShiftTemplateId(String shiftTemplateId) { this.shiftTemplateId = shiftTemplateId; }
     }
 
     // ==================== READ OPERATIONS ====================
@@ -239,10 +249,11 @@ public class CaLamService {
         // Check nhân viên
         TaiKhoan staff = taiKhoanDAO.getAccountById(request.getAccountId());
         if (staff == null) {
-            throw new IllegalArgumentException("Nhân viên không tồn tại");
+            throw new NotFoundException("Nhân viên không tồn tại.");
         }
 
         int targetCoSoId = request.getCoSoId() > 0 ? request.getCoSoId() : managerCoSoId;
+        BranchSecurityUtils.checkBranchAccess(targetCoSoId, managerCoSoId);
 
         // Collect all dates to generate shifts
         List<LocalDate> datesToSchedule = new ArrayList<>();
@@ -268,20 +279,48 @@ public class CaLamService {
 
         // MAX_REPEAT_OCCURRENCES = 90
         if (datesToSchedule.size() > 90) {
-            throw new IllegalArgumentException("Không thể tạo quá 90 ca làm việc lặp lại trong một lần!");
+            throw new ValidationException("Không thể tạo quá 90 ca làm việc lặp lại trong một lần!");
+        }
+
+        // P1-2: No duplicate dates in batch
+        java.util.Set<LocalDate> uniqueDates = new java.util.HashSet<>();
+        for (LocalDate d : datesToSchedule) {
+            if (!uniqueDates.add(d)) {
+                throw new ValidationException("Danh sách ngày tạo ca bị trùng lặp: " + d);
+            }
         }
 
         // Validate all generated dates using validationEngine
-        List<String> allErrors = new ArrayList<>();
+        boolean hasOverlap = false;
+        boolean hasCompleted = false;
+        boolean hasActive = false;
+        boolean hasNotFound = false;
+        boolean hasMismatch = false;
+        List<String> errorMessages = new ArrayList<>();
         List<String> allWarnings = new ArrayList<>();
         List<CaLamViec> shiftsToCreate = new ArrayList<>();
 
         for (LocalDate date : datesToSchedule) {
             CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
-                    request.getAccountId(), date, request.getGioBatDau(), request.getGioKetThuc(), request.getGioNghi(), null, targetCoSoId
+                    request.getAccountId(), date, request.getGioBatDau(), request.getGioKetThuc(), request.getGioNghi(), null, targetCoSoId,
+                    request.isCustomTime(), request.getCustomTimeReason()
             );
             if (!valRes.isValid()) {
-                allErrors.add(date.toString() + ": " + String.join(", ", valRes.getErrors()));
+                errorMessages.addAll(valRes.getErrors());
+                for (CaLamValidationEngine.ValidationItem item : valRes.getErrorsItems()) {
+                    String code = item.getCode();
+                    if ("SHIFT_OVERLAP".equalsIgnoreCase(code)) {
+                        hasOverlap = true;
+                    } else if ("SHIFT_COMPLETED".equalsIgnoreCase(code)) {
+                        hasCompleted = true;
+                    } else if ("SHIFT_ACTIVE".equalsIgnoreCase(code)) {
+                        hasActive = true;
+                    } else if ("STAFF_NOT_FOUND".equalsIgnoreCase(code)) {
+                        hasNotFound = true;
+                    } else if ("BRANCH_MISMATCH".equalsIgnoreCase(code)) {
+                        hasMismatch = true;
+                    }
+                }
             } else {
                 allWarnings.addAll(valRes.getWarnings());
                 CaLamViec ca = new CaLamViec();
@@ -290,13 +329,15 @@ public class CaLamService {
                 ca.setNgayLam(date);
                 ca.setGioBatDau(request.getGioBatDau());
                 ca.setGioKetThuc(request.getGioKetThuc());
-                ca.setGhiChu(request.getGhiChu());
+                ca.setGhiChu(sanitizeText(request.getGhiChu()));
                 ca.setTenCa(request.getTenCa() != null ? request.getTenCa() : "Tùy chỉnh");
                 ca.setViTri(request.getViTri());
                 String initialStatus = request.getTrangThai() != null ? request.getTrangThai() : "Draft";
                 ca.setTrangThai(initialStatus);
                 ca.setPublished("Published".equals(initialStatus) || "Confirmed".equals(initialStatus));
                 ca.setGioNghi(request.getGioNghi());
+                ca.setCustomTime(request.isCustomTime());
+                ca.setCustomTimeReason(sanitizeText(request.getCustomTimeReason()));
                 
                 int thuVal = date.getDayOfWeek().getValue() + 1; // Mon is 1 -> 2 in DB logic
                 ca.setThu(thuVal);
@@ -305,31 +346,56 @@ public class CaLamService {
             }
         }
 
-        if (!allErrors.isEmpty()) {
-            throw new IllegalArgumentException("Lỗi xung đột lịch:\n- " + String.join("\n- ", allErrors));
+        if (!errorMessages.isEmpty()) {
+            String errorMsg = String.join("\n- ", errorMessages);
+            if (hasOverlap) {
+                throw new ConflictException("Trùng ca.");
+            } else if (hasCompleted || hasActive) {
+                throw new ConflictException(errorMsg);
+            } else if (hasNotFound) {
+                throw new NotFoundException(errorMsg);
+            } else if (hasMismatch) {
+                throw new ForbiddenException(errorMsg);
+            } else {
+                throw new ValidationException(errorMsg);
+            }
         }
 
-        for (CaLamViec ca : shiftsToCreate) {
-            boolean success = caLamViecDAO.addCaLamViec(ca);
-            if (!success) {
-                throw new IllegalArgumentException("Thêm ca làm việc thất bại cho ngày " + ca.getNgayLam());
+        // All-or-nothing batch insert using a shared JDBC transaction
+        try (Connection txConn = DBUtil.getConnection()) {
+            txConn.setAutoCommit(false);
+            try {
+                for (CaLamViec ca : shiftsToCreate) {
+                    int generatedId = caLamViecDAO.addCaLamViecWithConnection(ca, txConn);
+                    if (generatedId <= 0) {
+                        throw new IllegalArgumentException("Thêm ca làm việc thất bại cho ngày " + ca.getNgayLam());
+                    }
+
+                    CaLamViecAudit audit = new CaLamViecAudit();
+                    audit.setCaLamViecId(generatedId);
+                    audit.setThaoTac("INSERT");
+                    audit.setNguoiThucHien(actorId);
+                    audit.setGiaTriMoi(ca.toString());
+                    audit.setLyDo("Thêm ca làm mới bởi quản lý" + (datesToSchedule.size() > 1 ? " (Lặp lại)" : ""));
+                    auditDAO.insertWithConnection(audit, txConn);
+                }
+                txConn.commit();
+            } catch (Exception e) {
+                txConn.rollback();
+                if (e instanceof RuntimeException) throw (RuntimeException) e;
+                throw new IllegalArgumentException("Lỗi khi lưu batch ca làm việc: " + e.getMessage(), e);
             }
+        } catch (java.sql.SQLException e) {
+            throw new IllegalArgumentException("Lỗi kết nối CSDL khi tạo ca làm việc: " + e.getMessage(), e);
+        }
 
-            // Log audit log
-            CaLamViecAudit audit = new CaLamViecAudit();
-            audit.setCaLamViecId(ca.getCaLamViecId());
-            audit.setThaoTac("INSERT");
-            audit.setNguoiThucHien(actorId);
-            audit.setGiaTriMoi(ca.toString());
-            audit.setLyDo("Thêm ca làm mới bởi quản lý" + (datesToSchedule.size() > 1 ? " (Lặp lại)" : ""));
-            auditDAO.insert(audit);
-
-            // Post-create notify if Published/Confirmed
+        // Post-commit notifications (outside transaction — non-critical)
+        for (CaLamViec ca : shiftsToCreate) {
             if (ca.isPublished()) {
                 org.example.model.ThongBao tb = new org.example.model.ThongBao();
                 tb.setAccountId(ca.getAccountId());
                 tb.setTieuDe("Lịch làm việc mới đã được phân công");
-                tb.setNoiDung(String.format("Bạn có ca làm mới ngày %s (%s - %s) tại cơ sở ID %d.", 
+                tb.setNoiDung(String.format("Bạn có ca làm mới ngày %s (%s - %s) tại cơ sở ID %d.",
                         ca.getNgayLam(), ca.getGioBatDau(), ca.getGioKetThuc(), ca.getCoSoId()));
                 tb.setLoaiThongBao("LichLamViec");
                 tb.setDaDoc(false);
@@ -339,8 +405,49 @@ public class CaLamService {
                 thongBaoDAO.insert(tb);
             }
         }
-        
+
         return allWarnings;
+    }
+
+    /**
+     * Helper method to map validation errors to custom exceptions.
+     */
+    private void throwValidationResultException(CaLamValidationEngine.ValidationResult valRes) {
+        if (valRes.isValid()) return;
+        
+        boolean hasOverlap = false;
+        boolean hasCompleted = false;
+        boolean hasActive = false;
+        boolean hasNotFound = false;
+        boolean hasMismatch = false;
+        
+        for (CaLamValidationEngine.ValidationItem item : valRes.getErrorsItems()) {
+            String code = item.getCode();
+            if ("SHIFT_OVERLAP".equalsIgnoreCase(code)) {
+                hasOverlap = true;
+            } else if ("SHIFT_COMPLETED".equalsIgnoreCase(code)) {
+                hasCompleted = true;
+            } else if ("SHIFT_ACTIVE".equalsIgnoreCase(code)) {
+                hasActive = true;
+            } else if ("STAFF_NOT_FOUND".equalsIgnoreCase(code)) {
+                hasNotFound = true;
+            } else if ("BRANCH_MISMATCH".equalsIgnoreCase(code)) {
+                hasMismatch = true;
+            }
+        }
+        
+        String errorMsg = String.join(", ", valRes.getErrors());
+        if (hasOverlap) {
+            throw new ConflictException("Trùng ca.");
+        } else if (hasCompleted || hasActive) {
+            throw new ConflictException(errorMsg);
+        } else if (hasNotFound) {
+            throw new NotFoundException(errorMsg);
+        } else if (hasMismatch) {
+            throw new ForbiddenException(errorMsg);
+        } else {
+            throw new ValidationException(errorMsg);
+        }
     }
 
     /**
@@ -356,13 +463,19 @@ public class CaLamService {
         BranchSecurityUtils.checkBranchAccess(existing.getCoSoId(), managerCoSoId);
 
         // CHECK TRẠNG THÁI TRƯỚC
-        if ("CheckedIn".equalsIgnoreCase(existing.getTrangThai()) || "CheckedOut".equalsIgnoreCase(existing.getTrangThai())) {
-            throw new IllegalArgumentException("Không thể sửa ca làm việc đang diễn ra hoặc đã hoàn thành.");
+        if (Constants.isTerminalStatus(existing.getTrangThai())) {
+            throw new ConflictException("Không sửa hoặc hủy ca đã completed.");
+        }
+        if (Constants.SHIFT_STATUS_CHECKED_IN.equalsIgnoreCase(existing.getTrangThai())) {
+            throw new ConflictException("Không thể sửa ca làm việc đang diễn ra (CheckedIn).");
+        }
+        if (Constants.SHIFT_STATUS_CANCELLED.equalsIgnoreCase(existing.getTrangThai())) {
+            throw new ConflictException("Không thể sửa ca làm việc đã bị hủy.");
         }
 
-        if ("Confirmed".equalsIgnoreCase(existing.getTrangThai())) {
+        if (Constants.SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(existing.getTrangThai())) {
             if (!request.isOverrideConfirm()) {
-                throw new IllegalArgumentException("CONFIRMED_OVERRIDE_REQUIRED: Ca làm việc đã được xác nhận. Vui lòng xác nhận để tiếp tục thay đổi.");
+                throw new ValidationException("CONFIRMED_OVERRIDE_REQUIRED: Ca làm việc đã được xác nhận. Vui lòng xác nhận để tiếp tục thay đổi.");
             }
         }
 
@@ -371,22 +484,24 @@ public class CaLamService {
         // Check nhân viên
         TaiKhoan staff = taiKhoanDAO.getAccountById(request.getAccountId());
         if (staff == null) {
-            throw new IllegalArgumentException("Nhân viên không tồn tại");
+            throw new NotFoundException("Nhân viên không tồn tại.");
         }
 
         // Không cho phép sửa ngày về quá khứ nếu ca đang Published
         if (existing.isPublished() && request.getNgayLam().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Không cho phép sửa ngày làm việc về quá khứ đối với ca đã công bố.");
+            throw new ValidationException("Không cho phép sửa ngày làm việc về quá khứ đối với ca đã công bố.");
         }
 
         int targetCoSoId = request.getCoSoId() > 0 ? request.getCoSoId() : managerCoSoId;
+        BranchSecurityUtils.checkBranchAccess(targetCoSoId, managerCoSoId);
 
         // Run validation engine
         CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
-                request.getAccountId(), request.getNgayLam(), request.getGioBatDau(), request.getGioKetThuc(), request.getGioNghi(), caLamViecId, targetCoSoId
+                request.getAccountId(), request.getNgayLam(), request.getGioBatDau(), request.getGioKetThuc(), request.getGioNghi(), caLamViecId, targetCoSoId,
+                request.isCustomTime(), request.getCustomTimeReason()
         );
         if (!valRes.isValid()) {
-            throw new IllegalArgumentException("Lỗi xung đột lịch:\n- " + String.join("\n- ", valRes.getErrors()));
+            throwValidationResultException(valRes);
         }
 
         String oldValue = existing.toString();
@@ -395,7 +510,7 @@ public class CaLamService {
         existing.setNgayLam(request.getNgayLam());
         existing.setGioBatDau(request.getGioBatDau());
         existing.setGioKetThuc(request.getGioKetThuc());
-        existing.setGhiChu(request.getGhiChu());
+        existing.setGhiChu(sanitizeText(request.getGhiChu()));
         existing.setCoSoId(targetCoSoId);
         existing.setTenCa(request.getTenCa() != null ? request.getTenCa() : "Tùy chỉnh");
         existing.setViTri(request.getViTri());
@@ -403,6 +518,8 @@ public class CaLamService {
             existing.setTrangThai(request.getTrangThai());
         }
         existing.setGioNghi(request.getGioNghi());
+        existing.setCustomTime(request.isCustomTime());
+        existing.setCustomTimeReason(sanitizeText(request.getCustomTimeReason()));
         int thuVal = request.getNgayLam().getDayOfWeek().getValue() + 1;
         existing.setThu(thuVal);
 
@@ -453,33 +570,42 @@ public class CaLamService {
         BranchSecurityUtils.checkBranchAccess(ca.getCoSoId(), managerCoSoId);
 
         // CheckedIn / CheckedOut -> ERROR cứng
-        if ("CheckedIn".equalsIgnoreCase(ca.getTrangThai()) || "CheckedOut".equalsIgnoreCase(ca.getTrangThai())) {
-            throw new IllegalArgumentException("Không thể xóa ca làm việc đang diễn ra hoặc đã hoàn thành.");
+        if (Constants.isTerminalStatus(ca.getTrangThai())) {
+            throw new ConflictException("Không sửa hoặc hủy ca đã completed.");
+        }
+        if (Constants.SHIFT_STATUS_CHECKED_IN.equalsIgnoreCase(ca.getTrangThai())) {
+            throw new ConflictException("Không thể xóa ca làm việc đang diễn ra (CheckedIn).");
+        }
+        if (Constants.SHIFT_STATUS_CANCELLED.equalsIgnoreCase(ca.getTrangThai())) {
+            throw new ConflictException("Ca làm việc đã bị hủy.");
         }
 
         // reason null/blank khi ca đã Published/Confirmed -> throw
         boolean isPublished = ca.isPublished();
-        boolean isConfirmed = "Confirmed".equalsIgnoreCase(ca.getTrangThai());
+        boolean isConfirmed = Constants.SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(ca.getTrangThai());
         if (isPublished || isConfirmed) {
             if (deleteReason == null || deleteReason.trim().isEmpty()) {
-                throw new IllegalArgumentException("Vui lòng nhập lý do xóa ca làm việc đã công bố hoặc xác nhận.");
+                throw new ValidationException("Vui lòng nhập lý do xóa ca làm việc đã công bố hoặc xác nhận.");
             }
         }
 
         String oldValue = ca.toString();
 
-        boolean success = caLamViecDAO.hardDelete(caLamViecId);
+        // Soft Cancel: Update status thành Cancelled instead of hardDelete
+        ca.setTrangThai(Constants.SHIFT_STATUS_CANCELLED);
+        boolean success = caLamViecDAO.updateCaLamViec(ca);
         if (!success) {
-            throw new IllegalArgumentException("Xóa ca làm việc thất bại");
+            throw new IllegalArgumentException("Hủy ca làm việc thất bại");
         }
 
         // Log audit log
         CaLamViecAudit audit = new CaLamViecAudit();
         audit.setCaLamViecId(caLamViecId);
-        audit.setThaoTac("DELETE");
+        audit.setThaoTac("CANCEL");
         audit.setNguoiThucHien(actorId);
         audit.setGiaTriCu(oldValue);
-        audit.setLyDo(deleteReason != null ? deleteReason : "Xóa ca làm bởi quản lý");
+        audit.setGiaTriMoi(ca.toString());
+        audit.setLyDo(deleteReason != null ? deleteReason : "Hủy ca làm bởi quản lý");
         auditDAO.insert(audit);
 
         // Notify employee if published
@@ -499,6 +625,15 @@ public class CaLamService {
 
     // ==================== VALIDATION ====================
 
+    static String sanitizeText(String text) {
+        if (text == null) return null;
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#x27;");
+    }
+
     private void validateShiftRequest(CaLamRequest request) {
         Map<String, String> errors = new java.util.HashMap<>();
 
@@ -508,6 +643,10 @@ public class CaLamService {
 
         if (request.getNgayLam() == null) {
             errors.put("ngayLam", "Ngày làm không được để trống");
+        }
+
+        if (request.getGhiChu() != null && request.getGhiChu().length() > 255) {
+            errors.put("ghiChu", "Ghi chú không được vượt quá 255 ký tự");
         }
 
         try {
@@ -527,7 +666,7 @@ public class CaLamService {
         }
 
         if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(errors.toString());
+            throw new ValidationException(errors.toString());
         }
     }
 
@@ -543,6 +682,10 @@ public class CaLamService {
     }
 
     public CaLamValidationEngine.ValidationResult validateShiftAssignment(int accountId, LocalDate ngayLam, LocalTime gioBatDau, LocalTime gioKetThuc, int gioNghi, Integer excludeCaLamViecId) {
+        return validateShiftAssignment(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, excludeCaLamViecId, false, null);
+    }
+
+    public CaLamValidationEngine.ValidationResult validateShiftAssignment(int accountId, LocalDate ngayLam, LocalTime gioBatDau, LocalTime gioKetThuc, int gioNghi, Integer excludeCaLamViecId, boolean isCustomTime, String customTimeReason) {
         Integer coSoId = null;
         if (excludeCaLamViecId != null) {
             CaLamViec existing = caLamViecDAO.getCaById(excludeCaLamViecId);
@@ -555,7 +698,7 @@ public class CaLamService {
                 coSoId = staff.getCoSoId();
             }
         }
-        return validationEngine.validateShift(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, excludeCaLamViecId, coSoId);
+        return validationEngine.validateShift(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, excludeCaLamViecId, coSoId, isCustomTime, customTimeReason);
     }
 
     public List<org.example.model.CoSo> getAllCoSo() {
@@ -611,6 +754,10 @@ public class CaLamService {
         if (fromStart.equals(toStart)) {
             throw new IllegalArgumentException("Không thể nhân bản lịch sang chính tuần đó.");
         }
+        // Priority 3 stub: Không cho clone vào tuần đã qua (tất cả 7 ngày đích đã là quá khứ)
+        if (toStart.plusDays(6).isBefore(LocalDate.now())) {
+            throw new ValidationException("Không thể nhân bản lịch vào tuần đã kết thúc trong quá khứ.");
+        }
 
         // Không cho clone tuần nguồn từ quá khứ > 4 tuần (stale data)
         LocalDate fourWeeksAgo = LocalDate.now().minusWeeks(4);
@@ -631,13 +778,17 @@ public class CaLamService {
         }
 
         long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(fromStart, toStart);
+        // BUG-CLONE-03: skip ALL terminal statuses, not just CheckedOut
+        java.util.Set<String> SKIP_STATUSES = java.util.Set.of(
+                "CheckedOut", "CheckedIn", "Cancelled", "Completed"
+        );
         List<CaLamViec> targetShiftsToInsert = new ArrayList<>();
 
         for (CaLamViec src : sourceShifts) {
             if (src.getNgayLam() == null) continue;
-            
-            // Skip ca CheckedOut (đã hoàn thành)
-            if ("CheckedOut".equalsIgnoreCase(src.getTrangThai())) {
+
+            // BUG-CLONE-03: skip terminal/in-progress statuses
+            if (src.getTrangThai() != null && SKIP_STATUSES.contains(src.getTrangThai())) {
                 continue;
             }
 
@@ -651,39 +802,64 @@ public class CaLamService {
             if (!valRes.isValid()) {
                 TaiKhoan staff = taiKhoanDAO.getAccountById(src.getAccountId());
                 String staffName = staff != null ? staff.getFullName() : "Nhân viên ID " + src.getAccountId();
-                reports.add(String.format("Bỏ qua ca của %s ngày %s do xung đột: %s", 
+                reports.add(String.format("Bỏ qua ca của %s ngày %s do xung đột: %s",
                         staffName, targetDate, String.join("; ", valRes.getErrors())));
             } else {
-                CaLamViec targetShift = new CaLamViec();
-                targetShift.setAccountId(src.getAccountId());
-                targetShift.setCoSoId(coSoId);
-                targetShift.setNgayLam(targetDate);
-                targetShift.setGioBatDau(src.getGioBatDau());
-                targetShift.setGioKetThuc(src.getGioKetThuc());
-                targetShift.setGhiChu(src.getGhiChu());
-                targetShift.setGioNghi(src.getGioNghi());
-                targetShift.setTrangThai("Draft");
-                targetShift.setPublished(false);
-                
+                CaLamViec target = new CaLamViec();
+                target.setAccountId(src.getAccountId());
+                target.setCoSoId(coSoId);
+                target.setNgayLam(targetDate);
+                target.setGioBatDau(src.getGioBatDau());
+                target.setGioKetThuc(src.getGioKetThuc());
+                target.setGhiChu(src.getGhiChu());
+                target.setGioNghi(src.getGioNghi());
+                target.setTrangThai("Draft");
+                target.setPublished(false);
+                // BUG-CLONE-04: copy all business fields
+                target.setTenCa(src.getTenCa());
+                target.setViTri(src.getViTri());
+                target.setCustomTime(src.isCustomTime());
+                target.setCustomTimeReason(src.getCustomTimeReason());
+
                 int thuVal = targetDate.getDayOfWeek().getValue() + 1;
-                targetShift.setThu(thuVal);
-                
-                targetShiftsToInsert.add(targetShift);
+                target.setThu(thuVal);
+
+                targetShiftsToInsert.add(target);
             }
         }
 
-        for (CaLamViec target : targetShiftsToInsert) {
-            caLamViecDAO.addCaLamViec(target);
-            // Log insert audit trail
-            CaLamViecAudit audit = new CaLamViecAudit();
-            audit.setCaLamViecId(target.getCaLamViecId());
-            audit.setThaoTac("CLONE");
-            audit.setNguoiThucHien(actorId);
-            audit.setGiaTriMoi(target.toString());
-            audit.setLyDo("Nhân bản lịch từ tuần " + fromStart);
-            auditDAO.insert(audit);
+        if (targetShiftsToInsert.isEmpty()) {
+            throw new ValidationException("Không có ca nào hợp lệ để nhân bản sang tuần đích. " +
+                    (reports.isEmpty() ? "" : "Chi tiết: " + String.join("; ", reports)));
         }
-        
+
+        // BUG-CLONE-01: wrap all inserts in one transaction
+        // BUG-CLONE-02: use addCaLamViecWithConnection to get generated ID for audit
+        try (Connection conn = DBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                for (CaLamViec target : targetShiftsToInsert) {
+                    int generatedId = caLamViecDAO.addCaLamViecWithConnection(target, conn);
+                    if (generatedId <= 0) {
+                        throw new IllegalStateException("Insert ca làm thất bại khi nhân bản.");
+                    }
+                    CaLamViecAudit audit = new CaLamViecAudit();
+                    audit.setCaLamViecId(generatedId);
+                    audit.setThaoTac("CLONE");
+                    audit.setNguoiThucHien(actorId);
+                    audit.setGiaTriMoi(target.toString());
+                    audit.setLyDo("Nhân bản lịch từ tuần " + fromStart);
+                    auditDAO.insertWithConnection(audit, conn);
+                }
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw new IllegalStateException("Nhân bản lịch thất bại (đã rollback): " + e.getMessage(), e);
+            }
+        } catch (java.sql.SQLException e) {
+            throw new IllegalStateException("Lỗi kết nối DB khi nhân bản lịch: " + e.getMessage(), e);
+        }
+
         return reports;
     }
 
@@ -699,23 +875,31 @@ public class CaLamService {
         }
 
         LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+        // BUG-PUB-04: block publishing past weeks
+        if (endOfWeek.isBefore(LocalDate.now())) {
+            throw new ValidationException("Không thể công bố lịch cho tuần đã kết thúc trong quá khứ.");
+        }
+
         List<CaLamViec> shifts = caLamViecDAO.getShiftsByCoSoAndDateRange(coSoId, startOfWeek, endOfWeek);
 
-        // Phải có ít nhất 1 ca trạng thái Draft/Unpublished
-        boolean hasDraft = shifts.stream().anyMatch(ca -> 
-            "Draft".equalsIgnoreCase(ca.getTrangThai()) || 
-            ca.getTrangThai() == null || 
-            "Unpublished".equalsIgnoreCase(ca.getTrangThai()) ||
-            !ca.isPublished()
+        // BUG-PUB-01: only check for Draft status, ignore Cancelled/CheckedIn/etc.
+        boolean hasDraft = shifts.stream().anyMatch(ca ->
+            "Draft".equalsIgnoreCase(ca.getTrangThai())
         );
         if (shifts.isEmpty() || !hasDraft) {
             throw new IllegalArgumentException("Không có ca làm việc nháp nào trong tuần để công bố.");
         }
 
+        // Keep only Draft shifts for audit (non-Draft shifts are untouched)
+        List<CaLamViec> draftShifts = shifts.stream()
+            .filter(ca -> "Draft".equalsIgnoreCase(ca.getTrangThai()))
+            .toList();
+
         List<String> warnings = new ArrayList<>();
 
         // WARNING nếu có ca chưa được assign (accountId <= 0 hoặc null)
-        boolean hasUnassigned = shifts.stream().anyMatch(ca -> ca.getAccountId() <= 0);
+        boolean hasUnassigned = draftShifts.stream().anyMatch(ca -> ca.getAccountId() <= 0);
         if (hasUnassigned) {
             warnings.add("Có ca làm việc trong tuần chưa được phân công cho nhân viên.");
         }
@@ -729,15 +913,40 @@ public class CaLamService {
             }
         }
 
-        boolean success = caLamViecDAO.publishWeekShifts(startOfWeek, endOfWeek, coSoId);
-        if (!success) {
-            throw new IllegalArgumentException("Công bố lịch tuần thất bại.");
+        // BUG-PUB-02: wrap publish + all audits in one transaction
+        try (Connection conn = DBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // BUG-PUB-01 + PUB-03: use new method that only touches Draft, returns count
+                int publishedCount = caLamViecDAO.publishDraftShiftsWithConnection(startOfWeek, endOfWeek, coSoId, conn);
+                if (publishedCount == 0) {
+                    throw new IllegalArgumentException("Công bố lịch tuần thất bại: không có ca nào được publish.");
+                }
+
+                // BUG-PUB-03: read actual old status per shift rather than hardcoding "Unpublished"
+                for (CaLamViec s : draftShifts) {
+                    String oldStatus = s.getTrangThai() != null ? s.getTrangThai() : "Draft";
+                    CaLamViecAudit audit = new CaLamViecAudit();
+                    audit.setCaLamViecId(s.getCaLamViecId());
+                    audit.setThaoTac("PUBLISH");
+                    audit.setNguoiThucHien(actorId);
+                    audit.setGiaTriCu(oldStatus);
+                    audit.setGiaTriMoi("Published");
+                    audit.setLyDo("Quản lý công bố lịch tuần");
+                    auditDAO.insertWithConnection(audit, conn);
+                }
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                if (e instanceof IllegalArgumentException) throw (IllegalArgumentException) e;
+                if (e instanceof ValidationException) throw (ValidationException) e;
+                throw new IllegalStateException("Công bố lịch thất bại (đã rollback): " + e.getMessage(), e);
+            }
+        } catch (java.sql.SQLException e) {
+            throw new IllegalStateException("Lỗi kết nối DB khi công bố lịch: " + e.getMessage(), e);
         }
 
-        // Tải lại danh sách ca sau khi đã công bố để log audit chính xác
-        shifts = caLamViecDAO.getShiftsByCoSoAndDateRange(coSoId, startOfWeek, endOfWeek);
-
-        // Date boundaries of today
+        // Notifications sent AFTER commit (non-critical, outside transaction)
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
         cal.set(java.util.Calendar.MINUTE, 0);
@@ -746,16 +955,15 @@ public class CaLamService {
         java.util.Date todayZero = cal.getTime();
 
         List<Integer> notifiedAccounts = new ArrayList<>();
-        for (CaLamViec s : shifts) {
+        for (CaLamViec s : draftShifts) {
             if (s.getAccountId() > 0 && !notifiedAccounts.contains(s.getAccountId())) {
                 notifiedAccounts.add(s.getAccountId());
 
-                // Kiểm tra xem hôm nay nhân viên đã nhận thông báo tương tự chưa
                 List<org.example.model.ThongBao> userNotifs = thongBaoDAO.findByAccountID(s.getAccountId());
                 boolean alreadyNotified = false;
                 for (org.example.model.ThongBao nt : userNotifs) {
                     if (nt.getThoiGianGui() != null && !nt.getThoiGianGui().before(todayZero)) {
-                        if ("LichLamViec".equals(nt.getLoaiThongBao()) && 
+                        if ("LichLamViec".equals(nt.getLoaiThongBao()) &&
                             (nt.getTieuDe().contains("công bố") || nt.getTieuDe().contains("Lịch làm việc"))) {
                             alreadyNotified = true;
                             break;
@@ -776,16 +984,6 @@ public class CaLamService {
                     thongBaoDAO.insert(tb);
                 }
             }
-
-            // Audit
-            CaLamViecAudit audit = new CaLamViecAudit();
-            audit.setCaLamViecId(s.getCaLamViecId());
-            audit.setThaoTac("PUBLISH");
-            audit.setNguoiThucHien(actorId);
-            audit.setGiaTriCu("Unpublished");
-            audit.setGiaTriMoi(s.toString());
-            audit.setLyDo("Quản lý công bố lịch tuần");
-            auditDAO.insert(audit);
         }
 
         return warnings;
@@ -839,6 +1037,18 @@ public class CaLamService {
             throw new IllegalArgumentException("Ca làm việc này không thuộc về bạn.");
         }
 
+        // BUG-SWAP-05: only allow swap for Published/Confirmed shifts
+        String shiftStatus = shift.getTrangThai();
+        if (shiftStatus == null ||
+                (!"Published".equalsIgnoreCase(shiftStatus) && !"Confirmed".equalsIgnoreCase(shiftStatus))) {
+            throw new ValidationException("Chỉ có thể gửi yêu cầu đổi ca cho ca ở trạng thái Đã Công Bố hoặc Đã Xác Nhận.");
+        }
+
+        // BUG-SWAP-06: block duplicate pending requests for the same shift
+        if (swapRequestDAO.hasPendingForShift(sr.getCaLamViecIdGui())) {
+            throw new ConflictException("Ca này đã có yêu cầu đổi ca đang chờ xử lý. Vui lòng đợi yêu cầu hiện tại được giải quyết.");
+        }
+
         TaiKhoan guiAcc = taiKhoanDAO.getAccountById(sr.getAccountIdGui());
         TaiKhoan nhanAcc = taiKhoanDAO.getAccountById(sr.getAccountIdNhan());
         if (guiAcc == null || nhanAcc == null) {
@@ -846,6 +1056,11 @@ public class CaLamService {
         }
         if (guiAcc.getCoSoId() == null || nhanAcc.getCoSoId() == null || !guiAcc.getCoSoId().equals(nhanAcc.getCoSoId())) {
             throw new IllegalArgumentException("Chỉ có thể hoán đổi ca làm với đồng nghiệp cùng chi nhánh.");
+        }
+
+        // BUG-SWAP-07: require same role (no LE_TAN swapping with BAO_VE)
+        if (guiAcc.getRoleId() != nhanAcc.getRoleId()) {
+            throw new ValidationException("Chỉ có thể đổi ca với nhân viên cùng vị trí (vai trò).");
         }
 
         // Validate receiver conflict for this shift
@@ -896,7 +1111,10 @@ public class CaLamService {
             TaiKhoan receiver = taiKhoanDAO.getAccountById(sr.getAccountIdNhan());
             
             for (TaiKhoan m : managers) {
-                if (m.getRoleId() == Constants.ROLE_MANAGER && m.getCoSoId().equals(receiver.getCoSoId())) {
+                // BUG-SWAP-03: null-guard m.getCoSoId() before equals() to prevent NPE
+                if (m.getRoleId() == Constants.ROLE_MANAGER &&
+                        m.getCoSoId() != null && receiver != null &&
+                        m.getCoSoId().equals(receiver.getCoSoId())) {
                     org.example.model.ThongBao tb = new org.example.model.ThongBao();
                     tb.setAccountId(m.getAccountId());
                     tb.setTieuDe("Yêu cầu đổi ca chờ duyệt");
@@ -968,12 +1186,8 @@ public class CaLamService {
             );
         }
 
-        // Nếu có validation error -> reject swap với lý do tự động
+        // BUG-SWAP-02: throw BEFORE any DB write when validation fails, so DB stays clean
         if (!valRes1.isValid() || (valRes2 != null && !valRes2.isValid())) {
-            sr.setTrangThai("TuChoi");
-            sr.setNguoiDuyet(managerId);
-            sr.setNgayDuyet(LocalDateTime.now());
-            
             String autoRejectReason = "Hệ thống tự động từ chối do phát sinh xung đột lịch: ";
             if (!valRes1.isValid()) {
                 autoRejectReason += "Xung đột lịch với nhân viên nhận: " + String.join(", ", valRes1.getErrors());
@@ -981,63 +1195,60 @@ public class CaLamService {
             if (valRes2 != null && !valRes2.isValid()) {
                 autoRejectReason += "; Xung đột lịch với nhân viên gửi: " + String.join(", ", valRes2.getErrors());
             }
-            sr.setGhiChuQuanLy(autoRejectReason);
-            swapRequestDAO.update(sr);
+            throw new ConflictException(autoRejectReason);
+        }
 
-            // Notify both staff of the rejection
-            for (int accId : new int[]{sr.getAccountIdGui(), sr.getAccountIdNhan()}) {
-                org.example.model.ThongBao tb = new org.example.model.ThongBao();
-                tb.setAccountId(accId);
-                tb.setTieuDe("Yêu cầu đổi ca bị hệ thống tự động từ chối");
-                tb.setNoiDung(autoRejectReason);
-                tb.setLoaiThongBao("DoiCa");
-                tb.setDaDoc(false);
-                tb.setThoiGianGui(new java.util.Date());
-                tb.setMaBanGhi("SWAP_REQUEST");
-                tb.setDuongDan("/staff/ca-lam");
-                thongBaoDAO.insert(tb);
+        // BUG-SWAP-01: wrap all swap DB ops in a single transaction
+        try (Connection conn = DBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // 1. Swap caGui to receiver
+                caGui.setAccountId(sr.getAccountIdNhan());
+                caLamViecDAO.updateCaLamViecWithConnection(caGui, conn);
+
+                CaLamViecAudit audit1 = new CaLamViecAudit();
+                audit1.setCaLamViecId(caGui.getCaLamViecId());
+                audit1.setThaoTac("SWAP");
+                audit1.setNguoiThucHien(managerId);
+                audit1.setGiaTriCu("Staff ID: " + sr.getAccountIdGui());
+                audit1.setGiaTriMoi("Staff ID: " + sr.getAccountIdNhan());
+                audit1.setLyDo("Phê duyệt hoán đổi ca làm. Ghi chú: " + notes);
+                auditDAO.insertWithConnection(audit1, conn);
+
+                // 2. Swap caNhan to requester (if trade)
+                if (caNhan != null) {
+                    caNhan.setAccountId(sr.getAccountIdGui());
+                    caLamViecDAO.updateCaLamViecWithConnection(caNhan, conn);
+
+                    CaLamViecAudit audit2 = new CaLamViecAudit();
+                    audit2.setCaLamViecId(caNhan.getCaLamViecId());
+                    audit2.setThaoTac("SWAP");
+                    audit2.setNguoiThucHien(managerId);
+                    audit2.setGiaTriCu("Staff ID: " + sr.getAccountIdNhan());
+                    audit2.setGiaTriMoi("Staff ID: " + sr.getAccountIdGui());
+                    audit2.setLyDo("Phê duyệt hoán đổi ca làm. Ghi chú: " + notes);
+                    auditDAO.insertWithConnection(audit2, conn);
+                }
+
+                // 3. Update swap request to DaDuyet
+                sr.setTrangThai("DaDuyet");
+                sr.setNguoiDuyet(managerId);
+                sr.setNgayDuyet(LocalDateTime.now());
+                sr.setGhiChuQuanLy(notes);
+                swapRequestDAO.updateWithConnection(sr, conn);
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                if (e instanceof ConflictException) throw (ConflictException) e;
+                if (e instanceof IllegalArgumentException) throw (IllegalArgumentException) e;
+                throw new IllegalStateException("Phê duyệt hoán đổi ca thất bại (đã rollback): " + e.getMessage(), e);
             }
-            throw new IllegalArgumentException(autoRejectReason);
+        } catch (java.sql.SQLException e) {
+            throw new IllegalStateException("Lỗi kết nối DB khi phê duyệt hoán đổi ca: " + e.getMessage(), e);
         }
 
-        // Perform swapping database updates
-        // 1. Swap first shift to receiver
-        caGui.setAccountId(sr.getAccountIdNhan());
-        caLamViecDAO.updateCaLamViec(caGui);
-
-        // Audit first swap
-        CaLamViecAudit audit1 = new CaLamViecAudit();
-        audit1.setCaLamViecId(caGui.getCaLamViecId());
-        audit1.setThaoTac("SWAP");
-        audit1.setNguoiThucHien(managerId);
-        audit1.setGiaTriCu("Staff ID: " + sr.getAccountIdGui());
-        audit1.setGiaTriMoi("Staff ID: " + sr.getAccountIdNhan());
-        audit1.setLyDo("Phê duyệt hoán đổi ca làm. Ghi chú: " + notes);
-        auditDAO.insert(audit1);
-
-        // 2. Swap second shift to requester (if trade)
-        if (caNhan != null) {
-            caNhan.setAccountId(sr.getAccountIdGui());
-            caLamViecDAO.updateCaLamViec(caNhan);
-
-            CaLamViecAudit audit2 = new CaLamViecAudit();
-            audit2.setCaLamViecId(caNhan.getCaLamViecId());
-            audit2.setThaoTac("SWAP");
-            audit2.setNguoiThucHien(managerId);
-            audit2.setGiaTriCu("Staff ID: " + sr.getAccountIdNhan());
-            audit2.setGiaTriMoi("Staff ID: " + sr.getAccountIdGui());
-            audit2.setLyDo("Phê duyệt hoán đổi ca làm. Ghi chú: " + notes);
-            auditDAO.insert(audit2);
-        }
-
-        // Update swap request status
-        sr.setTrangThai("DaDuyet");
-        sr.setNguoiDuyet(managerId);
-        sr.setNgayDuyet(LocalDateTime.now());
-        sr.setGhiChuQuanLy(notes);
-        swapRequestDAO.update(sr);
-
-        // Notify both staff
+        // Notify both staff AFTER commit (non-critical)
         for (int accId : new int[]{sr.getAccountIdGui(), sr.getAccountIdNhan()}) {
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(accId);
@@ -1070,6 +1281,16 @@ public class CaLamService {
         sr.setNgayDuyet(LocalDateTime.now());
         sr.setGhiChuQuanLy(notes);
         swapRequestDAO.update(sr);
+
+        // BUG-SWAP-04: write audit log on rejection
+        CaLamViecAudit rejectAudit = new CaLamViecAudit();
+        rejectAudit.setCaLamViecId(sr.getCaLamViecIdGui());
+        rejectAudit.setThaoTac("SWAP_REJECT");
+        rejectAudit.setNguoiThucHien(managerId);
+        rejectAudit.setGiaTriCu("ChoQuanLyDuyet");
+        rejectAudit.setGiaTriMoi("TuChoi");
+        rejectAudit.setLyDo("Quản lý từ chối yêu cầu đổi ca. Ghi chú: " + (notes != null ? notes : ""));
+        auditDAO.insert(rejectAudit);
 
         // Notify both staff
         for (int accId : new int[]{sr.getAccountIdGui(), sr.getAccountIdNhan()}) {
@@ -1169,6 +1390,14 @@ public class CaLamService {
         if (java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) > 30) {
             throw new IllegalArgumentException("Khoảng thời gian tự động sắp lịch không được quá 30 ngày.");
         }
+        // Priority 3 stub: Không cho auto-schedule ngày đã qua hoàn toàn
+        if (endDate.isBefore(LocalDate.now())) {
+            throw new ValidationException("Không thể tự động sắp lịch cho khoảng ngày đã kết thúc trong quá khứ.");
+        }
+        // BUG-AUTO-04: block if startDate itself is in the past
+        if (startDate.isBefore(LocalDate.now())) {
+            throw new ValidationException("Ngày bắt đầu sắp lịch tự động không thể là ngày đã qua.");
+        }
 
         // 1. Lấy tất cả ca làm việc trong khoảng ngày của cơ sở
         List<CaLamViec> shifts = caLamViecDAO.getShiftsByCoSoAndDateRange(coSoId, startDate, endDate);
@@ -1192,27 +1421,31 @@ public class CaLamService {
 
         int scheduledCount = 0;
         int unassignedCount = 0;
+        List<String> autoErrors = new ArrayList<>();
+
+        // BUG-AUTO-02: track assigned hours in-session (in-memory, updated as we assign)
+        java.util.Map<Integer, Double> assignedHoursMap = new java.util.HashMap<>();
 
         // Duyệt qua từng ca làm việc để tìm nhân viên phù hợp
         for (CaLamViec shift : shifts) {
-            // Chỉ phân lịch tự động cho ca ở trạng thái Draft hoặc chưa được Confirmed/CheckedIn/CheckedOut
-            if (!"Draft".equals(shift.getTrangThai()) && !"Unpublished".equals(shift.getTrangThai()) && shift.getTrangThai() != null) {
+            // BUG-AUTO-01: null status must be skipped (treated as non-Draft)
+            if (shift.getTrangThai() == null) continue;
+            // Only auto-schedule Draft shifts
+            if (!"Draft".equals(shift.getTrangThai())) {
                 continue;
             }
 
             // Tìm các nhân viên có nguyện vọng rảnh bao phủ khung giờ của ca này
             List<TaiKhoan> candidateStaffs = new ArrayList<>();
             for (TaiKhoan staff : staffs) {
-                // Kiểm tra xem nhân viên có đăng ký rảnh vào ngày này và bao phủ khung giờ của ca làm không
-                boolean isAvailable = freeAvails.stream().anyMatch(a -> 
-                    a.getAccountId() == staff.getAccountId() && 
+                boolean isAvailable = freeAvails.stream().anyMatch(a ->
+                    a.getAccountId() == staff.getAccountId() &&
                     a.getNgay().equals(shift.getNgayLam()) &&
                     !shift.getGioBatDau().isBefore(a.getGioBatDau()) &&
                     !shift.getGioKetThuc().isAfter(a.getGioKetThuc())
                 );
-                
+
                 if (isAvailable) {
-                    // Kiểm tra xem có xung đột ca làm khác không (loại trừ chính ca đang xét nếu staff đang được gán ca này)
                     CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
                             staff.getAccountId(), shift.getNgayLam(), shift.getGioBatDau(), shift.getGioKetThuc(), shift.getGioNghi(), shift.getCaLamViecId(), shift.getCoSoId()
                     );
@@ -1223,20 +1456,13 @@ public class CaLamService {
             }
 
             if (!candidateStaffs.isEmpty()) {
-                // Chọn nhân viên có ít giờ làm nhất trong tuần để công bằng
+                // BUG-AUTO-02: fairness using in-session tracking map, not just the DB snapshot
                 TaiKhoan bestStaff = null;
                 double minHours = Double.MAX_VALUE;
                 for (TaiKhoan staff : candidateStaffs) {
-                    // Tính tổng số giờ đã được gán cho nhân viên này trong khoảng ngày
-                    double assignedHours = 0;
-                    for (CaLamViec s : shifts) {
-                        if (s.getAccountId() == staff.getAccountId() && s.getCaLamViecId() != shift.getCaLamViecId()) {
-                            long minutes = java.time.Duration.between(s.getGioBatDau(), s.getGioKetThuc()).toMinutes();
-                            assignedHours += (minutes - s.getGioNghi()) / 60.0;
-                        }
-                    }
-                    if (assignedHours < minHours) {
-                        minHours = assignedHours;
+                    double h = assignedHoursMap.getOrDefault(staff.getAccountId(), 0.0);
+                    if (h < minHours) {
+                        minHours = h;
                         bestStaff = staff;
                     }
                 }
@@ -1244,10 +1470,19 @@ public class CaLamService {
                 if (bestStaff != null) {
                     int oldStaffId = shift.getAccountId();
                     shift.setAccountId(bestStaff.getAccountId());
-                    caLamViecDAO.updateCaLamViec(shift);
+                    boolean updated = caLamViecDAO.updateCaLamViec(shift);
+                    if (!updated) {
+                        // BUG-AUTO-03: consistent error tracking instead of silently dropping
+                        autoErrors.add("Cập nhật ca ID=" + shift.getCaLamViecId() + " thất bại.");
+                        unassignedCount++;
+                        continue;
+                    }
                     scheduledCount++;
 
-                    // Ghi log thay đổi
+                    // Update in-session hours map
+                    long netMinutes = java.time.Duration.between(shift.getGioBatDau(), shift.getGioKetThuc()).toMinutes() - shift.getGioNghi();
+                    assignedHoursMap.merge(bestStaff.getAccountId(), netMinutes / 60.0, Double::sum);
+
                     CaLamViecAudit audit = new CaLamViecAudit();
                     audit.setCaLamViecId(shift.getCaLamViecId());
                     audit.setThaoTac("AUTO_SCHEDULE");
@@ -1264,10 +1499,18 @@ public class CaLamService {
             }
         }
 
-        if (scheduledCount == 0) {
-            throw new IllegalArgumentException("Không thể tự động sắp lịch: Không có nhân viên nào phù hợp hoặc rảnh trong khoảng thời gian đã chọn.");
+        // BUG-AUTO-03: consistent error handling — throw only when zero scheduled AND no partial success
+        if (scheduledCount == 0 && autoErrors.isEmpty()) {
+            throw new ValidationException("Không thể tự động sắp lịch: Không có nhân viên nào phù hợp hoặc rảnh trong khoảng thời gian đã chọn.");
+        }
+        if (scheduledCount == 0 && !autoErrors.isEmpty()) {
+            throw new IllegalStateException("Tự động sắp lịch thất bại hoàn toàn: " + String.join("; ", autoErrors));
         }
 
-        return String.format("Tự động sắp lịch thành công: đã phân bổ %d ca làm việc, còn lại %d ca chưa tìm được nhân sự phù hợp.", scheduledCount, unassignedCount);
+        String result = String.format("Tự động sắp lịch thành công: đã phân bổ %d ca làm việc, còn lại %d ca chưa tìm được nhân sự phù hợp.", scheduledCount, unassignedCount);
+        if (!autoErrors.isEmpty()) {
+            result += " Lỗi ghi nhận: " + String.join("; ", autoErrors);
+        }
+        return result;
     }
 }

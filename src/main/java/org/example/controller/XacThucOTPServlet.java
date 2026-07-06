@@ -49,7 +49,7 @@ public class XacThucOTPServlet extends HttpServlet {
         boolean isAjax = "XMLHttpRequest".equals(requestedWith);
 
         Boolean needResend = (Boolean) session.getAttribute("needResend");
-        boolean isAdminOrManagerFlow = "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType);
+        boolean isAdminOrManagerFlow = "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType) || "MANAGER_ADD".equals(authType);
         if (isAdminOrManagerFlow && needResend != null && needResend) {
             req.setAttribute("loi", "Bạn đã nhập sai 5 lần. Vui lòng nhấn 'Gửi lại ngay' để nhận mã OTP mới.");
             req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
@@ -131,7 +131,7 @@ public class XacThucOTPServlet extends HttpServlet {
         session.removeAttribute("resendCount");
         session.removeAttribute("needResend");
 
-        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
+        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType) || "MANAGER_ADD".equals(authType)) {
             // Xử lý hoàn tất đăng ký hoặc admin thêm tài khoản
             TaiKhoan tempAccount = (TaiKhoan) session.getAttribute("tempAccount");
             String[] tempSports = (String[]) session.getAttribute("tempSports");
@@ -139,7 +139,12 @@ public class XacThucOTPServlet extends HttpServlet {
             if (tempAccount == null) {
                 if ("ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType)) {
                     resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
-                } else if ("MANAGER_EDIT".equals(authType)) {
+                } else if ("MANAGER_EDIT".equals(authType) || "MANAGER_ADD".equals(authType)) {
+                    if (isAjax) {
+                        resp.setContentType("application/json;charset=UTF-8");
+                        resp.getWriter().write("{\"success\": false, \"loi\": \"Phiên làm việc đã hết hạn. Vui lòng thử lại.\"}");
+                        return;
+                    }
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
                 } else {
                     if (isAjax) {
@@ -191,6 +196,82 @@ public class XacThucOTPServlet extends HttpServlet {
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
                 }
+            } else if ("MANAGER_ADD".equals(authType)) {
+                // Double check email uniqueness right before adding
+                if (tempAccount.getEmail() != null && !tempAccount.getEmail().trim().isEmpty()) {
+                    if (TaiKhoanDAO.kiemtraEmail(tempAccount.getEmail().trim())) {
+                        session.setAttribute("error", "Email đã tồn tại trên hệ thống!");
+                        session.removeAttribute("tempAccount");
+                        session.removeAttribute("tempRawPassword");
+                        session.removeAttribute("tempManagerAccountId");
+                        session.removeAttribute("authType");
+                        if (isAjax) {
+                            resp.setContentType("application/json;charset=UTF-8");
+                            resp.getWriter().write("{\"success\": false, \"loi\": \"Email đã tồn tại trên hệ thống!\"}");
+                            return;
+                        }
+                        resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                        return;
+                    }
+                }
+
+                // Manager thêm nhân viên sau khi email được xác thực qua OTP
+                boolean saved = TaiKhoanDAO.addAccountByAdmin(tempAccount);
+                if (!saved) {
+                    session.removeAttribute("tempAccount");
+                    session.removeAttribute("tempRawPassword");
+                    session.removeAttribute("tempManagerAccountId");
+                    session.removeAttribute("authType");
+                    if (isAjax) {
+                        resp.setContentType("application/json;charset=UTF-8");
+                        resp.getWriter().write("{\"success\": false, \"loi\": \"Lỗi hệ thống khi tạo tài khoản. Vui lòng thử lại hoặc liên hệ quản trị viên.\"}");
+                        return;
+                    }
+                    resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                    return;
+                }
+
+                // Gửi email thông báo kích hoạt kèm mật khẩu
+                String rawPwd = (String) session.getAttribute("tempRawPassword");
+                final String finalEmail = tempAccount.getEmail();
+                final String finalUsername = tempAccount.getUsername();
+                final String finalName = tempAccount.getFullName() != null ? tempAccount.getFullName() : finalUsername;
+                final String finalPwd = rawPwd != null ? rawPwd : "(đã được thiết lập)";
+                new Thread(() -> {
+                    try {
+                        org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT",
+                            "Chào " + finalName + ",\n\n" +
+                            "Tài khoản nhân viên của bạn đã được tạo bởi Quản lý.\n" +
+                            "Tên đăng nhập: " + finalUsername + "\n" +
+                            "Mật khẩu: " + finalPwd + "\n\n" +
+                            "Vui lòng đăng nhập và đổi mật khẩu ngay sau lần đầu tiên.");
+                    } catch (Exception ignored) {}
+                }).start();
+
+                // Audit log
+                TaiKhoan loggedInUser2 = (TaiKhoan) session.getAttribute("user");
+                if (loggedInUser2 != null) {
+                    try {
+                        org.example.service.AuditLogService.log(req, loggedInUser2,
+                            org.example.service.AuditLogService.ACTION_ADD_STAFF,
+                            org.example.service.AuditLogService.ENTITY_ACCOUNT,
+                            String.valueOf(tempAccount.getAccountId()), finalName,
+                            "Manager thêm nhân viên vào chi nhánh (xác thực OTP email)");
+                    } catch (Exception ignored) {}
+                }
+
+                session.removeAttribute("tempAccount");
+                session.removeAttribute("tempRawPassword");
+                session.removeAttribute("tempManagerAccountId");
+                session.removeAttribute("authType");
+
+                session.setAttribute("message", "Thêm nhân viên thành công!");
+                if (isAjax) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\": true, \"message\": \"Thêm nhân viên thành công!\"}");
+                    return;
+                }
+                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
             } else if ("ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
                 // Double check email uniqueness right before updating
                 if (tempAccount.getEmail() != null && !tempAccount.getEmail().trim().isEmpty()) {
@@ -289,7 +370,7 @@ public class XacThucOTPServlet extends HttpServlet {
         String email = null;
         String fullName = "";
         
-        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
+        if ("REGISTER".equals(authType) || "ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType) || "MANAGER_ADD".equals(authType)) {
             TaiKhoan tempAccount = (TaiKhoan) session.getAttribute("tempAccount");
             if (tempAccount != null) {
                 email = tempAccount.getEmail();

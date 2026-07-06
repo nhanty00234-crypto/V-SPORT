@@ -115,22 +115,60 @@ public class NhanSuManagerServlet extends HttpServlet {
         String action = req.getParameter("action");
         try {
             if ("add".equals(action)) {
-                StaffCreateRequest createReq = new StaffCreateRequest();
-                createReq.setUsername(req.getParameter("username"));
-                createReq.setFullName(req.getParameter("fullName"));
-                createReq.setEmail(req.getParameter("email"));
-                createReq.setPhoneNumber(req.getParameter("phoneNumber"));
-                createReq.setRoleId(Integer.parseInt(req.getParameter("roleId")));
-                createReq.setPassword(req.getParameter("password"));
-                
-                int newStaffId = nhanSuService.createStaff(createReq, managerCoSoId, user.getAccountId());
-                String newStaffName = createReq.getFullName() != null ? createReq.getFullName() : createReq.getUsername();
-                session.setAttribute("message", "Thêm nhân viên thành công!");
-                AuditLogService.log(req, user,
-                    AuditLogService.ACTION_ADD_STAFF, AuditLogService.ENTITY_ACCOUNT,
-                    String.valueOf(newStaffId), newStaffName,
-                    "Manager thêm nhân viên vào chi nhánh");
-                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                String username = req.getParameter("username");
+                String fullName = req.getParameter("fullName");
+                String email = req.getParameter("email");
+                String phoneNumber = req.getParameter("phoneNumber");
+                int roleId = Integer.parseInt(req.getParameter("roleId"));
+                String password = req.getParameter("password");
+
+                // Trim inputs
+                if (username != null) username = username.trim();
+                if (fullName != null) fullName = fullName.trim();
+                if (email != null) email = email.trim();
+                if (phoneNumber != null) phoneNumber = phoneNumber.trim();
+                if (password != null) password = password.trim();
+
+                // Validate fields
+                java.util.Map<String, String> errors = org.example.util.ValidationUtils.validateStaffCreate(username, email, phoneNumber, fullName, roleId);
+                org.example.dao.TaiKhoanDAO taiKhoanDAO = new org.example.dao.impl.TaiKhoanDAOImpl();
+                if (taiKhoanDAO.kiemtraUsername(username)) errors.put("username", "Tên đăng nhập đã tồn tại");
+                if (taiKhoanDAO.kiemtraEmail(email)) errors.put("email", "Email đã tồn tại trên hệ thống");
+                if (password == null || password.isEmpty()) errors.put("password", "Mật khẩu không được để trống");
+                if (!errors.isEmpty()) throw new IllegalArgumentException(errors.toString());
+
+                // Validate strong password
+                org.example.util.ValidationUtils.validateStrongPassword(password);
+
+                // Build TaiKhoan (but do NOT save yet – wait for OTP)
+                TaiKhoan newAcc = new TaiKhoan();
+                newAcc.setUsername(username);
+                newAcc.setFullName(fullName);
+                newAcc.setEmail(email);
+                newAcc.setPhoneNumber(phoneNumber);
+                newAcc.setRoleId(roleId);
+                newAcc.setCoSoId(managerCoSoId);
+                newAcc.setIsLocked(false);
+                newAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt(12)));
+
+                // Send OTP to the provided email for verification
+                String otpString = taiKhoanDAO.sendRegistrationOTP(email, fullName);
+                session.setAttribute("otp", otpString);
+                session.setAttribute("tempAccount", newAcc);
+                session.setAttribute("tempRawPassword", password);
+                session.setAttribute("tempManagerAccountId", user.getAccountId());
+                session.setAttribute("authType", "MANAGER_ADD");
+                session.setAttribute("otpAttempts", 0);
+                session.setAttribute("resendCount", 0);
+                session.setAttribute("needResend", false);
+
+                String requestedWith = req.getHeader("X-Requested-With");
+                if ("XMLHttpRequest".equals(requestedWith)) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"requiresOtp\": true, \"email\": \"" + email + "\"}");
+                    return;
+                }
+                resp.sendRedirect(req.getContextPath() + "/auth/NhapMa.jsp");
                 return;
             } 
             else if ("update".equals(action)) {

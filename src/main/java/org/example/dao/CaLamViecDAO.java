@@ -1,6 +1,8 @@
 package org.example.dao;
 
 import org.example.model.CaLamViec;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -17,6 +19,13 @@ public interface CaLamViecDAO {
      * @return true nếu thành công, false nếu thất bại
      */
     boolean addCaLamViec(CaLamViec ca);
+
+    /**
+     * Thêm mới ca làm việc trong một transaction hiện có.
+     * Set ca.caLamViecId theo generated key.
+     * @return generated ID (> 0) nếu thành công, -1 nếu thất bại
+     */
+    int addCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException;
 
     /**
      * Cập nhật ca làm việc
@@ -92,4 +101,16 @@ public interface CaLamViecDAO {
      * Lấy danh sách ca làm việc của một cơ sở theo khoảng ngày
      */
     List<CaLamViec> getShiftsByCoSoAndDateRange(int coSoId, LocalDate start, LocalDate end);
+
+    /**
+     * Cập nhật ca làm việc trong một transaction hiện có.
+     */
+    boolean updateCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException;
+
+    /**
+     * Publish (Draft → Published) các ca Draft trong khoảng tuần trong một transaction hiện có.
+     * Chỉ update TrangThai='Draft', không đụng Cancelled/CheckedIn/Published/...
+     * @return số dòng đã được update
+     */
+    int publishDraftShiftsWithConnection(LocalDate startOfWeek, LocalDate endOfWeek, int coSoId, Connection conn) throws SQLException;
 }

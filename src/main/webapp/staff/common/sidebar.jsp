@@ -24,9 +24,6 @@
     <a href="${pageContext.request.contextPath}/staff/dashboard" class="nav-link ${uri.contains('/staff/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
-    <a href="${pageContext.request.contextPath}/staff/ca-lam" class="nav-link ${uri.contains('/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
-      <i class="ti ti-clock text-[19px]"></i>Lịch làm việc
-    </a>
     <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
       <i class="ti ti-clipboard-list text-[19px]"></i>Đăng ký nghỉ phép
     </a>

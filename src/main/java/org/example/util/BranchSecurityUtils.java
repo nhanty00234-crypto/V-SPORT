@@ -1,5 +1,6 @@
 package org.example.util;
 
+import org.example.exception.ForbiddenException;
 
 /**
  * Utility class cho branch/cơ sở isolation security checks
@@ -16,7 +17,7 @@ public final class BranchSecurityUtils {
      *
      * @param resourceCoSoId CoSoID của resource cần check
      * @param managerCoSoId CoSoID của manager hiện tại
-     * @throws IllegalArgumentException nếu resource không thuộc branch của manager
+     * @throws ForbiddenException nếu resource không thuộc branch của manager
      */
     public static void checkBranchAccess(Integer resourceCoSoId, Integer managerCoSoId) {
         if (resourceCoSoId == null) {
@@ -28,7 +29,7 @@ public final class BranchSecurityUtils {
         }
 
         if (!resourceCoSoId.equals(managerCoSoId)) {
-            throw new IllegalArgumentException(
+            throw new ForbiddenException(
                 String.format(
                     "Resource thuộc cơ sở %d, không có quyền truy cập từ cơ sở %d",
                     resourceCoSoId, managerCoSoId
@@ -73,7 +74,7 @@ public final class BranchSecurityUtils {
      * @param entityCoSoId CoSoID của entity
      * @param managerCoSoId CoSoID của manager
      * @param entityName Tên entity cho error message
-     * @throws IllegalArgumentException nếu không cùng branch
+     * @throws ForbiddenException nếu không cùng branch
      */
     public static void validateBranchAccess(Integer entityCoSoId, Integer managerCoSoId, String entityName) {
         if (entityCoSoId == null) {
@@ -81,7 +82,7 @@ public final class BranchSecurityUtils {
         }
 
         if (!entityCoSoId.equals(managerCoSoId)) {
-            throw new IllegalArgumentException(
+            throw new ForbiddenException(
                 String.format(
                     "%s thuộc cơ sở %d, bạn chỉ có quyền quản lý cơ sở %d",
                     entityName, entityCoSoId, managerCoSoId

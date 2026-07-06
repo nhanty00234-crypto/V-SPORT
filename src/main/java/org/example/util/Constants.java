@@ -65,6 +65,14 @@ public final class Constants {
     // ========== SHIFT (CaLamViec) DEFAULT ==========
     public static final int DEFAULT_SHIFT_DURATION_HOURS = 8;
 
+    // ========== SHIFT LIMITS ==========
+    public static final int MIN_SHIFT_MINUTES = 60;
+    public static final int MAX_SHIFT_MINUTES = 720;
+    public static final int MONTHLY_HOUR_LIMIT_MINUTES = 160 * 60;
+    public static final int MAX_SHIFTS_PER_DAY = 2;
+    public static final int MIN_REST_MINUTES = 8 * 60;
+    public static final int WARN_REST_MINUTES = 12 * 60;
+
     // ========== PAGINATION ==========
     public static final int DEFAULT_PAGE_SIZE = 20;
     public static final int MAX_PAGE_SIZE = 100;
@@ -90,7 +98,66 @@ public final class Constants {
     public static final String MSG_SUCCESS_OPERATION = "Thao tác thành công";
     public static final String MSG_ERROR_DEFAULT = "Đã xảy ra lỗi, vui lòng thử lại";
 
+    // ========== SHIFT (CaLamViec) STATUSES ==========
+    public static final String SHIFT_STATUS_DRAFT = "Draft";
+    public static final String SHIFT_STATUS_PUBLISHED = "Published";
+    public static final String SHIFT_STATUS_CONFIRMED = "Confirmed";
+    public static final String SHIFT_STATUS_CHECKED_IN = "CheckedIn";
+    public static final String SHIFT_STATUS_CHECKED_OUT = "CheckedOut";
+    public static final String SHIFT_STATUS_COMPLETED = "Completed";
+    public static final String SHIFT_STATUS_CANCELLED = "Cancelled";
+
+    public static final java.util.List<Integer> ALLOWED_SHIFT_ROLES = java.util.List.of(ROLE_LE_TAN, ROLE_BAO_VE);
+
+    public static boolean isTerminalStatus(String status) {
+        return SHIFT_STATUS_CHECKED_OUT.equalsIgnoreCase(status) 
+            || SHIFT_STATUS_COMPLETED.equalsIgnoreCase(status);
+    }
+
+    public static boolean isEditableStatus(String status) {
+        return !isTerminalStatus(status) 
+            && !SHIFT_STATUS_CHECKED_IN.equalsIgnoreCase(status)
+            && !SHIFT_STATUS_CANCELLED.equalsIgnoreCase(status);
+    }
+
+    public static boolean isCancellableStatus(String status) {
+        return SHIFT_STATUS_DRAFT.equalsIgnoreCase(status)
+            || SHIFT_STATUS_PUBLISHED.equalsIgnoreCase(status)
+            || SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(status);
+    }
+
+    // ========== SHIFT TEMPLATES ==========
+    public static class ShiftTemplateDto {
+        public String id;
+        public String name;
+        public String startTime;
+        public String endTime;
+        public int breakMinutes;
+
+        public ShiftTemplateDto(String id, String name, String startTime, String endTime, int breakMinutes) {
+            this.id = id;
+            this.name = name;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.breakMinutes = breakMinutes;
+        }
+    }
+
+    public static ShiftTemplateDto getTemplateById(String templateId) {
+        if ("1".equals(templateId) || "Ca sáng".equalsIgnoreCase(templateId)) {
+            return new ShiftTemplateDto("1", "Ca sáng", "06:00", "14:00", 30);
+        }
+        if ("2".equals(templateId) || "Ca chiều".equalsIgnoreCase(templateId)) {
+            return new ShiftTemplateDto("2", "Ca chiều", "14:00", "22:00", 30);
+        }
+        if ("3".equals(templateId) || "Ca đêm".equalsIgnoreCase(templateId)) {
+            return new ShiftTemplateDto("3", "Ca đêm", "22:00", "06:00", 0);
+        }
+        return null;
+    }
+
     private Constants() {
         // Private constructor to prevent instantiation
     }
 }
+

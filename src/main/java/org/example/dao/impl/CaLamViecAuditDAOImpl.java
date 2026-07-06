@@ -34,6 +34,20 @@ public class CaLamViecAuditDAOImpl implements CaLamViecAuditDAO {
     }
 
     @Override
+    public boolean insertWithConnection(CaLamViecAudit audit, Connection conn) throws SQLException {
+        String sql = "INSERT INTO CaLamViec_Audit (CaLamViecID, ThaoTac, NguoiThucHien, GiaTriCu, GiaTriMoi, LyDo) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, audit.getCaLamViecId());
+            ps.setString(2, audit.getThaoTac());
+            ps.setInt(3, audit.getNguoiThucHien());
+            ps.setString(4, audit.getGiaTriCu());
+            ps.setString(5, audit.getGiaTriMoi());
+            ps.setString(6, audit.getLyDo());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    @Override
     public List<CaLamViecAudit> getByCaLamViec(int caLamViecId) {
         List<CaLamViecAudit> list = new ArrayList<>();
         String sql = "SELECT au.*, acc.FullName as ActorName FROM CaLamViec_Audit au JOIN Accounts acc ON au.NguoiThucHien = acc.AccountID WHERE au.CaLamViecID = ? ORDER BY au.ThoiGian DESC";

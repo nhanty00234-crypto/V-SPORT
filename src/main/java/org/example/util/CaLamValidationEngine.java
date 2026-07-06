@@ -3,12 +3,15 @@ package org.example.util;
 import org.example.dao.CaLamViecDAO;
 import org.example.dao.YeuCauNghiDAO;
 import org.example.dao.TaiKhoanDAO;
+import org.example.dao.CoSoDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.dao.impl.YeuCauNghiDAOImpl;
 import org.example.dao.impl.TaiKhoanDAOImpl;
+import org.example.dao.impl.CoSoDAOImpl;
 import org.example.model.CaLamViec;
 import org.example.model.YeuCauNghi;
 import org.example.model.TaiKhoan;
+import org.example.model.CoSo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,11 +25,13 @@ public class CaLamValidationEngine {
     private final CaLamViecDAO caLamViecDAO;
     private final YeuCauNghiDAO yeuCauNghiDAO;
     private final TaiKhoanDAO taiKhoanDAO;
+    private final CoSoDAO coSoDAO;
 
     public CaLamValidationEngine() {
         this.caLamViecDAO = new CaLamViecDAOImpl();
         this.yeuCauNghiDAO = new YeuCauNghiDAOImpl();
         this.taiKhoanDAO = new TaiKhoanDAOImpl();
+        this.coSoDAO = new CoSoDAOImpl();
     }
 
     public static class ValidationItem {
@@ -102,8 +107,35 @@ public class CaLamValidationEngine {
     }
 
     public ValidationResult validateShift(int accountId, LocalDate ngayLam, LocalTime gioBatDau, LocalTime gioKetThuc, int gioNghi, Integer excludeCaLamViecId, Integer coSoId) {
+        return validateShift(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, excludeCaLamViecId, coSoId, false, null);
+    }
+
+    public ValidationResult validateShift(int accountId, LocalDate ngayLam, LocalTime gioBatDau, LocalTime gioKetThuc, int gioNghi, Integer excludeCaLamViecId, Integer coSoId, boolean isCustomTime, String customTimeReason) {
         List<ValidationItem> errors = new ArrayList<>();
         List<ValidationItem> warnings = new ArrayList<>();
+
+        if (isCustomTime) {
+            if (customTimeReason == null || customTimeReason.trim().isEmpty()) {
+                errors.add(new ValidationItem("NULL_CUSTOM_REASON", "Lý do tùy chỉnh giờ làm không được để trống.", "customTimeReason", null));
+            } else if (customTimeReason.length() > 255) {
+                errors.add(new ValidationItem("INVALID_CUSTOM_REASON", "Lý do tùy chỉnh giờ làm không được vượt quá 255 ký tự.", "customTimeReason", null));
+            }
+        }
+
+        if (gioBatDau != null && gioKetThuc != null) {
+            if (gioBatDau.equals(LocalTime.of(22, 0)) && gioKetThuc.equals(LocalTime.of(6, 0))) {
+                errors.add(new ValidationItem("NIGHT_SHIFT_UNSUPPORTED", "Mẫu ca đêm chưa được hỗ trợ.", "gioBatDau", null));
+                return new ValidationResult(errors, warnings);
+            }
+            if (gioBatDau.equals(gioKetThuc)) {
+                errors.add(new ValidationItem("INVALID_TIME_ORDER", "Giờ bắt đầu phải trước giờ kết thúc.", "gioBatDau", null));
+                return new ValidationResult(errors, warnings);
+            }
+            if (!gioBatDau.isBefore(gioKetThuc)) {
+                errors.add(new ValidationItem("OVERNIGHT_UNSUPPORTED", "Ca qua ngày chưa được hỗ trợ.", "gioBatDau", null));
+                return new ValidationResult(errors, warnings);
+            }
+        }
 
         if (ngayLam == null) {
             errors.add(new ValidationItem("NULL_DATE", "Ngày làm việc không được để trống.", "ngayLam", null));
@@ -115,56 +147,112 @@ public class CaLamValidationEngine {
             return new ValidationResult(errors, warnings);
         }
 
+        // Rule 5: start_time < end_time
+        if (!gioBatDau.isBefore(gioKetThuc)) {
+            errors.add(new ValidationItem("INVALID_TIME_ORDER", "Giờ bắt đầu phải trước giờ kết thúc.", "gioBatDau", null));
+            return new ValidationResult(errors, warnings);
+        }
+
+        // Rule 2: Employee tồn tại
         TaiKhoan staff = taiKhoanDAO.getAccountById(accountId);
         if (staff == null) {
             errors.add(new ValidationItem("STAFF_NOT_FOUND", "Nhân viên không tồn tại.", "accountId", accountId));
             return new ValidationResult(errors, warnings);
         }
 
+        // Rule 4: Employee đang active
+        if (staff.isLocked() || staff.isDeleted() == Boolean.TRUE) {
+            errors.add(new ValidationItem("STAFF_INACTIVE", "Nhân viên không hoạt động.", "accountId", accountId));
+            return new ValidationResult(errors, warnings);
+        }
+
         int roleId = staff.getRoleId();
-        if (roleId != Constants.ROLE_LE_TAN && roleId != Constants.ROLE_BAO_VE) {
-            errors.add(new ValidationItem("INVALID_ROLE", "Chỉ được phân ca cho Lễ tân hoặc Bảo vệ (không được phân ca cho Admin, Quản lý hoặc Khách hàng).", "accountId", roleId));
+        if (!Constants.ALLOWED_SHIFT_ROLES.contains(roleId)) {
+            errors.add(new ValidationItem("INVALID_ROLE", "Nhân viên không có vai trò phù hợp để phân ca.", "accountId", roleId));
         }
 
-        if (coSoId != null && staff.getCoSoId() != null && !staff.getCoSoId().equals(coSoId)) {
-            errors.add(new ValidationItem("BRANCH_MISMATCH", "Không cho phép xếp ca cho nhân viên của cơ sở khác.", "coSoId", coSoId));
+        // Rule 3: Employee thuộc facility của manager (coSoId)
+        if (coSoId != null && (staff.getCoSoId() == null || !staff.getCoSoId().equals(coSoId))) {
+            errors.add(new ValidationItem("BRANCH_MISMATCH", "Không cho phép xếp ca cho nhân viên thuộc cơ sở khác.", "coSoId", coSoId));
         }
 
+        // Rule 10: Không sửa hoặc hủy ca đã completed (CheckedOut hoặc Completed)
         if (excludeCaLamViecId != null) {
             CaLamViec existing = caLamViecDAO.getCaById(excludeCaLamViecId);
             if (existing != null) {
-                if ("CheckedIn".equalsIgnoreCase(existing.getTrangThai())) {
-                    errors.add(new ValidationItem("SHIFT_ACTIVE", "Không thể sửa ca làm việc đang ở trạng thái CheckedIn.", "trangThai", "CheckedIn"));
+                if (Constants.SHIFT_STATUS_CHECKED_IN.equalsIgnoreCase(existing.getTrangThai())) {
+                    errors.add(new ValidationItem("SHIFT_ACTIVE", "Không thể sửa ca làm việc đang ở trạng thái CheckedIn.", "trangThai", Constants.SHIFT_STATUS_CHECKED_IN));
                 }
-                if ("CheckedOut".equalsIgnoreCase(existing.getTrangThai())) {
-                    errors.add(new ValidationItem("SHIFT_COMPLETED", "Không thể sửa ca làm việc đã ở trạng thái CheckedOut.", "trangThai", "CheckedOut"));
+                if (Constants.isTerminalStatus(existing.getTrangThai())) {
+                    errors.add(new ValidationItem("SHIFT_COMPLETED", "Không thể sửa ca làm việc đã hoàn thành.", "trangThai", existing.getTrangThai()));
                 }
-                if ("Confirmed".equalsIgnoreCase(existing.getTrangThai())) {
-                    warnings.add(new ValidationItem("SHIFT_CONFIRMED", "Ca làm việc đã được nhân viên xác nhận. Thay đổi sẽ tự động gửi thông báo cho nhân viên.", "trangThai", "Confirmed"));
+                if (Constants.SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(existing.getTrangThai())) {
+                    warnings.add(new ValidationItem("SHIFT_CONFIRMED", "Ca làm việc đã được nhân viên xác nhận. Thay đổi sẽ tự động gửi thông báo cho nhân viên.", "trangThai", Constants.SHIFT_STATUS_CONFIRMED));
                 }
             }
         }
 
         long durationMins = Duration.between(gioBatDau, gioKetThuc).toMinutes();
-        if (gioKetThuc.isBefore(gioBatDau)) {
-            durationMins += 1440;
-        }
         if (gioNghi < 0) {
             errors.add(new ValidationItem("INVALID_BREAK", "Giờ nghỉ giữa ca không được là số âm.", "gioNghi", gioNghi));
         } else if (gioNghi >= durationMins) {
             errors.add(new ValidationItem("INVALID_BREAK_DURATION", "Giờ nghỉ giữa ca phải nhỏ hơn thời lượng ca làm việc (" + durationMins + " phút).", "gioNghi", gioNghi));
         }
 
-        if (excludeCaLamViecId == null && ngayLam.isBefore(LocalDate.now())) {
-            errors.add(new ValidationItem("PAST_DATE", "Không thể xếp ca làm việc trong quá khứ.", "ngayLam", ngayLam));
+        // Rule 7: Không tạo ca trong quá khứ
+        java.time.LocalDateTime shiftStart = java.time.LocalDateTime.of(ngayLam, gioBatDau);
+        if (shiftStart.isBefore(java.time.LocalDateTime.now())) {
+            if (excludeCaLamViecId == null) {
+                errors.add(new ValidationItem("PAST_DATETIME", "Không thể tạo ca làm việc trong quá khứ.", "ngayLam", ngayLam));
+            } else {
+                CaLamViec oldShift = caLamViecDAO.getCaById(excludeCaLamViecId);
+                if (oldShift != null) {
+                    java.time.LocalDateTime oldStart = java.time.LocalDateTime.of(oldShift.getNgayLam(), oldShift.getGioBatDau());
+                    if (!oldStart.equals(shiftStart) && shiftStart.isBefore(java.time.LocalDateTime.now())) {
+                        errors.add(new ValidationItem("PAST_DATETIME", "Không thể thay đổi ca làm việc thành thời gian trong quá khứ.", "ngayLam", ngayLam));
+                    }
+                }
+            }
+        }
+
+        // Rule 9: Ca nằm trong giờ hoạt động của facility
+        if (coSoId != null) {
+            CoSo coSo = coSoDAO.getCoSoById(coSoId);
+            if (coSo != null) {
+                LocalTime openTime = coSo.getGioMoCua();
+                LocalTime closeTime = coSo.getGioDongCua();
+                if (openTime != null && closeTime != null) {
+                    boolean isWithin = false;
+                    if (closeTime.isAfter(openTime)) {
+                        isWithin = !gioBatDau.isBefore(openTime) && !gioKetThuc.isAfter(closeTime);
+                    } else {
+                        // Crosses midnight
+                        boolean startInClosed = gioBatDau.isAfter(closeTime) && gioBatDau.isBefore(openTime);
+                        boolean endInClosed = gioKetThuc.isAfter(closeTime) && gioKetThuc.isBefore(openTime);
+                        isWithin = !startInClosed && !endInClosed;
+                        if (isWithin) {
+                            if (gioBatDau.isBefore(closeTime) && gioKetThuc.isAfter(openTime)) {
+                                isWithin = false;
+                            }
+                        }
+                    }
+                    if (!isWithin) {
+                        errors.add(new ValidationItem("FACILITY_HOURS_VIOLATION", 
+                            String.format("Ca làm việc phải nằm trong giờ hoạt động của cơ sở (%s - %s).", openTime, closeTime), 
+                            "gioBatDau", null));
+                    }
+                }
+            }
         }
 
         long shiftNet = durationMins - gioNghi;
-        if (shiftNet < 30) {
-            errors.add(new ValidationItem("MIN_DURATION", "Độ dài ca làm việc tối thiểu phải là 30 phút sau khi trừ giờ nghỉ.", "duration", shiftNet));
+        if (shiftNet < Constants.MIN_SHIFT_MINUTES) {
+            errors.add(new ValidationItem("MIN_DURATION", "Độ dài ca làm việc tối thiểu phải là 60 phút sau khi trừ giờ nghỉ.", "duration", shiftNet));
         }
 
-        if (durationMins > 10 * 60) {
+        if (shiftNet > Constants.MAX_SHIFT_MINUTES) {
+            errors.add(new ValidationItem("MAX_DURATION_EXCEEDED", "Độ dài ca làm việc không được vượt quá 12 tiếng (720 phút) sau khi trừ giờ nghỉ.", "duration", shiftNet));
+        } else if (durationMins > 10 * 60) {
             warnings.add(new ValidationItem("MAX_DURATION", "Cảnh báo sức khỏe: Ca làm việc đơn kéo dài hơn 10 tiếng, nguy cơ quá tải (burnout).", "duration", durationMins));
         }
 
@@ -172,7 +260,10 @@ public class CaLamValidationEngine {
             warnings.add(new ValidationItem("MANDATORY_BREAK", "Cảnh báo vi phạm Bộ luật Lao động: Ca làm việc trên 6 tiếng yêu cầu thời gian nghỉ giữa ca ít nhất 30 phút.", "gioNghi", gioNghi));
         }
 
-        List<CaLamViec> relatedShifts = caLamViecDAO.getShiftsByAccountAndDateRange(accountId, ngayLam.minusDays(7), ngayLam.plusDays(7));
+        List<CaLamViec> relatedShifts = caLamViecDAO.getShiftsByAccountAndDateRange(accountId, ngayLam.minusDays(7), ngayLam.plusDays(7))
+            .stream()
+            .filter(s -> !Constants.SHIFT_STATUS_CANCELLED.equalsIgnoreCase(s.getTrangThai()))
+            .collect(java.util.stream.Collectors.toList());
 
         java.util.Set<LocalDate> shiftDates = new java.util.HashSet<>();
         shiftDates.add(ngayLam);
@@ -251,7 +342,10 @@ public class CaLamValidationEngine {
                 if (shift.getGioKetThuc().isAfter(gioBatDau)) {
                     restMinutes += 1440;
                 }
-                if (restMinutes < 12 * 60) {
+                if (restMinutes < Constants.MIN_REST_MINUTES) {
+                    errors.add(new ValidationItem("REST_HOURS_CRITICAL", String.format("Vi phạm nghỉ ngơi tối thiểu: Ca liền trước kết thúc lúc %s ngày %s, khoảng cách nghỉ dưới 8 tiếng.",
+                            shift.getGioKetThuc(), shift.getNgayLam()), "gioBatDau", shift));
+                } else if (restMinutes < Constants.WARN_REST_MINUTES) {
                     warnings.add(new ValidationItem("REST_HOURS_BEFORE", String.format("Cảnh báo giờ nghỉ tối thiểu: Ca làm liền trước kết thúc lúc %s ngày %s, khoảng cách nghỉ chưa đủ 12 tiếng.",
                             shift.getGioKetThuc(), shift.getNgayLam()), "gioBatDau", shift));
                 }
@@ -261,7 +355,10 @@ public class CaLamValidationEngine {
                 if (gioKetThuc.isAfter(shift.getGioBatDau())) {
                     restMinutes += 1440;
                 }
-                if (restMinutes < 12 * 60) {
+                if (restMinutes < Constants.MIN_REST_MINUTES) {
+                    errors.add(new ValidationItem("REST_HOURS_CRITICAL_AFTER", String.format("Vi phạm nghỉ ngơi tối thiểu: Ca tiếp theo bắt đầu lúc %s ngày %s, khoảng cách nghỉ dưới 8 tiếng.",
+                            shift.getGioBatDau(), shift.getNgayLam()), "gioKetThuc", shift));
+                } else if (restMinutes < Constants.WARN_REST_MINUTES) {
                     warnings.add(new ValidationItem("REST_HOURS_AFTER", String.format("Cảnh báo giờ nghỉ tối thiểu: Ca tiếp theo bắt đầu lúc %s ngày %s, khoảng cách nghỉ chưa đủ 12 tiếng.",
                             shift.getGioBatDau(), shift.getNgayLam()), "gioKetThuc", shift));
                 }
@@ -288,6 +385,21 @@ public class CaLamValidationEngine {
             warnings.add(new ValidationItem("DAILY_LIMIT_STANDARD", "Cảnh báo: Tổng số giờ làm việc trong ngày của nhân viên vượt quá 8 tiếng tiêu chuẩn.", "duration", dailyMinutes));
         }
 
+        long shiftCountToday = 1;
+        for (CaLamViec shift : relatedShifts) {
+            if (shift.getNgayLam() != null && ngayLam.equals(shift.getNgayLam())) {
+                if (excludeCaLamViecId != null && shift.getCaLamViecId() == excludeCaLamViecId.intValue()) {
+                    continue;
+                }
+                shiftCountToday++;
+            }
+        }
+        if (shiftCountToday > Constants.MAX_SHIFTS_PER_DAY) {
+            errors.add(new ValidationItem("MAX_SHIFTS_PER_DAY",
+                String.format("Nhân viên không thể có quá %d ca trong cùng một ngày (hiện tại: %d ca).", Constants.MAX_SHIFTS_PER_DAY, shiftCountToday),
+                "ngayLam", shiftCountToday));
+        }
+
         LocalDate startOfWeek = ngayLam.minusDays(ngayLam.getDayOfWeek().getValue() - 1);
         LocalDate endOfWeek = startOfWeek.plusDays(6);
         long weeklyMinutes = shiftNet;
@@ -309,6 +421,34 @@ public class CaLamValidationEngine {
         } else if (weeklyMinutes > 40 * 60) {
             warnings.add(new ValidationItem("WEEKLY_LIMIT_STANDARD", "Cảnh báo: Tổng số giờ làm việc trong tuần này vượt quá 40 tiếng tiêu chuẩn.", "duration", weeklyMinutes));
         }
+
+        LocalDate startOfMonth = ngayLam.withDayOfMonth(1);
+        LocalDate endOfMonth = ngayLam.withDayOfMonth(ngayLam.lengthOfMonth());
+        List<CaLamViec> monthlyShifts = caLamViecDAO.getShiftsByAccountAndDateRange(accountId, startOfMonth, endOfMonth)
+            .stream()
+            .filter(s -> !Constants.SHIFT_STATUS_CANCELLED.equalsIgnoreCase(s.getTrangThai()))
+            .collect(java.util.stream.Collectors.toList());
+        long monthlyMinutes = shiftNet;
+        for (CaLamViec shift : monthlyShifts) {
+            if (excludeCaLamViecId != null && shift.getCaLamViecId() == excludeCaLamViecId.intValue()) {
+                continue;
+            }
+            long shiftMins = Duration.between(shift.getGioBatDau(), shift.getGioKetThuc()).toMinutes();
+            if (shift.getGioKetThuc().isBefore(shift.getGioBatDau())) {
+                shiftMins += 1440;
+            }
+            monthlyMinutes += (shiftMins - shift.getGioNghi());
+        }
+        if (monthlyMinutes > Constants.MONTHLY_HOUR_LIMIT_MINUTES) {
+            errors.add(new ValidationItem("MONTHLY_LIMIT",
+                String.format("Vượt giới hạn giờ làm tháng: Tổng giờ làm trong tháng %d/%d vượt quá 160 tiếng (%d phút / %d phút cho phép).",
+                    ngayLam.getMonthValue(), ngayLam.getYear(), monthlyMinutes, Constants.MONTHLY_HOUR_LIMIT_MINUTES),
+                "duration", monthlyMinutes));
+        }
+
+        // P2-5: TODO — Availability check (nhân viên đăng ký ngày nghỉ / lịch cá nhân).
+        // Requires CaLamViecAvailabilityDAO.findByAccountAndDate(accountId, ngayLam).
+        // Block nếu nhân viên có đăng ký "Không có sẵn" (UNAVAILABLE) cho ngayLam.
 
         return new ValidationResult(errors, warnings);
     }

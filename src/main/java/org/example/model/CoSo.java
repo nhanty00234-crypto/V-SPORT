@@ -46,7 +46,7 @@ public class CoSo {
     private Integer AccountID_QuanLy;
 
     @Column(name = "IsDeleted")
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @Column(name = "DeletedAt")
     private LocalDateTime deletedAt;
@@ -168,9 +168,9 @@ public class CoSo {
         AccountID_QuanLy = accountID_QuanLy;
     }
 
-    public boolean isDeleted() { return isDeleted; }
+    public boolean isDeleted() { return isDeleted != null && isDeleted; }
 
-    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+    public void setDeleted(Boolean deleted) { isDeleted = deleted; }
 
     public LocalDateTime getDeletedAt() { return deletedAt; }
 

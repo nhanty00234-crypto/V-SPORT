@@ -127,6 +127,42 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
         return list;
     }
 
+    @Override
+    public boolean updateWithConnection(CaLamViecSwapRequest sr, Connection conn) throws SQLException {
+        String sql = "UPDATE CaLamViec_SwapRequest SET TrangThai = ?, NguoiDuyet = ?, NgayDuyet = ?, GhiChuQuanLy = ? WHERE SwapRequestID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, sr.getTrangThai());
+            if (sr.getNguoiDuyet() != null) {
+                ps.setInt(2, sr.getNguoiDuyet());
+            } else {
+                ps.setNull(2, Types.INTEGER);
+            }
+            if (sr.getNgayDuyet() != null) {
+                ps.setTimestamp(3, Timestamp.valueOf(sr.getNgayDuyet()));
+            } else {
+                ps.setNull(3, Types.TIMESTAMP);
+            }
+            ps.setString(4, sr.getGhiChuQuanLy());
+            ps.setInt(5, sr.getSwapRequestId());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    @Override
+    public boolean hasPendingForShift(int caLamViecId) {
+        String sql = "SELECT 1 FROM CaLamViec_SwapRequest WHERE CaLamViecID_Gui = ? AND TrangThai IN ('ChoXacNhan', 'ChoQuanLyDuyet')";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, caLamViecId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            logger.error("Error checking pending swap for shift {}: {}", caLamViecId, e.getMessage(), e);
+            return false;
+        }
+    }
+
     private String getSelectQuery() {
         return "SELECT sr.*, acc1.FullName as SenderName, acc2.FullName as ReceiverName, " +
                "c1.NgayLam as GuiNgay, c1.GioBatDau as GuiBD, c1.GioKetThuc as GuiKT, " +

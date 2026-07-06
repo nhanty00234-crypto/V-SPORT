@@ -271,7 +271,6 @@ public class OwnerRegisterServlet extends HttpServlet {
             // Link CoSo to Manager Account
             coSo.setAccountID_QuanLy(managerAcc.getAccountId());
             em.merge(coSo);
-
             trans.commit();
 
             // Clean up session OTP attributes

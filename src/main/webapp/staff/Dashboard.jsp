@@ -261,15 +261,6 @@
               <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="text-[10px] text-amber-700 font-bold hover:underline mt-1 inline-block">Đăng ký nghỉ phép →</a>
             </div>
           </div>
-          <!-- Low Inventory alert -->
-          <div class="flex items-start gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200/50">
-            <span class="material-symbols-outlined text-[18px] text-orange-700 shrink-0 mt-0.5">inventory</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold text-zinc-900">Lịch ca làm việc của tôi</p>
-              <p class="text-[10px] text-zinc-500 mt-0.5">Theo dõi và đăng ký rảnh/bận các ca làm.</p>
-              <a href="${pageContext.request.contextPath}/staff/ca-lam" class="text-[10px] text-orange-700 font-bold hover:underline mt-1 inline-block">Xem lịch làm →</a>
-            </div>
-          </div>
         </div>
       </div>
 

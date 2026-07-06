@@ -100,8 +100,8 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean addCaLamViec(CaLamViec ca) {
-        String sql = "INSERT INTO CaLamViec (AccountID, CoSoID, NgayLam, GioBatDau, GioKetThuc, GhiChu, Thu, IsPublished, TenCa, ViTri, TrangThai, GioNghi) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO CaLamViec (AccountID, CoSoID, NgayLam, GioBatDau, GioKetThuc, GhiChu, Thu, IsPublished, TenCa, ViTri, TrangThai, GioNghi, IsCustomTime, CustomTimeReason) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -126,6 +126,8 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
             ps.setString(10, ca.getViTri());
             ps.setString(11, ca.getTrangThai() != null ? ca.getTrangThai() : "Draft");
             ps.setInt(12, ca.getGioNghi());
+            ps.setBoolean(13, ca.isCustomTime());
+            ps.setNString(14, ca.getCustomTimeReason());
 
             return ps.executeUpdate() > 0;
 
@@ -135,6 +137,47 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         return false;
     }
 
+    @Override
+    public int addCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException {
+        String sql = "INSERT INTO CaLamViec (AccountID, CoSoID, NgayLam, GioBatDau, GioKetThuc, GhiChu, Thu, IsPublished, TenCa, ViTri, TrangThai, GioNghi, IsCustomTime, CustomTimeReason) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, ca.getAccountId());
+            ps.setInt(2, ca.getCoSoId());
+            if (ca.getNgayLam() != null) {
+                ps.setDate(3, Date.valueOf(ca.getNgayLam()));
+            } else {
+                ps.setNull(3, Types.DATE);
+            }
+            ps.setTime(4, Time.valueOf(ca.getGioBatDau()));
+            ps.setTime(5, Time.valueOf(ca.getGioKetThuc()));
+            ps.setString(6, ca.getGhiChu());
+            if (ca.getThu() != null) {
+                ps.setInt(7, ca.getThu());
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
+            ps.setBoolean(8, ca.isPublished());
+            ps.setString(9, ca.getTenCa());
+            ps.setString(10, ca.getViTri());
+            ps.setString(11, ca.getTrangThai() != null ? ca.getTrangThai() : "Draft");
+            ps.setInt(12, ca.getGioNghi());
+            ps.setBoolean(13, ca.isCustomTime());
+            ps.setNString(14, ca.getCustomTimeReason());
+
+            int rows = ps.executeUpdate();
+            if (rows == 0) return -1;
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    int generatedId = keys.getInt(1);
+                    ca.setCaLamViecId(generatedId);
+                    return generatedId;
+                }
+            }
+            return -1;
+        }
+    }
+
     /**
      * Cập nhật thông tin ca làm việc
      * @param ca Đối tượng CaLamViec chứa thông tin mới (phải có caLamViecId)
@@ -142,7 +185,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean updateCaLamViec(CaLamViec ca) {
-        String sql = "UPDATE CaLamViec SET AccountID=?, CoSoID=?, NgayLam=?, GioBatDau=?, GioKetThuc=?, GhiChu=?, Thu=?, IsPublished=?, TenCa=?, ViTri=?, TrangThai=?, GioNghi=? WHERE CaLamViecID=?";
+        String sql = "UPDATE CaLamViec SET AccountID=?, CoSoID=?, NgayLam=?, GioBatDau=?, GioKetThuc=?, GhiChu=?, Thu=?, IsPublished=?, TenCa=?, ViTri=?, TrangThai=?, GioNghi=?, IsCustomTime=?, CustomTimeReason=? WHERE CaLamViecID=?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -167,7 +210,9 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
             ps.setString(10, ca.getViTri());
             ps.setString(11, ca.getTrangThai() != null ? ca.getTrangThai() : "Draft");
             ps.setInt(12, ca.getGioNghi());
-            ps.setInt(13, ca.getCaLamViecId());
+            ps.setBoolean(13, ca.isCustomTime());
+            ps.setNString(14, ca.getCustomTimeReason());
+            ps.setInt(15, ca.getCaLamViecId());
 
             return ps.executeUpdate() > 0;
 
@@ -447,6 +492,8 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         ca.setViTri(rs.getNString("ViTri"));
         ca.setTrangThai(rs.getString("TrangThai"));
         ca.setGioNghi(rs.getInt("GioNghi"));
+        ca.setCustomTime(rs.getBoolean("IsCustomTime"));
+        ca.setCustomTimeReason(rs.getNString("CustomTimeReason"));
         ca.setDeleted(rs.getBoolean("IsDeleted"));
         Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
         if (deletedAtTs != null) {
@@ -458,6 +505,49 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         }
 
         return ca;
+    }
+
+    @Override
+    public boolean updateCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException {
+        String sql = "UPDATE CaLamViec SET AccountID=?, CoSoID=?, NgayLam=?, GioBatDau=?, GioKetThuc=?, GhiChu=?, Thu=?, IsPublished=?, TenCa=?, ViTri=?, TrangThai=?, GioNghi=?, IsCustomTime=?, CustomTimeReason=? WHERE CaLamViecID=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ca.getAccountId());
+            ps.setInt(2, ca.getCoSoId());
+            if (ca.getNgayLam() != null) {
+                ps.setDate(3, Date.valueOf(ca.getNgayLam()));
+            } else {
+                ps.setNull(3, Types.DATE);
+            }
+            ps.setTime(4, Time.valueOf(ca.getGioBatDau()));
+            ps.setTime(5, Time.valueOf(ca.getGioKetThuc()));
+            ps.setNString(6, ca.getGhiChu());
+            if (ca.getThu() != null) {
+                ps.setInt(7, ca.getThu());
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
+            ps.setBoolean(8, ca.isPublished());
+            ps.setString(9, ca.getTenCa());
+            ps.setString(10, ca.getViTri());
+            ps.setString(11, ca.getTrangThai() != null ? ca.getTrangThai() : "Draft");
+            ps.setInt(12, ca.getGioNghi());
+            ps.setBoolean(13, ca.isCustomTime());
+            ps.setNString(14, ca.getCustomTimeReason());
+            ps.setInt(15, ca.getCaLamViecId());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    @Override
+    public int publishDraftShiftsWithConnection(LocalDate startOfWeek, LocalDate endOfWeek, int coSoId, Connection conn) throws SQLException {
+        String sql = "UPDATE CaLamViec SET TrangThai = 'Published', IsPublished = 1 " +
+                     "WHERE CoSoID = ? AND NgayLam BETWEEN ? AND ? AND TrangThai = 'Draft' AND IsDeleted = 0";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            ps.setDate(2, Date.valueOf(startOfWeek));
+            ps.setDate(3, Date.valueOf(endOfWeek));
+            return ps.executeUpdate();
+        }
     }
 
     @Override

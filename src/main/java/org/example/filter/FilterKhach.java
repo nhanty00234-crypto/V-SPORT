@@ -26,7 +26,7 @@ public class FilterKhach implements Filter {
 
         if (loggedIn) {
             String authType = (session != null) ? (String) session.getAttribute("authType") : null;
-            if ("ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType)) {
+            if ("ADMIN_ADD".equals(authType) || "ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType) || "MANAGER_ADD".equals(authType)) {
                 chain.doFilter(request, response);
             } else {
                 String requestedWith = httpRequest.getHeader("X-Requested-With");

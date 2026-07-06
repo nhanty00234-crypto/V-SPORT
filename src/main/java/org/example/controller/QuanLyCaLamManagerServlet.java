@@ -4,6 +4,7 @@ import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;
 import org.example.service.manager.CaLamService;
 import org.example.util.Constants;
+import org.example.exception.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -82,7 +83,9 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                 return;
             }
 
-            resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
+            req.setAttribute("shifts", shifts);
+            req.setAttribute("staffs", staffs);
+            req.getRequestDispatcher("/manager/CaLamViec.jsp").forward(req, resp);
         } catch (Exception e) {
             logger.error("Error in doGet: {}", e.getMessage(), e);
             session.setAttribute("error", "Lá»—i khi táº£i dá»¯ liá»‡u: " + e.getMessage());
@@ -102,28 +105,20 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         }
 
         Integer managerCoSoId = manager.getCoSoId();
-        if (managerCoSoId == null) {
-            boolean isJson = "json".equals(req.getParameter("format"));
-            if (isJson) {
-                resp.setContentType("application/json");
-                resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write("{\"success\":false,\"error\":\"TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.\"}");
-            } else {
-                session.setAttribute("error", "TÃ i khoáº£n quáº£n lÃ½ chÆ°a Ä‘Æ°á»£c liÃªn káº¿t vá»›i cÆ¡ sá»Ÿ nÃ o.");
-                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
-            }
-            return;
-        }
-
-        String action = req.getParameter("action");
+        boolean isJson = "json".equals(req.getParameter("format"));
 
         try {
+            if (managerCoSoId == null) {
+                throw new ForbiddenException("Tài khoản quản lý chưa được liên kết với cơ sở nào.");
+            }
+
+            String action = req.getParameter("action");
+
             if ("delete".equals(action)) {
                 handleDelete(req, resp, session, manager, managerCoSoId);
             } else if ("add".equals(action) || "update".equals(action)) {
                 handleAddOrUpdate(req, resp, session, manager, managerCoSoId, action);
             } else {
-                boolean isJson = "json".equals(req.getParameter("format"));
                 String successMsg = null;
                 List<String> warnings = new ArrayList<>();
                 
@@ -158,10 +153,11 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     caLamService.rejectSwapRequest(swapId, manager.getAccountId(), notes);
                     successMsg = "Đã từ chối yêu cầu đổi ca!";
                 } else {
-                    throw new IllegalArgumentException("Hành động không hợp lệ: " + action);
+                    throw new ValidationException("Hành động không hợp lệ: " + action);
                 }
 
                 if (isJson) {
+                    resp.setStatus(HttpServletResponse.SC_OK);
                     resp.setContentType("application/json");
                     resp.setCharacterEncoding("UTF-8");
                     java.util.Map<String, Object> map = new java.util.HashMap<>();
@@ -179,34 +175,33 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
                 }
             }
-        } catch (IllegalArgumentException e) {
-            logger.warn("Lá»—i xá»­ lÃ½ ca lÃ m: {}", e.getMessage(), e);
-            boolean isJson = "json".equals(req.getParameter("format"));
-            if (isJson) {
-                resp.setContentType("application/json");
-                resp.setCharacterEncoding("UTF-8");
-                java.util.Map<String, Object> map = new java.util.HashMap<>();
-                map.put("success", false);
-                map.put("error", e.getMessage());
-                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
-            } else {
-                session.setAttribute("error", e.getMessage());
-                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
-            }
+        } catch (org.example.exception.ValidationException | IllegalArgumentException e) {
+            handleException(req, resp, session, HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), isJson);
+        } catch (org.example.exception.ForbiddenException e) {
+            handleException(req, resp, session, HttpServletResponse.SC_FORBIDDEN, e.getMessage(), isJson);
+        } catch (org.example.exception.NotFoundException e) {
+            handleException(req, resp, session, HttpServletResponse.SC_NOT_FOUND, e.getMessage(), isJson);
+        } catch (org.example.exception.ConflictException e) {
+            handleException(req, resp, session, HttpServletResponse.SC_CONFLICT, e.getMessage(), isJson);
         } catch (Exception e) {
             logger.error("Unexpected error in doPost: {}", e.getMessage(), e);
-            boolean isJson = "json".equals(req.getParameter("format"));
-            if (isJson) {
-                resp.setContentType("application/json");
-                resp.setCharacterEncoding("UTF-8");
-                java.util.Map<String, Object> map = new java.util.HashMap<>();
-                map.put("success", false);
-                map.put("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
-                resp.getWriter().write(new com.google.gson.Gson().toJson(map));
-            } else {
-                session.setAttribute("error", "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
-                resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
-            }
+            handleException(req, resp, session, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi hệ thống: " + e.getMessage(), isJson);
+        }
+    }
+
+    private void handleException(HttpServletRequest req, HttpServletResponse resp, HttpSession session,
+                                 int statusCode, String errorMsg, boolean isJson) throws IOException {
+        if (isJson) {
+            resp.setStatus(statusCode);
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("success", false);
+            map.put("error", errorMsg);
+            resp.getWriter().write(new com.google.gson.Gson().toJson(map));
+        } else {
+            session.setAttribute("error", errorMsg);
+            resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
         }
     }
 
@@ -221,123 +216,99 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
     }
 
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp,
-                              HttpSession session, TaiKhoan manager, int managerCoSoId) throws IOException {
+                              HttpSession session, TaiKhoan manager, int managerCoSoId) throws Exception {
         String idParam = req.getParameter("id");
         String reason = req.getParameter("reason");
         boolean isJson = "json".equals(req.getParameter("format"));
-        String errorMsg = null;
         String successMsg = null;
 
         if (idParam == null || idParam.trim().isEmpty()) {
-            errorMsg = "ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.";
-        } else {
-            try {
-                int id = Integer.parseInt(idParam);
-                caLamService.deleteShift(id, managerCoSoId, manager.getAccountId(), reason);
-                successMsg = "XÃ³a ca lÃ m viá»‡c thÃ nh cÃ´ng!";
-                AuditLogService.log(req, manager,
-                    AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_CA_LAM,
-                    String.valueOf(id), "Ca " + id,
-                    "Manager xóa mềm ca làm việc");
-            } catch (NumberFormatException e) {
-                errorMsg = "ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.";
-            } catch (Exception e) {
-                errorMsg = e.getMessage();
-            }
+            throw new ValidationException("ID ca làm việc không hợp lệ.");
         }
 
+        int id;
+        try {
+            id = Integer.parseInt(idParam);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("ID ca làm việc không hợp lệ.");
+        }
+
+        caLamService.deleteShift(id, managerCoSoId, manager.getAccountId(), reason);
+        successMsg = "Xóa ca làm việc thành công!";
+        AuditLogService.log(req, manager,
+            AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_CA_LAM,
+            String.valueOf(id), "Ca " + id,
+            "Manager xóa mềm ca làm việc");
+
         if (isJson) {
+            resp.setStatus(HttpServletResponse.SC_OK); // 200 OK
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
             java.util.Map<String, Object> map = new java.util.HashMap<>();
-            if (errorMsg != null) {
-                map.put("success", false);
-                map.put("error", errorMsg);
-            } else {
-                map.put("success", true);
-                map.put("message", successMsg);
-            }
+            map.put("success", true);
+            map.put("message", successMsg);
             resp.getWriter().write(new com.google.gson.Gson().toJson(map));
         } else {
-            if (errorMsg != null) {
-                session.setAttribute("error", errorMsg);
-            } else {
-                session.setAttribute("message", successMsg);
-            }
-            resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
+            session.setAttribute("message", successMsg);
+            resp.sendRedirect(req.getContextPath() + "/manager/ca-lam");
         }
     }
 
     private void handleAddOrUpdate(HttpServletRequest req, HttpServletResponse resp,
                                    HttpSession session, TaiKhoan manager, int managerCoSoId,
-                                   String action) throws IOException {
+                                   String action) throws Exception {
         boolean isJson = "json".equals(req.getParameter("format"));
-        String errorMsg = null;
         String successMsg = null;
 
-        try {
-            CaLamService.CaLamRequest caLamReq = parseCaLamRequest(req);
+        CaLamService.CaLamRequest caLamReq = parseCaLamRequest(req);
 
-            Integer targetCaLamViecId = null;
-            if (!"add".equals(action)) {
-                String caLamViecIdParam = req.getParameter("caLamViecId");
-                if (caLamViecIdParam != null && !caLamViecIdParam.trim().isEmpty()) {
-                    targetCaLamViecId = Integer.parseInt(caLamViecIdParam);
-                }
+        Integer targetCaLamViecId = null;
+        if (!"add".equals(action)) {
+            String caLamViecIdParam = req.getParameter("caLamViecId");
+            if (caLamViecIdParam != null && !caLamViecIdParam.trim().isEmpty()) {
+                targetCaLamViecId = Integer.parseInt(caLamViecIdParam);
             }
+        }
 
-            org.example.util.CaLamValidationEngine.ValidationResult valRes = caLamService.validateShiftAssignment(
-                caLamReq.getAccountId(), caLamReq.getNgayLam(), caLamReq.getGioBatDau(), caLamReq.getGioKetThuc(), caLamReq.getGioNghi(), targetCaLamViecId
-            );
-            if (!valRes.isValid()) {
-                throw new IllegalArgumentException("Lá»—i xung Ä‘á»™t lá»‹ch: " + String.join(", ", valRes.getErrors()));
+        if ("add".equals(action)) {
+            caLamService.createShift(caLamReq, managerCoSoId, manager.getAccountId());
+            successMsg = "Thêm ca làm việc thành công!";
+            AuditLogService.log(req, manager,
+                AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_CA_LAM,
+                "unknown",
+                "AccountID=" + caLamReq.getAccountId() + " ngay=" + caLamReq.getNgayLam(),
+                "Manager tạo ca làm việc");
+            
+            if (isJson) {
+                resp.setStatus(HttpServletResponse.SC_CREATED); // 201 Created
             }
-
-            if ("add".equals(action)) {
-                caLamService.createShift(caLamReq, managerCoSoId, manager.getAccountId());
-                successMsg = "ThÃªm ca lÃ m viá»‡c thÃ nh cÃ´ng!";
-                AuditLogService.log(req, manager,
-                    AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_CA_LAM,
-                    "unknown",
-                    "AccountID=" + caLamReq.getAccountId() + " ngay=" + caLamReq.getNgayLam(),
-                    "Manager tạo ca làm việc");
-            } else {
-                String reason = req.getParameter("reason");
-                if (targetCaLamViecId == null) {
-                    throw new IllegalArgumentException("ID ca lÃ m viá»‡c khÃ´ng há»£p lá»‡.");
-                }
-                caLamService.updateShift(targetCaLamViecId, caLamReq, managerCoSoId, manager.getAccountId(), reason);
-                successMsg = "Cáº­p nháº­t ca lÃ m viá»‡c thÃ nh cÃ´ng!";
-                AuditLogService.log(req, manager,
-                    AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_CA_LAM,
-                    String.valueOf(targetCaLamViecId), "Ca " + targetCaLamViecId,
-                    "Manager cập nhật ca làm việc");
+        } else {
+            String reason = req.getParameter("reason");
+            if (targetCaLamViecId == null) {
+                throw new ValidationException("ID ca làm việc không hợp lệ.");
             }
-        } catch (IllegalArgumentException e) {
-            errorMsg = e.getMessage();
-        } catch (Exception e) {
-            errorMsg = "Lá»—i há»‡ thá»‘ng: " + e.getMessage();
+            caLamService.updateShift(targetCaLamViecId, caLamReq, managerCoSoId, manager.getAccountId(), reason);
+            successMsg = "Cập nhật ca làm việc thành công!";
+            AuditLogService.log(req, manager,
+                AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_CA_LAM,
+                String.valueOf(targetCaLamViecId), "Ca " + targetCaLamViecId,
+                "Manager cập nhật ca làm việc");
+            
+            if (isJson) {
+                resp.setStatus(HttpServletResponse.SC_OK); // 200 OK
+            }
         }
 
         if (isJson) {
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
             java.util.Map<String, Object> map = new java.util.HashMap<>();
-            if (errorMsg != null) {
-                map.put("success", false);
-                map.put("error", errorMsg);
-            } else {
-                map.put("success", true);
-                map.put("message", successMsg);
-            }
+            map.put("success", true);
+            map.put("message", successMsg);
             resp.getWriter().write(new com.google.gson.Gson().toJson(map));
         } else {
-            if (errorMsg != null) {
-                session.setAttribute("error", errorMsg);
-            } else {
-                session.setAttribute("message", successMsg);
-            }
-            resp.sendRedirect(req.getContextPath() + "/manager/nhan-su?tab=schedule");
+            session.setAttribute("message", successMsg);
+            resp.sendRedirect(req.getContextPath() + "/manager/ca-lam");
         }
     }
 
@@ -345,37 +316,147 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         CaLamService.CaLamRequest request = new CaLamService.CaLamRequest();
 
         String accountIdParam = req.getParameter("accountId");
-        String ngayLamParam = req.getParameter("ngayLam");
-        String gioBatDauParam = req.getParameter("gioBatDau");
-        String gioKetThucParam = req.getParameter("gioKetThuc");
-
-        if (accountIdParam == null || ngayLamParam == null ||
-            gioBatDauParam == null || gioKetThucParam == null) {
-            throw new IllegalArgumentException("Thiáº¿u thÃ´ng tin báº¯t buá»™c tá»« form");
+        if (accountIdParam == null || accountIdParam.trim().isEmpty()) {
+            throw new org.example.exception.ValidationException("Vui lòng chọn nhân viên.");
         }
 
-        request.setAccountId(Integer.parseInt(accountIdParam));
-        request.setNgayLam(LocalDate.parse(ngayLamParam));
-        request.setGioBatDau(LocalTime.parse(gioBatDauParam));
-        request.setGioKetThuc(LocalTime.parse(gioKetThucParam));
-        request.setGhiChu(req.getParameter("ghiChu"));
-
-        // New fields parsing
         String coSoIdParam = req.getParameter("coSoId");
-        if (coSoIdParam != null && !coSoIdParam.trim().isEmpty()) {
-            request.setCoSoId(Integer.parseInt(coSoIdParam));
+        if (coSoIdParam == null || coSoIdParam.trim().isEmpty()) {
+            throw new org.example.exception.ValidationException("Cơ sở không hợp lệ.");
         }
 
-        request.setTenCa(req.getParameter("tenCa"));
+        String ngayLamParam = req.getParameter("ngayLam");
+        if (ngayLamParam == null || ngayLamParam.trim().isEmpty()) {
+            throw new org.example.exception.ValidationException("Ngày làm không được để trống.");
+        }
+
+        int accountId;
+        try {
+            accountId = Integer.parseInt(accountIdParam);
+        } catch (NumberFormatException e) {
+            throw new org.example.exception.ValidationException("Vui lòng chọn nhân viên.");
+        }
+
+        int coSoId;
+        try {
+            coSoId = Integer.parseInt(coSoIdParam);
+        } catch (NumberFormatException e) {
+            throw new org.example.exception.ValidationException("Cơ sở không hợp lệ.");
+        }
+
+        LocalDate ngayLam;
+        try {
+            ngayLam = LocalDate.parse(ngayLamParam);
+        } catch (Exception e) {
+            throw new org.example.exception.ValidationException("Ngày làm không hợp lệ.");
+        }
+
+        String shiftTemplateId = req.getParameter("shiftTemplateId");
+        if (shiftTemplateId == null || shiftTemplateId.trim().isEmpty()) {
+            shiftTemplateId = req.getParameter("mauCaId");
+        }
+        if (shiftTemplateId == null || shiftTemplateId.trim().isEmpty()) {
+            // Also check the old parameter name as fallback
+            shiftTemplateId = req.getParameter("tenCa");
+        }
+        
+        if (shiftTemplateId == null || shiftTemplateId.trim().isEmpty()) {
+            throw new org.example.exception.ValidationException("Vui lòng chọn mẫu ca hệ thống.");
+        }
+        
+        Constants.ShiftTemplateDto template = Constants.getTemplateById(shiftTemplateId);
+        if (template == null) {
+            throw new org.example.exception.ValidationException("Mẫu ca hệ thống không tồn tại.");
+        }
+        
+        if ("3".equals(template.id) || "Ca đêm".equalsIgnoreCase(template.name)) {
+            throw new org.example.exception.ValidationException("Mẫu ca đêm chưa được hỗ trợ.");
+        }
+        
+        boolean isCustomTime = Boolean.parseBoolean(req.getParameter("isCustomTime"));
+        
+        LocalTime gioBatDau;
+        LocalTime gioKetThuc;
+        int gioNghi;
+        String customTimeReason = null;
+        
+        if (!isCustomTime) {
+            gioBatDau = LocalTime.parse(template.startTime);
+            gioKetThuc = LocalTime.parse(template.endTime);
+            gioNghi = template.breakMinutes;
+        } else {
+            String gioBatDauParam = req.getParameter("gioBatDau");
+            String gioKetThucParam = req.getParameter("gioKetThuc");
+            String breakMinutesParam = req.getParameter("breakMinutes");
+            if (breakMinutesParam == null || breakMinutesParam.trim().isEmpty()) {
+                breakMinutesParam = req.getParameter("gioNghiPhut");
+            }
+            if (breakMinutesParam == null || breakMinutesParam.trim().isEmpty()) {
+                breakMinutesParam = req.getParameter("gioNghi");
+            }
+            
+            if (gioBatDauParam == null || gioBatDauParam.trim().isEmpty()) {
+                throw new org.example.exception.ValidationException("Giờ bắt đầu không được để trống.");
+            }
+            if (gioKetThucParam == null || gioKetThucParam.trim().isEmpty()) {
+                throw new org.example.exception.ValidationException("Giờ kết thúc không được để trống.");
+            }
+            
+            try {
+                gioBatDau = LocalTime.parse(gioBatDauParam);
+            } catch (Exception e) {
+                throw new org.example.exception.ValidationException("Giờ bắt đầu không hợp lệ.");
+            }
+            try {
+                gioKetThuc = LocalTime.parse(gioKetThucParam);
+            } catch (Exception e) {
+                throw new org.example.exception.ValidationException("Giờ kết thúc không hợp lệ.");
+            }
+            
+            if (gioBatDau.equals(gioKetThuc)) {
+                throw new org.example.exception.ValidationException("Giờ bắt đầu phải trước giờ kết thúc.");
+            }
+            if (!gioBatDau.isBefore(gioKetThuc)) {
+                throw new org.example.exception.ValidationException("Ca qua ngày chưa được hỗ trợ.");
+            }
+            
+            try {
+                gioNghi = (breakMinutesParam != null && !breakMinutesParam.trim().isEmpty()) 
+                        ? Integer.parseInt(breakMinutesParam) : 0;
+            } catch (NumberFormatException e) {
+                throw new org.example.exception.ValidationException("Giờ nghỉ không hợp lệ.");
+            }
+            
+            if (gioNghi < 0) {
+                throw new org.example.exception.ValidationException("Giờ nghỉ không được là số âm.");
+            }
+            
+            customTimeReason = req.getParameter("customTimeReason");
+            if (customTimeReason == null || customTimeReason.trim().isEmpty()) {
+                throw new org.example.exception.ValidationException("Lý do tùy chỉnh giờ làm không được để trống.");
+            }
+            if (customTimeReason.length() > 255) {
+                throw new org.example.exception.ValidationException("Lý do tùy chỉnh giờ làm không được vượt quá 255 ký tự.");
+            }
+        }
+
+        request.setAccountId(accountId);
+        request.setCoSoId(coSoId);
+        request.setNgayLam(ngayLam);
+        request.setGioBatDau(gioBatDau);
+        request.setGioKetThuc(gioKetThuc);
+        String ghiChu = req.getParameter("ghiChu");
+        if (ghiChu != null && ghiChu.length() > 255) {
+            throw new org.example.exception.ValidationException("Ghi chú không được vượt quá 255 ký tự.");
+        }
+        request.setGhiChu(ghiChu);
+        request.setTenCa(template.name);
         request.setViTri(req.getParameter("viTri"));
         request.setTrangThai(req.getParameter("trangThai"));
-
-        String gioNghiParam = req.getParameter("gioNghi");
-        if (gioNghiParam != null && !gioNghiParam.trim().isEmpty()) {
-            request.setGioNghi(Integer.parseInt(gioNghiParam));
-        } else {
-            request.setGioNghi(0);
-        }
+        request.setGioNghi(gioNghi);
+        request.setCustomTime(isCustomTime);
+        request.setCustomTimeReason(customTimeReason);
+        request.setShiftTemplateId(shiftTemplateId);
 
         String repeatTypeParam = req.getParameter("repeatType");
         if (repeatTypeParam != null && !repeatTypeParam.trim().isEmpty()) {
@@ -400,36 +481,92 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         
         try {
-            int accountId = Integer.parseInt(req.getParameter("accountId"));
-            LocalDate ngayLam = LocalDate.parse(req.getParameter("ngayLam"));
-            LocalTime gioBatDau = LocalTime.parse(req.getParameter("gioBatDau"));
-            LocalTime gioKetThuc = LocalTime.parse(req.getParameter("gioKetThuc"));
-            
-            int gioNghi = 0;
-            String gioNghiParam = req.getParameter("gioNghi");
-            if (gioNghiParam != null && !gioNghiParam.trim().isEmpty()) {
-                gioNghi = Integer.parseInt(gioNghiParam);
+            String accountIdParam = req.getParameter("accountId");
+            if (accountIdParam == null || accountIdParam.trim().isEmpty()) {
+                throw new org.example.exception.ValidationException("Vui lòng chọn nhân viên.");
             }
-            
+            int accountId = Integer.parseInt(accountIdParam);
+
+            String ngayLamParam = req.getParameter("ngayLam");
+            if (ngayLamParam == null || ngayLamParam.trim().isEmpty()) {
+                throw new org.example.exception.ValidationException("Ngày làm không được để trống.");
+            }
+            LocalDate ngayLam;
+            try {
+                ngayLam = LocalDate.parse(ngayLamParam);
+            } catch (Exception e) {
+                throw new org.example.exception.ValidationException("Ngày làm không hợp lệ.");
+            }
+
+            boolean isCustomTime = Boolean.parseBoolean(req.getParameter("isCustomTime"));
+            LocalTime gioBatDau;
+            LocalTime gioKetThuc;
+            int gioNghi = 0;
+
+            if (!isCustomTime) {
+                String shiftTemplateId = req.getParameter("shiftTemplateId");
+                if (shiftTemplateId == null || shiftTemplateId.trim().isEmpty()) {
+                    throw new org.example.exception.ValidationException("Vui lòng chọn mẫu ca hệ thống.");
+                }
+                Constants.ShiftTemplateDto template = Constants.getTemplateById(shiftTemplateId);
+                if (template == null) {
+                    throw new org.example.exception.ValidationException("Mẫu ca hệ thống không tồn tại.");
+                }
+                gioBatDau = LocalTime.parse(template.startTime);
+                gioKetThuc = LocalTime.parse(template.endTime);
+                gioNghi = template.breakMinutes;
+            } else {
+                String startParam = req.getParameter("gioBatDau");
+                String endParam   = req.getParameter("gioKetThuc");
+                if (startParam == null || startParam.trim().isEmpty()) {
+                    throw new org.example.exception.ValidationException("Giờ bắt đầu không được để trống.");
+                }
+                if (endParam == null || endParam.trim().isEmpty()) {
+                    throw new org.example.exception.ValidationException("Giờ kết thúc không được để trống.");
+                }
+                try { gioBatDau = LocalTime.parse(startParam); }
+                catch (Exception e) { throw new org.example.exception.ValidationException("Giờ bắt đầu không hợp lệ."); }
+                try { gioKetThuc = LocalTime.parse(endParam); }
+                catch (Exception e) { throw new org.example.exception.ValidationException("Giờ kết thúc không hợp lệ."); }
+                if (gioBatDau.equals(gioKetThuc)) {
+                    throw new org.example.exception.ValidationException("Giờ bắt đầu phải trước giờ kết thúc.");
+                }
+                if (!gioBatDau.isBefore(gioKetThuc)) {
+                    throw new org.example.exception.ValidationException("Ca qua ngày chưa được hỗ trợ.");
+                }
+                String gioNghiParam = req.getParameter("gioNghi");
+                if (gioNghiParam != null && !gioNghiParam.trim().isEmpty()) {
+                    gioNghi = Integer.parseInt(gioNghiParam);
+                }
+            }
+
             Integer caLamViecId = null;
             String caLamViecIdParam = req.getParameter("caLamViecId");
             if (caLamViecIdParam != null && !caLamViecIdParam.trim().isEmpty()) {
                 caLamViecId = Integer.parseInt(caLamViecIdParam);
             }
-            
-            org.example.util.CaLamValidationEngine.ValidationResult result = 
-                caLamService.validateShiftAssignment(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, caLamViecId);
-            
+
+            String customTimeReason = req.getParameter("customTimeReason");
+
+            org.example.util.CaLamValidationEngine.ValidationResult result =
+                caLamService.validateShiftAssignment(accountId, ngayLam, gioBatDau, gioKetThuc, gioNghi, caLamViecId, isCustomTime, customTimeReason);
+
             java.util.Map<String, Object> responseData = new java.util.HashMap<>();
             responseData.put("valid", result.isValid());
             responseData.put("errors", result.getErrors());
             responseData.put("warnings", result.getWarnings());
 
             resp.getWriter().write(new com.google.gson.Gson().toJson(responseData));
+        } catch (org.example.exception.ValidationException ve) {
+            java.util.Map<String, Object> errData = new java.util.HashMap<>();
+            errData.put("valid", false);
+            errData.put("errors", java.util.Collections.singletonList(ve.getMessage()));
+            errData.put("warnings", java.util.Collections.emptyList());
+            resp.getWriter().write(new com.google.gson.Gson().toJson(errData));
         } catch (Exception e) {
             java.util.Map<String, Object> errData = new java.util.HashMap<>();
             errData.put("valid", false);
-            errData.put("errors", java.util.Collections.singletonList("Lá»—i tham sá»‘ validation: " + e.getMessage()));
+            errData.put("errors", java.util.Collections.singletonList("Lỗi tham số validation: " + e.getMessage()));
             errData.put("warnings", java.util.Collections.emptyList());
             resp.getWriter().write(new com.google.gson.Gson().toJson(errData));
         }

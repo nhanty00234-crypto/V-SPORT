@@ -21,6 +21,8 @@ public class CaLamViec {
     private boolean isDeleted;
     private LocalDateTime deletedAt;
     private Integer deletedBy;
+    private boolean isCustomTime;
+    private String customTimeReason;
 
     public CaLamViec() {
     }
@@ -190,6 +192,22 @@ public class CaLamViec {
     public Integer getDeletedBy() { return deletedBy; }
 
     public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
+
+    public boolean isCustomTime() {
+        return isCustomTime;
+    }
+
+    public void setCustomTime(boolean customTime) {
+        isCustomTime = customTime;
+    }
+
+    public String getCustomTimeReason() {
+        return customTimeReason;
+    }
+
+    public void setCustomTimeReason(String customTimeReason) {
+        this.customTimeReason = customTimeReason;
+    }
 
     @Override
     public String toString() {

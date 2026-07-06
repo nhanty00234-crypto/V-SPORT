@@ -21,18 +21,19 @@
 
       <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
         <c:set var="uri" value="${pageContext.request.requestURI}" />
-        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mb-1.5">Vận hành cơ sở</p>
+        
+        <!-- Tổng quan -->
+        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mb-1.5">Tổng quan</p>
         <a href="${pageContext.request.contextPath}/manager/dashboard"
           class="nav-link ${uri.contains('/manager/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
           <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
         </a>
+
+        <!-- Vận hành sân bãi -->
+        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Vận hành sân bãi</p>
         <a href="${pageContext.request.contextPath}/manager/quan-ly-san"
           class="nav-link ${uri.contains('/manager/quan-ly-san') || uri.contains('/QuanLySan.jsp') ? 'active' : ''}">
           <i class="ti ti-building-stadium text-[19px]"></i>Quản lý sân
-        </a>
-        <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
-          class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
-          <i class="ti ti-package text-[19px]"></i>Kho &amp; Dịch Vụ
         </a>
         <a href="${pageContext.request.contextPath}/staff/checkin"
           class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
@@ -43,21 +44,37 @@
           <i class="ti ti-calendar-check text-[19px]"></i>Duyệt đặt sân
         </a>
 
-        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-5 mb-1.5">Nhân sự & Khách hàng
-        </p>
+        <!-- Kinh doanh & Dịch vụ -->
+        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Kinh doanh &amp; Dịch vụ</p>
+        <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
+          class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
+          <i class="ti ti-package text-[19px]"></i>Kho &amp; Dịch Vụ
+        </a>
+
+        <!-- Nhân sự -->
+        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Quản lý nhân sự</p>
         <a href="${pageContext.request.contextPath}/manager/nhan-su"
           class="nav-link ${uri.contains('/manager/nhan-su') || uri.contains('/NhanSu.jsp') ? 'active' : ''}">
           <i class="ti ti-users-group text-[19px]"></i>Nhân sự
         </a>
+        <a href="${pageContext.request.contextPath}/manager/ca-lam"
+          class="nav-link ${uri.contains('/manager/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
+          <i class="ti ti-calendar-time text-[19px]"></i>Lịch làm việc
+        </a>
+
+        <!-- Khách hàng -->
+        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Khách hàng</p>
         <a href="${pageContext.request.contextPath}/manager/khach-hang"
           class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
           <i class="ti ti-user text-[19px]"></i>Quản lý khách hàng
         </a>
+
+        <!-- Hệ thống -->
+        <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Hệ thống</p>
         <a href="${pageContext.request.contextPath}/manager/thung-rac"
           class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac.jsp') ? 'active' : ''}">
           <i class="ti ti-trash text-[19px]"></i>Thùng rác
         </a>
-
         <a href="${pageContext.request.contextPath}/manager/audit-log"
           class="nav-link ${uri.contains('/manager/audit-log') ? 'active' : ''}">
           <i class="ti ti-history text-[19px]"></i>Nhật Ký Thao Tác

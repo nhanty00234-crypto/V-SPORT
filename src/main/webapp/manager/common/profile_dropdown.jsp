@@ -244,29 +244,6 @@
     const reader = new FileReader();
     reader.onload = e => { document.getElementById('editAvatarPreview').src = e.target.result; };
     reader.readAsDataURL(file);
-
-    const preview = document.getElementById('editAvatarPreview');
-    if (preview) preview.style.opacity = '0.5';
-
-    const fd = new FormData();
-    fd.append('action', 'updateAvatar');
-    fd.append('avatar', file);
-
-    fetch('${pageContext.request.contextPath}/account/update-profile', { method: 'POST', body: fd })
-      .then(r => r.json())
-      .then(data => {
-        if (preview) preview.style.opacity = '';
-        if (data.success) {
-          document.querySelectorAll('.profile-avatar-img').forEach(img => img.src = data.avatarUrl);
-          showToast('Thành công', data.message || 'Cập nhật ảnh đại diện thành công.');
-        } else {
-          if (errEl) { errEl.textContent = data.message || 'Không thể tải ảnh lên.'; errEl.classList.remove('hidden'); }
-        }
-      })
-      .catch(() => {
-        if (preview) preview.style.opacity = '';
-        if (errEl) { errEl.textContent = 'Lỗi kết nối. Vui lòng thử lại.'; errEl.classList.remove('hidden'); }
-      });
   }
 
   function saveProfileChanges() {
@@ -278,46 +255,76 @@
       alert("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
-    
-    const params = new URLSearchParams();
-    params.append('action', 'updateInfo');
-    params.append('fullName', name);
-    params.append('email', email);
-    params.append('phoneNumber', phone);
-    
-    fetch('${pageContext.request.contextPath}/account/update-profile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-      },
-      body: params
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        if (data.requiresOtp) {
-          document.getElementById('profileOtpEmailTarget').textContent = data.email || email;
-          document.getElementById('profileEmailOtpInput').value = '';
-          document.getElementById('profileEmailOtpError').classList.add('hidden');
+
+    const avatarFile = document.getElementById('avatarUpload').files[0];
+    const saveBtn = document.querySelector('[onclick="saveProfileChanges()"]');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Đang lưu...'; }
+
+    const doSaveInfo = (newAvatarUrl) => {
+      const params = new URLSearchParams();
+      params.append('action', 'updateInfo');
+      params.append('fullName', name);
+      params.append('email', email);
+      params.append('phoneNumber', phone);
+
+      fetch('${pageContext.request.contextPath}/account/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: params
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lưu thay đổi'; }
+        if (data.success) {
+          if (data.requiresOtp) {
+            document.getElementById('profileOtpEmailTarget').textContent = data.email || email;
+            document.getElementById('profileEmailOtpInput').value = '';
+            document.getElementById('profileEmailOtpError').classList.add('hidden');
+            document.getElementById('editProfileModal').classList.add('hidden');
+            document.getElementById('profileEmailOtpModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('profileEmailOtpInput').focus(), 80);
+            showToast('Đã gửi OTP', data.message);
+            return;
+          }
+          syncProfileUi(data.fullName || name, data.email || email, data.phoneNumber || phone);
           document.getElementById('editProfileModal').classList.add('hidden');
-          document.getElementById('profileEmailOtpModal').classList.remove('hidden');
-          setTimeout(() => document.getElementById('profileEmailOtpInput').focus(), 80);
-          showToast('Đã gửi OTP', data.message);
-          return;
+          showToast('Thành công', data.message);
+        } else {
+          alert(data.message);
         }
-        // Save to UI
-        syncProfileUi(data.fullName || name, data.email || email, data.phoneNumber || phone);
-        
-        document.getElementById('editProfileModal').classList.add('hidden');
-        showToast('Thành công', data.message);
-      } else {
-        alert(data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert("Đã xảy ra lỗi khi kết nối tới máy chủ.");
-    });
+      })
+      .catch(error => {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lưu thay đổi'; }
+        console.error('Error:', error);
+        alert("Đã xảy ra lỗi khi kết nối tới máy chủ.");
+      });
+    };
+
+    if (avatarFile) {
+      const errEl = document.getElementById('avatarError');
+      const fd = new FormData();
+      fd.append('action', 'updateAvatar');
+      fd.append('avatar', avatarFile);
+
+      fetch('${pageContext.request.contextPath}/account/update-profile', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            document.querySelectorAll('.profile-avatar-img').forEach(img => img.src = data.avatarUrl);
+            document.getElementById('avatarUpload').value = '';
+            doSaveInfo(data.avatarUrl);
+          } else {
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lưu thay đổi'; }
+            if (errEl) { errEl.textContent = data.message || 'Không thể tải ảnh lên.'; errEl.classList.remove('hidden'); }
+          }
+        })
+        .catch(() => {
+          if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lưu thay đổi'; }
+          if (errEl) { errEl.textContent = 'Lỗi kết nối khi tải ảnh. Vui lòng thử lại.'; errEl.classList.remove('hidden'); }
+        });
+    } else {
+      doSaveInfo(null);
+    }
   }
 
   function verifyProfileEmailOtp() {

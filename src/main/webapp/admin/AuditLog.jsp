@@ -164,7 +164,6 @@
             <option value="LoaiSan" <c:if test="${entityType == 'LoaiSan'}">selected</c:if>>Loại sân</option>
             <option value="SanPham" <c:if test="${entityType == 'SanPham'}">selected</c:if>>Sản phẩm / Dịch vụ</option>
             <option value="CoSo" <c:if test="${entityType == 'CoSo'}">selected</c:if>>Chi nhánh cơ sở</option>
-            <option value="CaLamViec" <c:if test="${entityType == 'CaLamViec'}">selected</c:if>>Ca làm việc</option>
             <option value="YeuCauNghi" <c:if test="${entityType == 'YeuCauNghi'}">selected</c:if>>Yêu cầu nghỉ</option>
           </select>
           <i class="ti ti-chevron-down control-caret"></i>
@@ -303,7 +302,6 @@
                     <c:when test="${log.entityType == 'San'}"><i class="ti ti-stadium text-emerald-500 text-sm"></i></c:when>
                     <c:when test="${log.entityType == 'LoaiSan'}"><i class="ti ti-ball-tennis text-cyan-500 text-sm"></i></c:when>
                     <c:when test="${log.entityType == 'SanPham'}"><i class="ti ti-package text-amber-500 text-sm"></i></c:when>
-                    <c:when test="${log.entityType == 'CaLamViec'}"><i class="ti ti-calendar-time text-pink-500 text-sm"></i></c:when>
                     <c:when test="${log.entityType == 'YeuCauNghi'}"><i class="ti ti-clipboard-list text-rose-500 text-sm"></i></c:when>
                     <c:otherwise><i class="ti ti-hash text-slate-500 text-sm"></i></c:otherwise>
                   </c:choose>

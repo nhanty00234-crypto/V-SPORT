@@ -69,7 +69,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="flex flex-col gap-1.5 md:col-span-2">
           <label class="text-sm font-semibold text-purple-900">Chọn nhân viên <span class="text-red-500">*</span></label>
-          <select id="shiftStaff" onchange="triggerRealtimeValidation()" required 
+          <select id="shiftStaff" onchange="autoFillRoleFromStaff(); clearConflictPanel(); triggerRealtimeValidation()" required
                   class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
           </select>
         </div>
@@ -95,52 +95,62 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-semibold text-purple-900">Mẫu ca hệ thống <span class="text-red-500">*</span></label>
           <select id="shiftTemplate" onchange="applyShiftTemplate()" required 
                   class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
-            <option value="Tùy chỉnh">-- Tự cấu hình giờ --</option>
-            <option value="Ca sáng">Ca sáng (06:00 - 14:00)</option>
-            <option value="Ca chiều">Ca chiều (14:00 - 22:00)</option>
-            <option value="Ca đêm">Ca đêm (22:00 - 06:00)</option>
+            <option value="" disabled selected>-- Chọn mẫu ca --</option>
+            <option value="1" data-start-time="06:00" data-end-time="14:00" data-break-minutes="30">Ca sáng (06:00 - 14:00)</option>
+            <option value="2" data-start-time="14:00" data-end-time="22:00" data-break-minutes="30">Ca chiều (14:00 - 22:00)</option>
           </select>
         </div>
 
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Vai trò trong ca <span class="text-red-500">*</span></label>
-          <select id="shiftRole" required 
-                  class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
-            <option value="Lễ tân">Lễ tân</option>
-            <option value="Bảo vệ">Bảo vệ</option>
-            <option value="Kỹ thuật sân">Kỹ thuật sân</option>
-            <option value="Khác">Khác</option>
-          </select>
-        </div>
+        <input type="hidden" id="shiftRole">
+      </div>
 
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Giờ bắt đầu <span class="text-red-500">*</span></label>
-          <input type="time" id="shiftStartTime" onchange="triggerRealtimeValidation()" required 
-                 class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
-        </div>
+      <!-- Read-only Template Information Dashboard (Mẫu ca info) -->
+      <div id="templateInfoBlock" class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl flex flex-col gap-1 text-sm text-purple-950 font-medium">
+          <p class="text-zinc-500 text-xs italic">Vui lòng chọn mẫu ca để xem giờ làm.</p>
+      </div>
 
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Giờ kết thúc <span class="text-red-500">*</span></label>
-          <input type="time" id="shiftEndTime" onchange="triggerRealtimeValidation()" required 
-                 class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
-        </div>
+      <!-- Custom Time Toggle Checkbox -->
+      <div class="flex items-center gap-2 mt-2">
+          <input type="checkbox" id="isCustomTime" onchange="toggleCustomTime()" class="w-4 h-4 text-purple-650 rounded border-zinc-300 focus:ring-purple-500 cursor-pointer">
+          <label for="isCustomTime" class="text-sm font-bold text-purple-900 cursor-pointer select-none">Tùy chỉnh giờ làm</label>
+      </div>
+
+      <!-- Custom time inputs (hidden by default) -->
+      <div id="customTimeInputsContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-5 p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-xl">
+          <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-zinc-700">Giờ bắt đầu <span class="text-red-500">*</span></label>
+              <input type="time" id="shiftStartTime" onchange="triggerRealtimeValidation()"
+                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-zinc-700">Giờ kết thúc <span class="text-red-500">*</span></label>
+              <input type="time" id="shiftEndTime" onchange="triggerRealtimeValidation()"
+                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-zinc-700">Giờ nghỉ (phút)</label>
+              <input type="number" id="shiftBreakTime" onchange="triggerRealtimeValidation()" min="0" value="0" placeholder="Ví dụ: 30"
+                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+          </div>
+          
+          <div class="flex flex-col gap-1.5 sm:col-span-3">
+              <label class="text-sm font-semibold text-zinc-700">Lý do tùy chỉnh giờ làm <span class="text-red-500">*</span></label>
+              <input type="text" id="customTimeReason" placeholder="Nhập lý do tùy chỉnh (ví dụ: Hỗ trợ giải đấu, tăng ca đột xuất...)"
+                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+          </div>
       </div>
 
       <div id="shiftDurationDisplay" class="hidden"></div>
       <div id="shiftAlertBox" class="hidden"></div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Giờ nghỉ (phút)</label>
-          <input type="number" id="shiftBreakTime" onchange="triggerRealtimeValidation()" min="0" value="0" placeholder="Ví dụ: 30"
-                 class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
-        </div>
-
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-semibold text-purple-900">Trạng thái ca <span class="text-red-500">*</span></label>
           <select id="shiftStatusOption" required 
@@ -499,7 +509,9 @@ let shiftList = [
       viTri: '<c:out value="${s.viTri != null ? s.viTri : ''}" />',
       trangThai: '<c:out value="${s.trangThai != null ? s.trangThai : ''}" />',
       gioNghi: ${s.gioNghi != null ? s.gioNghi : 0},
-      ghiChu: `<c:out value="${s.ghiChu != null ? s.ghiChu : ''}" />`
+      ghiChu: `<c:out value="${s.ghiChu != null ? s.ghiChu : ''}" />`,
+      isCustomTime: ${s.customTime},
+      customTimeReason: `<c:out value="${s.customTimeReason != null ? s.customTimeReason : ''}" />`
     }${!loop.last ? ',' : ''}
   </c:forEach>
 ];
@@ -644,8 +656,10 @@ function renderTable(list) {
         <td class="px-5 py-4 text-xs text-zinc-500 max-w-[150px] truncate" title="\${s.ghiChu || 'Không có'}">\${s.ghiChu || '-'}</td>
         <td class="px-5 py-4 text-right">
           <div class="flex items-center justify-end gap-1">
-            <button onclick="editShift(\${s.caLamViecId})" class="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600"><span class="material-symbols-outlined text-[18px]">edit</span></button>
-            <button onclick="deleteShift(\${s.caLamViecId})" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+            \${(s.trangThai !== 'CheckedOut' && s.trangThai !== 'Completed') ? `
+              <button onclick="editShift(\${s.caLamViecId})" class="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600" title="Sửa ca"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+              <button onclick="deleteShift(\${s.caLamViecId})" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500" title="Xóa ca"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+            ` : `<span class="text-zinc-400 text-xs italic">Không thể sửa/xóa</span>`}
           </div>
         </td>
       </tr>
@@ -673,15 +687,85 @@ function populateStaffDropdown(selectedId) {
   });
 }
 
-function applyShiftTemplate() {
-    const tpl = document.getElementById('shiftTemplate').value;
-    const start = document.getElementById('shiftStartTime');
-    const end = document.getElementById('shiftEndTime');
-    const breakTime = document.getElementById('shiftBreakTime');
+function autoFillRoleFromStaff() {
+  const staffId = parseInt(document.getElementById('shiftStaff').value);
+  const staff = staffList.find(s => s.id === staffId);
+  document.getElementById('shiftRole').value = staff ? staff.roleName : 'Lễ tân';
+}
 
-    if (tpl === 'Ca sáng') { start.value = '06:00'; end.value = '14:00'; breakTime.value = '30'; }
-    else if (tpl === 'Ca chiều') { start.value = '14:00'; end.value = '22:00'; breakTime.value = '30'; }
-    else if (tpl === 'Ca đêm') { start.value = '22:00'; end.value = '06:00'; breakTime.value = '0'; }
+function applyShiftTemplate() {
+    const tplSelect = document.getElementById('shiftTemplate');
+    const selectedOpt = tplSelect.options[tplSelect.selectedIndex];
+    const infoBlock = document.getElementById('templateInfoBlock');
+    
+    if (!selectedOpt || !selectedOpt.value) {
+        infoBlock.innerHTML = '<p class="text-zinc-500 text-xs italic">Vui lòng chọn mẫu ca để xem giờ làm.</p>';
+        return;
+    }
+    
+    const startTime = selectedOpt.getAttribute('data-start-time');
+    const endTime = selectedOpt.getAttribute('data-end-time');
+    const breakMins = parseInt(selectedOpt.getAttribute('data-break-minutes')) || 0;
+    
+    // Readonly block update
+    let start = new Date(`2000-01-01T\${startTime}:00`);
+    let end = new Date(`2000-01-01T\${endTime}:00`);
+    if (end < start) end.setDate(end.getDate() + 1);
+    const diffMins = Math.floor((end - start) / 60000);
+    const workMins = diffMins - breakMins;
+    const workHours = (workMins / 60).toFixed(1);
+
+    infoBlock.innerHTML = `
+        <div class="flex items-center gap-1.5 font-bold text-purple-900 mb-1">
+            <span class="material-symbols-outlined text-[18px]">info</span> Thông tin ca:
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+            <div>Giờ làm: <strong class="text-purple-950">\${startTime} - \${endTime}</strong></div>
+            <div>Giờ nghỉ: <strong class="text-purple-950">\${breakMins} phút</strong></div>
+            <div>Tổng giờ làm: <strong class="text-purple-950">\${workHours} giờ</strong></div>
+        </div>
+    `;
+    
+    const isCustom = document.getElementById('isCustomTime').checked;
+    if (!isCustom) {
+        document.getElementById('shiftStartTime').value = startTime;
+        document.getElementById('shiftEndTime').value = endTime;
+        document.getElementById('shiftBreakTime').value = breakMins;
+    }
+
+    clearConflictPanel();
+    triggerRealtimeValidation();
+}
+
+function toggleCustomTime() {
+    const isCustom = document.getElementById('isCustomTime').checked;
+    const customContainer = document.getElementById('customTimeInputsContainer');
+    const customReasonInput = document.getElementById('customTimeReason');
+    
+    if (isCustom) {
+        customContainer.classList.remove('hidden');
+        customReasonInput.setAttribute('required', 'true');
+        
+        const tplSelect = document.getElementById('shiftTemplate');
+        const selectedOpt = tplSelect.options[tplSelect.selectedIndex];
+        if (selectedOpt && selectedOpt.value) {
+            document.getElementById('shiftStartTime').value = selectedOpt.getAttribute('data-start-time');
+            document.getElementById('shiftEndTime').value = selectedOpt.getAttribute('data-end-time');
+            document.getElementById('shiftBreakTime').value = selectedOpt.getAttribute('data-break-minutes') || '0';
+        }
+    } else {
+        customContainer.classList.add('hidden');
+        customReasonInput.removeAttribute('required');
+        customReasonInput.value = '';
+        
+        const tplSelect = document.getElementById('shiftTemplate');
+        const selectedOpt = tplSelect.options[tplSelect.selectedIndex];
+        if (selectedOpt && selectedOpt.value) {
+            document.getElementById('shiftStartTime').value = selectedOpt.getAttribute('data-start-time');
+            document.getElementById('shiftEndTime').value = selectedOpt.getAttribute('data-end-time');
+            document.getElementById('shiftBreakTime').value = selectedOpt.getAttribute('data-break-minutes') || '0';
+        }
+    }
     
     triggerRealtimeValidation();
 }
@@ -710,7 +794,7 @@ function updateWeekDays() {
     const year = current.getFullYear();
     const month = String(current.getMonth() + 1).padStart(2, '0');
     const dateNum = String(current.getDate()).padStart(2, '0');
-    const dateStr = `\${year}-\\${month}-\\${dateNum}`;
+    const dateStr = `\${year}-\${month}-\${dateNum}`;
     const displayDate = `\${dateNum}/\${month}`;
     
     const isToday = (dateStr === new Date().toISOString().split('T')[0]);
@@ -785,8 +869,14 @@ function calculateDurationAndOvertime() {
     }
 
     const start = new Date(`2000-01-01T\${startVal}:00`);
-    let end = new Date(`2000-01-01T\${endVal}:00`);
-    if (end < start) end.setDate(end.getDate() + 1); // Overnight shift
+    const end = new Date(`2000-01-01T\${endVal}:00`);
+    
+    if (end <= start) {
+        displayDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-800 rounded-xl text-sm border border-red-200 flex gap-2 items-center"><span class="material-symbols-outlined text-[18px]">cancel</span><span><strong>Lỗi:</strong> Ca qua ngày chưa được hỗ trợ.</span></div>`;
+        displayDiv.classList.remove('hidden');
+        document.getElementById('btnSubmitShift').disabled = true;
+        return;
+    }
     
     const diffMs = end - start;
     const diffMins = Math.floor(diffMs / 60000);
@@ -795,6 +885,7 @@ function calculateDurationAndOvertime() {
     if (workMins <= 0) {
         displayDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-800 rounded-xl text-sm border border-red-200">Giờ làm việc không hợp lệ (thời gian nghỉ quá lớn hoặc nhập sai giờ).</div>`;
         displayDiv.classList.remove('hidden');
+        document.getElementById('btnSubmitShift').disabled = true;
         return;
     }
 
@@ -852,6 +943,36 @@ function calculateDurationAndOvertime() {
     displayDiv.classList.remove('hidden');
 }
 
+function clearConflictPanel() {
+    const alertBox = document.getElementById('shiftAlertBox');
+    alertBox.innerHTML = '';
+    alertBox.classList.add('hidden');
+    document.getElementById('btnSubmitShift').disabled = false;
+}
+
+function isShiftFormComplete() {
+    const staffId = document.getElementById('shiftStaff').value;
+    if (!staffId) return false;
+
+    const checkedBoxes = document.querySelectorAll('#weekDaysCheckboxes input[type="checkbox"]:checked');
+    const hasDate = checkedBoxes.length > 0 || !!document.getElementById('shiftDate').value;
+    if (!hasDate) return false;
+
+    const isCustom = document.getElementById('isCustomTime').checked;
+    if (isCustom) {
+        const start = document.getElementById('shiftStartTime').value;
+        const end   = document.getElementById('shiftEndTime').value;
+        const reason = document.getElementById('customTimeReason').value.trim();
+        if (!start || !end || !reason) return false;
+        // overnight or equal → form is technically "complete" but invalid; let backend report it
+    } else {
+        const tplSelect = document.getElementById('shiftTemplate');
+        const opt = tplSelect.options[tplSelect.selectedIndex];
+        if (!tplSelect.value || !opt || !opt.getAttribute('data-start-time')) return false;
+    }
+    return true;
+}
+
 let validationTimeout = null;
 function triggerRealtimeValidation() {
     calculateDurationAndOvertime();
@@ -860,38 +981,39 @@ function triggerRealtimeValidation() {
 }
 
 async function runRealtimeValidation() {
+    if (!isShiftFormComplete()) {
+        clearConflictPanel();
+        return;
+    }
+
     const staffId = document.getElementById('shiftStaff').value;
     const gioBatDau = document.getElementById('shiftStartTime').value;
     const gioKetThuc = document.getElementById('shiftEndTime').value;
     const gioNghi = document.getElementById('shiftBreakTime').value || '0';
     const editId = document.getElementById('shiftEditId').value;
-    
+
     const alertBox = document.getElementById('shiftAlertBox');
     const submitBtn = document.getElementById('btnSubmitShift');
-    
-    if (!staffId || !gioBatDau || !gioKetThuc) {
-        alertBox.classList.add('hidden');
-        submitBtn.disabled = false;
-        return;
-    }
 
     const checkedCheckboxes = Array.from(document.querySelectorAll('#weekDaysCheckboxes input[type="checkbox"]:checked'));
     let datesToValidate = checkedCheckboxes.map(cb => cb.value);
-    
+
     if (datesToValidate.length === 0) {
         const referenceDate = document.getElementById('shiftDate').value;
         if (referenceDate) datesToValidate.push(referenceDate);
     }
-    
+
     if (datesToValidate.length === 0) {
-        alertBox.classList.add('hidden');
-        submitBtn.disabled = false;
+        clearConflictPanel();
         return;
     }
 
     try {
         const validationPromises = datesToValidate.map(date => {
-            const url = `\${_ctxPath}/manager/ca-lam?action=validate&accountId=\${staffId}&ngayLam=\${date}&gioBatDau=\${gioBatDau}&gioKetThuc=\${gioKetThuc}&gioNghi=\${gioNghi}` + (editId ? `&caLamViecId=\${editId}` : '');
+            const isCustom = document.getElementById('isCustomTime').checked;
+            const customReason = encodeURIComponent(document.getElementById('customTimeReason').value.trim());
+            const templateId = document.getElementById('shiftTemplate').value;
+            const url = `\${_ctxPath}/manager/ca-lam?action=validate&accountId=\${staffId}&ngayLam=\${date}&gioBatDau=\${gioBatDau}&gioKetThuc=\${gioKetThuc}&gioNghi=\${gioNghi}&shiftTemplateId=\${templateId}&isCustomTime=\${isCustom}&customTimeReason=\${customReason}` + (editId ? `&caLamViecId=\${editId}` : '');
             return fetch(url).then(res => res.json());
         });
 
@@ -949,10 +1071,18 @@ function resetForm() {
     
     // Set default values
     document.getElementById('shiftDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('shiftTemplate').value = 'Tùy chỉnh';
-    document.getElementById('shiftRole').value = 'Lễ tân';
+    document.getElementById('shiftTemplate').value = '';
+    document.getElementById('shiftRole').value = '';
     document.getElementById('shiftStatusOption').value = 'Published';
     document.getElementById('shiftBreakTime').value = '0';
+    
+    // Reset custom time fields
+    document.getElementById('isCustomTime').checked = false;
+    document.getElementById('customTimeReason').value = '';
+    document.getElementById('shiftStartTime').value = '';
+    document.getElementById('shiftEndTime').value = '';
+    toggleCustomTime();
+    applyShiftTemplate(); // Will clear templateInfoBlock
     
     document.getElementById('shiftDurationDisplay').innerHTML = '';
     document.getElementById('shiftDurationDisplay').classList.add('hidden');
@@ -972,17 +1102,36 @@ function editShift(id) {
   const s = shiftList.find(x => x.caLamViecId === id);
   if (!s) return;
 
+  if (s.trangThai === 'CheckedOut' || s.trangThai === 'Completed') {
+    showToast('error', 'Không thể sửa ca làm việc đã hoàn thành.');
+    return;
+  }
+
   document.getElementById('formTitle').innerHTML = `<span class="material-symbols-outlined text-purple-600 text-[22px]">edit_calendar</span> Chỉnh sửa ca làm việc`;
   
   document.getElementById('shiftEditId').value = s.caLamViecId;
   document.getElementById('shiftDate').value = s.ngayLam;
-  document.getElementById('shiftStartTime').value = formatTime(s.gioBatDau);
-  document.getElementById('shiftEndTime').value = formatTime(s.gioKetThuc);
-  document.getElementById('shiftTemplate').value = s.tenCa || 'Tùy chỉnh';
+  
+  let templateVal = "";
+  if (s.tenCa === 'Ca sáng') templateVal = "1";
+  else if (s.tenCa === 'Ca chiều') templateVal = "2";
+  document.getElementById('shiftTemplate').value = templateVal;
+
   document.getElementById('shiftRole').value = s.viTri || 'Lễ tân';
-  document.getElementById('shiftBreakTime').value = s.gioNghi || 0;
   document.getElementById('shiftStatusOption').value = s.trangThai || 'Draft';
   document.getElementById('shiftNotes').value = s.ghiChu || '';
+  
+  const isCustom = s.isCustomTime || false;
+  document.getElementById('isCustomTime').checked = isCustom;
+  document.getElementById('customTimeReason').value = s.customTimeReason || '';
+  
+  toggleCustomTime();
+  
+  document.getElementById('shiftStartTime').value = formatTime(s.gioBatDau);
+  document.getElementById('shiftEndTime').value = formatTime(s.gioKetThuc);
+  document.getElementById('shiftBreakTime').value = s.gioNghi || 0;
+  
+  applyShiftTemplate();
   
   document.getElementById('btnSubmitShift').disabled = false;
 
@@ -1002,6 +1151,13 @@ function editShift(id) {
 
 async function deleteShift(id) {
   const s = shiftList.find(x => x.caLamViecId === id);
+  if (!s) return;
+
+  if (s.trangThai === 'CheckedOut' || s.trangThai === 'Completed') {
+    showToast('error', 'Không thể xóa ca làm việc đã hoàn thành.');
+    return;
+  }
+
   const isPublishedOrConfirmed = s && (s.trangThai === 'Published' || s.trangThai === 'Confirmed');
   if (isPublishedOrConfirmed) {
     document.getElementById('deleteShiftId').value = id;
@@ -1164,6 +1320,29 @@ async function handleInlineShiftSubmit(e) {
     alert("Vui lòng chọn nhân viên!");
     return;
   }
+  const templateId = document.getElementById('shiftTemplate').value;
+  if (!templateId) {
+    alert("Vui lòng chọn mẫu ca hệ thống!");
+    return;
+  }
+  const isCustomTime = document.getElementById('isCustomTime').checked;
+  const customTimeReason = document.getElementById('customTimeReason').value.trim();
+  if (isCustomTime) {
+    if (!customTimeReason) {
+      alert("Lý do tùy chỉnh giờ làm không được để trống.");
+      return;
+    }
+    if (customTimeReason.length > 255) {
+      alert("Lý do tùy chỉnh giờ làm không được vượt quá 255 ký tự.");
+      return;
+    }
+    const start = new Date(`2000-01-01T\${startTime}:00`);
+    const end = new Date(`2000-01-01T\${endTime}:00`);
+    if (end <= start) {
+      alert("Ca qua ngày chưa được hỗ trợ.");
+      return;
+    }
+  }
   if (!startTime || !endTime) {
     alert("Vui lòng nhập giờ bắt đầu và giờ kết thúc!");
     return;
@@ -1208,6 +1387,9 @@ async function handleInlineShiftSubmit(e) {
       params.append('gioNghi', document.getElementById('shiftBreakTime').value || '0');
       params.append('ghiChu', document.getElementById('shiftNotes').value);
       params.append('reason', 'Cập nhật ca làm việc');
+      params.append('shiftTemplateId', templateId);
+      params.append('isCustomTime', isCustomTime);
+      params.append('customTimeReason', customTimeReason);
 
       const response = await fetch(`\${_ctxPath}/manager/ca-lam`, {
         method: 'POST',
@@ -1215,32 +1397,32 @@ async function handleInlineShiftSubmit(e) {
         body: params.toString()
       });
 
-      if (response.ok) {
-        const res = await response.json();
-        if (res.success) {
-          showToast('success', 'Đã cập nhật ca làm việc thành công!');
-          if (res.warnings && res.warnings.length > 0) {
-            res.warnings.forEach(w => showToast('warning', w));
-          }
-          const weekdayAndDateStr = getWeekdayAndDateStr(dateToSave);
-          showSuccessBanner(staffName, startTime, endTime, weekdayAndDateStr);
-          await loadScheduleData();
-          resetForm();
-          scrollToCalendar();
-        } else if (res.error && res.error.startsWith('CONFIRMED_OVERRIDE_REQUIRED')) {
-          // Ca đã confirmed — mở modal xác nhận override
-          document.getElementById('overrideReasonInput').value = '';
-          _pendingUpdateParams = params;
-          _pendingUpdateStaffName = staffName;
-          _pendingUpdateStartTime = startTime;
-          _pendingUpdateEndTime = endTime;
-          _pendingUpdateDateToSave = dateToSave;
-          document.getElementById('confirmedOverrideModal').classList.remove('hidden');
-        } else {
-          showToast('error', res.error || 'Cập nhật thất bại');
+      let res;
+      try {
+        res = await response.json();
+      } catch (err) {}
+
+      if (response.ok && res && res.success) {
+        showToast('success', 'Đã cập nhật ca làm việc thành công!');
+        if (res.warnings && res.warnings.length > 0) {
+          res.warnings.forEach(w => showToast('warning', w));
         }
+        const weekdayAndDateStr = getWeekdayAndDateStr(dateToSave);
+        showSuccessBanner(staffName, startTime, endTime, weekdayAndDateStr);
+        await loadScheduleData();
+        resetForm();
+        scrollToCalendar();
+      } else if (res && res.error && res.error.startsWith('CONFIRMED_OVERRIDE_REQUIRED')) {
+        // Ca đã confirmed — mở modal xác nhận override
+        document.getElementById('overrideReasonInput').value = '';
+        _pendingUpdateParams = params;
+        _pendingUpdateStaffName = staffName;
+        _pendingUpdateStartTime = startTime;
+        _pendingUpdateEndTime = endTime;
+        _pendingUpdateDateToSave = dateToSave;
+        document.getElementById('confirmedOverrideModal').classList.remove('hidden');
       } else {
-        showToast('error', 'Lỗi kết nối máy chủ');
+        showToast('error', (res && res.error) ? res.error : 'Lỗi kết nối máy chủ');
       }
     } else {
       // Add Mode (multiple days in parallel)
@@ -1259,6 +1441,9 @@ async function handleInlineShiftSubmit(e) {
         params.append('trangThai', document.getElementById('shiftStatusOption').value);
         params.append('gioNghi', document.getElementById('shiftBreakTime').value || '0');
         params.append('ghiChu', document.getElementById('shiftNotes').value);
+        params.append('shiftTemplateId', templateId);
+        params.append('isCustomTime', isCustomTime);
+        params.append('customTimeReason', customTimeReason);
         
         return fetch(`\${_ctxPath}/manager/ca-lam`, {
           method: 'POST',
@@ -1367,7 +1552,12 @@ function renderCalendar() {
         else if (staff.roleId === 5) { roleColor = 'text-orange-600'; bgColor = 'bg-orange-50 border-orange-200 hover:bg-orange-100'; } 
         else { roleColor = 'text-blue-600'; bgColor = 'bg-blue-50 border-blue-200 hover:bg-blue-100'; }
 
-        html += `<div class="shift-block \${bgColor} border rounded-lg p-2 cursor-pointer transition-all shadow-sm" onclick="editShift(\${s.caLamViecId})" title="Nhấn để chỉnh sửa">
+        const isCompleted = s.trangThai === 'CheckedOut' || s.trangThai === 'Completed';
+        const clickAction = isCompleted ? '' : `onclick="editShift(\${s.caLamViecId})"`;
+        const cursorStyle = isCompleted ? 'cursor-default opacity-85' : 'cursor-pointer hover:scale-[1.02]';
+        const titleText = isCompleted ? 'Ca làm việc đã hoàn thành' : 'Nhấn để chỉnh sửa';
+
+        html += `<div class="shift-block \${bgColor} \${cursorStyle} border rounded-lg p-2 transition-all shadow-sm" \${clickAction} title="\${titleText}">
             <div class="flex items-center justify-between mb-1">
               <span class="text-[10px] font-bold \${roleColor}">\${s.tenCa || 'Tùy chỉnh'}</span>
               <span class="text-[9px] px-1 py-0.5 rounded \${status.cssClass}">\${status.label}</span>
@@ -1485,6 +1675,8 @@ async function autoScheduleShifts() {
   const start = document.getElementById('autoStartDate').value;
   const end = document.getElementById('autoEndDate').value;
   if (!start || !end) { showToast('error', 'Vui lòng chọn khoảng ngày'); return; }
+  // BUG-UI-01: confirm before destructive auto-schedule
+  if (!confirm(`Xác nhận tự động sắp lịch từ ${start} đến ${end}?\n\nThao tác này sẽ phân công lại nhân viên cho các ca Draft dựa trên nguyện vọng rảnh bận. Tiếp tục?`)) return;
   const params = new URLSearchParams({ action: 'autoSchedule', format: 'json', startDate: start, endDate: end });
   try {
     const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
