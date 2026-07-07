@@ -162,15 +162,19 @@ public class CheckInServlet extends HttpServlet {
                     }
                 }
 
-                // Staff (roleId = 4) cannot change the price. Only Manager (roleId = 2) can change price.
-                if (user.getRoleId() != 2) {
-                    if (Math.abs(donGia - basePrice) > 1.0) {
-                        throw new CheckInException("Nhân viên lễ tân không có quyền thay đổi đơn giá sân.");
-                    }
+                // OPEN mode always uses the court's configured price — no custom price allowed
+                if ("OPEN".equals(playMode)) {
+                    donGia = basePrice;
                 } else {
-                    // Manager can change price, but must provide override reason if altered
-                    if (Math.abs(donGia - basePrice) > 1.0 && (ghiChuOverride == null || ghiChuOverride.trim().isEmpty())) {
-                        throw new CheckInException("Vui lòng nhập lý do thay đổi đơn giá.");
+                    // FIXED mode: staff cannot change price; manager can but must give a reason
+                    if (user.getRoleId() != 2) {
+                        if (Math.abs(donGia - basePrice) > 1.0) {
+                            throw new CheckInException("Nhân viên lễ tân không có quyền thay đổi đơn giá sân.");
+                        }
+                    } else {
+                        if (Math.abs(donGia - basePrice) > 1.0 && (ghiChuOverride == null || ghiChuOverride.trim().isEmpty())) {
+                            throw new CheckInException("Vui lòng nhập lý do thay đổi đơn giá.");
+                        }
                     }
                 }
 
@@ -338,7 +342,7 @@ public class CheckInServlet extends HttpServlet {
             org.example.dao.SanPhamDichVuDAO spDao = new org.example.dao.impl.SanPhamDichVuDAOImpl();
             List<org.example.model.SanPham_DichVu> allSp = spDao.findByCoSo(coSoId);
             List<org.example.model.SanPham_DichVu> products = allSp.stream()
-                .filter(sp -> "Đang kinh doanh".equals(sp.getTrangThai()))
+                .filter(sp -> !"Ngừng kinh doanh".equals(sp.getTrangThai()))
                 .collect(java.util.stream.Collectors.toList());
 
             org.example.dao.HoaDonDAO hdDao = new org.example.dao.impl.HoaDonDAOImpl();
@@ -393,9 +397,7 @@ public class CheckInServlet extends HttpServlet {
                 }
             }
 
-            long plannedMinutes = java.time.Duration.between(lich.getGioBatDau(), lich.getGioKetThuc()).toMinutes();
-            double baseCourtPrice = (plannedMinutes / 60.0) * donGiaGio;
-            double phuThuNhanSom = Math.max(0.0, tongTienSan - baseCourtPrice);
+            double phuThuNhanSom = 0.0;
 
             double finalTongTienSan = tongTienSan + phuThuQuaGio;
             double finalTongThanhToan = finalTongTienSan + tongTienDichVu;

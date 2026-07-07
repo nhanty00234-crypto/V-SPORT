@@ -175,14 +175,14 @@
           <i class="ti ti-bolt control-icon"></i>
           <select name="action" class="audit-control">
             <option value="">Tất cả hành động</option>
-            <option value="CREATE" <c:if test="${action == 'CREATE'}">selected</c:if>>Tạo mới (CREATE)</option>
-            <option value="UPDATE" <c:if test="${action == 'UPDATE'}">selected</c:if>>Cập nhật (UPDATE)</option>
-            <option value="SOFT_DELETE" <c:if test="${action == 'SOFT_DELETE'}">selected</c:if>>Xóa mềm (SOFT_DELETE)</option>
-            <option value="RESTORE" <c:if test="${action == 'RESTORE'}">selected</c:if>>Khôi phục (RESTORE)</option>
-            <option value="PERMANENT_DELETE" <c:if test="${action == 'PERMANENT_DELETE'}">selected</c:if>>Xóa vĩnh viễn (PERMANENT_DELETE)</option>
-            <option value="ADD_STAFF" <c:if test="${action == 'ADD_STAFF'}">selected</c:if>>Thêm nhân sự (ADD_STAFF)</option>
-            <option value="APPROVE" <c:if test="${action == 'APPROVE'}">selected</c:if>>Phê duyệt (APPROVE)</option>
-            <option value="REJECT" <c:if test="${action == 'REJECT'}">selected</c:if>>Từ chối (REJECT)</option>
+            <option value="CREATE" <c:if test="${action == 'CREATE'}">selected</c:if>>Tạo mới</option>
+            <option value="UPDATE" <c:if test="${action == 'UPDATE'}">selected</c:if>>Cập nhật</option>
+            <option value="SOFT_DELETE" <c:if test="${action == 'SOFT_DELETE'}">selected</c:if>>Xóa mềm</option>
+            <option value="RESTORE" <c:if test="${action == 'RESTORE'}">selected</c:if>>Khôi phục</option>
+            <option value="PERMANENT_DELETE" <c:if test="${action == 'PERMANENT_DELETE'}">selected</c:if>>Xóa vĩnh viễn</option>
+            <option value="ADD_STAFF" <c:if test="${action == 'ADD_STAFF'}">selected</c:if>>Thêm nhân sự</option>
+            <option value="APPROVE" <c:if test="${action == 'APPROVE'}">selected</c:if>>Phê duyệt</option>
+            <option value="REJECT" <c:if test="${action == 'REJECT'}">selected</c:if>>Từ chối</option>
           </select>
           <i class="ti ti-chevron-down control-caret"></i>
         </div>
@@ -241,10 +241,10 @@
                   <c:choose>
                     <c:when test="${log.actorRole == 1}">Admin</c:when>
                     <c:when test="${log.actorRole == 2}">Manager</c:when>
-                    <c:otherwise>Role ${log.actorRole}</c:otherwise>
+                    <c:otherwise>Nhân viên</c:otherwise>
                   </c:choose>
                   <c:if test="${not empty log.coSoId}">
-                    <span class="text-zinc-300 font-normal">|</span> CS${log.coSoId}
+                    <span class="text-zinc-300 font-normal">|</span> Chi nhánh ${log.coSoId}
                   </c:if>
                 </p>
               </div>
@@ -273,7 +273,7 @@
                     <span class="badge badge-purple"><i class="ti ti-rotate-dot mr-1"></i>Khôi phục</span>
                   </c:when>
                   <c:otherwise>
-                    <span class="badge badge-gray"><i class="ti ti-settings-automation mr-1"></i>${log.action}</span>
+                    <span class="badge badge-gray"><i class="ti ti-settings-automation mr-1"></i>Thao tác khác</span>
                   </c:otherwise>
                 </c:choose>
 
@@ -307,8 +307,19 @@
                   </c:choose>
                 </div>
                 <div>
-                  <span class="text-xs font-bold text-zinc-800"><c:out value="${log.entityName}"/></span>
-                  <span class="text-[10px] text-zinc-400 font-mono ml-1.5"><c:out value="${log.entityType}"/> #${log.entityId}</span>
+                  <span class="text-xs font-bold text-zinc-800 js-entity-name"><c:out value="${log.entityName}"/></span>
+                  <span class="text-[10px] text-zinc-400 ml-1.5">
+                    <c:choose>
+                      <c:when test="${log.entityType == 'TaiKhoan'}">Tài khoản</c:when>
+                      <c:when test="${log.entityType == 'San'}">Sân</c:when>
+                      <c:when test="${log.entityType == 'LoaiSan'}">Loại sân</c:when>
+                      <c:when test="${log.entityType == 'SanPham'}">Sản phẩm</c:when>
+                      <c:when test="${log.entityType == 'CoSo'}">Chi nhánh</c:when>
+                      <c:when test="${log.entityType == 'CaLamViec'}">Ca làm việc</c:when>
+                      <c:when test="${log.entityType == 'YeuCauNghi'}">Yêu cầu nghỉ</c:when>
+                      <c:when test="${not empty log.entityType}"><c:out value="${log.entityType}"/></c:when>
+                    </c:choose>
+                  </span>
                 </div>
               </div>
 
@@ -376,6 +387,16 @@
 </main>
 
 <script>
+  // Clean up raw DB-style entity names stored in old audit records
+  document.querySelectorAll('.js-entity-name').forEach(function(el) {
+    var t = el.textContent;
+    var m = t.match(/AccountID=\d+\s+ngay=(\d{4})-(\d{2})-(\d{2})/);
+    if (m) { el.textContent = 'Ca làm ngày ' + m[3] + '/' + m[2] + '/' + m[1]; return; }
+    if (/\w+=/.test(t)) {
+      el.textContent = t.replace(/\w+=/g, '').replace(/\s+/g, ' ').trim();
+    }
+  });
+
   // Mobile sidebar menu toggler
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   const sidebar = document.getElementById('sidebar');

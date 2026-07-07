@@ -391,7 +391,9 @@ function renderStaff() {
         else if (s.roleId === 5) dept = 'Bảo vệ';
         else dept = 'Nhân sự';
 
-        let avatarUrl = `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=7c3aed&color=fff&size=128&bold=true`;
+        let avatarUrl = s.avatarUrl
+            ? (_ctxPath + s.avatarUrl)
+            : `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=7c3aed&color=fff&size=128&bold=true`;
 
         return `
             <div class="card p-5 border border-violet-100 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">

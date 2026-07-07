@@ -45,8 +45,7 @@
 
     body { 
         font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-        background: linear-gradient(135deg, #e0e7ec 0%, #f1f4f6 50%, #e0e7ec 100%);
-        background-attachment: fixed;
+        background: #ffffff;
         color: #3d4b58;
         margin: 0;
         padding: 0;

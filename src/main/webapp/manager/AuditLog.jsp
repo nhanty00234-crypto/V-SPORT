@@ -76,14 +76,14 @@
         <label class="text-xs font-semibold text-zinc-500">Hành động</label>
         <select name="action" class="h-10 px-3 rounded-xl border border-purple-100 bg-white text-xs text-zinc-700 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-all">
           <option value="">-- Tất cả --</option>
-          <option value="CREATE" <c:if test="${action == 'CREATE'}">selected</c:if>>Tạo mới (CREATE)</option>
-          <option value="UPDATE" <c:if test="${action == 'UPDATE'}">selected</c:if>>Cập nhật (UPDATE)</option>
-          <option value="SOFT_DELETE" <c:if test="${action == 'SOFT_DELETE'}">selected</c:if>>Xóa mềm (SOFT_DELETE)</option>
-          <option value="RESTORE" <c:if test="${action == 'RESTORE'}">selected</c:if>>Khôi phục (RESTORE)</option>
-          <option value="PERMANENT_DELETE" <c:if test="${action == 'PERMANENT_DELETE'}">selected</c:if>>Xóa vĩnh viễn (PERMANENT_DELETE)</option>
-          <option value="ADD_STAFF" <c:if test="${action == 'ADD_STAFF'}">selected</c:if>>Thêm nhân sự (ADD_STAFF)</option>
-          <option value="APPROVE" <c:if test="${action == 'APPROVE'}">selected</c:if>>Phê duyệt (APPROVE)</option>
-          <option value="REJECT" <c:if test="${action == 'REJECT'}">selected</c:if>>Từ chối (REJECT)</option>
+          <option value="CREATE" <c:if test="${action == 'CREATE'}">selected</c:if>>Tạo mới</option>
+          <option value="UPDATE" <c:if test="${action == 'UPDATE'}">selected</c:if>>Cập nhật</option>
+          <option value="SOFT_DELETE" <c:if test="${action == 'SOFT_DELETE'}">selected</c:if>>Xóa mềm</option>
+          <option value="RESTORE" <c:if test="${action == 'RESTORE'}">selected</c:if>>Khôi phục</option>
+          <option value="PERMANENT_DELETE" <c:if test="${action == 'PERMANENT_DELETE'}">selected</c:if>>Xóa vĩnh viễn</option>
+          <option value="ADD_STAFF" <c:if test="${action == 'ADD_STAFF'}">selected</c:if>>Thêm nhân sự</option>
+          <option value="APPROVE" <c:if test="${action == 'APPROVE'}">selected</c:if>>Phê duyệt</option>
+          <option value="REJECT" <c:if test="${action == 'REJECT'}">selected</c:if>>Từ chối</option>
         </select>
       </div>
       <div class="flex flex-col gap-1">
@@ -149,7 +149,7 @@
                           <c:choose>
                             <c:when test="${log.actorRole == 1}">Admin</c:when>
                             <c:when test="${log.actorRole == 2}">Manager</c:when>
-                            <c:otherwise>Role ${log.actorRole}</c:otherwise>
+                            <c:otherwise>Nhân viên</c:otherwise>
                           </c:choose>
                         </p>
                       </div>
@@ -170,13 +170,24 @@
                         <span class="badge badge-red"><span class="w-1.5 h-1.5 rounded-full bg-red-600 mr-1.5"></span>Xóa vĩnh viễn</span>
                       </c:when>
                       <c:otherwise>
-                        <span class="badge badge-gray"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500 mr-1.5"></span>${log.action}</span>
+                        <span class="badge badge-gray"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500 mr-1.5"></span>Thao tác khác</span>
                       </c:otherwise>
                     </c:choose>
                   </td>
                   <td class="px-5 py-4">
-                    <div class="font-semibold text-purple-950 text-xs"><c:out value="${log.entityName}"/></div>
-                    <div class="text-[10px] text-purple-400 mt-0.5 font-mono"><c:out value="${log.entityType}"/> #${log.entityId}</div>
+                    <div class="font-semibold text-purple-950 text-xs js-entity-name"><c:out value="${log.entityName}"/></div>
+                    <div class="text-[10px] text-purple-400 mt-0.5">
+                      <c:choose>
+                        <c:when test="${log.entityType == 'TaiKhoan'}">Tài khoản</c:when>
+                        <c:when test="${log.entityType == 'San'}">Sân</c:when>
+                        <c:when test="${log.entityType == 'LoaiSan'}">Loại sân</c:when>
+                        <c:when test="${log.entityType == 'SanPham'}">Sản phẩm</c:when>
+                        <c:when test="${log.entityType == 'CoSo'}">Chi nhánh</c:when>
+                        <c:when test="${log.entityType == 'CaLamViec'}">Ca làm việc</c:when>
+                        <c:when test="${log.entityType == 'YeuCauNghi'}">Yêu cầu nghỉ</c:when>
+                        <c:when test="${not empty log.entityType}"><c:out value="${log.entityType}"/></c:when>
+                      </c:choose>
+                    </div>
                   </td>
                   <td class="px-5 py-4 text-zinc-650 max-w-xs md:max-w-md break-words leading-relaxed">
                     <c:out value="${log.details}"/>
@@ -239,6 +250,18 @@
 </main>
 
 <script>
+  // Clean up raw DB-style entity names stored in old audit records
+  document.querySelectorAll('.js-entity-name').forEach(function(el) {
+    var t = el.textContent;
+    // "AccountID=42 ngay=2026-07-08" → "Ca làm ngày 08/07/2026"
+    var m = t.match(/AccountID=\d+\s+ngay=(\d{4})-(\d{2})-(\d{2})/);
+    if (m) { el.textContent = 'Ca làm ngày ' + m[3] + '/' + m[2] + '/' + m[1]; return; }
+    // Any remaining raw "KEY=value" pairs → strip keys, keep values
+    if (/\w+=/.test(t)) {
+      el.textContent = t.replace(/\w+=/g, '').replace(/\s+/g, ' ').trim();
+    }
+  });
+
   // Mobile sidebar menu toggler
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   const sidebar = document.getElementById('sidebar');

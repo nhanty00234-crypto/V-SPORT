@@ -62,6 +62,7 @@ public class NhanSuService {
         private boolean locked;
         private String statusDisplay;
         private String initial;
+        private String avatarUrl;
 
         // Constructors, getters, setters
         public NhanSuDTO() {}
@@ -78,6 +79,12 @@ public class NhanSuService {
             this.locked = locked;
             this.initial = getInitial(fullName, username);
             this.statusDisplay = locked ? "Bị khóa" : "Đang làm";
+        }
+
+        public NhanSuDTO(int accountId, String username, String fullName, String email,
+                        String phoneNumber, int roleId, String roleName, boolean locked, String avatarUrl) {
+            this(accountId, username, fullName, email, phoneNumber, roleId, roleName, locked);
+            this.avatarUrl = avatarUrl;
         }
 
         private String getInitial(String fullName, String username) {
@@ -98,6 +105,7 @@ public class NhanSuService {
         public boolean isLocked() { return locked; }
         public String getStatusDisplay() { return statusDisplay; }
         public String getInitial() { return initial; }
+        public String getAvatarUrl() { return avatarUrl; }
 
         public void setAccountId(int accountId) { this.accountId = accountId; }
         public void setUsername(String username) { this.username = username; }
@@ -109,6 +117,7 @@ public class NhanSuService {
         public void setLocked(boolean locked) { this.locked = locked; }
         public void setStatusDisplay(String statusDisplay) { this.statusDisplay = statusDisplay; }
         public void setInitial(String initial) { this.initial = initial; }
+        public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     }
 
     /**
@@ -232,7 +241,8 @@ public class NhanSuService {
                     acc.getPhoneNumber(),
                     acc.getRoleId(),
                     role.getRoleName(),
-                    acc.isLocked()
+                    acc.isLocked(),
+                    acc.getAvatarUrl()
                 );
             })
             .collect(Collectors.toList());

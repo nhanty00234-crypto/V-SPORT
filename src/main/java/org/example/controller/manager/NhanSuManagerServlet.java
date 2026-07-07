@@ -318,6 +318,7 @@ public class NhanSuManagerServlet extends HttpServlet {
             map.put("VaiTro", s.getRoleName());
             map.put("status", s.isLocked() ? "Bị khóa" : "Đang làm");
             map.put("initial", s.getInitial());
+            map.put("avatarUrl", s.getAvatarUrl() != null ? s.getAvatarUrl() : "");
             mappedList.add(map);
         }
         return new com.google.gson.Gson().toJson(mappedList);

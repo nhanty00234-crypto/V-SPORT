@@ -276,7 +276,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             AuditLogService.log(req, manager,
                 AuditLogService.ACTION_CREATE, AuditLogService.ENTITY_CA_LAM,
                 "unknown",
-                "AccountID=" + caLamReq.getAccountId() + " ngay=" + caLamReq.getNgayLam(),
+                "Ca làm ngày " + caLamReq.getNgayLam(),
                 "Manager tạo ca làm việc");
             
             if (isJson) {

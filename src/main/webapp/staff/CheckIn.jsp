@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -303,7 +303,7 @@
                                                     </label>
                                                     <label id="card-mode-open-label-${san.sanID}" class="border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center">
                                                         <input type="radio" class="sr-only" name="playMode" value="OPEN" onchange="setCardPlayMode(${san.sanID}, 'OPEN')">
-                                                        Vô hạn
+                                                        Không cố định
                                                     </label>
                                                 </div>
                                             </div>
@@ -840,7 +840,7 @@
                                                     </label>
                                                     <label id="card-mode-open-label-\${san.sanID}" class="border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center">
                                                         <input type="radio" class="sr-only" name="playMode" value="OPEN" onchange="setCardPlayMode(\${san.sanID}, 'OPEN')">
-                                                        Vô hạn
+                                                        Không cố định
                                                     </label>
                                                 </div>
                                             </div>
@@ -1443,7 +1443,7 @@
 <script>
     function formatCurrency(val) {
         if (val === undefined || val === null || isNaN(val)) return '0 đ';
-        return Number(val).toLocaleString('vi-VN') + ' đ';
+        return Math.round(Number(val)).toLocaleString('vi-VN') + ' đ';
     }
 
     let staffProducts = [];
@@ -1807,7 +1807,12 @@
             if (lblFixed) lblFixed.className = "border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center";
             if (lblOpen) lblOpen.className = `border ${themeBorderStrong} ${themeBgLight} rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold ${themeTextMedium} transition-all text-center`;
             if (fixedPanel) fixedPanel.classList.add('hidden');
-            if (openNote) openNote.classList.remove('hidden');
+            if (openNote) {
+                openNote.classList.remove('hidden');
+                const rateEl = document.getElementById("card-rate-${sanId}");
+                const rateVal = rateEl ? parseFloat(rateEl.value) || 0 : 0;
+                openNote.innerHTML = `Đơn giá áp dụng: <strong>\${formatCurrency(rateVal)}/giờ</strong><br><span style="opacity:.75">Tính tiền thực tế khi trả sân.</span>`;
+            }
             
             // Set 120 default for conflict checks in open mode
             if (durationInput) durationInput.value = 120;

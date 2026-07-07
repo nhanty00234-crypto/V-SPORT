@@ -19,8 +19,7 @@
   /* ── Base ── */
   body {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #fffaf6 0%, #fff5ed 50%, #fffaf6 100%);
-    background-attachment: fixed;
+    background: #ffffff;
     color: #18181b;
     min-height: 100vh;
   }
