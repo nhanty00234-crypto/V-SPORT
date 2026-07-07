@@ -345,13 +345,23 @@ public class CheckInDAO {
             BigDecimal totalAmount = BigDecimal.valueOf(hours * donGiaSan);
 
             // 3. Tạo mới lịch đặt sân cho khách vãng lai
+            // Đối với giờ không cố định, ta gán GioKetThuc trong database lớn (ví dụ: cộng thêm 12 giờ) để tránh việc
+            // updateExpiredBookingsAndFields() tự động kết thúc phiên chơi khi quá hạn ban đầu.
+            LocalTime insertEndTime = endTime;
+            if (ghiChu != null && ghiChu.contains("Không cố định")) {
+                insertEndTime = now.plusHours(12);
+                if (insertEndTime.isBefore(now)) {
+                    insertEndTime = LocalTime.of(23, 59, 59);
+                }
+            }
+
             String sqlInsertBooking = "INSERT INTO LichDatSan (AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, actual_start_time, TrangThai, GhiChu, NguonDatSan, TongTienDuKien) " +
                                       "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             psInsertBooking = conn.prepareStatement(sqlInsertBooking, Statement.RETURN_GENERATED_KEYS);
             psInsertBooking.setInt(1, sanId);
             psInsertBooking.setDate(2, Date.valueOf(today));
             psInsertBooking.setTime(3, Time.valueOf(now));
-            psInsertBooking.setTime(4, Time.valueOf(endTime));
+            psInsertBooking.setTime(4, Time.valueOf(insertEndTime));
             psInsertBooking.setTime(5, Time.valueOf(now));
             psInsertBooking.setString(6, BOOKING_STATUS_IN_USE);
             psInsertBooking.setString(7, ghiChu != null ? ghiChu : ("Khách vãng lai chơi " + durationMinutes + " phút"));
@@ -532,7 +542,9 @@ public class CheckInDAO {
         String sql = "SELECT s.SanID, s.TenSan, s.LoaiSanID, s.CoSoID, s.TrangThai, s.MoTa, s.HinhAnh, " +
                      "ls.TenLoai AS TenLoaiSan, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen, " +
                      "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS DatSanIDActive, " +
-                     "(SELECT TOP 1 CONVERT(VARCHAR(5), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(5), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive, " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(5), lds.GioKetThuc, 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioKetThucActive, " +
+                     "(SELECT TOP 1 lds.GhiChu FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GhiChuActive " +
                      "FROM San s " +
                      "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
                      "WHERE s.CoSoID = ? AND s.IsDeleted = 0 " +
@@ -557,6 +569,8 @@ public class CheckInDAO {
                     s.setGioKetThucLenDen(rs.getTime("GioKetThucLenDen") != null ? rs.getTime("GioKetThucLenDen").toLocalTime() : null);
                     s.setDatSanIdActive(rs.getObject("DatSanIDActive") != null ? rs.getInt("DatSanIDActive") : null);
                     s.setGioBatDauActive(rs.getString("GioBatDauActive"));
+                    s.setGioKetThucActive(rs.getString("GioKetThucActive"));
+                    s.setGhiChuActive(rs.getString("GhiChuActive"));
                     list.add(s);
                 }
             }
@@ -891,6 +905,134 @@ public class CheckInDAO {
             logger.error("Lỗi hasUnpaidSplitBills datSanId={}: {}", datSanId, e.getMessage(), e);
         }
         return false;
+    }
+
+    /**
+     * Dừng phiên chơi của sân "Không cố định" và tính tiền sân thực tế.
+     */
+    public void stopOpenSession(int datSanId, int staffAccountId) throws CheckInException {
+        Connection conn = null;
+        PreparedStatement psSelect = null;
+        PreparedStatement psUpdateBooking = null;
+        PreparedStatement psUpdateInvoice = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Lấy thông tin ca chơi và kiểm tra trạng thái
+            String sqlSelect = "SELECT lds.SanID, lds.GioBatDau, lds.GioKetThuc, lds.actual_start_time, lds.TrangThai, lds.GhiChu, hd.TongTienSan " +
+                               "FROM LichDatSan lds " +
+                               "INNER JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID " +
+                               "WHERE lds.DatSanID = ?";
+            psSelect = conn.prepareStatement(sqlSelect);
+            psSelect.setInt(1, datSanId);
+            rs = psSelect.executeQuery();
+
+            if (!rs.next()) {
+                throw new CheckInException("Không tìm thấy ca chơi có ID: " + datSanId);
+            }
+
+            String trangThai = rs.getString("TrangThai");
+            if (!"Đang sử dụng".equals(trangThai)) {
+                throw new CheckInException("Ca chơi này không ở trạng thái 'Đang sử dụng'.");
+            }
+
+            Time gioBatDau = rs.getTime("GioBatDau");
+            Time actualStartTime = rs.getTime("actual_start_time");
+            Time startTime = actualStartTime != null ? actualStartTime : gioBatDau;
+            Time gioKetThucPlanned = rs.getTime("GioKetThuc");
+            String ghiChu = rs.getString("GhiChu");
+            BigDecimal tongTienSanOriginal = rs.getBigDecimal("TongTienSan");
+
+            LocalTime localStart = startTime.toLocalTime();
+            LocalTime localEndPlanned = gioKetThucPlanned.toLocalTime();
+            LocalTime localNow = LocalTime.now();
+
+            // Tính thời gian đã chơi thực tế
+            long durationMins = Duration.between(localStart, localNow).toMinutes();
+            if (durationMins < 0) {
+                // Hỗ trợ ca chơi qua đêm (hiếm nhưng có thể xảy ra)
+                durationMins += 24 * 60;
+            }
+            if (durationMins < 1) {
+                durationMins = 1; // Tối thiểu 1 phút
+            }
+
+            // Tính đơn giá gốc bằng cách chia TongTienSanOriginal cho thời lượng dự kiến
+            long plannedMins = 0;
+            if (ghiChu != null && ghiChu.contains("[duration: ")) {
+                try {
+                    int startIndex = ghiChu.indexOf("[duration: ") + 11;
+                    int endIndex = ghiChu.indexOf("]", startIndex);
+                    plannedMins = Long.parseLong(ghiChu.substring(startIndex, endIndex));
+                } catch (Exception ignored) {}
+            }
+            if (plannedMins <= 0) {
+                plannedMins = Duration.between(localStart, localEndPlanned).toMinutes();
+                if (plannedMins < 0) {
+                    plannedMins += 24 * 60;
+                }
+            }
+            if (plannedMins <= 0) {
+                plannedMins = 60; // Tránh chia cho 0
+            }
+            double hourlyRate = tongTienSanOriginal.doubleValue() / (plannedMins / 60.0);
+
+            // Tính toán số tiền thực tế
+            double finalCourtPrice = (durationMins / 60.0) * hourlyRate;
+            BigDecimal finalCourtPriceBD = BigDecimal.valueOf(finalCourtPrice);
+
+            // 2. Cập nhật GioKetThuc và TongTienDuKien trong LichDatSan
+            String newGhiChu = (ghiChu != null ? ghiChu : "") + " [Đã chốt giờ thực tế: " + durationMins + " phút]";
+            String sqlUpdateBooking = "UPDATE LichDatSan SET GioKetThuc = ?, TongTienDuKien = ?, GhiChu = ? WHERE DatSanID = ?";
+            psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
+            psUpdateBooking.setTime(1, Time.valueOf(localNow));
+            psUpdateBooking.setBigDecimal(2, finalCourtPriceBD);
+            psUpdateBooking.setString(3, newGhiChu);
+            psUpdateBooking.setInt(4, datSanId);
+            psUpdateBooking.executeUpdate();
+
+            // 3. Cập nhật tổng tiền trong HoaDon
+            String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe, AccountID_NhanVien = ? WHERE DatSanID = ?";
+            psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
+            psUpdateInvoice.setBigDecimal(1, finalCourtPriceBD);
+            psUpdateInvoice.setBigDecimal(2, finalCourtPriceBD);
+            psUpdateInvoice.setInt(3, staffAccountId);
+            psUpdateInvoice.setInt(4, datSanId);
+            psUpdateInvoice.executeUpdate();
+
+            conn.commit();
+            logger.info("Đã chốt giờ chơi thực tế thành công cho ca #" + datSanId + " (Đã chơi " + durationMins + " phút, Số tiền: " + finalCourtPriceBD + ")");
+
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    logger.error("Failed to rollback stopOpenSession transaction", ex);
+                }
+            }
+            if (e instanceof CheckInException) {
+                throw (CheckInException) e;
+            } else {
+                throw new CheckInException("Lỗi hệ thống khi dừng ca chơi: " + e.getMessage());
+            }
+        } finally {
+            closeResource(rs);
+            closeResource(psSelect);
+            closeResource(psUpdateBooking);
+            closeResource(psUpdateInvoice);
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    logger.error("Failed to close connection", e);
+                }
+            }
+        }
     }
 
     /**

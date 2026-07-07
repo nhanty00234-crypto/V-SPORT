@@ -115,6 +115,7 @@ public class CheckInServlet extends HttpServlet {
                 String durationStr = req.getParameter("duration");
                 String donGiaStr = req.getParameter("donGia");
                 String ghiChuOverride = req.getParameter("ghiChuOverride");
+                String playMode = req.getParameter("playMode"); // "FIXED" or "OPEN"
 
                 if (sanIdStr == null || durationStr == null || donGiaStr == null ||
                         sanIdStr.isEmpty() || durationStr.isEmpty() || donGiaStr.isEmpty()) {
@@ -174,8 +175,11 @@ public class CheckInServlet extends HttpServlet {
                 }
 
                 String ghiChu = "Walk-in";
+                if ("OPEN".equals(playMode)) {
+                    ghiChu = "Walk-in [Không cố định] [duration: " + duration + "]";
+                }
                 if (ghiChuOverride != null && !ghiChuOverride.trim().isEmpty()) {
-                    ghiChu = "Walk-in [Thay đổi giá: " + ghiChuOverride.trim() + "]";
+                    ghiChu += " [Thay đổi giá: " + ghiChuOverride.trim() + "]";
                 }
 
                 String lockKey = "walkin_lock_" + sanId;
@@ -189,6 +193,15 @@ public class CheckInServlet extends HttpServlet {
                     session.removeAttribute(lockKey);
                 }
                 successMsg = "Đã mở sân thành công cho khách vãng lai!";
+            } else if ("stopOpenSession".equals(action)) {
+                String datSanIdStr = req.getParameter("datSanId");
+                if (datSanIdStr == null || datSanIdStr.isEmpty()) {
+                    throw new CheckInException("Thiếu ID đơn đặt sân để dừng.");
+                }
+                int datSanId = Integer.parseInt(datSanIdStr);
+                checkInDAO.stopOpenSession(datSanId, user.getAccountId());
+                successMsg = "Đã dừng chơi và chốt thời gian cho ca #" + datSanId + "!";
+                req.setAttribute("autoOpenInvoiceDatSanId", datSanId);
             } else if ("cancelNoShow".equals(action)) {
                 // Há»§y Ä‘Æ¡n Ä‘áº·t sÃ¢n do khÃ¡ch bÃ¹ng
                 String datSanIdStr = req.getParameter("datSanId");

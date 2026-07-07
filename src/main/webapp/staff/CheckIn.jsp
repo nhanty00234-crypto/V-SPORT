@@ -232,6 +232,8 @@
                          data-giokethuclenden="${san.gioKetThucLenDen}"
                          data-datsanidactive="${san.datSanIdActive}"
                          data-giobatdauactive="${san.gioBatDauActive}"
+                         data-giokethucactive="${san.gioKetThucActive}"
+                         data-ghichuactive="${san.ghiChuActive}"
                          onclick="onCardClick(event, this)">
                         
                         <div class="w-full flex flex-col items-center">
@@ -244,7 +246,13 @@
                                     <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
                                     <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
                                     <span class="badge ${badgeTheme} mt-2 uppercase text-[10px]">Đang sử dụng</span>
-                                    <p class="text-[10px] text-zinc-500 mt-1">Bắt đầu: <span class="font-bold text-zinc-700">${san.gioBatDauActive}</span></p>
+                                    <p class="text-[10px] text-zinc-500 mt-1 flex items-center justify-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                        <span class="card-timer font-bold text-zinc-700" 
+                                              data-start="${san.gioBatDauActive}" 
+                                              data-end="${san.gioKetThucActive}" 
+                                              data-note="${san.ghiChuActive}">Bắt đầu: ${san.gioBatDauActive}</span>
+                                    </p>
                                     
                                     <button type="button" onclick="openStaffInvoiceModal(${san.datSanIdActive})" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
                                         Dịch vụ & Thanh toán
@@ -483,6 +491,167 @@
 </main>
 
 <script>
+    let drawerTimerInterval = null;
+
+    // Convert time string "HH:MM" or "HH:MM:SS" to a Date object today
+    function parseTimeToDate(timeStr) {
+        if (!timeStr) return null;
+        const parts = timeStr.split(':');
+        if (parts.length < 2) return null;
+        const d = new Date();
+        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+        return d;
+    }
+
+    // Get correct start and end Date objects, handling potential overnight wrap-around
+    function getTimerDates(startStr, endStr) {
+        const startDate = parseTimeToDate(startStr);
+        let endDate = parseTimeToDate(endStr);
+        if (startDate && endDate && endDate < startDate) {
+            // End time is on the next day
+            endDate.setDate(endDate.getDate() + 1);
+        }
+        return { startDate, endDate };
+    }
+
+    // Format millisecond duration into HH:MM:SS
+    function formatDuration(ms) {
+        const totalSecs = Math.max(0, Math.floor(ms / 1000));
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        
+        const pad = (num) => String(num).padStart(2, '0');
+        return pad(hrs) + ':' + pad(mins) + ':' + pad(secs);
+    }
+
+    // Update all card timers in the court grid
+    function updateAllCardTimers() {
+        const timers = document.querySelectorAll('.card-timer');
+        const now = new Date();
+        
+        timers.forEach(timer => {
+            const startStr = timer.getAttribute('data-start');
+            const endStr = timer.getAttribute('data-end');
+            const noteStr = timer.getAttribute('data-note') || '';
+            if (!startStr) return;
+            
+            const isOpenMode = noteStr.includes('Không cố định');
+            const { startDate, endDate } = getTimerDates(startStr, endStr);
+            
+            if (isOpenMode) {
+                // Count up timer
+                if (startDate) {
+                    let elapsedMs = now - startDate;
+                    if (elapsedMs < 0) elapsedMs += 24 * 60 * 60 * 1000;
+                    timer.textContent = "Đã chơi: " + formatDuration(elapsedMs);
+                    timer.className = "card-timer font-black text-emerald-650 animate-pulse";
+                }
+            } else {
+                // Countdown timer
+                if (startDate && endDate) {
+                    if (now < startDate) {
+                        timer.textContent = "Chờ bắt đầu";
+                        timer.className = "card-timer font-bold text-zinc-500";
+                    } else if (now >= endDate) {
+                        timer.textContent = "Hết giờ chơi";
+                        timer.className = "card-timer font-black text-rose-600 animate-bounce";
+                    } else {
+                        const remainingMs = endDate - now;
+                        timer.textContent = "Còn lại: " + formatDuration(remainingMs);
+                        
+                        // Change style dynamically based on remaining time
+                        const remainingMins = remainingMs / 60000;
+                        if (remainingMins <= 15) {
+                            timer.className = "card-timer font-black text-rose-600 animate-pulse";
+                        } else {
+                            timer.className = "card-timer font-bold text-indigo-650";
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Start timer loop for the side drawer
+    function startDrawerTimerLoop(startDate, endDate, isOpenMode, ratePerHour, baseCourtPrice) {
+        if (drawerTimerInterval) {
+            clearInterval(drawerTimerInterval);
+        }
+        
+        const timerValEl = document.getElementById('drawer-active-timer-val');
+        const timerRowEl = document.getElementById('drawer-active-timer-row');
+        const timerLabelEl = document.getElementById('drawer-active-timer-label');
+        const totalPriceEl = document.getElementById('drawer-active-total-price');
+        
+        function update() {
+            const now = new Date();
+            if (isOpenMode) {
+                // Count-up mode
+                if (startDate) {
+                    let elapsedMs = now - startDate;
+                    if (elapsedMs < 0) elapsedMs += 24 * 60 * 60 * 1000;
+                    
+                    if (timerValEl) timerValEl.textContent = formatDuration(elapsedMs);
+                    if (timerLabelEl) timerLabelEl.textContent = "Đang đếm tới:";
+                    
+                    // Styling
+                    if (timerRowEl) {
+                        timerRowEl.className = "flex justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800";
+                    }
+                    if (timerValEl) {
+                        timerValEl.className = "font-black text-sm text-emerald-700 animate-pulse";
+                    }
+                    
+                    // Real-time calculation of accrued price
+                    const elapsedHours = (elapsedMs / 1000) / 3600.0;
+                    const accruedPrice = elapsedHours * ratePerHour;
+                    if (totalPriceEl) totalPriceEl.textContent = formatCurrency(accruedPrice);
+                }
+            } else {
+                // Countdown mode
+                if (startDate && endDate) {
+                    if (now < startDate) {
+                        if (timerValEl) timerValEl.textContent = "Chờ bắt đầu";
+                        if (timerLabelEl) timerLabelEl.textContent = "Trạng thái:";
+                        if (timerRowEl) timerRowEl.className = "flex justify-between p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-800";
+                        if (timerValEl) timerValEl.className = "font-bold text-sm text-zinc-650";
+                        if (totalPriceEl) totalPriceEl.textContent = formatCurrency(baseCourtPrice);
+                    } else if (now >= endDate) {
+                        if (timerValEl) timerValEl.textContent = "Hết giờ chơi";
+                        if (timerLabelEl) timerLabelEl.textContent = "Thời gian:";
+                        if (timerRowEl) timerRowEl.className = "flex justify-between p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 animate-pulse";
+                        if (timerValEl) timerValEl.className = "font-black text-sm text-rose-700";
+                        if (totalPriceEl) totalPriceEl.textContent = formatCurrency(baseCourtPrice);
+                    } else {
+                        const remainingMs = endDate - now;
+                        if (timerValEl) timerValEl.textContent = formatDuration(remainingMs);
+                        if (timerLabelEl) timerLabelEl.textContent = "Đếm ngược:";
+                        
+                        const remainingMins = remainingMs / 60000;
+                        if (remainingMins <= 15) {
+                            if (timerRowEl) timerRowEl.className = "flex justify-between p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 animate-pulse";
+                            if (timerValEl) timerValEl.className = "font-black text-sm text-rose-700";
+                        } else {
+                            if (timerRowEl) timerRowEl.className = "flex justify-between p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800";
+                            if (timerValEl) timerValEl.className = "font-black text-sm text-indigo-700";
+                        }
+                        if (totalPriceEl) totalPriceEl.textContent = formatCurrency(baseCourtPrice);
+                    }
+                }
+            }
+        }
+        
+        update();
+        drawerTimerInterval = setInterval(update, 1000);
+    }
+    
+    // Auto start grid timers
+    document.addEventListener("DOMContentLoaded", () => {
+        updateAllCardTimers();
+        setInterval(updateAllCardTimers, 1000);
+    });
+
     // Responsive Mobile Menu handler
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     if (mobileMenuBtn) {
@@ -496,7 +665,7 @@
 
     async function pollUpdates() {
         try {
-            const response = await fetch(`\${contextPath}/staff/checkin?ajax=true`);
+            const response = await fetch('${pageContext.request.contextPath}/staff/checkin?ajax=true');
             if (!response.ok) return;
             const data = await response.json();
             
@@ -543,6 +712,8 @@
                                  data-giokethuclenden="\${gioKetThucLenDenStr}"
                                  data-datsanidactive="\${san.datSanIdActive}"
                                  data-giobatdauactive="\${san.gioBatDauActive}"
+                                 data-giokethucactive="\${san.gioKetThucActive || ''}"
+                                 data-ghichuactive="\${san.ghiChuActive || ''}"
                                  onclick="onCardClick(event, this)">
                                 <div class="w-full flex flex-col items-center">
                                     <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
@@ -552,7 +723,13 @@
                                     <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
                                     <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
                                     <span class="badge ${badgeTheme} mt-2 uppercase text-[10px]">Đang sử dụng</span>
-                                    <p class="text-[10px] text-zinc-555 mt-1">Bắt đầu: <span class="font-bold">\${san.gioBatDauActive || ''}</span></p>
+                                    <p class="text-[10px] text-zinc-500 mt-1 flex items-center justify-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                        <span class="card-timer font-bold text-zinc-700" 
+                                              data-start="\${san.gioBatDauActive || ''}" 
+                                              data-end="\${san.gioKetThucActive || ''}" 
+                                              data-note="\${san.ghiChuActive || ''}">Bắt đầu: \${san.gioBatDauActive || ''}</span>
+                                    </p>
                                     
                                     <button type="button" onclick="openStaffInvoiceModal(\${san.datSanIdActive})" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
                                         Dịch vụ & Thanh toán
@@ -704,7 +881,7 @@
                         if (booking.trangThai === 'Đã xác nhận' || booking.trangThai === 'Chờ xác nhận') {
                             actionButtons = `
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <form action="\${contextPath}/staff/checkin" method="post" class="inline-block">
+                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
                                         <input type="hidden" name="action" value="checkInPreBooked">
                                         <input type="hidden" name="datSanId" value="\${booking.datSanId}">
                                         <input type="hidden" name="daThuTienMat" value="false">
@@ -712,7 +889,7 @@
                                             Mở sân
                                         </button>
                                     </form>
-                                    <form action="\${contextPath}/staff/checkin" method="post" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
+                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
                                         <input type="hidden" name="action" value="cancelNoShow">
                                         <input type="hidden" name="datSanId" value="\${booking.datSanId}">
                                         <button type="submit" class="bg-red-550 hover:bg-red-700 text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
@@ -729,6 +906,10 @@
                             `;
                         }
 
+                        const batDau = booking.gioBatDau.substring(0, 5);
+                        const ketThuc = booking.gioKetThuc.substring(0, 5);
+                        const formattedTongTien = formatCurrency(booking.tongTien);
+
                         htmlTable += `
                             <tr class="border-b \${themeBorder} hover:bg-\${isManager ? 'purple' : 'orange'}-50/10 transition-all">
                                 <td class="p-3 font-semibold text-zinc-800">\${booking.tenSan}</td>
@@ -737,10 +918,10 @@
                                     <div class="text-[10px] text-zinc-500 italic max-w-[150px] truncate" title="\${booking.ghiChu}">\${booking.ghiChu}</div>
                                 </td>
                                 <td class="p-3 text-center text-zinc-600 font-mono">
-                                    \${booking.gioBatDau.substring(0, 5)} - \${booking.gioKetThuc.substring(0, 5)}
+                                    \${batDau} - \${ketThuc}
                                 </td>
                                 <td class="p-3 text-right font-bold text-zinc-800">
-                                    \${formatCurrency(booking.tongTien)}
+                                    \${formattedTongTien}
                                 </td>
                                 <td class="p-3 text-center">
                                     <span class="badge \${booking.nguonDatSan === 'Walk-in' ? 'badge-gray' : 'badge-blue'}">
@@ -1112,14 +1293,29 @@
                     <span id="drawer-active-start" class="font-bold text-zinc-800">-</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-zinc-550">Thời gian đã chơi:</span>
-                    <span id="drawer-active-elapsed" class="font-bold text-zinc-800">0 phút</span>
+                    <span class="text-zinc-550">Kiểu giờ chơi:</span>
+                    <span id="drawer-active-mode" class="font-bold text-zinc-800">-</span>
+                </div>
+                <!-- Dynamic Timer display row -->
+                <div class="flex justify-between p-2.5 rounded-xl bg-white border border-indigo-100/50" id="drawer-active-timer-row">
+                    <span class="text-zinc-600 font-semibold" id="drawer-active-timer-label">Thời gian:</span>
+                    <span id="drawer-active-timer-val" class="font-black text-sm text-zinc-800">-</span>
                 </div>
                 <div class="flex justify-between pt-2 border-t border-indigo-50/50 text-sm font-extrabold">
                     <span class="text-zinc-700">Tổng tiền sân tạm tính:</span>
                     <span id="drawer-active-total-price" class="text-indigo-700">0 đ</span>
                 </div>
             </div>
+
+            <!-- Stop Session Form (only for OPEN mode) -->
+            <form id="drawer-stop-session-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" class="hidden">
+                <input type="hidden" name="action" value="stopOpenSession">
+                <input type="hidden" id="drawer-stop-datsan-id" name="datSanId">
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 rounded-xl shadow-lg hover:shadow-rose-600/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 animate-pulse">
+                    <span class="material-symbols-outlined text-[18px]">stop_circle</span>
+                    Dừng chơi & Tính tiền
+                </button>
+            </form>
             
             <button type="button" id="drawer-btn-invoice" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl shadow hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5">
                 <span class="material-symbols-outlined text-[18px]">payments</span>
@@ -1160,14 +1356,14 @@
         }, 10);
  
         // Fetch invoice detail
-        fetch(`${pageContext.request.contextPath}/staff/checkin?action=getInvoiceDetails&datSanId=\${datSanId}`)
+        fetch('${pageContext.request.contextPath}/staff/checkin?action=getInvoiceDetails&datSanId=' + datSanId)
             .then(res => res.json())
             .then(data => {
                 staffProducts = data.products || [];
                 staffOrdered = data.ordered || [];
                 
                 document.getElementById("staff-invoice-court-name").textContent = data.tenSan;
-                document.getElementById("staff-invoice-time-slot").textContent = `\${data.gioBatDau} - \${data.gioKetThuc} (\${data.ngayDat})`;
+                document.getElementById("staff-invoice-time-slot").textContent = data.gioBatDau + ' - ' + data.gioKetThuc + ' (' + data.ngayDat + ')';
                 
                 const statusBadge = document.getElementById("staff-invoice-payment-status");
                 statusBadge.textContent = data.trangThaiThanhToan;
@@ -1247,13 +1443,15 @@
         } else {
             staffOrdered.forEach(item => {
                 const prod = staffProducts.find(p => p.SanPhamID === item.SanPhamID);
-                const prodName = prod ? prod.TenSanPham : `Sản phẩm #\${item.SanPhamID}`;
+                const prodName = prod ? prod.TenSanPham : ('Sản phẩm #' + item.SanPhamID);
                 const unit = prod ? (prod.DonViTinh || 'cái') : 'cái';
+                const formattedPrice = item.DonGiaTaiThoiDiemBan.toLocaleString('vi-VN');
+                const formattedTotal = item.ThanhTien.toLocaleString('vi-VN');
                 
                 tbody.insertAdjacentHTML("beforeend", `
                     <tr class="border-b border-zinc-100 hover:bg-zinc-50/50">
                         <td class="p-3 font-semibold text-zinc-850">\${prodName}</td>
-                        <td class="p-3 text-center text-zinc-600">\${item.DonGiaTaiThoiDiemBan.toLocaleString('vi-VN')} đ</td>
+                        <td class="p-3 text-center text-zinc-600">\${formattedPrice} đ</td>
                         <td class="p-3 text-center">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, -1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">-</button>
@@ -1261,7 +1459,7 @@
                                 <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, 1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">+</button>
                             </div>
                         </td>
-                        <td class="p-3 text-right font-bold text-zinc-800">\${item.ThanhTien.toLocaleString('vi-VN')} đ</td>
+                        <td class="p-3 text-right font-bold text-zinc-800">\${formattedTotal} đ</td>
                         <td class="p-3 text-center">
                             <button type="button" onclick="removeStaffItem(\${item.SanPhamID})" class="p-1 rounded text-red-500 hover:bg-red-50 flex items-center justify-center mx-auto transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
@@ -1455,7 +1653,7 @@
         const donGia = parseFloat(donGiaInput.value) || 0;
         
         const subtotal = (duration / 60.0) * donGia;
-        subtotalPreview.innerHTML = `Tạm tính tiền sân: <span class="${themeTextMedium} font-black">\${formatCurrency(subtotal)}</span>`;
+        subtotalPreview.innerHTML = 'Tạm tính tiền sân: <span class="' + '${themeTextMedium}' + ' font-black">' + formatCurrency(subtotal) + '</span>';
     }
 
     function onWalkinPriceInput() {
@@ -1533,7 +1731,7 @@
     function openCourtDetailDrawer(sanId) {
         activeDrawerSanId = sanId;
         
-        const cardEl = document.querySelector(`.card[data-sanid="\${sanId}"]`);
+        const cardEl = document.querySelector('.card[data-sanid="' + sanId + '"]');
         if (!cardEl) return;
         
         const tenSan = cardEl.getAttribute('data-tensan');
@@ -1551,10 +1749,10 @@
         document.getElementById('drawer-court-name').textContent = tenSan;
         document.getElementById('drawer-court-type').textContent = tenLoaiSan;
         document.getElementById('drawer-court-id').textContent = sanId;
-        document.getElementById('drawer-court-coso').textContent = `CS\${sessionScope.user.coSoId}`;
+        document.getElementById('drawer-court-coso').textContent = 'CS' + '${sessionScope.user.coSoId}';
         document.getElementById('drawer-price-nolite').textContent = formatCurrency(giaKhongDen);
         document.getElementById('drawer-price-lite').textContent = formatCurrency(giaCoDen);
-        document.getElementById('drawer-light-time').textContent = gioBatDauLenDen && gioKetThucLenDen ? `\${gioBatDauLenDen.substring(0,5)} - \${gioKetThucLenDen.substring(0,5)}` : 'Không có cấu hình';
+        document.getElementById('drawer-light-time').textContent = gioBatDauLenDen && gioKetThucLenDen ? (gioBatDauLenDen.substring(0,5) + ' - ' + gioKetThucLenDen.substring(0,5)) : 'Không có cấu hình';
         
         const descContainer = document.getElementById('drawer-desc-container');
         if (moTa && moTa !== 'null') {
@@ -1570,7 +1768,7 @@
         if (trangThai === 'Sẵn sàng') {
             statusBadge.className = 'badge badge-green';
         } else if (trangThai === 'Đang sử dụng') {
-            statusBadge.className = 'badge \${badgeTheme}';
+            statusBadge.className = 'badge ' + '${badgeTheme}';
         } else if (trangThai === 'Bảo trì') {
             statusBadge.className = 'badge badge-amber';
         } else {
@@ -1622,28 +1820,52 @@
             document.getElementById('drawer-active-id').textContent = datSanIdActive || '-';
             document.getElementById('drawer-active-start').textContent = gioBatDauActive || '-';
             
-            // Calculate elapsed time
-            if (gioBatDauActive) {
-                const now = new Date();
-                const [h, m] = gioBatDauActive.split(':');
-                const start = new Date();
-                start.setHours(parseInt(h), parseInt(m), 0);
-                
-                let diffMs = now - start;
-                if (diffMs < 0) {
-                    diffMs += 24 * 60 * 60 * 1000;
-                }
-                const elapsedMin = Math.floor(diffMs / 60000);
-                document.getElementById('drawer-active-elapsed').textContent = `\${elapsedMin} phút`;
-                
-                // Calculate estimated accrued price
-                const elapsedHours = elapsedMin / 60.0;
-                const accruedPrice = elapsedHours * giaKhongDen;
-                document.getElementById('drawer-active-total-price').textContent = formatCurrency(accruedPrice);
-            } else {
-                document.getElementById('drawer-active-elapsed').textContent = 'Không rõ';
-                document.getElementById('drawer-active-total-price').textContent = '0 đ';
+            // Set datSanId on the stop session form
+            document.getElementById('drawer-stop-datsan-id').value = datSanIdActive || '';
+            
+            // Determine playing mode
+            const gioKetThucActive = cardEl.getAttribute('data-giokethucactive') || '';
+            const ghiChuActive = cardEl.getAttribute('data-ghichuactive') || '';
+            const isOpenMode = ghiChuActive.includes('Không cố định');
+            
+            // Display playing mode
+            const activeModeEl = document.getElementById('drawer-active-mode');
+            if (activeModeEl) {
+                activeModeEl.textContent = isOpenMode ? 'Giờ không cố định' : 'Giờ cố định';
             }
+            
+            // Show/Hide Stop Session button depending on mode
+            const stopFormEl = document.getElementById('drawer-stop-session-form');
+            if (stopFormEl) {
+                if (isOpenMode) {
+                    stopFormEl.classList.remove('hidden');
+                } else {
+                    stopFormEl.classList.add('hidden');
+                }
+            }
+
+            // Calculate start and end dates
+            const { startDate, endDate } = getTimerDates(gioBatDauActive, gioKetThucActive);
+
+            // Determine active hourly rate based on whether current time is in light time
+            const now = new Date();
+            const currentTimeStr = now.toTimeString().split(' ')[0];
+            let rate = giaKhongDen;
+            if (gioBatDauLenDen && gioKetThucLenDen) {
+                if (currentTimeStr >= gioBatDauLenDen && currentTimeStr <= gioKetThucLenDen) {
+                    rate = giaCoDen;
+                }
+            }
+
+            // Estimate baseCourtPrice for fixed mode
+            let baseCourtPrice = 0;
+            if (!isOpenMode && startDate && endDate) {
+                const plannedMins = Math.max(0, Math.floor((endDate - startDate) / 60000));
+                baseCourtPrice = (plannedMins / 60.0) * rate;
+            }
+
+            // Start the drawer timer loop
+            startDrawerTimerLoop(startDate, endDate, isOpenMode, rate, baseCourtPrice);
             
             const payBtn = document.getElementById('drawer-btn-invoice');
             payBtn.onclick = () => {
@@ -1667,6 +1889,86 @@
             drawer.classList.remove('translate-x-full');
             overlay.classList.remove('opacity-0');
         }, 10);
+    }
+
+    function setDrawerPlayMode(mode) {
+        const lblFixed = document.getElementById('drawer-mode-fixed-label');
+        const lblOpen = document.getElementById('drawer-mode-open-label');
+        const fixedPanel = document.getElementById('drawer-fixed-duration-panel');
+        const openNote = document.getElementById('drawer-open-duration-note');
+        const durationInput = document.getElementById('drawer-walkin-duration');
+        const customHoursInput = document.getElementById('drawer-custom-hours');
+        
+        if (mode === 'FIXED') {
+            if (lblFixed) lblFixed.className = "border-2 border-indigo-600 bg-indigo-50/30 rounded-xl p-3 cursor-pointer text-xs font-bold text-indigo-700 transition-all";
+            if (lblOpen) lblOpen.className = "border-2 border-zinc-150 rounded-xl p-3 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all";
+            if (fixedPanel) fixedPanel.classList.remove('hidden');
+            if (openNote) openNote.classList.add('hidden');
+            
+            // Revert duration input to the active button's value
+            let activeFixedBtn = document.querySelector('.drawer-duration-btn.border-indigo-600');
+            if (activeFixedBtn) {
+                const dur = parseInt(activeFixedBtn.getAttribute('data-duration-btn')) || 120;
+                if (durationInput) durationInput.value = dur;
+            } else {
+                if (durationInput) durationInput.value = 120;
+            }
+            if (customHoursInput) customHoursInput.value = '';
+        } else {
+            if (lblFixed) lblFixed.className = "border-2 border-zinc-150 rounded-xl p-3 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all";
+            if (lblOpen) lblOpen.className = "border-2 border-indigo-600 bg-indigo-50/30 rounded-xl p-3 cursor-pointer text-xs font-bold text-indigo-700 transition-all";
+            if (fixedPanel) fixedPanel.classList.add('hidden');
+            if (openNote) openNote.classList.remove('hidden');
+            
+            // For open mode, we set duration input to 120 minutes by default (which represents the initial conflict checking window, 2 hours)
+            if (durationInput) durationInput.value = 120;
+        }
+        calculateDrawerPrice();
+    }
+
+    function setDrawerDuration(mins) {
+        const durationInput = document.getElementById('drawer-walkin-duration');
+        if (durationInput) {
+            durationInput.value = mins;
+        }
+        
+        // Highlight active button
+        const buttons = document.querySelectorAll('.drawer-duration-btn');
+        buttons.forEach(btn => {
+            const btnDur = parseInt(btn.getAttribute('data-duration-btn'));
+            if (btnDur === mins) {
+                btn.className = "drawer-duration-btn h-9 rounded-lg border border-indigo-600 bg-indigo-50 text-xs font-bold text-indigo-700";
+            } else {
+                btn.className = "drawer-duration-btn h-9 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50";
+            }
+        });
+        
+        // Clear custom input
+        const customHoursInput = document.getElementById('drawer-custom-hours');
+        if (customHoursInput) {
+            customHoursInput.value = '';
+        }
+        
+        calculateDrawerPrice();
+    }
+
+    function setDrawerCustomDuration() {
+        const customHoursInput = document.getElementById('drawer-custom-hours');
+        const durationInput = document.getElementById('drawer-walkin-duration');
+        if (!customHoursInput || !durationInput) return;
+        
+        const hours = parseFloat(customHoursInput.value);
+        if (!isNaN(hours) && hours > 0) {
+            const mins = Math.round(hours * 60);
+            durationInput.value = mins;
+            
+            // De-select all fixed buttons
+            const buttons = document.querySelectorAll('.drawer-duration-btn');
+            buttons.forEach(btn => {
+                btn.className = "drawer-duration-btn h-9 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50";
+            });
+        }
+        calculateDrawerPrice();
     }
 
     function calculateDrawerPrice() {
@@ -1694,6 +1996,10 @@
     }
 
     function closeCourtDetailDrawer() {
+        if (drawerTimerInterval) {
+            clearInterval(drawerTimerInterval);
+            drawerTimerInterval = null;
+        }
         activeDrawerSanId = null;
         const drawer = document.getElementById('courtDetailDrawer');
         const overlay = document.getElementById('drawerOverlay');
@@ -1740,32 +2046,35 @@
         list.innerHTML = '';
         splitBills.forEach(sb => {
             const isPaid = sb.trangThai === 'Đã thanh toán';
+            const formattedTotal = formatCurrency(sb.tongThanhToan);
+            const payBtnHtml = !isPaid ? (
+                '<button type="button" onclick="paySplitBill(' + sb.hoaDonId + ')" ' +
+                'class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] active:scale-95 transition-all">' +
+                'Thanh toán' +
+                '</button>'
+            ) : '';
             list.insertAdjacentHTML('beforeend', `
                 <div class="p-3 rounded-xl border \${isPaid ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'} text-xs flex items-center justify-between gap-2">
                     <div>
                         <span class="font-bold text-zinc-800">HĐ Tách #\${sb.hoaDonId}</span>
                         <span class="text-zinc-500 ml-2">\${sb.ngayLap}</span>
                         <span class="ml-2 \${isPaid ? 'text-green-700' : 'text-amber-700'} font-bold">\${isPaid ? '✓ Đã TT' : '⏳ Chưa TT'}</span>
-                        <span class="ml-2 font-extrabold text-zinc-800">\${formatCurrency(sb.tongThanhToan)}</span>
+                        <span class="ml-2 font-extrabold text-zinc-800">\${formattedTotal}</span>
                     </div>
-                    \${!isPaid ? `
-                    <button type="button" onclick="paySplitBill(\${sb.hoaDonId})"
-                        class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] active:scale-95 transition-all">
-                        Thanh toán
-                    </button>` : ''}
+                    \${payBtnHtml}
                 </div>
             `);
         });
     }
 
     function paySplitBill(hoaDonId) {
-        if (!confirm(`Xác nhận thanh toán hóa đơn tách #\${hoaDonId}?`)) return;
+        if (!confirm('Xác nhận thanh toán hóa đơn tách #' + hoaDonId + '?')) return;
         const form = document.createElement('form');
         form.method = 'post';
         form.action = '${pageContext.request.contextPath}/staff/checkin';
-        form.innerHTML = `<input type="hidden" name="action" value="payInvoice">
-            <input type="hidden" name="hoaDonId" value="\${hoaDonId}">
-            <input type="hidden" name="phuongThucThanhToan" value="Tiền mặt">`;
+        form.innerHTML = '<input type="hidden" name="action" value="payInvoice">' +
+            '<input type="hidden" name="hoaDonId" value="' + hoaDonId + '">' +
+            '<input type="hidden" name="phuongThucThanhToan" value="Tiền mặt">';
         document.body.appendChild(form);
         form.submit();
     }
@@ -1828,5 +2137,16 @@
         }
     });
 </script>
+
+<c:if test="${not empty autoOpenInvoiceDatSanId}">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                openStaffInvoiceModal(${autoOpenInvoiceDatSanId});
+            }, 600);
+        });
+    </script>
+</c:if>
+
 </body>
 </html>
