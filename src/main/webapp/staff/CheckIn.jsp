@@ -127,7 +127,7 @@
                 <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0 shadow-inner">
                     <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1">lock</span>
                 </div>
-                <div>
+                <div class="hidden">
                     <h3 class="font-black text-base text-amber-950 tracking-tight flex items-center gap-1.5">
                         CẢNH BÁO THU TIỀN MẶT <span class="badge badge-red uppercase">Payment Lock</span>
                     </h3>
@@ -154,6 +154,19 @@
         </section>
     </c:if>
 
+    <c:set var="availCount" value="0" />
+    <c:set var="useCount" value="0" />
+    <c:set var="maintCount" value="0" />
+    <c:set var="closeCount" value="0" />
+    <c:forEach var="s" items="${danhSachSan}">
+        <c:choose>
+            <c:when test="${s.trangThai == 'Sẵn sàng'}"><c:set var="availCount" value="${availCount + 1}" /></c:when>
+            <c:when test="${s.trangThai == 'Đang sử dụng'}"><c:set var="useCount" value="${useCount + 1}" /></c:when>
+            <c:when test="${s.trangThai == 'Bảo trì'}"><c:set var="maintCount" value="${maintCount + 1}" /></c:when>
+            <c:otherwise><c:set var="closeCount" value="${closeCount + 1}" /></c:otherwise>
+        </c:choose>
+    </c:forEach>
+
     <!-- Welcome & Facility Status Bar -->
     <section class="hero-gradient rounded-2xl border ${themeBorderStrong} p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
         <div class="absolute -top-12 -right-12 w-64 h-64 ${isManager ? 'bg-purple-300/10' : 'bg-orange-300/10'} rounded-full blur-3xl pointer-events-none"></div>
@@ -162,42 +175,126 @@
             <h2 class="text-xl font-black ${themeTextDark} tracking-tight">Kích hoạt & Giám sát sân bãi thời gian thực</h2>
             <p class="text-xs ${themeTextMedium} mt-1">Đảm bảo việc mở sân chính xác và xử lý tranh chấp đặt sân online.</p>
         </div>
-        <div class="flex items-center gap-4 bg-white/60 backdrop-blur-md border ${themeBorder} p-3 rounded-xl shadow-sm">
-            <div class="text-center px-3 border-r ${themeBorder}">
-                <span class="text-[10px] text-zinc-500 font-bold block">TỔNG SỐ SÂN</span>
-                <span class="text-lg font-black ${themeTextMedium}">${danhSachSan.size()}</span>
-            </div>
-            <div class="text-center px-3">
-                <span class="text-[10px] text-zinc-500 font-bold block">LỊCH HÔM NAY</span>
-                <span class="text-lg font-black ${themeTextMedium}">${danhSachLich.size()}</span>
-            </div>
+    </section>
+
+    <!-- Dashboard Stats Grid -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-zinc-200 shadow-sm text-center">
+            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Tổng số sân</span>
+            <span id="stat-total" class="text-lg font-black text-zinc-800 mt-1">${danhSachSan.size()}</span>
+        </div>
+        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-green-200 shadow-sm text-center">
+            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Sẵn sàng</span>
+            <span id="stat-available" class="text-lg font-black text-green-600 mt-1">${availCount}</span>
+        </div>
+        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-indigo-200 shadow-sm text-center">
+            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Đang sử dụng</span>
+            <span id="stat-in-use" class="text-lg font-black text-indigo-650 mt-1">${useCount}</span>
+        </div>
+        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-amber-200 shadow-sm text-center">
+            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Bảo trì</span>
+            <span id="stat-maintenance" class="text-lg font-black text-amber-600 mt-1">${maintCount}</span>
+        </div>
+        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-red-200 shadow-sm text-center">
+            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Tạm đóng</span>
+            <span id="stat-closed" class="text-lg font-black text-red-650 mt-1">${closeCount}</span>
+        </div>
+        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-zinc-200 shadow-sm text-center">
+            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Lịch hôm nay</span>
+            <span id="stat-today" class="text-lg font-black ${themeTextMedium} mt-1">${danhSachLich.size()}</span>
         </div>
     </section>
 
     <!-- 2. HÌNH ẢNH TRẠNG THÁI SÂN BÃI THỰC TẾ (Real-time Field Status Grid) -->
     <section id="field-status-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <c:forEach var="san" items="${danhSachSan}">
-            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 <c:if test="${san.trangThai == 'Đang sử dụng'}">border-${isManager ? 'purple-300' : 'orange-300'} shadow-md</c:if>">
-                <c:choose>
-                    <c:when test="${san.trangThai == 'Đang sử dụng'}">
-                        <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
-                        <div class="w-12 h-12 rounded-2xl ${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center ${themeIcon} mb-3 shadow-inner">
-                            <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+        <c:choose>
+            <c:when test="${danhSachSan.size() == 0}">
+                <div class="col-span-full py-12 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-zinc-150 p-6">
+                    <span class="material-symbols-outlined text-[48px] text-zinc-300 mb-2">sports_soccer</span>
+                    <p class="font-extrabold text-zinc-800 text-sm">Chưa có sân nào trong cơ sở này</p>
+                    <p class="text-xs text-zinc-500 mt-1">Hãy tạo sân ở mục Quản lý sân trước.</p>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="san" items="${danhSachSan}">
+                    <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300
+                         ${san.trangThai == 'Đang sử dụng' ? (isManager ? 'border-purple-300 shadow-md' : 'border-orange-300 shadow-md') : ''}
+                         ${san.trangThai == 'Bảo trì' ? 'border-amber-200 bg-amber-50/20' : ''}
+                         ${san.trangThai == 'Tạm đóng' ? 'border-red-200 bg-red-50/20' : ''}"
+                         data-sanid="${san.sanID}"
+                         data-tensan="${san.tenSan}"
+                         data-loaisan="${san.tenLoaiSan}"
+                         data-trangthai="${san.trangThai}"
+                         data-mota="${san.moTa}"
+                         data-giakhongden="${san.giaKhongDen}"
+                         data-giacoden="${san.giaCoDen}"
+                         data-giobatdaulenden="${san.gioBatDauLenDen}"
+                         data-giokethuclenden="${san.gioKetThucLenDen}"
+                         data-datsanidactive="${san.datSanIdActive}"
+                         data-giobatdauactive="${san.gioBatDauActive}"
+                         onclick="onCardClick(event, this)">
+                        
+                        <div class="w-full flex flex-col items-center">
+                            <c:choose>
+                                <c:when test="${san.trangThai == 'Đang sử dụng'}">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
+                                    <div class="w-12 h-12 rounded-2xl ${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center ${themeIcon} mb-2 shadow-inner">
+                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
+                                    <span class="badge ${badgeTheme} mt-2 uppercase text-[10px]">Đang sử dụng</span>
+                                    <p class="text-[10px] text-zinc-500 mt-1">Bắt đầu: <span class="font-bold text-zinc-700">${san.gioBatDauActive}</span></p>
+                                    
+                                    <button type="button" onclick="openStaffInvoiceModal(${san.datSanIdActive})" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
+                                        Dịch vụ & Thanh toán
+                                    </button>
+                                </c:when>
+                                <c:when test="${san.trangThai == 'Sẵn sàng'}">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
+                                    <span class="badge badge-green mt-2 uppercase text-[10px]">Sẵn sàng</span>
+                                    
+                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
+                                        Mở sân
+                                    </button>
+                                </c:when>
+                                <c:when test="${san.trangThai == 'Bảo trì'}">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">build</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
+                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Bảo trì</span>
+                                    
+                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
+                                        Chi tiết
+                                    </button>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-650 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">block</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
+                                    <span class="badge badge-red mt-2 uppercase text-[10px]">Tạm đóng</span>
+                                    
+                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
+                                        Chi tiết
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
-                        <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
-                        <span class="badge ${badgeTheme} mt-2.5 uppercase text-[10px]">Đang sử dụng</span>
-                    </c:when>
-                    <c:otherwise>
-                        <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
-                        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-3">
-                            <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
-                        <span class="badge badge-green mt-2.5 uppercase text-[10px]">Sẵn sàng</span>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </c:forEach>
+                    </div>
+                </c:forEach>
+            </c:otherwise>
+        </c:choose>
     </section>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -212,20 +309,29 @@
                     <input type="hidden" name="action" value="checkInWalkIn">
                     
                     <div>
-                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Chọn sân mở trống:</label>
-                        <select id="walkin-san-select" name="sanId" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required>
+                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Chọn sân mở trống *:</label>
+                        <select id="walkin-san-select" name="sanId" onchange="updateWalkinPrice()" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required>
                             <option value="">-- Chọn Sân Trống --</option>
+                            <c:if test="${availCount == 0}">
+                                <option value="" disabled>Hiện không có sân trống để mở.</option>
+                            </c:if>
                             <c:forEach var="san" items="${danhSachSan}">
                                 <c:if test="${san.trangThai == 'Sẵn sàng'}">
-                                    <option value="${san.sanID}">${san.tenSan}</option>
+                                    <option value="${san.sanID}" 
+                                            data-giakhongden="${san.giaKhongDen}" 
+                                            data-giacoden="${san.giaCoDen}"
+                                            data-giobatdaulenden="${san.gioBatDauLenDen}"
+                                            data-giokethuclenden="${san.gioKetThucLenDen}">
+                                        ${san.tenSan} (${san.tenLoaiSan})
+                                    </option>
                                 </c:if>
                             </c:forEach>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Thời gian chơi (phút):</label>
-                        <select name="duration" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required>
+                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Thời gian chơi (phút) *:</label>
+                        <select name="duration" onchange="updateWalkinSubtotal()" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required>
                             <option value="60">60 phút (1 giờ)</option>
                             <option value="90">90 phút (1.5 giờ)</option>
                             <option value="120" selected>120 phút (2 giờ)</option>
@@ -235,8 +341,22 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Đơn giá sân (VND / giờ):</label>
-                        <input type="number" name="donGia" value="200000" step="10000" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required>
+                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Đơn giá sân (VND / giờ) *:</label>
+                        <input type="number" id="walkin-dongia-input" name="donGia" value="200000" step="10000" 
+                               class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" 
+                               required ${isManager ? '' : 'readonly'} oninput="onWalkinPriceInput()">
+                    </div>
+
+                    <!-- Lý do thay đổi đơn giá (chỉ Manager được thay đổi) -->
+                    <div id="walkin-override-reason-container" class="hidden mt-3">
+                        <label class="block text-xs font-bold text-zinc-650 mb-1.5">Lý do thay đổi đơn giá *:</label>
+                        <textarea id="walkin-override-reason" name="ghiChuOverride" rows="2" 
+                                  class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none focus:border-indigo-500 focus:bg-white" 
+                                  placeholder="Nhập lý do tại sao thay đổi giá niêm yết..."></textarea>
+                    </div>
+
+                    <div id="walkin-subtotal-preview" class="text-xs font-bold text-zinc-500 mt-1">
+                        Tạm tính tiền sân: <span class="${themeTextMedium} font-black">0đ</span>
                     </div>
 
                     <button type="submit" class="w-full mt-2 ${themeBg} ${themeBgHover} text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
@@ -374,50 +494,160 @@
         });
     }
 
-    // Cấu hình cập nhật dữ liệu tự động (Polling mỗi 30 giây)
-    const contextPath = '${pageContext.request.contextPath}';
-    const isManager = ${isManager};
-    const themeBg = '${themeBg}';
-    const themeBgHover = '${themeBgHover}';
-    const themeIcon = '${themeIcon}';
-    const badgeTheme = '${badgeTheme}';
-    const themeBorder = '${themeBorder}';
-    
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace(/₫/g, 'đ');
-    }
-
     async function pollUpdates() {
         try {
-            const response = await fetch(`${contextPath}/staff/checkin?ajax=true`);
+            const response = await fetch(`\${contextPath}/staff/checkin?ajax=true`);
             if (!response.ok) return;
             const data = await response.json();
+            
+            // Update dynamic stats counters
+            if (data.danhSachSan) {
+                let total = data.danhSachSan.length;
+                let avail = 0, inUse = 0, maint = 0, closed = 0;
+                data.danhSachSan.forEach(s => {
+                    if (s.trangThai === 'Sẵn sàng') avail++;
+                    else if (s.trangThai === 'Đang sử dụng') inUse++;
+                    else if (s.trangThai === 'Bảo trì') maint++;
+                    else closed++;
+                });
+                if(document.getElementById('stat-total')) document.getElementById('stat-total').textContent = total;
+                if(document.getElementById('stat-available')) document.getElementById('stat-available').textContent = avail;
+                if(document.getElementById('stat-in-use')) document.getElementById('stat-in-use').textContent = inUse;
+                if(document.getElementById('stat-maintenance')) document.getElementById('stat-maintenance').textContent = maint;
+                if(document.getElementById('stat-closed')) document.getElementById('stat-closed').textContent = closed;
+            }
+            if (data.danhSachLich && document.getElementById('stat-today')) {
+                document.getElementById('stat-today').textContent = data.danhSachLich.length;
+            }
             
             // 1. Cập nhật Real-time Field Status Grid
             const fieldGrid = document.getElementById('field-status-grid');
             if (fieldGrid && data.danhSachSan) {
                 let htmlGrid = '';
                 data.danhSachSan.forEach(san => {
+                    const tenLoaiSan = san.tenLoaiSan || '';
+                    const gioBatDauLenDenStr = san.gioBatDauLenDen || '';
+                    const gioKetThucLenDenStr = san.gioKetThucLenDen || '';
+                    
                     if (san.trangThai === 'Đang sử dụng') {
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 border-${isManager ? 'purple-300' : 'orange-300'} shadow-md">
-                                <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full \${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
-                                <div class="w-12 h-12 rounded-2xl \${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center \${themeIcon} mb-3 shadow-inner">
-                                    <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300 border-${isManager ? 'purple-300' : 'orange-300'} shadow-md"
+                                 data-sanid="\${san.sanID}"
+                                 data-tensan="\${san.tenSan}"
+                                 data-loaisan="\${tenLoaiSan}"
+                                 data-trangthai="\${san.trangThai}"
+                                 data-mota="\${san.moTa || ''}"
+                                 data-giakhongden="\${san.giaKhongDen}"
+                                 data-giacoden="\${san.giaCoDen}"
+                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
+                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
+                                 data-datsanidactive="\${san.datSanIdActive}"
+                                 data-giobatdauactive="\${san.gioBatDauActive}"
+                                 onclick="onCardClick(event, this)">
+                                <div class="w-full flex flex-col items-center">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
+                                    <div class="w-12 h-12 rounded-2xl ${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center ${themeIcon} mb-2 shadow-inner">
+                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
+                                    <span class="badge ${badgeTheme} mt-2 uppercase text-[10px]">Đang sử dụng</span>
+                                    <p class="text-[10px] text-zinc-555 mt-1">Bắt đầu: <span class="font-bold">\${san.gioBatDauActive || ''}</span></p>
+                                    
+                                    <button type="button" onclick="openStaffInvoiceModal(\${san.datSanIdActive})" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
+                                        Dịch vụ & Thanh toán
+                                    </button>
                                 </div>
-                                <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
-                                <span class="badge \${badgeTheme} mt-2.5 uppercase text-[10px]">Đang sử dụng</span>
+                            </div>
+                        `;
+                    } else if (san.trangThai === 'Sẵn sàng') {
+                        htmlGrid += `
+                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300"
+                                 data-sanid="\${san.sanID}"
+                                 data-tensan="\${san.tenSan}"
+                                 data-loaisan="\${tenLoaiSan}"
+                                 data-trangthai="\${san.trangThai}"
+                                 data-mota="\${san.moTa || ''}"
+                                 data-giakhongden="\${san.giaKhongDen}"
+                                 data-giacoden="\${san.giaCoDen}"
+                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
+                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
+                                 data-datsanidactive="\${san.datSanIdActive}"
+                                 data-giobatdauactive="\${san.gioBatDauActive}"
+                                 onclick="onCardClick(event, this)">
+                                <div class="w-full flex flex-col items-center">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
+                                    <span class="badge badge-green mt-2 uppercase text-[10px]">Sẵn sàng</span>
+                                    
+                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
+                                        Mở sân
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (san.trangThai === 'Bảo trì') {
+                        htmlGrid += `
+                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 border-amber-200 bg-amber-50/20 cursor-pointer card-hover hover:border-zinc-300"
+                                 data-sanid="\${san.sanID}"
+                                 data-tensan="\${san.tenSan}"
+                                 data-loaisan="\${tenLoaiSan}"
+                                 data-trangthai="\${san.trangThai}"
+                                 data-mota="\${san.moTa || ''}"
+                                 data-giakhongden="\${san.giaKhongDen}"
+                                 data-giacoden="\${san.giaCoDen}"
+                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
+                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
+                                 data-datsanidactive="\${san.datSanIdActive}"
+                                 data-giobatdauactive="\${san.gioBatDauActive}"
+                                 onclick="onCardClick(event, this)">
+                                <div class="w-full flex flex-col items-center">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">build</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">\${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
+                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Bảo trì</span>
+                                    
+                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
+                                        Chi tiết
+                                    </button>
+                                </div>
                             </div>
                         `;
                     } else {
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200">
-                                <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
-                                <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-3">
-                                    <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 border-red-200 bg-red-50/20 cursor-pointer card-hover hover:border-zinc-300"
+                                 data-sanid="\${san.sanID}"
+                                 data-tensan="\${san.tenSan}"
+                                 data-loaisan="\${tenLoaiSan}"
+                                 data-trangthai="\${san.trangThai}"
+                                 data-mota="\${san.moTa || ''}"
+                                 data-giakhongden="\${san.giaKhongDen}"
+                                 data-giacoden="\${san.giaCoDen}"
+                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
+                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
+                                 data-datsanidactive="\${san.datSanIdActive}"
+                                 data-giobatdauactive="\${san.gioBatDauActive}"
+                                 onclick="onCardClick(event, this)">
+                                <div class="w-full flex flex-col items-center">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-655 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">block</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">\${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
+                                    <span class="badge badge-red mt-2 uppercase text-[10px]">Tạm đóng</span>
+                                    
+                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
+                                        Chi tiết
+                                    </button>
                                 </div>
-                                <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
-                                <span class="badge badge-green mt-2.5 uppercase text-[10px]">Sẵn sàng</span>
                             </div>
                         `;
                     }
@@ -432,7 +662,14 @@
                 let htmlSelect = '<option value="">-- Chọn Sân Trống --</option>';
                 data.danhSachSan.forEach(san => {
                     if (san.trangThai === 'Sẵn sàng') {
-                        htmlSelect += `<option value="\${san.sanID}" \${currentSelected == san.sanID ? 'selected' : ''}>\${san.tenSan}</option>`;
+                        htmlSelect += `<option value="\${san.sanID}" 
+                                               data-giakhongden="\${san.giaKhongDen}" 
+                                               data-giacoden="\${san.giaCoDen}"
+                                               data-giobatdaulenden="\${san.gioBatDauLenDen}"
+                                               data-giokethuclenden="\${san.gioKetThucLenDen}"
+                                               \${currentSelected == san.sanID ? 'selected' : ''}>
+                                            \${san.tenSan} (\${san.tenLoaiSan || ''})
+                                       </option>`;
                     }
                 });
                 walkinSelect.innerHTML = htmlSelect;
@@ -519,6 +756,11 @@
                     tableBody.innerHTML = htmlTable;
                 }
             }
+            
+            // Refresh Open Side Drawer details if open
+            if (activeDrawerSanId !== null) {
+                openCourtDetailDrawer(activeDrawerSanId);
+            }
         } catch (err) {
             console.error('Lỗi khi cập nhật trạng thái sân tự động:', err);
         }
@@ -548,23 +790,80 @@
             </div>
             
             <div id="staff-invoice-content" class="hidden space-y-6">
-                <!-- General details -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs">
-                    <div>
-                        <p class="text-zinc-500 font-semibold uppercase">Thông tin ca đấu</p>
-                        <h4 class="font-bold text-zinc-800 text-sm mt-1" id="staff-invoice-court-name">Tên sân</h4>
-                        <p class="text-zinc-600 mt-0.5" id="staff-invoice-time-slot">00:00 - 00:00 (01/01/2026)</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- General details -->
+                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs space-y-2 flex flex-col justify-between">
+                        <div>
+                            <p class="text-zinc-500 font-semibold uppercase text-[10px]">Thông tin ca đấu</p>
+                            <h4 class="font-bold text-zinc-850 text-sm mt-1" id="staff-invoice-court-name">Tên sân</h4>
+                            <p class="text-zinc-650 mt-0.5" id="staff-invoice-time-slot">00:00 - 00:00 (01/01/2026)</p>
+                        </div>
+                        <div>
+                            <p class="text-zinc-500 font-semibold uppercase text-[10px] mb-1">Trạng thái thanh toán</p>
+                            <span class="badge badge-amber" id="staff-invoice-payment-status">Chưa thanh toán</span>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-zinc-500 font-semibold uppercase">Trạng thái thanh toán</p>
-                        <span class="badge badge-amber mt-1.5" id="staff-invoice-payment-status">Chưa thanh toán</span>
+                    
+                    <!-- Surcharges & Court price details -->
+                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs space-y-1.5 text-zinc-700">
+                        <p class="text-zinc-500 font-bold uppercase mb-1 text-[10px]">Chi tiết tiền sân</p>
+                        <div class="flex justify-between">
+                            <span>Đơn giá sân:</span>
+                            <span class="font-bold text-zinc-800" id="staff-detail-court-rate">0 đ/giờ</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Giờ bắt đầu:</span>
+                            <span class="font-bold text-zinc-800" id="staff-detail-start-time">00:00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Giờ kết thúc:</span>
+                            <span class="font-bold text-zinc-800" id="staff-detail-end-time">00:00</span>
+                        </div>
+                        <div id="staff-detail-early-container" class="flex justify-between text-amber-700 hidden">
+                            <span>Phụ thu nhận sớm:</span>
+                            <span class="font-bold" id="staff-detail-early-surcharge">0 đ</span>
+                        </div>
+                        <div id="staff-detail-late-container" class="flex justify-between text-red-650 hidden">
+                            <span>Phụ thu quá giờ (<span id="staff-detail-late-minutes">0</span> phút):</span>
+                            <span class="font-bold" id="staff-detail-late-surcharge">0 đ</span>
+                        </div>
                     </div>
                 </div>
                 
+                <!-- Bill mode selector -->
+                <div id="bill-mode-section">
+                    <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-2">Loại bill dịch vụ</h4>
+                    <div class="flex gap-2">
+                        <label id="lbl-billmode-main" class="flex-1 border-2 border-indigo-600 bg-indigo-50/10 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-indigo-700 transition-all" onclick="setBillMode('MAIN')">
+                            <input type="radio" name="billModeRadio" value="MAIN" checked class="hidden">
+                            <span class="material-symbols-outlined text-[16px]">merge</span>
+                            <span>Cộng vào hóa đơn sân</span>
+                        </label>
+                        <label id="lbl-billmode-split" class="flex-1 border-2 border-zinc-150 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all" onclick="setBillMode('SPLIT')">
+                            <input type="radio" name="billModeRadio" value="SPLIT" class="hidden">
+                            <span class="material-symbols-outlined text-[16px]">call_split</span>
+                            <span>Tách bill dịch vụ</span>
+                        </label>
+                    </div>
+                    <div id="split-paynow-section" class="hidden mt-2 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+                        <input type="checkbox" id="split-pay-now-cb" class="accent-indigo-600">
+                        <label for="split-pay-now-cb" class="text-xs font-bold text-amber-800">Thanh toán bill tách ngay bây giờ</label>
+                    </div>
+                </div>
+
+                <!-- Split bills list -->
+                <div id="split-bills-section" class="hidden">
+                    <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-amber-600">receipt</span>
+                        Hóa đơn tách dịch vụ
+                    </h4>
+                    <div id="split-bills-list" class="space-y-2"></div>
+                </div>
+
                 <!-- Services management -->
                 <div>
                     <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-3">Dịch vụ đi kèm / Nước uống</h4>
-                    
+
                     <!-- Add service inline form -->
                     <div class="flex gap-2 mb-4 items-end bg-zinc-50 p-3 rounded-xl border border-zinc-100">
                         <div class="flex-grow">
@@ -577,7 +876,7 @@
                             <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Số lượng</label>
                             <input type="number" id="staff-product-qty" value="1" min="1" class="w-full text-xs p-2 bg-white border border-zinc-200 rounded-lg text-center font-bold focus:outline-none focus:border-indigo-600">
                         </div>
-                        <button type="button" onclick="addServiceToInvoiceList()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-4 py-2 rounded-lg transition-all active:scale-95 h-[34px] flex items-center justify-center">
+                        <button type="button" id="staff-add-service-btn" onclick="addServiceToInvoiceList()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-4 py-2 rounded-lg transition-all active:scale-95 h-[34px] flex items-center justify-center">
                             Thêm
                         </button>
                     </div>
@@ -635,12 +934,15 @@
                 <!-- Actions -->
                 <div class="pt-4 flex justify-between gap-3">
                     <div class="flex gap-2">
-                        <form id="staff-save-services-form" action="${pageContext.request.contextPath}/staff/checkin" method="post">
+                        <form id="staff-save-services-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return prepareAddServicesSubmit()">
                             <input type="hidden" name="action" value="addServices">
                             <input type="hidden" name="datSanId" id="staff-save-datsan-id">
+                            <input type="hidden" name="billMode" id="staff-save-billmode" value="MAIN">
+                            <input type="hidden" name="payNow" id="staff-save-paynow" value="false">
+                            <input type="hidden" name="phuongThucThanhToan" id="staff-save-paymethod" value="Tiền mặt">
                             <div id="staff-save-hidden-inputs" class="hidden"></div>
                             <button type="submit" class="px-6 py-3 rounded-xl font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs active:scale-95">
-                                Lưu thay đổi dịch vụ
+                                Lưu dịch vụ
                             </button>
                         </form>
                     </div>
@@ -658,8 +960,177 @@
                             </button>
                         </form>
                     </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Court Detail Side Drawer -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="closeCourtDetailDrawer()"></div>
+<div id="courtDetailDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white border-l border-zinc-200 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col hidden">
+    <!-- Header -->
+    <div class="p-5 border-b border-zinc-100 flex items-center justify-between">
+        <div>
+            <h3 id="drawer-court-name" class="text-base font-extrabold text-zinc-900 tracking-tight">Tên sân</h3>
+            <div class="flex items-center gap-1.5 mt-1">
+                <span id="drawer-court-type" class="text-[10px] text-zinc-550 font-bold uppercase">Loại sân</span>
+                <span class="text-zinc-300">•</span>
+                <span id="drawer-court-status-badge" class="badge">Sẵn sàng</span>
+            </div>
+        </div>
+        <button type="button" onclick="closeCourtDetailDrawer()" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-zinc-650 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+    
+    <!-- Content (Scrollable) -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-6">
+        <!-- Court Specifications -->
+        <div class="bg-zinc-50 rounded-2xl p-4 border border-zinc-150 space-y-3">
+            <h4 class="text-[11px] font-bold text-zinc-450 uppercase tracking-wider">Thông số chi tiết</h4>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                    <span class="text-zinc-550 block">Mã sân (SanID):</span>
+                    <span id="drawer-court-id" class="font-extrabold text-zinc-800">-</span>
+                </div>
+                <div>
+                    <span class="text-zinc-550 block">Cơ sở chi nhánh:</span>
+                    <span id="drawer-court-coso" class="font-extrabold text-zinc-800">-</span>
+                </div>
+                <div>
+                    <span class="text-zinc-550 block">Giá không đèn:</span>
+                    <span id="drawer-price-nolite" class="font-extrabold text-zinc-800">-</span>
+                </div>
+                <div>
+                    <span class="text-zinc-550 block">Giá có đèn:</span>
+                    <span id="drawer-price-lite" class="font-extrabold text-zinc-800">-</span>
+                </div>
+                <div class="col-span-2">
+                    <span class="text-zinc-550 block">Khung giờ bật đèn:</span>
+                    <span id="drawer-light-time" class="font-extrabold text-zinc-800">-</span>
+                </div>
+            </div>
+            <div id="drawer-desc-container" class="mt-2 pt-2 border-t border-zinc-100 hidden">
+                <span class="text-zinc-550 block text-xs">Mô tả:</span>
+                <p id="drawer-court-desc" class="text-xs text-zinc-650 mt-1 italic"></p>
+            </div>
+        </div>
+        
+        <!-- Action Sections -->
+        
+        <!-- Section A: Sẵn sàng -> Mở sân nhanh -->
+        <div id="drawer-action-walkin" class="hidden space-y-4">
+            <div class="flex items-center gap-2 text-zinc-850 font-extrabold text-sm">
+                <span class="material-symbols-outlined text-green-600">bolt</span>
+                <span>Mở sân nhanh cho Khách vãng lai</span>
+            </div>
+            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="space-y-4">
+                <input type="hidden" name="action" value="checkInWalkIn">
+                <input type="hidden" id="drawer-walkin-san-id" name="sanId">
+                <input type="hidden" id="drawer-walkin-duration" name="duration" value="120">
+                
+                <div>
+                    <label class="block text-[11px] font-bold text-zinc-500 mb-1">Thời gian chơi (phút) *:</label>
+                    <select id="drawer-walkin-duration-old" onchange="calculateDrawerPrice()" class="hidden" disabled>
+                        <option value="60">60 phút (1 giờ)</option>
+                        <option value="90">90 phút (1.5 giờ)</option>
+                        <option value="120" selected>120 phút (2 giờ)</option>
+                        <option value="150">150 phút (2.5 giờ)</option>
+                        <option value="180">180 phút (3 giờ)</option>
+                    </select>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-zinc-500">Kiểu giờ chơi:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label id="drawer-mode-fixed-label" class="border-2 border-indigo-600 bg-indigo-50/30 rounded-xl p-3 cursor-pointer text-xs font-bold text-indigo-700 transition-all">
+                            <input type="radio" class="sr-only" name="playMode" value="FIXED" checked onchange="setDrawerPlayMode('FIXED')">
+                            Giờ cố định
+                        </label>
+                        <label id="drawer-mode-open-label" class="border-2 border-zinc-150 rounded-xl p-3 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all">
+                            <input type="radio" class="sr-only" name="playMode" value="OPEN" onchange="setDrawerPlayMode('OPEN')">
+                            Không cố định
+                        </label>
+                    </div>
+                    <div id="drawer-fixed-duration-panel" class="space-y-2">
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" data-duration-btn="60" onclick="setDrawerDuration(60)" class="drawer-duration-btn h-9 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50">1 giờ</button>
+                            <button type="button" data-duration-btn="120" onclick="setDrawerDuration(120)" class="drawer-duration-btn h-9 rounded-lg border border-indigo-600 bg-indigo-50 text-xs font-bold text-indigo-700">2 giờ</button>
+                            <button type="button" data-duration-btn="180" onclick="setDrawerDuration(180)" class="drawer-duration-btn h-9 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50">3 giờ</button>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-500 mb-1">Tự chọn số giờ:</label>
+                            <input type="number" id="drawer-custom-hours" min="0.5" max="12" step="0.5" placeholder="VD: 1.5"
+                                   oninput="setDrawerCustomDuration()"
+                                   class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white">
+                        </div>
+                    </div>
+                    <div id="drawer-open-duration-note" class="hidden p-3 rounded-xl border border-sky-100 bg-sky-50 text-[11px] text-sky-800 font-semibold">
+                        Phiên không cố định sẽ hiển thị đồng hồ đếm tới trong màn hình chi tiết sân.
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-zinc-500 mb-1">Đơn giá tự áp dụng (VND / giờ):</label>
+                    <input type="number" id="drawer-walkin-rate" name="donGia" step="10000" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required ${isManager ? '' : 'readonly'} oninput="calculateDrawerPrice()">
+                    <span id="drawer-walkin-rate-type" class="text-[10px] text-zinc-500 mt-1 block">Áp dụng: Giá không đèn</span>
+                </div>
+
+                <div id="drawer-walkin-override-container" class="hidden">
+                    <label class="block text-[11px] font-bold text-zinc-500 mb-1">Lý do thay đổi đơn giá *:</label>
+                    <textarea id="drawer-walkin-override-reason" name="ghiChuOverride" rows="2" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none focus:border-indigo-500 focus:bg-white" placeholder="Nhập lý do thay đổi..."></textarea>
+                </div>
+                
+                <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-150 flex items-center justify-between text-xs">
+                    <span class="text-zinc-550">Tạm tính tiền sân:</span>
+                    <span id="drawer-walkin-total" class="font-extrabold text-sm ${themeTextMedium}">0 đ</span>
+                </div>
+                
+                <button type="submit" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-xs py-3 rounded-xl shadow hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px]">play_circle</span>
+                    Mở sân ngay
+                </button>
+            </form>
+        </div>
+        
+        <!-- Section B: Đang sử dụng -> Phiên chơi hiện tại -->
+        <div id="drawer-action-active" class="hidden space-y-4">
+            <div class="flex items-center gap-2 text-zinc-850 font-extrabold text-sm">
+                <span class="material-symbols-outlined text-indigo-650">sports_tennis</span>
+                <span>Phiên chơi hiện tại</span>
+            </div>
+            
+            <div class="space-y-3 bg-indigo-50/20 border border-indigo-100 rounded-2xl p-4 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-zinc-550">Mã đơn đặt (DatSanID):</span>
+                    <span id="drawer-active-id" class="font-bold text-zinc-800">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-zinc-550">Giờ bắt đầu:</span>
+                    <span id="drawer-active-start" class="font-bold text-zinc-800">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-zinc-550">Thời gian đã chơi:</span>
+                    <span id="drawer-active-elapsed" class="font-bold text-zinc-800">0 phút</span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-indigo-50/50 text-sm font-extrabold">
+                    <span class="text-zinc-700">Tổng tiền sân tạm tính:</span>
+                    <span id="drawer-active-total-price" class="text-indigo-700">0 đ</span>
+                </div>
+            </div>
+            
+            <button type="button" id="drawer-btn-invoice" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl shadow hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px]">payments</span>
+                Dịch vụ & Thanh toán
+            </button>
+        </div>
+        
+        <!-- Section C: Bảo trì / Tạm đóng -> Không thể mở -->
+        <div id="drawer-action-disabled" class="hidden bg-red-50/40 border border-red-100 text-red-900 rounded-xl p-4 text-xs flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-600 text-[18px]">warning</span>
+            <span>Sân hiện đang bảo trì hoặc tạm đóng, không thể mở cho khách chơi.</span>
         </div>
     </div>
 </div>
@@ -687,37 +1158,75 @@
             modal.classList.remove("opacity-0");
             modal.querySelector(".bg-white").classList.remove("scale-95");
         }, 10);
-
+ 
         // Fetch invoice detail
-        fetch(`${pageContext.request.contextPath}/staff/checkin?action=getInvoiceDetails&datSanId=${datSanId}`)
+        fetch(`${pageContext.request.contextPath}/staff/checkin?action=getInvoiceDetails&datSanId=\${datSanId}`)
             .then(res => res.json())
             .then(data => {
                 staffProducts = data.products || [];
                 staffOrdered = data.ordered || [];
                 
                 document.getElementById("staff-invoice-court-name").textContent = data.tenSan;
-                document.getElementById("staff-invoice-time-slot").textContent = `${data.gioBatDau} - ${data.gioKetThuc} (${data.ngayDat})`;
+                document.getElementById("staff-invoice-time-slot").textContent = `\${data.gioBatDau} - \${data.gioKetThuc} (\${data.ngayDat})`;
                 
                 const statusBadge = document.getElementById("staff-invoice-payment-status");
                 statusBadge.textContent = data.trangThaiThanhToan;
                 if (data.trangThaiThanhToan === 'Đã thanh toán') {
-                    statusBadge.className = "badge badge-green mt-1.5";
+                    statusBadge.className = "badge badge-green";
                 } else {
-                    statusBadge.className = "badge badge-amber mt-1.5";
+                    statusBadge.className = "badge badge-amber";
                 }
 
-                // Populate court price
-                const summaryCourtPriceEl = document.getElementById("staff-summary-court-price");
-                summaryCourtPriceEl.textContent = data.tongTienSan.toLocaleString('vi-VN') + " đ";
-                summaryCourtPriceEl.setAttribute("data-val", data.tongTienSan);
+                // Handle split bill state
+                currentMainBillPaid = !!data.mainBillPaid;
+                const lblMain = document.getElementById('lbl-billmode-main');
+                if (currentMainBillPaid) {
+                    // Main already paid → disable MAIN mode, force SPLIT
+                    lblMain.classList.add('opacity-40', 'cursor-not-allowed');
+                    lblMain.onclick = null;
+                    setBillMode('SPLIT');
+                } else {
+                    lblMain.classList.remove('opacity-40', 'cursor-not-allowed');
+                    lblMain.onclick = () => setBillMode('MAIN');
+                    setBillMode('MAIN');
+                }
+                renderSplitBillsList(data.splitBills || []);
+ 
+                // Populate court details
+                document.getElementById("staff-detail-court-rate").textContent = formatCurrency(data.donGiaGio) + "/giờ";
+                document.getElementById("staff-detail-start-time").textContent = data.gioBatDau;
+                document.getElementById("staff-detail-end-time").textContent = data.gioKetThuc;
 
+                const earlyContainer = document.getElementById("staff-detail-early-container");
+                if (data.phuThuNhanSom > 0) {
+                    earlyContainer.classList.remove("hidden");
+                    document.getElementById("staff-detail-early-surcharge").textContent = formatCurrency(data.phuThuNhanSom);
+                } else {
+                    earlyContainer.classList.add("hidden");
+                }
+
+                const lateContainer = document.getElementById("staff-detail-late-container");
+                if (data.minutesOver > 10) {
+                    lateContainer.classList.remove("hidden");
+                    document.getElementById("staff-detail-late-minutes").textContent = data.minutesOver;
+                    document.getElementById("staff-detail-late-surcharge").textContent = formatCurrency(data.phuThuQuaGio);
+                } else {
+                    lateContainer.classList.add("hidden");
+                }
+
+                // Populate court price summary
+                const summaryCourtPriceEl = document.getElementById("staff-summary-court-price");
+                summaryCourtPriceEl.textContent = formatCurrency(data.tongTienSan);
+                summaryCourtPriceEl.setAttribute("data-val", data.tongTienSan);
+ 
                 // Populate products select
                 const select = document.getElementById("staff-product-select");
                 select.innerHTML = '<option value="">-- Chọn sản phẩm thêm --</option>';
                 staffProducts.forEach(prod => {
-                    select.insertAdjacentHTML("beforeend", `<option value="${prod.SanPhamID}">${prod.TenSanPham} (${prod.DonGia.toLocaleString('vi-VN')} đ / ${prod.DonViTinh || 'cái'} - Kho: ${prod.SoLuongTon})</option>`);
+                    const statusText = prod.SoLuongTon <= 0 ? ' - HẾT HÀNG' : ` - Kho: \${prod.SoLuongTon}`;
+                    select.insertAdjacentHTML("beforeend", `<option value="\${prod.SanPhamID}">\${prod.TenSanPham} (\${formatCurrency(prod.DonGia)} / \${prod.DonViTinh || 'cái'}\${statusText})</option>`);
                 });
-
+ 
                 renderStaffOrderedTable();
                 
                 loading.classList.add("hidden");
@@ -738,23 +1247,23 @@
         } else {
             staffOrdered.forEach(item => {
                 const prod = staffProducts.find(p => p.SanPhamID === item.SanPhamID);
-                const prodName = prod ? prod.TenSanPham : `Sản phẩm #${item.SanPhamID}`;
+                const prodName = prod ? prod.TenSanPham : `Sản phẩm #\${item.SanPhamID}`;
                 const unit = prod ? (prod.DonViTinh || 'cái') : 'cái';
                 
                 tbody.insertAdjacentHTML("beforeend", `
                     <tr class="border-b border-zinc-100 hover:bg-zinc-50/50">
-                        <td class="p-3 font-semibold text-zinc-850">${prodName}</td>
-                        <td class="p-3 text-center text-zinc-600">${item.DonGiaTaiThoiDiemBan.toLocaleString('vi-VN')} đ</td>
+                        <td class="p-3 font-semibold text-zinc-850">\${prodName}</td>
+                        <td class="p-3 text-center text-zinc-600">\${item.DonGiaTaiThoiDiemBan.toLocaleString('vi-VN')} đ</td>
                         <td class="p-3 text-center">
                             <div class="flex items-center justify-center gap-1.5">
-                                <button type="button" onclick="adjustStaffItemQty(${item.SanPhamID}, -1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">-</button>
-                                <span class="font-bold text-sm w-8 text-center">${item.SoLuong}</span>
-                                <button type="button" onclick="adjustStaffItemQty(${item.SanPhamID}, 1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">+</button>
+                                <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, -1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">-</button>
+                                <span class="font-bold text-sm w-8 text-center">\${item.SoLuong}</span>
+                                <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, 1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">+</button>
                             </div>
                         </td>
-                        <td class="p-3 text-right font-bold text-zinc-800">${item.ThanhTien.toLocaleString('vi-VN')} đ</td>
+                        <td class="p-3 text-right font-bold text-zinc-800">\${item.ThanhTien.toLocaleString('vi-VN')} đ</td>
                         <td class="p-3 text-center">
-                            <button type="button" onclick="removeStaffItem(${item.SanPhamID})" class="p-1 rounded text-red-500 hover:bg-red-50 flex items-center justify-center mx-auto transition-colors">
+                            <button type="button" onclick="removeStaffItem(\${item.SanPhamID})" class="p-1 rounded text-red-500 hover:bg-red-50 flex items-center justify-center mx-auto transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                             </button>
                         </td>
@@ -780,7 +1289,7 @@
         }
 
         if (newQty > prod.SoLuongTon) {
-            alert(`Không thể chọn vượt quá số lượng tồn kho (${prod.SoLuongTon})`);
+            alert(`Không thể chọn vượt quá số lượng tồn kho (\${prod.SoLuongTon})`);
             newQty = prod.SoLuongTon;
         }
 
@@ -810,7 +1319,7 @@
         if (!prod) return;
 
         if (qty > prod.SoLuongTon) {
-            alert(`Sản phẩm này chỉ còn tồn kho: ${prod.SoLuongTon}`);
+            alert(`Sản phẩm này chỉ còn tồn kho: \${prod.SoLuongTon}`);
             return;
         }
 
@@ -819,7 +1328,7 @@
         if (existing) {
             const newQty = existing.SoLuong + qty;
             if (newQty > prod.SoLuongTon) {
-                alert(`Không thể thêm vì tổng số lượng vượt quá tồn kho (${prod.SoLuongTon})`);
+                alert(`Không thể thêm vì tổng số lượng vượt quá tồn kho (\${prod.SoLuongTon})`);
                 return;
             }
             existing.SoLuong = newQty;
@@ -856,8 +1365,8 @@
         const hiddenContainer = document.getElementById("staff-save-hidden-inputs");
         hiddenContainer.innerHTML = "";
         staffOrdered.forEach(item => {
-            hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="productId" value="${item.SanPhamID}">`);
-            hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="quantity" value="${item.SoLuong}">`);
+            hiddenContainer.insertAdjacentHTML("beforeend", \`<input type="hidden" name="productId" value="\${item.SanPhamID}">\`);
+            hiddenContainer.insertAdjacentHTML("beforeend", \`<input type="hidden" name="quantity" value="\${item.SoLuong}">\`);
         });
     }
 
@@ -877,6 +1386,14 @@
     }
 
     function confirmPaymentSubmit() {
+        // Kiểm tra split bills chưa thanh toán (cảnh báo phía client, server sẽ chặn cứng)
+        const splitSection = document.getElementById('split-bills-section');
+        if (splitSection && !splitSection.classList.contains('hidden')) {
+            const unpaidBtns = splitSection.querySelectorAll('button[onclick^="paySplitBill"]');
+            if (unpaidBtns.length > 0) {
+                return confirm(`⚠️ Có \${unpaidBtns.length} hóa đơn tách dịch vụ CHƯA thanh toán!\nNếu tiếp tục, hệ thống sẽ từ chối yêu cầu kết thúc ca chơi.\n\nBạn vẫn muốn thử?`);
+            }
+        }
         return confirm("Xác nhận khách đã thanh toán đơn này? Sân bóng sẽ được giải phóng về trạng thái Sẵn sàng.");
     }
 
@@ -889,6 +1406,427 @@
             modal.classList.remove("flex");
         }, 300);
     }
+
+    function updateWalkinPrice() {
+        const select = document.getElementById("walkin-san-select");
+        const selectedOption = select.options[select.selectedIndex];
+        if (!selectedOption || !selectedOption.value) {
+            return;
+        }
+        
+        const giaKhongDen = parseFloat(selectedOption.getAttribute("data-giakhongden")) || 0;
+        const giaCoDen = parseFloat(selectedOption.getAttribute("data-giacoden")) || 0;
+        const gioBatDauLenDen = selectedOption.getAttribute("data-giobatdaulenden");
+        const gioKetThucLenDen = selectedOption.getAttribute("data-giokethuclenden");
+        
+        let applyPrice = giaKhongDen;
+        
+        if (gioBatDauLenDen && gioKetThucLenDen) {
+            const now = new Date();
+            const currentTimeStr = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
+            
+            if (currentTimeStr >= gioBatDauLenDen && currentTimeStr <= gioKetThucLenDen) {
+                applyPrice = giaCoDen;
+            }
+        }
+        
+        const donGiaInput = document.getElementById("walkin-dongia-input");
+        donGiaInput.value = applyPrice;
+        
+        // Hide override reason and update subtotal
+        const reasonContainer = document.getElementById("walkin-override-reason-container");
+        const reasonTextarea = document.getElementById("walkin-override-reason");
+        if (reasonContainer) {
+            reasonContainer.classList.add("hidden");
+            reasonTextarea.removeAttribute("required");
+            reasonTextarea.value = "";
+        }
+        
+        updateWalkinSubtotal();
+    }
+
+    function updateWalkinSubtotal() {
+        const durationSelect = document.querySelector('select[name="duration"]');
+        const donGiaInput = document.getElementById("walkin-dongia-input");
+        const subtotalPreview = document.getElementById("walkin-subtotal-preview");
+        if (!durationSelect || !donGiaInput || !subtotalPreview) return;
+        
+        const duration = parseInt(durationSelect.value) || 0;
+        const donGia = parseFloat(donGiaInput.value) || 0;
+        
+        const subtotal = (duration / 60.0) * donGia;
+        subtotalPreview.innerHTML = `Tạm tính tiền sân: <span class="${themeTextMedium} font-black">\${formatCurrency(subtotal)}</span>`;
+    }
+
+    function onWalkinPriceInput() {
+        updateWalkinSubtotal();
+        
+        const select = document.getElementById("walkin-san-select");
+        const selectedOption = select.options[select.selectedIndex];
+        if (!selectedOption || !selectedOption.value) return;
+        
+        const giaKhongDen = parseFloat(selectedOption.getAttribute("data-giakhongden")) || 0;
+        const giaCoDen = parseFloat(selectedOption.getAttribute("data-giacoden")) || 0;
+        const gioBatDauLenDen = selectedOption.getAttribute("data-giobatdaulenden");
+        const gioKetThucLenDen = selectedOption.getAttribute("data-giokethuclenden");
+        
+        let basePrice = giaKhongDen;
+        if (gioBatDauLenDen && gioKetThucLenDen) {
+            const now = new Date();
+            const currentTimeStr = now.toTimeString().split(' ')[0];
+            if (currentTimeStr >= gioBatDauLenDen && currentTimeStr <= gioKetThucLenDen) {
+                basePrice = giaCoDen;
+            }
+        }
+        
+        const donGiaInput = document.getElementById("walkin-dongia-input");
+        const currentPrice = parseFloat(donGiaInput.value) || 0;
+        
+        const reasonContainer = document.getElementById("walkin-override-reason-container");
+        const reasonTextarea = document.getElementById("walkin-override-reason");
+        if (!reasonContainer || !reasonTextarea) return;
+        
+        if (currentPrice !== basePrice) {
+            reasonContainer.classList.remove("hidden");
+            reasonTextarea.setAttribute("required", "required");
+        } else {
+            reasonContainer.classList.add("hidden");
+            reasonTextarea.removeAttribute("required");
+        }
+    }
+
+    function quickOpenWalkIn(sanId) {
+        const select = document.getElementById("walkin-san-select");
+        if (!select) return;
+        select.value = sanId;
+        updateWalkinPrice();
+        
+        const cardSection = select.closest('section');
+        if (cardSection) {
+            cardSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        select.focus();
+    }
+
+    // --- Side Drawer Functions ---
+    let activeDrawerSanId = null;
+
+    function getLocalTimeString(timeVal) {
+        if (!timeVal) return '';
+        if (typeof timeVal === 'string') return timeVal;
+        if (typeof timeVal === 'object' && timeVal.hour !== undefined) {
+            const h = String(timeVal.hour).padStart(2, '0');
+            const m = String(timeVal.minute).padStart(2, '0');
+            return `\${h}:\${m}:00`;
+        }
+        return '';
+    }
+
+    function onCardClick(event, cardEl) {
+        if (event.target.closest('button')) return;
+        const sanId = parseInt(cardEl.getAttribute('data-sanid'));
+        openCourtDetailDrawer(sanId);
+    }
+
+    function openCourtDetailDrawer(sanId) {
+        activeDrawerSanId = sanId;
+        
+        const cardEl = document.querySelector(`.card[data-sanid="\${sanId}"]`);
+        if (!cardEl) return;
+        
+        const tenSan = cardEl.getAttribute('data-tensan');
+        const tenLoaiSan = cardEl.getAttribute('data-loaisan');
+        const trangThai = cardEl.getAttribute('data-trangthai');
+        const moTa = cardEl.getAttribute('data-mota') || '';
+        const giaKhongDen = parseFloat(cardEl.getAttribute('data-giakhongden')) || 0;
+        const giaCoDen = parseFloat(cardEl.getAttribute('data-giacoden')) || 0;
+        const gioBatDauLenDen = cardEl.getAttribute('data-giobatdaulenden') || '';
+        const gioKetThucLenDen = cardEl.getAttribute('data-giokethuclenden') || '';
+        const datSanIdActive = cardEl.getAttribute('data-datsanidactive');
+        const gioBatDauActive = cardEl.getAttribute('data-giobatdauactive');
+        
+        // Update Drawer elements
+        document.getElementById('drawer-court-name').textContent = tenSan;
+        document.getElementById('drawer-court-type').textContent = tenLoaiSan;
+        document.getElementById('drawer-court-id').textContent = sanId;
+        document.getElementById('drawer-court-coso').textContent = `CS\${sessionScope.user.coSoId}`;
+        document.getElementById('drawer-price-nolite').textContent = formatCurrency(giaKhongDen);
+        document.getElementById('drawer-price-lite').textContent = formatCurrency(giaCoDen);
+        document.getElementById('drawer-light-time').textContent = gioBatDauLenDen && gioKetThucLenDen ? `\${gioBatDauLenDen.substring(0,5)} - \${gioKetThucLenDen.substring(0,5)}` : 'Không có cấu hình';
+        
+        const descContainer = document.getElementById('drawer-desc-container');
+        if (moTa && moTa !== 'null') {
+            descContainer.classList.remove('hidden');
+            document.getElementById('drawer-court-desc').textContent = moTa;
+        } else {
+            descContainer.classList.add('hidden');
+        }
+        
+        // Set Status Badge
+        const statusBadge = document.getElementById('drawer-court-status-badge');
+        statusBadge.textContent = trangThai;
+        if (trangThai === 'Sẵn sàng') {
+            statusBadge.className = 'badge badge-green';
+        } else if (trangThai === 'Đang sử dụng') {
+            statusBadge.className = 'badge \${badgeTheme}';
+        } else if (trangThai === 'Bảo trì') {
+            statusBadge.className = 'badge badge-amber';
+        } else {
+            statusBadge.className = 'badge badge-red';
+        }
+        
+        // Hide all action blocks first
+        document.getElementById('drawer-action-walkin').classList.add('hidden');
+        document.getElementById('drawer-action-active').classList.add('hidden');
+        document.getElementById('drawer-action-disabled').classList.add('hidden');
+        
+        if (trangThai === 'Sẵn sàng') {
+            document.getElementById('drawer-action-walkin').classList.remove('hidden');
+            document.getElementById('drawer-walkin-san-id').value = sanId;
+            
+            // Set base rates
+            const now = new Date();
+            const currentTimeStr = now.toTimeString().split(' ')[0];
+            let rate = giaKhongDen;
+            let isLite = false;
+            
+            if (gioBatDauLenDen && gioKetThucLenDen) {
+                if (currentTimeStr >= gioBatDauLenDen && currentTimeStr <= gioKetThucLenDen) {
+                    rate = giaCoDen;
+                    isLite = true;
+                }
+            }
+            
+            const rateInput = document.getElementById('drawer-walkin-rate');
+            rateInput.value = rate;
+            rateInput.setAttribute('data-base', rate);
+            rateInput.setAttribute('data-giakhongden', giaKhongDen);
+            rateInput.setAttribute('data-giacoden', giaCoDen);
+            rateInput.setAttribute('data-giobatdaulenden', gioBatDauLenDen);
+            rateInput.setAttribute('data-giokethuclenden', gioKetThucLenDen);
+            
+            const rateTypeSpan = document.getElementById('drawer-walkin-rate-type');
+            rateTypeSpan.textContent = `Áp dụng: \${isLite ? 'Giá có đèn' : 'Giá không đèn'}`;
+            
+            calculateDrawerPrice();
+            
+            // Auto focus duration
+            setTimeout(() => {
+                document.getElementById('drawer-walkin-duration').focus();
+            }, 100);
+            
+        } else if (trangThai === 'Đang sử dụng') {
+            document.getElementById('drawer-action-active').classList.remove('hidden');
+            document.getElementById('drawer-active-id').textContent = datSanIdActive || '-';
+            document.getElementById('drawer-active-start').textContent = gioBatDauActive || '-';
+            
+            // Calculate elapsed time
+            if (gioBatDauActive) {
+                const now = new Date();
+                const [h, m] = gioBatDauActive.split(':');
+                const start = new Date();
+                start.setHours(parseInt(h), parseInt(m), 0);
+                
+                let diffMs = now - start;
+                if (diffMs < 0) {
+                    diffMs += 24 * 60 * 60 * 1000;
+                }
+                const elapsedMin = Math.floor(diffMs / 60000);
+                document.getElementById('drawer-active-elapsed').textContent = `\${elapsedMin} phút`;
+                
+                // Calculate estimated accrued price
+                const elapsedHours = elapsedMin / 60.0;
+                const accruedPrice = elapsedHours * giaKhongDen;
+                document.getElementById('drawer-active-total-price').textContent = formatCurrency(accruedPrice);
+            } else {
+                document.getElementById('drawer-active-elapsed').textContent = 'Không rõ';
+                document.getElementById('drawer-active-total-price').textContent = '0 đ';
+            }
+            
+            const payBtn = document.getElementById('drawer-btn-invoice');
+            payBtn.onclick = () => {
+                if (datSanIdActive && datSanIdActive !== 'null') {
+                    openStaffInvoiceModal(parseInt(datSanIdActive));
+                } else {
+                    alert("Không tìm thấy phiên chơi đang hoạt động của sân này.");
+                }
+            };
+            
+        } else {
+            document.getElementById('drawer-action-disabled').classList.remove('hidden');
+        }
+        
+        // Open drawer
+        const drawer = document.getElementById('courtDetailDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        drawer.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            drawer.classList.remove('translate-x-full');
+            overlay.classList.remove('opacity-0');
+        }, 10);
+    }
+
+    function calculateDrawerPrice() {
+        const durationSelect = document.getElementById('drawer-walkin-duration');
+        const rateInput = document.getElementById('drawer-walkin-rate');
+        const totalSpan = document.getElementById('drawer-walkin-total');
+        if (!durationSelect || !rateInput || !totalSpan) return;
+        
+        const duration = parseInt(durationSelect.value) || 0;
+        const rate = parseFloat(rateInput.value) || 0;
+        const total = (duration / 60.0) * rate;
+        
+        totalSpan.textContent = formatCurrency(total);
+        
+        const base = parseFloat(rateInput.getAttribute('data-base')) || 0;
+        const overrideContainer = document.getElementById('drawer-walkin-override-container');
+        const reasonText = document.getElementById('drawer-walkin-override-reason');
+        if (rate !== base) {
+            overrideContainer.classList.remove('hidden');
+            reasonText.setAttribute('required', 'required');
+        } else {
+            overrideContainer.classList.add('hidden');
+            reasonText.removeAttribute('required');
+        }
+    }
+
+    function closeCourtDetailDrawer() {
+        activeDrawerSanId = null;
+        const drawer = document.getElementById('courtDetailDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        
+        drawer.classList.add('translate-x-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+            drawer.classList.add('hidden');
+            overlay.classList.add('hidden');
+        }, 300);
+    }
+
+    // --- Split Bill ---
+    let currentBillMode = 'MAIN';
+    let currentMainBillPaid = false;
+
+    function setBillMode(mode) {
+        currentBillMode = mode;
+        document.getElementById('staff-save-billmode').value = mode;
+
+        const lblMain = document.getElementById('lbl-billmode-main');
+        const lblSplit = document.getElementById('lbl-billmode-split');
+        const payNowSection = document.getElementById('split-paynow-section');
+
+        if (mode === 'MAIN') {
+            lblMain.className = 'flex-1 border-2 border-indigo-600 bg-indigo-50/10 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-indigo-700 transition-all';
+            lblSplit.className = 'flex-1 border-2 border-zinc-150 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all';
+            payNowSection.classList.add('hidden');
+        } else {
+            lblSplit.className = 'flex-1 border-2 border-indigo-600 bg-indigo-50/10 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-indigo-700 transition-all';
+            lblMain.className = 'flex-1 border-2 border-zinc-150 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all';
+            payNowSection.classList.remove('hidden');
+        }
+    }
+
+    function renderSplitBillsList(splitBills) {
+        const section = document.getElementById('split-bills-section');
+        const list = document.getElementById('split-bills-list');
+        if (!splitBills || splitBills.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+        section.classList.remove('hidden');
+        list.innerHTML = '';
+        splitBills.forEach(sb => {
+            const isPaid = sb.trangThai === 'Đã thanh toán';
+            list.insertAdjacentHTML('beforeend', `
+                <div class="p-3 rounded-xl border \${isPaid ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'} text-xs flex items-center justify-between gap-2">
+                    <div>
+                        <span class="font-bold text-zinc-800">HĐ Tách #\${sb.hoaDonId}</span>
+                        <span class="text-zinc-500 ml-2">\${sb.ngayLap}</span>
+                        <span class="ml-2 \${isPaid ? 'text-green-700' : 'text-amber-700'} font-bold">\${isPaid ? '✓ Đã TT' : '⏳ Chưa TT'}</span>
+                        <span class="ml-2 font-extrabold text-zinc-800">\${formatCurrency(sb.tongThanhToan)}</span>
+                    </div>
+                    \${!isPaid ? `
+                    <button type="button" onclick="paySplitBill(\${sb.hoaDonId})"
+                        class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] active:scale-95 transition-all">
+                        Thanh toán
+                    </button>` : ''}
+                </div>
+            `);
+        });
+    }
+
+    function paySplitBill(hoaDonId) {
+        if (!confirm(`Xác nhận thanh toán hóa đơn tách #\${hoaDonId}?`)) return;
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '${pageContext.request.contextPath}/staff/checkin';
+        form.innerHTML = `<input type="hidden" name="action" value="payInvoice">
+            <input type="hidden" name="hoaDonId" value="\${hoaDonId}">
+            <input type="hidden" name="phuongThucThanhToan" value="Tiền mặt">`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function prepareAddServicesSubmit() {
+        if (staffOrdered.length === 0) {
+            alert('Vui lòng chọn ít nhất một sản phẩm.');
+            return false;
+        }
+        const mode = currentBillMode;
+        document.getElementById('staff-save-billmode').value = mode;
+
+        if (mode === 'MAIN' && currentMainBillPaid) {
+            if (!confirm('Hóa đơn sân đã được thanh toán. Bạn có muốn tạo hóa đơn tách thay thế không?')) {
+                return false;
+            }
+            document.getElementById('staff-save-billmode').value = 'SPLIT';
+        }
+
+        if (mode === 'SPLIT' || (mode === 'MAIN' && currentMainBillPaid)) {
+            const payNow = document.getElementById('split-pay-now-cb').checked;
+            document.getElementById('staff-save-paynow').value = payNow ? 'true' : 'false';
+            document.getElementById('staff-save-paymethod').value =
+                document.getElementById('staff-pay-method-input').value || 'Tiền mặt';
+        }
+        return true;
+    }
+
+    // Initialize subtotal and event listener for product stock check
+    document.addEventListener("DOMContentLoaded", () => {
+        updateWalkinSubtotal();
+        
+        const prodSelect = document.getElementById("staff-product-select");
+        const addBtn = document.getElementById("staff-add-service-btn");
+        if (prodSelect) {
+            prodSelect.addEventListener("change", function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (!selectedOption || !selectedOption.value) {
+                    if (addBtn) {
+                        addBtn.removeAttribute("disabled");
+                        addBtn.textContent = "Thêm";
+                    }
+                    return;
+                }
+                
+                const spId = parseInt(selectedOption.value);
+                const prod = staffProducts.find(p => p.SanPhamID === spId);
+                if (prod && prod.SoLuongTon <= 0) {
+                    if (addBtn) {
+                        addBtn.setAttribute("disabled", "disabled");
+                        addBtn.textContent = "Hết hàng";
+                    }
+                } else {
+                    if (addBtn) {
+                        addBtn.removeAttribute("disabled");
+                        addBtn.textContent = "Thêm";
+                    }
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>

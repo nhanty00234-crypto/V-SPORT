@@ -232,9 +232,16 @@
       </div>
     </div>
 
-    <form id="courtForm" class="px-6 py-4 flex flex-col gap-4" method="POST" action="${pageContext.request.contextPath}/manager/quan-ly-san" novalidate>
+    <form id="courtForm" class="px-6 py-4 flex flex-col gap-4" method="POST" action="${pageContext.request.contextPath}/manager/quan-ly-san" enctype="multipart/form-data" novalidate>
       <input type="hidden" name="action" id="courtAction" value="add">
       <input type="hidden" name="sanID" id="courtEditId">
+      <input type="hidden" name="existingHinhAnh" id="existingCourtImage" value="">
+
+      <!-- Warning: Sân đang sử dụng -->
+      <div id="courtOccupiedWarning" class="hidden p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl flex items-start gap-2">
+        <span class="material-symbols-outlined text-[16px] shrink-0">warning</span>
+        <span>Sân này đang có trận đấu diễn ra (Đang sử dụng/Đang dùng). Bạn không thể thay đổi tên, loại sân hoặc trạng thái lúc này.</span>
+      </div>
 
       <!-- Tên sân -->
       <div class="flex flex-col gap-1.5">
@@ -327,11 +334,22 @@
         <label class="text-xs font-semibold text-purple-900">
           Link ảnh sân <span class="font-normal text-zinc-400">(Tùy chọn)</span>
         </label>
-        <input type="text" name="hinhAnh" id="courtImage"
-               placeholder="https://unsplash.com/..."
-               oninput="updateImagePreview(); updateCardPreview()"
-               class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
-        <div id="courtImagePreviewWrap" class="hidden rounded-xl overflow-hidden border border-purple-100 bg-zinc-50" style="height:130px">
+        <input type="file" name="courtImageFile" id="courtImageFile"
+               accept="image/png,image/jpeg,image/webp,image/gif"
+               onchange="updateImagePreview(); updateCardPreview()"
+               class="hidden">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="document.getElementById('courtImageFile').click()"
+                  class="h-10 px-4 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-purple-700 hover:bg-purple-50">
+            Chọn ảnh từ máy
+          </button>
+          <button type="button" id="clearCourtImageBtn" onclick="clearCourtImageSelection()"
+                  class="hidden h-10 px-3 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50">
+            Bỏ ảnh
+          </button>
+        </div>
+        <p id="courtImageFileName" class="text-[11px] text-zinc-500">Chưa chọn ảnh nào.</p>
+        <div id="courtImagePreviewWrap" class="hidden relative rounded-xl overflow-hidden border border-purple-100 bg-zinc-50" style="height:130px">
           <img id="courtImagePreview" src="" alt="preview" class="w-full h-full object-cover"
                onload="document.getElementById('courtImageError').classList.add('hidden')"
                onerror="document.getElementById('courtImageError').classList.remove('hidden')">
@@ -508,6 +526,8 @@
     document.getElementById('sidebar').classList.toggle('-translate-x-full');
   });
 
+  const contextPath = '${pageContext.request.contextPath}';
+
   // DATA SERIALIZATION
   const mockSports = [
     <c:forEach items="${dsMonTheThao}" var="m" varStatus="loop">
@@ -536,6 +556,12 @@
 
   let currentTab = 'courts';
   let viewMode = 'grid';
+
+  function normalizeCourtImageUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('/uploads/')) return contextPath + url;
+    return url;
+  }
 
   function initCurrencyFormatter(inputId) {
     const input = document.getElementById(inputId);
@@ -658,7 +684,7 @@
     const type = mockLoaiSan.find(t => t.id === typeId) || {};
     const sport = mockSports.find(s => s.id === type.sportId) || {};
     const status = document.getElementById('courtStatus').value || 'Sẵn sàng';
-    const imgUrl = document.getElementById('courtImage').value.trim();
+    const imgUrl = getCurrentCourtImagePreviewSource();
 
     document.getElementById('cardPrevName').textContent = name || 'Tên sân...';
     document.getElementById('cardPrevType').textContent = type.name || 'Loại sân';
@@ -689,7 +715,7 @@
 
     document.getElementById('courtTypeSelect').value = c.typeId;
     document.getElementById('courtDesc').value = c.desc || '';
-    document.getElementById('courtImage').value = c.image || '';
+    document.getElementById('existingCourtImage').value = c.image || '';
     updateImagePreview();
 
     // Tên gợi ý theo loại sân của sân gốc, cho phép manager sửa
@@ -716,11 +742,47 @@
   }
 
   // Image preview
+  function getCurrentCourtImagePreviewSource() {
+    const fileInput = document.getElementById('courtImageFile');
+    const existingImage = document.getElementById('existingCourtImage').value.trim();
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      return URL.createObjectURL(fileInput.files[0]);
+    }
+    return normalizeCourtImageUrl(existingImage);
+  }
+
+  function clearCourtImageSelection() {
+    const fileInput = document.getElementById('courtImageFile');
+    const existingImage = document.getElementById('existingCourtImage');
+    if (fileInput) fileInput.value = '';
+    if (existingImage) existingImage.value = '';
+    updateImagePreview();
+    updateCardPreview();
+  }
+
   function updateImagePreview() {
-    const url = document.getElementById('courtImage').value.trim();
+    const url = getCurrentCourtImagePreviewSource();
     const wrap = document.getElementById('courtImagePreviewWrap');
     const img = document.getElementById('courtImagePreview');
     const errDiv = document.getElementById('courtImageError');
+    const fileInput = document.getElementById('courtImageFile');
+    const fileName = document.getElementById('courtImageFileName');
+    const clearBtn = document.getElementById('clearCourtImageBtn');
+    const existingImage = document.getElementById('existingCourtImage').value.trim();
+
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      fileName.textContent = fileInput.files[0].name;
+    } else if (existingImage) {
+      fileName.textContent = 'Dang dung anh da luu cua san.';
+    } else {
+      fileName.textContent = 'Chua chon anh nao.';
+    }
+
+    if (clearBtn) {
+      if ((fileInput && fileInput.files && fileInput.files[0]) || existingImage) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+    }
+
     if (!url) { wrap.classList.add('hidden'); return; }
     wrap.classList.remove('hidden');
     errDiv.classList.add('hidden');
@@ -766,6 +828,12 @@
     }
 
     if (!valid) return;
+
+    // Gỡ bỏ disabled để đảm bảo dữ liệu được gửi lên Servlet
+    document.getElementById('courtName').removeAttribute('disabled');
+    document.getElementById('courtTypeSelect').removeAttribute('disabled');
+    document.getElementById('courtStatus').removeAttribute('disabled');
+
     document.getElementById('courtForm').submit();
   }
 
@@ -853,7 +921,7 @@
       const type = mockLoaiSan.find(t => t.id === c.typeId) || {};
       const sport = mockSports.find(s => s.id === type.sportId) || {};
       const defaultImg = sportImages[type.sportId] || sportImages[1];
-      const img = c.image && c.image.trim() ? c.image : defaultImg;
+      const img = c.image && c.image.trim() ? normalizeCourtImageUrl(c.image) : defaultImg;
       
       let badgeColor = 'badge-purple';
       if (c.status === 'Sẵn sàng') badgeColor = 'badge-green';
@@ -1009,6 +1077,8 @@
   // COURT MODAL ACTIONS
   function openCreateModal() {
     document.getElementById('courtForm').reset();
+    document.getElementById('existingCourtImage').value = '';
+    document.getElementById('courtImageFile').value = '';
     courtNameEdited = false;
     document.getElementById('bulkNamePreview').classList.add('hidden');
     clearFieldError('courtName'); clearFieldError('courtTypeSelect'); clearFieldError('courtQty');
@@ -1019,6 +1089,12 @@
     document.getElementById('courtQtyWrap').classList.remove('hidden');
     document.getElementById('courtQty').value = 1;
     document.getElementById('courtImagePreviewWrap').classList.add('hidden');
+    updateImagePreview();
+
+    document.getElementById('courtName').removeAttribute('disabled');
+    document.getElementById('courtTypeSelect').removeAttribute('disabled');
+    document.getElementById('courtStatus').removeAttribute('disabled');
+    document.getElementById('courtOccupiedWarning').classList.add('hidden');
 
     // Empty state banner
     const banner = document.getElementById('courtNoTypesBanner');
@@ -1044,14 +1120,33 @@
     document.getElementById('courtModalSubtitle').textContent = 'Cập nhật thông tin sân #' + c.id;
     document.getElementById('courtAction').value = 'update';
     document.getElementById('courtEditId').value = c.id;
+    document.getElementById('courtImageFile').value = '';
     document.getElementById('courtName').value = c.name;
     document.getElementById('courtDesc').value = c.desc || '';
-    document.getElementById('courtImage').value = c.image || '';
+    document.getElementById('existingCourtImage').value = c.image || '';
     document.getElementById('courtQtyWrap').classList.add('hidden');
 
     setStatusOptions(true, c.status);
     populateCourtTypeDropdown(c.typeId);
     updateImagePreview();
+
+    const isOccupied = c.status === 'Đang dùng' || c.status === 'Đang sử dụng';
+    const warning = document.getElementById('courtOccupiedWarning');
+    const nameInput = document.getElementById('courtName');
+    const typeSelect = document.getElementById('courtTypeSelect');
+    const statusSelect = document.getElementById('courtStatus');
+
+    if (isOccupied) {
+      warning.classList.remove('hidden');
+      nameInput.setAttribute('disabled', 'disabled');
+      typeSelect.setAttribute('disabled', 'disabled');
+      statusSelect.setAttribute('disabled', 'disabled');
+    } else {
+      warning.classList.add('hidden');
+      nameInput.removeAttribute('disabled');
+      typeSelect.removeAttribute('disabled');
+      statusSelect.removeAttribute('disabled');
+    }
 
     document.getElementById('courtNoTypesBanner').classList.add('hidden');
     document.getElementById('courtForm').classList.remove('hidden');

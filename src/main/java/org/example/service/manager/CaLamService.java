@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -473,6 +474,18 @@ public class CaLamService {
             throw new ConflictException("Không thể sửa ca làm việc đã bị hủy.");
         }
 
+        // 2-hour cutoff: block update if shift starts within 120 minutes
+        LocalDateTime shiftStart = LocalDateTime.of(existing.getNgayLam(), existing.getGioBatDau());
+        long minutesUntilStart = ChronoUnit.MINUTES.between(LocalDateTime.now(), shiftStart);
+        if (minutesUntilStart > 0 && minutesUntilStart < 120) {
+            throw new ConflictException("SHIFT_CUTOFF_VIOLATED: Ca làm việc sắp bắt đầu trong vòng 2 giờ. Không thể cập nhật.");
+        }
+
+        // Require reason when updating a Published shift
+        if (existing.isPublished() && (changeReason == null || changeReason.trim().isEmpty())) {
+            throw new ValidationException("PUBLISHED_REASON_REQUIRED: Vui lòng nhập lý do thay đổi ca đã gửi cho nhân viên.");
+        }
+
         if (Constants.SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(existing.getTrangThai())) {
             if (!request.isOverrideConfirm()) {
                 throw new ValidationException("CONFIRMED_OVERRIDE_REQUIRED: Ca làm việc đã được xác nhận. Vui lòng xác nhận để tiếp tục thay đổi.");
@@ -580,12 +593,20 @@ public class CaLamService {
             throw new ConflictException("Ca làm việc đã bị hủy.");
         }
 
+        // 2-hour emergency check
+        LocalDateTime shiftStart2h = LocalDateTime.of(ca.getNgayLam(), ca.getGioBatDau());
+        long minutesUntilStart2h = ChronoUnit.MINUTES.between(LocalDateTime.now(), shiftStart2h);
+        boolean isEmergencyCancel = minutesUntilStart2h > 0 && minutesUntilStart2h < 120;
+        if (isEmergencyCancel && (deleteReason == null || deleteReason.trim().isEmpty())) {
+            throw new ValidationException("EMERGENCY_CANCEL_REQUIRED: Ca sắp bắt đầu trong vòng 2 giờ. Vui lòng nhập lý do hủy khẩn cấp.");
+        }
+
         // reason null/blank khi ca đã Published/Confirmed -> throw
         boolean isPublished = ca.isPublished();
         boolean isConfirmed = Constants.SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(ca.getTrangThai());
         if (isPublished || isConfirmed) {
             if (deleteReason == null || deleteReason.trim().isEmpty()) {
-                throw new ValidationException("Vui lòng nhập lý do xóa ca làm việc đã công bố hoặc xác nhận.");
+                throw new ValidationException("Vui lòng nhập lý do hủy ca làm việc đã công bố hoặc xác nhận.");
             }
         }
 
@@ -601,7 +622,7 @@ public class CaLamService {
         // Log audit log
         CaLamViecAudit audit = new CaLamViecAudit();
         audit.setCaLamViecId(caLamViecId);
-        audit.setThaoTac("CANCEL");
+        audit.setThaoTac(isEmergencyCancel ? "EMERGENCY_CANCEL" : "CANCEL");
         audit.setNguoiThucHien(actorId);
         audit.setGiaTriCu(oldValue);
         audit.setGiaTriMoi(ca.toString());
@@ -613,7 +634,9 @@ public class CaLamService {
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(ca.getAccountId());
             tb.setTieuDe("Lịch làm việc của bạn đã bị hủy");
-            tb.setNoiDung(String.format("Ca làm việc ngày %s (%s - %s) đã bị hủy bởi quản lý.", ca.getNgayLam(), ca.getGioBatDau(), ca.getGioKetThuc()));
+            String cancelMsg = String.format("Ca làm việc ngày %s (%s - %s) đã bị hủy bởi quản lý.", ca.getNgayLam(), ca.getGioBatDau(), ca.getGioKetThuc());
+            if (deleteReason != null && !deleteReason.trim().isEmpty()) { cancelMsg += " Lý do: " + deleteReason.trim(); }
+            tb.setNoiDung(cancelMsg);
             tb.setLoaiThongBao("LichLamViec");
             tb.setDaDoc(false);
             tb.setThoiGianGui(new java.util.Date());

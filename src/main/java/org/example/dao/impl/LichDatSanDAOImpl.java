@@ -714,6 +714,10 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities) throws Exception {
+        if (productIds == null || quantities == null || productIds.length != quantities.length) {
+            throw new Exception("Dữ liệu đầu vào không hợp lệ (mảng sản phẩm và số lượng không khớp).");
+        }
+
         Connection conn = null;
         PreparedStatement psSelectBooking = null;
         PreparedStatement psCheckInvoice = null;
@@ -731,7 +735,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             conn.setAutoCommit(false);
 
             // 1. Lấy thông tin booking và khóa dòng
-            String sqlSelectBooking = "SELECT SanID, TongTienDuKien, AccountID, TrangThai FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?";
+            String sqlSelectBooking = "SELECT lds.SanID, lds.TongTienDuKien, lds.AccountID, lds.TrangThai, s.CoSoID FROM LichDatSan lds INNER JOIN San s ON lds.SanID = s.SanID WITH (UPDLOCK, ROWLOCK) WHERE lds.DatSanID = ?";
             psSelectBooking = conn.prepareStatement(sqlSelectBooking);
             psSelectBooking.setInt(1, datSanId);
             rsBooking = psSelectBooking.executeQuery();
@@ -743,6 +747,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             Integer customerAccountId = rsBooking.getInt("AccountID");
             if (rsBooking.wasNull()) {
                 customerAccountId = null;
+            }
+            String trangThaiBooking = rsBooking.getString("TrangThai");
+            int coSoId = rsBooking.getInt("CoSoID");
+
+            if (!"Đang sử dụng".equals(trangThaiBooking)) {
+                throw new Exception("Chỉ được phép thêm/cập nhật dịch vụ khi đơn đặt sân ở trạng thái 'Đang sử dụng'.");
             }
 
             // 2. Kiểm tra/Tạo hóa đơn nếu chưa có
@@ -807,7 +817,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             String sqlInsertChiTiet = "INSERT INTO ChiTietHoaDon (HoaDonID, SanPhamID, SoLuong, DonGiaTaiThoiDiemBan, ThanhTien) VALUES (?, ?, ?, ?, ?)";
             psInsertChiTiet = conn.prepareStatement(sqlInsertChiTiet);
 
-            String sqlGetProduct = "SELECT TenSanPham, DonGia, SoLuongTon FROM SanPham_DichVu WITH (UPDLOCK, ROWLOCK) WHERE SanPhamID = ?";
+            String sqlGetProduct = "SELECT TenSanPham, DonGia, SoLuongTon, CoSoID, TrangThai FROM SanPham_DichVu WITH (UPDLOCK, ROWLOCK) WHERE SanPhamID = ?";
             psGetProductDetails = conn.prepareStatement(sqlGetProduct);
 
             String sqlUpdateStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon - ? WHERE SanPhamID = ?";
@@ -827,6 +837,15 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                         String tenSp = rsProd.getNString("TenSanPham");
                         double donGia = rsProd.getDouble("DonGia");
                         int stock = rsProd.getInt("SoLuongTon");
+                        int prodCoSoId = rsProd.getInt("CoSoID");
+                        String prodStatus = rsProd.getString("TrangThai");
+
+                        if (prodCoSoId != coSoId) {
+                            throw new Exception("Sản phẩm '" + tenSp + "' không thuộc cùng chi nhánh với sân bóng.");
+                        }
+                        if (!"Đang kinh doanh".equals(prodStatus)) {
+                            throw new Exception("Sản phẩm '" + tenSp + "' hiện tại ngừng kinh doanh.");
+                        }
 
                         if (stock < qty) {
                             throw new Exception("Sản phẩm '" + tenSp + "' không đủ số lượng tồn (Hiện còn: " + stock + ").");
@@ -916,7 +935,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Lấy thông tin đơn đặt
+            // 1. Lấy thông tin đơn đặt và kiểm tra
             String sqlSelect = "SELECT SanID, TrangThai FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
@@ -929,25 +948,115 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             int sanId = rs.getInt("SanID");
             String trangThai = rs.getString("TrangThai");
 
-            if ("Đã hoàn thành".equals(trangThai) || "Đã hủy".equals(trangThai)) {
-                throw new Exception("Đơn đặt sân đã kết thúc hoặc đã hủy, không thể thanh toán.");
+            if (!"Đang sử dụng".equals(trangThai)) {
+                throw new Exception("Chỉ có thể thanh toán hóa đơn cho các ca chơi đang ở trạng thái 'Đang sử dụng'.");
             }
 
-            // 2. Cập nhật hóa đơn sang Đã thanh toán
+            // 2. Kiểm tra hóa đơn đã thanh toán chưa
+            String sqlCheckInvoice = "SELECT TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?";
+            try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckInvoice)) {
+                psCheck.setInt(1, datSanId);
+                try (ResultSet rsCheck = psCheck.executeQuery()) {
+                    if (rsCheck.next()) {
+                        String invoiceStatus = rsCheck.getString("TrangThaiThanhToan");
+                        if ("Đã thanh toán".equals(invoiceStatus)) {
+                            throw new Exception("Hóa đơn này đã được thanh toán trước đó.");
+                        }
+                    }
+                }
+            }
+
+            // 3. Kiểm tra phương thức thanh toán
+            if (phuongThucThanhToan == null || phuongThucThanhToan.trim().isEmpty()) {
+                throw new IllegalArgumentException("Phương thức thanh toán không được để trống.");
+            }
+            String paymentMethodTrim = phuongThucThanhToan.trim();
+            if (!"Tiền mặt".equals(paymentMethodTrim) && !"Chuyển khoản".equals(paymentMethodTrim) && !"Thẻ".equals(paymentMethodTrim) && !"Ví điện tử".equals(paymentMethodTrim)) {
+                throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ.");
+            }
+
+            // 4. Tính toán phụ thu quá giờ (Late Checkout)
+            String sqlSelectDetails = "SELECT lds.GioKetThuc, lds.NgayDat, lds.ApDungGiaCoDen, ls.GiaCoDen, ls.GiaKhongDen, lds.GhiChu " +
+                                      "FROM LichDatSan lds " +
+                                      "INNER JOIN San s ON lds.SanID = s.SanID " +
+                                      "INNER JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                                      "WHERE lds.DatSanID = ?";
+            Time gioKetThuc = null;
+            Date ngayDat = null;
+            boolean apDungGiaCoDen = false;
+            double giaCoDen = 0.0;
+            double giaKhongDen = 0.0;
+            String existingGhiChu = "";
+            try (PreparedStatement psDet = conn.prepareStatement(sqlSelectDetails)) {
+                psDet.setInt(1, datSanId);
+                try (ResultSet rsDet = psDet.executeQuery()) {
+                    if (rsDet.next()) {
+                        gioKetThuc = rsDet.getTime("GioKetThuc");
+                        ngayDat = rsDet.getDate("NgayDat");
+                        apDungGiaCoDen = rsDet.getBoolean("ApDungGiaCoDen");
+                        giaCoDen = rsDet.getDouble("GiaCoDen");
+                        giaKhongDen = rsDet.getDouble("GiaKhongDen");
+                        existingGhiChu = rsDet.getString("GhiChu");
+                    }
+                }
+            }
+
+            double hourlyRate = apDungGiaCoDen ? giaCoDen : giaKhongDen;
+            double phuThuTre = 0.0;
+            long minutesOver = 0;
+            
+            if (ngayDat != null && gioKetThuc != null) {
+                java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(ngayDat.toLocalDate(), gioKetThuc.toLocalTime());
+                java.time.LocalDateTime actualCheckOut = java.time.LocalDateTime.now();
+                if (actualCheckOut.isAfter(plannedEnd)) {
+                    minutesOver = java.time.Duration.between(plannedEnd, actualCheckOut).toMinutes();
+                    if (minutesOver > 10) { // Grace period: 10 minutes
+                        phuThuTre = minutesOver * (hourlyRate / 60.0);
+                    }
+                }
+            }
+
+            if (phuThuTre > 0.0) {
+                // Cập nhật phụ thu vào HoaDon
+                String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE DatSanID = ?";
+                try (PreparedStatement psUpSurch = conn.prepareStatement(sqlUpdateInvoiceSurcharge)) {
+                    psUpSurch.setDouble(1, phuThuTre);
+                    psUpSurch.setDouble(2, phuThuTre);
+                    psUpSurch.setInt(3, datSanId);
+                    psUpSurch.executeUpdate();
+                }
+                // Cập nhật phụ thu vào LichDatSan
+                String updatedGhiChu = (existingGhiChu != null ? existingGhiChu : "") + " [Phụ thu quá giờ: " + minutesOver + " phút (" + String.format("%.0f", phuThuTre) + "đ)]";
+                String sqlUpdateLichSurcharge = "UPDATE LichDatSan SET TongTienDuKien = TongTienDuKien + ?, GhiChu = ? WHERE DatSanID = ?";
+                try (PreparedStatement psUpLich = conn.prepareStatement(sqlUpdateLichSurcharge)) {
+                    psUpLich.setDouble(1, phuThuTre);
+                    psUpLich.setString(2, updatedGhiChu);
+                    psUpLich.setInt(3, datSanId);
+                    psUpLich.executeUpdate();
+                }
+            }
+
+            // 5. Cập nhật hóa đơn sang Đã thanh toán
             String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE DatSanID = ?";
             psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
-            psUpdateInvoice.setString(1, phuongThucThanhToan);
+            psUpdateInvoice.setString(1, paymentMethodTrim);
             psUpdateInvoice.setInt(2, staffAccountId);
             psUpdateInvoice.setInt(3, datSanId);
-            psUpdateInvoice.executeUpdate();
+            int affectedInv = psUpdateInvoice.executeUpdate();
+            if (affectedInv == 0) {
+                throw new Exception("Thanh toán hóa đơn thất bại (Hóa đơn không tồn tại).");
+            }
 
-            // 3. Cập nhật đơn đặt sang Đã hoàn thành
+            // 6. Cập nhật đơn đặt sang Đã hoàn thành
             String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = N'Đã hoàn thành' WHERE DatSanID = ?";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
             psUpdateBooking.setInt(1, datSanId);
-            psUpdateBooking.executeUpdate();
+            int affectedBooking = psUpdateBooking.executeUpdate();
+            if (affectedBooking == 0) {
+                throw new Exception("Cập nhật trạng thái đơn đặt sân thất bại.");
+            }
 
-            // 4. Giải phóng sân bóng
+            // 7. Giải phóng sân bóng
             String sqlUpdateSan = "UPDATE San SET TrangThai = N'Sẵn sàng' WHERE SanID = ?";
             psUpdateSan = conn.prepareStatement(sqlUpdateSan);
             psUpdateSan.setInt(1, sanId);

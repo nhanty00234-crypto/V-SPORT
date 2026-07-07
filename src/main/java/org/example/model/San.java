@@ -38,6 +38,26 @@ public class San {
     @Column(name = "DeletedBy")
     private Integer deletedBy;
 
+    @Transient
+    private String tenLoaiSan;
+    @Transient
+    private double giaKhongDen;
+    @Transient
+    private double giaCoDen;
+    @Transient
+    private java.time.LocalTime gioBatDauLenDen;
+    @Transient
+    private java.time.LocalTime gioKetThucLenDen;
+    @Transient
+    private Integer datSanIdActive;
+    @Transient
+    private String gioBatDauActive;
+    @Transient
+    private String gioKetThucActive;
+    @Transient
+    private String ghiChuActive;
+
+
     public San(int sanID, String tenSan, int loaiSanID, int coSoID, String trangThai, String moTa, String hinhAnh) {
         this.sanID = sanID;
         this.tenSan = tenSan;
@@ -118,6 +138,34 @@ public class San {
     public Integer getDeletedBy() { return deletedBy; }
 
     public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
+
+    public String getTenLoaiSan() { return tenLoaiSan; }
+    public void setTenLoaiSan(String tenLoaiSan) { this.tenLoaiSan = tenLoaiSan; }
+
+    public double getGiaKhongDen() { return giaKhongDen; }
+    public void setGiaKhongDen(double giaKhongDen) { this.giaKhongDen = giaKhongDen; }
+
+    public double getGiaCoDen() { return giaCoDen; }
+    public void setGiaCoDen(double giaCoDen) { this.giaCoDen = giaCoDen; }
+
+    public java.time.LocalTime getGioBatDauLenDen() { return gioBatDauLenDen; }
+    public void setGioBatDauLenDen(java.time.LocalTime gioBatDauLenDen) { this.gioBatDauLenDen = gioBatDauLenDen; }
+
+    public java.time.LocalTime getGioKetThucLenDen() { return gioKetThucLenDen; }
+    public void setGioKetThucLenDen(java.time.LocalTime gioKetThucLenDen) { this.gioKetThucLenDen = gioKetThucLenDen; }
+
+    public Integer getDatSanIdActive() { return datSanIdActive; }
+    public void setDatSanIdActive(Integer datSanIdActive) { this.datSanIdActive = datSanIdActive; }
+
+    public String getGioBatDauActive() { return gioBatDauActive; }
+    public void setGioBatDauActive(String gioBatDauActive) { this.gioBatDauActive = gioBatDauActive; }
+
+    public String getGioKetThucActive() { return gioKetThucActive; }
+    public void setGioKetThucActive(String gioKetThucActive) { this.gioKetThucActive = gioKetThucActive; }
+
+    public String getGhiChuActive() { return ghiChuActive; }
+    public void setGhiChuActive(String ghiChuActive) { this.ghiChuActive = ghiChuActive; }
+
 
     @Override
     public String toString() {

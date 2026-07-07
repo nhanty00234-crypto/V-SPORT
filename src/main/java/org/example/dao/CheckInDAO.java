@@ -280,7 +280,7 @@ public class CheckInDAO {
      * @param donGiaSan Đơn giá tính theo giờ cho loại sân này
      * @throws CheckInException nếu có lỗi nghiệp vụ xảy ra (như kẹt lịch đặt online)
      */
-    public void checkInKhachVangLai(int sanId, int durationMinutes, int staffAccountId, double donGiaSan) throws CheckInException {
+    public void checkInKhachVangLai(int sanId, int durationMinutes, int staffAccountId, double donGiaSan, String ghiChu) throws CheckInException {
         Connection conn = null;
         PreparedStatement psCheckConflict = null;
         PreparedStatement psSelectField = null;
@@ -354,7 +354,7 @@ public class CheckInDAO {
             psInsertBooking.setTime(4, Time.valueOf(endTime));
             psInsertBooking.setTime(5, Time.valueOf(now));
             psInsertBooking.setString(6, BOOKING_STATUS_IN_USE);
-            psInsertBooking.setString(7, "Khách vãng lai chơi " + durationMinutes + " phút");
+            psInsertBooking.setString(7, ghiChu != null ? ghiChu : ("Khách vãng lai chơi " + durationMinutes + " phút"));
             psInsertBooking.setString(8, "Walk-in");
             psInsertBooking.setBigDecimal(9, totalAmount);
             psInsertBooking.executeUpdate();
@@ -524,25 +524,41 @@ public class CheckInDAO {
     }
 
     /**
-     * Lấy danh sách toàn bộ sân để hiển thị trên giao diện Lễ tân
+     * Lấy danh sách toàn bộ sân theo chi nhánh để hiển thị trên giao diện Lễ tân
      */
-    public List<San> getDanhSachSan() {
+    public List<San> getDanhSachSan(int coSoId) {
         org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
         List<San> list = new ArrayList<>();
-        String sql = "SELECT SanID, TenSan, LoaiSanID, CoSoID, TrangThai, MoTa, HinhAnh FROM San ORDER BY SanID";
+        String sql = "SELECT s.SanID, s.TenSan, s.LoaiSanID, s.CoSoID, s.TrangThai, s.MoTa, s.HinhAnh, " +
+                     "ls.TenLoai AS TenLoaiSan, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen, " +
+                     "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS DatSanIDActive, " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(5), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive " +
+                     "FROM San s " +
+                     "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                     "WHERE s.CoSoID = ? AND s.IsDeleted = 0 " +
+                     "ORDER BY s.SanID";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                San s = new San();
-                s.setSanID(rs.getInt("SanID"));
-                s.setTenSan(rs.getString("TenSan"));
-                s.setLoaiSanID(rs.getInt("LoaiSanID"));
-                s.setCoSoID(rs.getInt("CoSoID"));
-                s.setTrangThai(rs.getString("TrangThai"));
-                s.setMoTa(rs.getString("MoTa"));
-                s.setHinhAnh(rs.getString("HinhAnh"));
-                list.add(s);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    San s = new San();
+                    s.setSanID(rs.getInt("SanID"));
+                    s.setTenSan(rs.getString("TenSan"));
+                    s.setLoaiSanID(rs.getInt("LoaiSanID"));
+                    s.setCoSoID(rs.getInt("CoSoID"));
+                    s.setTrangThai(rs.getString("TrangThai"));
+                    s.setMoTa(rs.getString("MoTa"));
+                    s.setHinhAnh(rs.getString("HinhAnh"));
+                    s.setTenLoaiSan(rs.getString("TenLoaiSan"));
+                    s.setGiaKhongDen(rs.getDouble("GiaKhongDen"));
+                    s.setGiaCoDen(rs.getDouble("GiaCoDen"));
+                    s.setGioBatDauLenDen(rs.getTime("GioBatDauLenDen") != null ? rs.getTime("GioBatDauLenDen").toLocalTime() : null);
+                    s.setGioKetThucLenDen(rs.getTime("GioKetThucLenDen") != null ? rs.getTime("GioKetThucLenDen").toLocalTime() : null);
+                    s.setDatSanIdActive(rs.getObject("DatSanIDActive") != null ? rs.getInt("DatSanIDActive") : null);
+                    s.setGioBatDauActive(rs.getString("GioBatDauActive"));
+                    list.add(s);
+                }
             }
         } catch (Exception e) {
             logger.error("Error in getDanhSachSan: ", e);
@@ -551,9 +567,9 @@ public class CheckInDAO {
     }
 
     /**
-     * Lấy danh sách lịch đặt sân trong ngày hôm nay phục vụ check-in
+     * Lấy danh sách lịch đặt sân trong ngày hôm nay phục vụ check-in của chi nhánh
      */
-    public List<BookingViewDTO> getDanhSachLichCheckInHomNay() {
+    public List<BookingViewDTO> getDanhSachLichCheckInHomNay(int coSoId) {
         org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
         List<BookingViewDTO> list = new ArrayList<>();
         String sql = "SELECT lds.DatSanID, s.SanID, s.TenSan, acc.FullName AS TenKhachHang, " +
@@ -563,29 +579,31 @@ public class CheckInDAO {
                      "INNER JOIN San s ON lds.SanID = s.SanID " +
                      "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
                      "LEFT JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID " +
-                     "WHERE lds.NgayDat = CAST(GETDATE() AS DATE) " +
+                     "WHERE lds.NgayDat = CAST(GETDATE() AS DATE) AND s.CoSoID = ? " +
                      "ORDER BY lds.GioBatDau ASC";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                BookingViewDTO dto = new BookingViewDTO();
-                dto.setDatSanId(rs.getInt("DatSanID"));
-                dto.setSanId(rs.getInt("SanID"));
-                dto.setTenSan(rs.getString("TenSan"));
-                String guestName = rs.getString("TenKhachHang");
-                dto.setTenKhachHang(guestName != null ? guestName : "Khách vãng lai");
-                dto.setNgayDat(rs.getDate("NgayDat").toLocalDate());
-                dto.setGioBatDau(rs.getTime("GioBatDau").toLocalTime());
-                dto.setGioKetThuc(rs.getTime("GioKetThuc").toLocalTime());
-                dto.setTongTien(rs.getBigDecimal("TongTienDuKien"));
-                dto.setTrangThai(rs.getString("TrangThai"));
-                dto.setGhiChu(rs.getString("GhiChu"));
-                String paymentStatus = rs.getString("TrangThaiThanhToan");
-                dto.setTrangThaiThanhToan(paymentStatus != null ? paymentStatus : PAYMENT_STATUS_UNPAID);
-                String nguonDat = rs.getString("NguonDatSan");
-                dto.setNguonDatSan(nguonDat != null ? nguonDat : "Walk-in");
-                list.add(dto);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    BookingViewDTO dto = new BookingViewDTO();
+                    dto.setDatSanId(rs.getInt("DatSanID"));
+                    dto.setSanId(rs.getInt("SanID"));
+                    dto.setTenSan(rs.getString("TenSan"));
+                    String guestName = rs.getString("TenKhachHang");
+                    dto.setTenKhachHang(guestName != null ? guestName : "Khách vãng lai");
+                    dto.setNgayDat(rs.getDate("NgayDat").toLocalDate());
+                    dto.setGioBatDau(rs.getTime("GioBatDau").toLocalTime());
+                    dto.setGioKetThuc(rs.getTime("GioKetThuc").toLocalTime());
+                    dto.setTongTien(rs.getBigDecimal("TongTienDuKien"));
+                    dto.setTrangThai(rs.getString("TrangThai"));
+                    dto.setGhiChu(rs.getString("GhiChu"));
+                    String paymentStatus = rs.getString("TrangThaiThanhToan");
+                    dto.setTrangThaiThanhToan(paymentStatus != null ? paymentStatus : PAYMENT_STATUS_UNPAID);
+                    String nguonDat = rs.getString("NguonDatSan");
+                    dto.setNguonDatSan(nguonDat != null ? nguonDat : "Walk-in");
+                    list.add(dto);
+                }
             }
         } catch (Exception e) {
             logger.error("Error in getDanhSachLichCheckInHomNay: ", e);
@@ -645,6 +663,234 @@ public class CheckInDAO {
 
         public String getNguonDatSan() { return nguonDatSan; }
         public void setNguonDatSan(String nguonDatSan) { this.nguonDatSan = nguonDatSan; }
+    }
+
+    /**
+     * Tạo hóa đơn tách (split bill) riêng biệt cho dịch vụ, không ảnh hưởng hóa đơn sân chính.
+     * Yêu cầu DB đã có cột LoaiHoaDon, ParentHoaDonID, GhiChu trên bảng HoaDon.
+     *
+     * @return HoaDonID của split bill vừa tạo
+     */
+    public int addServicesSplitBill(int datSanId, int[] productIds, int[] quantities,
+                                     boolean payNow, String paymentMethod, int staffAccountId,
+                                     int requiredCoSoId) throws Exception {
+        if (productIds == null || quantities == null || productIds.length != quantities.length) {
+            throw new CheckInException("Dữ liệu đầu vào không hợp lệ.");
+        }
+        if (productIds.length == 0) {
+            throw new CheckInException("Vui lòng chọn ít nhất một sản phẩm.");
+        }
+
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Xác minh booking đang sử dụng và thuộc chi nhánh
+            int coSoIdFromDB;
+            Integer customerAccountId = null;
+            String sqlBooking = "SELECT s.CoSoID, lds.AccountID, lds.TrangThai " +
+                                "FROM LichDatSan lds INNER JOIN San s ON lds.SanID = s.SanID " +
+                                "WHERE lds.DatSanID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlBooking)) {
+                ps.setInt(1, datSanId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new CheckInException("Không tìm thấy đơn đặt sân.");
+                    coSoIdFromDB = rs.getInt("CoSoID");
+                    if (coSoIdFromDB != requiredCoSoId) {
+                        throw new CheckInException("Đơn đặt sân không thuộc cơ sở của bạn.");
+                    }
+                    if (!"Đang sử dụng".equals(rs.getString("TrangThai"))) {
+                        throw new CheckInException("Chỉ thêm dịch vụ khi sân đang sử dụng.");
+                    }
+                    int accId = rs.getInt("AccountID");
+                    if (!rs.wasNull()) customerAccountId = accId;
+                }
+            }
+
+            // 2. Lấy HoaDonID của main invoice để làm ParentHoaDonID
+            int parentHoaDonId = -1;
+            String sqlMain = "SELECT HoaDonID FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+            try (PreparedStatement ps = conn.prepareStatement(sqlMain)) {
+                ps.setInt(1, datSanId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) parentHoaDonId = rs.getInt("HoaDonID");
+                }
+            }
+
+            // 3. Lấy đơn giá và kiểm tra tồn kho sản phẩm
+            double totalDichVu = 0.0;
+            int[][] validItems = new int[productIds.length][2]; // [qty, confirmed]
+            double[] donGias = new double[productIds.length];
+
+            String sqlGetProduct = "SELECT TenSanPham, DonGia, SoLuongTon, CoSoID, TrangThai " +
+                                   "FROM SanPham_DichVu WITH (UPDLOCK, ROWLOCK) WHERE SanPhamID = ?";
+            try (PreparedStatement psGetProd = conn.prepareStatement(sqlGetProduct)) {
+                for (int i = 0; i < productIds.length; i++) {
+                    int qty = quantities[i];
+                    if (qty <= 0) continue;
+                    psGetProd.setInt(1, productIds[i]);
+                    try (ResultSet rs = psGetProd.executeQuery()) {
+                        if (!rs.next()) throw new CheckInException("Không tìm thấy sản phẩm ID: " + productIds[i]);
+                        String tenSp = rs.getNString("TenSanPham");
+                        if (rs.getInt("CoSoID") != coSoIdFromDB)
+                            throw new CheckInException("Sản phẩm '" + tenSp + "' không thuộc chi nhánh này.");
+                        if (!"Đang kinh doanh".equals(rs.getString("TrangThai")))
+                            throw new CheckInException("Sản phẩm '" + tenSp + "' ngừng kinh doanh.");
+                        int stock = rs.getInt("SoLuongTon");
+                        if (stock < qty)
+                            throw new CheckInException("Sản phẩm '" + tenSp + "' không đủ tồn kho (còn: " + stock + ").");
+                        donGias[i] = rs.getDouble("DonGia");
+                        totalDichVu += qty * donGias[i];
+                        validItems[i][0] = qty;
+                        validItems[i][1] = 1;
+                    }
+                }
+            }
+
+            if (totalDichVu <= 0) throw new CheckInException("Không có sản phẩm hợp lệ để lập hóa đơn tách.");
+
+            // 4. Tạo split HoaDon
+            String trangThai = payNow ? "Đã thanh toán" : "Chưa thanh toán";
+            String phuongThuc = (payNow && paymentMethod != null) ? paymentMethod : null;
+            String ghiChu = "Tách bill dịch vụ";
+
+            String sqlInsertHD;
+            if (parentHoaDonId > 0) {
+                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                              "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, " +
+                              "TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon, ParentHoaDonID, GhiChu) " +
+                              "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, ?, ?, N'SPLIT', ?, ?)";
+            } else {
+                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                              "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, " +
+                              "TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon, GhiChu) " +
+                              "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, ?, ?, N'SPLIT', ?)";
+            }
+
+            int splitHoaDonId;
+            try (PreparedStatement psHD = conn.prepareStatement(sqlInsertHD, Statement.RETURN_GENERATED_KEYS)) {
+                psHD.setInt(1, datSanId);
+                if (customerAccountId != null) psHD.setInt(2, customerAccountId);
+                else psHD.setNull(2, Types.INTEGER);
+                psHD.setInt(3, staffAccountId);
+                psHD.setDouble(4, totalDichVu);
+                psHD.setDouble(5, totalDichVu);
+                psHD.setNString(6, trangThai);
+                if (phuongThuc != null) psHD.setString(7, phuongThuc);
+                else psHD.setNull(7, Types.NVARCHAR);
+                if (parentHoaDonId > 0) {
+                    psHD.setInt(8, parentHoaDonId);
+                    psHD.setNString(9, ghiChu);
+                } else {
+                    psHD.setNString(8, ghiChu);
+                }
+                psHD.executeUpdate();
+                try (ResultSet keys = psHD.getGeneratedKeys()) {
+                    if (!keys.next()) throw new CheckInException("Không thể tạo hóa đơn tách.");
+                    splitHoaDonId = keys.getInt(1);
+                }
+            }
+
+            // 5. Thêm chi tiết và giảm tồn kho
+            String sqlInsertCT = "INSERT INTO ChiTietHoaDon (HoaDonID, SanPhamID, SoLuong, DonGiaTaiThoiDiemBan, ThanhTien) " +
+                                  "VALUES (?, ?, ?, ?, ?)";
+            String sqlStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon - ? WHERE SanPhamID = ?";
+            try (PreparedStatement psInsertCT = conn.prepareStatement(sqlInsertCT);
+                 PreparedStatement psStock = conn.prepareStatement(sqlStock)) {
+                for (int i = 0; i < productIds.length; i++) {
+                    if (validItems[i][1] != 1) continue;
+                    int qty = validItems[i][0];
+                    psStock.setInt(1, qty);
+                    psStock.setInt(2, productIds[i]);
+                    psStock.executeUpdate();
+
+                    psInsertCT.setInt(1, splitHoaDonId);
+                    psInsertCT.setInt(2, productIds[i]);
+                    psInsertCT.setInt(3, qty);
+                    psInsertCT.setDouble(4, donGias[i]);
+                    psInsertCT.setDouble(5, qty * donGias[i]);
+                    psInsertCT.executeUpdate();
+                }
+            }
+
+            conn.commit();
+            return splitHoaDonId;
+        } catch (Exception e) {
+            if (conn != null) { try { conn.rollback(); } catch (Exception ignored) {} }
+            logger.error("Lỗi addServicesSplitBill datSanId={}: {}", datSanId, e.getMessage(), e);
+            throw e;
+        } finally {
+            if (conn != null) { try { conn.setAutoCommit(true); conn.close(); } catch (Exception ignored) {} }
+        }
+    }
+
+    /**
+     * Thanh toán một hóa đơn cụ thể (dùng cho split bills).
+     * Xác minh hóa đơn thuộc chi nhánh và chưa thanh toán trước khi cập nhật.
+     */
+    public void payInvoice(int hoaDonId, int staffAccountId, String paymentMethod, int requiredCoSoId) throws Exception {
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            throw new CheckInException("Phương thức thanh toán không được để trống.");
+        }
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // Xác minh hóa đơn thuộc chi nhánh và chưa thanh toán
+            String sqlCheck = "SELECT hd.TrangThaiThanhToan, s.CoSoID " +
+                              "FROM HoaDon hd " +
+                              "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
+                              "INNER JOIN San s ON lds.SanID = s.SanID " +
+                              "WHERE hd.HoaDonID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlCheck)) {
+                ps.setInt(1, hoaDonId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new CheckInException("Không tìm thấy hóa đơn #" + hoaDonId);
+                    if (rs.getInt("CoSoID") != requiredCoSoId)
+                        throw new CheckInException("Hóa đơn không thuộc cơ sở của bạn.");
+                    if ("Đã thanh toán".equals(rs.getString("TrangThaiThanhToan")))
+                        throw new CheckInException("Hóa đơn này đã được thanh toán.");
+                }
+            }
+
+            String sqlPay = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', " +
+                            "PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() " +
+                            "WHERE HoaDonID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlPay)) {
+                ps.setString(1, paymentMethod.trim());
+                ps.setInt(2, staffAccountId);
+                ps.setInt(3, hoaDonId);
+                if (ps.executeUpdate() == 0) throw new CheckInException("Cập nhật hóa đơn thất bại.");
+            }
+
+            conn.commit();
+        } catch (Exception e) {
+            if (conn != null) { try { conn.rollback(); } catch (Exception ignored) {} }
+            logger.error("Lỗi payInvoice hoaDonId={}: {}", hoaDonId, e.getMessage(), e);
+            throw e;
+        } finally {
+            if (conn != null) { try { conn.setAutoCommit(true); conn.close(); } catch (Exception ignored) {} }
+        }
+    }
+
+    /**
+     * Kiểm tra xem có hóa đơn tách chưa thanh toán thuộc đơn đặt sân này không.
+     * Dùng để chặn checkout khi còn split bill chưa trả.
+     */
+    public boolean hasUnpaidSplitBills(int datSanId) {
+        String sql = "SELECT COUNT(*) FROM HoaDon WHERE DatSanID = ? AND LoaiHoaDon = N'SPLIT' AND TrangThaiThanhToan = N'Chưa thanh toán'";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, datSanId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            logger.error("Lỗi hasUnpaidSplitBills datSanId={}: {}", datSanId, e.getMessage(), e);
+        }
+        return false;
     }
 
     /**

@@ -15,6 +15,38 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<style>
+  /* ── flatpickr V-Sport theme ── */
+  .flatpickr-calendar {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px -8px rgba(124,58,237,.18), 0 4px 16px -4px rgba(0,0,0,.08);
+    border: 1px solid #ede9fe;
+    z-index: 9999 !important;
+  }
+  .flatpickr-month { background: #7c3aed; border-radius: 15px 15px 0 0; padding: 10px 0 8px; color: #fff; }
+  .flatpickr-current-month { color: #fff; font-size: .9rem; font-weight: 700; }
+  .flatpickr-current-month .flatpickr-monthDropdown-months { background: #7c3aed; color: #fff; border: none; font-weight: 700; }
+  .flatpickr-current-month input.cur-year { color: #fff; font-weight: 700; }
+  .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: #fff; }
+  .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg { fill: #ddd6fe; }
+  .flatpickr-weekdays { background: #f5f3ff; }
+  span.flatpickr-weekday { background: #f5f3ff; color: #7c3aed; font-weight: 700; font-size: .7rem; }
+  .flatpickr-day { border-radius: 10px; font-size: .8rem; color: #3f3f46; transition: background .1s, color .1s; }
+  .flatpickr-day:hover { background: #f3e8ff; border-color: #f3e8ff; color: #6d28d9; }
+  .flatpickr-day.today { border-color: #a78bfa; color: #7c3aed; font-weight: 700; background: #faf5ff; }
+  .flatpickr-day.today:hover { background: #ede9fe; }
+  .flatpickr-day.selected, .flatpickr-day.selected:hover { background: #7c3aed; border-color: #7c3aed; color: #fff; font-weight: 700; }
+  .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color: #d4d4d8; }
+  .flatpickr-innerContainer { padding: 4px 8px 8px; }
+  .flatpickr-rContainer { padding: 0 2px; }
+  /* hide the native calendar icon from type=date — handled by our custom icon */
+  input[type=date]::-webkit-calendar-picker-indicator { display: none; }
+  /* flatpickr alt input: remove default browser date picker icon */
+  .flatpickr-input.flatpickr-mobile { display: none !important; }
+</style>
 <style>
   /* ── Base ── */
   body {

@@ -8,28 +8,40 @@ import org.example.service.manager.SanService;
 import org.example.util.Constants;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.service.AuditLogService;
 
 import java.io.IOException;
+import java.io.File;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Servlet quản lý sân thi đấu dành cho Manager
  * Business logic được delegate cho SanService
  */
 @WebServlet("/manager/quan-ly-san")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize = 5 * 1024 * 1024,
+        maxRequestSize = 7 * 1024 * 1024
+)
 public class QuanLySanManagerServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(QuanLySanManagerServlet.class);
+    private static final Set<String> ALLOWED_COURT_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/gif");
 
     private final SanService sanService;
 
@@ -98,9 +110,12 @@ public class QuanLySanManagerServlet extends HttpServlet {
             return;
         }
 
-        String action = request.getParameter("action");
+        String action = getFormField(request, "action");
 
         try {
+            if (action == null || action.isBlank()) {
+                throw new IllegalArgumentException("Không xác định được thao tác gửi lên từ form quản lý sân.");
+            }
             switch (action) {
                 case "add" -> handleAddSan(request, coSoId, session, manager);
                 case "update" -> handleUpdateSan(request, coSoId, session, manager);
@@ -124,7 +139,7 @@ public class QuanLySanManagerServlet extends HttpServlet {
 
     // ==================== HANDLER METHODS ====================
 
-    private void handleAddSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
+    private void handleAddSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) throws IOException, ServletException {
         int soLuong = 1;
         String soLuongParam = req.getParameter("soLuong");
         if (soLuongParam != null && !soLuongParam.isBlank()) {
@@ -133,6 +148,7 @@ public class QuanLySanManagerServlet extends HttpServlet {
 
         SanService.SanCreateRequest createReq = new SanService.SanCreateRequest();
         populateSanRequest(req, createReq);
+        createReq.setHinhAnh(resolveCourtImage(req, null));
 
         String baseName = createReq.getTenSan() == null ? "" : createReq.getTenSan().trim();
         for (int i = 1; i <= soLuong; i++) {
@@ -150,12 +166,13 @@ public class QuanLySanManagerServlet extends HttpServlet {
         session.setAttribute("message", msg);
     }
 
-    private void handleUpdateSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
+    private void handleUpdateSan(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) throws IOException, ServletException {
         int sanId = Integer.parseInt(req.getParameter("sanID"));
         String tenSan = req.getParameter("tenSan");
 
         SanService.SanUpdateRequest updateReq = new SanService.SanUpdateRequest();
         populateSanUpdateRequest(req, updateReq);
+        updateReq.setHinhAnh(resolveCourtImage(req, req.getParameter("existingHinhAnh")));
 
         sanService.updateSan(sanId, updateReq, coSoId);
         session.setAttribute("message", "Cập nhật sân thành công!");
@@ -222,37 +239,104 @@ public class QuanLySanManagerServlet extends HttpServlet {
     // ==================== REQUEST POPULATORS ====================
 
     private void populateSanRequest(HttpServletRequest req, SanService.SanCreateRequest createReq) {
-        createReq.setTenSan(req.getParameter("tenSan"));
-        createReq.setLoaiSanId(Integer.parseInt(req.getParameter("loaiSanID")));
-        createReq.setTrangThai(req.getParameter("trangThai"));
-        createReq.setMoTa(req.getParameter("moTa"));
-        createReq.setHinhAnh(req.getParameter("hinhAnh"));
+        createReq.setTenSan(getFormField(req, "tenSan"));
+        createReq.setLoaiSanId(Integer.parseInt(getFormField(req, "loaiSanID")));
+        createReq.setTrangThai(getFormField(req, "trangThai"));
+        createReq.setMoTa(getFormField(req, "moTa"));
     }
 
     private void populateSanUpdateRequest(HttpServletRequest req, SanService.SanUpdateRequest updateReq) {
-        updateReq.setTenSan(req.getParameter("tenSan"));
-        updateReq.setLoaiSanId(Integer.parseInt(req.getParameter("loaiSanID")));
-        updateReq.setTrangThai(req.getParameter("trangThai"));
-        updateReq.setMoTa(req.getParameter("moTa"));
-        updateReq.setHinhAnh(req.getParameter("hinhAnh"));
+        updateReq.setTenSan(getFormField(req, "tenSan"));
+        updateReq.setLoaiSanId(Integer.parseInt(getFormField(req, "loaiSanID")));
+        updateReq.setTrangThai(getFormField(req, "trangThai"));
+        updateReq.setMoTa(getFormField(req, "moTa"));
     }
 
     private void populateLoaiSanRequest(HttpServletRequest req, SanService.LoaiSanRequest loaiReq) {
-        loaiReq.setTenLoai(req.getParameter("tenLoai"));
-        loaiReq.setMonTheThaoId(Integer.parseInt(req.getParameter("monTheThaoID")));
-        loaiReq.setGiaKhongDen(new BigDecimal(req.getParameter("giaKhongDen")));
-        loaiReq.setGiaCoDen(new BigDecimal(req.getParameter("giaCoDen")));
+        loaiReq.setTenLoai(getFormField(req, "tenLoai"));
+        loaiReq.setMonTheThaoId(Integer.parseInt(getFormField(req, "monTheThaoID")));
+        loaiReq.setGiaKhongDen(new BigDecimal(getFormField(req, "giaKhongDen")));
+        loaiReq.setGiaCoDen(new BigDecimal(getFormField(req, "giaCoDen")));
 
-        String timeStr = req.getParameter("gioBatDauLenDen");
+        String timeStr = getFormField(req, "gioBatDauLenDen");
         if (timeStr != null && !timeStr.isEmpty()) {
             if (timeStr.length() == 5) timeStr += ":00";
             loaiReq.setGioBatDauLenDen(LocalTime.parse(timeStr));
         }
 
-        String endTimeStr = req.getParameter("gioKetThucLenDen");
+        String endTimeStr = getFormField(req, "gioKetThucLenDen");
         if (endTimeStr != null && !endTimeStr.isEmpty()) {
             if (endTimeStr.length() == 5) endTimeStr += ":00";
             loaiReq.setGioKetThucLenDen(LocalTime.parse(endTimeStr));
+        }
+    }
+
+    private String resolveCourtImage(HttpServletRequest req, String existingImage) throws IOException, ServletException {
+        Part imagePart = req.getPart("courtImageFile");
+        if (imagePart != null && imagePart.getSize() > 0) {
+            String contentType = imagePart.getContentType();
+            if (contentType == null || contentType.isBlank() || !ALLOWED_COURT_IMAGE_TYPES.contains(contentType)) {
+                throw new IllegalArgumentException("Chỉ hỗ trợ ảnh sân định dạng JPG, PNG, WEBP hoặc GIF.");
+            }
+            return saveCourtImageFile(req, imagePart);
+        }
+        return existingImage != null ? existingImage.trim() : null;
+    }
+
+    private String saveCourtImageFile(HttpServletRequest req, Part imagePart) throws IOException {
+        String submittedFileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+        String extension = getSafeImageExtension(submittedFileName, imagePart.getContentType());
+        String fileName = "court-" + UUID.randomUUID() + extension;
+
+        String uploadPath = getServletContext().getRealPath("/uploads/courts");
+        if (uploadPath == null) {
+            uploadPath = new File(System.getProperty("user.home"), "v-sport/uploads/courts").getAbsolutePath();
+        }
+
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
+            throw new IOException("Không thể tạo thư mục lưu ảnh sân.");
+        }
+
+        File courtImageFile = new File(uploadDir, fileName);
+        imagePart.write(courtImageFile.getAbsolutePath());
+        return "/uploads/courts/" + fileName;
+    }
+
+    private String getSafeImageExtension(String fileName, String contentType) {
+        String lowerName = fileName == null ? "" : fileName.toLowerCase();
+        if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) return ".jpg";
+        if (lowerName.endsWith(".png")) return ".png";
+        if (lowerName.endsWith(".webp")) return ".webp";
+        if (lowerName.endsWith(".gif")) return ".gif";
+
+        if ("image/jpeg".equals(contentType)) return ".jpg";
+        if ("image/png".equals(contentType)) return ".png";
+        if ("image/webp".equals(contentType)) return ".webp";
+        if ("image/gif".equals(contentType)) return ".gif";
+
+        throw new IllegalArgumentException("Định dạng ảnh sân không hợp lệ.");
+    }
+
+    private String getFormField(HttpServletRequest req, String fieldName) {
+        String value = req.getParameter(fieldName);
+        if (value != null) {
+            return value;
+        }
+
+        try {
+            Part part = req.getPart(fieldName);
+            if (part == null || part.getSubmittedFileName() != null) {
+                return null;
+            }
+            java.io.InputStream inputStream = part.getInputStream();
+            try (java.util.Scanner scanner = new java.util.Scanner(inputStream, java.nio.charset.StandardCharsets.UTF_8)) {
+                scanner.useDelimiter("\\A");
+                return scanner.hasNext() ? scanner.next() : "";
+            }
+        } catch (Exception e) {
+            logger.debug("Không đọc được field multipart '{}': {}", fieldName, e.getMessage());
+            return null;
         }
     }
 }
