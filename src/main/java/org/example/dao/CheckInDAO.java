@@ -122,7 +122,7 @@ public class CheckInDAO {
             }
 
             // 2. Kiểm tra trạng thái thanh toán (Payment Lock)
-            String sqlCheckPayment = "SELECT HoaDonID, TrangThaiThanhToan, TongThanhToan FROM HoaDon WHERE DatSanID = ?";
+            String sqlCheckPayment = "SELECT HoaDonID, TrangThaiThanhToan, TongThanhToan FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
             psCheckPayment = conn.prepareStatement(sqlCheckPayment);
             psCheckPayment.setInt(1, datSanId);
             rsPayment = psCheckPayment.executeQuery();
@@ -924,7 +924,7 @@ public class CheckInDAO {
             // 1. Lấy thông tin ca chơi và kiểm tra trạng thái
             String sqlSelect = "SELECT lds.SanID, lds.GioBatDau, lds.GioKetThuc, lds.actual_start_time, lds.TrangThai, lds.GhiChu, hd.TongTienSan " +
                                "FROM LichDatSan lds " +
-                               "INNER JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID " +
+                               "LEFT JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID AND (hd.LoaiHoaDon = N'MAIN' OR hd.LoaiHoaDon IS NULL) " +
                                "WHERE lds.DatSanID = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
@@ -995,7 +995,7 @@ public class CheckInDAO {
             psUpdateBooking.executeUpdate();
 
             // 3. Cập nhật tổng tiền trong HoaDon
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe, AccountID_NhanVien = ? WHERE DatSanID = ?";
+            String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe, AccountID_NhanVien = ? WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
             psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
             psUpdateInvoice.setBigDecimal(1, finalCourtPriceBD);
             psUpdateInvoice.setBigDecimal(2, finalCourtPriceBD);

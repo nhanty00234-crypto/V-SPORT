@@ -164,6 +164,10 @@
       class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
       <i class="ti ti-package text-[19px]"></i>Kho &amp; Dịch Vụ
     </a>
+    <a href="${pageContext.request.contextPath}/manager/hoa-don"
+      class="nav-link ${uri.contains('/manager/hoa-don') || uri.contains('/QuanLyHoaDon.jsp') ? 'active' : ''}">
+      <i class="ti ti-receipt text-[19px]"></i>Quản lý hóa đơn
+    </a>
 
     <!-- Nhân sự -->
     <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Quản lý nhân sự</p>

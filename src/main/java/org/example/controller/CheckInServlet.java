@@ -29,6 +29,15 @@ public class CheckInServlet extends HttpServlet {
 
     private final CheckInDAO checkInDAO = new CheckInDAO();
 
+    private static final com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+            .registerTypeAdapter(java.time.LocalDate.class, (com.google.gson.JsonSerializer<java.time.LocalDate>)
+                    (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+            .registerTypeAdapter(java.time.LocalTime.class, (com.google.gson.JsonSerializer<java.time.LocalTime>)
+                    (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+            .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>)
+                    (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+            .create();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // 1. PhÃ¢n quyá» n (Authorization): Kiá»ƒm tra Role qua Session
@@ -55,7 +64,7 @@ public class CheckInServlet extends HttpServlet {
             data.put("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
             data.put("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
             
-            resp.getWriter().write(new com.google.gson.Gson().toJson(data));
+            resp.getWriter().write(gson.toJson(data));
             return;
         }
 
@@ -353,7 +362,7 @@ public class CheckInServlet extends HttpServlet {
             String trangThaiThanhToan = "Chưa thanh toán";
 
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
-                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?")) {
+                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)")) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -452,8 +461,9 @@ public class CheckInServlet extends HttpServlet {
             data.put("ngayDat", lich.getNgayDat().toString());
             data.put("gioBatDau", lich.getGioBatDau().toString().substring(0, 5));
             data.put("gioKetThuc", lich.getGioKetThuc().toString().substring(0, 5));
-            resp.getWriter().write(new com.google.gson.Gson().toJson(data));
+            resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
+            e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

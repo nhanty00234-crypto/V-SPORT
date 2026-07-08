@@ -55,6 +55,15 @@ public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
 
+    private static final com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+            .registerTypeAdapter(java.time.LocalDate.class, (com.google.gson.JsonSerializer<java.time.LocalDate>)
+                    (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+            .registerTypeAdapter(java.time.LocalTime.class, (com.google.gson.JsonSerializer<java.time.LocalTime>)
+                    (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+            .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>)
+                    (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
+            .create();
+
     /** Số lần thử lại tối đa khi xảy ra deadlock (SQL Error 1205) */
     private static final int MAX_DEADLOCK_RETRIES = 3;
 
@@ -712,7 +721,7 @@ public class DatSanServlet extends HttpServlet {
             java.util.Map<String, Object> data = new java.util.HashMap<>();
             data.put("products", products);
             data.put("ordered", ordered);
-            resp.getWriter().write(new com.google.gson.Gson().toJson(data));
+            resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách dịch vụ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

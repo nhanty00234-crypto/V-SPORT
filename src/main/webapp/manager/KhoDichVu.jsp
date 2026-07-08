@@ -8,34 +8,264 @@
 <title>${pageTitle}</title>
 <jsp:include page="/manager/common/manager_head.jsp" />
 <style>
-  /* ── Page-specific overrides ── */
-  .stat-card { background:#fff; border:1px solid #ede9fe; border-radius:16px; padding:20px; transition:box-shadow .2s,transform .15s; }
-  .stat-card:hover { box-shadow:0 8px 24px -8px rgba(124,58,237,.12); transform:translateY(-2px); }
-  .stat-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .form-input { height:38px; width:100%; padding:0 12px; border-radius:8px; border:1px solid #ede9fe; font-size:13px; color:#18181b; background:#fff; transition:border-color .15s,box-shadow .15s; outline:none; }
-  .form-input:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.1); }
-  .form-select { height:38px; padding:0 30px 0 11px; border-radius:8px; border:1px solid #ede9fe; font-size:13px; color:#18181b; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center; appearance:none; outline:none; transition:border-color .15s; cursor:pointer; }
-  .form-select:focus { border-color:#7c3aed; }
-  .btn-primary { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 16px; border-radius:9px; background:#7c3aed; color:#fff; font-size:13px; font-weight:700; border:none; cursor:pointer; box-shadow:0 2px 8px -2px rgba(124,58,237,.3); transition:background .15s; }
-  .btn-primary:hover { background:#6d28d9; }
-  .btn-secondary { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 14px; border-radius:9px; background:#ede9fe; color:#6d28d9; font-size:13px; font-weight:700; border:1px solid #ddd6fe; cursor:pointer; transition:background .15s; }
-  .btn-secondary:hover { background:#ddd6fe; }
-  .btn-ghost { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 14px; border-radius:9px; background:#fff; color:#3f3f46; font-size:13px; font-weight:600; border:1px solid #e4e4e7; cursor:pointer; transition:background .15s; }
-  .btn-ghost:hover { background:#f4f4f5; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(9,9,11,.5); backdrop-filter:blur(4px); z-index:50; }
-  .modal-box { background:#fff; border-radius:20px; box-shadow:0 24px 64px -12px rgba(0,0,0,.18); border:1px solid #e4e4e7; animation:pop .2s ease both; }
-  .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid #f4f4f5; }
-  .modal-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .modal-close { width:32px; height:32px; border-radius:50%; border:none; background:transparent; display:flex; align-items:center; justify-content:center; color:#a1a1aa; cursor:pointer; }
-  .modal-close:hover { background:#f4f4f5; color:#52525b; }
-  .field-label { display:block; font-size:11.5px; font-weight:700; color:#52525b; margin-bottom:5px; letter-spacing:.01em; }
-  .field-req { color:#ef4444; }
-  .section-sep { font-size:10.5px; font-weight:800; color:#a1a1aa; text-transform:uppercase; letter-spacing:.07em; padding:4px 0 10px; display:flex; align-items:center; gap:6px; }
-  .section-sep::after { content:''; flex:1; height:1px; background:#f4f4f5; }
-  tr.row-hover:hover td { background:#faf5ff; }
-  .stock-bar { height:3px; border-radius:2px; background:#f4f4f5; overflow:hidden; margin-top:3px; }
-  .stock-bar-fill { height:100%; border-radius:2px; transition:width .4s; }
-  @keyframes pop { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:scale(1)} }
+  /* ── Page-specific overrides for Premium B2B Dashboard ── */
+  body {
+    background-color: #f8fafc !important;
+  }
+  
+  /* Glassmorphic/elevated dashboard cards */
+  .stat-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .stat-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    transform: translateY(-3px);
+    border-color: #e2e8f0;
+  }
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  /* Modern Form Field Styling */
+  .form-input {
+    height: 40px;
+    width: 100%;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    font-size: 13.5px;
+    color: #1e293b;
+    background: #ffffff;
+    transition: all 0.15s ease;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+    background: #ffffff;
+  }
+  .form-select {
+    height: 40px;
+    padding: 0 34px 0 14px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    font-size: 13.5px;
+    color: #1e293b;
+    background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+    appearance: none;
+    outline: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+  .form-select:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+  }
+  
+  /* Visual hierarchy buttons */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 10px;
+    background: #7c3aed;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px -2px rgba(124, 58, 237, 0.3);
+    transition: all 0.15s ease;
+  }
+  .btn-primary:hover {
+    background: #6d28d9;
+    box-shadow: 0 6px 16px -2px rgba(124, 58, 237, 0.4);
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: #f5f3ff;
+    color: #7c3aed;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: 1px solid #ddd6fe;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-secondary:hover {
+    background: #ede9fe;
+    border-color: #c084fc;
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-ghost:hover {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: #cbd5e1;
+  }
+  
+  /* Modals Refined */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 80;
+  }
+  .modal-box {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    border: none;
+    animation: pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .modal-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .modal-close:hover {
+    background: #f1f5f9;
+    color: #475569;
+  }
+  .field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .field-req {
+    color: #ef4444;
+  }
+  .section-sep {
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+  
+  /* Tables & Rows */
+  tr.row-hover:hover td {
+    background: #f8fafc;
+  }
+  .stock-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .stock-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  
+  /* Custom Preset Card */
+  .preset-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .preset-card:hover {
+    border-color: #c084fc;
+    background: #faf5ff;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.04);
+  }
+  .preset-card.active {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.06);
+  }
+  
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
 </style>
 </head>
 <body class="text-zinc-900 min-h-screen">
@@ -51,140 +281,171 @@
 
   <%-- ── A. STATUS ALERTS ── --%>
   <c:if test="${not empty successMsg}">
-    <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl animation-fadeUp">
-      <span class="material-symbols-outlined text-green-600 text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
-      <p class="text-sm font-medium">${successMsg}</p>
+    <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl shadow-sm animation-fadeUp">
+      <span class="material-symbols-outlined text-emerald-600 text-[20px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+      <p class="text-sm font-semibold">${successMsg}</p>
     </div>
   </c:if>
   <c:if test="${not empty errorMsg}">
-    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl animation-fadeUp">
-      <span class="material-symbols-outlined text-red-600 text-[18px]" style="font-variation-settings:'FILL' 1">error</span>
-      <p class="text-sm font-medium">${errorMsg}</p>
+    <div class="flex items-center gap-3 p-4 bg-rose-50 border border-rose-100 text-rose-800 rounded-2xl shadow-sm animation-fadeUp">
+      <span class="material-symbols-outlined text-rose-600 text-[20px]" style="font-variation-settings:'FILL' 1">error</span>
+      <p class="text-sm font-semibold">${errorMsg}</p>
     </div>
   </c:if>
 
   <%-- ── B. PAGE HEADER ── --%>
-  <section>
-    <nav class="flex items-center gap-1.5 text-xs text-zinc-400 mb-3 select-none">
-      <span class="material-symbols-outlined text-[12px]">home</span>
-      <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+  <section class="mb-2">
+    <nav class="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium mb-3 select-none">
+      <span class="material-symbols-outlined text-[14px]">home</span>
+      <span class="material-symbols-outlined text-[12px] text-slate-300">chevron_right</span>
       <span>Kinh doanh & Dịch vụ</span>
-      <span class="material-symbols-outlined text-[12px]">chevron_right</span>
-      <span class="font-semibold text-zinc-700">Kho & Dịch vụ</span>
+      <span class="material-symbols-outlined text-[12px] text-slate-300">chevron_right</span>
+      <span class="font-semibold text-slate-600">Kho & Dịch vụ</span>
     </nav>
-    <div class="flex items-start justify-between gap-4 flex-wrap">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <h1 class="text-2xl font-bold text-zinc-900 tracking-tight">Kho &amp; Dịch vụ</h1>
-        <p class="text-sm text-zinc-500 mt-1">Quản lý mặt hàng, dịch vụ bán tại chi nhánh và theo dõi tồn kho.</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kho &amp; Dịch vụ</h1>
+        <p class="text-[13.5px] text-slate-500 mt-1">Quản lý mặt hàng, dịch vụ bán tại chi nhánh và theo dõi tồn kho.</p>
       </div>
-      <div class="flex items-center gap-1.5 px-3 py-2 bg-green-50 rounded-xl border border-green-100 shrink-0">
-        <span class="w-2 h-2 rounded-full bg-green-500 live-dot shrink-0"></span>
-        <span class="text-xs font-semibold text-green-700">CS${sessionScope.user.coSoId} — Đang hoạt động</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50/60 rounded-xl border border-emerald-100/60 shrink-0 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 live-dot shrink-0"></span>
+        <span class="text-[11.5px] font-bold text-emerald-700">CS${sessionScope.user.coSoId} — Đang hoạt động</span>
       </div>
     </div>
   </section>
 
   <%-- ── C. STAT CARDS ── --%>
   <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger">
+    <!-- Card 1: Tổng mặt hàng -->
     <div class="stat-card">
       <div class="flex items-start justify-between mb-4">
-        <div class="stat-icon bg-violet-50"><span class="material-symbols-outlined text-violet-600 text-[22px]" style="font-variation-settings:'FILL' 1">inventory_2</span></div>
+        <div class="stat-icon bg-violet-50 text-violet-600">
+          <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1">inventory_2</span>
+        </div>
+        <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Mặt hàng</span>
       </div>
-      <p class="text-3xl font-black text-zinc-900 leading-none">${totalItems}</p>
-      <p class="text-sm font-semibold text-zinc-600 mt-1.5">Tổng mặt hàng</p>
-      <p class="text-xs text-zinc-400 mt-0.5">SKU đang quản lý</p>
+      <p class="text-3xl font-extrabold text-slate-900 leading-none">${totalItems}</p>
+      <p class="text-sm font-bold text-slate-700 mt-2">Tổng mặt hàng</p>
+      <p class="text-[11.5px] text-slate-400 mt-0.5">Mẫu đang quản lý tại kho</p>
     </div>
 
+    <!-- Card 2: Tổng giá trị tồn kho -->
     <div class="stat-card">
       <div class="flex items-start justify-between mb-4">
-        <div class="stat-icon bg-green-50"><span class="material-symbols-outlined text-green-600 text-[22px]" style="font-variation-settings:'FILL' 1">payments</span></div>
+        <div class="stat-icon bg-emerald-50 text-emerald-600">
+          <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1">payments</span>
+        </div>
+        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Giá trị</span>
       </div>
-      <p class="text-3xl font-black text-green-700 leading-none">
-        <fmt:formatNumber value="${totalInventoryValue / 1000}" pattern="#,##0"/>K
+      <p class="text-3xl font-extrabold text-slate-900 leading-none">
+        <fmt:formatNumber value="${totalInventoryValue}" pattern="#,##0"/>đ
       </p>
-      <p class="text-sm font-semibold text-zinc-600 mt-1.5">Giá trị tồn kho</p>
-      <p class="text-xs text-zinc-400 mt-0.5">đồng tổng giá trị</p>
+      <p class="text-sm font-bold text-slate-700 mt-2">Tổng giá trị tồn kho</p>
+      <p class="text-[11.5px] text-slate-400 mt-0.5">Tính theo đơn giá nhập kho</p>
     </div>
 
+    <!-- Card 3: Sắp hết hàng -->
     <div class="stat-card">
       <div class="flex items-start justify-between mb-4">
-        <div class="stat-icon bg-amber-50"><span class="material-symbols-outlined text-amber-500 text-[22px]" style="font-variation-settings:'FILL' 1">production_quantity_limits</span></div>
-        <c:if test="${lowStockCount > 0}"><span class="w-2 h-2 rounded-full bg-amber-400 mt-1 live-dot"></span></c:if>
+        <div class="stat-icon bg-amber-50 text-amber-600">
+          <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1">production_quantity_limits</span>
+        </div>
+        <c:choose>
+          <c:when test="${lowStockCount > 0}">
+            <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Cảnh báo
+            </span>
+          </c:when>
+          <c:otherwise>
+            <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Ổn định</span>
+          </c:otherwise>
+        </c:choose>
       </div>
-      <p class="text-3xl font-black ${lowStockCount > 0 ? 'text-amber-600' : 'text-zinc-900'} leading-none">${lowStockCount}</p>
-      <p class="text-sm font-semibold text-zinc-600 mt-1.5">Sắp hết hàng</p>
-      <p class="text-xs text-zinc-400 mt-0.5">${lowStockCount > 0 ? 'Cần bổ sung sớm' : 'Tồn kho ổn định'}</p>
+      <p class="text-3xl font-extrabold leading-none ${lowStockCount > 0 ? 'text-amber-600' : 'text-slate-900'}">${lowStockCount}</p>
+      <p class="text-sm font-bold text-slate-700 mt-2">Sắp hết hàng</p>
+      <p class="text-[11.5px] text-slate-400 mt-0.5">${lowStockCount > 0 ? 'Số lượng tồn kho dưới 5' : 'Tồn kho nằm trong hạn mức'}</p>
     </div>
 
+    <!-- Card 4: Hết hàng -->
     <div class="stat-card">
       <div class="flex items-start justify-between mb-4">
-        <div class="stat-icon bg-red-50"><span class="material-symbols-outlined text-red-500 text-[22px]" style="font-variation-settings:'FILL' 1">remove_shopping_cart</span></div>
-        <c:if test="${outOfStockCount > 0}"><span class="w-2 h-2 rounded-full bg-red-500 mt-1 live-dot"></span></c:if>
+        <div class="stat-icon bg-rose-50 text-rose-600">
+          <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1">remove_shopping_cart</span>
+        </div>
+        <c:choose>
+          <c:when test="${outOfStockCount > 0}">
+            <span class="text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md flex items-center gap-1 animate-pulse">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Hết hàng
+            </span>
+          </c:when>
+          <c:otherwise>
+            <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Trống</span>
+          </c:otherwise>
+        </c:choose>
       </div>
-      <p class="text-3xl font-black ${outOfStockCount > 0 ? 'text-red-600' : 'text-zinc-900'} leading-none">${outOfStockCount}</p>
-      <p class="text-sm font-semibold text-zinc-600 mt-1.5">Đã hết hàng</p>
-      <p class="text-xs text-zinc-400 mt-0.5">${outOfStockCount > 0 ? 'Cần nhập ngay' : 'Không có hết hàng'}</p>
+      <p class="text-3xl font-extrabold leading-none ${outOfStockCount > 0 ? 'text-rose-600' : 'text-slate-900'}">${outOfStockCount}</p>
+      <p class="text-sm font-bold text-slate-700 mt-2">Đã hết hàng</p>
+      <p class="text-[11.5px] text-slate-400 mt-0.5">${outOfStockCount > 0 ? 'Cần bổ sung mặt hàng ngay' : 'Không có sản phẩm hết hàng'}</p>
     </div>
   </section>
 
   <%-- ── D. ACTION BAR ── --%>
-  <section class="bg-white border border-violet-100 rounded-2xl p-4 shadow-sm">
+  <section class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
     <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="GET">
-      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-3">
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
         <%-- Left: search + filters --%>
-        <div class="flex items-center gap-2.5 flex-wrap flex-1 w-full">
-          <div class="relative flex-1 min-w-[200px]">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400 pointer-events-none">search</span>
+        <div class="flex items-center gap-3 flex-wrap flex-1">
+          <div class="relative flex-1 min-w-[260px]">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-slate-400 pointer-events-none">search</span>
             <input type="search" name="search" value="${search}" autocomplete="off"
                    placeholder="Tìm mặt hàng theo tên hoặc mã SKU..."
-                   class="form-input pl-9 bg-zinc-50/50">
+                   class="form-input pl-10 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border-slate-200">
           </div>
-          <select name="category" class="form-select">
+          <select name="category" class="form-select min-w-[160px] max-w-[220px]">
             <option value="">Tất cả nhóm dịch vụ</option>
             <c:forEach items="${categories}" var="cat">
               <option value="${cat.danhMucID}" ${selectedCategory == cat.danhMucID ? 'selected' : ''}>${cat.tenDanhMuc}</option>
             </c:forEach>
           </select>
-          <select name="status" class="form-select">
+          <select name="status" class="form-select min-w-[150px]">
             <option value="">Tất cả trạng thái</option>
             <option value="Đang kinh doanh" ${selectedStatus == 'Đang kinh doanh' ? 'selected' : ''}>Đang kinh doanh</option>
             <option value="Tạm hết hàng"    ${selectedStatus == 'Tạm hết hàng'    ? 'selected' : ''}>Tạm hết hàng</option>
             <option value="Ngừng kinh doanh" ${selectedStatus == 'Ngừng kinh doanh'? 'selected' : ''}>Ngừng kinh doanh</option>
           </select>
           <div class="flex items-center gap-2">
-            <button type="submit" class="btn-ghost text-sm">
-              <span class="material-symbols-outlined text-[16px]">filter_list</span>Lọc
+            <button type="submit" class="btn-ghost text-sm border-slate-200 hover:bg-slate-50 hover:border-slate-300">
+              <span class="material-symbols-outlined text-[18px] text-slate-500">filter_list</span>Lọc
             </button>
-            <a href="${pageContext.request.contextPath}/manager/kho-dich-vu" class="btn-ghost text-sm" title="Xóa bộ lọc">
-              <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+            <a href="${pageContext.request.contextPath}/manager/kho-dich-vu" class="btn-ghost text-sm border-slate-200 hover:bg-slate-50" title="Xóa bộ lọc">
+              <span class="material-symbols-outlined text-[18px] text-slate-500">restart_alt</span>
             </a>
           </div>
         </div>
-        <%-- Right: action buttons --%>
-        <div class="flex items-center gap-2 shrink-0 flex-wrap">
-          <button type="button" onclick="openCategoryModal()" class="btn-ghost text-sm">
-            <span class="material-symbols-outlined text-[16px]">category</span>
-            <span class="hidden sm:inline">Quản lý nhóm dịch vụ</span>
+        <%-- Right: action buttons with clear B2B hierarchy --%>
+        <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
+          <button type="button" onclick="openCategoryModal()" class="btn-ghost text-sm text-slate-700 hover:text-slate-900 border-slate-200">
+            <span class="material-symbols-outlined text-[18px] text-slate-500">category</span>
+            <span>Quản lý nhóm dịch vụ</span>
           </button>
           <button type="button" onclick="openPresetModal()" class="btn-secondary text-sm">
-            <span class="material-symbols-outlined text-[16px]">bolt</span>
-            <span class="hidden sm:inline">Thêm nhanh từ mẫu</span>
+            <span class="material-symbols-outlined text-[18px]">bolt</span>
+            <span>Thêm nhanh từ mẫu</span>
           </button>
           <button type="button" onclick="openAddModal()" class="btn-primary text-sm">
-            <span class="material-symbols-outlined text-[16px]">add</span>Thêm mặt hàng mới
+            <span class="material-symbols-outlined text-[18px]">add</span>Thêm mặt hàng mới
           </button>
         </div>
       </div>
     </form>
 
     <%-- Result count + helper strip --%>
-    <div class="mt-3.5 pt-3.5 border-t border-violet-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <p class="text-xs text-zinc-500">Hiển thị <span class="font-bold text-violet-800">${productList.size()}</span> / <span class="font-bold text-zinc-700">${totalItems}</span> mặt hàng</p>
-      <div class="flex items-start gap-2 text-[11px] text-zinc-500 flex-wrap">
-        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px] text-zinc-400">category</span><strong class="text-zinc-700">Quản lý nhóm:</strong> Sắp xếp theo nhóm (Đồ uống, Thuê dụng cụ...).</span>
-        <span class="hidden sm:inline text-zinc-200">·</span>
-        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px] text-violet-500">bolt</span><strong class="text-zinc-700">Thêm nhanh:</strong> Tạo từ mẫu thường dùng.</span>
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-violet-500 text-[18px]">info</span>
+        <span>Bạn có thể thêm mặt hàng mới từ đầu hoặc dùng mẫu có sẵn để tạo nhanh các dịch vụ thường bán tại sân.</span>
       </div>
+      <p class="shrink-0 font-medium">Hiển thị <span class="font-bold text-violet-700">${productList.size()}</span> / <span class="font-bold text-slate-700">${totalItems}</span> mặt hàng</p>
     </div>
   </section>
 
@@ -192,69 +453,76 @@
   <c:choose>
     <c:when test="${totalItems == 0}">
       <%-- EMPTY STATE --%>
-      <section class="bg-white rounded-2xl border border-dashed border-violet-200 py-20 px-8 flex flex-col items-center text-center reveal-on-scroll">
-        <div class="w-20 h-20 rounded-2xl bg-violet-50 flex items-center justify-center mb-5">
-          <span class="material-symbols-outlined text-violet-400 text-[44px]" style="font-variation-settings:'FILL' 1">inventory_2</span>
+      <section class="bg-white rounded-2xl border border-dashed border-slate-200 py-16 px-6 flex flex-col items-center text-center reveal-on-scroll shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center mb-5">
+          <span class="material-symbols-outlined text-[36px]" style="font-variation-settings:'FILL' 1">inventory_2</span>
         </div>
-        <h3 class="text-xl font-bold text-zinc-900 mb-2">Kho dịch vụ chưa có mặt hàng nào</h3>
-        <p class="text-sm text-zinc-500 max-w-sm mb-2">Bạn có thể thêm các dịch vụ bán tại sân như nước uống, thuê vợt, thuê bóng hoặc khăn để quản lý doanh thu tiện ích.</p>
-        <p class="text-xs text-zinc-400 mb-8 italic">Ví dụ: Nước suối, nước ngọt, thuê vợt, thuê bóng, khăn lạnh.</p>
+        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Kho dịch vụ chưa có mặt hàng nào</h3>
+        <p class="text-sm text-slate-500 max-w-md mb-2 leading-relaxed">Bạn có thể thêm các dịch vụ bán tại sân như nước uống, thuê vợt, thuê bóng hoặc khăn lạnh để quản lý doanh thu tiện ích.</p>
+        <p class="text-xs text-slate-400 mb-6 italic">Ví dụ: Nước suối, nước ngọt, thuê vợt, thuê bóng, khăn lạnh.</p>
         <div class="flex items-center gap-3 flex-wrap justify-center">
           <button onclick="openPresetModal()" class="btn-secondary">
-            <span class="material-symbols-outlined text-[16px]">bolt</span>Thêm nhanh từ mẫu có sẵn
+            <span class="material-symbols-outlined text-[18px]">bolt</span>Thêm nhanh từ mẫu có sẵn
           </button>
           <button onclick="openAddModal()" class="btn-primary">
-            <span class="material-symbols-outlined text-[16px]">add</span>Thêm mặt hàng mới
+            <span class="material-symbols-outlined text-[18px]">add</span>Thêm mặt hàng mới
           </button>
         </div>
         <c:if test="${empty categories}">
-          <div class="mt-6 pt-5 border-t border-zinc-100 w-full max-w-xs">
-            <p class="text-xs text-amber-600 font-medium flex items-center gap-1.5 justify-center mb-2">
-              <span class="material-symbols-outlined text-[14px]">warning</span>
-              Nên tạo nhóm dịch vụ trước để phân loại mặt hàng.
-            </p>
-            <button onclick="openCategoryModal()" class="text-xs font-bold text-violet-700 hover:underline flex items-center gap-1 mx-auto">
-              <span class="material-symbols-outlined text-[13px]">category</span>Quản lý nhóm dịch vụ →
-            </button>
+          <div class="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-2xl max-w-sm text-left flex items-start gap-3">
+            <span class="material-symbols-outlined text-amber-600 text-[20px] shrink-0 mt-0.5">warning</span>
+            <div>
+              <p class="text-xs font-bold text-amber-800">Chưa có nhóm dịch vụ</p>
+              <p class="text-[11px] text-amber-600 mt-0.5 mb-2">Nên tạo nhóm dịch vụ trước (Đồ uống, Thuê dụng cụ...) để phân loại mặt hàng và quản lý tốt hơn.</p>
+              <button onclick="openCategoryModal()" class="text-xs font-bold text-violet-700 hover:text-violet-900 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">category</span>Quản lý nhóm dịch vụ →
+              </button>
+            </div>
           </div>
         </c:if>
       </section>
     </c:when>
     <c:when test="${empty productList}">
       <%-- NO FILTER RESULTS --%>
-      <section class="bg-white rounded-2xl border border-zinc-200 py-14 flex flex-col items-center text-center">
-        <span class="material-symbols-outlined text-[48px] text-zinc-300 mb-3">search_off</span>
-        <h3 class="text-sm font-semibold text-zinc-700">Không tìm thấy mặt hàng nào</h3>
-        <p class="text-xs text-zinc-400 mt-1">Thử thay đổi từ khóa hoặc bộ lọc của bạn.</p>
-        <a href="${pageContext.request.contextPath}/manager/kho-dich-vu" class="mt-4 text-xs text-violet-600 font-semibold underline">Xóa tất cả bộ lọc</a>
+      <section class="bg-white rounded-2xl border border-slate-200 py-16 flex flex-col items-center text-center shadow-sm">
+        <span class="material-symbols-outlined text-[44px] text-slate-300 mb-2">search_off</span>
+        <h3 class="text-base font-bold text-slate-800">Không tìm thấy mặt hàng nào</h3>
+        <p class="text-sm text-slate-400 max-w-xs mt-1">Vui lòng điều chỉnh từ khóa tìm kiếm hoặc thay đổi bộ lọc nhóm/trạng thái.</p>
+        <a href="${pageContext.request.contextPath}/manager/kho-dich-vu" class="btn-secondary text-sm mt-5">
+          <span class="material-symbols-outlined text-[18px]">restart_alt</span>Xóa bộ lọc
+        </a>
       </section>
     </c:when>
     <c:otherwise>
       <%-- PRODUCT TABLE --%>
-      <section class="bg-white rounded-2xl border border-violet-100 overflow-hidden shadow-sm reveal-on-scroll">
+      <section class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm reveal-on-scroll">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-violet-50/60 border-b border-violet-100">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-200/80">
               <tr>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide w-24">SKU / Mã</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide">Tên mặt hàng</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Nhóm dịch vụ</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide text-right hidden md:table-cell">Giá nhập</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide text-right hidden md:table-cell">Giá bán lẻ</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide text-right">Tồn kho</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide">Trạng thái</th>
-                <th class="px-4 py-3.5 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide text-right w-28">Thao tác</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-32">SKU / Mã</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tên mặt hàng</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Nhóm dịch vụ</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right hidden md:table-cell">Giá nhập</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right hidden md:table-cell">Giá bán lẻ</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center w-28">Tồn kho</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right w-32">Thao tác</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-violet-50/80">
+            <tbody class="divide-y divide-slate-100">
               <c:forEach items="${productList}" var="sp">
                 <c:set var="isOut" value="${sp.soLuongTon == 0}" />
                 <c:set var="isLow" value="${sp.soLuongTon > 0 and sp.soLuongTon <= 5}" />
                 <tr class="row-hover transition-colors">
-                  <td class="px-4 py-3.5 font-mono text-[11px] text-zinc-500 font-semibold">${sp.skuCode != null ? sp.skuCode : 'N/A'}</td>
-                  <td class="px-4 py-3.5">
+                  <td class="px-5 py-4">
+                    <span class="font-mono text-[11px] text-slate-500 font-bold bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg">
+                      ${sp.skuCode != null ? sp.skuCode : 'N/A'}
+                    </span>
+                  </td>
+                  <td class="px-5 py-4">
                     <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-xl overflow-hidden bg-violet-50 border border-violet-100/60 shrink-0 flex items-center justify-center">
+                      <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/60 shrink-0 flex items-center justify-center shadow-xs">
                         <c:set var="imgUrl" value="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=80&auto=format&fit=crop&q=60"/>
                         <c:choose>
                           <c:when test="${fn:containsIgnoreCase(sp.tenSanPham, 'Aquafina')}"><c:set var="imgUrl" value="https://images.unsplash.com/photo-1608885898957-a599fb18de3e?w=80&auto=format&fit=crop&q=60"/></c:when>
@@ -269,55 +537,65 @@
                         <img src="${imgUrl}" alt="${sp.tenSanPham}" class="w-full h-full object-cover">
                       </div>
                       <div>
-                        <p class="font-semibold text-zinc-800 text-[13px]">${sp.tenSanPham}</p>
+                        <p class="font-bold text-slate-800 text-[13.5px]">${sp.tenSanPham}</p>
                         <c:if test="${not empty sp.moTa}">
-                          <p class="text-[10px] text-zinc-400 mt-0.5 max-w-[200px] truncate">${sp.moTa}</p>
+                          <p class="text-[11px] text-slate-400 mt-0.5 max-w-[240px] truncate">${sp.moTa}</p>
                         </c:if>
                       </div>
                     </div>
                   </td>
-                  <td class="px-4 py-3.5 hidden sm:table-cell">
+                  <td class="px-5 py-4 hidden sm:table-cell">
                     <c:forEach items="${categories}" var="cat">
                       <c:if test="${cat.danhMucID == sp.danhMucID}">
-                        <span class="badge badge-purple text-[10.5px]">${cat.tenDanhMuc}</span>
+                        <span class="badge badge-purple border border-purple-100 text-[11px] py-0.5 px-2 rounded-md font-bold">${cat.tenDanhMuc}</span>
                       </c:if>
                     </c:forEach>
                   </td>
-                  <td class="px-4 py-3.5 text-right text-zinc-500 font-medium hidden md:table-cell">
+                  <td class="px-5 py-4 text-right text-slate-500 font-semibold hidden md:table-cell">
                     <fmt:formatNumber value="${sp.giaNhap}" pattern="#,##0"/>đ
                   </td>
-                  <td class="px-4 py-3.5 text-right font-bold text-zinc-900 hidden md:table-cell">
+                  <td class="px-5 py-4 text-right font-extrabold text-slate-900 hidden md:table-cell">
                     <fmt:formatNumber value="${sp.donGia}" pattern="#,##0"/>đ
                   </td>
-                  <td class="px-4 py-3.5 text-right">
-                    <p class="font-bold text-[13px] ${isOut ? 'text-red-600' : (isLow ? 'text-amber-600' : 'text-zinc-800')}">${sp.soLuongTon}</p>
-                    <p class="text-[10px] text-zinc-400">${sp.donViTinh != null ? sp.donViTinh : 'cái'}</p>
+                  <td class="px-5 py-4 text-center">
+                    <c:choose>
+                      <c:when test="${isOut}">
+                        <span class="inline-block w-full max-w-[80px] font-bold text-[12px] text-rose-600 bg-rose-50 border border-rose-100 py-1 rounded-lg">Hết hàng</span>
+                      </c:when>
+                      <c:when test="${isLow}">
+                        <span class="inline-block w-full max-w-[80px] font-bold text-[12px] text-amber-700 bg-amber-50 border border-amber-100 py-1 rounded-lg">${sp.soLuongTon} ${sp.donViTinh != null ? sp.donViTinh : 'cái'}</span>
+                      </c:when>
+                      <c:otherwise>
+                        <span class="inline-block w-full max-w-[80px] font-bold text-[12px] text-slate-700 bg-slate-50 border border-slate-100 py-1 rounded-lg">${sp.soLuongTon} ${sp.donViTinh != null ? sp.donViTinh : 'cái'}</span>
+                      </c:otherwise>
+                    </c:choose>
                   </td>
-                  <td class="px-4 py-3.5">
+                  <td class="px-5 py-4">
                     <span class="badge
                       <c:choose>
                         <c:when test="${sp.trangThai == 'Đang kinh doanh'}">badge-green</c:when>
                         <c:when test="${sp.trangThai == 'Tạm hết hàng'}">badge-amber</c:when>
                         <c:otherwise>badge-gray</c:otherwise>
                       </c:choose>
+                      text-[11px] py-1 px-2.5 rounded-full font-bold
                     ">${sp.trangThai}</span>
                   </td>
-                  <td class="px-4 py-3.5">
-                    <div class="flex items-center justify-end gap-1">
+                  <td class="px-5 py-4">
+                    <div class="flex items-center justify-end gap-1.5">
                       <button onclick="openStockModal(${sp.sanPhamID}, '${sp.skuCode}', '${sp.tenSanPham}', ${sp.soLuongTon}, '${sp.donViTinh}')"
-                              title="Nhập / Xuất kho"
-                              class="w-8 h-8 rounded-lg hover:bg-violet-100 text-violet-700 flex items-center justify-center transition-colors">
-                        <span class="material-symbols-outlined text-[17px]">inventory</span>
+                              title="Nhập kho"
+                              class="w-8 h-8 rounded-lg hover:bg-violet-50 text-violet-600 flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">inventory</span>
                       </button>
                       <button onclick="openEditModal(${sp.sanPhamID}, '${sp.skuCode}', '${sp.tenSanPham}', ${sp.danhMucID}, ${sp.donGia}, ${sp.giaNhap}, '${sp.donViTinh}', ${sp.soLuongTon}, '${sp.trangThai}', '${sp.moTa}')"
                               title="Chỉnh sửa"
-                              class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-500 flex items-center justify-center transition-colors">
-                        <span class="material-symbols-outlined text-[17px]">edit</span>
+                              class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
                       </button>
                       <button onclick="confirmDelete(${sp.sanPhamID}, '${sp.tenSanPham}')"
                               title="Xóa"
-                              class="w-8 h-8 rounded-lg hover:bg-red-50 text-red-400 flex items-center justify-center transition-colors">
-                        <span class="material-symbols-outlined text-[17px]">delete</span>
+                              class="w-8 h-8 rounded-lg hover:bg-rose-50 text-rose-500 flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
                       </button>
                     </div>
                   </td>
@@ -336,31 +614,33 @@
      MODAL 1: THÊM MẶT HÀNG MỚI
 ════════════════════════════════════════════ --%>
 <div id="addModal" class="modal-overlay hidden z-[80] flex items-start justify-center p-4 pt-10 overflow-y-auto">
-  <div class="modal-box relative w-full max-w-[640px] z-10">
+  <div class="modal-box relative w-full max-w-[680px] z-10 my-8">
     <div class="modal-header">
       <div class="flex items-center gap-3">
-        <div class="modal-icon bg-violet-50"><span class="material-symbols-outlined text-violet-600 text-[22px]">inventory_2</span></div>
+        <div class="modal-icon bg-violet-50 text-violet-600">
+          <span class="material-symbols-outlined text-[24px]">inventory_2</span>
+        </div>
         <div>
-          <h3 class="text-base font-bold text-zinc-900">Thêm mặt hàng mới</h3>
-          <p class="text-xs text-zinc-400 mt-0.5">Tạo sản phẩm hoặc dịch vụ bán tại chi nhánh.</p>
+          <h3 class="text-base font-extrabold text-slate-900">Thêm mặt hàng mới</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Tạo sản phẩm hoặc dịch vụ bán tại chi nhánh.</p>
         </div>
       </div>
-      <button type="button" onclick="closeAddModal()" class="modal-close"><span class="material-symbols-outlined text-[18px]">close</span></button>
+      <button type="button" onclick="closeAddModal()" class="modal-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
     </div>
 
-    <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="px-6 py-5 flex flex-col gap-5">
+    <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="px-8 py-6 flex flex-col gap-6">
       <input type="hidden" name="action" value="add">
 
       <%-- Group 1: Thông tin cơ bản --%>
       <div>
-        <p class="section-sep"><span class="material-symbols-outlined text-[13px]">info</span>Thông tin cơ bản</p>
-        <div class="grid grid-cols-2 gap-4">
+        <p class="section-sep"><span class="material-symbols-outlined text-[15px] text-slate-400">info</span>Thông tin cơ bản</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="field-label">Mã SKU</label>
             <div class="flex gap-2">
-              <input type="text" id="addSkuCode" name="skuCode" placeholder="VD: NUOC-LAVIE-500" class="form-input flex-1 font-mono text-sm">
-              <button type="button" onclick="regenerateAddSku()" title="Tạo mã ngẫu nhiên" class="h-[38px] w-10 border border-violet-100 rounded-lg hover:bg-violet-50 text-violet-500 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[16px]">refresh</span>
+              <input type="text" id="addSkuCode" name="skuCode" placeholder="VD: NUOC-LAVIE-500" class="form-input flex-1 font-mono text-[13px]">
+              <button type="button" onclick="regenerateAddSku()" title="Tạo mã ngẫu nhiên" class="h-[40px] w-10 border border-slate-200 hover:border-violet-300 rounded-lg hover:bg-violet-50 text-violet-500 flex items-center justify-center shrink-0 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
               </button>
             </div>
           </div>
@@ -386,15 +666,15 @@
 
       <%-- Group 2: Giá & Tồn kho --%>
       <div>
-        <p class="section-sep"><span class="material-symbols-outlined text-[13px]">payments</span>Giá &amp; Tồn kho</p>
-        <div class="grid grid-cols-3 gap-4">
+        <p class="section-sep"><span class="material-symbols-outlined text-[15px] text-slate-400">payments</span>Giá &amp; Tồn kho</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="field-label">Giá nhập (đ) <span class="field-req">*</span></label>
-            <input type="number" step="any" name="giaNhap" min="0" required placeholder="5000" class="form-input">
+            <input type="number" step="any" name="giaNhap" min="0" required placeholder="5,000" class="form-input">
           </div>
           <div>
             <label class="field-label">Giá bán lẻ (đ) <span class="field-req">*</span></label>
-            <input type="number" step="any" name="donGia" min="0" required placeholder="10000" class="form-input">
+            <input type="number" step="any" name="donGia" min="0" required placeholder="10,000" class="form-input">
           </div>
           <div>
             <label class="field-label">Số lượng ban đầu</label>
@@ -417,11 +697,11 @@
         <input type="text" name="moTa" placeholder="Thông tin tóm tắt về mặt hàng..." class="form-input">
       </div>
 
-      <div class="flex items-center justify-between pt-2 border-t border-zinc-100">
-        <p class="text-xs text-zinc-400"><span class="text-red-400">*</span> Trường bắt buộc</p>
+      <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-2">
+        <p class="text-[12px] text-slate-400 font-medium"><span class="text-red-500">*</span> Trường bắt buộc nhập</p>
         <div class="flex gap-2.5">
           <button type="button" onclick="closeAddModal()" class="btn-ghost text-sm">Hủy</button>
-          <button type="submit" class="btn-primary text-sm"><span class="material-symbols-outlined text-[16px]">save</span>Lưu mặt hàng</button>
+          <button type="submit" class="btn-primary text-sm"><span class="material-symbols-outlined text-[18px]">save</span>Lưu mặt hàng</button>
         </div>
       </div>
     </form>
@@ -432,28 +712,30 @@
      MODAL 2: CHỈNH SỬA MẶT HÀNG
 ════════════════════════════════════════════ --%>
 <div id="editModal" class="modal-overlay hidden z-[80] flex items-start justify-center p-4 pt-10 overflow-y-auto">
-  <div class="modal-box relative w-full max-w-[640px] z-10">
+  <div class="modal-box relative w-full max-w-[680px] z-10 my-8">
     <div class="modal-header">
       <div class="flex items-center gap-3">
-        <div class="modal-icon bg-indigo-50"><span class="material-symbols-outlined text-indigo-600 text-[22px]">edit_square</span></div>
+        <div class="modal-icon bg-indigo-50 text-indigo-600">
+          <span class="material-symbols-outlined text-[24px]">edit_square</span>
+        </div>
         <div>
-          <h3 class="text-base font-bold text-zinc-900">Cập nhật mặt hàng</h3>
-          <p class="text-xs text-zinc-400 mt-0.5">Chỉnh sửa thông tin mặt hàng trong kho.</p>
+          <h3 class="text-base font-extrabold text-slate-900">Cập nhật mặt hàng</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Chỉnh sửa thông tin mặt hàng trong kho.</p>
         </div>
       </div>
-      <button type="button" onclick="closeEditModal()" class="modal-close"><span class="material-symbols-outlined text-[18px]">close</span></button>
+      <button type="button" onclick="closeEditModal()" class="modal-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
     </div>
 
-    <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="px-6 py-5 flex flex-col gap-5">
+    <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="px-8 py-6 flex flex-col gap-6">
       <input type="hidden" name="action" value="update">
       <input type="hidden" id="editSanPhamID" name="sanPhamID">
 
       <div>
-        <p class="section-sep"><span class="material-symbols-outlined text-[13px]">info</span>Thông tin cơ bản</p>
-        <div class="grid grid-cols-2 gap-4">
+        <p class="section-sep"><span class="material-symbols-outlined text-[15px] text-slate-400">info</span>Thông tin cơ bản</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="field-label">Mã SKU <span class="field-req">*</span></label>
-            <input type="text" id="editSkuCode" name="skuCode" required class="form-input font-mono text-sm">
+            <input type="text" id="editSkuCode" name="skuCode" required class="form-input font-mono text-[13px]">
           </div>
           <div>
             <label class="field-label">Tên mặt hàng <span class="field-req">*</span></label>
@@ -475,8 +757,8 @@
       </div>
 
       <div>
-        <p class="section-sep"><span class="material-symbols-outlined text-[13px]">payments</span>Giá &amp; Tồn kho</p>
-        <div class="grid grid-cols-3 gap-4">
+        <p class="section-sep"><span class="material-symbols-outlined text-[15px] text-slate-400">payments</span>Giá &amp; Tồn kho</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="field-label">Giá nhập (đ) <span class="field-req">*</span></label>
             <input type="number" step="any" id="editGiaNhap" name="giaNhap" min="0" required class="form-input">
@@ -505,9 +787,9 @@
         <input type="text" id="editMoTa" name="moTa" class="form-input">
       </div>
 
-      <div class="flex justify-end gap-2.5 pt-2 border-t border-zinc-100">
+      <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100 mt-2">
         <button type="button" onclick="closeEditModal()" class="btn-ghost text-sm">Hủy</button>
-        <button type="submit" class="btn-primary text-sm" style="background:#4f46e5"><span class="material-symbols-outlined text-[16px]">save</span>Lưu thay đổi</button>
+        <button type="submit" class="btn-primary text-sm" style="background:#4f46e5; box-shadow:0 4px 12px -2px rgba(79, 70, 229, 0.3)"><span class="material-symbols-outlined text-[18px]">save</span>Lưu thay đổi</button>
       </div>
     </form>
   </div>
@@ -517,42 +799,42 @@
      MODAL 3: NHẬP / XUẤT KHO
 ════════════════════════════════════════════ --%>
 <div id="stockModal" class="modal-overlay hidden z-[80] flex items-center justify-center p-4">
-  <div class="modal-box relative w-full max-w-[400px] z-10">
+  <div class="modal-box relative w-full max-w-[420px] z-10">
     <div class="modal-header">
       <div class="flex items-center gap-3">
-        <div class="modal-icon bg-zinc-100"><span class="material-symbols-outlined text-zinc-600 text-[22px]">published_with_changes</span></div>
-        <h3 class="text-base font-bold text-zinc-900">Điều chỉnh kho</h3>
+        <div class="modal-icon bg-slate-100 text-slate-600">
+          <span class="material-symbols-outlined text-[24px]">published_with_changes</span>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Nhập kho</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Nhập thêm số lượng tồn kho.</p>
+        </div>
       </div>
-      <button type="button" onclick="closeStockModal()" class="modal-close"><span class="material-symbols-outlined text-[18px]">close</span></button>
+      <button type="button" onclick="closeStockModal()" class="modal-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
     </div>
 
-    <div class="px-6 py-4 bg-zinc-50 border-b border-zinc-100">
-      <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-0.5">Mặt hàng được chọn</p>
-      <p class="font-bold text-zinc-800 text-sm" id="stockProdName">—</p>
-      <div class="flex gap-4 mt-1 text-xs text-zinc-500">
-        <span>SKU: <span class="font-mono font-bold text-zinc-700" id="stockProdSku">—</span></span>
-        <span>Tồn hiện tại: <span class="font-bold text-violet-700" id="stockProdQty">—</span> <span id="stockProdUnit"></span></span>
+    <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mặt hàng được chọn</p>
+      <p class="font-extrabold text-slate-800 text-sm" id="stockProdName">—</p>
+      <div class="flex gap-4 mt-2 text-xs text-slate-500">
+        <span>Mã SKU: <span class="font-mono font-bold text-slate-700 bg-white border border-slate-200 px-1.5 py-0.5 rounded" id="stockProdSku">—</span></span>
+        <span>Tồn hiện tại: <span class="font-bold text-violet-700 bg-white border border-slate-200 px-1.5 py-0.5 rounded" id="stockProdQty">—</span> <span id="stockProdUnit" class="text-slate-400"></span></span>
       </div>
     </div>
 
     <div class="px-6 py-5">
-      <div class="flex gap-1.5 p-1 bg-zinc-100 rounded-xl mb-5 text-xs font-bold">
-        <button onclick="setStockAction('nhap-kho')" id="btnActionNhap" class="flex-1 py-2 text-center rounded-lg bg-white text-zinc-800 shadow-sm border border-zinc-200">Nhập kho (+)</button>
-        <button onclick="setStockAction('xuat-kho')" id="btnActionXuat" class="flex-1 py-2 text-center rounded-lg text-zinc-500 hover:bg-white/50">Xuất kho (−)</button>
-      </div>
-
       <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="flex flex-col gap-4">
-        <input type="hidden" name="action" id="stockFormAction" value="nhap-kho">
+        <input type="hidden" name="action" value="nhap-kho">
         <input type="hidden" name="id" id="stockProdId">
         <div>
-          <label class="field-label" id="lblStockQty">Số lượng cần nhập thêm <span class="field-req">*</span></label>
+          <label class="field-label">Số lượng cần nhập thêm <span class="field-req">*</span></label>
           <input type="number" name="amount" min="1" required placeholder="Nhập số lượng..." class="form-input font-bold text-sm">
         </div>
         <div>
           <label class="field-label">Ghi chú điều chỉnh</label>
           <input type="text" name="note" placeholder="Lý do điều chỉnh..." class="form-input">
         </div>
-        <div class="flex justify-end gap-2.5 pt-2 border-t border-zinc-100">
+        <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100 mt-2">
           <button type="button" onclick="closeStockModal()" class="btn-ghost text-sm">Hủy</button>
           <button type="submit" id="btnStockSubmit" class="btn-primary text-sm">Xác nhận nhập kho</button>
         </div>
@@ -568,30 +850,35 @@
   <div class="modal-box relative w-full max-w-[440px] z-10">
     <div class="modal-header">
       <div class="flex items-center gap-3">
-        <div class="modal-icon bg-zinc-100"><span class="material-symbols-outlined text-zinc-600 text-[22px]">category</span></div>
+        <div class="modal-icon bg-slate-100 text-slate-600">
+          <span class="material-symbols-outlined text-[24px]">category</span>
+        </div>
         <div>
-          <h3 class="text-base font-bold text-zinc-900">Quản lý nhóm dịch vụ</h3>
-          <p class="text-xs text-zinc-400 mt-0.5">Tạo nhóm như Đồ uống, Thuê dụng cụ, Đồ ăn.</p>
+          <h3 class="text-base font-extrabold text-slate-900">Quản lý nhóm dịch vụ</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Tạo nhóm như Đồ uống, Thuê dụng cụ, Đồ ăn.</p>
         </div>
       </div>
-      <button onclick="closeCategoryModal()" class="modal-close"><span class="material-symbols-outlined text-[18px]">close</span></button>
+      <button onclick="closeCategoryModal()" class="modal-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
     </div>
 
     <div class="px-6 py-5 flex flex-col gap-4">
       <div>
-        <p class="text-xs font-bold text-zinc-500 mb-2.5">Nhóm dịch vụ hiện tại</p>
-        <div class="flex flex-col gap-2 max-h-52 overflow-y-auto">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Nhóm dịch vụ hiện tại</p>
+        <div class="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
           <c:choose>
             <c:when test="${empty categories}">
-              <p class="text-xs text-zinc-400 py-4 text-center">Chưa có nhóm dịch vụ nào.</p>
+              <div class="bg-slate-50 border border-dashed border-slate-200 rounded-xl p-6 text-center">
+                <span class="material-symbols-outlined text-[28px] text-slate-300">category</span>
+                <p class="text-xs text-slate-400 mt-1">Chưa có nhóm dịch vụ nào.</p>
+              </div>
             </c:when>
             <c:otherwise>
               <c:forEach items="${categories}" var="cat">
-                <div class="flex items-center gap-3 px-3 py-2.5 bg-white rounded-xl border border-violet-100/60 hover:border-violet-200 transition-colors">
-                  <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-[15px] text-violet-600">label</span>
+                <div class="flex items-center gap-3 px-3 py-2.5 bg-white rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/30 transition-colors shadow-2xs">
+                  <div class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[16px]">label</span>
                   </div>
-                  <span class="text-sm font-medium text-zinc-800 flex-1">${cat.tenDanhMuc}</span>
+                  <span class="text-sm font-bold text-slate-800 flex-1">${cat.tenDanhMuc}</span>
                 </div>
               </c:forEach>
             </c:otherwise>
@@ -599,12 +886,12 @@
         </div>
       </div>
 
-      <div class="border-t border-zinc-100 pt-4">
-        <p class="text-xs font-bold text-zinc-500 mb-2.5">Thêm nhóm mới</p>
+      <div class="border-t border-slate-100 pt-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Thêm nhóm mới</p>
         <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" onsubmit="return handleAddCategory(event)" class="flex gap-2">
           <input type="hidden" name="action" value="add-category">
           <input type="text" name="tenDanhMuc" id="newCatName" required placeholder="VD: Đồ uống" class="form-input flex-1">
-          <button type="submit" class="btn-secondary text-sm shrink-0"><span class="material-symbols-outlined text-[16px]">add</span>Thêm</button>
+          <button type="submit" class="btn-secondary text-sm shrink-0"><span class="material-symbols-outlined text-[18px]">add</span>Thêm</button>
         </form>
       </div>
     </div>
@@ -615,111 +902,256 @@
      MODAL 5: THÊM NHANH TỪ MẪU CÓ SẴN
 ════════════════════════════════════════════ --%>
 <div id="presetModal" class="modal-overlay hidden z-[80] flex items-start justify-center p-4 pt-8 overflow-y-auto">
-  <div class="modal-box relative w-full max-w-[680px] z-10 flex flex-col max-h-[88vh]">
+  <div class="modal-box relative w-full max-w-[700px] z-10 flex flex-col max-h-[90vh] my-4 shadow-2xl">
     <div class="modal-header shrink-0">
       <div class="flex items-center gap-3">
-        <div class="modal-icon bg-amber-50"><span class="material-symbols-outlined text-amber-600 text-[22px]">bolt</span></div>
+        <div class="modal-icon bg-amber-50 text-amber-600">
+          <span class="material-symbols-outlined text-[24px]">bolt</span>
+        </div>
         <div>
-          <h3 class="text-base font-bold text-zinc-900">Thêm nhanh từ mẫu có sẵn</h3>
-          <p class="text-xs text-zinc-400 mt-0.5">Chọn các mặt hàng thường bán tại sân để thêm nhanh vào kho.</p>
+          <h3 class="text-base font-extrabold text-slate-900">Thêm nhanh từ mẫu có sẵn</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Chọn các mặt hàng thường bán tại sân để thêm nhanh vào kho.</p>
         </div>
       </div>
-      <button type="button" onclick="closePresetModal()" class="modal-close"><span class="material-symbols-outlined text-[18px]">close</span></button>
+      <button type="button" onclick="closePresetModal()" class="modal-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
     </div>
 
     <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" class="flex flex-col flex-1 min-h-0">
       <input type="hidden" name="action" value="add-presets">
 
-      <div class="flex items-center justify-between px-6 py-2.5 bg-amber-50/60 border-b border-amber-100 shrink-0">
-        <p class="text-xs text-amber-700 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[14px]">info</span>
-          Bạn có thể chỉnh lại giá bán và tồn kho sau khi thêm.
-        </p>
+      <div class="flex items-center gap-2 px-6 py-3 bg-amber-50/50 border-b border-amber-100/60 shrink-0 text-amber-800 text-[12.5px] font-medium">
+        <span class="material-symbols-outlined text-[18px]">info</span>
+        <span>Bạn có thể chỉnh lại giá bán và số lượng tồn kho sau khi thêm.</span>
       </div>
 
-      <div class="overflow-y-auto flex-1 px-6 py-4">
-        <table class="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="border-b border-zinc-200">
-              <th class="pb-3 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide w-[50%]">Tên mặt hàng mẫu</th>
-              <th class="pb-3 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide">Nhóm</th>
-              <th class="pb-3 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide">Đơn vị</th>
-              <th class="pb-3 text-[10.5px] font-bold text-zinc-500 uppercase tracking-wide text-right">Giá gợi ý</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-zinc-100">
-            <%-- Đồ uống --%>
-            <tr class="bg-blue-50/40">
-              <td colspan="4" class="px-0 py-2.5 text-[10px] font-bold text-blue-800 uppercase tracking-widest">
-                <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px]">local_cafe</span>Đồ uống</div>
-              </td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Nước tinh khiết Aquafina 500ml</span></div><input type="hidden" name="presetNames" value="Nước tinh khiết Aquafina 500ml"><input type="hidden" name="presetCatNames" value="Nước uống"><input type="hidden" name="presetUnits" value="chai"><input type="hidden" name="presetGiaNhaps" value="5000"><input type="hidden" name="presetDonGias" value="10000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Nước uống</td><td class="py-3 text-zinc-400">chai</td><td class="py-3 text-right font-bold text-zinc-800">10.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Nước ngọt Coca-Cola lon</span></div><input type="hidden" name="presetNames" value="Nước ngọt Coca-Cola lon"><input type="hidden" name="presetCatNames" value="Nước uống"><input type="hidden" name="presetUnits" value="lon"><input type="hidden" name="presetGiaNhaps" value="8000"><input type="hidden" name="presetDonGias" value="12000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Nước uống</td><td class="py-3 text-zinc-400">lon</td><td class="py-3 text-right font-bold text-zinc-800">12.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Trà xanh Không Độ chai</span></div><input type="hidden" name="presetNames" value="Trà xanh Không Độ chai"><input type="hidden" name="presetCatNames" value="Nước uống"><input type="hidden" name="presetUnits" value="chai"><input type="hidden" name="presetGiaNhaps" value="8000"><input type="hidden" name="presetDonGias" value="12000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Nước uống</td><td class="py-3 text-zinc-400">chai</td><td class="py-3 text-right font-bold text-zinc-800">12.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Nước bù khoáng Revive 500ml</span></div><input type="hidden" name="presetNames" value="Nước bù khoáng Revive 500ml"><input type="hidden" name="presetCatNames" value="Nước uống"><input type="hidden" name="presetUnits" value="chai"><input type="hidden" name="presetGiaNhaps" value="8000"><input type="hidden" name="presetDonGias" value="12000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Nước uống</td><td class="py-3 text-zinc-400">chai</td><td class="py-3 text-right font-bold text-zinc-800">12.000đ</td>
-            </tr>
+      <div class="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-6">
+        <%-- Đồ uống --%>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-500">local_cafe</span>Đồ uống
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Aquafina 500ml</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Nước uống · chai</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">10.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Nước tinh khiết Aquafina 500ml">
+              <input type="hidden" name="presetCatNames" value="Nước uống">
+              <input type="hidden" name="presetUnits" value="chai">
+              <input type="hidden" name="presetGiaNhaps" value="5000">
+              <input type="hidden" name="presetDonGias" value="10000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
 
-            <%-- Thuê dụng cụ --%>
-            <tr class="bg-violet-50/40 border-t border-zinc-200">
-              <td colspan="4" class="px-0 py-2.5 text-[10px] font-bold text-violet-800 uppercase tracking-widest">
-                <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px]">sports_tennis</span>Thuê dụng cụ</div>
-              </td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Thuê vợt cầu lông Yonex</span></div><input type="hidden" name="presetNames" value="Thuê vợt cầu lông Yonex"><input type="hidden" name="presetCatNames" value="Thuê dụng cụ"><input type="hidden" name="presetUnits" value="lượt"><input type="hidden" name="presetGiaNhaps" value="0"><input type="hidden" name="presetDonGias" value="30000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Thuê dụng cụ</td><td class="py-3 text-zinc-400">lượt</td><td class="py-3 text-right font-bold text-zinc-800">30.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Thuê quả bóng đá size 5</span></div><input type="hidden" name="presetNames" value="Thuê quả bóng đá size 5"><input type="hidden" name="presetCatNames" value="Thuê dụng cụ"><input type="hidden" name="presetUnits" value="lượt"><input type="hidden" name="presetGiaNhaps" value="0"><input type="hidden" name="presetDonGias" value="40000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Thuê dụng cụ</td><td class="py-3 text-zinc-400">lượt</td><td class="py-3 text-right font-bold text-zinc-800">40.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Thuê giày thể thao cơ bản</span></div><input type="hidden" name="presetNames" value="Thuê giày thể thao cơ bản"><input type="hidden" name="presetCatNames" value="Thuê dụng cụ"><input type="hidden" name="presetUnits" value="đôi"><input type="hidden" name="presetGiaNhaps" value="0"><input type="hidden" name="presetDonGias" value="25000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Thuê dụng cụ</td><td class="py-3 text-zinc-400">đôi</td><td class="py-3 text-right font-bold text-zinc-800">25.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Thuê áo tập / áo bib đấu</span></div><input type="hidden" name="presetNames" value="Thuê áo tập / áo bib đấu"><input type="hidden" name="presetCatNames" value="Thuê dụng cụ"><input type="hidden" name="presetUnits" value="bộ"><input type="hidden" name="presetGiaNhaps" value="0"><input type="hidden" name="presetDonGias" value="10000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Thuê dụng cụ</td><td class="py-3 text-zinc-400">bộ</td><td class="py-3 text-right font-bold text-zinc-800">10.000đ</td>
-            </tr>
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Coca-Cola lon</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Nước uống · lon</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">12.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Nước ngọt Coca-Cola lon">
+              <input type="hidden" name="presetCatNames" value="Nước uống">
+              <input type="hidden" name="presetUnits" value="lon">
+              <input type="hidden" name="presetGiaNhaps" value="8000">
+              <input type="hidden" name="presetDonGias" value="12000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
 
-            <%-- Dịch vụ khác --%>
-            <tr class="bg-zinc-50/60 border-t border-zinc-200">
-              <td colspan="4" class="px-0 py-2.5 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px]">more_horiz</span>Dịch vụ khác</div>
-              </td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Khăn lạnh lau mặt</span></div><input type="hidden" name="presetNames" value="Khăn lạnh lau mặt"><input type="hidden" name="presetCatNames" value="Dịch vụ khác"><input type="hidden" name="presetUnits" value="cái"><input type="hidden" name="presetGiaNhaps" value="1500"><input type="hidden" name="presetDonGias" value="5000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Dịch vụ khác</td><td class="py-3 text-zinc-400">cái</td><td class="py-3 text-right font-bold text-zinc-800">5.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Phí gửi xe máy/ô tô</span></div><input type="hidden" name="presetNames" value="Phí gửi xe máy/ô tô"><input type="hidden" name="presetCatNames" value="Dịch vụ khác"><input type="hidden" name="presetUnits" value="lượt"><input type="hidden" name="presetGiaNhaps" value="0"><input type="hidden" name="presetDonGias" value="5000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Dịch vụ khác</td><td class="py-3 text-zinc-400">lượt</td><td class="py-3 text-right font-bold text-zinc-800">5.000đ</td>
-            </tr>
-            <tr class="hover:bg-violet-50/20">
-              <td class="py-3"><div class="flex items-center gap-2.5"><input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded" onchange="togglePresetRow(this)"><span class="font-semibold text-zinc-800">Phụ thu tiền điện chiếu sáng</span></div><input type="hidden" name="presetNames" value="Phụ thu tiền điện chiếu sáng"><input type="hidden" name="presetCatNames" value="Dịch vụ khác"><input type="hidden" name="presetUnits" value="ca"><input type="hidden" name="presetGiaNhaps" value="0"><input type="hidden" name="presetDonGias" value="50000"><input type="hidden" name="presetStocks" class="preset-stock-input" value="0"></td>
-              <td class="py-3 text-zinc-400">Dịch vụ khác</td><td class="py-3 text-zinc-400">ca</td><td class="py-3 text-right font-bold text-zinc-800">50.000đ</td>
-            </tr>
-          </tbody>
-        </table>
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Trà xanh Không Độ</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Nước uống · chai</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">12.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Trà xanh Không Độ chai">
+              <input type="hidden" name="presetCatNames" value="Nước uống">
+              <input type="hidden" name="presetUnits" value="chai">
+              <input type="hidden" name="presetGiaNhaps" value="8000">
+              <input type="hidden" name="presetDonGias" value="12000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Revive 500ml</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Nước uống · chai</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">12.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Nước bù khoáng Revive 500ml">
+              <input type="hidden" name="presetCatNames" value="Nước uống">
+              <input type="hidden" name="presetUnits" value="chai">
+              <input type="hidden" name="presetGiaNhaps" value="8000">
+              <input type="hidden" name="presetDonGias" value="12000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+          </div>
+        </div>
+
+        <%-- Thuê dụng cụ --%>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5 border-t border-slate-100 pt-4">
+            <span class="material-symbols-outlined text-[16px] text-violet-500">sports_tennis</span>Thuê dụng cụ
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Thuê vợt cầu lông Yonex</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Thuê dụng cụ · lượt</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">30.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Thuê vợt cầu lông Yonex">
+              <input type="hidden" name="presetCatNames" value="Thuê dụng cụ">
+              <input type="hidden" name="presetUnits" value="lượt">
+              <input type="hidden" name="presetGiaNhaps" value="0">
+              <input type="hidden" name="presetDonGias" value="30000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Thuê quả bóng đá size 5</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Thuê dụng cụ · lượt</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">40.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Thuê quả bóng đá size 5">
+              <input type="hidden" name="presetCatNames" value="Thuê dụng cụ">
+              <input type="hidden" name="presetUnits" value="lượt">
+              <input type="hidden" name="presetGiaNhaps" value="0">
+              <input type="hidden" name="presetDonGias" value="40000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Thuê giày thể thao</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Thuê dụng cụ · đôi</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">25.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Thuê giày thể thao cơ bản">
+              <input type="hidden" name="presetCatNames" value="Thuê dụng cụ">
+              <input type="hidden" name="presetUnits" value="đôi">
+              <input type="hidden" name="presetGiaNhaps" value="0">
+              <input type="hidden" name="presetDonGias" value="25000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Thuê áo tập / áo bib</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Thuê dụng cụ · bộ</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">10.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Thuê áo tập / áo bib đấu">
+              <input type="hidden" name="presetCatNames" value="Thuê dụng cụ">
+              <input type="hidden" name="presetUnits" value="bộ">
+              <input type="hidden" name="presetGiaNhaps" value="0">
+              <input type="hidden" name="presetDonGias" value="10000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+          </div>
+        </div>
+
+        <%-- Dịch vụ khác --%>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5 border-t border-slate-100 pt-4">
+            <span class="material-symbols-outlined text-[16px] text-slate-500">more_horiz</span>Dịch vụ khác
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Khăn lạnh lau mặt</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Dịch vụ khác · cái</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">5.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Khăn lạnh lau mặt">
+              <input type="hidden" name="presetCatNames" value="Dịch vụ khác">
+              <input type="hidden" name="presetUnits" value="cái">
+              <input type="hidden" name="presetGiaNhaps" value="1500">
+              <input type="hidden" name="presetDonGias" value="5000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Phí gửi xe máy/ô tô</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Dịch vụ khác · lượt</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">5.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Phí gửi xe máy/ô tô">
+              <input type="hidden" name="presetCatNames" value="Dịch vụ khác">
+              <input type="hidden" name="presetUnits" value="lượt">
+              <input type="hidden" name="presetGiaNhaps" value="0">
+              <input type="hidden" name="presetDonGias" value="5000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+
+            <div class="preset-card" onclick="handlePresetCardClick(this, event)">
+              <input type="checkbox" class="preset-checkbox w-4 h-4 accent-violet-600 rounded shrink-0" onchange="togglePresetRow(this)" onclick="event.stopPropagation()">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-800 text-[13px] truncate">Phụ thu tiền điện</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Dịch vụ khác · ca</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-[9px] text-slate-400">Gợi ý</p>
+                <p class="font-extrabold text-slate-800 text-[12.5px] mt-0.5">50.000đ</p>
+              </div>
+              <input type="hidden" name="presetNames" value="Phụ thu tiền điện chiếu sáng">
+              <input type="hidden" name="presetCatNames" value="Dịch vụ khác">
+              <input type="hidden" name="presetUnits" value="ca">
+              <input type="hidden" name="presetGiaNhaps" value="0">
+              <input type="hidden" name="presetDonGias" value="50000">
+              <input type="hidden" name="presetStocks" class="preset-stock-input" value="0">
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="px-6 py-4 bg-zinc-50/60 border-t border-zinc-100 flex justify-end gap-2.5 shrink-0">
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2.5 shrink-0 rounded-b-2xl">
         <button type="button" onclick="closePresetModal()" class="btn-ghost text-sm">Hủy</button>
         <button type="submit" id="presetSubmitBtn" disabled class="btn-primary text-sm opacity-50 cursor-not-allowed">
-          <span class="material-symbols-outlined text-[16px]">add_circle</span>Thêm các mẫu đã chọn
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>Thêm các mẫu đã chọn
         </button>
       </div>
     </form>
@@ -779,33 +1211,12 @@
     document.getElementById('stockProdName').innerText = name;
     document.getElementById('stockProdQty').innerText = currentStock;
     document.getElementById('stockProdUnit').innerText = unit || 'cái';
-    setStockAction('nhap-kho');
     document.getElementById('stockModal').classList.remove('hidden');
     document.getElementById('stockModal').classList.add('flex');
   }
   function closeStockModal() {
     document.getElementById('stockModal').classList.add('hidden');
     document.getElementById('stockModal').classList.remove('flex');
-  }
-  function setStockAction(action) {
-    document.getElementById('stockFormAction').value = action;
-    const btnN = document.getElementById('btnActionNhap');
-    const btnX = document.getElementById('btnActionXuat');
-    const lbl  = document.getElementById('lblStockQty');
-    const btnS = document.getElementById('btnStockSubmit');
-    if (action === 'nhap-kho') {
-      btnN.className = 'flex-1 py-2 text-center rounded-lg bg-white text-zinc-800 shadow-sm border border-zinc-200 font-bold text-xs';
-      btnX.className = 'flex-1 py-2 text-center rounded-lg text-zinc-500 hover:bg-white/50 font-bold text-xs';
-      lbl.innerHTML  = 'Số lượng cần nhập thêm <span class="field-req">*</span>';
-      btnS.textContent = 'Xác nhận nhập kho';
-      btnS.style.background = '#7c3aed';
-    } else {
-      btnX.className = 'flex-1 py-2 text-center rounded-lg bg-white text-zinc-800 shadow-sm border border-zinc-200 font-bold text-xs';
-      btnN.className = 'flex-1 py-2 text-center rounded-lg text-zinc-500 hover:bg-white/50 font-bold text-xs';
-      lbl.innerHTML  = 'Số lượng cần xuất giảm <span class="field-req">*</span>';
-      btnS.textContent = 'Xác nhận xuất kho';
-      btnS.style.background = '#18181b';
-    }
   }
 
   // ── Category Modal ──
@@ -830,16 +1241,22 @@
   }
 
   // ── Preset Modal ──
+  function handlePresetCardClick(card, event) {
+    if (event.target.type === 'checkbox') return;
+    const checkbox = card.querySelector('.preset-checkbox');
+    checkbox.checked = !checkbox.checked;
+    togglePresetRow(checkbox);
+  }
   function togglePresetRow(checkbox) {
-    const row = checkbox.closest('tr');
-    const stockHidden = row.querySelector('.preset-stock-input');
-    const name = row.querySelector('input[name="presetNames"]').value;
+    const card = checkbox.closest('.preset-card');
+    const stockHidden = card.querySelector('.preset-stock-input');
+    const name = card.querySelector('input[name="presetNames"]').value;
     if (checkbox.checked) {
       stockHidden.value = name.includes('Phí gửi') || name.includes('Phụ thu') ? '1' : name.includes('Thuê') ? '5' : '10';
-      row.classList.add('bg-violet-50/40');
+      card.classList.add('active');
     } else {
       stockHidden.value = '0';
-      row.classList.remove('bg-violet-50/40');
+      card.classList.remove('active');
     }
     validatePresetSelection();
   }
@@ -856,7 +1273,7 @@
   function openPresetModal() {
     document.querySelectorAll('.preset-checkbox').forEach(cb => {
       cb.checked = false;
-      cb.closest('tr').classList.remove('bg-violet-50/40');
+      cb.closest('.preset-card').classList.remove('active');
     });
     document.querySelectorAll('.preset-stock-input').forEach(i => i.value = 0);
     validatePresetSelection();

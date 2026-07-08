@@ -953,7 +953,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 2. Kiểm tra hóa đơn đã thanh toán chưa
-            String sqlCheckInvoice = "SELECT TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?";
+            String sqlCheckInvoice = "SELECT TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
             try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckInvoice)) {
                 psCheck.setInt(1, datSanId);
                 try (ResultSet rsCheck = psCheck.executeQuery()) {
@@ -1018,7 +1018,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             if (phuThuTre > 0.0) {
                 // Cập nhật phụ thu vào HoaDon
-                String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE DatSanID = ?";
+                String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
                 try (PreparedStatement psUpSurch = conn.prepareStatement(sqlUpdateInvoiceSurcharge)) {
                     psUpSurch.setDouble(1, phuThuTre);
                     psUpSurch.setDouble(2, phuThuTre);
@@ -1037,7 +1037,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 5. Cập nhật hóa đơn sang Đã thanh toán
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE DatSanID = ?";
+            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
             psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
             psUpdateInvoice.setString(1, paymentMethodTrim);
             psUpdateInvoice.setInt(2, staffAccountId);

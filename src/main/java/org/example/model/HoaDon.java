@@ -48,6 +48,15 @@ public class HoaDon {
     @Column(name = "TrangThaiThanhToan")
     private String trangThaiThanhToan;
 
+    @Column(name = "LoaiHoaDon")
+    private String loaiHoaDon;
+
+    @Column(name = "ParentHoaDonID")
+    private Integer parentHoaDonId;
+
+    @Column(name = "GhiChu")
+    private String ghiChu;
+
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DatSanID", insertable = false, updatable = false)
@@ -123,6 +132,15 @@ public class HoaDon {
 
     public String getTrangThaiThanhToan() { return trangThaiThanhToan; }
     public void setTrangThaiThanhToan(String trangThaiThanhToan) { this.trangThaiThanhToan = trangThaiThanhToan; }
+
+    public String getLoaiHoaDon() { return loaiHoaDon; }
+    public void setLoaiHoaDon(String loaiHoaDon) { this.loaiHoaDon = loaiHoaDon; }
+
+    public Integer getParentHoaDonId() { return parentHoaDonId; }
+    public void setParentHoaDonId(Integer parentHoaDonId) { this.parentHoaDonId = parentHoaDonId; }
+
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 
     public Lichdatsan getDatSan() { return datSan; }
     public void setDatSan(Lichdatsan datSan) { this.datSan = datSan; }

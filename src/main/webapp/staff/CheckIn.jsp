@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -43,6 +43,173 @@
             background: ${sessionScope.user.roleId == 2 
                 ? 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 60%, #e9d5ff 100%)' 
                 : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 60%, #ffedad 100%)'}; 
+        }
+
+        /* POS Product Catalog styles */
+        .pos-tab {
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            user-select: none;
+        }
+        .pos-tab:hover {
+            border-color: #cbd5e1;
+            color: #334155;
+            background: #f8fafc;
+        }
+        .pos-tab.active {
+            background: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+            color: #ffffff;
+            border-color: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+        }
+        
+        .pos-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            user-select: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+            min-height: 85px;
+        }
+        .pos-card:hover:not(.disabled) {
+            border-color: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+            box-shadow: 0 6px 16px -4px ${sessionScope.user.roleId == 2 ? 'rgba(124, 58, 237, 0.12)' : 'rgba(234, 88, 12, 0.1)'};
+            transform: translateY(-1.5px);
+        }
+        .pos-card:active:not(.disabled) {
+            transform: scale(0.97);
+        }
+        .pos-card.disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            box-shadow: none;
+        }
+
+        /* 3-Column POS modal custom styling */
+        .pos-grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 1024px) {
+            .pos-grid-container {
+                grid-template-columns: 42fr 30fr 28fr;
+            }
+        }
+        
+        /* Stepper styles */
+        .stepper-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .stepper-btn:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .stepper-btn:active {
+            transform: scale(0.92);
+        }
+        
+        /* Billing Mode Cards */
+        .bill-mode-card {
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            position: relative;
+            user-select: none;
+        }
+        .bill-mode-card:hover:not(.disabled) {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        .bill-mode-card.active {
+            border-color: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+            background: ${sessionScope.user.roleId == 2 ? 'rgba(124, 58, 237, 0.03)' : 'rgba(234, 88, 12, 0.02)'};
+            box-shadow: 0 4px 12px ${sessionScope.user.roleId == 2 ? 'rgba(124, 58, 237, 0.05)' : 'rgba(234, 88, 12, 0.04)'};
+        }
+        .bill-mode-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        /* Payment Method Cards */
+        .pay-method-card {
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            user-select: none;
+            text-align: center;
+            min-height: 70px;
+        }
+        .pay-method-card:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        .pay-method-card.active {
+            border-color: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+            background: ${sessionScope.user.roleId == 2 ? 'rgba(124, 58, 237, 0.03)' : 'rgba(234, 88, 12, 0.02)'};
+            color: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+            box-shadow: 0 4px 12px ${sessionScope.user.roleId == 2 ? 'rgba(124, 58, 237, 0.05)' : 'rgba(234, 88, 12, 0.04)'};
+        }
+        .pay-method-card.active .material-symbols-outlined {
+            color: ${sessionScope.user.roleId == 2 ? '#7c3aed' : '#ea580c'};
+        }
+        
+        /* Cart items styling */
+        .cart-item {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 10px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: background 0.15s ease;
+        }
+        .cart-item:hover {
+            background: rgba(248, 250, 252, 0.5);
         }
     </style>
 </head>
@@ -1057,201 +1224,253 @@
 </script>
 
 <!-- STAFF INVOICE & SERVICE MODAL -->
-<div id="staffInvoiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
-    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
-        
-        <div class="${isManager ? 'bg-gradient-to-r from-purple-700 to-indigo-800' : 'bg-gradient-to-r from-orange-500 to-amber-600'} px-6 py-4 flex items-center justify-between text-white">
-            <h3 class="font-bold text-lg flex items-center gap-2">
-                <span class="material-symbols-outlined">receipt_long</span> Thanh toán & Quản lý Dịch vụ
-            </h3>
-            <button onclick="closeStaffInvoiceModal()" class="text-white/80 hover:text-white transition-colors p-1">
+<div id="staffInvoiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-2 sm:p-4">
+    <div class="bg-white w-full max-w-[1400px] rounded-lg sm:rounded-xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative flex flex-col" style="max-height: 96vh;">
+
+        <!-- Header -->
+        <header class="bg-[#f8f9ff] border-b border-[#ccc3d8] flex justify-between items-center px-4 lg:px-8 py-3 lg:py-4 shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-[#e5eeff] flex items-center justify-center ${isManager ? 'text-purple-700' : 'text-orange-600'}">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#0b1c30]">Thanh toán &amp; Quản lý Dịch vụ</h1>
+                    <p class="text-xs text-[#5d5d67]">Chọn dịch vụ · Xác nhận thanh toán · In hóa đơn</p>
+                </div>
+            </div>
+            <button onclick="closeStaffInvoiceModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#dce9ff] transition-colors text-[#5d5d67]">
                 <span class="material-symbols-outlined">close</span>
             </button>
-        </div>
-        
-        <div class="p-6 md:p-8 max-h-[75vh] overflow-y-auto">
-            <div id="staff-invoice-loading" class="text-center py-12 text-zinc-500">
+        </header>
+
+        <!-- Flex body: loading + content -->
+        <div class="flex-1 min-h-0 overflow-hidden flex flex-col">
+
+            <!-- Loading state -->
+            <div id="staff-invoice-loading" class="flex-1 flex flex-col items-center justify-center text-zinc-500">
                 <span class="material-symbols-outlined animate-spin text-[32px] ${themeIcon} mb-2">sync</span>
                 <p class="text-sm font-medium">Đang tải chi tiết hóa đơn...</p>
             </div>
-            
-            <div id="staff-invoice-content" class="hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- General details -->
-                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs space-y-2 flex flex-col justify-between">
-                        <div>
-                            <p class="text-zinc-500 font-semibold uppercase text-[10px]">Thông tin ca đấu</p>
-                            <h4 class="font-bold text-zinc-850 text-sm mt-1" id="staff-invoice-court-name">Tên sân</h4>
-                            <p class="text-zinc-650 mt-0.5" id="staff-invoice-time-slot">00:00 - 00:00 (01/01/2026)</p>
+
+            <!-- Main 3-column content -->
+            <div id="staff-invoice-content" class="hidden flex-1 min-h-0 bg-[#f8f9ff] p-3 lg:p-6 gap-3 lg:gap-6 animate-fadeUp flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+
+                <!-- Section 1: Dịch vụ đi kèm / Nước uống -->
+                <section class="flex-none lg:flex-1 min-w-0 bg-white rounded-xl border border-[#ccc3d8] p-4 lg:p-6 flex flex-col lg:min-h-0">
+                    <div class="mb-4 shrink-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-[#5d5d67] text-sm">shopping_cart</span>
+                            <h2 class="text-base font-bold uppercase text-[#0b1c30]">DỊCH VỤ ĐI KÈM / NƯỚC UỐNG</h2>
                         </div>
-                        <div>
-                            <p class="text-zinc-500 font-semibold uppercase text-[10px] mb-1">Trạng thái thanh toán</p>
+                        <p class="text-sm text-[#5d5d67]">Chọn sản phẩm từ kho dịch vụ để thêm vào hóa đơn.</p>
+                    </div>
+                    <!-- Category Filter Tabs -->
+                    <div class="flex flex-wrap gap-2 mb-4 shrink-0">
+                        <button type="button" onclick="filterStaffCatalog('all', this)" class="pos-tab active"><span class="material-symbols-outlined text-[15px]">apps</span> Tất cả</button>
+                        <button type="button" onclick="filterStaffCatalog('drinks', this)" class="pos-tab"><span class="material-symbols-outlined text-[15px]">local_cafe</span> Đồ uống</button>
+                        <button type="button" onclick="filterStaffCatalog('rentals', this)" class="pos-tab"><span class="material-symbols-outlined text-[15px]">sports_tennis</span> Thuê dụng cụ</button>
+                        <button type="button" onclick="filterStaffCatalog('others', this)" class="pos-tab"><span class="material-symbols-outlined text-[15px]">more_horiz</span> Khác</button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div class="relative mb-4 shrink-0">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-[#7b7487] text-[20px]">search</span>
+                        </div>
+                        <input type="text" id="staff-catalog-search" oninput="searchStaffCatalog(this.value)" placeholder="Tìm nhanh dịch vụ, nước uống..." class="w-full text-sm pl-10 pr-4 py-3 rounded-lg border border-[#ccc3d8] bg-white focus:outline-none focus:border-[#630ed4] focus:ring-1 focus:ring-[#630ed4] transition-all text-[#0b1c30] placeholder-[#5d5d67]">
+                    </div>
+                    <!-- Product Grid -->
+                    <div id="staff-product-catalog" class="max-h-[240px] lg:max-h-none lg:flex-1 overflow-y-auto grid grid-cols-2 auto-rows-max gap-3 pr-1 lg:min-h-0 content-start">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                    <!-- Hidden inputs for backward compatibility -->
+                    <select id="staff-product-select" class="hidden"></select>
+                    <input type="number" id="staff-product-qty" class="hidden" value="1">
+                    <button type="button" id="staff-add-service-btn" class="hidden"></button>
+                </section>
+
+                <!-- Section 2: Sản phẩm đã chọn -->
+                <section class="flex-none lg:flex-1 min-w-0 bg-white rounded-xl border border-[#ccc3d8] p-4 lg:p-6 flex flex-col lg:min-h-0">
+                    <div class="flex justify-between items-center border-b border-[#ccc3d8] pb-4 mb-4 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[#5d5d67] text-sm">shopping_bag</span>
+                            <h2 class="text-sm font-bold uppercase text-[#0b1c30]">SẢN PHẨM ĐÃ CHỌN</h2>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] text-[#5d5d67] font-medium uppercase">DANH SÁCH GIỎ HÀNG</span>
+                            <span class="text-xs font-semibold text-[#0b1c30]" id="staff-cart-item-count">0 mặt hàng</span>
+                        </div>
+                    </div>
+                    <!-- Cart items list -->
+                    <div id="staff-cart-list" class="max-h-[200px] lg:max-h-none lg:flex-1 overflow-y-auto pr-1 space-y-1 lg:min-h-0">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                    <!-- Cart subtotal -->
+                    <div class="mt-4 pt-4 border-t border-[#ccc3d8] flex justify-between items-center shrink-0">
+                        <span class="text-[10px] text-[#5d5d67] font-medium uppercase">TỔNG TIỀN DỊCH VỤ:</span>
+                        <span class="text-base font-bold text-[#0b1c30]" id="staff-cart-subtotal">0 đ</span>
+                    </div>
+                </section>
+
+                <!-- Section 3: Right Sidebar -->
+                <section class="w-full lg:w-[340px] lg:shrink-0 flex flex-col gap-4 lg:overflow-y-auto lg:min-h-0 pr-1">
+
+                    <!-- Court Info Card -->
+                    <div class="bg-white rounded-xl border border-[#ccc3d8] p-5 shrink-0">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-[#e5eeff] flex items-center justify-center text-[#5d5d67] shrink-0">
+                                <span class="material-symbols-outlined">sports_soccer</span>
+                            </div>
+                            <div>
+                                <p class="text-xs ${isManager ? 'text-purple-700' : 'text-orange-600'} uppercase font-medium mb-1">THÔNG TIN CA ĐẤU</p>
+                                <h3 class="text-base font-bold text-[#0b1c30]" id="staff-invoice-court-name">Tên sân</h3>
+                                <p class="text-sm text-[#5d5d67]" id="staff-invoice-time-slot">00:00 - 00:00 (01/01/2026)</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t border-[#ccc3d8]">
+                            <span class="text-xs text-[#5d5d67] uppercase font-medium">TRẠNG THÁI:</span>
                             <span class="badge badge-amber" id="staff-invoice-payment-status">Chưa thanh toán</span>
                         </div>
                     </div>
-                    
-                    <!-- Surcharges & Court price details -->
-                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs space-y-1.5 text-zinc-700">
-                        <p class="text-zinc-500 font-bold uppercase mb-1 text-[10px]">Chi tiết tiền sân</p>
-                        <div class="flex justify-between">
-                            <span>Đơn giá sân:</span>
-                            <span class="font-bold text-zinc-800" id="staff-detail-court-rate">0 đ/giờ</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Giờ bắt đầu:</span>
-                            <span class="font-bold text-zinc-800" id="staff-detail-start-time">00:00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Giờ kết thúc:</span>
-                            <span class="font-bold text-zinc-800" id="staff-detail-end-time">00:00</span>
-                        </div>
-                        <div id="staff-detail-early-container" class="flex justify-between text-amber-700 hidden">
-                            <span>Phụ thu nhận sớm:</span>
-                            <span class="font-bold" id="staff-detail-early-surcharge">0 đ</span>
-                        </div>
-                        <div id="staff-detail-late-container" class="flex justify-between text-red-650 hidden">
-                            <span>Phụ thu quá giờ (<span id="staff-detail-late-minutes">0</span> phút):</span>
-                            <span class="font-bold" id="staff-detail-late-surcharge">0 đ</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Bill mode selector -->
-                <div id="bill-mode-section">
-                    <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-2">Loại bill dịch vụ</h4>
-                    <div class="flex gap-2">
-                        <label id="lbl-billmode-main" class="flex-1 border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold ${themeTextMedium} transition-all" onclick="setBillMode('MAIN')">
-                            <input type="radio" name="billModeRadio" value="MAIN" checked class="hidden">
-                            <span class="material-symbols-outlined text-[16px]">merge</span>
-                            <span>Cộng vào hóa đơn sân</span>
-                        </label>
-                        <label id="lbl-billmode-split" class="flex-1 border-2 border-zinc-150 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all" onclick="setBillMode('SPLIT')">
-                            <input type="radio" name="billModeRadio" value="SPLIT" class="hidden">
-                            <span class="material-symbols-outlined text-[16px]">call_split</span>
-                            <span>Tách bill dịch vụ</span>
-                        </label>
-                    </div>
-                    <div id="split-paynow-section" class="hidden mt-2 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
-                        <input type="checkbox" id="split-pay-now-cb" class="${isManager ? 'accent-purple-600' : 'accent-orange-600'}">
-                        <label for="split-pay-now-cb" class="text-xs font-bold text-amber-800">Thanh toán bill tách ngay bây giờ</label>
-                    </div>
-                </div>
 
-                <!-- Split bills list -->
-                <div id="split-bills-section" class="hidden">
-                    <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px] text-amber-600">receipt</span>
-                        Hóa đơn tách dịch vụ
-                    </h4>
-                    <div id="split-bills-list" class="space-y-2"></div>
-                </div>
+                    <!-- Price Details Card -->
+                    <div class="bg-white rounded-xl border border-[#ccc3d8] p-5 shrink-0">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="material-symbols-outlined text-[#5d5d67] text-[18px]">schedule</span>
+                            <h4 class="text-xs text-[#5d5d67] uppercase font-medium">CHI TIẾT TIỀN SÂN</h4>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-[#5d5d67]">Đơn giá sân:</span>
+                                <span class="font-semibold text-[#0b1c30]" id="staff-detail-court-rate">0 đ/giờ</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#5d5d67]">Giờ bắt đầu:</span>
+                                <span class="font-semibold text-[#0b1c30]" id="staff-detail-start-time">00:00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#5d5d67]">Giờ kết thúc:</span>
+                                <span class="font-semibold text-[#0b1c30]" id="staff-detail-end-time">00:00</span>
+                            </div>
+                            <div id="staff-detail-early-container" class="flex justify-between text-amber-700 hidden">
+                                <span>Phụ thu nhận sớm:</span>
+                                <span class="font-bold" id="staff-detail-early-surcharge">0 đ</span>
+                            </div>
+                            <div id="staff-detail-late-container" class="flex justify-between text-red-600 hidden">
+                                <span>Phụ thu quá giờ (<span id="staff-detail-late-minutes">0</span> phút):</span>
+                                <span class="font-bold" id="staff-detail-late-surcharge">0 đ</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <!-- Services management -->
-                <div>
-                    <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider mb-3">Dịch vụ đi kèm / Nước uống</h4>
+                    <!-- Bill Types -->
+                    <div id="bill-mode-section" class="shrink-0">
+                        <h4 class="text-xs text-[#0b1c30] uppercase font-semibold mb-3">LOẠI BILL DỊCH VỤ</h4>
+                        <div class="space-y-2">
+                            <div id="lbl-billmode-main" class="bill-mode-card active" onclick="setBillMode('MAIN')">
+                                <input type="radio" name="billModeRadio" value="MAIN" checked class="hidden">
+                                <span class="material-symbols-outlined text-[18px] text-[#5d5d67] shrink-0 mt-0.5">merge</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-semibold text-[#0b1c30] text-sm">Cộng vào hóa đơn sân</p>
+                                    <p class="text-xs text-[#5d5d67] mt-0.5 leading-tight">Dùng khi khách thanh toán chung tiền sân và dịch vụ.</p>
+                                </div>
+                            </div>
+                            <div id="lbl-billmode-split" class="bill-mode-card" onclick="setBillMode('SPLIT')">
+                                <input type="radio" name="billModeRadio" value="SPLIT" class="hidden">
+                                <span class="material-symbols-outlined text-[18px] text-[#5d5d67] shrink-0 mt-0.5">call_split</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-semibold text-[#0b1c30] text-sm">Tách bill dịch vụ</p>
+                                    <p class="text-xs text-[#5d5d67] mt-0.5 leading-tight">Dùng khi khách muốn trả riêng phần dịch vụ.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="split-paynow-section" class="hidden flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-2">
+                            <input type="checkbox" id="split-pay-now-cb" class="${isManager ? 'accent-purple-600' : 'accent-orange-600'}">
+                            <label for="split-pay-now-cb" class="text-xs font-bold text-amber-800 cursor-pointer">Thanh toán bill tách ngay bây giờ</label>
+                        </div>
+                    </div>
 
-                    <!-- Add service inline form -->
-                    <div class="flex gap-2 mb-4 items-end bg-zinc-50 p-3 rounded-xl border border-zinc-100">
-                        <div class="flex-grow">
-                            <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Chọn sản phẩm</label>
-                            <select id="staff-product-select" class="w-full text-xs p-2 bg-white border border-zinc-200 rounded-lg focus:outline-none ${focusRing}">
-                                <!-- Populated dynamically -->
-                            </select>
-                        </div>
-                        <div class="w-20">
-                            <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Số lượng</label>
-                            <input type="number" id="staff-product-qty" value="1" min="1" class="w-full text-xs p-2 bg-white border border-zinc-200 rounded-lg text-center font-bold focus:outline-none ${focusRing}">
-                        </div>
-                        <button type="button" id="staff-add-service-btn" onclick="addServiceToInvoiceList()" class="${themeBg} ${themeBgHover} text-white font-extrabold text-xs px-4 py-2 rounded-lg transition-all active:scale-95 h-[34px] flex items-center justify-center">
-                            Thêm
-                        </button>
+                    <!-- Split bills list -->
+                    <div id="split-bills-section" class="hidden shrink-0">
+                        <h4 class="text-xs text-[#0b1c30] uppercase font-semibold mb-2 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px] text-amber-600">receipt</span>
+                            Hóa đơn tách dịch vụ
+                        </h4>
+                        <div id="split-bills-list" class="space-y-2"></div>
                     </div>
-                    
-                    <!-- Invoice detail table -->
-                    <div class="border border-zinc-100 rounded-xl overflow-hidden">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="bg-zinc-50 border-b border-zinc-100 text-zinc-500 font-bold">
-                                    <th class="p-3">Tên sản phẩm</th>
-                                    <th class="p-3 text-center">Đơn giá</th>
-                                    <th class="p-3 text-center">Số lượng</th>
-                                    <th class="p-3 text-right">Thành tiền</th>
-                                    <th class="p-3 text-center">Xóa</th>
-                                </tr>
-                            </thead>
-                            <tbody id="staff-invoice-details-body">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- Pricing summary & payment method -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-zinc-100">
-                    <div class="space-y-3">
-                        <h4 class="font-extrabold text-zinc-800 text-xs uppercase tracking-wider">Phương thức thanh toán</h4>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs ${themeTextMedium} hover:${isManager ? 'bg-purple-50/20' : 'bg-orange-50/20'} active:scale-95 transition-all" id="lbl-pay-cash">
-                                <input type="radio" name="staffPaymentMethod" value="Tiền mặt" checked class="hidden" onchange="changeStaffPayMethod('Tiền mặt')">
-                                <span class="material-symbols-outlined text-[18px]">payments</span> Tiền mặt
-                            </label>
-                            <label class="border-2 border-zinc-150 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all" id="lbl-pay-transfer">
-                                <input type="radio" name="staffPaymentMethod" value="Chuyển khoản" class="hidden" onchange="changeStaffPayMethod('Chuyển khoản')">
-                                <span class="material-symbols-outlined text-[18px]">qr_code_2</span> Chuyển khoản
-                            </label>
+
+                    <!-- Payment Methods -->
+                    <div class="shrink-0">
+                        <h4 class="text-xs text-[#0b1c30] uppercase font-semibold mb-3">PHƯƠNG THỨC THANH TOÁN</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="pay-method-card active" id="lbl-pay-cash" onclick="changeStaffPayMethod('Tiền mặt')">
+                                <input type="radio" name="staffPaymentMethod" value="Tiền mặt" checked class="hidden">
+                                <span class="material-symbols-outlined text-[22px]">payments</span>
+                                <span class="font-semibold text-sm">Tiền mặt</span>
+                            </div>
+                            <div class="pay-method-card" id="lbl-pay-transfer" onclick="changeStaffPayMethod('Chuyển khoản')">
+                                <input type="radio" name="staffPaymentMethod" value="Chuyển khoản" class="hidden">
+                                <span class="material-symbols-outlined text-[22px]">qr_code_2</span>
+                                <span class="font-semibold text-sm">Chuyển khoản</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-zinc-50 border border-zinc-100 p-4 rounded-2xl space-y-2 text-xs">
-                        <div class="flex justify-between text-zinc-650">
-                            <span>Tiền sân:</span>
-                            <span class="font-bold text-zinc-800" id="staff-summary-court-price" data-val="0">0 đ</span>
+
+                    <!-- Summary Total -->
+                    <div class="bg-[#dce9ff] rounded-xl p-5 shrink-0">
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[#5d5d67]">Tiền sân:</span>
+                                <span class="font-semibold text-[#0b1c30]" id="staff-summary-court-price" data-val="0">0 đ</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[#5d5d67]">Tiền dịch vụ:</span>
+                                <span class="font-semibold text-[#0b1c30]" id="staff-summary-services-price">0 đ</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between text-zinc-650">
-                            <span>Tiền dịch vụ:</span>
-                            <span class="font-bold text-zinc-800" id="staff-summary-services-price">0 đ</span>
-                        </div>
-                        <div class="pt-2.5 mt-1 border-t border-zinc-200 flex justify-between items-end">
-                            <span class="font-extrabold text-zinc-800 uppercase text-[10px]">Tổng thanh toán:</span>
-                            <span class="text-lg font-black ${themeText}" id="staff-summary-total">0 đ</span>
+                        <div class="flex justify-between items-center pt-4 border-t border-[#ccc3d8]">
+                            <span class="text-xs text-[#5d5d67] uppercase font-medium">TỔNG THANH TOÁN</span>
+                            <span class="text-2xl font-bold ${themeTextMedium}" id="staff-summary-total">0 đ</span>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Actions -->
-                <div class="pt-4 flex justify-between gap-3">
-                    <div class="flex gap-2">
-                        <form id="staff-save-services-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return prepareAddServicesSubmit()">
-                            <input type="hidden" name="action" value="addServices">
-                            <input type="hidden" name="datSanId" id="staff-save-datsan-id">
-                            <input type="hidden" name="billMode" id="staff-save-billmode" value="MAIN">
-                            <input type="hidden" name="payNow" id="staff-save-paynow" value="false">
-                            <input type="hidden" name="phuongThucThanhToan" id="staff-save-paymethod" value="Tiền mặt">
-                            <div id="staff-save-hidden-inputs" class="hidden"></div>
-                            <button type="submit" class="px-6 py-3 rounded-xl font-bold ${themeTextMedium} ${themeBgLight} border ${themeBorderStrong} ${isManager ? 'hover:bg-purple-100' : 'hover:bg-orange-100'} transition-colors text-xs active:scale-95">
-                                Lưu dịch vụ
-                            </button>
-                        </form>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" onclick="closeStaffInvoiceModal()" class="px-6 py-3 rounded-xl font-bold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 text-xs active:scale-95 transition-colors">
-                            Đóng
-                        </button>
-                        <form id="staff-payment-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return confirmPaymentSubmit()">
-                            <input type="hidden" name="action" value="processPayment">
-                            <input type="hidden" name="datSanId" id="staff-pay-datsan-id">
-                            <input type="hidden" name="phuongThucThanhToan" id="staff-pay-method-input" value="Tiền mặt">
-                            <button type="submit" class="px-8 py-3 rounded-xl font-extrabold text-white ${themeBg} ${themeBgHover} transition-all shadow-md ${isManager ? 'hover:shadow-purple-600/20' : 'hover:shadow-orange-600/20'} text-xs active:scale-95 duration-200 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">print</span>
-                                Thanh toán & Xuất hóa đơn (Bill)
-                            </button>
-                        </form>
-                    </div>
-                    </div>
-                </div>
+
+                    <!-- Hidden forms -->
+                    <form id="staff-save-services-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return prepareAddServicesSubmit()">
+                        <input type="hidden" name="action" value="addServices">
+                        <input type="hidden" name="datSanId" id="staff-save-datsan-id">
+                        <input type="hidden" name="billMode" id="staff-save-billmode" value="MAIN">
+                        <input type="hidden" name="payNow" id="staff-save-paynow" value="false">
+                        <input type="hidden" name="phuongThucThanhToan" id="staff-save-paymethod" value="Tiền mặt">
+                        <div id="staff-save-hidden-inputs" class="hidden"></div>
+                    </form>
+                    <form id="staff-payment-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return confirmPaymentSubmit()">
+                        <input type="hidden" name="action" value="processPayment">
+                        <input type="hidden" name="datSanId" id="staff-pay-datsan-id">
+                        <input type="hidden" name="phuongThucThanhToan" id="staff-pay-method-input" value="Tiền mặt">
+                    </form>
+
+                </section>
+            </div><!-- End of staff-invoice-content -->
+
+        </div><!-- End of flex body -->
+
+        <!-- Footer -->
+        <footer class="bg-[#f8f9ff] border-t border-[#ccc3d8] flex flex-wrap justify-between items-center gap-2 px-4 lg:px-8 py-3 lg:py-4 shrink-0">
+            <button type="button" onclick="closeStaffInvoiceModal()" class="bg-[#e3e1ed] text-[#64636d] rounded-lg px-5 py-2 text-sm font-semibold hover:brightness-95 transition-all active:scale-95">
+                Đóng
+            </button>
+            <div class="flex flex-wrap gap-2">
+                <button form="staff-save-services-form" type="submit" class="bg-white border ${themeBorderStrong} ${themeTextMedium} rounded-lg px-6 py-2.5 text-sm font-semibold ${isManager ? 'hover:bg-purple-50' : 'hover:bg-orange-50'} transition-all active:scale-95">
+                    Lưu dịch vụ
+                </button>
+                <button form="staff-payment-form" type="submit" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">print</span>
+                    Thanh toán &amp; In hóa đơn
+                </button>
             </div>
-        </div>
-    </div>
-</div>
+        </footer>
+
+    </div><!-- End of modal inner container -->
+</div><!-- End of staffInvoiceModal -->
 
 <!-- Court Detail Side Drawer -->
 <div id="drawerOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="closeCourtDetailDrawer()"></div>
@@ -1450,6 +1669,116 @@
     let staffOrdered = [];
     let currentStaffDatSanId = -1;
 
+    let currentStaffCatalogCat = "all";
+    let currentStaffCatalogSearch = "";
+
+    function filterStaffCatalog(cat, button) {
+        document.querySelectorAll(".pos-tab").forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+        currentStaffCatalogCat = cat;
+        renderStaffProductCatalog(cat, currentStaffCatalogSearch);
+    }
+
+    function searchStaffCatalog(val) {
+        currentStaffCatalogSearch = val.trim().toLowerCase();
+        renderStaffProductCatalog(currentStaffCatalogCat, currentStaffCatalogSearch);
+    }
+
+    function getProductCategory(prod) {
+        if (!prod || !prod.TenSanPham) return "others";
+        const name = prod.TenSanPham.toLowerCase();
+        if (name.includes("nước") || name.includes("coca") || name.includes("sting") || name.includes("revive") || name.includes("trà") || name.includes("aquafina") || name.includes("lon") || name.includes("chai") || name.includes("h2o")) {
+            return "drinks";
+        }
+        if (name.includes("thuê") || name.includes("vợt") || name.includes("bóng") || name.includes("giày") || name.includes("áo") || name.includes("bib") || name.includes("vớ") || name.includes("phục vụ")) {
+            return "rentals";
+        }
+        return "others";
+    }
+
+    function renderStaffProductCatalog(filterCat = 'all', keyword = '') {
+        const container = document.getElementById("staff-product-catalog");
+        if (!container) return;
+        container.innerHTML = "";
+
+        let filtered = staffProducts || [];
+
+        // 1. Filter by category tab
+        if (filterCat !== 'all') {
+            filtered = filtered.filter(p => getProductCategory(p) === filterCat);
+        }
+
+        // 2. Filter by search input keyword
+        if (keyword) {
+            filtered = filtered.filter(p => p.TenSanPham && p.TenSanPham.toLowerCase().includes(keyword));
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="col-span-full py-12 text-center text-xs text-zinc-400 italic">Không tìm thấy sản phẩm nào.</div>`;
+            return;
+        }
+
+        filtered.forEach(prod => {
+            const isOutOfStock = prod.SoLuongTon <= 0;
+            const cardClass = isOutOfStock ? "pos-card disabled" : "pos-card";
+            const stockText = isOutOfStock 
+                ? `<span class="px-2 py-0.5 rounded-md bg-red-50 text-red-650 font-bold text-[9px] uppercase tracking-wide">Hết hàng</span>` 
+                : `<span class="text-[10px] text-zinc-500 font-semibold">Kho: <strong class="text-zinc-700 font-bold">\${prod.SoLuongTon}</strong></span>`;
+            
+            const cat = getProductCategory(prod);
+            const icon = cat === 'drinks' ? 'local_cafe' : cat === 'rentals' ? 'sports_tennis' : 'grid_view';
+            const iconBg = cat === 'drinks' ? 'bg-blue-50 text-blue-600' : cat === 'rentals' ? 'bg-orange-50 text-orange-600' : 'bg-slate-100 text-slate-600';
+
+            const cardHtml = `
+                <div class="\${cardClass}" onclick="if(!this.classList.contains('disabled')) quickAddProduct(\${prod.SanPhamID}, 1)">
+                    <div class="flex items-start gap-2">
+                        <div class="w-8 h-8 rounded-lg \${iconBg} flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[16px]">\${icon}</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-bold text-zinc-800 text-[12px] truncate leading-tight" title="\${prod.TenSanPham}">\${prod.TenSanPham}</p>
+                            <p class="text-[10px] text-zinc-400 mt-0.5 capitalize">\${prod.DonViTinh || 'cái'}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-3 pt-1 border-t border-zinc-50">
+                        <span class="font-black text-[12.5px] text-zinc-900">\${formatCurrency(prod.DonGia)}</span>
+                        \${stockText}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML("beforeend", cardHtml);
+        });
+    }
+
+    function quickAddProduct(spId, qty) {
+        const prod = staffProducts.find(p => p.SanPhamID === spId);
+        if (!prod) return;
+
+        if (prod.SoLuongTon <= 0) {
+            alert("Sản phẩm này đã hết hàng!");
+            return;
+        }
+
+        const existing = staffOrdered.find(o => o.SanPhamID === spId);
+        if (existing) {
+            const newQty = existing.SoLuong + qty;
+            if (newQty > prod.SoLuongTon) {
+                alert(`Không thể chọn vượt quá số lượng tồn kho (\${prod.SoLuongTon})`);
+                return;
+            }
+            existing.SoLuong = newQty;
+            existing.ThanhTien = newQty * existing.DonGiaTaiThoiDiemBan;
+        } else {
+            staffOrdered.push({
+                SanPhamID: spId,
+                SoLuong: qty,
+                DonGiaTaiThoiDiemBan: prod.DonGia,
+                ThanhTien: qty * prod.DonGia
+            });
+        }
+        renderStaffOrderedTable();
+    }
+
     function openStaffInvoiceModal(datSanId) {
         currentStaffDatSanId = datSanId;
         document.getElementById("staff-save-datsan-id").value = datSanId;
@@ -1492,11 +1821,11 @@
                 const lblMain = document.getElementById('lbl-billmode-main');
                 if (currentMainBillPaid) {
                     // Main already paid → disable MAIN mode, force SPLIT
-                    lblMain.classList.add('opacity-40', 'cursor-not-allowed');
+                    lblMain.className = 'bill-mode-card disabled pointer-events-none opacity-50';
                     lblMain.onclick = null;
                     setBillMode('SPLIT');
                 } else {
-                    lblMain.classList.remove('opacity-40', 'cursor-not-allowed');
+                    lblMain.className = 'bill-mode-card';
                     lblMain.onclick = () => setBillMode('MAIN');
                     setBillMode('MAIN');
                 }
@@ -1529,13 +1858,28 @@
                 summaryCourtPriceEl.textContent = formatCurrency(data.tongTienSan);
                 summaryCourtPriceEl.setAttribute("data-val", data.tongTienSan);
  
-                // Populate products select
+                // Reset search lookup and filter tab states
+                const searchInput = document.getElementById("staff-catalog-search");
+                if (searchInput) searchInput.value = "";
+                currentStaffCatalogSearch = "";
+                
+                document.querySelectorAll(".pos-tab").forEach(btn => btn.classList.remove("active"));
+                const defaultTab = document.querySelector(".pos-tab[onclick*='all']");
+                if (defaultTab) defaultTab.classList.add("active");
+                currentStaffCatalogCat = "all";
+
+                // Render catalog grid
+                renderStaffProductCatalog("all", "");
+
+                // Populate products select (for legacy bindings)
                 const select = document.getElementById("staff-product-select");
-                select.innerHTML = '<option value="">-- Chọn sản phẩm thêm --</option>';
-                staffProducts.forEach(prod => {
-                    const statusText = prod.SoLuongTon <= 0 ? ' - HẾT HÀNG' : ` - Kho: \${prod.SoLuongTon}`;
-                    select.insertAdjacentHTML("beforeend", `<option value="\${prod.SanPhamID}">\${prod.TenSanPham} (\${formatCurrency(prod.DonGia)} / \${prod.DonViTinh || 'cái'}\${statusText})</option>`);
-                });
+                if (select) {
+                    select.innerHTML = '<option value="">-- Chọn sản phẩm thêm --</option>';
+                    staffProducts.forEach(prod => {
+                        const statusText = prod.SoLuongTon <= 0 ? ' - HẾT HÀNG' : ` - Kho: \${prod.SoLuongTon}`;
+                        select.insertAdjacentHTML("beforeend", `<option value="\${prod.SanPhamID}">\${prod.TenSanPham} (\${formatCurrency(prod.DonGia)} / \${prod.DonViTinh || 'cái'}\${statusText})</option>`);
+                    });
+                }
  
                 renderStaffOrderedTable();
                 
@@ -1549,11 +1893,22 @@
     }
 
     function renderStaffOrderedTable() {
-        const tbody = document.getElementById("staff-invoice-details-body");
-        tbody.innerHTML = "";
+        const cartList = document.getElementById("staff-cart-list");
+        if (!cartList) return;
+        cartList.innerHTML = "";
+        
+        let totalItems = 0;
         
         if (staffOrdered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-zinc-400 italic">Chưa có dịch vụ nào được thêm.</td></tr>`;
+            cartList.innerHTML = `
+                <div class="flex flex-col items-center justify-center text-center py-14 px-4 border-2 border-dashed border-slate-100 rounded-2xl h-full min-h-[300px]">
+                    <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-2.5">
+                        <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                    </div>
+                    <p class="text-xs font-bold text-slate-700">Chưa có dịch vụ nào được thêm</p>
+                    <p class="text-[10px] text-slate-400 mt-1 max-w-[200px]">Chọn sản phẩm từ danh sách bên trái để bắt đầu.</p>
+                </div>
+            `;
         } else {
             staffOrdered.forEach(item => {
                 const prod = staffProducts.find(p => p.SanPhamID === item.SanPhamID);
@@ -1562,27 +1917,38 @@
                 const formattedPrice = item.DonGiaTaiThoiDiemBan.toLocaleString('vi-VN');
                 const formattedTotal = item.ThanhTien.toLocaleString('vi-VN');
                 
-                tbody.insertAdjacentHTML("beforeend", `
-                    <tr class="border-b border-zinc-100 hover:bg-zinc-50/50">
-                        <td class="p-3 font-semibold text-zinc-850">\${prodName}</td>
-                        <td class="p-3 text-center text-zinc-600">\${formattedPrice} đ</td>
-                        <td class="p-3 text-center">
-                            <div class="flex items-center justify-center gap-1.5">
-                                <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, -1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">-</button>
-                                <span class="font-bold text-sm w-8 text-center">\${item.SoLuong}</span>
-                                <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, 1)" class="w-6 h-6 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold flex items-center justify-center select-none">+</button>
-                            </div>
-                        </td>
-                        <td class="p-3 text-right font-bold text-zinc-800">\${formattedTotal} đ</td>
-                        <td class="p-3 text-center">
-                            <button type="button" onclick="removeStaffItem(\${item.SanPhamID})" class="p-1 rounded text-red-500 hover:bg-red-50 flex items-center justify-center mx-auto transition-colors">
-                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                totalItems += item.SoLuong;
+                
+                cartList.insertAdjacentHTML("beforeend", `
+                    <div class="cart-item">
+                        <div class="min-w-0 flex-grow">
+                            <p class="font-bold text-slate-800 text-xs truncate" title="\${prodName}">\${prodName}</p>
+                            <p class="text-[9px] text-slate-400 mt-0.5 capitalize">\${unit} • \${formattedPrice} đ</p>
+                        </div>
+                        
+                        <!-- Stepper count -->
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, -1)" class="stepper-btn">-</button>
+                            <span class="font-bold text-xs w-6 text-center text-slate-800">\${item.SoLuong}</span>
+                            <button type="button" onclick="adjustStaffItemQty(\${item.SanPhamID}, 1)" class="stepper-btn">+</button>
+                        </div>
+                        
+                        <!-- Line total price & Delete -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="font-extrabold text-xs text-slate-800 text-right min-w-[70px]">\${formattedTotal} đ</span>
+                            <button type="button" onclick="removeStaffItem(\${item.SanPhamID})" class="p-1 rounded text-red-500 hover:bg-red-50 hover:text-red-650 transition-colors flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[16px]">close</span>
                             </button>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                 `);
             });
         }
+
+        // Update item count badge in Column 2
+        const countText = staffOrdered.length === 1 ? '1 mặt hàng' : `\${staffOrdered.length} mặt hàng`;
+        const countEl = document.getElementById("staff-cart-item-count");
+        if (countEl) countEl.textContent = countText;
 
         recalculateStaffTotals();
     }
@@ -1670,30 +2036,38 @@
         
         const totalVal = courtPriceVal + serviceTotal;
         
+        const cartSubtotalEl = document.getElementById("staff-cart-subtotal");
+        if (cartSubtotalEl) cartSubtotalEl.textContent = serviceTotal.toLocaleString('vi-VN') + " đ";
+        
         document.getElementById("staff-summary-services-price").textContent = serviceTotal.toLocaleString('vi-VN') + " đ";
         document.getElementById("staff-summary-total").textContent = totalVal.toLocaleString('vi-VN') + " đ";
 
         // Update hidden inputs for saving
         const hiddenContainer = document.getElementById("staff-save-hidden-inputs");
-        hiddenContainer.innerHTML = "";
-        staffOrdered.forEach(item => {
-            hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="productId" value="\${item.SanPhamID}">`);
-            hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="quantity" value="\${item.SoLuong}">`);
-        });
+        if (hiddenContainer) {
+            hiddenContainer.innerHTML = "";
+            staffOrdered.forEach(item => {
+                hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="productId" value="\${item.SanPhamID}">`);
+                hiddenContainer.insertAdjacentHTML("beforeend", `<input type="hidden" name="quantity" value="\${item.SoLuong}">`);
+            });
+        }
     }
 
     function changeStaffPayMethod(method) {
         document.getElementById("staff-pay-method-input").value = method;
+        document.getElementById("staff-save-paymethod").value = method;
         
         const lblCash = document.getElementById("lbl-pay-cash");
         const lblTransfer = document.getElementById("lbl-pay-transfer");
         
-        if (method === 'Tiền mặt') {
-            lblCash.className = `border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs ${themeTextMedium} hover:${isManager ? 'bg-purple-50/20' : 'bg-orange-50/20'} active:scale-95 transition-all`;
-            lblTransfer.className = "border-2 border-zinc-150 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all";
-        } else {
-            lblTransfer.className = `border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs ${themeTextMedium} hover:${isManager ? 'bg-purple-50/20' : 'bg-orange-50/20'} active:scale-95 transition-all`;
-            lblCash.className = "border-2 border-zinc-150 rounded-xl p-3 flex items-center justify-center gap-1.5 cursor-pointer font-bold text-xs text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all";
+        if (lblCash && lblTransfer) {
+            if (method === 'Tiền mặt') {
+                lblCash.classList.add("active");
+                lblTransfer.classList.remove("active");
+            } else {
+                lblTransfer.classList.add("active");
+                lblCash.classList.remove("active");
+            }
         }
     }
 
@@ -2327,12 +2701,20 @@
         const payNowSection = document.getElementById('split-paynow-section');
 
         if (mode === 'MAIN') {
-            lblMain.className = `flex-1 border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold ${themeTextMedium} transition-all`;
-            lblSplit.className = 'flex-1 border-2 border-zinc-150 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all';
+            if (currentMainBillPaid) {
+                lblMain.className = 'bill-mode-card disabled pointer-events-none opacity-50';
+            } else {
+                lblMain.className = 'bill-mode-card active';
+            }
+            lblSplit.className = 'bill-mode-card';
             payNowSection.classList.add('hidden');
         } else {
-            lblSplit.className = `flex-1 border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold ${themeTextMedium} transition-all`;
-            lblMain.className = 'flex-1 border-2 border-zinc-150 rounded-xl p-3 flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all';
+            lblSplit.className = 'bill-mode-card active';
+            if (currentMainBillPaid) {
+                lblMain.className = 'bill-mode-card disabled pointer-events-none opacity-50';
+            } else {
+                lblMain.className = 'bill-mode-card';
+            }
             payNowSection.classList.remove('hidden');
         }
     }
