@@ -307,7 +307,7 @@ public class YeuCauNghiDAOImpl implements YeuCauNghiDAO {
         EntityManager em = getEntityManager();
         try {
             String sql = "SELECT * FROM V_YeuCauNghi_ChiTiet " +
-                         "WHERE AccountID = ? AND NgayNghi >= CAST(GETDATE() AS DATE) AND IsDeleted = 0 " +
+                         "WHERE AccountID = ? AND NgayNghi >= CAST(DATEADD(hour, 7, GETUTCDATE()) AS DATE) AND IsDeleted = 0 " +
                          "ORDER BY NgayNghi ASC";
             return em.createNativeQuery(sql, YeuCauNghi.class)
                      .setParameter(1, accountID)

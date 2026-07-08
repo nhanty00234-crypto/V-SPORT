@@ -620,14 +620,16 @@ public class CheckInDAO {
             String invoiceJoin = columnExists(conn, "HoaDon", "LoaiHoaDon")
                     ? "LEFT JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID AND (hd.LoaiHoaDon = N'MAIN' OR hd.LoaiHoaDon IS NULL) "
                     : "LEFT JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID ";
-            String sql = "SELECT lds.DatSanID, s.SanID, s.TenSan, acc.FullName AS TenKhachHang, " +
+            String sql = "SELECT lds.DatSanID, s.SanID, s.TenSan, acc.FullName AS TenKhachHang, acc.PhoneNumber AS SoDienThoai, " +
+                         "ls.TenLoai AS TenLoaiSan, " +
                          "lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.TongTienDuKien, " +
                          "lds.TrangThai, lds.GhiChu, hd.TrangThaiThanhToan, lds.NguonDatSan " +
                          "FROM LichDatSan lds " +
                          "INNER JOIN San s ON lds.SanID = s.SanID " +
+                         "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
                          "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
                          invoiceJoin +
-                         "WHERE lds.NgayDat = CAST(GETDATE() AS DATE) AND s.CoSoID = ? " +
+                         "WHERE lds.NgayDat = CAST(DATEADD(hour, 7, GETUTCDATE()) AS DATE) AND s.CoSoID = ? " +
                          "ORDER BY lds.GioBatDau ASC";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -639,6 +641,8 @@ public class CheckInDAO {
                     dto.setTenSan(rs.getString("TenSan"));
                     String guestName = rs.getString("TenKhachHang");
                     dto.setTenKhachHang(guestName != null ? guestName : "Khách vãng lai");
+                    dto.setSoDienThoai(rs.getString("SoDienThoai"));
+                    dto.setTenLoaiSan(rs.getString("TenLoaiSan"));
                     dto.setNgayDat(rs.getDate("NgayDat").toLocalDate());
                     dto.setGioBatDau(rs.getTime("GioBatDau").toLocalTime());
                     dto.setGioKetThuc(rs.getTime("GioKetThuc").toLocalTime());
@@ -667,6 +671,8 @@ public class CheckInDAO {
         private int sanId;
         private String tenSan;
         private String tenKhachHang;
+        private String soDienThoai;
+        private String tenLoaiSan;
         private LocalDate ngayDat;
         private LocalTime gioBatDau;
         private LocalTime gioKetThuc;
@@ -687,6 +693,12 @@ public class CheckInDAO {
 
         public String getTenKhachHang() { return tenKhachHang; }
         public void setTenKhachHang(String tenKhachHang) { this.tenKhachHang = tenKhachHang; }
+
+        public String getSoDienThoai() { return soDienThoai; }
+        public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
+
+        public String getTenLoaiSan() { return tenLoaiSan; }
+        public void setTenLoaiSan(String tenLoaiSan) { this.tenLoaiSan = tenLoaiSan; }
 
         public LocalDate getNgayDat() { return ngayDat; }
         public void setNgayDat(LocalDate ngayDat) { this.ngayDat = ngayDat; }

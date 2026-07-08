@@ -183,34 +183,22 @@ public class CheckInServlet extends HttpServlet {
                     java.time.LocalTime startLight = ls.getGioBatDauLenDen();
                     java.time.LocalTime endLight = ls.getGioKetThucLenDen();
                     if (startLight != null && endLight != null) {
-                        if (nowTime.isAfter(startLight) || nowTime.equals(startLight)) {
+                        if ((nowTime.isAfter(startLight) || nowTime.equals(startLight))
+                                && (nowTime.isBefore(endLight) || nowTime.equals(endLight))) {
                             basePrice = ls.getGiaCoDen();
                         }
                     }
                 }
 
-                // OPEN mode always uses the court's configured price — no custom price allowed
-                if ("OPEN".equals(playMode)) {
-                    donGia = basePrice;
-                } else {
-                    // FIXED mode: staff cannot change price; manager can but must give a reason
-                    if (user.getRoleId() != 2) {
-                        if (Math.abs(donGia - basePrice) > 1.0) {
-                            throw new CheckInException("Nhân viên lễ tân không có quyền thay đổi đơn giá sân.");
-                        }
-                    } else {
-                        if (Math.abs(donGia - basePrice) > 1.0 && (ghiChuOverride == null || ghiChuOverride.trim().isEmpty())) {
-                            throw new CheckInException("Vui lòng nhập lý do thay đổi đơn giá.");
-                        }
-                    }
-                }
+                // Price changes are not allowed for anyone in this feature. Always enforce the calculated base price.
+                donGia = basePrice;
 
                 String ghiChu = "Walk-in";
                 if ("OPEN".equals(playMode)) {
                     ghiChu = "Walk-in [Không cố định] [duration: " + duration + "]";
                 }
                 if (ghiChuOverride != null && !ghiChuOverride.trim().isEmpty()) {
-                    ghiChu += " [Thay đổi giá: " + ghiChuOverride.trim() + "]";
+                    ghiChu += " [Ghi chú: " + ghiChuOverride.trim() + "]";
                 }
 
                 String lockKey = "walkin_lock_" + sanId;

@@ -344,8 +344,7 @@ public class SanService {
         if ("Tạm đóng".equals(newStatus) || "Bảo trì".equals(newStatus)) {
             String sql = "SELECT COUNT(*) FROM LichDatSan " +
                          "WHERE SanID = ? AND TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                         "AND (NgayDat > CAST(GETDATE() AS date) " +
-                         "     OR (NgayDat = CAST(GETDATE() AS date) AND GioKetThuc > CAST(GETDATE() AS time)))";
+                         "AND DATEADD(second, DATEDIFF(second, '00:00:00', GioKetThuc), DATEADD(day, CASE WHEN GioKetThuc < GioBatDau THEN 1 ELSE 0 END, CAST(NgayDat AS datetime))) > GETDATE()";
             try (Connection conn = DBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, sanId);
@@ -375,8 +374,7 @@ public class SanService {
         // Chặn xóa sân nếu đang có ca đặt sân hoạt động hoặc chưa hoàn thành
         String sql = "SELECT COUNT(*) FROM LichDatSan " +
                      "WHERE SanID = ? AND TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                     "AND (NgayDat > CAST(GETDATE() AS date) " +
-                     "     OR (NgayDat = CAST(GETDATE() AS date) AND GioKetThuc > CAST(GETDATE() AS time)))";
+                     "AND DATEADD(second, DATEDIFF(second, '00:00:00', GioKetThuc), DATEADD(day, CASE WHEN GioKetThuc < GioBatDau THEN 1 ELSE 0 END, CAST(NgayDat AS datetime))) > GETDATE()";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sanId);

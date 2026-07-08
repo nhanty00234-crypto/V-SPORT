@@ -38,8 +38,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     public static void updateExpiredBookingsAndFields() {
         String sqlUpdateLich = "UPDATE LichDatSan SET TrangThai = N'Đã hoàn thành' " +
                                "WHERE TrangThai = N'Đang sử dụng' " +
-                               "AND (NgayDat < CAST(GETDATE() AS date) " +
-                               "     OR (NgayDat = CAST(GETDATE() AS date) AND GioKetThuc < CAST(GETDATE() AS time)))";
+                               "AND DATEADD(second, DATEDIFF(second, '00:00:00', GioKetThuc), DATEADD(day, CASE WHEN GioKetThuc < GioBatDau THEN 1 ELSE 0 END, CAST(NgayDat AS datetime))) < DATEADD(hour, 7, GETUTCDATE())";
         String sqlUpdateSan = "UPDATE San SET TrangThai = N'Sẵn sàng' " +
                              "WHERE TrangThai = N'Đang sử dụng' " +
                              "AND SanID NOT IN (SELECT DISTINCT SanID FROM LichDatSan WHERE TrangThai = N'Đang sử dụng')";
@@ -323,7 +322,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         String sql = "SELECT l.*, s.TenSan, s.CoSoID " +
                      "FROM LichDatSan l " +
                      "JOIN San s ON l.SanID = s.SanID " +
-                     "WHERE s.CoSoID = ? AND l.NgayDat = CAST(GETDATE() AS date) AND l.IsDeleted = 0 " +
+                     "WHERE s.CoSoID = ? AND l.NgayDat = CAST(DATEADD(hour, 7, GETUTCDATE()) AS date) AND l.IsDeleted = 0 " +
                      "ORDER BY l.GioBatDau ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

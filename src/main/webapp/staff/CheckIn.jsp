@@ -497,13 +497,8 @@
 
                                             <div class="space-y-1">
                                                 <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Đơn giá (VND/h):</label>
-                                                <input type="number" id="card-rate-${san.sanID}" name="donGia" step="10000" class="w-full text-[10px] p-1 border border-zinc-200 rounded bg-white focus:outline-none" required ${isManager ? '' : 'readonly'} oninput="calculateCardPrice(${san.sanID})">
+                                                <input type="number" id="card-rate-${san.sanID}" name="donGia" step="10000" class="w-full text-[10px] p-1 border border-zinc-150 rounded bg-zinc-50 cursor-not-allowed focus:outline-none" required readonly oninput="calculateCardPrice(${san.sanID})">
                                                 <span id="card-rate-type-${san.sanID}" class="text-[8px] text-zinc-450 block italic"></span>
-                                            </div>
-
-                                            <div id="card-override-container-${san.sanID}" class="hidden space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Lý do thay đổi giá *:</label>
-                                                <textarea id="card-override-reason-${san.sanID}" name="ghiChuOverride" rows="1" class="w-full text-[9px] p-1 border border-zinc-200 rounded bg-white focus:outline-none" placeholder="Lý do..."></textarea>
                                             </div>
 
                                             <div class="p-1.5 bg-zinc-50 rounded border border-zinc-150 flex items-center justify-between text-[9px]">
@@ -553,111 +548,70 @@
     </section>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <!-- 4. DANH SÁCH LỊCH ĐẶT SÂN TRONG NGÀY (Today's Bookings Schedule) -->
+        <!-- 4. DANH SÁCH LỊCH ĐẶT SÂN TRONG NGÀY (Today's Bookings Schedule Dashboard) -->
         <section class="card p-5 xl:col-span-3 border ${themeBorder} overflow-hidden flex flex-col justify-between">
             <div>
-                <h3 class="text-base font-black ${themeTextDark} tracking-tight flex items-center gap-2 mb-4">
-                    <span class="material-symbols-outlined ${themeIcon}">calendar_today</span>
-                    Lịch Đặt Sân Hôm Nay & Check-in
-                </h3>
-                <div class="overflow-x-auto rounded-xl border ${themeBorder}">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="${themeBgLight} border-b ${themeBorder} ${themeTextDark} font-bold">
-                                <th class="p-3">Sân</th>
-                                <th class="p-3">Khách hàng</th>
-                                <th class="p-3 text-center">Khung giờ</th>
-                                <th class="p-3 text-right">Tổng tiền</th>
-                                <th class="p-3 text-center">Nguồn đặt</th>
-                                <th class="p-3 text-center">Trạng thái</th>
-                                <th class="p-3 text-center">Thanh toán</th>
-                                <th class="p-3 text-center">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="booking-table-body">
-                            <c:choose>
-                                <c:when test="${empty danhSachLich}">
-                                    <tr>
-                                        <td colspan="8" class="p-8 text-center text-zinc-450 italic">Không có lịch đặt sân nào trong ngày hôm nay.</td>
-                                    </tr>
-                                </c:when>
-                                <c:otherwise>
-                                    <c:forEach var="booking" items="${danhSachLich}">
-                                        <tr class="border-b ${themeBorder} hover:bg-${isManager ? 'purple' : 'orange'}-50/10 transition-all">
-                                            <td class="p-3 font-semibold text-zinc-800">${booking.tenSan}</td>
-                                            <td class="p-3 text-zinc-700">
-                                                <div>${booking.tenKhachHang}</div>
-                                                <div class="text-[10px] text-zinc-500 italic max-w-[150px] truncate" title="${booking.ghiChu}">${booking.ghiChu}</div>
-                                            </td>
-                                            <td class="p-3 text-center text-zinc-600 font-mono">
-                                                ${booking.gioBatDau.toString().substring(0,5)} - ${booking.gioKetThuc.toString().substring(0,5)}
-                                            </td>
-                                            <td class="p-3 text-right font-bold ${themeTextDark}">
-                                                <fmt:formatNumber value="${booking.tongTien}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
-                                            </td>
-                                            <td class="p-3 text-center">
-                                                <span class="badge ${booking.nguonDatSan == 'Walk-in' ? 'badge-gray' : 'badge-blue'}">
-                                                    ${booking.nguonDatSan}
-                                                </span>
-                                            </td>
-                                            <td class="p-3 text-center">
-                                                <c:choose>
-                                                    <c:when test="${booking.trangThai == 'Đang sử dụng'}">
-                                                        <span class="badge ${badgeTheme} uppercase">Đang đá</span>
-                                                    </c:when>
-                                                    <c:when test="${booking.trangThai == 'Đã xác nhận'}">
-                                                        <span class="badge badge-green">Đã xác nhận</span>
-                                                    </c:when>
-                                                    <c:when test="${booking.trangThai == 'Chờ xác nhận'}">
-                                                        <span class="badge badge-amber">Chờ duyệt</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="badge badge-gray">${booking.trangThai}</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="p-3 text-center">
-                                                <span class="badge ${booking.trangThaiThanhToan == 'Đã thanh toán' ? 'badge-green' : 'badge-amber'}">
-                                                    ${booking.trangThaiThanhToan}
-                                                </span>
-                                            </td>
-                                            <td class="p-3 text-center">
-                                                <c:if test="${booking.trangThai == 'Đã xác nhận' or booking.trangThai == 'Chờ xác nhận'}">
-                                                    <div class="flex items-center justify-center gap-1.5">
-                                                        <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
-                                                            <input type="hidden" name="action" value="checkInPreBooked">
-                                                            <input type="hidden" name="datSanId" value="${booking.datSanId}">
-                                                            <input type="hidden" name="daThuTienMat" value="false">
-                                                            <button type="submit" class="${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
-                                                                Mở sân
-                                                            </button>
-                                                        </form>
-                                                        <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
-                                                            <input type="hidden" name="action" value="cancelNoShow">
-                                                            <input type="hidden" name="datSanId" value="${booking.datSanId}">
-                                                            <button type="submit" class="bg-red-550 hover:bg-red-700 text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
-                                                                Hủy ca
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </c:if>
-                                                <c:if test="${booking.trangThai == 'Đang sử dụng'}">
-                                                    <button type="button" onclick="openStaffInvoiceModal(${booking.datSanId})" class="${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
-                                                        Dịch vụ & Thanh toán
-                                                    </button>
-                                                </c:if>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:otherwise>
-                            </c:choose>
-                        </tbody>
-                    </table>
+                <!-- Header with Tabs -->
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b ${themeBorder} pb-4 mb-5 gap-4">
+                    <h3 class="text-base font-black ${themeTextDark} tracking-tight flex items-center gap-2">
+                        <span class="material-symbols-outlined ${themeIcon}">calendar_today</span>
+                        Vận Hành & Check-in Hôm Nay
+                    </h3>
+                    
+                    <div class="flex bg-zinc-100 p-1 rounded-xl text-xs font-bold gap-1 self-start lg:self-auto shadow-inner">
+                        <button type="button" id="tab-btn-playing" onclick="switchBookingTab('playing')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-555 hover:text-zinc-800">
+                            <span class="material-symbols-outlined text-[16px]">sports_soccer</span>
+                            Đang chơi
+                            <span id="badge-count-playing" class="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
+                        </button>
+                        <button type="button" id="tab-btn-waiting" onclick="switchBookingTab('waiting')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-555 hover:text-zinc-800">
+                            <span class="material-symbols-outlined text-[16px]">schedule</span>
+                            Chờ check-in
+                            <span id="badge-count-waiting" class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
+                        </button>
+                        <button type="button" id="tab-btn-completed" onclick="switchBookingTab('completed')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-500 hover:text-zinc-700">
+                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                            Đã xong hôm nay
+                            <span id="badge-count-completed" class="bg-zinc-400 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="mb-5 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <span class="material-symbols-outlined text-zinc-450 text-[18px]">search</span>
+                    </div>
+                    <input type="text" id="booking-search-input" oninput="onBookingSearch(this.value)" placeholder="Tìm kiếm nhanh ca chơi theo tên khách, số điện thoại hoặc sân..." class="w-full text-xs pl-10 pr-4 py-2.5 border border-zinc-200 focus:border-zinc-400 rounded-xl bg-white focus:outline-none transition-all placeholder-zinc-400 text-zinc-800">
+                </div>
+
+                <!-- Tab Contents -->
+                <!-- Tab 1: Playing -->
+                <div id="tab-content-playing" class="tab-pane hidden">
+                    <div id="list-playing" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Tab 2: Waiting -->
+                <div id="tab-content-waiting" class="tab-pane hidden">
+                    <div id="list-waiting" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Tab 3: Completed -->
+                <div id="tab-content-completed" class="tab-pane hidden">
+                    <div id="list-completed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Filled by JS -->
+                    </div>
                 </div>
             </div>
-            <div class="mt-4 p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-[10px] text-zinc-550 flex items-center gap-2">
-                <span class="material-symbols-outlined text-zinc-400">help</span>
-                <span>Thao tác có thể bấm nút <strong>"Mở sân"</strong> để check-in. Hệ thống sẽ tự động đối chiếu thời gian đến sớm phụ thu hoặc đến trễ và kiểm tra tiền cọc trước khi kích hoạt.</span>
+
+            <!-- Helpful tips -->
+            <div class="mt-6 p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-[10px] text-zinc-550 flex items-center gap-2">
+                <span class="material-symbols-outlined text-zinc-400 text-[16px]">info</span>
+                <span>Mẹo: Staff có thể nhấn vào biểu tượng <span class="material-symbols-outlined text-[12px] inline-block align-middle text-[#630ed4]">content_copy</span> để copy nhanh số điện thoại của khách hàng, hoặc click số điện thoại để gọi.</span>
             </div>
         </section>
     </div>
@@ -684,9 +638,11 @@
                 sanId: ${b.sanId},
                 tenSan: `${b.tenSan}`,
                 tenKhachHang: `${b.tenKhachHang}`,
-                gioBatDau: "${b.gioBatDau.toString().substring(0,5)}",
-                gioKetThuc: "${b.gioKetThuc.toString().substring(0,5)}",
-                tongTien: ${b.tongTien},
+                soDienThoai: `${b.soDienThoai != null ? b.soDienThoai : ''}`,
+                tenLoaiSan: `${b.tenLoaiSan != null ? b.tenLoaiSan : ''}`,
+                gioBatDau: "${b.gioBatDau != null ? b.gioBatDau.toString().substring(0,5) : '00:00'}",
+                gioKetThuc: "${b.gioKetThuc != null ? b.gioKetThuc.toString().substring(0,5) : '00:00'}",
+                tongTien: ${b.tongTien != null ? b.tongTien : 0},
                 trangThai: "${b.trangThai}",
                 ghiChu: `${b.ghiChu != null ? b.ghiChu : ''}`,
                 trangThaiThanhToan: "${b.trangThaiThanhToan}",
@@ -694,6 +650,365 @@
             }<c:if test="${not status.last}">,</c:if>
         </c:forEach>
     ];
+
+    let activeBookingTab = null;
+    let bookingSearchQuery = "";
+
+    function onBookingSearch(val) {
+        bookingSearchQuery = val.trim().toLowerCase();
+        renderBookings();
+    }
+
+    function switchBookingTab(tabName) {
+        activeBookingTab = tabName;
+        
+        // Hide all tab panes
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        
+        // Remove active styling from all tab buttons
+        document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+            btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-550 hover:text-zinc-800";
+        });
+        
+        // Show current tab pane
+        const activePane = document.getElementById(`tab-content-${tabName}`);
+        if (activePane) activePane.classList.remove('hidden');
+        
+        // Set active styling on current button
+        const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+        if (activeBtn) {
+            if (tabName === 'playing') {
+                activeBtn.className = `flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-emerald-500 text-white shadow-md`;
+            } else if (tabName === 'waiting') {
+                activeBtn.className = `flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${themeBg} text-white shadow-md`;
+            } else {
+                activeBtn.className = `flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-zinc-650 text-white shadow-md`;
+            }
+        }
+    }
+
+    function copyToClipboard(text, btnEl) {
+        if (!navigator.clipboard) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                const icon = btnEl.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.textContent = 'check';
+                    icon.classList.remove('text-zinc-450');
+                    icon.classList.add('text-green-600');
+                    setTimeout(() => {
+                        icon.textContent = 'content_copy';
+                        icon.classList.remove('text-green-600');
+                        icon.classList.add('text-zinc-450');
+                    }, 1500);
+                }
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textarea);
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            const icon = btnEl.querySelector('.material-symbols-outlined');
+            if (icon) {
+                icon.textContent = 'check';
+                icon.classList.remove('text-zinc-450');
+                icon.classList.add('text-green-600');
+                setTimeout(() => {
+                    icon.textContent = 'content_copy';
+                    icon.classList.remove('text-green-600');
+                    icon.classList.add('text-zinc-450');
+                }, 1500);
+            }
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+
+    function renderBookings() {
+        const playingContainer = document.getElementById('list-playing');
+        const waitingContainer = document.getElementById('list-waiting');
+        const completedContainer = document.getElementById('list-completed');
+        
+        if (!playingContainer || !waitingContainer || !completedContainer) return;
+        
+        playingContainer.innerHTML = '';
+        waitingContainer.innerHTML = '';
+        completedContainer.innerHTML = '';
+        
+        // Filter by search query if any
+        let list = localDanhSachLich || [];
+        if (bookingSearchQuery) {
+            list = list.filter(b => 
+                (b.tenKhachHang && b.tenKhachHang.toLowerCase().includes(bookingSearchQuery)) ||
+                (b.soDienThoai && b.soDienThoai.toLowerCase().includes(bookingSearchQuery)) ||
+                (b.tenSan && b.tenSan.toLowerCase().includes(bookingSearchQuery))
+            );
+        }
+        
+        let countPlaying = 0;
+        let countWaiting = 0;
+        let countCompleted = 0;
+        
+        list.forEach(b => {
+            const batDau = b.gioBatDau;
+            const ketThuc = b.gioKetThuc;
+            const formattedTongTien = formatCurrency(b.tongTien);
+            const statusBadgeClass = b.trangThaiThanhToan === 'Đã thanh toán' ? 'badge-green' : 'badge-amber';
+            const nguonBadgeClass = b.nguonDatSan === 'Walk-in' ? 'badge-gray' : 'badge-blue';
+            
+            // Determine booking status badge theme
+            let statusTheme = 'badge-gray';
+            if (b.trangThai === 'Đang sử dụng' || b.trangThai === 'Đang chơi') {
+                statusTheme = 'badge-green';
+            } else if (b.trangThai === 'Đã xác nhận') {
+                statusTheme = 'badge-green';
+            } else if (b.trangThai === 'Chờ xác nhận') {
+                statusTheme = 'badge-amber';
+            }
+            
+            const hasPhone = b.soDienThoai && b.soDienThoai.trim().length > 0;
+            const phoneActionHtml = hasPhone ? `
+                <div class="flex items-center gap-1 font-mono">
+                    <a href="tel:\${b.soDienThoai}" class="hover:underline text-[#630ed4] font-bold">\${b.soDienThoai}</a>
+                    <button type="button" onclick="copyToClipboard('\${b.soDienThoai}', this)" class="text-zinc-450 hover:text-[#630ed4] transition-colors p-0.5" title="Copy số điện thoại">
+                        <span class="material-symbols-outlined text-[13px]">content_copy</span>
+                    </button>
+                </div>
+            ` : '<span class="text-zinc-400">Không có SĐT</span>';
+
+            const noteTooltipHtml = b.ghiChu ? `
+                <div class="mt-2 pt-2 border-t border-zinc-100 flex items-start gap-1 text-[10px] text-zinc-555 italic" title="\${b.ghiChu}">
+                    <span class="material-symbols-outlined text-[12px] text-zinc-400 shrink-0 mt-0.5">speaker_notes</span>
+                    <span class="truncate max-w-full">\${b.ghiChu}</span>
+                </div>
+            ` : '';
+            
+            if (b.trangThai === 'Đang sử dụng' || b.trangThai === 'Đang chơi') {
+                countPlaying++;
+                playingContainer.insertAdjacentHTML('beforeend', `
+                    <div class="border border-emerald-250 hover:border-emerald-350 bg-emerald-50/10 rounded-2xl p-4 flex flex-col justify-between shadow-sm transition-all duration-200 relative overflow-hidden group">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <h4 class="font-extrabold text-sm text-zinc-800">\${b.tenSan}</h4>
+                                        <span class="text-[9px] font-semibold text-emerald-700 px-1.5 py-0.5 bg-emerald-50 rounded">\${b.tenLoaiSan || 'Sân bóng'}</span>
+                                    </div>
+                                    <div class="text-xs font-black text-zinc-650 mt-1 font-mono flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px] text-zinc-450">schedule</span>
+                                        \${batDau} - \${ketThuc}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1 shrink-0">
+                                    <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                    <span class="badge badge-green text-[8px] uppercase font-bold tracking-tight">ĐANG CHƠI</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl p-3 space-y-1.5 border border-zinc-150 text-xs mb-4">
+                                <div class="flex items-center justify-between text-zinc-700 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Khách hàng:</span>
+                                    <span class="font-extrabold text-zinc-900 flex items-center gap-1 truncate font-sans" title="\${b.tenKhachHang}">
+                                        <span class="material-symbols-outlined text-[13px] text-zinc-400">person</span>
+                                        \${b.tenKhachHang}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-zinc-700 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Liên hệ:</span>
+                                    \${phoneActionHtml}
+                                </div>
+                                <div class="flex items-center justify-between text-zinc-700 pt-1 border-t border-zinc-100 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Thanh toán:</span>
+                                    <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs mb-4">
+                                <span class="font-semibold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">play_circle</span>
+                                    Thời gian:
+                                </span>
+                                <span class="font-black text-xs animate-pulse card-timer" data-start="\${b.gioBatDau}" data-end="\${b.gioKetThuc}" data-note="\${b.ghiChu}">-</span>
+                            </div>
+                            
+                            \${noteTooltipHtml}
+                        </div>
+                        
+                        <div class="mt-4 flex gap-2">
+                            <button type="button" onclick="openStaffInvoiceModal(\${b.datSanId})" class="w-full \${themeBg} \${themeBgHover} text-white font-extrabold text-[11px] py-2.5 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                Dịch vụ &amp; Thanh toán
+                            </button>
+                        </div>
+                    </div>
+                `);
+            } else if (b.trangThai === 'Đã xác nhận' || b.trangThai === 'Chờ xác nhận') {
+                countWaiting++;
+                
+                let checkinBtnText = "Mở sân";
+                let checkinAction = "checkInPreBooked";
+                
+                waitingContainer.insertAdjacentHTML('beforeend', `
+                    <div class="border border-zinc-200 hover:border-zinc-350 bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm transition-all duration-200 relative overflow-hidden group">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        <h4 class="font-extrabold text-sm text-zinc-800">\${b.tenSan}</h4>
+                                        <span class="text-[9px] font-semibold text-zinc-500 px-1.5 py-0.5 bg-zinc-100 rounded">\${b.tenLoaiSan || 'Sân bóng'}</span>
+                                    </div>
+                                    <div class="text-xs font-black text-zinc-650 mt-1 font-mono flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px] text-zinc-450">schedule</span>
+                                        \${batDau} - \${ketThuc}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1 shrink-0">
+                                    <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                    <span class="badge \${statusTheme} text-[8px] uppercase font-bold tracking-tight">\${b.trangThai === 'Chờ xác nhận' ? 'Chờ duyệt' : b.trangThai}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-zinc-50 rounded-xl p-3 space-y-1.5 border border-zinc-150 text-xs mb-4">
+                                <div class="flex items-center justify-between text-zinc-700 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Khách hàng:</span>
+                                    <span class="font-extrabold text-zinc-900 flex items-center gap-1 truncate font-sans" title="\${b.tenKhachHang}">
+                                        <span class="material-symbols-outlined text-[13px] text-zinc-400">person</span>
+                                        \${b.tenKhachHang}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-zinc-700 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Liên hệ:</span>
+                                    \${phoneActionHtml}
+                                </div>
+                                <div class="flex items-center justify-between text-zinc-700 pt-1 border-t border-zinc-100 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Thanh toán:</span>
+                                    <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
+                                </div>
+                            </div>
+                            
+                            \${noteTooltipHtml}
+                        </div>
+                        
+                        <div class="mt-4 flex gap-2">
+                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="flex-1">
+                                <input type="hidden" name="action" value="\${checkinAction}">
+                                <input type="hidden" name="datSanId" value="\${b.datSanId}">
+                                <input type="hidden" name="daThuTienMat" value="false">
+                                <button type="submit" class="w-full \${themeBg} \${themeBgHover} text-white font-extrabold text-[11px] py-2.5 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">power_settings_new</span>
+                                    \${checkinBtnText}
+                                </button>
+                            </form>
+                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="flex-none" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
+                                <input type="hidden" name="action" value="cancelNoShow">
+                                <input type="hidden" name="datSanId" value="\${b.datSanId}">
+                                <button type="submit" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[11px] px-3.5 py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
+                                    <span class="material-symbols-outlined text-[16px]">cancel</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `);
+            } else {
+                countCompleted++;
+                completedContainer.insertAdjacentHTML('beforeend', `
+                    <div class="border border-zinc-200 bg-zinc-50 opacity-80 hover:opacity-100 rounded-2xl p-4 flex flex-col justify-between shadow-sm transition-all duration-200 relative overflow-hidden group">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-zinc-400"></span>
+                                        <h4 class="font-bold text-sm text-zinc-700">\${b.tenSan}</h4>
+                                        <span class="text-[9px] font-semibold text-zinc-500 px-1.5 py-0.5 bg-zinc-100 rounded">\${b.tenLoaiSan || 'Sân bóng'}</span>
+                                    </div>
+                                    <div class="text-xs font-medium text-zinc-500 mt-1 font-mono flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px] text-zinc-400">schedule</span>
+                                        \${batDau} - \${ketThuc}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1 shrink-0">
+                                    <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                    <span class="badge badge-gray text-[8px] uppercase font-bold tracking-tight">\${b.trangThai}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl p-3 space-y-1.5 border border-zinc-150 text-xs mb-4">
+                                <div class="flex items-center justify-between text-zinc-700 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Khách hàng:</span>
+                                    <span class="font-bold text-zinc-800 flex items-center gap-1 truncate font-sans" title="\${b.tenKhachHang}">
+                                        <span class="material-symbols-outlined text-[13px] text-zinc-400">person</span>
+                                        \${b.tenKhachHang}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-zinc-700 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Liên hệ:</span>
+                                    <span class="font-medium text-zinc-700 font-mono">\${b.soDienThoai || '---'}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-zinc-700 pt-1 border-t border-zinc-100 gap-2">
+                                    <span class="text-zinc-400 font-medium shrink-0">Tổng tiền sân:</span>
+                                    <span class="font-extrabold text-zinc-900">\${formattedTongTien}</span>
+                                </div>
+                            </div>
+                            
+                            \${noteTooltipHtml}
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-2 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-[10px]">
+                            <span class="font-medium">Trạng thái HĐ:</span>
+                            <span class="font-bold uppercase \${b.trangThaiThanhToan === 'Đã thanh toán' ? 'text-emerald-700' : 'text-amber-700'}">\${b.trangThaiThanhToan}</span>
+                        </div>
+                    </div>
+                `);
+            }
+        });
+        
+        // Show empty states if counters are 0
+        if (countPlaying === 0) {
+            playingContainer.innerHTML = `
+                <div class="col-span-full py-12 text-center text-xs text-zinc-450 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[32px] text-zinc-300">sports_soccer</span>
+                    Hiện chưa có ca chơi nào đang hoạt động.
+                </div>
+            `;
+        }
+        if (countWaiting === 0) {
+            waitingContainer.innerHTML = `
+                <div class="col-span-full py-12 text-center text-xs text-zinc-450 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[32px] text-zinc-300">schedule</span>
+                    Không có lịch chờ check-in nào trong ngày hôm nay.
+                </div>
+            `;
+        }
+        if (countCompleted === 0) {
+            completedContainer.innerHTML = `
+                <div class="col-span-full py-12 text-center text-xs text-zinc-450 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[32px] text-zinc-300">check_circle</span>
+                    Chưa ghi nhận ca chơi hoàn thành nào hôm nay.
+                </div>
+            `;
+        }
+        
+        // Update badge counts on tabs
+        document.getElementById('badge-count-playing').textContent = countPlaying;
+        document.getElementById('badge-count-waiting').textContent = countWaiting;
+        document.getElementById('badge-count-completed').textContent = countCompleted;
+        
+        // Auto-select active tab on initial render
+        if (activeBookingTab === null) {
+            const hasPlaying = localDanhSachLich.some(b => b.trangThai === 'Đang sử dụng' || b.trangThai === 'Đang chơi');
+            switchBookingTab(hasPlaying ? 'playing' : 'waiting');
+        } else {
+            switchBookingTab(activeBookingTab);
+        }
+    }
 
     // Convert time string "HH:MM" or "HH:MM:SS" to a Date object today
     function parseTimeToDate(timeStr) {
@@ -848,8 +1163,9 @@
         drawerTimerInterval = setInterval(update, 1000);
     }
     
-    // Auto start grid timers
+    // Auto start grid timers and render bookings
     document.addEventListener("DOMContentLoaded", () => {
+        renderBookings();
         updateAllCardTimers();
         setInterval(updateAllCardTimers, 1000);
     });
@@ -1034,13 +1350,8 @@
 
                                             <div class="space-y-1">
                                                 <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Đơn giá (VND/h):</label>
-                                                <input type="number" id="card-rate-\${san.sanID}" name="donGia" step="10000" class="w-full text-[10px] p-1 border border-zinc-200 rounded bg-white focus:outline-none" required ${isManager ? '' : 'readonly'} oninput="calculateCardPrice(\${san.sanID})">
+                                                <input type="number" id="card-rate-\${san.sanID}" name="donGia" step="10000" class="w-full text-[10px] p-1 border border-zinc-150 rounded bg-zinc-50 cursor-not-allowed focus:outline-none" required readonly oninput="calculateCardPrice(\${san.sanID})">
                                                 <span id="card-rate-type-\${san.sanID}" class="text-[8px] text-zinc-450 block italic"></span>
-                                            </div>
-
-                                            <div id="card-override-container-\${san.sanID}" class="hidden space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Lý do thay đổi giá *:</label>
-                                                <textarea id="card-override-reason-\${san.sanID}" name="ghiChuOverride" rows="1" class="w-full text-[9px] p-1 border border-zinc-200 rounded bg-white focus:outline-none" placeholder="Lý do..."></textarea>
                                             </div>
 
                                             <div class="p-1.5 bg-zinc-50 rounded border border-zinc-150 flex items-center justify-between text-[9px]">
@@ -1121,90 +1432,9 @@
             }
             
 
-            // 3. Cập nhật Today's Bookings Table
-            const tableBody = document.getElementById('booking-table-body');
-            if (tableBody && data.danhSachLich) {
-                if (data.danhSachLich.length === 0) {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="p-8 text-center text-zinc-450 italic">Không có lịch đặt sân nào trong ngày hôm nay.</td>
-                        </tr>
-                    `;
-                } else {
-                    let htmlTable = '';
-                    data.danhSachLich.forEach(booking => {
-                        let statusBadge = '';
-                        if (booking.trangThai === 'Đang sử dụng') {
-                            statusBadge = `<span class="badge ${badgeTheme} uppercase">Đang đá</span>`;
-                        } else if (booking.trangThai === 'Đã xác nhận') {
-                            statusBadge = `<span class="badge badge-green">Đã xác nhận</span>`;
-                        } else if (booking.trangThai === 'Chờ xác nhận') {
-                            statusBadge = `<span class="badge badge-amber">Chờ duyệt</span>`;
-                        } else {
-                            statusBadge = `<span class="badge badge-gray">\${booking.trangThai}</span>`;
-                        }
-                        
-                        let paymentBadge = `<span class="badge \${booking.trangThaiThanhToan === 'Đã thanh toán' ? 'badge-green' : 'badge-amber'}>\${booking.trangThaiThanhToan}</span>`;
-                        
-                        let actionButtons = '';
-                        if (booking.trangThai === 'Đã xác nhận' || booking.trangThai === 'Chờ xác nhận') {
-                            actionButtons = `
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
-                                        <input type="hidden" name="action" value="checkInPreBooked">
-                                        <input type="hidden" name="datSanId" value="\${booking.datSanId}">
-                                        <input type="hidden" name="daThuTienMat" value="false">
-                                        <button type="submit" class="${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
-                                            Mở sân
-                                        </button>
-                                    </form>
-                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
-                                        <input type="hidden" name="action" value="cancelNoShow">
-                                        <input type="hidden" name="datSanId" value="\${booking.datSanId}">
-                                        <button type="submit" class="bg-red-550 hover:bg-red-700 text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
-                                            Hủy ca
-                                        </button>
-                                    </form>
-                                </div>
-                            `;
-                        } else if (booking.trangThai === 'Đang sử dụng') {
-                            actionButtons = `
-                                <button type="button" onclick="openStaffInvoiceModal(\${booking.datSanId})" class="\${themeBg} \${themeBgHover} text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:shadow transition-all active:scale-95">
-                                    Dịch vụ & Thanh toán
-                                </button>
-                            `;
-                        }
- 
-                        const batDau = booking.gioBatDau.substring(0, 5);
-                        const ketThuc = booking.gioKetThuc.substring(0, 5);
-                        const formattedTongTien = formatCurrency(booking.tongTien);
- 
-                        htmlTable += `
-                            <tr class="border-b ${themeBorder} hover:bg-${isManager ? 'purple' : 'orange'}-50/10 transition-all">
-                                <td class="p-3 font-semibold text-zinc-800">\${booking.tenSan}</td>
-                                <td class="p-3 text-zinc-700">
-                                    <div>\${booking.tenKhachHang}</div>
-                                    <div class="text-[10px] text-zinc-500 italic max-w-[150px] truncate" title="\${booking.ghiChu}">\${booking.ghiChu}</div>
-                                </td>
-                                <td class="p-3 text-center text-zinc-600 font-mono">
-                                    \${batDau} - \${ketThuc}
-                                </td>
-                                <td class="p-3 text-right font-bold text-zinc-800">
-                                    \${formattedTongTien}
-                                </td>
-                                <td class="p-3 text-center">
-                                    <span class="badge \${booking.nguonDatSan === 'Walk-in' ? 'badge-gray' : 'badge-blue'}">
-                                        \${booking.nguonDatSan}
-                                    </span>
-                                </td>
-                                <td class="p-3 text-center">\${statusBadge}</td>
-                                <td class="p-3 text-center">\${paymentBadge}</td>
-                                <td class="p-3 text-center">\${actionButtons}</td>
-                            </tr>
-                        `;
-                    });
-                    tableBody.innerHTML = htmlTable;
-                }
+            // 3. Cập nhật Today's Bookings Layout
+            if (data.danhSachLich) {
+                renderBookings();
             }
             
             // Refresh grid card timers immediately
@@ -1583,13 +1813,8 @@
 
                 <div>
                     <label class="block text-[11px] font-bold text-zinc-500 mb-1">Đơn giá tự áp dụng (VND / giờ):</label>
-                    <input type="number" id="drawer-walkin-rate" name="donGia" step="10000" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" required ${isManager ? '' : 'readonly'} oninput="calculateDrawerPrice()">
+                    <input type="number" id="drawer-walkin-rate" name="donGia" step="10000" class="w-full text-xs p-2.5 border border-zinc-150 rounded-xl bg-zinc-100 cursor-not-allowed focus:outline-none" required readonly oninput="calculateDrawerPrice()">
                     <span id="drawer-walkin-rate-type" class="text-[10px] text-zinc-500 mt-1 block">Áp dụng: Giá không đèn</span>
-                </div>
-
-                <div id="drawer-walkin-override-container" class="hidden">
-                    <label class="block text-[11px] font-bold text-zinc-500 mb-1">Lý do thay đổi đơn giá *:</label>
-                    <textarea id="drawer-walkin-override-reason" name="ghiChuOverride" rows="2" class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white" placeholder="Nhập lý do thay đổi..."></textarea>
                 </div>
                 
                 <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-150 flex items-center justify-between text-xs">
@@ -2675,12 +2900,14 @@
         const base = parseFloat(rateInput.getAttribute('data-base')) || 0;
         const overrideContainer = document.getElementById('drawer-walkin-override-container');
         const reasonText = document.getElementById('drawer-walkin-override-reason');
-        if (rate !== base) {
-            overrideContainer.classList.remove('hidden');
-            reasonText.setAttribute('required', 'required');
-        } else {
-            overrideContainer.classList.add('hidden');
-            reasonText.removeAttribute('required');
+        if (overrideContainer && reasonText) {
+            if (rate !== base) {
+                overrideContainer.classList.remove('hidden');
+                reasonText.setAttribute('required', 'required');
+            } else {
+                overrideContainer.classList.add('hidden');
+                reasonText.removeAttribute('required');
+            }
         }
     }
 

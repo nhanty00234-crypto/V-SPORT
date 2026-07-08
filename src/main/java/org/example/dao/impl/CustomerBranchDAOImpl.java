@@ -69,7 +69,7 @@ public class CustomerBranchDAOImpl implements CustomerBranchDAO {
                          "JOIN San s ON l.SanID = s.SanID " +
                          "JOIN Accounts t ON l.AccountID = t.AccountID " +
                          "WHERE s.CoSoID = ?1 AND l.TrangThai IN (N'Chờ thanh toán', N'Pending') " +
-                         "AND l.NgayDat >= CAST(GETDATE() AS DATE) " +
+                         "AND l.NgayDat >= CAST(DATEADD(hour, 7, GETUTCDATE()) AS DATE) " +
                          "ORDER BY l.NgayDat ASC, l.GioBatDau ASC";
             Query query = em.createNativeQuery(sql);
             query.setParameter(1, coSoId);
