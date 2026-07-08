@@ -1800,7 +1800,20 @@
  
         // Fetch invoice detail
         fetch('${pageContext.request.contextPath}/staff/checkin?action=getInvoiceDetails&datSanId=' + datSanId)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        try {
+                            const errData = JSON.parse(text);
+                            throw new Error(errData.error || 'Lỗi server: ' + res.status);
+                        } catch (parseErr) {
+                            if (parseErr.message && parseErr.message.startsWith('Lỗi server')) throw parseErr;
+                            throw new Error('Lỗi server (' + res.status + '). Vui lòng tải lại trang.');
+                        }
+                    });
+                }
+                return res.json();
+            })
             .then(data => {
                 staffProducts = data.products || [];
                 staffOrdered = data.ordered || [];

@@ -17,6 +17,24 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     private static final Logger logger = LogManager.getLogger(LichDatSanDAOImpl.class);
 
+    private boolean columnExists(Connection conn, String tableName, String columnName) throws SQLException {
+        String sql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(?) AND name = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, tableName);
+            ps.setNString(2, columnName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private String mainInvoiceWhereClause(Connection conn, String datSanColumnExpression) throws SQLException {
+        if (columnExists(conn, "HoaDon", "LoaiHoaDon")) {
+            return datSanColumnExpression + " = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+        }
+        return datSanColumnExpression + " = ?";
+    }
+
     public static void updateExpiredBookingsAndFields() {
         String sqlUpdateLich = "UPDATE LichDatSan SET TrangThai = N'Đã hoàn thành' " +
                                "WHERE TrangThai = N'Đang sử dụng' " +
@@ -480,8 +498,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 psCheckInv.setInt(1, datSanId);
                 try (ResultSet rsInv = psCheckInv.executeQuery()) {
                     if (rsInv.next() && rsInv.getInt(1) == 0) {
-                        String sqlInsertInvoice = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
-                                                  "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán')";
+                        boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                        String sqlInsertInvoice = hasLoaiHoaDon
+                                ? "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, LoaiHoaDon) " +
+                                  "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán', N'MAIN')"
+                                : "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
+                                  "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán')";
                         psInsertInvoice = conn.prepareStatement(sqlInsertInvoice);
                         psInsertInvoice.setInt(1, datSanId);
                         if (customerAccountId != null) {
@@ -757,15 +779,19 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             // 2. Kiểm tra/Tạo hóa đơn nếu chưa có
             int hoaDonId = -1;
-            String sqlCheckInvoice = "SELECT HoaDonID FROM HoaDon WHERE DatSanID = ?";
+            String sqlCheckInvoice = "SELECT HoaDonID FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
             psCheckInvoice = conn.prepareStatement(sqlCheckInvoice);
             psCheckInvoice.setInt(1, datSanId);
             rsInv = psCheckInvoice.executeQuery();
             if (rsInv.next()) {
                 hoaDonId = rsInv.getInt("HoaDonID");
             } else {
-                String sqlInsertInvoice = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
-                                          "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán')";
+                boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                String sqlInsertInvoice = hasLoaiHoaDon
+                        ? "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, LoaiHoaDon) " +
+                          "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán', N'MAIN')"
+                        : "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
+                          "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán')";
                 psInsertInvoice = conn.prepareStatement(sqlInsertInvoice, Statement.RETURN_GENERATED_KEYS);
                 psInsertInvoice.setInt(1, datSanId);
                 if (customerAccountId != null) {
@@ -953,7 +979,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 2. Kiểm tra hóa đơn đã thanh toán chưa
-            String sqlCheckInvoice = "SELECT TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+            String sqlCheckInvoice = "SELECT TrangThaiThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
             try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckInvoice)) {
                 psCheck.setInt(1, datSanId);
                 try (ResultSet rsCheck = psCheck.executeQuery()) {
@@ -1018,7 +1044,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             if (phuThuTre > 0.0) {
                 // Cập nhật phụ thu vào HoaDon
-                String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+                String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
                 try (PreparedStatement psUpSurch = conn.prepareStatement(sqlUpdateInvoiceSurcharge)) {
                     psUpSurch.setDouble(1, phuThuTre);
                     psUpSurch.setDouble(2, phuThuTre);
@@ -1037,7 +1063,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 5. Cập nhật hóa đơn sang Đã thanh toán
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
             psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
             psUpdateInvoice.setString(1, paymentMethodTrim);
             psUpdateInvoice.setInt(2, staffAccountId);

@@ -29,6 +29,17 @@ public class CheckInServlet extends HttpServlet {
 
     private final CheckInDAO checkInDAO = new CheckInDAO();
 
+    private boolean columnExists(java.sql.Connection conn, String tableName, String columnName) throws java.sql.SQLException {
+        String sql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(?) AND name = ?";
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, tableName);
+            ps.setNString(2, columnName);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     private static final com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
             .registerTypeAdapter(java.time.LocalDate.class, (com.google.gson.JsonSerializer<java.time.LocalDate>)
                     (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
@@ -46,7 +57,14 @@ public class CheckInServlet extends HttpServlet {
 
         if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 4)) {
             // Không phải Manager (Role 2) hoặc Staff/Receptionist (Role 4)
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            String action = req.getParameter("action");
+            if (action != null || "true".equals(req.getParameter("ajax"))) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.getWriter().write("{\"error\":\"Phiên đăng nhập hết hạn hoặc bạn không có quyền truy cập.\"}");
+            } else {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            }
             return;
         }
 
@@ -335,14 +353,18 @@ public class CheckInServlet extends HttpServlet {
             LichDatSanDAO lichDatSanDAO = new LichDatSanDAOImpl();
             Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
             if (lich == null) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn đặt sân.");
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().write("{\"error\":\"Không tìm thấy đơn đặt sân.\"}");
                 return;
             }
 
             SanDAO sanDAO = new SanDAOImpl();
             San san = sanDAO.getSanById(lich.getSanId());
             if (user.getRoleId() == 4 && san.getCoSoID() != user.getCoSoId()) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập đơn đặt sân thuộc cơ sở khác.");
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.getWriter().write("{\"error\":\"Bạn không có quyền truy cập đơn đặt sân thuộc cơ sở khác.\"}");
                 return;
             }
 
@@ -361,8 +383,11 @@ public class CheckInServlet extends HttpServlet {
             double tongThanhToan = tongTienSan;
             String trangThaiThanhToan = "Chưa thanh toán";
 
-            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
-                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)")) {
+            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
+                boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                String invoiceSql = "SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?" +
+                        (hasLoaiHoaDon ? " AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)" : "");
+                try (java.sql.PreparedStatement ps = conn.prepareStatement(invoiceSql)) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -371,6 +396,22 @@ public class CheckInServlet extends HttpServlet {
                         tongTienDichVu = rs.getDouble("TongTienDichVu");
                         tongThanhToan = rs.getDouble("TongThanhToan");
                         trangThaiThanhToan = rs.getString("TrangThaiThanhToan");
+                    }
+                }
+                }
+            } catch (java.sql.SQLException sqlEx) {
+                // Fallback: LoaiHoaDon column may not exist yet
+                try (java.sql.Connection conn2 = org.example.util.DBUtil.getConnection();
+                     java.sql.PreparedStatement ps2 = conn2.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?")) {
+                    ps2.setInt(1, datSanId);
+                    try (java.sql.ResultSet rs2 = ps2.executeQuery()) {
+                        if (rs2.next()) {
+                            hoaDonId = rs2.getInt("HoaDonID");
+                            tongTienSan = rs2.getDouble("TongTienSan");
+                            tongTienDichVu = rs2.getDouble("TongTienDichVu");
+                            tongThanhToan = rs2.getDouble("TongThanhToan");
+                            trangThaiThanhToan = rs2.getString("TrangThaiThanhToan");
+                        }
                     }
                 }
             }
@@ -395,7 +436,7 @@ public class CheckInServlet extends HttpServlet {
 
             double phuThuQuaGio = 0.0;
             long minutesOver = 0;
-            if ("Đang sử dụng".equals(lich.getTrangThai())) {
+            if ("Đang sử dụng".equals(lich.getTrangThai()) && lich.getNgayDat() != null && lich.getGioKetThuc() != null) {
                 java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(lich.getNgayDat(), lich.getGioKetThuc());
                 java.time.LocalDateTime now = java.time.LocalDateTime.now();
                 if (now.isAfter(plannedEnd)) {
@@ -419,10 +460,15 @@ public class CheckInServlet extends HttpServlet {
             // Lấy danh sách split bills và chi tiết của chúng
             boolean mainBillPaid = "Đã thanh toán".equals(trangThaiThanhToan);
             java.util.List<java.util.Map<String, Object>> splitBills = new java.util.ArrayList<>();
-            String sqlSplits = "SELECT hd.HoaDonID, hd.TongThanhToan, hd.TrangThaiThanhToan, hd.GhiChu, hd.NgayLap " +
-                               "FROM HoaDon hd WHERE hd.DatSanID = ? AND hd.LoaiHoaDon = N'SPLIT' ORDER BY hd.NgayLap ASC";
-            try (java.sql.Connection connSplit = org.example.util.DBUtil.getConnection();
-                 java.sql.PreparedStatement psSplit = connSplit.prepareStatement(sqlSplits)) {
+            try (java.sql.Connection connSplit = org.example.util.DBUtil.getConnection()) {
+                if (!columnExists(connSplit, "HoaDon", "LoaiHoaDon")) {
+                    throw new java.sql.SQLException("HoaDon.LoaiHoaDon chưa tồn tại");
+                }
+                boolean hasGhiChu = columnExists(connSplit, "HoaDon", "GhiChu");
+                String sqlSplits = "SELECT hd.HoaDonID, hd.TongThanhToan, hd.TrangThaiThanhToan, " +
+                                   (hasGhiChu ? "hd.GhiChu" : "CAST(NULL AS NVARCHAR(500)) AS GhiChu") + ", hd.NgayLap " +
+                                   "FROM HoaDon hd WHERE hd.DatSanID = ? AND hd.LoaiHoaDon = N'SPLIT' ORDER BY hd.NgayLap ASC";
+                try (java.sql.PreparedStatement psSplit = connSplit.prepareStatement(sqlSplits)) {
                 psSplit.setInt(1, datSanId);
                 try (java.sql.ResultSet rsSplit = psSplit.executeQuery()) {
                     while (rsSplit.next()) {
@@ -437,6 +483,7 @@ public class CheckInServlet extends HttpServlet {
                         sb.put("items", hdDao.getChiTietByHoaDonId(sbHdId));
                         splitBills.add(sb);
                     }
+                }
                 }
             } catch (Exception ignored) {
                 // Bảng HoaDon chưa có cột LoaiHoaDon → bỏ qua, splitBills = []
@@ -458,13 +505,17 @@ public class CheckInServlet extends HttpServlet {
             data.put("mainHoaDonId", hoaDonId);
             data.put("splitBills", splitBills);
             data.put("tenSan", san.getTenSan());
-            data.put("ngayDat", lich.getNgayDat().toString());
-            data.put("gioBatDau", lich.getGioBatDau().toString().substring(0, 5));
-            data.put("gioKetThuc", lich.getGioKetThuc().toString().substring(0, 5));
+            data.put("ngayDat", lich.getNgayDat() != null ? lich.getNgayDat().toString() : "");
+            data.put("gioBatDau", lich.getGioBatDau() != null ? lich.getGioBatDau().toString().substring(0, 5) : "00:00");
+            data.put("gioKetThuc", lich.getGioKetThuc() != null ? lich.getGioKetThuc().toString().substring(0, 5) : "00:00");
             resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            java.util.Map<String, String> err = new java.util.HashMap<>();
+            err.put("error", e.getMessage() != null ? e.getMessage() : "Lỗi hệ thống");
+            resp.getWriter().write(gson.toJson(err));
         }
     }
 }

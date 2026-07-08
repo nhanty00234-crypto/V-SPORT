@@ -133,6 +133,10 @@
          class="bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg px-4 py-2 text-xs font-semibold transition-all flex items-center gap-1">
         <span class="material-symbols-outlined text-[15px]">refresh</span>Đặt lại
       </a>
+      <button type="button" onclick="openCreateServiceModal()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-5 py-2 text-xs font-bold transition-all shadow-md shadow-emerald-100 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[15px]">add_shopping_cart</span>Lập HĐ dịch vụ
+      </button>
     </form>
   </section>
 
@@ -308,11 +312,165 @@
   </div>
 </div>
 
+
+<%-- ═══ CREATE SERVICE INVOICE MODAL ═══ --%>
+<div id="createServiceModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeCreateServiceModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto border border-emerald-100">
+    <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+      <div>
+        <h3 class="font-bold text-sm text-zinc-800">Lập hóa đơn dịch vụ</h3>
+        <p class="text-[11px] text-zinc-400 mt-0.5">Chọn đơn đặt sân và dịch vụ cần thu tiền.</p>
+      </div>
+      <button onclick="closeCreateServiceModal()" class="p-1 rounded-lg hover:bg-slate-100 text-zinc-500">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <form id="createServiceForm" class="px-6 py-5 space-y-4" onsubmit="submitCreateServiceInvoice(event)">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Đơn đặt sân</label>
+          <select name="datSanId" required class="border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200">
+            <option value="">-- Chọn đơn đặt sân --</option>
+            <c:forEach var="booking" items="${payableBookings}">
+              <option value="${booking.datSanId}">${booking.label}</option>
+            </c:forEach>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Ghi chú</label>
+          <input name="ghiChu" maxlength="255" value="Manager lập hóa đơn dịch vụ"
+                 class="border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200"/>
+        </div>
+      </div>
+
+      <div class="border border-slate-100 rounded-2xl overflow-hidden">
+        <div class="px-4 py-3 bg-slate-50 flex items-center justify-between">
+          <p class="text-xs font-bold text-zinc-700">Danh sách dịch vụ</p>
+          <p class="text-[11px] text-zinc-400">Nhập số lượng cho sản phẩm muốn tính tiền</p>
+        </div>
+        <div class="max-h-[300px] overflow-y-auto divide-y divide-slate-50">
+          <c:forEach var="sp" items="${serviceProducts}">
+            <div class="grid grid-cols-[1fr_110px_90px] gap-3 items-center px-4 py-3 service-row"
+                 data-price="${sp.donGia}">
+              <div>
+                <input type="hidden" name="productId" value="${sp.sanPhamId}"/>
+                <p class="text-xs font-semibold text-zinc-800">${sp.tenSanPham}</p>
+                <p class="text-[11px] text-zinc-400">
+                  <fmt:formatNumber value="${sp.donGia}" type="number" maxFractionDigits="0"/>đ/${empty sp.donViTinh ? 'sp' : sp.donViTinh} · Tồn: ${sp.soLuongTon}
+                </p>
+              </div>
+              <input name="quantity" type="number" min="0" max="${sp.soLuongTon}" value="0"
+                     oninput="updateCreateTotal()"
+                     class="border border-slate-200 rounded-lg px-3 py-2 text-xs text-right focus:outline-none focus:ring-2 focus:ring-emerald-200"/>
+              <p class="line-total text-xs font-bold text-right text-zinc-700">0đ</p>
+            </div>
+          </c:forEach>
+          <c:if test="${empty serviceProducts}">
+            <div class="px-4 py-8 text-center text-xs text-zinc-400">Chưa có dịch vụ/sản phẩm trong kho của cơ sở.</div>
+          </c:if>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <div class="rounded-2xl border border-slate-100 p-4 space-y-2">
+          <label class="flex items-center gap-2 text-xs font-semibold text-zinc-700">
+            <input id="createPayNow" name="payNow" type="checkbox" value="true" class="accent-emerald-600" checked onchange="toggleCreatePayMethod()"/>
+            Thanh toán ngay
+          </label>
+          <div id="createPayMethodBox" class="grid grid-cols-2 gap-2 pt-2">
+            <label class="text-xs flex items-center gap-2"><input type="radio" name="phuongThucThanhToan" value="Tiền mặt" checked class="accent-emerald-600"/>Tiền mặt</label>
+            <label class="text-xs flex items-center gap-2"><input type="radio" name="phuongThucThanhToan" value="Chuyển khoản" class="accent-emerald-600"/>Chuyển khoản</label>
+            <label class="text-xs flex items-center gap-2"><input type="radio" name="phuongThucThanhToan" value="Thẻ" class="accent-emerald-600"/>Thẻ</label>
+            <label class="text-xs flex items-center gap-2"><input type="radio" name="phuongThucThanhToan" value="Ví điện tử" class="accent-emerald-600"/>Ví điện tử</label>
+          </div>
+        </div>
+        <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
+          <p class="text-[11px] text-emerald-700 font-bold uppercase tracking-widest">Tổng tiền dịch vụ</p>
+          <p id="createServiceTotal" class="text-2xl font-black text-emerald-800 mt-1">0đ</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeCreateServiceModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-zinc-600 rounded-xl text-xs font-semibold transition-all">Hủy</button>
+        <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all shadow-md shadow-emerald-100">Tạo hóa đơn</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 var BASE = '${pageContext.request.contextPath}';
 
 function fmtMoney(v) {
-  return new Intl.NumberFormat('vi-VN').format(Math.round(v)) + 'đ';
+  return new Intl.NumberFormat('vi-VN').format(Math.round(v || 0)) + 'đ';
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+  });
+}
+
+function showToast(msg, type) {
+  var toast = document.createElement('div');
+  var isError = type === 'error';
+  toast.className = 'fixed bottom-6 right-6 z-[9999] px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 transition-all ' +
+    (isError ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white');
+  toast.innerHTML = '<span class="material-symbols-outlined text-[18px]">' + (isError ? 'error' : 'check_circle') + '</span>' + escapeHtml(msg);
+  document.body.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    setTimeout(function() { toast.remove(); }, 250);
+  }, 2400);
+}
+
+function showCustomConfirm(message, onOk) {
+  if (window.confirm(message)) onOk();
+}
+
+
+function openCreateServiceModal() {
+  document.getElementById('createServiceModal').classList.remove('hidden');
+  updateCreateTotal();
+}
+function closeCreateServiceModal() {
+  document.getElementById('createServiceModal').classList.add('hidden');
+}
+function toggleCreatePayMethod() {
+  var checked = document.getElementById('createPayNow').checked;
+  document.getElementById('createPayMethodBox').style.opacity = checked ? '1' : '.45';
+}
+function updateCreateTotal() {
+  var total = 0;
+  document.querySelectorAll('#createServiceModal .service-row').forEach(function(row) {
+    var price = Number(row.getAttribute('data-price') || 0);
+    var qtyInput = row.querySelector('input[name="quantity"]');
+    var qty = Number(qtyInput.value || 0);
+    if (qty < 0) { qty = 0; qtyInput.value = 0; }
+    var line = price * qty;
+    total += line;
+    row.querySelector('.line-total').textContent = fmtMoney(line);
+  });
+  document.getElementById('createServiceTotal').textContent = fmtMoney(total);
+}
+function submitCreateServiceInvoice(event) {
+  event.preventDefault();
+  var form = document.getElementById('createServiceForm');
+  var totalQty = 0;
+  form.querySelectorAll('input[name="quantity"]').forEach(function(input) { totalQty += Number(input.value || 0); });
+  if (totalQty <= 0) { showToast('Vui lòng nhập số lượng cho ít nhất một dịch vụ.', 'error'); return; }
+  var data = new URLSearchParams(new FormData(form));
+  data.set('action', 'createServiceInvoice');
+  fetch(BASE + '/manager/hoa-don', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:data.toString() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok) { closeCreateServiceModal(); showToast(d.msg, 'success'); setTimeout(function(){ location.reload(); }, 1000); }
+      else { showToast(d.msg || 'Không thể tạo hóa đơn.', 'error'); }
+    })
+    .catch(function(){ showToast('Lỗi kết nối.', 'error'); });
 }
 
 // ── Detail modal ──
@@ -327,7 +485,7 @@ function openDetail(hoaDonId) {
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.ok === false) {
-        document.getElementById('detailBody').innerHTML = '<p class="text-red-500 text-xs">' + d.msg + '</p>';
+        document.getElementById('detailBody').innerHTML = '<p class="text-red-500 text-xs">' + escapeHtml(d.msg) + '</p>';
         return;
       }
       var loaiLabel = d.loaiHoaDon === 'SPLIT'
@@ -338,7 +496,7 @@ function openDetail(hoaDonId) {
       var itemsHtml = '';
       if (d.items && d.items.length > 0) {
         d.items.forEach(function(it) {
-          itemsHtml += '<tr class="border-t border-slate-50"><td class="py-1.5">' + it.tenSanPham + '</td>' +
+          itemsHtml += '<tr class="border-t border-slate-50"><td class="py-1.5">' + escapeHtml(it.tenSanPham) + '</td>' +
             '<td class="py-1.5 text-right">' + it.soLuong + '</td>' +
             '<td class="py-1.5 text-right">' + fmtMoney(it.donGia) + '</td>' +
             '<td class="py-1.5 text-right font-semibold">' + fmtMoney(it.thanhTien) + '</td></tr>';
@@ -351,12 +509,12 @@ function openDetail(hoaDonId) {
         '<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">' +
           '<div><p class="text-zinc-400">Số HĐ</p><p class="font-bold text-purple-700">#' + d.hoaDonId + '</p></div>' +
           '<div><p class="text-zinc-400">Loại</p>' + loaiLabel + (d.parentHoaDonId ? ' <span class="text-zinc-400">← #' + d.parentHoaDonId + '</span>' : '') + '</div>' +
-          '<div><p class="text-zinc-400">Sân</p><p class="font-semibold">' + (d.tenSan||'—') + '</p></div>' +
-          '<div><p class="text-zinc-400">Ngày chơi</p><p>' + (d.ngayDat||'—') + ' · ' + (d.gioBatDau||'') + '–' + (d.gioKetThuc||'') + '</p></div>' +
-          '<div><p class="text-zinc-400">Khách hàng</p><p>' + (d.tenKhachHang||'Khách vãng lai') + '</p></div>' +
-          '<div><p class="text-zinc-400">Nhân viên</p><p>' + (d.tenNhanVien||'—') + '</p></div>' +
-          '<div><p class="text-zinc-400">Ngày lập</p><p>' + (d.ngayLap||'—') + '</p></div>' +
-          '<div><p class="text-zinc-400">PT Thanh toán</p><p>' + (d.phuongThuc||'—') + '</p></div>' +
+          '<div><p class="text-zinc-400">Sân</p><p class="font-semibold">' + escapeHtml(d.tenSan||'—') + '</p></div>' +
+          '<div><p class="text-zinc-400">Ngày chơi</p><p>' + escapeHtml(d.ngayDat||'—') + ' · ' + (d.gioBatDau||'') + '–' + (d.gioKetThuc||'') + '</p></div>' +
+          '<div><p class="text-zinc-400">Khách hàng</p><p>' + escapeHtml(d.tenKhachHang||'Khách vãng lai') + '</p></div>' +
+          '<div><p class="text-zinc-400">Nhân viên</p><p>' + escapeHtml(d.tenNhanVien||'—') + '</p></div>' +
+          '<div><p class="text-zinc-400">Ngày lập</p><p>' + escapeHtml(d.ngayLap||'—') + '</p></div>' +
+          '<div><p class="text-zinc-400">PT Thanh toán</p><p>' + escapeHtml(d.phuongThuc||'—') + '</p></div>' +
         '</div>' +
         '<hr class="border-slate-100 my-3"/>' +
         '<table class="w-full text-xs">' +
@@ -373,8 +531,8 @@ function openDetail(hoaDonId) {
         '</div>' +
         '<div class="mt-3 flex items-center gap-2 pt-3 border-t border-slate-100">' +
           '<span class="text-zinc-400">Trạng thái:</span>' +
-          '<span class="' + statusClass + ' text-[10px] font-bold px-2 py-0.5 rounded-full">' + d.trangThai + '</span>' +
-          (d.ghiChu ? '<span class="text-zinc-400 ml-auto italic">' + d.ghiChu + '</span>' : '') +
+          '<span class="' + statusClass + ' text-[10px] font-bold px-2 py-0.5 rounded-full">' + escapeHtml(d.trangThai) + '</span>' +
+          (d.ghiChu ? '<span class="text-zinc-400 ml-auto italic">' + escapeHtml(d.ghiChu) + '</span>' : '') +
         '</div>';
     })
     .catch(function(e) {
