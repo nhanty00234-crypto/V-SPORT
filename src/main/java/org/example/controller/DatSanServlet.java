@@ -406,10 +406,17 @@ public class DatSanServlet extends HttpServlet {
 
                     // ── 3d. Kiểm tra trùng lịch (Overlap check) ──
                     // Công thức overlap: NOT (KetThuc <= BatDau_Khac OR BatDau >= KetThuc_Khac)
+                    // "Chờ xác nhận" (COD) chặn slot cho tới khi được duyệt/từ chối/tự hết hạn.
+                    // "Chờ thanh toán" chỉ chặn khi còn hạn giữ chỗ thật (HoldExpiresAt), không còn
+                    // dùng DATEDIFF(CreatedTime) giả nữa.
+                    // "Đã hoàn thành"/"Quá hạn"/"Đã hủy" không chặn — booking cho NgayDat/GioBatDau
+                    // trong quá khứ đã bị validate ở Bước 2b phía trên rồi nên không cần chặn lại ở đây.
                     String checkSql = "SELECT COUNT(*) FROM LichDatSan " +
                             "WHERE SanID = ? AND NgayDat = ? " +
-                            "AND (TrangThai IN (N'Đã xác nhận', N'Đang sử dụng', N'Đã hoàn thành') " +
-                            "     OR (TrangThai = N'Chờ thanh toán' AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
+                            "AND (TrangThai IN (N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
+                            "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
+                            "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') " +
+                            "     OR (TrangThai = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND HoldExpiresAt > GETDATE())) " +
                             "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
 
                     boolean hasOverlap;
@@ -499,10 +506,21 @@ public class DatSanServlet extends HttpServlet {
                     double tongTien = durationHours * hourlyPrice;
 
                     // ── 3f. INSERT lịch đặt sân trong cùng transaction ──
+                    boolean isOnlineDeposit = "payos".equalsIgnoreCase(paymentMethod);
+                    String initialStatus = isOnlineDeposit
+                            ? org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
+                            : org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN;
+                    // HoldExpiresAt luôn tính bằng GETDATE() phía SQL Server, không bao giờ nhận từ
+                    // frontend/request — Constants.BOOKING_HOLD_MINUTES là hằng số compile-time, không
+                    // phải input người dùng, nên nối trực tiếp vào SQL an toàn (không có rủi ro injection).
+                    String holdExpiresAtExpr = isOnlineDeposit
+                            ? "DATEADD(MINUTE, " + org.example.util.Constants.BOOKING_HOLD_MINUTES + ", GETDATE())"
+                            : "NULL";
+
                     String insertSql = "INSERT INTO LichDatSan " +
                             "(AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, " +
-                            " ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            " ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan, HoldExpiresAt) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + holdExpiresAtExpr + ")";
 
                     try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
                         insertPs.setInt(1, user.getAccountId());
@@ -513,7 +531,6 @@ public class DatSanServlet extends HttpServlet {
                         insertPs.setBoolean(6, applyLights);
                         insertPs.setBigDecimal(7,
                                 BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP));
-                        String initialStatus = "payos".equalsIgnoreCase(paymentMethod) ? "Chờ thanh toán" : "Chờ xác nhận";
                         insertPs.setString(8, initialStatus);
                         insertPs.setString(9, ghiChu != null ? ghiChu.trim() : "");
                         insertPs.setString(10, "Web");
@@ -538,9 +555,10 @@ public class DatSanServlet extends HttpServlet {
                             "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s",
                             user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod));
 
-                    if ("payos".equalsIgnoreCase(paymentMethod)) {
+                    if (isOnlineDeposit) {
                         session.setAttribute("message",
-                                "Đăng ký đặt sân thành công! Vui lòng tiến hành quét mã QR thanh toán trong vòng 10 phút để giữ chỗ.");
+                                "Đăng ký đặt sân thành công! Vui lòng tiến hành quét mã QR thanh toán trong vòng " +
+                                        org.example.util.Constants.BOOKING_HOLD_MINUTES + " phút để giữ chỗ.");
                     } else {
                         session.setAttribute("message",
                                 "Đặt sân thành công! Lịch đặt bằng tiền mặt chỉ được giữ chỗ tạm thời. Vui lòng đến sớm 15 phút để làm thủ tục nhận sân.");
