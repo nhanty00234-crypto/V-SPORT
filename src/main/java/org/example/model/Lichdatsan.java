@@ -74,6 +74,30 @@ public class Lichdatsan {
     @Column(name = "EarlyCheckoutDiscount")
     private BigDecimal earlyCheckoutDiscount;
 
+    @Column(name = "HoldExpiresAt")
+    private LocalDateTime holdExpiresAt;
+
+    @Column(name = "DepositAmount")
+    private BigDecimal depositAmount;
+
+    @Column(name = "PaymentMethodConfirmed", length = 50)
+    private String paymentMethodConfirmed;
+
+    @Column(name = "TransactionCode", length = 100)
+    private String transactionCode;
+
+    @Column(name = "ConfirmedAt")
+    private LocalDateTime confirmedAt;
+
+    @Column(name = "ConfirmedBy")
+    private Integer confirmedBy;
+
+    @Column(name = "ConfirmSource", length = 20)
+    private String confirmSource;
+
+    @Column(name = "NoShowAt")
+    private LocalDateTime noShowAt;
+
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SanID", insertable = false, updatable = false)
@@ -270,6 +294,70 @@ public class Lichdatsan {
 
     public void setEarlyCheckoutDiscount(BigDecimal earlyCheckoutDiscount) {
         this.earlyCheckoutDiscount = earlyCheckoutDiscount;
+    }
+
+    public LocalDateTime getHoldExpiresAt() {
+        return holdExpiresAt;
+    }
+
+    public void setHoldExpiresAt(LocalDateTime holdExpiresAt) {
+        this.holdExpiresAt = holdExpiresAt;
+    }
+
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public void setDepositAmount(BigDecimal depositAmount) {
+        this.depositAmount = depositAmount;
+    }
+
+    public String getPaymentMethodConfirmed() {
+        return paymentMethodConfirmed;
+    }
+
+    public void setPaymentMethodConfirmed(String paymentMethodConfirmed) {
+        this.paymentMethodConfirmed = paymentMethodConfirmed;
+    }
+
+    public String getTransactionCode() {
+        return transactionCode;
+    }
+
+    public void setTransactionCode(String transactionCode) {
+        this.transactionCode = transactionCode;
+    }
+
+    public LocalDateTime getConfirmedAt() {
+        return confirmedAt;
+    }
+
+    public void setConfirmedAt(LocalDateTime confirmedAt) {
+        this.confirmedAt = confirmedAt;
+    }
+
+    public Integer getConfirmedBy() {
+        return confirmedBy;
+    }
+
+    public void setConfirmedBy(Integer confirmedBy) {
+        this.confirmedBy = confirmedBy;
+    }
+
+    public String getConfirmSource() {
+        return confirmSource;
+    }
+
+    public void setConfirmSource(String confirmSource) {
+        this.confirmSource = confirmSource;
+    }
+
+    public LocalDateTime getNoShowAt() {
+        return noShowAt;
+    }
+
+    public void setNoShowAt(LocalDateTime noShowAt) {
+        this.noShowAt = noShowAt;
     }
 
     @Override
