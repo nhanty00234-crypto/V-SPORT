@@ -23,6 +23,10 @@ public final class Constants {
     public static final String TRANG_THAI_DAT_SAN_CHO_THANH_TOAN = "Chờ thanh toán";
     public static final String TRANG_THAI_DAT_SAN_QUA_HAN = "Quá hạn";
     public static final String TRANG_THAI_DAT_SAN_KHONG_DEN = "Không đến";
+    // Literal thực tế dùng trong CheckInDAO/CheckInServlet/LichDatSanDAOImpl khi booking đang được chơi.
+    // KHÁC với TRANG_THAI_DAT_SAN_DANG_CHOI ("Đang chơi") ở trên — hằng số đó không được dùng ở đâu
+    // trong code hiện tại, giữ nguyên không đổi/không xoá (rà soát toàn bộ codebase, 2026-07-09).
+    public static final String TRANG_THAI_DAT_SAN_DANG_SU_DUNG = "Đang sử dụng";
 
     // ========== TIMEOUT ==========
     public static final int PENDING_PAYMENT_TIMEOUT_MINUTES = 10;
