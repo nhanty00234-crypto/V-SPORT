@@ -19,16 +19,26 @@ public final class Constants {
     public static final String TRANG_THAI_DAT_SAN_DA_HUY = "Đã hủy";
     public static final String TRANG_THAI_DAT_SAN_DANG_CHOI = "Đang chơi";
     public static final String TRANG_THAI_DAT_SAN_DA_HOAN_THANH = "Đã hoàn thành";
+    // Reservation-hold (docs/superpowers/specs/2026-07-09-auto-booking-reservation-hold-design.md, mục 4)
+    public static final String TRANG_THAI_DAT_SAN_CHO_THANH_TOAN = "Chờ thanh toán";
+    public static final String TRANG_THAI_DAT_SAN_QUA_HAN = "Quá hạn";
+    public static final String TRANG_THAI_DAT_SAN_KHONG_DEN = "Không đến";
 
     // ========== TIMEOUT ==========
     public static final int PENDING_PAYMENT_TIMEOUT_MINUTES = 10;
     public static final int SOFT_HOLD_TIMEOUT_MINUTES = 2;
+    // Reservation-hold (docs/superpowers/specs/2026-07-09-auto-booking-reservation-hold-design.md, mục 6)
+    public static final int BOOKING_HOLD_MINUTES = 10;
+    public static final int NO_SHOW_GRACE_MINUTES = 15;
+    public static final int COD_APPROVAL_EXPIRE_HOURS = 2;
+    public static final boolean NO_SHOW_AUTO_MODE = false;
 
     // ========== INVOICE (HoaDon) STATUS ==========
     public static final String TRANG_THAI_HOA_DON_CHUA_TT = "Chưa thanh toán";
     public static final String TRANG_THAI_HOA_DON_DA_TT = "Đã thanh toán";
     public static final String TRANG_THAI_HOA_DON_HOAN_TIEN = "Hoàn tiền";
     public static final String TRANG_THAI_HOA_DON_GHI_NO = "Ghi nợ";
+    public static final String TRANG_THAI_HOA_DON_DA_COC = "Đã cọc";
 
     // ========== PAYMENT METHODS ==========
     public static final String PT_TIEN_MAT = "Tiền mặt";
