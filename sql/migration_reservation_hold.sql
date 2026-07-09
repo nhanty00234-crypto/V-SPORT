@@ -123,5 +123,20 @@ BEGIN
 END
 GO
 
+-- Backfill: LichDatSan "Chờ thanh toán" tạo TRƯỚC migration này có HoldExpiresAt = NULL.
+-- Overlap-check mới (DatSanServlet.handleDatSan) chỉ chặn "Chờ thanh toán" khi
+-- HoldExpiresAt > GETDATE() — NULL > GETDATE() là UNKNOWN (đánh giá là false trong SQL Server),
+-- nên các booking "Chờ thanh toán" cũ sẽ KHÔNG chặn slot nếu không backfill cột này.
+-- 10 (phút) dưới đây PHẢI khớp với Constants.BOOKING_HOLD_MINUTES bên Java (SQL không gọi
+-- được hằng số Java) — nếu đổi BOOKING_HOLD_MINUTES thì phải sửa lại số này tương ứng.
+-- Idempotent tự nhiên: chỉ update các row còn HoldExpiresAt IS NULL, chạy lại vô hại.
+UPDATE LichDatSan
+SET HoldExpiresAt = DATEADD(MINUTE, 10, CreatedTime)
+WHERE TrangThai = N'Chờ thanh toán'
+  AND HoldExpiresAt IS NULL
+  AND CreatedTime IS NOT NULL;
+PRINT N'Backfill HoldExpiresAt cho ' + CAST(@@ROWCOUNT AS NVARCHAR) + N' booking "Chờ thanh toán" cũ.';
+GO
+
 PRINT N'Migration reservation-hold hoàn tất.';
 GO
