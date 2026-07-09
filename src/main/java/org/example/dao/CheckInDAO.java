@@ -579,6 +579,7 @@ public class CheckInDAO {
      */
     public List<San> getDanhSachSan(int coSoId) {
         org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
+        org.example.service.BookingLifecycleService.runExpirySweep();
         List<San> list = new ArrayList<>();
         String sql = "SELECT s.SanID, s.TenSan, s.LoaiSanID, s.CoSoID, s.TrangThai, s.MoTa, s.HinhAnh, " +
                      "ls.TenLoai AS TenLoaiSan, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen, " +
@@ -626,6 +627,7 @@ public class CheckInDAO {
      */
     public List<BookingViewDTO> getDanhSachLichCheckInHomNay(int coSoId) {
         org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
+        org.example.service.BookingLifecycleService.runExpirySweep();
         List<BookingViewDTO> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection()) {
             String invoiceJoin = columnExists(conn, "HoaDon", "LoaiHoaDon")

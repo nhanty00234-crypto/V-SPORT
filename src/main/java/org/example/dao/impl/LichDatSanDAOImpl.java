@@ -69,6 +69,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     @Override
     public List<Lichdatsan> getAllLichDatSan() {
         updateExpiredBookingsAndFields();
+        org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
         String sql = "SELECT * FROM LichDatSan WHERE IsDeleted = 0 ORDER BY NgayDat DESC, GioBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
@@ -86,6 +87,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     @Override
     public List<Lichdatsan> getLichByAccountId(int accountId) {
         updateExpiredBookingsAndFields();
+        org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
         String sql = "SELECT * FROM LichDatSan WHERE AccountID = ? AND IsDeleted = 0 ORDER BY NgayDat DESC, GioBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
@@ -341,6 +343,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     @Override
     public List<Lichdatsan> getLichDatSanTodayByCoSo(int coSoId) {
         updateExpiredBookingsAndFields();
+        org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
         String sql = "SELECT l.*, s.TenSan, s.CoSoID " +
                      "FROM LichDatSan l " +
@@ -365,6 +368,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     @Override
     public List<Lichdatsan> getLichDatSanByCoSo(int coSoId) {
         updateExpiredBookingsAndFields();
+        org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
         String sql = "SELECT l.*, s.TenSan, s.CoSoID, a.FullName, a.PhoneNumber, a.Email " +
                      "FROM LichDatSan l " +
