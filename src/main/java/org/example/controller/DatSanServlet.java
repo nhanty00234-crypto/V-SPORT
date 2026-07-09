@@ -522,19 +522,25 @@ public class DatSanServlet extends HttpServlet {
                             " ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan, HoldExpiresAt) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + holdExpiresAtExpr + ")";
 
-                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                    BigDecimal tongTienRounded = BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP);
+                    int newDatSanId = -1;
+                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                         insertPs.setInt(1, user.getAccountId());
                         insertPs.setInt(2, sanId);
                         insertPs.setDate(3, java.sql.Date.valueOf(ngayDat));
                         insertPs.setTime(4, java.sql.Time.valueOf(gioBatDau));
                         insertPs.setTime(5, java.sql.Time.valueOf(gioKetThuc));
                         insertPs.setBoolean(6, applyLights);
-                        insertPs.setBigDecimal(7,
-                                BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP));
+                        insertPs.setBigDecimal(7, tongTienRounded);
                         insertPs.setString(8, initialStatus);
                         insertPs.setString(9, ghiChu != null ? ghiChu.trim() : "");
                         insertPs.setString(10, "Web");
                         insertPs.executeUpdate();
+                        try (java.sql.ResultSet generatedKeys = insertPs.getGeneratedKeys()) {
+                            if (generatedKeys.next()) {
+                                newDatSanId = generatedKeys.getInt(1);
+                            }
+                        }
                     }
 
                     // ── 3f-2. Dọn SoftHold của chính tài khoản này cho San+Ngày này ──
@@ -556,13 +562,37 @@ public class DatSanServlet extends HttpServlet {
                             user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod));
 
                     if (isOnlineDeposit) {
-                        session.setAttribute("message",
-                                "Đăng ký đặt sân thành công! Vui lòng tiến hành quét mã QR thanh toán trong vòng " +
-                                        org.example.util.Constants.BOOKING_HOLD_MINUTES + " phút để giữ chỗ.");
-                    } else {
-                        session.setAttribute("message",
-                                "Đặt sân thành công! Lịch đặt bằng tiền mặt chỉ được giữ chỗ tạm thời. Vui lòng đến sớm 15 phút để làm thủ tục nhận sân.");
+                        // ── 3h. Gọi payOS tạo link thanh toán thật (sau khi đã commit — không giữ
+                        //        lock San trong lúc gọi mạng). Thất bại thì booking vừa tạo bị
+                        //        chuyển "Quá hạn" ngay, không để giữ sân 10 phút vô ích.
+                        long orderCode = newDatSanId > 0 ? newDatSanId : (System.currentTimeMillis() / 1000);
+                        String description = "VSport DS" + newDatSanId;
+                        if (description.length() > 25) {
+                            description = description.substring(0, 25);
+                        }
+                        String baseUrl = getBaseUrl(req);
+                        String returnUrl = baseUrl + "/customer/payos-return?datSanId=" + newDatSanId;
+                        String cancelUrl = baseUrl + "/customer/payos-cancel?datSanId=" + newDatSanId;
+
+                        try {
+                            org.example.service.PayOSService.PaymentLinkResult link =
+                                    org.example.service.PayOSService.createPaymentLink(
+                                            orderCode, tongTienRounded.longValueExact(), description, returnUrl, cancelUrl);
+                            saveTransactionCode(newDatSanId, link.paymentLinkId);
+                            resp.sendRedirect(link.checkoutUrl);
+                            return;
+                        } catch (org.example.service.PayOSService.PayOSLinkCreationException payosEx) {
+                            LOGGER.log(Level.SEVERE, "Tạo link thanh toán payOS thất bại cho DatSanID=" + newDatSanId, payosEx);
+                            expireBookingAfterPaymentLinkFailure(newDatSanId, "Không tạo được link thanh toán payOS");
+                            session.setAttribute("error",
+                                    "Không thể tạo link thanh toán lúc này. Đơn giữ chỗ đã được hủy, vui lòng thử đặt lại.");
+                            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                            return;
+                        }
                     }
+
+                    session.setAttribute("message",
+                            "Đặt sân thành công! Lịch đặt bằng tiền mặt chỉ được giữ chỗ tạm thời. Vui lòng đến sớm 15 phút để làm thủ tục nhận sân.");
                     resp.sendRedirect(req.getContextPath() + "/customer/lich-su-dat-san");
                     return;
 
@@ -696,6 +726,49 @@ public class DatSanServlet extends HttpServlet {
             Thread.sleep(baseMs + jitterMs);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt(); // Khôi phục trạng thái interrupt
+        }
+    }
+
+    /** Xây base URL (scheme://host:port/contextPath) để tạo returnUrl/cancelUrl tuyệt đối cho payOS. */
+    private String getBaseUrl(HttpServletRequest req) {
+        String scheme = req.getScheme();
+        String serverName = req.getServerName();
+        int serverPort = req.getServerPort();
+        String contextPath = req.getContextPath();
+
+        String url = scheme + "://" + serverName;
+        if (("http".equals(scheme) && serverPort != 80) || ("https".equals(scheme) && serverPort != 443)) {
+            url += ":" + serverPort;
+        }
+        url += contextPath;
+        return url;
+    }
+
+    private void saveTransactionCode(int datSanId, String transactionCode) {
+        String sql = "UPDATE LichDatSan SET TransactionCode = ? WHERE DatSanID = ?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, transactionCode);
+            ps.setInt(2, datSanId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Không thể lưu TransactionCode cho DatSanID=" + datSanId, e);
+        }
+    }
+
+    private void expireBookingAfterPaymentLinkFailure(int datSanId, String reason) {
+        String sql = "UPDATE LichDatSan SET TrangThai = ?, " +
+                "GhiChu = CONCAT(ISNULL(GhiChu, N''), ?) " +
+                "WHERE DatSanID = ? AND TrangThai = ?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, org.example.util.Constants.TRANG_THAI_DAT_SAN_QUA_HAN);
+            ps.setString(2, " [Tự động hủy: " + reason + "]");
+            ps.setInt(3, datSanId);
+            ps.setString(4, org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Không thể tự hủy booking #" + datSanId + " sau khi tạo link payOS thất bại", e);
         }
     }
 
