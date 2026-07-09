@@ -220,14 +220,21 @@ public class CheckInDAO {
                 logGhiChu += " [Check-in đúng giờ]";
             }
 
+            long durationMinutes = Duration.between(localGioBatDau, localGioKetThuc).toMinutes();
+            if (durationMinutes < 0) {
+                durationMinutes += 24 * 60;
+            }
+
             // 5. Thực hiện cập nhật trạng thái đơn đặt sân
-            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, actual_start_time = ?, TongTienDuKien = TongTienDuKien + ?, GhiChu = ? WHERE DatSanID = ?";
+            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, actual_start_time = ?, TongTienDuKien = TongTienDuKien + ?, GhiChu = ?, TimeMode = ?, ReservedDurationMinutes = ? WHERE DatSanID = ?";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
             psUpdateBooking.setString(1, BOOKING_STATUS_IN_USE);
             psUpdateBooking.setTime(2, Time.valueOf(now));
             psUpdateBooking.setBigDecimal(3, phuThu);
             psUpdateBooking.setString(4, logGhiChu.trim());
-            psUpdateBooking.setInt(5, datSanId);
+            psUpdateBooking.setString(5, "FIXED_BOOKING");
+            psUpdateBooking.setInt(6, (int) durationMinutes);
+            psUpdateBooking.setInt(7, datSanId);
             psUpdateBooking.executeUpdate();
 
             // Cập nhật lại số tiền trên hóa đơn (nếu có phụ thu đến sớm)
@@ -296,16 +303,7 @@ public class CheckInDAO {
         }
     }
 
-    /**
-     * Nghiệp vụ 2: Mở sân cho KHÁCH VÃNG LAI (Walk-in Customer)
-     * 
-     * @param sanId ID sân cần mở
-     * @param durationMinutes Thời lượng chơi định trước (phút)
-     * @param staffAccountId ID nhân viên tiếp đón mở sân
-     * @param donGiaSan Đơn giá tính theo giờ cho loại sân này
-     * @throws CheckInException nếu có lỗi nghiệp vụ xảy ra (như kẹt lịch đặt online)
-     */
-    public void checkInKhachVangLai(int sanId, int durationMinutes, int staffAccountId, double donGiaSan, String ghiChu) throws CheckInException {
+    public void checkInKhachVangLai(int sanId, int durationMinutes, int staffAccountId, double donGiaSan, String ghiChu, String playMode) throws CheckInException {
         Connection conn = null;
         PreparedStatement psCheckConflict = null;
         PreparedStatement psSelectField = null;
@@ -380,8 +378,15 @@ public class CheckInDAO {
                 }
             }
 
-            String sqlInsertBooking = "INSERT INTO LichDatSan (AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, actual_start_time, TrangThai, GhiChu, NguonDatSan, TongTienDuKien) " +
-                                      "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String timeMode = "FIXED_DURATION";
+            Integer reservedMinutes = durationMinutes;
+            if ("OPEN".equals(playMode)) {
+                timeMode = "OPEN_ENDED";
+                reservedMinutes = null;
+            }
+
+            String sqlInsertBooking = "INSERT INTO LichDatSan (AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, actual_start_time, TrangThai, GhiChu, NguonDatSan, TongTienDuKien, TimeMode, ReservedDurationMinutes) " +
+                                      "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             psInsertBooking = conn.prepareStatement(sqlInsertBooking, Statement.RETURN_GENERATED_KEYS);
             psInsertBooking.setInt(1, sanId);
             psInsertBooking.setDate(2, Date.valueOf(today));
@@ -392,6 +397,12 @@ public class CheckInDAO {
             psInsertBooking.setString(7, ghiChu != null ? ghiChu : ("Khách vãng lai chơi " + durationMinutes + " phút"));
             psInsertBooking.setString(8, "Walk-in");
             psInsertBooking.setBigDecimal(9, totalAmount);
+            psInsertBooking.setString(10, timeMode);
+            if (reservedMinutes != null) {
+                psInsertBooking.setInt(11, reservedMinutes);
+            } else {
+                psInsertBooking.setNull(11, java.sql.Types.INTEGER);
+            }
             psInsertBooking.executeUpdate();
 
             // Lấy ID tự sinh của đơn đặt sân
@@ -629,10 +640,11 @@ public class CheckInDAO {
                          "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
                          "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
                          invoiceJoin +
-                         "WHERE lds.NgayDat = CAST(DATEADD(hour, 7, GETUTCDATE()) AS DATE) AND s.CoSoID = ? " +
+                         "WHERE lds.NgayDat = ? AND s.CoSoID = ? " +
                          "ORDER BY lds.GioBatDau ASC";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, coSoId);
+                ps.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
+                ps.setInt(2, coSoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     BookingViewDTO dto = new BookingViewDTO();
@@ -1087,6 +1099,91 @@ public class CheckInDAO {
                 throw (CheckInException) e;
             } else {
                 throw new CheckInException("Lỗi hệ thống khi dừng ca chơi: " + e.getMessage());
+            }
+        } finally {
+            closeResource(rs);
+            closeResource(psSelect);
+            closeResource(psUpdateBooking);
+            closeResource(psUpdateInvoice);
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    logger.error("Failed to close connection", e);
+                }
+            }
+        }
+    }
+
+    public void applyEarlyCheckoutAdjustment(int datSanId, double discountAmount, String reason, int staffAccountId, int coSoId) throws CheckInException {
+        Connection conn = null;
+        PreparedStatement psSelect = null;
+        PreparedStatement psUpdateBooking = null;
+        PreparedStatement psUpdateInvoice = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Kiểm tra ca chơi và cơ sở
+            String sqlSelect = "SELECT lds.SanID, lds.TrangThai, lds.TongTienDuKien, s.CoSoID " +
+                               "FROM LichDatSan lds " +
+                               "INNER JOIN San s ON lds.SanID = s.SanID " +
+                               "WHERE lds.DatSanID = ?";
+            psSelect = conn.prepareStatement(sqlSelect);
+            psSelect.setInt(1, datSanId);
+            rs = psSelect.executeQuery();
+
+            if (!rs.next()) {
+                throw new CheckInException("Không tìm thấy ca chơi có ID: " + datSanId);
+            }
+
+            String trangThai = rs.getString("TrangThai");
+            int sanCoSoId = rs.getInt("CoSoID");
+            BigDecimal tongTienDuKien = rs.getBigDecimal("TongTienDuKien");
+
+            if (sanCoSoId != coSoId) {
+                throw new CheckInException("Bạn không có quyền quản lý ca chơi thuộc cơ sở khác.");
+            }
+            if (!"Đang sử dụng".equals(trangThai)) {
+                throw new CheckInException("Chỉ được áp dụng giảm trừ cho ca chơi đang ở trạng thái 'Đang sử dụng'.");
+            }
+            if (discountAmount < 0) {
+                throw new CheckInException("Số tiền giảm trừ không hợp lệ.");
+            }
+            if (discountAmount > tongTienDuKien.doubleValue()) {
+                throw new CheckInException("Số tiền giảm trừ không được lớn hơn tổng số tiền của ca chơi.");
+            }
+
+            // 2. Cập nhật giảm trừ trong LichDatSan
+            String sqlUpdateBooking = "UPDATE LichDatSan SET EarlyCheckoutDiscount = ?, EarlyCheckoutReason = ?, TongTienDuKien = TongTienDuKien - ? WHERE DatSanID = ?";
+            psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
+            psUpdateBooking.setBigDecimal(1, BigDecimal.valueOf(discountAmount));
+            psUpdateBooking.setNString(2, reason);
+            psUpdateBooking.setBigDecimal(3, BigDecimal.valueOf(discountAmount));
+            psUpdateBooking.setInt(4, datSanId);
+            psUpdateBooking.executeUpdate();
+
+            // 3. Cập nhật tổng tiền trong HoaDon
+            String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = TongTienSan - ?, GiamGia = GiamGia + ?, TongThanhToan = TongThanhToan - ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
+            psUpdateInvoice.setBigDecimal(1, BigDecimal.valueOf(discountAmount));
+            psUpdateInvoice.setBigDecimal(2, BigDecimal.valueOf(discountAmount));
+            psUpdateInvoice.setBigDecimal(3, BigDecimal.valueOf(discountAmount));
+            psUpdateInvoice.setInt(4, datSanId);
+            psUpdateInvoice.executeUpdate();
+
+            conn.commit();
+        } catch (Exception e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { logger.error("Failed to rollback early checkout adjustment", ex); }
+            }
+            if (e instanceof CheckInException) {
+                throw (CheckInException) e;
+            } else {
+                throw new CheckInException("Lỗi hệ thống khi giảm trừ trả sân sớm: " + e.getMessage());
             }
         } finally {
             closeResource(rs);

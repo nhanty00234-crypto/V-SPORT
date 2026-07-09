@@ -1,29 +1,10 @@
-# Maven build output — NEVER commit these
 target/
-
-# IntelliJ IDEA
-.idea/
-*.iml
-*.iws
-*.ipr
+build/
 out/
-
-# Eclipse
-.classpath
-.project
-.settings/
-
-# VS Code
+.idea/
 .vscode/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
+*.class
 *.log
-logs/
-
-# Environment / secrets
-*.env
-application-local.properties
+.DS_Store
+.env
+node_modules/

@@ -56,6 +56,24 @@ public class Lichdatsan {
     @Column(name = "DeletedBy")
     private Integer deletedBy;
 
+    @Column(name = "TimeMode", length = 30)
+    private String timeMode;
+
+    @Column(name = "ReservedDurationMinutes")
+    private Integer reservedDurationMinutes;
+
+    @Column(name = "actual_end_time")
+    private LocalTime actualEndTime;
+
+    @Column(name = "actual_start_time")
+    private LocalTime actualStartTime;
+
+    @Column(name = "EarlyCheckoutReason", length = 255)
+    private String earlyCheckoutReason;
+
+    @Column(name = "EarlyCheckoutDiscount")
+    private BigDecimal earlyCheckoutDiscount;
+
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SanID", insertable = false, updatable = false)
@@ -205,6 +223,54 @@ public class Lichdatsan {
     public Integer getDeletedBy() { return deletedBy; }
 
     public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
+
+    public String getTimeMode() {
+        return timeMode;
+    }
+
+    public void setTimeMode(String timeMode) {
+        this.timeMode = timeMode;
+    }
+
+    public Integer getReservedDurationMinutes() {
+        return reservedDurationMinutes;
+    }
+
+    public void setReservedDurationMinutes(Integer reservedDurationMinutes) {
+        this.reservedDurationMinutes = reservedDurationMinutes;
+    }
+
+    public LocalTime getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(LocalTime actualEndTime) {
+        this.actualEndTime = actualEndTime;
+    }
+
+    public LocalTime getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(LocalTime actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public String getEarlyCheckoutReason() {
+        return earlyCheckoutReason;
+    }
+
+    public void setEarlyCheckoutReason(String earlyCheckoutReason) {
+        this.earlyCheckoutReason = earlyCheckoutReason;
+    }
+
+    public BigDecimal getEarlyCheckoutDiscount() {
+        return earlyCheckoutDiscount;
+    }
+
+    public void setEarlyCheckoutDiscount(BigDecimal earlyCheckoutDiscount) {
+        this.earlyCheckoutDiscount = earlyCheckoutDiscount;
+    }
 
     @Override
     public String toString() {

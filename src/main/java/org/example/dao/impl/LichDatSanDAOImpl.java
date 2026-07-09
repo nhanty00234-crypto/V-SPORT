@@ -286,6 +286,29 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         }
 
         try {
+            lich.setTimeMode(rs.getString("TimeMode"));
+            int reserved = rs.getInt("ReservedDurationMinutes");
+            if (!rs.wasNull()) {
+                lich.setReservedDurationMinutes(reserved);
+            }
+            Time actualStart = rs.getTime("actual_start_time");
+            if (actualStart != null) {
+                lich.setActualStartTime(actualStart.toLocalTime());
+            }
+            Time actualEnd = rs.getTime("actual_end_time");
+            if (actualEnd != null) {
+                lich.setActualEndTime(actualEnd.toLocalTime());
+            }
+            lich.setEarlyCheckoutReason(rs.getNString("EarlyCheckoutReason"));
+            BigDecimal earlyDisc = rs.getBigDecimal("EarlyCheckoutDiscount");
+            if (earlyDisc != null) {
+                lich.setEarlyCheckoutDiscount(earlyDisc);
+            }
+        } catch (SQLException e) {
+            // New columns might not be present in some select statements
+        }
+
+        try {
             String tenSan = rs.getNString("TenSan");
             if (tenSan != null) {
                 org.example.model.San san = new org.example.model.San();
@@ -322,11 +345,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         String sql = "SELECT l.*, s.TenSan, s.CoSoID " +
                      "FROM LichDatSan l " +
                      "JOIN San s ON l.SanID = s.SanID " +
-                     "WHERE s.CoSoID = ? AND l.NgayDat = CAST(DATEADD(hour, 7, GETUTCDATE()) AS date) AND l.IsDeleted = 0 " +
+                     "WHERE s.CoSoID = ? AND l.NgayDat = ? AND l.IsDeleted = 0 " +
                      "ORDER BY l.GioBatDau ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
+            ps.setDate(2, java.sql.Date.valueOf(java.time.LocalDate.now()));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToLichDatSan(rs));
@@ -1000,8 +1024,8 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ.");
             }
 
-            // 4. Tính toán phụ thu quá giờ (Late Checkout)
-            String sqlSelectDetails = "SELECT lds.GioKetThuc, lds.NgayDat, lds.ApDungGiaCoDen, ls.GiaCoDen, ls.GiaKhongDen, lds.GhiChu " +
+            // 4. Tính toán phụ thu quá giờ (Late Checkout) hoặc tính tiền chơi thực tế cho OPEN_ENDED
+            String sqlSelectDetails = "SELECT lds.GioKetThuc, lds.NgayDat, lds.ApDungGiaCoDen, ls.GiaCoDen, ls.GiaKhongDen, lds.GhiChu, lds.TimeMode, lds.actual_start_time " +
                                       "FROM LichDatSan lds " +
                                       "INNER JOIN San s ON lds.SanID = s.SanID " +
                                       "INNER JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
@@ -1012,6 +1036,8 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             double giaCoDen = 0.0;
             double giaKhongDen = 0.0;
             String existingGhiChu = "";
+            String timeMode = "";
+            Time actualStartTime = null;
             try (PreparedStatement psDet = conn.prepareStatement(sqlSelectDetails)) {
                 psDet.setInt(1, datSanId);
                 try (ResultSet rsDet = psDet.executeQuery()) {
@@ -1022,6 +1048,8 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                         giaCoDen = rsDet.getDouble("GiaCoDen");
                         giaKhongDen = rsDet.getDouble("GiaKhongDen");
                         existingGhiChu = rsDet.getString("GhiChu");
+                        timeMode = rsDet.getString("TimeMode");
+                        actualStartTime = rsDet.getTime("actual_start_time");
                     }
                 }
             }
@@ -1029,35 +1057,80 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             double hourlyRate = apDungGiaCoDen ? giaCoDen : giaKhongDen;
             double phuThuTre = 0.0;
             long minutesOver = 0;
-            
-            if (ngayDat != null && gioKetThuc != null) {
-                java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(ngayDat.toLocalDate(), gioKetThuc.toLocalTime());
+
+            if ("OPEN_ENDED".equals(timeMode)) {
+                LocalTime localStart = (actualStartTime != null ? actualStartTime.toLocalTime() : (gioKetThuc != null ? gioKetThuc.toLocalTime() : LocalTime.now()));
+                LocalTime localEnd = LocalTime.now();
+                long actualDurationMins = Duration.between(localStart, localEnd).toMinutes();
+                if (actualDurationMins < 0) {
+                    actualDurationMins += 24 * 60;
+                }
+                if (actualDurationMins < 15) {
+                    actualDurationMins = 15; // Minimum 15 minutes charge
+                }
+                double finalCourtPrice = (actualDurationMins / 60.0) * hourlyRate;
+                BigDecimal finalCourtPriceBD = BigDecimal.valueOf(finalCourtPrice);
+
+                // Update LichDatSan set GioKetThuc = localEnd, actual_end_time = localEnd, TongTienDuKien = finalCourtPrice
+                String sqlUpdateLichOpen = "UPDATE LichDatSan SET GioKetThuc = ?, actual_end_time = ?, TongTienDuKien = ? WHERE DatSanID = ?";
+                try (PreparedStatement psUpLich = conn.prepareStatement(sqlUpdateLichOpen)) {
+                    psUpLich.setTime(1, Time.valueOf(localEnd));
+                    psUpLich.setTime(2, Time.valueOf(localEnd));
+                    psUpLich.setBigDecimal(3, finalCourtPriceBD);
+                    psUpLich.setInt(4, datSanId);
+                    psUpLich.executeUpdate();
+                }
+
+                // Update HoaDon set TongTienSan = finalCourtPrice, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe
+                String sqlUpdateInvoiceOpen = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+                try (PreparedStatement psUpInv = conn.prepareStatement(sqlUpdateInvoiceOpen)) {
+                    psUpInv.setBigDecimal(1, finalCourtPriceBD);
+                    psUpInv.setBigDecimal(2, finalCourtPriceBD);
+                    psUpInv.setInt(3, datSanId);
+                    psUpInv.executeUpdate();
+                }
+            } else {
+                // FIXED_DURATION or FIXED_BOOKING or NULL (fallback)
                 java.time.LocalDateTime actualCheckOut = java.time.LocalDateTime.now();
-                if (actualCheckOut.isAfter(plannedEnd)) {
-                    minutesOver = java.time.Duration.between(plannedEnd, actualCheckOut).toMinutes();
-                    if (minutesOver > 10) { // Grace period: 10 minutes
-                        phuThuTre = minutesOver * (hourlyRate / 60.0);
+                java.time.LocalTime actualCheckOutTime = actualCheckOut.toLocalTime();
+
+                // Update actual_end_time in LichDatSan
+                String sqlUpdateActualEnd = "UPDATE LichDatSan SET actual_end_time = ? WHERE DatSanID = ?";
+                try (PreparedStatement psUpEnd = conn.prepareStatement(sqlUpdateActualEnd)) {
+                    psUpEnd.setTime(1, Time.valueOf(actualCheckOutTime));
+                    psUpEnd.setInt(2, datSanId);
+                    psUpEnd.executeUpdate();
+                }
+
+                if (ngayDat != null && gioKetThuc != null) {
+                    java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(ngayDat.toLocalDate(), gioKetThuc.toLocalTime());
+                    if (actualCheckOut.isAfter(plannedEnd)) {
+                        minutesOver = java.time.Duration.between(plannedEnd, actualCheckOut).toMinutes();
+                        if (minutesOver > 10) { // Grace period: 10 minutes
+                            long overMinutes = minutesOver - 10;
+                            phuThuTre = overMinutes * (hourlyRate / 60.0);
+                        }
                     }
                 }
-            }
 
-            if (phuThuTre > 0.0) {
-                // Cập nhật phụ thu vào HoaDon
-                String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-                try (PreparedStatement psUpSurch = conn.prepareStatement(sqlUpdateInvoiceSurcharge)) {
-                    psUpSurch.setDouble(1, phuThuTre);
-                    psUpSurch.setDouble(2, phuThuTre);
-                    psUpSurch.setInt(3, datSanId);
-                    psUpSurch.executeUpdate();
-                }
-                // Cập nhật phụ thu vào LichDatSan
-                String updatedGhiChu = (existingGhiChu != null ? existingGhiChu : "") + " [Phụ thu quá giờ: " + minutesOver + " phút (" + String.format("%.0f", phuThuTre) + "đ)]";
-                String sqlUpdateLichSurcharge = "UPDATE LichDatSan SET TongTienDuKien = TongTienDuKien + ?, GhiChu = ? WHERE DatSanID = ?";
-                try (PreparedStatement psUpLich = conn.prepareStatement(sqlUpdateLichSurcharge)) {
-                    psUpLich.setDouble(1, phuThuTre);
-                    psUpLich.setString(2, updatedGhiChu);
-                    psUpLich.setInt(3, datSanId);
-                    psUpLich.executeUpdate();
+                if (phuThuTre > 0.0) {
+                    // Cập nhật phụ thu vào HoaDon
+                    String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+                    try (PreparedStatement psUpSurch = conn.prepareStatement(sqlUpdateInvoiceSurcharge)) {
+                        psUpSurch.setDouble(1, phuThuTre);
+                        psUpSurch.setDouble(2, phuThuTre);
+                        psUpSurch.setInt(3, datSanId);
+                        psUpSurch.executeUpdate();
+                    }
+                    // Cập nhật phụ thu vào LichDatSan
+                    String updatedGhiChu = (existingGhiChu != null ? existingGhiChu : "") + " [Phụ thu quá giờ: " + minutesOver + " phút (" + String.format("%.0f", phuThuTre) + "đ)]";
+                    String sqlUpdateLichSurcharge = "UPDATE LichDatSan SET TongTienDuKien = TongTienDuKien + ?, GhiChu = ? WHERE DatSanID = ?";
+                    try (PreparedStatement psUpLich = conn.prepareStatement(sqlUpdateLichSurcharge)) {
+                        psUpLich.setDouble(1, phuThuTre);
+                        psUpLich.setString(2, updatedGhiChu);
+                        psUpLich.setInt(3, datSanId);
+                        psUpLich.executeUpdate();
+                    }
                 }
             }
 

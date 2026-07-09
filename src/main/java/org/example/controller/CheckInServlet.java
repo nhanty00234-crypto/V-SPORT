@@ -207,7 +207,7 @@ public class CheckInServlet extends HttpServlet {
                 }
                 session.setAttribute(lockKey, true);
                 try {
-                    checkInDAO.checkInKhachVangLai(sanId, duration, user.getAccountId(), donGia, ghiChu);
+                    checkInDAO.checkInKhachVangLai(sanId, duration, user.getAccountId(), donGia, ghiChu, playMode);
                 } finally {
                     session.removeAttribute(lockKey);
                 }
@@ -300,6 +300,34 @@ public class CheckInServlet extends HttpServlet {
                 LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
                 lichDAO.thanhToanHoaDonDatSan(datSanId, user.getAccountId(), paymentMethod);
                 successMsg = "Đã hoàn thành thanh toán hóa đơn cho đơn đặt sân #" + datSanId + "!";
+            } else if ("applyEarlyCheckoutAdjustment".equals(action)) {
+                if (user.getRoleId() != 1 && user.getRoleId() != 2) {
+                    throw new CheckInException("Chỉ quản lý hoặc admin mới được thực hiện giảm trừ trả sân sớm.");
+                }
+                String datSanIdStr = req.getParameter("datSanId");
+                String discountAmountStr = req.getParameter("earlyDiscount");
+                String reason = req.getParameter("reason");
+
+                if (datSanIdStr == null || discountAmountStr == null || reason == null ||
+                        datSanIdStr.isEmpty() || discountAmountStr.isEmpty() || reason.trim().isEmpty()) {
+                    throw new CheckInException("Vui lòng nhập đầy đủ thông tin giảm trừ.");
+                }
+
+                int datSanId = Integer.parseInt(datSanIdStr);
+                double discountAmount = Double.parseDouble(discountAmountStr);
+
+                checkInDAO.applyEarlyCheckoutAdjustment(datSanId, discountAmount, reason, user.getAccountId(), user.getCoSoId());
+                
+                // Write Audit Log
+                org.example.service.AuditLogService.log(req, user, 
+                    "EARLY_CHECKOUT_ADJUSTMENT", 
+                    "LichDatSan", 
+                    String.valueOf(datSanId), 
+                    "Đơn đặt sân #" + datSanId, 
+                    "Giảm trừ trả sân sớm: giảm " + discountAmount + "đ. Lý do: " + reason);
+
+                successMsg = "Đã áp dụng giảm trừ trả sân sớm thành công!";
+                req.setAttribute("autoOpenInvoiceDatSanId", datSanId);
             } else {
                 throw new CheckInException("HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡.");
             }
@@ -424,21 +452,52 @@ public class CheckInServlet extends HttpServlet {
 
             double phuThuQuaGio = 0.0;
             long minutesOver = 0;
-            if ("Đang sử dụng".equals(lich.getTrangThai()) && lich.getNgayDat() != null && lich.getGioKetThuc() != null) {
-                java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(lich.getNgayDat(), lich.getGioKetThuc());
-                java.time.LocalDateTime now = java.time.LocalDateTime.now();
-                if (now.isAfter(plannedEnd)) {
-                    minutesOver = java.time.Duration.between(plannedEnd, now).toMinutes();
-                    if (minutesOver > 10) { // Grace period: 10 mins
-                        phuThuQuaGio = minutesOver * (donGiaGio / 60.0);
+            boolean isEarly = false;
+            long minutesEarly = 0;
+
+            if ("OPEN_ENDED".equals(lich.getTimeMode())) {
+                if ("Đang sử dụng".equals(lich.getTrangThai())) {
+                    java.time.LocalTime start = (lich.getActualStartTime() != null ? lich.getActualStartTime() : lich.getGioBatDau());
+                    java.time.LocalTime end = java.time.LocalTime.now();
+                    long elapsedMins = java.time.Duration.between(start, end).toMinutes();
+                    if (elapsedMins < 0) {
+                        elapsedMins += 24 * 60;
+                    }
+                    if (elapsedMins < 15) {
+                        elapsedMins = 15;
+                    }
+                    tongTienSan = (elapsedMins / 60.0) * donGiaGio;
+                }
+            } else {
+                // FIXED_DURATION or FIXED_BOOKING or fallback
+                if ("Đang sử dụng".equals(lich.getTrangThai()) && lich.getNgayDat() != null && lich.getGioKetThuc() != null) {
+                    java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(lich.getNgayDat(), lich.getGioKetThuc());
+                    java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                    if (now.isAfter(plannedEnd)) {
+                        minutesOver = java.time.Duration.between(plannedEnd, now).toMinutes();
+                        if (minutesOver > 10) { // Grace period: 10 mins
+                            long overMinutes = minutesOver - 10;
+                            phuThuQuaGio = overMinutes * (donGiaGio / 60.0);
+                        }
+                    } else if (now.isBefore(plannedEnd)) {
+                        isEarly = true;
+                        minutesEarly = java.time.Duration.between(now, plannedEnd).toMinutes();
                     }
                 }
             }
 
             double phuThuNhanSom = 0.0;
-
             double finalTongTienSan = tongTienSan + phuThuQuaGio;
             double finalTongThanhToan = finalTongTienSan + tongTienDichVu;
+
+            double proposedEarlyDiscount = 0.0;
+            if (isEarly && minutesEarly > 0) {
+                proposedEarlyDiscount = (minutesEarly / 60.0) * donGiaGio;
+                proposedEarlyDiscount = Math.round(proposedEarlyDiscount / 1000.0) * 1000.0;
+                if (proposedEarlyDiscount > finalTongTienSan) {
+                    proposedEarlyDiscount = finalTongTienSan;
+                }
+            }
 
             List<org.example.model.ChiTietHoaDon> ordered = new java.util.ArrayList<>();
             if (hoaDonId != -1) {
@@ -496,6 +555,12 @@ public class CheckInServlet extends HttpServlet {
             data.put("ngayDat", lich.getNgayDat() != null ? lich.getNgayDat().toString() : "");
             data.put("gioBatDau", lich.getGioBatDau() != null ? lich.getGioBatDau().toString().substring(0, 5) : "00:00");
             data.put("gioKetThuc", lich.getGioKetThuc() != null ? lich.getGioKetThuc().toString().substring(0, 5) : "00:00");
+            data.put("timeMode", lich.getTimeMode());
+            data.put("isEarly", isEarly);
+            data.put("minutesEarly", minutesEarly);
+            data.put("earlyCheckoutDiscount", lich.getEarlyCheckoutDiscount() != null ? lich.getEarlyCheckoutDiscount().doubleValue() : 0.0);
+            data.put("earlyCheckoutReason", lich.getEarlyCheckoutReason() != null ? lich.getEarlyCheckoutReason() : "");
+            data.put("proposedEarlyDiscount", proposedEarlyDiscount);
             resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
             e.printStackTrace();

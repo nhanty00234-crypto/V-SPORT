@@ -588,21 +588,21 @@
                 <!-- Tab Contents -->
                 <!-- Tab 1: Playing -->
                 <div id="tab-content-playing" class="tab-pane hidden">
-                    <div id="list-playing" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div id="list-playing" class="flex flex-col gap-2.5">
                         <!-- Filled by JS -->
                     </div>
                 </div>
 
                 <!-- Tab 2: Waiting -->
                 <div id="tab-content-waiting" class="tab-pane hidden">
-                    <div id="list-waiting" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div id="list-waiting" class="flex flex-col gap-2.5">
                         <!-- Filled by JS -->
                     </div>
                 </div>
 
                 <!-- Tab 3: Completed -->
                 <div id="tab-content-completed" class="tab-pane hidden">
-                    <div id="list-completed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div id="list-completed" class="flex flex-col gap-2.5">
                         <!-- Filled by JS -->
                     </div>
                 </div>
@@ -671,18 +671,18 @@
         });
         
         // Show current tab pane
-        const activePane = document.getElementById(`tab-content-${tabName}`);
+        const activePane = document.getElementById("tab-content-" + tabName);
         if (activePane) activePane.classList.remove('hidden');
         
         // Set active styling on current button
-        const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+        const activeBtn = document.getElementById("tab-btn-" + tabName);
         if (activeBtn) {
             if (tabName === 'playing') {
-                activeBtn.className = `flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-emerald-500 text-white shadow-md`;
+                activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-emerald-500 text-white shadow-md";
             } else if (tabName === 'waiting') {
-                activeBtn.className = `flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${themeBg} text-white shadow-md`;
+                activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all " + themeBg + " text-white shadow-md";
             } else {
-                activeBtn.className = `flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-zinc-650 text-white shadow-md`;
+                activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-zinc-650 text-white shadow-md";
             }
         }
     }
@@ -780,70 +780,59 @@
                         <span class="material-symbols-outlined text-[13px]">content_copy</span>
                     </button>
                 </div>
-            ` : '<span class="text-zinc-400">Không có SĐT</span>';
-
-            const noteTooltipHtml = b.ghiChu ? `
-                <div class="mt-2 pt-2 border-t border-zinc-100 flex items-start gap-1 text-[10px] text-zinc-555 italic" title="\${b.ghiChu}">
-                    <span class="material-symbols-outlined text-[12px] text-zinc-400 shrink-0 mt-0.5">speaker_notes</span>
-                    <span class="truncate max-w-full">\${b.ghiChu}</span>
-                </div>
-            ` : '';
+            ` : '<span class="text-zinc-450">Không có SĐT</span>';
             
             if (b.trangThai === 'Đang sử dụng' || b.trangThai === 'Đang chơi') {
                 countPlaying++;
                 playingContainer.insertAdjacentHTML('beforeend', `
-                    <div class="border border-emerald-250 hover:border-emerald-350 bg-emerald-50/10 rounded-2xl p-4 flex flex-col justify-between shadow-sm transition-all duration-200 relative overflow-hidden group">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
+                    <div class="border border-emerald-200 hover:border-emerald-350 bg-emerald-50/5 rounded-xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm transition-all duration-200 group text-xs">
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
+                            <!-- Sân -->
+                            <div class="flex items-center gap-2 min-w-[160px] truncate">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span>
                                 <div>
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <h4 class="font-extrabold text-sm text-zinc-800">\${b.tenSan}</h4>
-                                        <span class="text-[9px] font-semibold text-emerald-700 px-1.5 py-0.5 bg-emerald-50 rounded">\${b.tenLoaiSan || 'Sân bóng'}</span>
-                                    </div>
-                                    <div class="text-xs font-black text-zinc-650 mt-1 font-mono flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[14px] text-zinc-450">schedule</span>
-                                        \${batDau} - \${ketThuc}
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-end gap-1 shrink-0">
-                                    <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
-                                    <span class="badge badge-green text-[8px] uppercase font-bold tracking-tight">ĐANG CHƠI</span>
+                                    <div class="font-black text-zinc-800 truncate">\${b.tenSan}</div>
+                                    <div class="text-[9px] font-semibold text-emerald-700 px-1 py-0.5 bg-emerald-50 rounded inline-block mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
                                 </div>
                             </div>
-                            
-                            <div class="bg-white rounded-xl p-3 space-y-1.5 border border-zinc-150 text-xs mb-4">
-                                <div class="flex items-center justify-between text-zinc-700 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Khách hàng:</span>
-                                    <span class="font-extrabold text-zinc-900 flex items-center gap-1 truncate font-sans" title="\${b.tenKhachHang}">
-                                        <span class="material-symbols-outlined text-[13px] text-zinc-400">person</span>
-                                        \${b.tenKhachHang}
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between text-zinc-700 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Liên hệ:</span>
-                                    \${phoneActionHtml}
-                                </div>
-                                <div class="flex items-center justify-between text-zinc-700 pt-1 border-t border-zinc-100 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Thanh toán:</span>
-                                    <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
+
+                            <!-- Khách hàng -->
+                            <div class="flex items-center gap-2 min-w-[180px] truncate">
+                                <span class="material-symbols-outlined text-[16px] text-zinc-450 shrink-0">person</span>
+                                <div class="truncate">
+                                    <div class="font-extrabold text-zinc-800 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
+                                    <div class="mt-0.5">\${phoneActionHtml}</div>
                                 </div>
                             </div>
-                            
-                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs mb-4">
-                                <span class="font-semibold flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">play_circle</span>
-                                    Thời gian:
-                                </span>
-                                <span class="font-black text-xs animate-pulse card-timer" data-start="\${b.gioBatDau}" data-end="\${b.gioKetThuc}" data-note="\${b.ghiChu}">-</span>
+
+                            <!-- Ca chơi -->
+                            <div class="flex items-center gap-2 min-w-[130px] font-mono font-bold text-zinc-650">
+                                <span class="material-symbols-outlined text-[15px] text-zinc-450 shrink-0">schedule</span>
+                                <span>\${batDau} - \${ketThuc}</span>
                             </div>
-                            
-                            \${noteTooltipHtml}
+
+                            <!-- Trạng thái / Thanh toán -->
+                            <div class="flex items-center gap-2 min-w-[160px] shrink-0">
+                                <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
+                                <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                            </div>
+
+                            <!-- Timer -->
+                            <div class="flex items-center gap-2 min-w-[150px] bg-emerald-50 border border-emerald-100/80 px-2.5 py-1 rounded-lg text-emerald-800 text-[11px] font-semibold shrink-0">
+                                <span class="material-symbols-outlined text-[14px]">play_circle</span>
+                                <span class="font-black card-timer animate-pulse" data-start="\${b.gioBatDau}" data-end="\${b.gioKetThuc}" data-note="\${b.ghiChu}">-</span>
+                            </div>
+
+                            <!-- Ghi chú (nếu có) -->
+                            <div class="min-w-[100px] flex-1 max-w-[200px] truncate text-[10px] text-zinc-400 italic">
+                                \${b.ghiChu ? `<span>Ghi chú: \${b.ghiChu}</span>` : ''}
+                            </div>
                         </div>
-                        
-                        <div class="mt-4 flex gap-2">
-                            <button type="button" onclick="openStaffInvoiceModal(\${b.datSanId})" class="w-full \${themeBg} \${themeBgHover} text-white font-extrabold text-[11px] py-2.5 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+
+                        <!-- Actions -->
+                        <div class="shrink-0 flex items-center justify-end">
+                            <button type="button" onclick="openStaffInvoiceModal(\${b.datSanId})" class="\${themeBg} \${themeBgHover} text-white font-extrabold text-[10.5px] px-3.5 py-2 rounded-lg shadow-sm hover:shadow transition-all active:scale-95 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px]">receipt_long</span>
                                 Dịch vụ &amp; Thanh toán
                             </button>
                         </div>
@@ -856,62 +845,61 @@
                 let checkinAction = "checkInPreBooked";
                 
                 waitingContainer.insertAdjacentHTML('beforeend', `
-                    <div class="border border-zinc-200 hover:border-zinc-350 bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm transition-all duration-200 relative overflow-hidden group">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
+                    <div class="border border-zinc-200 hover:border-zinc-300 bg-white rounded-xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm transition-all duration-200 group text-xs">
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
+                            <!-- Sân -->
+                            <div class="flex items-center gap-2 min-w-[160px] truncate">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
                                 <div>
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                        <h4 class="font-extrabold text-sm text-zinc-800">\${b.tenSan}</h4>
-                                        <span class="text-[9px] font-semibold text-zinc-500 px-1.5 py-0.5 bg-zinc-100 rounded">\${b.tenLoaiSan || 'Sân bóng'}</span>
-                                    </div>
-                                    <div class="text-xs font-black text-zinc-650 mt-1 font-mono flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[14px] text-zinc-450">schedule</span>
-                                        \${batDau} - \${ketThuc}
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-end gap-1 shrink-0">
-                                    <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
-                                    <span class="badge \${statusTheme} text-[8px] uppercase font-bold tracking-tight">\${b.trangThai === 'Chờ xác nhận' ? 'Chờ duyệt' : b.trangThai}</span>
+                                    <div class="font-black text-zinc-800 truncate">\${b.tenSan}</div>
+                                    <div class="text-[9px] font-semibold text-zinc-500 px-1 py-0.5 bg-zinc-100 rounded inline-block mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
                                 </div>
                             </div>
-                            
-                            <div class="bg-zinc-50 rounded-xl p-3 space-y-1.5 border border-zinc-150 text-xs mb-4">
-                                <div class="flex items-center justify-between text-zinc-700 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Khách hàng:</span>
-                                    <span class="font-extrabold text-zinc-900 flex items-center gap-1 truncate font-sans" title="\${b.tenKhachHang}">
-                                        <span class="material-symbols-outlined text-[13px] text-zinc-400">person</span>
-                                        \${b.tenKhachHang}
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between text-zinc-700 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Liên hệ:</span>
-                                    \${phoneActionHtml}
-                                </div>
-                                <div class="flex items-center justify-between text-zinc-700 pt-1 border-t border-zinc-100 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Thanh toán:</span>
-                                    <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
+
+                            <!-- Khách hàng -->
+                            <div class="flex items-center gap-2 min-w-[180px] truncate">
+                                <span class="material-symbols-outlined text-[16px] text-zinc-450 shrink-0">person</span>
+                                <div class="truncate">
+                                    <div class="font-extrabold text-zinc-800 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
+                                    <div class="mt-0.5">\${phoneActionHtml}</div>
                                 </div>
                             </div>
-                            
-                            \${noteTooltipHtml}
+
+                            <!-- Ca chơi -->
+                            <div class="flex items-center gap-2 min-w-[130px] font-mono font-bold text-zinc-650">
+                                <span class="material-symbols-outlined text-[15px] text-zinc-450 shrink-0">schedule</span>
+                                <span>\${batDau} - \${ketThuc}</span>
+                            </div>
+
+                            <!-- Trạng thái / Thanh toán -->
+                            <div class="flex items-center gap-2 min-w-[200px] shrink-0">
+                                <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
+                                <span class="badge \${statusTheme} text-[8px] uppercase font-bold tracking-tight">\${b.trangThai === 'Chờ xác nhận' ? 'Chờ duyệt' : b.trangThai}</span>
+                                <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                            </div>
+
+                            <!-- Ghi chú (nếu có) -->
+                            <div class="min-w-[100px] flex-1 max-w-[200px] truncate text-[10px] text-zinc-400 italic">
+                                \${b.ghiChu ? `<span>Ghi chú: \${b.ghiChu}</span>` : ''}
+                            </div>
                         </div>
-                        
-                        <div class="mt-4 flex gap-2">
-                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="flex-1">
+
+                        <!-- Actions -->
+                        <div class="shrink-0 flex items-center justify-end gap-2">
+                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
                                 <input type="hidden" name="action" value="\${checkinAction}">
                                 <input type="hidden" name="datSanId" value="\${b.datSanId}">
                                 <input type="hidden" name="daThuTienMat" value="false">
-                                <button type="submit" class="w-full \${themeBg} \${themeBgHover} text-white font-extrabold text-[11px] py-2.5 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
+                                <button type="submit" class="\${themeBg} \${themeBgHover} text-white font-extrabold text-[10.5px] px-3.5 py-2 rounded-lg shadow-sm hover:shadow transition-all active:scale-95 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[14px]">power_settings_new</span>
                                     \${checkinBtnText}
                                 </button>
                             </form>
-                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="flex-none" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
+                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
                                 <input type="hidden" name="action" value="cancelNoShow">
                                 <input type="hidden" name="datSanId" value="\${b.datSanId}">
-                                <button type="submit" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[11px] px-3.5 py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
-                                    <span class="material-symbols-outlined text-[16px]">cancel</span>
+                                <button type="submit" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[10.5px] px-2.5 py-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
+                                    <span class="material-symbols-outlined text-[15px]">cancel</span>
                                 </button>
                             </form>
                         </div>
@@ -920,50 +908,56 @@
             } else {
                 countCompleted++;
                 completedContainer.insertAdjacentHTML('beforeend', `
-                    <div class="border border-zinc-200 bg-zinc-50 opacity-80 hover:opacity-100 rounded-2xl p-4 flex flex-col justify-between shadow-sm transition-all duration-200 relative overflow-hidden group">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
+                    <div class="border border-zinc-200 bg-zinc-50/50 opacity-90 hover:opacity-100 rounded-xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm transition-all duration-200 group text-xs">
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
+                            <!-- Sân -->
+                            <div class="flex items-center gap-2 min-w-[160px] truncate">
+                                <span class="w-2 h-2 rounded-full bg-zinc-400 shrink-0"></span>
                                 <div>
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-zinc-400"></span>
-                                        <h4 class="font-bold text-sm text-zinc-700">\${b.tenSan}</h4>
-                                        <span class="text-[9px] font-semibold text-zinc-500 px-1.5 py-0.5 bg-zinc-100 rounded">\${b.tenLoaiSan || 'Sân bóng'}</span>
-                                    </div>
-                                    <div class="text-xs font-medium text-zinc-500 mt-1 font-mono flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[14px] text-zinc-400">schedule</span>
-                                        \${batDau} - \${ketThuc}
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-end gap-1 shrink-0">
-                                    <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
-                                    <span class="badge badge-gray text-[8px] uppercase font-bold tracking-tight">\${b.trangThai}</span>
+                                    <div class="font-black text-zinc-700 truncate">\${b.tenSan}</div>
+                                    <div class="text-[9px] font-semibold text-zinc-500 px-1 py-0.5 bg-zinc-100 rounded inline-block mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
                                 </div>
                             </div>
-                            
-                            <div class="bg-white rounded-xl p-3 space-y-1.5 border border-zinc-150 text-xs mb-4">
-                                <div class="flex items-center justify-between text-zinc-700 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Khách hàng:</span>
-                                    <span class="font-bold text-zinc-800 flex items-center gap-1 truncate font-sans" title="\${b.tenKhachHang}">
-                                        <span class="material-symbols-outlined text-[13px] text-zinc-400">person</span>
-                                        \${b.tenKhachHang}
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between text-zinc-700 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Liên hệ:</span>
-                                    <span class="font-medium text-zinc-700 font-mono">\${b.soDienThoai || '---'}</span>
-                                </div>
-                                <div class="flex items-center justify-between text-zinc-700 pt-1 border-t border-zinc-100 gap-2">
-                                    <span class="text-zinc-400 font-medium shrink-0">Tổng tiền sân:</span>
-                                    <span class="font-extrabold text-zinc-900">\${formattedTongTien}</span>
+
+                            <!-- Khách hàng -->
+                            <div class="flex items-center gap-2 min-w-[180px] truncate">
+                                <span class="material-symbols-outlined text-[16px] text-zinc-450 shrink-0">person</span>
+                                <div class="truncate">
+                                    <div class="font-extrabold text-zinc-700 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
+                                    <div class="text-[10px] text-zinc-500 font-mono mt-0.5">\${b.soDienThoai || '---'}</div>
                                 </div>
                             </div>
-                            
-                            \${noteTooltipHtml}
+
+                            <!-- Ca chơi -->
+                            <div class="flex items-center gap-2 min-w-[130px] font-mono font-medium text-zinc-500">
+                                <span class="material-symbols-outlined text-[15px] text-zinc-400 shrink-0">schedule</span>
+                                <span>\${batDau} - \${ketThuc}</span>
+                            </div>
+
+                            <!-- Nguồn đặt sân -->
+                            <div class="flex items-center gap-2 min-w-[90px] shrink-0">
+                                <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                <span class="badge badge-gray text-[8px] uppercase font-bold tracking-tight">\${b.trangThai}</span>
+                            </div>
+
+                            <!-- Tổng tiền -->
+                            <div class="flex items-center gap-2 min-w-[120px] shrink-0 font-extrabold text-zinc-800">
+                                <span class="text-zinc-450 text-[10px] font-medium">Tổng tiền:</span>
+                                <span>\${formattedTongTien}</span>
+                            </div>
+
+                            <!-- Ghi chú (nếu có) -->
+                            <div class="min-w-[100px] flex-1 max-w-[200px] truncate text-[10px] text-zinc-400 italic">
+                                \${b.ghiChu ? `<span>Ghi chú: \${b.ghiChu}</span>` : ''}
+                            </div>
                         </div>
-                        
-                        <div class="flex items-center justify-between p-2 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-[10px]">
-                            <span class="font-medium">Trạng thái HĐ:</span>
-                            <span class="font-bold uppercase \${b.trangThaiThanhToan === 'Đã thanh toán' ? 'text-emerald-700' : 'text-amber-700'}">\${b.trangThaiThanhToan}</span>
+
+                        <!-- Trạng thái HĐ -->
+                        <div class="shrink-0 flex items-center justify-end">
+                            <div class="px-3 py-1.5 rounded-lg bg-zinc-100 border border-zinc-200 text-zinc-600 text-[10px] font-semibold">
+                                <span class="font-medium text-zinc-450">Trạng thái HD:</span>
+                                <span class="font-bold uppercase ml-1 \${b.trangThaiThanhToan === 'Đã thanh toán' ? 'text-emerald-700' : 'text-amber-700'}">\${b.trangThaiThanhToan}</span>
+                            </div>
                         </div>
                     </div>
                 `);
@@ -1589,6 +1583,25 @@
                                 <span>Phụ thu quá giờ (<span id="staff-detail-late-minutes">0</span> phút):</span>
                                 <span class="font-bold" id="staff-detail-late-surcharge">0 đ</span>
                             </div>
+                            
+                            <div id="staff-detail-early-checkout-warning-panel" class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1.5 hidden">
+                                <div class="flex items-center gap-1.5 font-bold">
+                                    <span class="material-symbols-outlined text-[16px]">warning</span>
+                                    <span>Khách trả sân sớm <span id="staff-detail-early-checkout-minutes">0</span> phút</span>
+                                </div>
+                                <p class="text-[11px] leading-relaxed">Theo quy định, ca chơi cố định trả sớm vẫn tính đủ tiền giờ đã đăng ký ban đầu.</p>
+                                <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2}">
+                                    <button type="button" onclick="openEarlyCheckoutAdjustmentModal()" class="mt-2 w-full bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-[10px] py-1.5 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px]">local_activity</span>
+                                        Áp dụng giảm trừ trả sân sớm
+                                    </button>
+                                </c:if>
+                            </div>
+                            
+                            <div id="staff-detail-early-discount-container" class="flex justify-between text-green-700 font-bold hidden">
+                                <span>Giảm trừ trả sân sớm:</span>
+                                <span id="staff-detail-early-discount-value">-0 đ</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1893,6 +1906,7 @@
     let staffProducts = [];
     let staffOrdered = [];
     let currentStaffDatSanId = -1;
+    let currentProposedEarlyDiscount = 0;
 
     let currentStaffCatalogCat = "all";
     let currentStaffCatalogSearch = "";
@@ -2042,6 +2056,7 @@
             .then(data => {
                 staffProducts = data.products || [];
                 staffOrdered = data.ordered || [];
+                currentProposedEarlyDiscount = data.proposedEarlyDiscount || 0;
                 
                 document.getElementById("staff-invoice-court-name").textContent = data.tenSan;
                 document.getElementById("staff-invoice-time-slot").textContent = data.gioBatDau + ' - ' + data.gioKetThuc + ' (' + data.ngayDat + ')';
@@ -2119,6 +2134,30 @@
                     });
                 }
  
+                // Update early checkout warning & discount views
+                const warningPanel = document.getElementById("staff-detail-early-checkout-warning-panel");
+                const earlyMinsEl = document.getElementById("staff-detail-early-checkout-minutes");
+                const earlyDiscountContainer = document.getElementById("staff-detail-early-discount-container");
+                const earlyDiscountValEl = document.getElementById("staff-detail-early-discount-value");
+
+                if (warningPanel) {
+                    if (data.isEarly && data.trangThaiThanhToan !== 'Đã thanh toán') {
+                        warningPanel.classList.remove("hidden");
+                        if (earlyMinsEl) earlyMinsEl.textContent = data.minutesEarly;
+                    } else {
+                        warningPanel.classList.add("hidden");
+                    }
+                }
+
+                if (earlyDiscountContainer) {
+                    if (data.earlyCheckoutDiscount > 0) {
+                        earlyDiscountContainer.classList.remove("hidden");
+                        if (earlyDiscountValEl) earlyDiscountValEl.textContent = "-" + formatCurrency(data.earlyCheckoutDiscount);
+                    } else {
+                        earlyDiscountContainer.classList.add("hidden");
+                    }
+                }
+
                 renderStaffOrderedTable();
                 
                 loading.classList.add("hidden");
@@ -2261,6 +2300,38 @@
         select.value = "";
         qtyInput.value = "1";
         renderStaffOrderedTable();
+    }
+
+    function openEarlyCheckoutAdjustmentModal() {
+        const modal = document.getElementById("earlyCheckoutAdjustmentModal");
+        if (!modal) return;
+        
+        const datSanId = currentStaffDatSanId;
+        const courtPriceVal = parseFloat(document.getElementById("staff-summary-court-price").getAttribute("data-val")) || 0;
+        
+        document.getElementById("early-adjust-datsan-id").value = datSanId;
+        document.getElementById("early-adjust-court-total").value = formatCurrency(courtPriceVal);
+        document.getElementById("early-adjust-discount-amount").max = courtPriceVal;
+        document.getElementById("early-adjust-discount-amount").value = currentProposedEarlyDiscount;
+        document.getElementById("early-adjust-reason").value = "Khách trả sân sớm";
+        
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        setTimeout(() => {
+            modal.classList.remove("opacity-0");
+            modal.querySelector(".bg-white").classList.remove("scale-95");
+        }, 10);
+    }
+
+    function closeEarlyCheckoutAdjustmentModal() {
+        const modal = document.getElementById("earlyCheckoutAdjustmentModal");
+        if (!modal) return;
+        modal.classList.add("opacity-0");
+        modal.querySelector(".bg-white").classList.add("scale-95");
+        setTimeout(() => {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }, 300);
     }
 
     function recalculateStaffTotals() {
@@ -3070,6 +3141,47 @@
             }, 600);
         });
     </script>
+</c:if>
+
+<!-- Early Checkout Adjustment Modal (Managers only) -->
+<c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2}">
+<div id="earlyCheckoutAdjustmentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+    <div class="bg-white w-full max-w-[400px] rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative flex flex-col p-6">
+        <div class="flex justify-between items-center pb-3 border-b border-zinc-150 mb-4">
+            <h3 class="text-base font-extrabold text-zinc-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-600">local_activity</span>
+                Giảm trừ trả sân sớm
+            </h3>
+            <button onclick="closeEarlyCheckoutAdjustmentModal()" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-400">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <form id="early-checkout-adjustment-form" method="post" action="${pageContext.request.contextPath}/staff/checkin">
+            <input type="hidden" name="action" value="applyEarlyCheckoutAdjustment">
+            <input type="hidden" name="datSanId" id="early-adjust-datsan-id">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-zinc-550 mb-1">Tổng tiền sân ban đầu:</label>
+                    <input type="text" id="early-adjust-court-total" class="w-full text-xs p-3 border border-zinc-150 rounded-xl bg-zinc-100 font-bold text-zinc-700" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-zinc-550 mb-1">Số tiền giảm trừ (VND):</label>
+                    <input type="number" name="earlyDiscount" id="early-adjust-discount-amount" min="0" step="1000" class="w-full text-xs p-3 border border-zinc-200 rounded-xl focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" required placeholder="VD: 50000">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-[#0b1c30] mb-1">Lý do giảm trừ:</label>
+                    <textarea name="reason" id="early-adjust-reason" rows="3" class="w-full text-xs p-3 border border-zinc-200 rounded-xl focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" required placeholder="Nhập lý do giảm trừ (bắt buộc)..."></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeEarlyCheckoutAdjustmentModal()" class="flex-1 bg-zinc-100 text-zinc-650 font-bold text-xs py-3 rounded-xl transition-colors hover:bg-zinc-200">Hủy</button>
+                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold text-xs py-3 rounded-xl shadow transition-all active:scale-95">Xác nhận</button>
+            </div>
+        </form>
+    </div>
+</div>
 </c:if>
 
 </body>

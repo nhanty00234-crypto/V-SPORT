@@ -212,16 +212,6 @@
                           class="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600 transition-all" title="Xem chi tiết">
                     <span class="material-symbols-outlined text-[16px]">visibility</span>
                   </button>
-                  <c:if test="${hd.trangThai == 'Chưa thanh toán'}">
-                    <button onclick="openPayModal(${hd.hoaDonId}, '${hd.loaiHoaDon}')"
-                            class="p-1.5 rounded-lg hover:bg-green-50 text-green-600 transition-all" title="Thanh toán">
-                      <span class="material-symbols-outlined text-[16px]">payments</span>
-                    </button>
-                    <button onclick="confirmCancel(${hd.hoaDonId})"
-                            class="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-all" title="Hủy hóa đơn">
-                      <span class="material-symbols-outlined text-[16px]">cancel</span>
-                    </button>
-                  </c:if>
                 </div>
               </td>
             </tr>
