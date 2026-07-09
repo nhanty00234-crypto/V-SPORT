@@ -529,7 +529,7 @@
                         <p class="text-[10px] text-slate-500 mt-1 leading-normal max-w-[280px] mx-auto">Hệ thống sẽ tạo mã chuyển khoản tự động. Bạn cần hoàn tất trong 10 phút.</p>
                     </div>
                 </div>
-                <button onclick="confirmBooking()" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-bold h-12 rounded-xl text-[14px] transition-colors shadow-md flex items-center justify-center gap-2">
+                <button type="button" id="final-submit-btn" onclick="confirmBooking()" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-bold h-12 rounded-xl text-[14px] transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                     <span class="material-symbols-outlined text-[20px]">verified</span> Hoàn tất đặt sân
                 </button>
             </div>
@@ -999,7 +999,29 @@
             setTimeout(() => { cp.classList.add("hidden"); cp.classList.remove("opacity-0"); fp.classList.remove("hidden"); setTimeout(() => fp.classList.remove("scale-95"), 10); }, 200);
         }
 
-        function confirmBooking() { document.getElementById('booking-form').submit(); }
+        function confirmBooking() {
+            const submitBtn = document.getElementById("final-submit-btn");
+            if (submitBtn && submitBtn.disabled) return; // chặn bấm lần 2 trong lúc đang chờ tạo mã QR
+            const paymentMethod = document.getElementById("input-payment-method").value;
+            if (paymentMethod === 'payos' && submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span> Đang tạo mã QR...';
+                showPayosLoadingToast();
+            }
+            document.getElementById('booking-form').submit();
+        }
+
+        function showPayosLoadingToast() {
+            let toast = document.getElementById("payos-loading-toast");
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "payos-loading-toast";
+                toast.className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2";
+                toast.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Đang tạo mã QR thanh toán, vui lòng chờ trong giây lát...';
+                document.body.appendChild(toast);
+            }
+            toast.classList.remove("hidden");
+        }
 
         function applyBranchTimeConstraints(branchId) {
             const { openTime, closeTime } = getBranchHours(branchId);
