@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author DatN (Senior refactor)
  * @version 2.0
  */
-@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san" })
+@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel" })
 public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
@@ -107,6 +107,10 @@ public class DatSanServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
         } else if (path.equals("/customer/dat-dich-vu")) {
             handleGetDichVu(req, resp, user);
+        } else if (path.equals("/customer/payos-return")) {
+            handlePayOSReturn(req, resp, session);
+        } else if (path.equals("/customer/payos-cancel")) {
+            handlePayOSCancel(req, resp, session);
         }
     }
 
@@ -116,22 +120,28 @@ public class DatSanServlet extends HttpServlet {
      */
     private void loadBookingPage(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        long t0 = System.currentTimeMillis();
+
         List<org.example.model.CoSo> dsCoSo = coSoDAO.getAllCoSo();
         List<San> dsSan = new java.util.ArrayList<>();
         List<MonTheThao> dsMon = new java.util.ArrayList<>();
         List<LoaiSan> dsLoai = new java.util.ArrayList<>();
 
         try {
+            long tSan0 = System.currentTimeMillis();
             dsSan = sanDAO.getAllSan();
             dsMon = loaiSanDAO.getAllMonTheThao();
             dsLoai = loaiSanDAO.getAllLoaiSan();
-            LOGGER.info("Loaded " + dsSan.size() + " courts from database.");
+            LOGGER.info(String.format("loadBookingPage: tải danh sách sân/loại=%dms, count=%d", System.currentTimeMillis() - tSan0, dsSan.size()));
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Lỗi khi tải dữ liệu trang đặt sân", e);
         }
 
         // Lấy toàn bộ lịch đặt hiện tại để hiển thị timetable xung đột trên frontend
+        long tAll0 = System.currentTimeMillis();
         List<Lichdatsan> activeBookings = lichDatSanDAO.getAllLichDatSan();
+        LOGGER.info(String.format("loadBookingPage: getAllLichDatSan=%dms, count=%d",
+                System.currentTimeMillis() - tAll0, activeBookings != null ? activeBookings.size() : 0));
         if (activeBookings != null) {
             activeBookings.removeIf(b -> "Chờ thanh toán".equals(b.getTrangThai()) &&
                     b.getCreatedTime() != null &&
@@ -143,7 +153,10 @@ public class DatSanServlet extends HttpServlet {
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
         if (user != null) {
             try {
+                long tUser0 = System.currentTimeMillis();
                 List<Lichdatsan> dsLich = lichDatSanDAO.getLichByAccountId(user.getAccountId());
+                LOGGER.info(String.format("loadBookingPage: getLichByAccountId(accountId=%d)=%dms, count=%d",
+                        user.getAccountId(), System.currentTimeMillis() - tUser0, dsLich != null ? dsLich.size() : 0));
                 req.setAttribute("dsLich", dsLich);
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Lỗi khi tải lịch sử đặt sân cho khách hàng", e);
@@ -156,6 +169,7 @@ public class DatSanServlet extends HttpServlet {
         req.setAttribute("dsLoai", dsLoai);
         req.setAttribute("activeBookings", activeBookings);
 
+        LOGGER.info(String.format("loadBookingPage: tổng=%dms", System.currentTimeMillis() - t0));
         req.getRequestDispatcher("/customer/DatSan.jsp").forward(req, resp);
     }
 
@@ -223,6 +237,7 @@ public class DatSanServlet extends HttpServlet {
      */
     private void handleDatSan(HttpServletRequest req, HttpServletResponse resp,
             HttpSession session, TaiKhoan user) throws IOException {
+        long tSubmit0 = System.currentTimeMillis();
         // --- Bước 1: Parse input ---
         int sanId;
         LocalDate ngayDat;
@@ -522,7 +537,8 @@ public class DatSanServlet extends HttpServlet {
                             " ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan, HoldExpiresAt) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + holdExpiresAtExpr + ")";
 
-                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                    int newDatSanId = -1;
+                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                         insertPs.setInt(1, user.getAccountId());
                         insertPs.setInt(2, sanId);
                         insertPs.setDate(3, java.sql.Date.valueOf(ngayDat));
@@ -535,6 +551,9 @@ public class DatSanServlet extends HttpServlet {
                         insertPs.setString(9, ghiChu != null ? ghiChu.trim() : "");
                         insertPs.setString(10, "Web");
                         insertPs.executeUpdate();
+                        try (java.sql.ResultSet genKeys = insertPs.getGeneratedKeys()) {
+                            if (genKeys.next()) newDatSanId = genKeys.getInt(1);
+                        }
                     }
 
                     // ── 3f-2. Dọn SoftHold của chính tài khoản này cho San+Ngày này ──
@@ -549,21 +568,58 @@ public class DatSanServlet extends HttpServlet {
                     }
 
                     // ── 3g. Commit toàn bộ transaction ──
+                    long tCommit0 = System.currentTimeMillis();
                     conn.commit();
+                    LOGGER.info(String.format("handleDatSan: commit transaction=%dms", System.currentTimeMillis() - tCommit0));
 
                     LOGGER.info(String.format(
-                            "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s",
-                            user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod));
+                            "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s, tổng submit=%dms",
+                            user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod, System.currentTimeMillis() - tSubmit0));
 
                     if (isOnlineDeposit) {
-                        session.setAttribute("message",
-                                "Đăng ký đặt sân thành công! Vui lòng tiến hành quét mã QR thanh toán trong vòng " +
-                                        org.example.util.Constants.BOOKING_HOLD_MINUTES + " phút để giữ chỗ.");
+                        // ── PayOS: tạo payment link và redirect sang trang thanh toán ──
+                        String scheme = req.getScheme();
+                        String serverName = req.getServerName();
+                        int port = req.getServerPort();
+                        String ctx = req.getContextPath();
+                        boolean defaultPort = (scheme.equals("http") && port == 80)
+                                || (scheme.equals("https") && port == 443);
+                        String baseUrl = scheme + "://" + serverName + (defaultPort ? "" : ":" + port) + ctx;
+
+                        String returnUrl = baseUrl + "/customer/payos-return?datSanId=" + newDatSanId;
+                        String cancelUrl = baseUrl + "/customer/payos-cancel?datSanId=" + newDatSanId;
+                        long amount = BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+                        // description tối đa 25 ký tự theo giới hạn PayOS
+                        String description = "VSport DS" + newDatSanId;
+
+                        try {
+                            long tPayOS0 = System.currentTimeMillis();
+                            String checkoutUrl = org.example.service.PayOSService.getInstance()
+                                    .createCheckoutUrl(newDatSanId, amount, description, returnUrl, cancelUrl);
+                            LOGGER.info(String.format("handleDatSan: PayOS createCheckoutUrl=%dms", System.currentTimeMillis() - tPayOS0));
+                            resp.sendRedirect(checkoutUrl);
+                        } catch (Exception payosEx) {
+                            LOGGER.log(Level.SEVERE, "PayOS tạo link thất bại, DatSanID=" + newDatSanId, payosEx);
+                            if (newDatSanId != -1) {
+                                try (java.sql.Connection cancelConn = org.example.util.DBUtil.getConnection()) {
+                                    String cancelSql = "UPDATE LichDatSan SET TrangThai = N'Đã hủy', " +
+                                            "GhiChu = ISNULL(GhiChu, '') + N' [Tự động hủy: Không tạo được link thanh toán PayOS]' " +
+                                            "WHERE DatSanID = ? AND TrangThai = N'Chờ thanh toán'";
+                                    try (java.sql.PreparedStatement cancelPs = cancelConn.prepareStatement(cancelSql)) {
+                                        cancelPs.setInt(1, newDatSanId);
+                                        cancelPs.executeUpdate();
+                                    }
+                                } catch (Exception ignored) {}
+                            }
+                            session.setAttribute("error",
+                                    "Không thể tạo link thanh toán PayOS. Vui lòng thử lại hoặc chọn thanh toán tại quầy.");
+                            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                        }
                     } else {
                         session.setAttribute("message",
                                 "Đặt sân thành công! Lịch đặt bằng tiền mặt chỉ được giữ chỗ tạm thời. Vui lòng đến sớm 15 phút để làm thủ tục nhận sân.");
+                        resp.sendRedirect(req.getContextPath() + "/customer/lich-su-dat-san");
                     }
-                    resp.sendRedirect(req.getContextPath() + "/customer/lich-su-dat-san");
                     return;
 
                 } catch (SQLException sqlEx) {
@@ -659,7 +715,46 @@ public class DatSanServlet extends HttpServlet {
     }
 
     // =========================================================================
-    // PHẦN 5: UTILITY METHODS
+    // PHẦN 5: PAYOS RETURN / CANCEL
+    // =========================================================================
+
+    private void handlePayOSReturn(HttpServletRequest req, HttpServletResponse resp,
+            HttpSession session) throws IOException {
+        session.setAttribute("message",
+                "Hệ thống đang kiểm tra thanh toán. Vui lòng chờ xác nhận.");
+        resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+    }
+
+    private void handlePayOSCancel(HttpServletRequest req, HttpServletResponse resp,
+            HttpSession session) throws IOException {
+        int datSanId = -1;
+        String paramId = req.getParameter("datSanId");
+        if (paramId == null) paramId = req.getParameter("orderCode");
+        try {
+            if (paramId != null) datSanId = Integer.parseInt(paramId.trim());
+        } catch (NumberFormatException ignored) {}
+
+        if (datSanId != -1) {
+            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
+                String sql = "UPDATE LichDatSan " +
+                        "SET TrangThai = N'Đã hủy', " +
+                        "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Người dùng hủy thanh toán PayOS]') " +
+                        "WHERE DatSanID = ? AND TrangThai = N'Chờ thanh toán'";
+                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setInt(1, datSanId);
+                    ps.executeUpdate();
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Lỗi khi hủy booking PayOS DatSanID=" + datSanId, e);
+            }
+        }
+
+        session.setAttribute("message", "Bạn đã hủy thanh toán. Đơn giữ chỗ đã được hủy.");
+        resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+    }
+
+    // =========================================================================
+    // PHẦN 6: UTILITY METHODS
     // =========================================================================
 
     /**

@@ -999,7 +999,29 @@
             setTimeout(() => { cp.classList.add("hidden"); cp.classList.remove("opacity-0"); fp.classList.remove("hidden"); setTimeout(() => fp.classList.remove("scale-95"), 10); }, 200);
         }
 
-        function confirmBooking() { document.getElementById('booking-form').submit(); }
+        function confirmBooking() {
+            const form = document.getElementById('booking-form');
+            if (!form) return;
+            const btn = document.querySelector('button[onclick="confirmBooking()"]');
+            const paymentMethod = document.getElementById('input-payment-method').value;
+            const isPayOS = paymentMethod === 'payos';
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = isPayOS
+                    ? '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span> Đang tạo mã QR...'
+                    : '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span> Đang xử lý...';
+            }
+            if (isPayOS) {
+                const info = document.getElementById('payment-info-payos');
+                if (info) {
+                    info.innerHTML = '<div class="flex items-center justify-center gap-2 text-emerald-700 font-semibold text-sm py-1">' +
+                        '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>' +
+                        '<span>Đang kết nối PayOS, vui lòng chờ...</span></div>';
+                }
+            }
+            form.submit();
+        }
 
         function applyBranchTimeConstraints(branchId) {
             const { openTime, closeTime } = getBranchHours(branchId);
