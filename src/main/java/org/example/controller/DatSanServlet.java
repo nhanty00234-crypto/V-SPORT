@@ -695,6 +695,16 @@ public class DatSanServlet extends HttpServlet {
                 session.setAttribute("error", "Bạn không có quyền hủy đơn này.");
                 LOGGER.warning(String.format("IDOR attempt: AccountID=%d cố hủy đơn ID=%d của AccountID=%d",
                         user.getAccountId(), id, lich.getAccountId()));
+            } else if ("Đã xác nhận".equals(lich.getTrangThai())
+                    && lich.getGhiChu() != null
+                    && lich.getGhiChu().contains(org.example.util.Constants.PAYOS_PAID_GHI_CHU_MARKER)) {
+                // Đơn đã được PayOS webhook xác nhận thanh toán: chưa có refund tự động,
+                // không cho khách tự hủy để tránh mất tiền mà không hoàn lại được.
+                session.setAttribute("error",
+                        "Đơn này đã thanh toán PayOS. Vui lòng liên hệ sân để được hỗ trợ hủy/hoàn tiền.");
+                LOGGER.warning(String.format(
+                        "[huy-dat-san] CHAN: AccountID=%d co huy don da thanh toan PayOS, DatSanID=%d",
+                        user.getAccountId(), id));
             } else if ("Chờ xác nhận".equals(lich.getTrangThai())) {
                 LocalDateTime startDateTime = LocalDateTime.of(lich.getNgayDat(), lich.getGioBatDau());
                 if (LocalDateTime.now().plusHours(6).isAfter(startDateTime)) {

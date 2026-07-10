@@ -50,6 +50,12 @@ public final class Constants {
     public static final String PT_VI_DIEN_TU = "Ví điện tử";
     public static final String PT_THE = "Thẻ";
 
+    // ========== PAYOS ==========
+    // Đánh dấu trong GhiChu của LichDatSan khi PayOSWebhookServlet xác nhận thanh
+    // toán thành công. Chưa có field payment_method/payment_status riêng nên tạm
+    // dùng marker này để nhận diện booking đã thanh toán PayOS (xem PayOSWebhookServlet).
+    public static final String PAYOS_PAID_GHI_CHU_MARKER = "PayOS webhook xác nhận thanh toán thành công";
+
     // ========== COURT (San) STATUS ==========
     public static final String TRANG_THAI_SAN_SAN_SANG = "Sẵn sàng";
     public static final String TRANG_THAI_SAN_TAM_DONG = "Tạm đóng";
