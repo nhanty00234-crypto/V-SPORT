@@ -1,5 +1,0 @@
-2026-07-08 10:21:00 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: SQLServerDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-07-08 10:21:02 [main] INFO  org.example.util.JPAUtil - JPAUtil: EntityManagerFactory created successfully for SportPU
-2026-07-08 10:21:27 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: SQLServerDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-07-08 10:21:29 [main] INFO  org.example.util.JPAUtil - JPAUtil: EntityManagerFactory created successfully for SportPU
-2026-07-08 10:21:31 [main] INFO  org.example.util.DBUtil - DBUtil: HikariCP data source initialized successfully

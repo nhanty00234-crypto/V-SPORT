@@ -5,6 +5,8 @@ out/
 .vscode/
 *.class
 *.log
+/logs/*.log
+/logs/*.log.gz
 .DS_Store
 .env
 node_modules/
