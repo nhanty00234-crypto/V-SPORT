@@ -144,19 +144,19 @@
         border-color: var(--primary);
     }
     .user-avatar {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
-        background-color: var(--primary);
+        background-color: var(--primary-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #ffffff;
+        color: var(--primary-dark);
         font-weight: 700;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
     }
     .user-name {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: 600;
         color: var(--text-dark);
     }

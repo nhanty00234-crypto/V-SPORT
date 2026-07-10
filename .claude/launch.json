@@ -6,6 +6,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "FE/manager", "-p", "5500", "--no-clipboard"],
       "port": 5500
+    },
+    {
+      "name": "vsport-tomcat-preview",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["/tmp/claude-1000/-home-nhan-Downloads-V-SPORT/b020ca5e-4189-4fd5-8f43-a4c3e4e47823/scratchpad/run-tomcat-preview.sh"],
+      "port": 18080
     }
   ]
 }

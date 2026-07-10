@@ -415,42 +415,40 @@ ul {
 }
 
 .header-user-chip {
-    min-height: 46px;
+    min-height: 42px;
     max-width: 250px;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 6px 10px 6px 6px;
-    border: 1px solid rgba(15, 15, 15, .08);
+    gap: 9px;
+    padding: 5px 10px 5px 5px;
+    border: 1px solid #e5e7eb;
     border-radius: 999px;
-    background: linear-gradient(135deg, #ffffff, #f7fbef);
+    background: #ffffff;
     color: var(--dark);
     cursor: pointer;
-    box-shadow: 0 12px 28px rgba(15, 15, 15, .07);
+    box-shadow: 0 2px 8px rgba(17, 24, 39, .05);
     transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
 }
 
 .header-user-chip:hover,
 .header-user-menu.is-open .header-user-chip {
-    transform: translateY(-1px);
-    border-color: rgba(175, 214, 57, .55);
-    box-shadow: 0 16px 34px rgba(15, 15, 15, .10);
+    border-color: #d6dee0;
+    box-shadow: 0 4px 12px rgba(17, 24, 39, .08);
 }
 
 .header-user-avatar {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     display: grid;
     place-items: center;
     flex: 0 0 auto;
     border-radius: 50%;
-    background: var(--primary);
-    color: #111;
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: .03em;
+    background: var(--primary-light);
+    color: #3f5a1c;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .02em;
     text-transform: uppercase;
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,.55);
 }
 
 .header-user-copy {
@@ -464,7 +462,7 @@ ul {
 .header-user-name {
     max-width: 140px;
     overflow: hidden;
-    color: #111;
+    color: #111827;
     font-size: 13px;
     font-weight: 900;
     text-overflow: ellipsis;
@@ -473,7 +471,7 @@ ul {
 
 .header-user-role {
     margin-top: 3px;
-    color: #6f7c70;
+    color: #6b7280;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .08em;
@@ -481,7 +479,7 @@ ul {
 }
 
 .header-user-caret {
-    color: #657064;
+    color: #9ca3af;
     font-size: 11px;
     transition: transform var(--transition-normal);
 }
@@ -490,19 +488,19 @@ ul {
 
 .header-user-dropdown {
     position: absolute;
-    top: calc(100% + 12px);
+    top: calc(100% + 10px);
     right: 0;
-    width: 286px;
-    padding: 12px;
-    border: 1px solid rgba(15, 15, 15, .08);
-    border-radius: 22px;
-    background: rgba(255, 255, 255, .98);
-    box-shadow: 0 24px 70px rgba(15, 15, 15, .18);
+    width: 270px;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, .10);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(8px) scale(.98);
+    transform: translateY(6px);
     transform-origin: top right;
-    transition: opacity var(--transition-normal), visibility var(--transition-normal), transform var(--transition-normal);
+    transition: opacity 180ms ease-out, visibility 180ms ease-out, transform 180ms ease-out;
 }
 
 .header-user-menu.is-open .header-user-dropdown {
@@ -529,8 +527,8 @@ ul {
     align-items: center;
     gap: 12px;
     padding: 10px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #f7fbef, #ffffff);
+    border-radius: 12px;
+    background: #f9fafb;
 }
 
 .header-user-summary .header-user-avatar {
@@ -542,7 +540,7 @@ ul {
 .header-user-email {
     max-width: 185px;
     overflow: hidden;
-    color: #6f7c70;
+    color: #6b7280;
     font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -556,7 +554,7 @@ ul {
 
 .header-user-menu-label {
     margin: 12px 4px 4px;
-    color: #8a958b;
+    color: #9ca3af;
     font-size: 10px;
     font-weight: 900;
     letter-spacing: .12em;
@@ -566,51 +564,50 @@ ul {
 .header-user-dropdown-menu a,
 .header-user-dropdown-menu button {
     width: 100%;
-    min-height: 42px;
+    min-height: 38px;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 0 12px;
+    padding: 0 10px;
     border: 0;
-    border-radius: 13px;
+    border-radius: 8px;
     background: transparent;
-    color: #263027;
+    color: #111827;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 12.5px;
+    font-weight: 600;
     text-align: left;
     text-decoration: none;
-    transition: background var(--transition-normal), color var(--transition-normal), transform var(--transition-normal);
+    transition: background 150ms ease, color 150ms ease;
 }
 
 .header-user-dropdown-menu a:hover,
 .header-user-dropdown-menu button:hover {
-    background: #f2f7e7;
-    color: #4d6f08;
-    transform: translateX(2px);
+    background: #f9fafb;
+    color: #111827;
 }
 
 .header-user-dropdown-menu .is-muted {
-    color: #8d988e;
+    color: #9ca3af;
     cursor: default;
 }
 
 .header-user-dropdown-menu .is-muted:hover {
-    transform: none;
-    background: #fafbf7;
-    color: #8d988e;
+    background: transparent;
+    color: #9ca3af;
 }
 
 .header-user-dropdown-menu .logout-link {
-    margin-top: 6px;
-    border: 1px solid #ffd7d7;
-    background: #fff5f5;
-    color: #c62929;
+    margin-top: 4px;
+    border-top: 1px solid #f1f2f4;
+    border-radius: 0 0 13px 13px;
+    color: #d1453a;
 }
 
 .header-user-dropdown-menu .logout-link:hover {
-    background: #c62929;
-    color: #fff;
+    background: #fef2f2;
+    color: #b91c1c;
+    transform: none;
 }
 
 .cart-trigger .cart-badge {
@@ -3058,7 +3055,7 @@ ul {
                 <div class="header-actions">
                     <!-- User Profile Trigger (Login/Register) -->
                     <% if (loggedInUser == null) { %>
-                    <button class="action-btn auth-trigger-btn" type="button" aria-label="Đăng nhập hoặc đăng ký" id="header-user-btn" onclick="openAuthModal('login')">
+                    <button class="action-btn auth-trigger-btn" type="button" aria-label="Đăng nhập hoặc đăng ký" id="header-user-btn" onclick="if (window.openAuthModal) openAuthModal('login', this)">
                         <i class="fa-regular fa-user"></i>
                     </button>
                     <% } else {
@@ -3732,6 +3729,10 @@ document.addEventListener('DOMContentLoaded', () => {
         speed: 800,
     });
 
+    // Testimonials custom avatar bullets logic
+    // (khai báo TRƯỚC khi khởi tạo Swiper vì slideChange có thể bắn đồng bộ ngay khi init)
+    const testimonialAvatars = document.querySelectorAll('.pagination-avatar');
+
     // Testimonials Swiper
     const testimonialSwiper = new Swiper('.testimonial-swiper', {
         loop: true,
@@ -3747,9 +3748,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Testimonials custom avatar bullets logic
-    const testimonialAvatars = document.querySelectorAll('.pagination-avatar');
-    
     testimonialAvatars.forEach((avatar, index) => {
         avatar.addEventListener('click', () => {
             testimonialSwiper.slideToLoop(index);

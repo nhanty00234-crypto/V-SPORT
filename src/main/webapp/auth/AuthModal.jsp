@@ -1,327 +1,362 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
+<!--
+    Auth dropdown — CSS hoàn toàn tự chứa (không phụ thuộc Tailwind hay bất kỳ
+    framework nào của trang chủ), vì component này được include ở nhiều trang
+    có hệ thiết kế khác nhau (trang chủ mới: CSS thuần / DatSan.jsp: Tailwind CDN).
+    Toàn bộ class bên dưới dùng tiền tố "authdd-" để không đụng CSS của trang chủ.
+-->
 <style>
-    .auth-modal-scroll::-webkit-scrollbar { width: 6px; }
-    .auth-modal-scroll::-webkit-scrollbar-track { background: transparent; }
-    .auth-modal-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-
-    #auth-modal {
+    /* Bảng màu: chữ chính #111827, chữ phụ #6b7280, viền #e5e7eb, accent xanh
+       đậm dùng rất tiết chế (underline tab / focus / nút chính). */
+    #authdd-root, #authdd-root * { box-sizing: border-box; }
+    #authdd-root {
         position: fixed;
-        z-index: 130;
+        z-index: 9999;
         display: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    #auth-modal.is-open { display: block; }
-    #auth-modal-card {
-        width: 360px;
+    #authdd-root.authdd-open { display: block; }
+
+    /* Bất kỳ phần tử nào dùng attribute [hidden] trong dropdown đều phải ẩn
+       tuyệt đối — tránh lặp lại lỗi banner rỗng vẫn hiện do class display:flex
+       thắng UA stylesheet [hidden] (cùng specificity, CSS tác giả nạp sau). */
+    #authdd-root [hidden] { display: none !important; }
+
+    .authdd-card {
+        width: 350px;
         max-width: calc(100vw - 16px);
         max-height: 85vh;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(17, 24, 39, 0.10);
+        display: flex;
+        flex-direction: column;
+        position: relative;
         opacity: 0;
         transform: translateY(-6px);
         transition: opacity 180ms ease-out, transform 180ms ease-out;
+        overflow: hidden;
     }
-    #auth-modal-card.is-visible {
-        opacity: 1;
-        transform: translateY(0);
+    .authdd-card.authdd-visible { opacity: 1; transform: translateY(0); }
+
+    .authdd-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 5;
     }
-    .modal-panel { transition: opacity 200ms ease-out, transform 200ms ease-out; }
-    :where(#auth-modal button) {
-        background-color: transparent; background-image: none;
-        border: none; padding: 0; margin: 0; outline: none; box-shadow: none;
+    .authdd-close:hover { background: #f3f4f6; color: #6b7280; }
+
+    .authdd-tabs {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 16px 20px 0;
+        border-bottom: 1px solid #f1f2f4;
+        flex-shrink: 0;
     }
-    #auth-loading-overlay { transition: opacity 200ms ease-out; }
-    #auth-loading-overlay.is-visible {
-        display: flex !important;
-        animation: authLoadingFadeIn 200ms ease-out forwards;
+    .authdd-tab {
+        background: none; border: none; cursor: pointer;
+        font-size: 13.5px; font-weight: 600; color: #9ca3af;
+        padding-bottom: 10px; border-bottom: 2px solid transparent;
     }
-    @keyframes authLoadingFadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes authLoadingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
-    .auth-loading-pulse { animation: authLoadingPulse 1.4s ease-in-out infinite; }
-    .btn-submit.is-loading, #modal-login-btn.is-loading { cursor: wait; pointer-events: none; }
-    .auth-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
-    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-    .auth-google-btn {
-        width: 100%; height: 40px; border-radius: 10px; border: 1.5px solid #e2e8f0 !important;
+    .authdd-tab.authdd-tab-active { color: #111827; border-bottom-color: #1f6f52; }
+
+    .authdd-body { padding: 18px 20px 20px; overflow-y: auto; }
+    .authdd-body::-webkit-scrollbar { width: 6px; }
+    .authdd-body::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 20px; }
+
+    .authdd-panel { display: flex; flex-direction: column; }
+    .authdd-panel[hidden] { display: none; }
+
+    .authdd-heading { font-size: 14.5px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+    .authdd-subtext { font-size: 11.5px; color: #6b7280; font-weight: 500; margin: 0 0 14px; line-height: 1.5; }
+
+    .authdd-field { margin-bottom: 12px; }
+    .authdd-label { display: block; font-size: 11.5px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .authdd-input {
+        width: 100%; height: 37px; padding: 0 12px;
+        border: 1px solid #d1d5db; border-radius: 8px;
+        font-size: 12.5px; font-weight: 500; color: #111827;
+        background: #fff; outline: none;
+        transition: border-color 150ms ease;
+    }
+    .authdd-input:focus { border-color: #1f6f52; }
+    .authdd-input::placeholder { color: #9ca3af; }
+
+    .authdd-pass-wrap { position: relative; }
+    .authdd-pass-wrap .authdd-input { padding-right: 36px; }
+    .authdd-pass-toggle {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer; color: #9ca3af;
+        display: flex; align-items: center; justify-content: center; padding: 4px;
+    }
+    .authdd-pass-toggle:hover { color: #1f6f52; }
+
+    .authdd-row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .authdd-checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6b7280; font-weight: 500; cursor: pointer; user-select: none; }
+    .authdd-checkbox-label input { width: 14px; height: 14px; accent-color: #1f6f52; }
+
+    .authdd-link-btn { background: none; border: none; padding: 0; cursor: pointer; font-size: 11px; font-weight: 600; color: #1f6f52; }
+    .authdd-link-btn:hover { text-decoration: underline; }
+
+    .authdd-strength { display: flex; gap: 4px; margin-top: 6px; }
+    .authdd-strength div { height: 3px; flex: 1; border-radius: 2px; background: #e5e7eb; transition: background-color 250ms ease; }
+    .authdd-hint { font-size: 9.5px; color: #9ca3af; line-height: 1.4; margin-top: 5px; }
+
+    .authdd-agree { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+    .authdd-agree input { width: 14px; height: 14px; margin-top: 2px; accent-color: #1f6f52; }
+    .authdd-agree span { font-size: 10.5px; color: #6b7280; font-weight: 500; line-height: 1.4; }
+    .authdd-agree a { color: #1f6f52; font-weight: 600; }
+
+    .authdd-btn {
+        width: 100%; height: 37px; border: none; border-radius: 8px;
+        background: #1f6f52; color: #fff; font-size: 13px; font-weight: 600;
+        cursor: pointer; position: relative; overflow: hidden;
         display: flex; align-items: center; justify-content: center; gap: 8px;
-        font-size: 12.5px; font-weight: 600; color: #334155; transition: all 150ms ease;
+        transition: background-color 150ms ease;
     }
-    .auth-google-btn:hover { background-color: #f8fafc !important; border-color: #cbd5e1 !important; }
+    .authdd-btn:hover { background: #195a42; }
+    .authdd-btn:disabled { cursor: wait; opacity: 0.85; }
+    .authdd-btn-loading {
+        position: absolute; inset: 0; background: #195a42; color: #fff;
+        display: none; align-items: center; justify-content: center; gap: 8px;
+    }
+    .authdd-btn-loading.authdd-show { display: flex; }
+    .authdd-spinner {
+        width: 14px; height: 14px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+        animation: authdd-spin 0.7s linear infinite;
+    }
+    @keyframes authdd-spin { to { transform: rotate(360deg); } }
+
+    /* Alert: chỉ hiện khi có nội dung thật (điều khiển bằng [hidden] ở JS),
+       nền rất nhạt + chữ nhỏ, không viền đậm để tránh nặng mắt. */
+    .authdd-banner {
+        display: flex; align-items: center; gap: 7px;
+        padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 500;
+        margin-bottom: 12px;
+    }
+    .authdd-banner-error { background: #fef2f2; color: #b91c1c; }
+    .authdd-banner-success { background: #f0fdf4; color: #15803d; }
+
+    .authdd-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
+    .authdd-divider::before, .authdd-divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+    .authdd-divider span { font-size: 10.5px; color: #9ca3af; font-weight: 500; }
+
+    .authdd-google-btn {
+        width: 100%; height: 35px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+        font-size: 11.5px; font-weight: 500; color: #4b5563; cursor: pointer;
+    }
+    .authdd-google-btn:hover { background: #f9fafb; border-color: #d1d5db; }
+
+    .authdd-footnote { text-align: center; border-top: 1px solid #f1f2f4; padding-top: 12px; margin-top: 14px; font-size: 11.5px; color: #6b7280; font-weight: 500; }
+
+    .authdd-otp-input {
+        width: 100%; height: 44px; text-align: center; font-size: 19px; font-weight: 600; letter-spacing: 0.3em;
+        border: 1px solid #d1d5db; border-radius: 8px; outline: none; color: #111827;
+    }
+    .authdd-otp-input:focus { border-color: #1f6f52; }
+
+    .authdd-back-link { display: flex; align-items: center; justify-content: center; gap: 4px; }
 </style>
 
-<div id="auth-modal">
-    <div id="auth-modal-card" class="bg-white rounded-2xl flex flex-col shadow-xl relative border border-slate-200">
-
-        <!-- Loading overlay -->
-        <div id="auth-loading-overlay" class="hidden absolute inset-0 z-[140] bg-white/85 backdrop-blur-sm rounded-2xl flex-col items-center justify-center gap-4">
-            <div class="w-9 h-9 border-[3px] border-[#378b76]/20 border-t-[#378b76] rounded-full animate-spin"></div>
-            <div class="text-center px-6">
-                <p id="auth-loading-text" class="text-[13px] font-bold text-slate-800 auth-loading-pulse">Đang đăng nhập...</p>
-            </div>
-        </div>
-
-        <!-- Close Button -->
-        <button onclick="closeAuthModal()" class="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 transition-colors z-[130] w-7 h-7 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100">
-            <span class="material-symbols-outlined text-[18px]">close</span>
+<div id="authdd-root">
+    <div id="authdd-card" class="authdd-card">
+        <button type="button" class="authdd-close" onclick="closeAuthModal()" aria-label="Đóng">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
 
-        <!-- Toggle Tabs -->
-        <div id="modal-tabs-header" class="px-5 pt-5 pb-3 border-b border-slate-100 flex items-center justify-start gap-4">
-            <button id="modal-tab-login" onclick="switchAuthTab('login')" class="text-[15px] font-bold tracking-tight text-slate-900 border-b-2 border-[#378b76] pb-1.5 transition-all">Đăng nhập</button>
-            <button id="modal-tab-register" onclick="switchAuthTab('register')" class="text-[15px] font-bold tracking-tight text-slate-400 hover:text-slate-900 border-b-2 border-transparent pb-1.5 transition-all">Đăng ký</button>
+        <div id="authdd-tabs" class="authdd-tabs">
+            <button type="button" id="authdd-tab-login" class="authdd-tab authdd-tab-active" onclick="switchAuthTab('login')">Đăng nhập</button>
+            <button type="button" id="authdd-tab-register" class="authdd-tab" onclick="switchAuthTab('register')">Đăng ký</button>
         </div>
 
-        <!-- Content Area -->
-        <div class="flex-grow overflow-y-auto p-5 auth-modal-scroll">
+        <div class="authdd-body">
 
-            <!-- LOGIN PANEL -->
-            <div id="modal-login-panel" class="modal-panel flex flex-col">
-                <div id="login-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-[11.5px] font-semibold border border-red-100 flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px]">error</span>
-                    <span class="error-msg"></span>
-                </div>
-                <div id="login-success-banner" class="hidden mb-4 p-3 bg-green-50 text-green-600 rounded-lg text-[11.5px] font-semibold border border-green-100 flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                    <span class="success-msg"></span>
-                </div>
+            <!-- LOGIN -->
+            <div id="modal-login-panel" class="authdd-panel">
+                <div id="login-error-banner" class="authdd-banner authdd-banner-error" hidden><span class="error-msg"></span></div>
+                <div id="login-success-banner" class="authdd-banner authdd-banner-success" hidden><span class="success-msg"></span></div>
 
-                <form id="modal-login-form" action="${pageContext.request.contextPath}/dangnhap" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitLoginForm(event)">
+                <form id="modal-login-form" action="${pageContext.request.contextPath}/dangnhap" method="POST" autocomplete="off" onsubmit="submitLoginForm(event)">
                     <input type="hidden" name="loginType" value="customer">
-                    <div class="mb-3">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Tên đăng nhập hoặc email</label>
-                        <input type="text" name="username" id="modal-login-username" required placeholder="Nhập tên đăng nhập hoặc email" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Tên đăng nhập hoặc email</label>
+                        <input type="text" name="username" id="modal-login-username" required placeholder="Nhập tên đăng nhập hoặc email" class="authdd-input">
                     </div>
-                    <div class="mb-3 relative">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mật khẩu</label>
-                        <div class="relative">
-                            <input type="password" name="password" id="modal-login-pass" required placeholder="Nhập mật khẩu" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <button type="button" onclick="togglePassField('modal-login-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    <div class="authdd-field">
+                        <label class="authdd-label">Mật khẩu</label>
+                        <div class="authdd-pass-wrap">
+                            <input type="password" name="password" id="modal-login-pass" required placeholder="Nhập mật khẩu" class="authdd-input">
+                            <button type="button" class="authdd-pass-toggle" onclick="togglePassField('modal-login-pass', this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between mb-4">
-                        <label class="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-slate-500 font-semibold">
-                            <input type="checkbox" name="rememberMe" class="w-3.5 h-3.5 accent-[#378b76] rounded border-slate-300">
-                            <span>Ghi nhớ 7 ngày</span>
-                        </label>
-                        <button type="button" onclick="switchAuthTab('forgot-password')" class="text-[11px] font-bold text-[#378b76] hover:underline cursor-pointer">Quên mật khẩu?</button>
+                    <div class="authdd-row-between">
+                        <label class="authdd-checkbox-label"><input type="checkbox" name="rememberMe"> Ghi nhớ 7 ngày</label>
+                        <button type="button" class="authdd-link-btn" onclick="switchAuthTab('forgot-password')">Quên mật khẩu?</button>
                     </div>
-                    <button type="submit" id="modal-login-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden disabled:opacity-70 disabled:cursor-wait">
-                        <span class="btn-text flex items-center gap-1.5 transition-opacity duration-200">Đăng nhập</span>
-                        <span class="btn-loading hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
-                            <span class="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin"></span>
-                            <span class="btn-loading-text text-[12px] font-semibold">Đang đăng nhập...</span>
-                        </span>
+                    <button type="submit" id="modal-login-btn" class="authdd-btn">
+                        <span class="btn-text">Đăng nhập</span>
+                        <span class="btn-loading authdd-btn-loading"><span class="authdd-spinner"></span><span class="btn-loading-text">Đang đăng nhập...</span></span>
                     </button>
                 </form>
 
-                <div class="auth-divider">
-                    <span class="text-[10.5px] text-slate-400 font-semibold">hoặc</span>
-                </div>
-                <button type="button" class="auth-google-btn" title="Chưa tích hợp OAuth thật">
-                    <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.5 35.4 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.6 5.4C41.5 35.9 44 30.3 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+                <div class="authdd-divider"><span>hoặc</span></div>
+                <button type="button" class="authdd-google-btn" title="Chưa tích hợp OAuth thật">
+                    <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.5 35.4 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.6 5.4C41.5 35.9 44 30.3 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
                     Tiếp tục với Google
                 </button>
 
-                <div class="mt-4 text-center border-t border-slate-100 pt-3">
-                    <p class="text-[11.5px] text-slate-500 font-medium">
-                        Chưa có tài khoản?
-                        <button onclick="switchAuthTab('register')" class="font-bold text-[#378b76] hover:underline ml-1">Tạo tài khoản</button>
-                    </p>
-                </div>
+                <div class="authdd-footnote">Chưa có tài khoản? <button type="button" class="authdd-link-btn" onclick="switchAuthTab('register')">Tạo tài khoản</button></div>
             </div>
 
-            <!-- REGISTER PANEL -->
-            <div id="modal-register-panel" class="modal-panel hidden flex flex-col">
-                <div id="register-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-[11.5px] font-semibold border border-red-100 flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px]">error</span>
-                    <span class="error-msg"></span>
-                </div>
+            <!-- REGISTER -->
+            <div id="modal-register-panel" class="authdd-panel" hidden>
+                <div id="register-error-banner" class="authdd-banner authdd-banner-error" hidden><span class="error-msg"></span></div>
 
-                <form id="modal-register-form" action="${pageContext.request.contextPath}/dangky" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitRegisterForm(event)">
-                    <!-- Giới tính không bắt buộc phía backend nhưng lưu mặc định an toàn -->
+                <form id="modal-register-form" action="${pageContext.request.contextPath}/dangky" method="POST" autocomplete="off" onsubmit="submitRegisterForm(event)">
                     <input type="hidden" name="gender" value="Khác">
 
-                    <div class="mb-3">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Tên đăng nhập</label>
-                        <input type="text" name="username" required placeholder="Tên đăng nhập" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Tên đăng nhập</label>
+                        <input type="text" name="username" required placeholder="Tên đăng nhập" class="authdd-input">
                     </div>
-                    <div class="mb-3">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Họ và tên</label>
-                        <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Họ và tên</label>
+                        <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="authdd-input">
                     </div>
-                    <div class="mb-3">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Email</label>
-                        <input type="email" name="email" required placeholder="Địa chỉ email" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Email</label>
+                        <input type="email" name="email" required placeholder="Địa chỉ email" class="authdd-input">
                     </div>
-                    <div class="mb-3">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Số điện thoại</label>
-                        <input type="tel" name="phone" required placeholder="Nhập số điện thoại" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Số điện thoại</label>
+                        <input type="tel" name="phone" required placeholder="Nhập số điện thoại" class="authdd-input">
                     </div>
-                    <div class="mb-3 relative">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mật khẩu</label>
-                        <div class="relative">
-                            <input type="password" name="password" id="modal-reg-pass" required placeholder="Tạo mật khẩu" oninput="updateModalPwStrength(this)" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <button type="button" onclick="togglePassField('modal-reg-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    <div class="authdd-field">
+                        <label class="authdd-label">Mật khẩu</label>
+                        <div class="authdd-pass-wrap">
+                            <input type="password" name="password" id="modal-reg-pass" required placeholder="Tạo mật khẩu" oninput="updateModalPwStrength(this)" class="authdd-input">
+                            <button type="button" class="authdd-pass-toggle" onclick="togglePassField('modal-reg-pass', this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
                         </div>
-                        <div class="mt-1.5 flex gap-1 w-full">
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr1"></div>
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr2"></div>
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr3"></div>
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr4"></div>
+                        <div class="authdd-strength">
+                            <div id="modalRegStr1"></div><div id="modalRegStr2"></div><div id="modalRegStr3"></div><div id="modalRegStr4"></div>
                         </div>
-                        <p class="text-[9.5px] text-slate-400 leading-tight mt-1">Tối thiểu 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt.</p>
+                        <p class="authdd-hint">Tối thiểu 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt.</p>
                     </div>
-                    <div class="mb-3 relative">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Xác nhận mật khẩu</label>
-                        <div class="relative">
-                            <input type="password" name="confirm_password" id="modal-reg-confirm" required placeholder="Nhập lại mật khẩu" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <button type="button" onclick="togglePassField('modal-reg-confirm', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    <div class="authdd-field">
+                        <label class="authdd-label">Xác nhận mật khẩu</label>
+                        <div class="authdd-pass-wrap">
+                            <input type="password" name="confirm_password" id="modal-reg-confirm" required placeholder="Nhập lại mật khẩu" class="authdd-input">
+                            <button type="button" class="authdd-pass-toggle" onclick="togglePassField('modal-reg-confirm', this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-2 select-none mb-3.5">
-                        <input type="checkbox" name="agree" value="Đồng ý" required class="w-3.5 h-3.5 mt-0.5 accent-[#378b76] rounded border-slate-300 cursor-pointer">
-                        <span class="text-[10.5px] text-slate-500 font-semibold leading-tight">
-                            Tôi đồng ý với <a href="#" class="text-[#378b76] font-bold hover:underline">điều khoản</a> và <a href="#" class="text-[#378b76] font-bold hover:underline">chính sách</a>.
-                        </span>
+                    <div class="authdd-agree">
+                        <input type="checkbox" name="agree" value="Đồng ý" required>
+                        <span>Tôi đồng ý với <a href="#">điều khoản</a> và <a href="#">chính sách</a>.</span>
                     </div>
-                    <button type="submit" id="modal-register-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden">
-                        <span class="btn-text flex items-center gap-1.5">Tạo tài khoản</span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
-                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                            <span class="text-[12px] font-semibold text-white">Đang gửi OTP...</span>
-                        </div>
+                    <button type="submit" id="modal-register-btn" class="authdd-btn">
+                        <span class="btn-text">Tạo tài khoản</span>
+                        <span class="loading-spinner authdd-btn-loading"><span class="authdd-spinner"></span><span>Đang gửi OTP...</span></span>
                     </button>
                 </form>
 
-                <div class="mt-4 text-center border-t border-slate-100 pt-3">
-                    <p class="text-[11.5px] text-slate-500 font-medium">
-                        Đã có tài khoản?
-                        <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1">Đăng nhập ngay</button>
-                    </p>
-                </div>
+                <div class="authdd-footnote">Đã có tài khoản? <button type="button" class="authdd-link-btn" onclick="switchAuthTab('login')">Đăng nhập ngay</button></div>
             </div>
 
-            <!-- FORGOT PASSWORD PANEL -->
-            <div id="modal-forgot-password-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-4">
-                    <h2 class="text-[15px] font-bold tracking-tight text-slate-900 mb-1">Quên mật khẩu?</h2>
-                    <p class="text-[11.5px] text-slate-400 font-medium leading-relaxed">Nhập email đã đăng ký để khôi phục mật khẩu.</p>
-                </div>
-                <div id="forgot-password-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-600 border border-red-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px] shrink-0">error</span>
-                    <span class="error-msg"></span>
-                </div>
-                <form id="modal-forgot-password-form" action="${pageContext.request.contextPath}/quenmatkhau" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitForgotPasswordForm(event)">
-                    <div class="mb-4">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Email đã đăng ký</label>
-                        <input type="email" name="email" required placeholder="Nhập địa chỉ email" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+            <!-- FORGOT PASSWORD -->
+            <div id="modal-forgot-password-panel" class="authdd-panel" hidden>
+                <h2 class="authdd-heading">Quên mật khẩu?</h2>
+                <p class="authdd-subtext">Nhập email đã đăng ký để khôi phục mật khẩu.</p>
+                <div id="forgot-password-error-banner" class="authdd-banner authdd-banner-error" hidden><span class="error-msg"></span></div>
+                <form id="modal-forgot-password-form" action="${pageContext.request.contextPath}/quenmatkhau" method="POST" autocomplete="off" onsubmit="submitForgotPasswordForm(event)">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Email đã đăng ký</label>
+                        <input type="email" name="email" required placeholder="Nhập địa chỉ email" class="authdd-input">
                     </div>
-                    <button type="submit" id="modal-forgot-password-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden">
-                        <span class="btn-text flex items-center gap-1.5">Gửi mã xác thực</span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
-                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                            <span class="text-[12px] font-semibold text-white">Đang gửi mã...</span>
-                        </div>
+                    <button type="submit" id="modal-forgot-password-btn" class="authdd-btn">
+                        <span class="btn-text">Gửi mã xác thực</span>
+                        <span class="loading-spinner authdd-btn-loading"><span class="authdd-spinner"></span><span>Đang gửi mã...</span></span>
                     </button>
                 </form>
-                <div class="mt-4 text-center border-t border-slate-100 pt-3">
-                    <p class="text-[11.5px] text-slate-500 font-medium">
-                        Nhớ lại mật khẩu?
-                        <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">Đăng nhập</button>
-                    </p>
-                </div>
+                <div class="authdd-footnote">Nhớ lại mật khẩu? <button type="button" class="authdd-link-btn" onclick="switchAuthTab('login')">Đăng nhập</button></div>
             </div>
 
-            <!-- OTP PANEL -->
-            <div id="modal-otp-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-4">
-                    <h2 class="text-[15px] font-bold tracking-tight text-slate-900 mb-1">Xác thực OTP</h2>
-                    <p class="text-[11.5px] text-slate-400 font-medium leading-relaxed">
-                        Nhập mã 6 chữ số đã gửi tới <b id="otp-email-display" class="text-slate-800"></b>.
-                    </p>
-                </div>
-                <div id="otp-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-650 border border-red-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px] shrink-0">error</span>
-                    <span class="error-msg"></span>
-                </div>
-                <div id="otp-success-banner" class="hidden mb-4 p-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px] shrink-0">check_circle</span>
-                    <span class="success-msg"></span>
-                </div>
-                <form id="modal-otp-form" action="${pageContext.request.contextPath}/nhapma" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitOtpForm(event)">
+            <!-- OTP -->
+            <div id="modal-otp-panel" class="authdd-panel" hidden>
+                <h2 class="authdd-heading">Xác thực OTP</h2>
+                <p class="authdd-subtext">Nhập mã 6 chữ số đã gửi tới <b id="otp-email-display"></b>.</p>
+                <div id="otp-error-banner" class="authdd-banner authdd-banner-error" hidden><span class="error-msg"></span></div>
+                <div id="otp-success-banner" class="authdd-banner authdd-banner-success" hidden><span class="success-msg"></span></div>
+                <form id="modal-otp-form" action="${pageContext.request.contextPath}/nhapma" method="POST" autocomplete="off" onsubmit="submitOtpForm(event)">
                     <input type="hidden" name="email" id="otp-hidden-email">
-                    <div class="mb-4">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mã OTP 6 chữ số</label>
-                        <input type="text" name="otp" required maxlength="6" placeholder="••••••" class="w-full h-12 border-1.5 border-slate-300 rounded-lg text-center text-xl font-bold tracking-[0.3em] focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Mã OTP 6 chữ số</label>
+                        <input type="text" name="otp" required maxlength="6" placeholder="••••••" class="authdd-otp-input">
                     </div>
-                    <button type="submit" id="modal-otp-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden">
-                        <span class="btn-text flex items-center gap-1.5">Xác minh OTP</span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
-                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                            <span class="text-[12px] font-semibold text-white">Đang xác thực...</span>
-                        </div>
+                    <button type="submit" id="modal-otp-btn" class="authdd-btn">
+                        <span class="btn-text">Xác minh OTP</span>
+                        <span class="loading-spinner authdd-btn-loading"><span class="authdd-spinner"></span><span>Đang xác thực...</span></span>
                     </button>
                 </form>
-                <div class="mt-4 text-center border-t border-slate-100 pt-3 flex flex-col gap-1.5">
-                    <p class="text-[11.5px] text-slate-500 font-medium">
-                        Không nhận được mã?
-                        <button onclick="resendOtp()" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">Gửi lại</button>
-                    </p>
-                    <p class="text-[11.5px]">
-                        <button onclick="goBackFromOtp()" class="font-bold text-slate-400 hover:text-slate-600 hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto">
-                            <span class="material-symbols-outlined text-[14px]">arrow_back</span> Quay lại
-                        </button>
-                    </p>
+                <div class="authdd-footnote" style="display:flex;flex-direction:column;gap:6px;">
+                    <div>Không nhận được mã? <button type="button" class="authdd-link-btn" onclick="resendOtp()">Gửi lại</button></div>
+                    <button type="button" class="authdd-link-btn authdd-back-link" onclick="goBackFromOtp()">← Quay lại</button>
                 </div>
             </div>
 
-            <!-- RESET PASSWORD PANEL -->
-            <div id="modal-reset-password-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-4">
-                    <h2 class="text-[15px] font-bold tracking-tight text-slate-900 mb-1">Mật khẩu mới</h2>
-                    <p class="text-[11.5px] text-slate-400 font-medium leading-relaxed">Tạo mật khẩu mới cho tài khoản của bạn.</p>
-                </div>
-                <div id="reset-password-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-650 border border-red-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[16px] shrink-0">error</span>
-                    <span class="error-msg"></span>
-                </div>
-                <form id="modal-reset-password-form" action="${pageContext.request.contextPath}/nhapmatkhaumoi" method="POST" class="flex flex-col gap-3" onsubmit="submitResetPasswordForm(event)">
-                    <div class="relative">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mật khẩu mới</label>
-                        <div class="relative">
-                            <input type="password" name="password" id="modal-new-pass" required placeholder="••••••••" oninput="updateModalResetPwStrength(this)" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <button type="button" onclick="togglePassField('modal-new-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+            <!-- RESET PASSWORD -->
+            <div id="modal-reset-password-panel" class="authdd-panel" hidden>
+                <h2 class="authdd-heading">Mật khẩu mới</h2>
+                <p class="authdd-subtext">Tạo mật khẩu mới cho tài khoản của bạn.</p>
+                <div id="reset-password-error-banner" class="authdd-banner authdd-banner-error" hidden><span class="error-msg"></span></div>
+                <form id="modal-reset-password-form" action="${pageContext.request.contextPath}/nhapmatkhaumoi" method="POST" onsubmit="submitResetPasswordForm(event)">
+                    <div class="authdd-field">
+                        <label class="authdd-label">Mật khẩu mới</label>
+                        <div class="authdd-pass-wrap">
+                            <input type="password" name="password" id="modal-new-pass" required placeholder="••••••••" oninput="updateModalResetPwStrength(this)" class="authdd-input">
+                            <button type="button" class="authdd-pass-toggle" onclick="togglePassField('modal-new-pass', this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
                         </div>
-                        <div class="mt-1.5 flex gap-1 w-full">
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr1"></div>
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr2"></div>
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr3"></div>
-                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr4"></div>
+                        <div class="authdd-strength">
+                            <div id="modalResetStr1"></div><div id="modalResetStr2"></div><div id="modalResetStr3"></div><div id="modalResetStr4"></div>
                         </div>
                     </div>
-                    <div class="relative">
-                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Xác nhận mật khẩu mới</label>
-                        <div class="relative">
-                            <input type="password" name="confirm_password" id="modal-new-confirm" required placeholder="••••••••" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <button type="button" onclick="togglePassField('modal-new-confirm', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    <div class="authdd-field">
+                        <label class="authdd-label">Xác nhận mật khẩu mới</label>
+                        <div class="authdd-pass-wrap">
+                            <input type="password" name="confirm_password" id="modal-new-confirm" required placeholder="••••••••" class="authdd-input">
+                            <button type="button" class="authdd-pass-toggle" onclick="togglePassField('modal-new-confirm', this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
                         </div>
                     </div>
-                    <button type="submit" id="modal-reset-password-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden mt-1">
-                        <span class="btn-text flex items-center gap-1.5">Lưu mật khẩu mới</span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
-                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                            <span class="text-[12px] font-semibold text-white">Đang cập nhật...</span>
-                        </div>
+                    <button type="submit" id="modal-reset-password-btn" class="authdd-btn">
+                        <span class="btn-text">Lưu mật khẩu mới</span>
+                        <span class="loading-spinner authdd-btn-loading"><span class="authdd-spinner"></span><span>Đang cập nhật...</span></span>
                     </button>
                 </form>
             </div>
@@ -339,141 +374,103 @@
     }
 
     function positionAuthModal(triggerEl) {
-        const card = document.getElementById('auth-modal-card');
+        const root = document.getElementById('authdd-root');
         const trigger = triggerEl || resolveDefaultTrigger();
-        if (!card) return;
-        const cardWidth = 360;
+        const cardWidth = 350;
         let top, right;
         if (trigger) {
             const rect = trigger.getBoundingClientRect();
             top = rect.bottom + 8;
             right = Math.max(8, window.innerWidth - rect.right);
         } else {
-            top = 70;
-            right = 24;
+            top = 70; right = 24;
         }
         if (window.innerWidth - right - cardWidth < 8) {
             right = Math.max(8, window.innerWidth - cardWidth - 8);
         }
-        const modal = document.getElementById('auth-modal');
-        modal.style.top = top + 'px';
-        modal.style.right = right + 'px';
+        root.style.top = top + 'px';
+        root.style.right = right + 'px';
     }
 
-    function openAuthModal(tab = 'login', triggerEl = null) {
-        const modal = document.getElementById('auth-modal');
-        const card = document.getElementById('auth-modal-card');
-        if (!modal || !card) return;
+    function openAuthModal(tab, triggerEl) {
+        if (!tab) tab = 'login';
+        const root = document.getElementById('authdd-root');
+        const card = document.getElementById('authdd-card');
+        if (!root || !card) return;
         authTriggerEl = triggerEl || resolveDefaultTrigger();
         clearModalAlerts();
         positionAuthModal(authTriggerEl);
-        modal.classList.add('is-open');
-        requestAnimationFrame(() => { card.classList.add('is-visible'); });
-
-        ['modal-login-panel','modal-register-panel','modal-forgot-password-panel','modal-otp-panel','modal-reset-password-panel'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        });
-        const tabHeader = document.getElementById('modal-tabs-header');
-        const tabLogin = document.getElementById('modal-tab-login');
-        const tabRegister = document.getElementById('modal-tab-register');
-        if (tab === 'login' || tab === 'register') {
-            if (tabHeader) tabHeader.classList.remove('hidden');
-            if (tab === 'login') {
-                tabLogin.classList.replace('text-slate-400','text-slate-900'); tabLogin.classList.replace('border-transparent','border-[#378b76]');
-                tabRegister.classList.replace('text-slate-900','text-slate-400'); tabRegister.classList.replace('border-[#378b76]','border-transparent');
-                const p = document.getElementById('modal-login-panel');
-                p.classList.remove('hidden'); p.style.opacity='1'; p.style.transform='translateY(0)';
-            } else {
-                tabRegister.classList.replace('text-slate-400','text-slate-900'); tabRegister.classList.replace('border-transparent','border-[#378b76]');
-                tabLogin.classList.replace('text-slate-900','text-slate-400'); tabLogin.classList.replace('border-[#378b76]','border-transparent');
-                const p = document.getElementById('modal-register-panel');
-                p.classList.remove('hidden'); p.style.opacity='1'; p.style.transform='translateY(0)';
-            }
-        } else {
-            if (tabHeader) tabHeader.classList.add('hidden');
-            const map = {'forgot-password':'modal-forgot-password-panel','otp':'modal-otp-panel','reset-password':'modal-reset-password-panel'};
-            const p = document.getElementById(map[tab]);
-            if (p) { p.classList.remove('hidden'); p.style.opacity='1'; p.style.transform='translateY(0)'; }
-        }
+        root.classList.add('authdd-open');
+        requestAnimationFrame(() => { card.classList.add('authdd-visible'); });
+        showAuthTabPanel(tab);
     }
 
     function closeAuthModal() {
         setLoginFormLoading(false);
-        const modal = document.getElementById('auth-modal');
-        const card = document.getElementById('auth-modal-card');
-        if (!modal || !card) return;
-        card.classList.remove('is-visible');
-        setTimeout(() => { modal.classList.remove('is-open'); }, 180);
+        const root = document.getElementById('authdd-root');
+        const card = document.getElementById('authdd-card');
+        if (!root || !card) return;
+        card.classList.remove('authdd-visible');
+        setTimeout(() => { root.classList.remove('authdd-open'); }, 180);
     }
 
-    // Click ra ngoài dropdown thì đóng lại
+    // Dùng capture phase để không bị chặn bởi stopPropagation() nội bộ của
+    // các thư viện bên thứ 3 (vd. Swiper chặn click trên slide ở bubble phase).
     document.addEventListener('click', (e) => {
-        const modal = document.getElementById('auth-modal');
-        if (!modal || !modal.classList.contains('is-open')) return;
-        const card = document.getElementById('auth-modal-card');
+        const root = document.getElementById('authdd-root');
+        if (!root || !root.classList.contains('authdd-open')) return;
+        const card = document.getElementById('authdd-card');
         if (card && card.contains(e.target)) return;
         if (authTriggerEl && authTriggerEl.contains(e.target)) return;
         closeAuthModal();
-    });
+    }, true);
 
-    // ESC đóng dropdown
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
-        const modal = document.getElementById('auth-modal');
-        if (modal && modal.classList.contains('is-open')) closeAuthModal();
+        const root = document.getElementById('authdd-root');
+        if (root && root.classList.contains('authdd-open')) closeAuthModal();
     });
 
-    function switchAuthTab(tab) {
-        const tabHeader = document.getElementById('modal-tabs-header');
-        const tabLogin = document.getElementById('modal-tab-login');
-        const tabRegister = document.getElementById('modal-tab-register');
-        const panelMap = {
-            'login': 'modal-login-panel',
-            'register': 'modal-register-panel',
-            'forgot-password': 'modal-forgot-password-panel',
-            'otp': 'modal-otp-panel',
-            'reset-password': 'modal-reset-password-panel'
-        };
-        const currentPanel = document.querySelector('.modal-panel:not(.hidden)');
-        if (!currentPanel) return;
-        const targetPanel = document.getElementById(panelMap[tab]);
-        if (!targetPanel || targetPanel === currentPanel) return;
+    const AUTHDD_PANEL_MAP = {
+        'login': 'modal-login-panel',
+        'register': 'modal-register-panel',
+        'forgot-password': 'modal-forgot-password-panel',
+        'otp': 'modal-otp-panel',
+        'reset-password': 'modal-reset-password-panel'
+    };
 
-        if (tab === 'otp') {
-            const registerPanel = document.getElementById('modal-register-panel');
-            const forgotPanel = document.getElementById('modal-forgot-password-panel');
-            if (currentPanel === forgotPanel) otpSourceTab = 'forgot-password';
-            else if (currentPanel === registerPanel) otpSourceTab = 'register';
-        }
+    function showAuthTabPanel(tab) {
+        Object.values(AUTHDD_PANEL_MAP).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.hidden = true;
+        });
+        const target = document.getElementById(AUTHDD_PANEL_MAP[tab]);
+        if (target) target.hidden = false;
 
-        clearModalAlerts();
-        currentPanel.style.opacity = '0';
-        currentPanel.style.transform = 'translateY(8px)';
-
+        const tabs = document.getElementById('authdd-tabs');
+        const tabLogin = document.getElementById('authdd-tab-login');
+        const tabRegister = document.getElementById('authdd-tab-register');
         if (tab === 'login' || tab === 'register') {
-            if (tabHeader) tabHeader.classList.remove('hidden');
-            if (tab === 'login') {
-                tabLogin.classList.remove('text-slate-400','border-transparent'); tabLogin.classList.add('text-slate-900','border-[#378b76]');
-                tabRegister.classList.remove('text-slate-900','border-[#378b76]'); tabRegister.classList.add('text-slate-400','border-transparent');
-            } else {
-                tabRegister.classList.remove('text-slate-400','border-transparent'); tabRegister.classList.add('text-slate-900','border-[#378b76]');
-                tabLogin.classList.remove('text-slate-900','border-[#378b76]'); tabLogin.classList.add('text-slate-400','border-transparent');
-            }
+            if (tabs) tabs.style.display = 'flex';
+            if (tabLogin) tabLogin.classList.toggle('authdd-tab-active', tab === 'login');
+            if (tabRegister) tabRegister.classList.toggle('authdd-tab-active', tab === 'register');
         } else {
-            if (tabHeader) tabHeader.classList.add('hidden');
+            if (tabs) tabs.style.display = 'none';
         }
+    }
 
-        setTimeout(() => {
-            currentPanel.classList.add('hidden');
-            targetPanel.classList.remove('hidden');
-            targetPanel.style.opacity = '0';
-            targetPanel.style.transform = 'translateY(8px)';
-            targetPanel.style.transition = 'opacity 200ms ease-out, transform 200ms ease-out';
-            requestAnimationFrame(() => {
-                setTimeout(() => { targetPanel.style.opacity='1'; targetPanel.style.transform='translateY(0)'; }, 20);
+    function switchAuthTab(tab) {
+        if (tab === 'otp') {
+            const current = Object.entries(AUTHDD_PANEL_MAP).find(([k, id]) => {
+                const el = document.getElementById(id);
+                return el && !el.hidden;
             });
-        }, 120);
+            if (current && (current[0] === 'forgot-password' || current[0] === 'register')) {
+                otpSourceTab = current[0];
+            }
+        }
+        clearModalAlerts();
+        showAuthTabPanel(tab);
     }
 
     function goBackFromOtp() { switchAuthTab(otpSourceTab); }
@@ -481,103 +478,70 @@
     function clearModalAlerts() {
         ['login-error-banner','login-success-banner','register-error-banner','forgot-password-error-banner','otp-error-banner','otp-success-banner','reset-password-error-banner'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
+            if (el) el.hidden = true;
         });
     }
 
     function togglePassField(id, btn) {
         const input = document.getElementById(id);
-        const icon = btn.querySelector('span');
-        if (input) {
-            input.type = input.type === 'password' ? 'text' : 'password';
-            icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
-        }
+        if (input) input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    function updateModalPwStrength(inp) {
-        const v = inp.value;
+    function computeStrength(v) {
         let s = 0;
         if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[a-z]/.test(v)) s++;
         if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++;
         let strength = 0;
         if (v.length > 0) strength = 1; if (s >= 3) strength = 2; if (s >= 4) strength = 3; if (s >= 5) strength = 4;
+        return strength;
+    }
+
+    function paintStrength(prefix, strength) {
         const cols = ['#f43f5e','#f59e0b','#8b5cf6','#10b981'];
         for (let i = 1; i <= 4; i++) {
-            const el = document.getElementById('modalRegStr' + i);
+            const el = document.getElementById(prefix + i);
             if (el) el.style.backgroundColor = i <= strength ? cols[strength-1] : '#e2e8f0';
         }
     }
 
-    function updateModalResetPwStrength(inp) {
-        const v = inp.value;
-        let s = 0;
-        if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[a-z]/.test(v)) s++;
-        if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++;
-        let strength = 0;
-        if (v.length > 0) strength = 1; if (s >= 3) strength = 2; if (s >= 4) strength = 3; if (s >= 5) strength = 4;
-        const cols = ['#f43f5e','#f59e0b','#8b5cf6','#10b981'];
-        for (let i = 1; i <= 4; i++) {
-            const el = document.getElementById('modalResetStr' + i);
-            if (el) el.style.backgroundColor = i <= strength ? cols[strength-1] : '#e2e8f0';
-        }
-    }
+    function updateModalPwStrength(inp) { paintStrength('modalRegStr', computeStrength(inp.value)); }
+    function updateModalResetPwStrength(inp) { paintStrength('modalResetStr', computeStrength(inp.value)); }
 
-    // ✅ FIX: Chỉ disable button[type="button"], KHÔNG disable input
-    function setLoginFormLoading(isLoading, message = 'Đang đăng nhập...') {
+    function setLoginFormLoading(isLoading, message) {
+        if (!message) message = 'Đang đăng nhập...';
         const form = document.getElementById('modal-login-form');
         const btn = document.getElementById('modal-login-btn');
-        const overlay = document.getElementById('auth-loading-overlay');
-        const overlayText = document.getElementById('auth-loading-text');
         const btnText = btn ? btn.querySelector('.btn-text') : null;
         const btnLoading = btn ? btn.querySelector('.btn-loading') : null;
-        const closeBtn = document.querySelector('#auth-modal-card > button[onclick="closeAuthModal()"]');
-        const tabButtons = document.querySelectorAll('#modal-tabs-header button');
-
-        if (overlayText) overlayText.textContent = message;
+        const btnLoadingText = btn ? btn.querySelector('.btn-loading-text') : null;
+        if (btnLoadingText) btnLoadingText.textContent = message;
 
         if (isLoading) {
-            if (overlay) { overlay.classList.remove('hidden'); overlay.classList.add('is-visible'); }
-            if (btn) { btn.disabled = true; btn.classList.add('is-loading'); }
-            if (btnText) btnText.classList.add('hidden');
-            if (btnLoading) btnLoading.classList.remove('hidden');
-            // ✅ Chỉ disable toggle button, KHÔNG disable input
+            if (btn) { btn.disabled = true; }
+            if (btnText) btnText.style.visibility = 'hidden';
+            if (btnLoading) btnLoading.classList.add('authdd-show');
             if (form) {
-                form.querySelectorAll('button[type="button"]').forEach(el => {
-                    el.dataset.wasDisabled = el.disabled ? '1' : '0';
-                    el.disabled = true;
-                    el.style.pointerEvents = 'none';
-                });
+                form.querySelectorAll('button[type="button"]').forEach(el => { el.disabled = true; });
             }
-            if (closeBtn) closeBtn.style.pointerEvents = 'none';
-            tabButtons.forEach(t => t.style.pointerEvents = 'none');
         } else {
-            if (overlay) { overlay.classList.add('hidden'); overlay.classList.remove('is-visible'); }
-            if (btn) { btn.disabled = false; btn.classList.remove('is-loading'); }
-            if (btnText) btnText.classList.remove('hidden');
-            if (btnLoading) btnLoading.classList.add('hidden');
+            if (btn) { btn.disabled = false; }
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btnLoading) btnLoading.classList.remove('authdd-show');
             if (form) {
-                form.querySelectorAll('button[type="button"]').forEach(el => {
-                    el.disabled = el.dataset.wasDisabled === '1';
-                    el.style.pointerEvents = '';
-                });
+                form.querySelectorAll('button[type="button"]').forEach(el => { el.disabled = false; });
             }
-            if (closeBtn) closeBtn.style.pointerEvents = '';
-            tabButtons.forEach(t => t.style.pointerEvents = '');
         }
     }
 
-    // ✅ FIX: Lấy FormData TRƯỚC khi gọi setLoginFormLoading
     function submitLoginForm(event) {
         event.preventDefault();
         const form = document.getElementById('modal-login-form');
         const errorBanner = document.getElementById('login-error-banner');
         const successBanner = document.getElementById('login-success-banner');
-        if (errorBanner) errorBanner.classList.add('hidden');
-        if (successBanner) successBanner.classList.add('hidden');
+        if (errorBanner) errorBanner.hidden = true;
+        if (successBanner) successBanner.hidden = true;
 
-        // ✅ Lấy data TRƯỚC khi loading (input chưa bị disable)
         const searchParams = new URLSearchParams(new FormData(form));
-
         setLoginFormLoading(true, 'Đang đăng nhập...');
 
         fetch(form.action, {
@@ -589,26 +553,17 @@
         .then(data => {
             if (data.success) {
                 setLoginFormLoading(true, 'Đăng nhập thành công! Đang chuyển hướng...');
-                if (successBanner) {
-                    successBanner.querySelector('.success-msg').textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
-                    successBanner.classList.remove('hidden');
-                }
+                if (successBanner) { successBanner.querySelector('.success-msg').textContent = 'Đăng nhập thành công! Đang chuyển hướng...'; successBanner.hidden = false; }
                 setTimeout(() => { window.location.href = data.redirectUrl; }, 600);
             } else {
                 setLoginFormLoading(false);
-                if (errorBanner) {
-                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng nhập không thành công.';
-                    errorBanner.classList.remove('hidden');
-                }
+                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng nhập không thành công.'; errorBanner.hidden = false; }
             }
         })
         .catch(err => {
             console.error('Lỗi login AJAX:', err);
             setLoginFormLoading(false);
-            if (errorBanner) {
-                errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!';
-                errorBanner.classList.remove('hidden');
-            }
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent = 'Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.hidden = false; }
         });
     }
 
@@ -616,12 +571,11 @@
         event.preventDefault();
         const form = document.getElementById('modal-register-form');
         const btn = document.getElementById('modal-register-btn');
-        const spinner = btn.querySelector('.loading-spinner');
         const btnText = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.loading-spinner');
         const errorBanner = document.getElementById('register-error-banner');
-        if (errorBanner) errorBanner.classList.add('hidden');
+        if (errorBanner) errorBanner.hidden = true;
 
-        // Client-side validations
         const username = form.username.value.trim();
         const email = form.email.value.trim();
         const phone = form.phone.value.trim();
@@ -629,56 +583,25 @@
         const confirmPassword = document.getElementById('modal-reg-confirm').value;
 
         function showError(msg) {
-            if (errorBanner) {
-                errorBanner.querySelector('.error-msg').textContent = msg;
-                errorBanner.classList.remove('hidden');
-                const scrollContainer = document.querySelector('.auth-modal-scroll');
-                if (scrollContainer) scrollContainer.scrollTop = 0;
-            }
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent = msg; errorBanner.hidden = false; }
         }
 
-        if (username.indexOf(' ') >= 0) {
-            showError("Tên đăng nhập không được chứa khoảng trắng!");
-            return false;
-        }
-        if (username.length < 3 || username.length > 50) {
-            showError("Tên đăng nhập phải từ 3 đến 50 ký tự!");
-            return false;
-        }
+        if (username.indexOf(' ') >= 0) { showError("Tên đăng nhập không được chứa khoảng trắng!"); return; }
+        if (username.length < 3 || username.length > 50) { showError("Tên đăng nhập phải từ 3 đến 50 ký tự!"); return; }
+        if (email.indexOf(' ') >= 0) { showError("Email không được chứa khoảng trắng!"); return; }
+        if (!/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) { showError("Định dạng Email không hợp lệ!"); return; }
+        if (!/^(0|\+84)[35789][0-9]{8}$/.test(phone)) { showError("Số điện thoại không hợp lệ (Phải bắt đầu bằng 0 hoặc +84 và có 10 số)!"); return; }
+        if (password !== confirmPassword) { showError("Mật khẩu xác nhận không khớp!"); return; }
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password)) { showError("Mật khẩu không đủ mạnh! Phải có tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."); return; }
 
-        if (email.indexOf(' ') >= 0) {
-            showError("Email không được chứa khoảng trắng!");
-            return false;
-        }
-        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-        if (!emailRegex.test(email)) {
-            showError("Định dạng Email không hợp lệ!");
-            return false;
-        }
+        if (spinner) spinner.classList.add('authdd-show');
+        if (btnText) btnText.style.visibility = 'hidden';
+        if (btn) btn.disabled = true;
 
-        const phoneRegex = /^(0|\+84)[35789][0-9]{8}$/;
-        if (!phoneRegex.test(phone)) {
-            showError("Số điện thoại không hợp lệ (Phải bắt đầu bằng 0 hoặc +84 và có 10 số)!");
-            return false;
-        }
-
-        if (password !== confirmPassword) {
-            showError("Mật khẩu xác nhận không khớp!");
-            return false;
-        }
-
-        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
-        if (!passRegex.test(password)) {
-            showError("Mật khẩu không đủ mạnh! Phải có tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
-            return false;
-        }
-
-        if (spinner && btnText) { spinner.classList.remove('hidden'); btnText.style.opacity='0'; btn.style.pointerEvents='none'; }
-        const searchParams = new URLSearchParams(new FormData(form));
         fetch(form.action, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: searchParams
+            body: new URLSearchParams(new FormData(form))
         })
         .then(res => res.json())
         .then(data => {
@@ -688,27 +611,28 @@
                     const hiddenEmailEl = document.getElementById('otp-hidden-email');
                     if (displayEl) displayEl.textContent = data.email;
                     if (hiddenEmailEl) hiddenEmailEl.value = data.email;
-                    if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
+                    if (spinner) spinner.classList.remove('authdd-show');
+                    if (btnText) btnText.style.visibility = 'visible';
+                    if (btn) btn.disabled = false;
                     const otpSuccessBanner = document.getElementById('otp-success-banner');
-                    if (otpSuccessBanner) { otpSuccessBanner.querySelector('.success-msg').textContent='Đăng ký thông tin thành công! Vui lòng nhập mã OTP để kích hoạt.'; otpSuccessBanner.classList.remove('hidden'); }
+                    if (otpSuccessBanner) { otpSuccessBanner.querySelector('.success-msg').textContent='Đăng ký thông tin thành công! Vui lòng nhập mã OTP để kích hoạt.'; otpSuccessBanner.hidden = false; }
                     switchAuthTab('otp');
                 } else {
                     window.location.href = data.redirectUrl;
                 }
             } else {
-                if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
-                if (errorBanner) {
-                    errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng ký không thành công.';
-                    errorBanner.classList.remove('hidden');
-                    const scrollContainer = document.querySelector('.auth-modal-scroll');
-                    if (scrollContainer) scrollContainer.scrollTop = 0;
-                }
+                if (spinner) spinner.classList.remove('authdd-show');
+                if (btnText) btnText.style.visibility = 'visible';
+                if (btn) btn.disabled = false;
+                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng ký không thành công.'; errorBanner.hidden = false; }
             }
         })
         .catch(err => {
             console.error('Lỗi register AJAX:', err);
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.classList.remove('hidden'); }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.hidden = false; }
         });
     }
 
@@ -716,13 +640,15 @@
         event.preventDefault();
         const form = document.getElementById('modal-forgot-password-form');
         const btn = document.getElementById('modal-forgot-password-btn');
-        const spinner = btn.querySelector('.loading-spinner');
         const btnText = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.loading-spinner');
         const errorBanner = document.getElementById('forgot-password-error-banner');
-        if (errorBanner) errorBanner.classList.add('hidden');
+        if (errorBanner) errorBanner.hidden = true;
         const formData = new FormData(form);
         const email = formData.get('email');
-        if (spinner && btnText) { spinner.classList.remove('hidden'); btnText.style.opacity='0'; btn.style.pointerEvents='none'; }
+        if (spinner) spinner.classList.add('authdd-show');
+        if (btnText) btnText.style.visibility = 'hidden';
+        if (btn) btn.disabled = true;
         fetch(form.action, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -730,23 +656,27 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
             if (data.success) {
                 const displayEl = document.getElementById('otp-email-display');
                 const hiddenEmailEl = document.getElementById('otp-hidden-email');
                 if (displayEl) displayEl.textContent = email;
                 if (hiddenEmailEl) hiddenEmailEl.value = email;
                 const otpSuccessBanner = document.getElementById('otp-success-banner');
-                if (otpSuccessBanner) { otpSuccessBanner.querySelector('.success-msg').textContent='Mã OTP đã được gửi đến email của bạn!'; otpSuccessBanner.classList.remove('hidden'); }
+                if (otpSuccessBanner) { otpSuccessBanner.querySelector('.success-msg').textContent='Mã OTP đã được gửi đến email của bạn!'; otpSuccessBanner.hidden = false; }
                 switchAuthTab('otp');
             } else {
-                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Có lỗi xảy ra.'; errorBanner.classList.remove('hidden'); }
+                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Có lỗi xảy ra.'; errorBanner.hidden = false; }
             }
         })
         .catch(err => {
             console.error('Lỗi Forgot Password AJAX:', err);
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.classList.remove('hidden'); }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.hidden = false; }
         });
     }
 
@@ -754,13 +684,15 @@
         event.preventDefault();
         const form = document.getElementById('modal-otp-form');
         const btn = document.getElementById('modal-otp-btn');
-        const spinner = btn.querySelector('.loading-spinner');
         const btnText = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.loading-spinner');
         const errorBanner = document.getElementById('otp-error-banner');
         const successBanner = document.getElementById('otp-success-banner');
-        if (errorBanner) errorBanner.classList.add('hidden');
-        if (successBanner) successBanner.classList.add('hidden');
-        if (spinner && btnText) { spinner.classList.remove('hidden'); btnText.style.opacity='0'; btn.style.pointerEvents='none'; }
+        if (errorBanner) errorBanner.hidden = true;
+        if (successBanner) successBanner.hidden = true;
+        if (spinner) spinner.classList.add('authdd-show');
+        if (btnText) btnText.style.visibility = 'hidden';
+        if (btn) btn.disabled = true;
         fetch(form.action, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -768,22 +700,26 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
             if (data.success) {
                 if (data.step === 'reset-password') { switchAuthTab('reset-password'); }
                 else if (data.step === 'register-success') {
                     switchAuthTab('login');
                     const loginSuccessBanner = document.getElementById('login-success-banner');
-                    if (loginSuccessBanner) { loginSuccessBanner.querySelector('.success-msg').textContent=data.thongbao||'Đăng ký thành công! Vui lòng đăng nhập.'; loginSuccessBanner.classList.remove('hidden'); }
+                    if (loginSuccessBanner) { loginSuccessBanner.querySelector('.success-msg').textContent=data.thongbao||'Đăng ký thành công! Vui lòng đăng nhập.'; loginSuccessBanner.hidden = false; }
                 }
             } else {
-                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Mã xác thực không đúng.'; errorBanner.classList.remove('hidden'); }
+                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Mã xác thực không đúng.'; errorBanner.hidden = false; }
             }
         })
         .catch(err => {
             console.error('Lỗi Verify OTP AJAX:', err);
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.classList.remove('hidden'); }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.hidden = false; }
         });
     }
 
@@ -791,10 +727,10 @@
         const errorBanner = document.getElementById('otp-error-banner');
         const successBanner = document.getElementById('otp-success-banner');
         const emailInput = document.getElementById('otp-hidden-email');
-        if (errorBanner) errorBanner.classList.add('hidden');
-        if (successBanner) successBanner.classList.add('hidden');
+        if (errorBanner) errorBanner.hidden = true;
+        if (successBanner) successBanner.hidden = true;
         if (!emailInput || !emailInput.value) {
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Không tìm thấy email để gửi lại mã!'; errorBanner.classList.remove('hidden'); }
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Không tìm thấy email để gửi lại mã!'; errorBanner.hidden = false; }
             return;
         }
         const params = new URLSearchParams();
@@ -807,14 +743,14 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                if (successBanner) { successBanner.querySelector('.success-msg').textContent=data.thongbao||'Gửi lại mã OTP thành công!'; successBanner.classList.remove('hidden'); }
+                if (successBanner) { successBanner.querySelector('.success-msg').textContent=data.thongbao||'Gửi lại mã OTP thành công!'; successBanner.hidden = false; }
             } else {
-                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Không thể gửi lại mã OTP.'; errorBanner.classList.remove('hidden'); }
+                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Không thể gửi lại mã OTP.'; errorBanner.hidden = false; }
             }
         })
         .catch(err => {
             console.error('Lỗi Resend OTP:', err);
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.classList.remove('hidden'); }
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.hidden = false; }
         });
     }
 
@@ -822,25 +758,18 @@
         event.preventDefault();
         const form = document.getElementById('modal-reset-password-form');
         const btn = document.getElementById('modal-reset-password-btn');
-        const spinner = btn.querySelector('.loading-spinner');
         const btnText = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.loading-spinner');
         const errorBanner = document.getElementById('reset-password-error-banner');
-        if (errorBanner) errorBanner.classList.add('hidden');
+        if (errorBanner) errorBanner.hidden = true;
         const p1 = document.getElementById('modal-new-pass').value;
         const p2 = document.getElementById('modal-new-confirm').value;
-        if (p1.trim() === '') {
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Mật khẩu không được để trống hoặc chỉ chứa khoảng trắng!'; errorBanner.classList.remove('hidden'); }
-            return;
-        }
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p1)) {
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Mật khẩu phải có tối thiểu 8 ký tự, bao gồm cả chữ hoa, chữ thường, số và ký tự đặc biệt.'; errorBanner.classList.remove('hidden'); }
-            return;
-        }
-        if (p1 !== p2) {
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Mật khẩu xác nhận chưa trùng khớp!'; errorBanner.classList.remove('hidden'); }
-            return;
-        }
-        if (spinner && btnText) { spinner.classList.remove('hidden'); btnText.style.opacity='0'; btn.style.pointerEvents='none'; }
+        if (p1.trim() === '') { if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Mật khẩu không được để trống hoặc chỉ chứa khoảng trắng!'; errorBanner.hidden = false; } return; }
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p1)) { if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Mật khẩu phải có tối thiểu 8 ký tự, bao gồm cả chữ hoa, chữ thường, số và ký tự đặc biệt.'; errorBanner.hidden = false; } return; }
+        if (p1 !== p2) { if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Mật khẩu xác nhận chưa trùng khớp!'; errorBanner.hidden = false; } return; }
+        if (spinner) spinner.classList.add('authdd-show');
+        if (btnText) btnText.style.visibility = 'hidden';
+        if (btn) btn.disabled = true;
         fetch(form.action, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -848,19 +777,23 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
             if (data.success) {
                 switchAuthTab('login');
                 const loginSuccessBanner = document.getElementById('login-success-banner');
-                if (loginSuccessBanner) { loginSuccessBanner.querySelector('.success-msg').textContent=data.thongbao||'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.'; loginSuccessBanner.classList.remove('hidden'); }
+                if (loginSuccessBanner) { loginSuccessBanner.querySelector('.success-msg').textContent=data.thongbao||'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.'; loginSuccessBanner.hidden = false; }
             } else {
-                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Có lỗi xảy ra.'; errorBanner.classList.remove('hidden'); }
+                if (errorBanner) { errorBanner.querySelector('.error-msg').textContent=data.loi||'Có lỗi xảy ra.'; errorBanner.hidden = false; }
             }
         })
         .catch(err => {
             console.error('Lỗi Reset Password AJAX:', err);
-            if (spinner && btnText) { spinner.classList.add('hidden'); btnText.style.opacity='1'; btn.style.pointerEvents=''; }
-            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.classList.remove('hidden'); }
+            if (spinner) spinner.classList.remove('authdd-show');
+            if (btnText) btnText.style.visibility = 'visible';
+            if (btn) btn.disabled = false;
+            if (errorBanner) { errorBanner.querySelector('.error-msg').textContent='Có lỗi mạng xảy ra. Vui lòng thử lại!'; errorBanner.hidden = false; }
         });
     }
 

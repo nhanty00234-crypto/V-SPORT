@@ -22,30 +22,30 @@
                       "on-surface-variant": "#3d4a3d",
                       "outline": "#6d7b6c",
                       "on-primary": "#ffffff",
-                      "surface-tint": "#006e2f",
+                      "surface-tint": "#4d7c0f",
                       "on-error-container": "#93000a",
-                      "inverse-primary": "#4ae176",
+                      "inverse-primary": "#bef264",
                       "secondary-fixed-dim": "#c6c6c7",
                       "error-container": "#ffdad6",
                       "on-secondary-fixed-variant": "#454747",
                       "on-secondary-fixed": "#1a1c1c",
-                      "primary": "#006e2f",
+                      "primary": "#4d7c0f",
                       "secondary-fixed": "#e2e2e2",
                       "on-secondary-container": "#616363",
                       "on-tertiary": "#ffffff",
-                      "on-primary-fixed-variant": "#005321",
+                      "on-primary-fixed-variant": "#3f6212",
                       "surface-variant": "#e0e3e5",
                       "surface-dim": "#d8dadc",
                       "inverse-on-surface": "#eff1f3",
                       "surface-bright": "#f7f9fb",
-                      "primary-fixed-dim": "#4ae176",
+                      "primary-fixed-dim": "#bef264",
                       "secondary": "#5d5f5f",
                       "background": "#f7f9fb",
                       "tertiary-fixed": "#d8e3fb",
                       "on-surface": "#191c1e",
                       "tertiary": "#545f73",
-                      "on-primary-container": "#004b1e",
-                      "on-primary-fixed": "#002109",
+                      "on-primary-container": "#365314",
+                      "on-primary-fixed": "#1a2e05",
                       "inverse-surface": "#2d3133",
                       "on-tertiary-fixed": "#111c2d",
                       "surface-container-lowest": "#ffffff",
@@ -60,11 +60,11 @@
                       "tertiary-fixed-dim": "#bcc7de",
                       "surface-container-high": "#e6e8ea",
                       "surface-container-low": "#f2f4f6",
-                      "primary-fixed": "#6bff8f",
+                      "primary-fixed": "#d9f99d",
                       "on-tertiary-fixed-variant": "#3c475a",
                       "on-tertiary-container": "#354053",
                       "error": "#ba1a1a",
-                      "primary-container": "#22c55e",
+                      "primary-container": "#ecfccb",
                       "on-error": "#ffffff"
               },
               "borderRadius": {
@@ -112,7 +112,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
         .ambient-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
         .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
-        .search-input:focus { border-color: #006e2f; box-shadow: 0 0 0 2px rgba(0, 110, 47, 0.2); }
+        .search-input:focus { border-color: #4d7c0f; box-shadow: 0 0 0 2px rgba(77, 124, 15, 0.2); }
         
         /* Form inputs inside modals */
         .form-input {
@@ -122,8 +122,8 @@
             transition: all 0.2s ease; font-size: 0.9375rem;
         }
         .form-input:focus {
-            border-color: #006e2f; outline: none; background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(0, 110, 47, 0.12);
+            border-color: #4d7c0f; outline: none; background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(77, 124, 15, 0.12);
         }
         .form-label {
             display: block; font-size: 0.75rem; font-weight: 700;
@@ -135,6 +135,27 @@
             0% { opacity: 0; transform: translateY(12px); }
             100% { opacity: 1; transform: translateY(0); }
         }
+
+        /* Sport filter chips (results toolbar) */
+        .chip-filter {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: 1px solid #e0e3e5;
+            background-color: #ffffff;
+            color: #3d4a3d;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .chip-filter:hover { border-color: #4d7c0f; color: #4d7c0f; }
+        .chip-filter-active {
+            background-color: #4d7c0f;
+            border-color: #4d7c0f;
+            color: #ffffff;
+        }
+        .chip-filter-active:hover { color: #ffffff; }
     </style>
 </head>
 <body class="bg-[#f7f9fb] text-on-surface antialiased flex flex-col min-h-screen">
@@ -143,115 +164,104 @@
 
     <main class="flex-grow pt-24 pb-24">
 
-        <!-- Hero Search Section -->
-        <section class="w-full bg-surface-container-low py-xl px-margin-mobile md:px-margin-desktop border-b border-surface-variant">
-            <div class="max-w-[1800px] mx-auto flex flex-col items-center text-center">
-                <h1 class="font-display text-display text-on-surface mb-sm">Tìm Kiếm Sân Đấu Hoàn Hảo</h1>
-                <p class="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-2xl">Khám phá các địa điểm thể thao hàng đầu gần bạn. Đặt sân tức thì và trải nghiệm ngay.</p>
-                
+        <!-- Intro / Search Section (light, đồng bộ homepage) -->
+        <section class="w-full bg-white py-2xl px-margin-mobile md:px-margin-desktop border-b border-surface-variant">
+            <div class="max-w-[1000px] mx-auto flex flex-col items-center text-center">
+                <span class="inline-flex items-center gap-1.5 bg-primary/10 text-on-primary-container text-[11px] font-bold uppercase tracking-[0.15em] px-4 py-1.5 rounded-full mb-4">
+                    Tìm kiếm siêu tốc
+                </span>
+                <h1 class="font-display text-display text-on-surface mb-sm">Tìm sân phù hợp với lịch của bạn</h1>
+                <p class="font-body-md text-body-md text-on-surface-variant mb-lg max-w-xl">Chọn môn thể thao, khu vực và ngày chơi — chúng tôi lo phần còn lại.</p>
+
                 <!-- Alerts -->
                 <c:if test="${not empty sessionScope.error}">
-                    <div class="mb-5 w-full max-w-3xl p-3 bg-red-50 border border-red-100 rounded-xl text-red-650 text-sm flex items-start gap-3 text-left">
+                    <div class="mb-5 w-full max-w-2xl p-3 bg-red-50 border border-red-100 rounded-xl text-red-650 text-sm flex items-start gap-3 text-left">
                         <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
                         <span>${sessionScope.error}</span>
                         <% session.removeAttribute("error"); %>
                     </div>
                 </c:if>
                 <c:if test="${not empty sessionScope.message}">
-                    <div class="mb-5 w-full max-w-3xl p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-start gap-3 text-left">
+                    <div class="mb-5 w-full max-w-2xl p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-start gap-3 text-left">
                         <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
                         <span>${sessionScope.message}</span>
                         <% session.removeAttribute("message"); %>
                     </div>
                 </c:if>
 
-                <div class="w-full max-w-3xl flex flex-col md:flex-row gap-sm bg-surface-container-lowest p-2 rounded-2xl shadow-sm border border-surface-variant">
-                    <div class="relative flex-grow flex items-center">
-                        <span class="material-symbols-outlined absolute left-4 text-outline">search</span>
-                        <input id="location-search-input" class="w-full pl-12 pr-4 py-3 bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none" placeholder="Nhập tên đường, quận, cơ sở..." type="text"/>
+                <!-- Search bar nổi -->
+                <div class="w-full max-w-3xl bg-surface-container-lowest rounded-2xl shadow-md border border-surface-variant p-3 flex flex-col md:flex-row gap-2">
+                    <div class="flex-1 flex items-center gap-2 px-3 py-2 md:border-r border-surface-variant/60">
+                        <span class="material-symbols-outlined text-outline text-[20px]">sports_tennis</span>
+                        <select id="hero-sport-select" class="w-full bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none">
+                            <option value="0">Tất cả bộ môn</option>
+                            <c:forEach var="mon" items="${dsMon}">
+                                <option value="${mon.monTheThaoID}">${mon.tenMon}</option>
+                            </c:forEach>
+                        </select>
                     </div>
-                    <div class="relative w-full md:w-48 flex items-center border-t md:border-t-0 md:border-l border-surface-variant/50 pt-2 md:pt-0 md:pl-2">
-                        <span class="material-symbols-outlined absolute left-3 text-outline">calendar_today</span>
-                        <input type="date" id="quick-date-input" class="w-full pl-10 pr-2 py-3 bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none" />
+                    <div class="flex-1 flex items-center gap-2 px-3 py-2 md:border-r border-surface-variant/60">
+                        <span class="material-symbols-outlined text-outline text-[20px]">location_on</span>
+                        <select id="hero-branch-select" class="w-full bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none">
+                            <option value="0">Tất cả cơ sở</option>
+                            <c:forEach var="cs" items="${dsCoSo}">
+                                <option value="${cs.coSoID}">${cs.tenCoSo}</option>
+                            </c:forEach>
+                        </select>
                     </div>
-                    <button id="btn-auto-locate" class="bg-primary text-on-primary font-label-md text-label-md px-lg py-3 rounded-xl hover:bg-opacity-90 transition-colors shrink-0 flex items-center justify-center gap-1.5 active:scale-95 duration-200">
-                        <span class="material-symbols-outlined text-[20px]" id="locate-icon">radar</span> <span id="locate-text">QUÉT SÂN</span>
+                    <div class="flex-1 flex items-center gap-2 px-3 py-2">
+                        <span class="material-symbols-outlined text-outline text-[20px]">calendar_today</span>
+                        <input type="date" id="quick-date-input" class="w-full bg-transparent border-none font-body-md text-body-md text-on-surface focus:outline-none"/>
+                    </div>
+                    <button id="btn-search-court" type="button" class="bg-primary text-on-primary font-label-md text-label-md px-lg py-3 rounded-xl hover:bg-opacity-90 transition-colors shrink-0 flex items-center justify-center gap-1.5 active:scale-95 duration-200">
+                        <span class="material-symbols-outlined text-[20px]" id="search-icon">search</span> <span id="search-text">Tìm sân</span>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Main Content Layout -->
-        <section class="max-w-[1800px] mx-auto px-margin-mobile md:px-margin-desktop py-xl grid grid-cols-1 lg:grid-cols-4 gap-xl">
-            <!-- Filters Sidebar -->
-            <aside class="lg:col-span-1 flex flex-col gap-lg">
-                <div class="bg-surface-container-lowest rounded-xl p-md ambient-shadow border border-surface-variant">
-                    <h3 class="font-headline-md text-headline-md mb-sm">Bộ lọc tìm kiếm</h3>
-                    
-                    <!-- Sport Type -->
-                    <div class="mb-lg">
-                        <h4 class="font-label-md text-label-md text-on-surface-variant mb-sm">Môn thể thao</h4>
-                        <div class="flex flex-col gap-xs font-body-md text-body-md">
-                            <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
-                                <input type="radio" name="sportFilter" id="btn-sport-0" checked onclick="filterSport(0)" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
-                                Tất cả bộ môn
-                            </label>
-                            <c:forEach var="mon" items="${dsMon}">
-                                <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
-                                    <input type="radio" name="sportFilter" id="btn-sport-${mon.monTheThaoID}" onclick="filterSport(${mon.monTheThaoID})" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
-                                    ${mon.tenMon}
-                                </label>
-                            </c:forEach>
-                        </div>
-                    </div>
+        <!-- Results Section -->
+        <section id="results-section" class="max-w-[1800px] mx-auto px-margin-mobile md:px-margin-desktop py-xl">
 
-                    <!-- Branches -->
-                    <div>
-                        <h4 class="font-label-md text-label-md text-on-surface-variant mb-sm">Chi nhánh / Cơ sở</h4>
-                        <div class="flex flex-col gap-xs font-body-md text-body-md">
-                            <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
-                                <input type="radio" name="branchFilter" id="btn-branch-0" checked onclick="filterBranch(0)" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
-                                Tất cả cơ sở
-                            </label>
-                            <c:forEach var="cs" items="${dsCoSo}">
-                                <label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors">
-                                    <input type="radio" name="branchFilter" id="btn-branch-${cs.coSoID}" onclick="filterBranch(${cs.coSoID})" class="rounded-full text-primary focus:ring-primary h-5 w-5 border-surface-variant"/>
-                                    ${cs.tenCoSo}
-                                </label>
-                            </c:forEach>
-                        </div>
-                    </div>
-
-                    <!-- Lịch sử đặt sân -->
+            <!-- Filter chips + branch dropdown + history -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-md mb-lg">
+                <div id="sport-chip-row" class="flex flex-wrap gap-2">
+                    <button type="button" onclick="selectSportChip(0, this)" class="chip-filter chip-filter-active">Tất cả</button>
+                    <c:forEach var="mon" items="${dsMon}">
+                        <button type="button" onclick="selectSportChip(${mon.monTheThaoID}, this)" class="chip-filter">${mon.tenMon}</button>
+                    </c:forEach>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <select id="branch-select-chip" class="text-sm font-medium border border-surface-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:outline-none focus:border-primary">
+                        <option value="0">Tất cả cơ sở</option>
+                        <c:forEach var="cs" items="${dsCoSo}">
+                            <option value="${cs.coSoID}">${cs.tenCoSo}</option>
+                        </c:forEach>
+                    </select>
                     <c:if test="${sessionScope.user != null}">
-                        <div class="mt-lg pt-lg border-t border-surface-variant">
-                            <button type="button" onclick="openHistoryModal()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-opacity-90 active:scale-95 transition-all shadow-md">
-                                <span class="material-symbols-outlined text-[18px]">history</span>
-                                Lịch sử đặt sân
-                            </button>
-                        </div>
+                        <button type="button" onclick="openHistoryModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-surface-variant text-sm font-semibold text-on-surface hover:border-primary hover:text-primary transition-all">
+                            <span class="material-symbols-outlined text-[18px]">history</span>
+                            Lịch sử
+                        </button>
                     </c:if>
                 </div>
-            </aside>
+            </div>
 
-            <!-- Venue Grid -->
-            <div class="lg:col-span-3">
-                <div class="flex justify-between items-center mb-md">
-                    <h2 class="font-headline-md text-headline-md">Sân Đấu Khả Dụng</h2>
-                    <span class="font-body-md text-body-md text-on-surface-variant">
-                        Đang hiển thị <span id="court-count" class="font-bold">0</span> kết quả (<span id="court-status-summary"></span>)
-                    </span>
-                </div>
-                
-                <div id="courts-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-gutter">
-                    <!-- Rendered dynamically by JS -->
-                </div>
+            <div class="flex justify-between items-center mb-md">
+                <h2 class="font-headline-md text-headline-md">Sân đấu khả dụng</h2>
+                <span class="font-body-md text-body-md text-on-surface-variant">
+                    Đang hiển thị <span id="court-count" class="font-bold">0</span> kết quả (<span id="court-status-summary"></span>)
+                </span>
+            </div>
 
-                <div class="w-full flex justify-center mt-12">
-                    <button class="font-label-md text-label-md border-2 border-surface-variant text-on-surface px-8 py-3 rounded-full hover:border-primary hover:text-primary transition-colors flex items-center gap-2 group bg-surface-container-lowest backdrop-blur-sm shadow-sm hover:shadow-md">
-                        TẢI THÊM <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">expand_more</span>
-                    </button>
-                </div>
+            <div id="courts-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
+                <!-- Rendered dynamically by JS -->
+            </div>
+
+            <div class="w-full flex justify-center mt-12">
+                <button class="font-label-md text-label-md border-2 border-surface-variant text-on-surface px-8 py-3 rounded-full hover:border-primary hover:text-primary transition-colors flex items-center gap-2 group bg-surface-container-lowest backdrop-blur-sm shadow-sm hover:shadow-md">
+                    TẢI THÊM <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">expand_more</span>
+                </button>
             </div>
         </section>
 
@@ -280,18 +290,18 @@
     <!-- ════ HISTORY MODAL ════ -->
     <div id="historyModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
         <div id="historyPanel" class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
-            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-primary px-6 py-4 flex items-center justify-between text-on-primary">
                 <h3 class="font-bold text-lg flex items-center gap-2">
                     <span class="material-symbols-outlined">history</span> Lịch sử đặt sân của bạn
                 </h3>
-                <button type="button" onclick="closeHistoryModal()" class="text-white/80 hover:text-white p-1">
+                <button type="button" onclick="closeHistoryModal()" class="text-on-primary/80 hover:text-on-primary p-1">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             <c:if test="${sessionScope.user != null}">
                 <div class="px-6 py-4 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-extrabold text-sm shadow-inner border border-emerald-100/50">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 text-on-primary-container flex items-center justify-center font-extrabold text-sm border border-primary/10">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.user.fullName}">${fn:substring(sessionScope.user.fullName, 0, 1)}</c:when>
                                 <c:otherwise>${fn:substring(sessionScope.user.username, 0, 1)}</c:otherwise>
@@ -305,7 +315,7 @@
                     <div class="flex gap-4">
                         <div class="text-center px-4 py-1.5 bg-white rounded-xl border border-slate-100 shadow-sm">
                             <span class="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">ĐÃ ĐẶT</span>
-                            <span class="text-sm font-black text-emerald-600 block mt-0.5">${fn:length(dsLich)} ca</span>
+                            <span class="text-sm font-black text-primary block mt-0.5">${fn:length(dsLich)} ca</span>
                         </div>
                         <div class="text-center px-4 py-1.5 bg-white rounded-xl border border-slate-100 shadow-sm">
                             <span class="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">UY TÍN</span>
@@ -739,7 +749,7 @@
                     <div class="text-center py-20 col-span-full">
                         <span class="material-symbols-outlined text-[64px] text-slate-200 block mb-4">search_off</span>
                         <p class="text-slate-500 font-medium">Không tìm thấy sân phù hợp.</p>
-                        <button onclick="filterBranch(0); filterSport(0);" class="mt-4 text-green-600 font-bold hover:underline text-sm">Xóa bộ lọc</button>
+                        <button onclick="filterBranch(0); filterSport(0);" class="mt-4 text-primary font-bold hover:underline text-sm">Xóa bộ lọc</button>
                     </div>
                 `;
                 return;
@@ -763,39 +773,27 @@
                     imgUrl = c.image;
                 }
 
-                const rating = (4.5 + (c.id % 5) * 0.1).toFixed(1);
-
                 const cardHtml = `
-                    <div class="bg-surface-container-lowest rounded-xl ambient-shadow hover-lift transition-all flex flex-col overflow-hidden cursor-pointer group border border-surface-variant/30" onclick="window.location.href='${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}'"  >
-                        <div class="relative h-48 w-full overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-surface-variant shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer group" onclick="window.location.href='${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}'">
+                        <div class="relative h-56 w-full overflow-hidden">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="\${imgUrl}" alt="\${c.name}"/>
-                            <div class="absolute top-sm right-sm bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded text-label-sm font-label-sm text-on-surface flex items-center gap-1 border border-surface-variant/40">
-                                <span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings:'FILL' 1">star</span>
-                                \${rating}
-                            </div>
-                            <div class="absolute top-sm left-sm font-bold text-[10px] tracking-widest uppercase px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border \${statusInfo.badgeClass}">
+                            <div class="absolute top-3 left-3 font-bold text-[10px] tracking-widest uppercase px-3 py-1 rounded-full shadow-sm border \${statusInfo.badgeClass}">
                                 \${statusInfo.label}
                             </div>
                         </div>
-                        <div class="p-md flex flex-col flex-grow">
-                            <div class="flex justify-between items-start mb-xs">
-                                <h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface group-hover:text-primary transition-colors">\${c.name}</h3>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface group-hover:text-primary transition-colors mb-1">\${c.name}</h3>
+                            <p class="text-[13px] text-on-surface-variant mb-3">\${branch.name}</p>
+                            <div class="mb-4">
+                                <span class="bg-primary/10 text-on-primary-container px-2.5 py-1 rounded-full font-label-sm text-label-sm">\${sportName}</span>
                             </div>
-                            <p class="text-[13px] text-on-surface-variant flex items-center gap-1 mb-2">
-                                <span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
-                                <span class="truncate">\${branch.name}</span>
-                            </p>
-                            <div class="flex gap-2 mb-sm flex-wrap">
-                                <span class="bg-primary/10 text-on-primary-container px-2 py-1 rounded font-label-sm text-label-sm">\${sportName}</span>
-                                <span class="bg-surface-container text-on-surface-variant px-2 py-1 rounded font-label-sm text-label-sm">Đầy đủ tiện ích</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant line-clamp-2 mb-4 min-h-[2.5rem]">\${c.desc || 'Sân đấu tiêu chuẩn chất lượng cao, hệ thống đèn chiếu sáng ban đêm hiện đại.'}</p>
-                            <div class="mt-auto pt-sm border-t border-surface-variant flex justify-between items-center">
-                                <div class="font-label-md text-label-md text-on-surface">
-                                    <span class="text-primary text-lg font-bold">\${priceText}</span> / giờ
+                            <div class="mt-auto pt-4 border-t border-surface-variant flex items-center justify-between">
+                                <div>
+                                    <span class="text-on-surface text-xl font-bold">\${priceText}</span>
+                                    <span class="text-on-surface-variant text-xs">/ giờ</span>
                                 </div>
-                                <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}" class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
-                                    Đặt sân ngay <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=\${c.id}" onclick="event.stopPropagation()" class="bg-primary text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-xl hover:bg-opacity-90 transition-colors">
+                                    Đặt sân
                                 </a>
                             </div>
                         </div>
@@ -806,17 +804,35 @@
         }
 
         // ─── Filter functions ───
+        // ─── Đồng bộ mọi nơi hiển thị filter (search bar / chip row / dropdown nhỏ) ───
+        function syncSportUI(sportId) {
+            const heroSelect = document.getElementById('hero-sport-select');
+            if (heroSelect) heroSelect.value = String(sportId);
+            const row = document.getElementById('sport-chip-row');
+            if (row) {
+                row.querySelectorAll('.chip-filter').forEach(chip => chip.classList.remove('chip-filter-active'));
+                const active = row.querySelector('[data-sport-id="' + sportId + '"]') ||
+                    (sportId === 0 ? row.firstElementChild : null);
+                if (active) active.classList.add('chip-filter-active');
+            }
+        }
+
+        function syncBranchUI(branchId) {
+            ['hero-branch-select', 'branch-select-chip'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = String(branchId);
+            });
+        }
+
         function filterSport(sportId) {
-            selectedSportId = sportId;
-            const input = document.getElementById('btn-sport-' + sportId);
-            if (input) input.checked = true;
+            selectedSportId = Number(sportId);
+            syncSportUI(selectedSportId);
             renderCourts();
         }
 
         function filterBranch(branchId) {
-            selectedBranchId = branchId;
-            const input = document.getElementById('btn-branch-' + branchId);
-            if (input) input.checked = true;
+            selectedBranchId = Number(branchId);
+            syncBranchUI(selectedBranchId);
             renderCourts();
         }
 
@@ -825,30 +841,49 @@
             renderCourts();
         }
 
+        // Chip filter — data-sport-id đã được gắn sẵn lúc DOMContentLoaded,
+        // syncSportUI() dùng nó để tô sáng đúng chip.
+        function selectSportChip(sportId) {
+            filterSport(sportId);
+        }
+
         // ─── Event listeners ───
         document.addEventListener("DOMContentLoaded", () => {
-            const locationInput = document.getElementById("location-search-input");
-            if (locationInput) locationInput.addEventListener("input", e => filterLocation(e.target.value));
+            // Gắn data-sport-id cho từng chip theo đúng thứ tự render (chip đầu = "Tất cả" = 0)
+            const chipRow = document.getElementById('sport-chip-row');
+            if (chipRow) {
+                Array.from(chipRow.children).forEach(chip => {
+                    const match = chip.getAttribute('onclick').match(/selectSportChip\((\d+)/);
+                    if (match) chip.dataset.sportId = match[1];
+                });
+            }
 
-            const locateBtn = document.getElementById("btn-auto-locate");
-            const locateIcon = document.getElementById("locate-icon");
-            const locateText = document.getElementById("locate-text");
-            if (locateBtn) {
-                locateBtn.addEventListener("click", () => {
-                    locateIcon.innerHTML = "sync";
-                    locateIcon.classList.add("animate-spin");
-                    locateText.textContent = "Đang quét...";
-                    locateBtn.disabled = true;
+            const heroSportSelect = document.getElementById('hero-sport-select');
+            if (heroSportSelect) heroSportSelect.addEventListener('change', e => filterSport(e.target.value));
+
+            const heroBranchSelect = document.getElementById('hero-branch-select');
+            if (heroBranchSelect) heroBranchSelect.addEventListener('change', e => filterBranch(e.target.value));
+
+            const branchSelectChip = document.getElementById('branch-select-chip');
+            if (branchSelectChip) branchSelectChip.addEventListener('change', e => filterBranch(e.target.value));
+
+            const searchBtn = document.getElementById('btn-search-court');
+            const searchIcon = document.getElementById('search-icon');
+            const searchText = document.getElementById('search-text');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', () => {
+                    searchIcon.textContent = 'progress_activity';
+                    searchIcon.classList.add('animate-spin');
+                    searchText.textContent = 'Đang tìm...';
+                    searchBtn.disabled = true;
+                    renderCourts();
                     setTimeout(() => {
-                        const firstKey = Object.keys(branches)[0];
-                        let detected = firstKey ? (branches[firstKey].address || branches[firstKey].name || '') : '';
-                        if (detected.includes(',')) detected = detected.split(',')[0].trim();
-                        if (locationInput) { locationInput.value = detected; filterLocation(detected); }
-                        locateIcon.innerHTML = "radar";
-                        locateIcon.classList.remove("animate-spin");
-                        locateText.textContent = "QUÉT";
-                        locateBtn.disabled = false;
-                    }, 900);
+                        searchIcon.textContent = 'search';
+                        searchIcon.classList.remove('animate-spin');
+                        searchText.textContent = 'Tìm sân';
+                        searchBtn.disabled = false;
+                        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
                 });
             }
 

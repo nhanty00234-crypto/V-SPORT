@@ -30,7 +30,7 @@
             width: 22px;
             height: 22px;
             background: white;
-            border: 2.5px solid #006e2f;
+            border: 2.5px solid #4d7c0f;
             border-radius: 50%;
             cursor: ew-resize;
             z-index: 3;
@@ -52,9 +52,9 @@
 
             <!-- Breadcrumbs -->
             <div class="flex flex-wrap items-center gap-1.5 text-[#3d4a3d] text-xs font-semibold mb-5">
-                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors whitespace-nowrap">Tìm Sân</a>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#4d7c0f] transition-colors whitespace-nowrap">Tìm Sân</a>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#006e2f] transition-colors whitespace-nowrap">Danh sách sân</a>
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="hover:text-[#4d7c0f] transition-colors whitespace-nowrap">Danh sách sân</a>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
                 <span class="text-[#191c1e] font-bold truncate max-w-[160px] sm:max-w-none">${san.tenSan}</span>
             </div>
@@ -138,13 +138,13 @@
                                 <label class="text-sm font-semibold text-[#191c1e]">Ngày đặt sân</label>
                                 <div class="flex items-center justify-between bg-green-50 border border-[#d1fae5] rounded-lg px-2 py-2">
                                     <button type="button" id="prev-day-btn" onclick="prevDay()"
-                                            class="p-1 rounded-full hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[#006e2f]"
+                                            class="p-1 rounded-full hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[#4d7c0f]"
                                             disabled aria-label="Ngày trước">
                                         <span class="material-symbols-outlined text-[22px]">chevron_left</span>
                                     </button>
-                                    <span id="date-display" class="text-sm font-semibold text-[#006e2f] select-none"></span>
+                                    <span id="date-display" class="text-sm font-semibold text-[#4d7c0f] select-none"></span>
                                     <button type="button" onclick="nextDay()"
-                                            class="p-1 rounded-full hover:bg-green-100 transition-colors text-[#006e2f]"
+                                            class="p-1 rounded-full hover:bg-green-100 transition-colors text-[#4d7c0f]"
                                             aria-label="Ngày tiếp theo">
                                         <span class="material-symbols-outlined text-[22px]">chevron_right</span>
                                     </button>
@@ -173,7 +173,7 @@
                                         <span class="inline-block w-3 h-3 rounded bg-red-100 border border-red-200 flex-shrink-0"></span>Đã đặt
                                     </span>
                                     <span class="flex items-center gap-1.5">
-                                        <span class="inline-block w-3 h-3 rounded bg-[#006e2f] flex-shrink-0"></span>Đang chọn
+                                        <span class="inline-block w-3 h-3 rounded bg-[#4d7c0f] flex-shrink-0"></span>Đang chọn
                                     </span>
                                 </div>
 
@@ -185,8 +185,8 @@
                                 <!-- Selection display -->
                                 <div id="tl-selection-display" class="hidden bg-green-50 border border-green-200 rounded-lg px-3 py-2.5 flex items-center justify-between">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-[16px] text-[#006e2f]">schedule</span>
-                                        <span id="tl-sel-text" class="text-sm font-semibold text-[#006e2f]"></span>
+                                        <span class="material-symbols-outlined text-[16px] text-[#4d7c0f]">schedule</span>
+                                        <span id="tl-sel-text" class="text-sm font-semibold text-[#4d7c0f]"></span>
                                     </div>
                                     <button type="button" onclick="resetSelection()"
                                             class="text-[11px] text-[#6d7b6c] hover:text-red-500 transition-colors">
@@ -204,13 +204,13 @@
                             <div class="flex flex-col gap-1.5">
                                 <label for="ghiChu" class="text-sm font-semibold text-[#191c1e]">Ghi chú</label>
                                 <textarea name="ghiChu" id="ghiChu" rows="2"
-                                          class="border border-[#bccbb9] rounded-lg px-3 py-2.5 text-sm bg-[#f7f9fb] text-[#191c1e] placeholder-[#6d7b6c] resize-none outline-none hover:border-[#006e2f] focus:border-[#006e2f] focus:ring-2 focus:ring-[#006e2f]/20 transition-all"
+                                          class="border border-[#bccbb9] rounded-lg px-3 py-2.5 text-sm bg-[#f7f9fb] text-[#191c1e] placeholder-[#6d7b6c] resize-none outline-none hover:border-[#4d7c0f] focus:border-[#4d7c0f] focus:ring-2 focus:ring-[#4d7c0f]/20 transition-all"
                                           placeholder="Thuê bóng, mượn áo tập..."></textarea>
                             </div>
 
                             <!-- Payment Method -->
                             <div class="grid grid-cols-2 gap-2">
-                                <label class="pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all" id="lbl-opt-sau">
+                                <label class="pay-opt border-2 border-[#4d7c0f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#4d7c0f] active:scale-95 transition-all" id="lbl-opt-sau">
                                     <input type="radio" name="paymentMethod" value="sau" checked class="hidden" onchange="changePayMethod('sau')">
                                     Trả tại quầy
                                 </label>
@@ -230,7 +230,7 @@
                                 </div>
                                 <div class="flex justify-between font-bold text-base text-[#191c1e] pt-2 border-t border-[#e6e8ea] mt-1">
                                     <span>Tổng cộng</span>
-                                    <span id="price-total" class="text-[#006e2f]"></span>
+                                    <span id="price-total" class="text-[#4d7c0f]"></span>
                                 </div>
                             </div>
 
@@ -238,13 +238,13 @@
                             <c:choose>
                                 <c:when test="${sessionScope.user != null}">
                                     <button type="submit" id="btn-submit-booking" disabled
-                                            class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                                            class="w-full bg-[#4d7c0f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#3f6212] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                                         Đặt Sân Ngay
                                     </button>
                                 </c:when>
                                 <c:otherwise>
                                     <a href="${pageContext.request.contextPath}/dangnhap"
-                                       class="w-full bg-[#006e2f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#005321] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 text-center">
+                                       class="w-full bg-[#4d7c0f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#3f6212] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 text-center">
                                         Đăng Nhập Để Đặt Sân
                                         <span class="material-symbols-outlined text-[18px]">login</span>
                                     </a>
@@ -264,7 +264,7 @@
                         <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#191c1e] leading-tight mb-3">${san.tenSan}</h1>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[#3d4a3d] text-sm font-medium mb-4">
                             <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px] text-[#006e2f] filled">star</span>
+                                <span class="material-symbols-outlined text-[16px] text-[#4d7c0f] filled">star</span>
                                 <span class="text-[#6d7b6c] text-xs sm:text-sm">${coSo.tenCoSo}</span>
                             </div>
                             <span class="text-[#bccbb9] hidden sm:inline">•</span>
@@ -274,12 +274,12 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
-                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">${tenMon}</span>
-                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">${loai.tenLoai}</span>
-                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">
+                            <span class="px-2.5 py-1 bg-[#4d7c0f]/10 text-[#365314] rounded font-semibold text-[11px] sm:text-xs">${tenMon}</span>
+                            <span class="px-2.5 py-1 bg-[#4d7c0f]/10 text-[#365314] rounded font-semibold text-[11px] sm:text-xs">${loai.tenLoai}</span>
+                            <span class="px-2.5 py-1 bg-[#4d7c0f]/10 text-[#365314] rounded font-semibold text-[11px] sm:text-xs">
                                 ${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}
                             </span>
-                            <span class="px-2.5 py-1 bg-[#006e2f]/10 text-[#004b1e] rounded font-semibold text-[11px] sm:text-xs">${totalSimilarCourts} sân tương tự</span>
+                            <span class="px-2.5 py-1 bg-[#4d7c0f]/10 text-[#365314] rounded font-semibold text-[11px] sm:text-xs">${totalSimilarCourts} sân tương tự</span>
                         </div>
                     </div>
 
@@ -300,27 +300,27 @@
                         <h2 class="text-lg sm:text-xl font-semibold text-[#191c1e] mb-4 sm:mb-6">Tiện ích</h2>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 sm:gap-y-6 gap-x-3 sm:gap-x-4">
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
-                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">wifi</span>
+                                <span class="material-symbols-outlined text-[24px] text-[#4d7c0f]">wifi</span>
                                 <span class="text-base">Wifi miễn phí</span>
                             </div>
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
-                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">local_parking</span>
+                                <span class="material-symbols-outlined text-[24px] text-[#4d7c0f]">local_parking</span>
                                 <span class="text-base">Bãi đỗ xe</span>
                             </div>
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
-                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">lightbulb</span>
+                                <span class="material-symbols-outlined text-[24px] text-[#4d7c0f]">lightbulb</span>
                                 <span class="text-base">Đèn chiếu sáng</span>
                             </div>
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
-                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">shower</span>
+                                <span class="material-symbols-outlined text-[24px] text-[#4d7c0f]">shower</span>
                                 <span class="text-base">Phòng tắm</span>
                             </div>
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
-                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">local_drink</span>
+                                <span class="material-symbols-outlined text-[24px] text-[#4d7c0f]">local_drink</span>
                                 <span class="text-base">Nước uống</span>
                             </div>
                             <div class="flex items-center gap-3 text-[#3d4a3d]">
-                                <span class="material-symbols-outlined text-[24px] text-[#006e2f]">security</span>
+                                <span class="material-symbols-outlined text-[24px] text-[#4d7c0f]">security</span>
                                 <span class="text-base">Bảo vệ 24/7</span>
                             </div>
                         </div>
@@ -332,7 +332,7 @@
                     <div>
                         <h2 class="text-lg sm:text-xl font-semibold text-[#191c1e] mb-2">Vị trí</h2>
                         <p class="text-base text-[#3d4a3d] mb-4 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[18px] text-[#006e2f]">location_on</span>
+                            <span class="material-symbols-outlined text-[18px] text-[#4d7c0f]">location_on</span>
                             ${coSo.diaChi}
                         </p>
                         <div class="w-full h-44 sm:h-56 bg-[#eceef0] rounded-xl overflow-hidden border border-[#e0e3e5] shadow-sm">
@@ -357,7 +357,7 @@
         <div class="w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 mt-10 md:mt-16">
             <div class="bg-white p-4 sm:p-6 md:p-8 rounded-xl border border-[#e0e3e5] shadow-sm">
                 <h2 class="text-lg sm:text-xl font-bold text-[#191c1e] mb-4 sm:mb-6 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[22px] text-[#006e2f]">sports_tennis</span>
+                    <span class="material-symbols-outlined text-[22px] text-[#4d7c0f]">sports_tennis</span>
                     Các sân đấu khác dành cho bạn
                 </h2>
                 <!-- Horizontal scroll on mobile, grid on larger -->
@@ -396,7 +396,7 @@
                                         <span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm">${osSportName}</span>
                                     </div>
                                     <div class="p-4 space-y-1.5">
-                                        <h4 class="font-bold text-[#191c1e] text-sm truncate group-hover:text-[#006e2f] transition-colors">${os.tenSan}</h4>
+                                        <h4 class="font-bold text-[#191c1e] text-sm truncate group-hover:text-[#4d7c0f] transition-colors">${os.tenSan}</h4>
                                         <p class="text-xs text-[#6d7b6c] flex items-center gap-1">
                                             <span class="material-symbols-outlined text-[13px]">location_on</span>
                                             ${osCoSoName}
@@ -405,9 +405,9 @@
                                     </div>
                                 </a>
                                 <div class="px-4 pb-4 pt-0 flex items-center justify-between border-t border-[#e6e8ea] mt-auto">
-                                    <span class="text-sm font-bold text-[#006e2f]"><fmt:formatNumber value="${osPrice}" pattern="#,##0"/> đ<span class="text-[10px] font-normal text-[#6d7b6c]">/h</span></span>
+                                    <span class="text-sm font-bold text-[#4d7c0f]"><fmt:formatNumber value="${osPrice}" pattern="#,##0"/> đ<span class="text-[10px] font-normal text-[#6d7b6c]">/h</span></span>
                                     <a href="${pageContext.request.contextPath}/customer/chi-tiet-san?id=${os.sanID}"
-                                       class="px-3 py-1.5 bg-[#006e2f] text-white rounded-lg text-[11px] font-semibold hover:bg-[#005321] hover:no-underline transition-all">
+                                       class="px-3 py-1.5 bg-[#4d7c0f] text-white rounded-lg text-[11px] font-semibold hover:bg-[#3f6212] hover:no-underline transition-all">
                                         Xem sân
                                     </a>
                                 </div>
@@ -427,7 +427,7 @@
             <span class="text-[10px] text-[#6d7b6c]">${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}</span>
         </div>
         <a href="#booking-widget"
-           class="px-5 py-2.5 bg-[#006e2f] text-white font-semibold text-sm rounded-xl hover:bg-[#005321] active:scale-95 transition-all shadow-sm">
+           class="px-5 py-2.5 bg-[#4d7c0f] text-white font-semibold text-sm rounded-xl hover:bg-[#3f6212] active:scale-95 transition-all shadow-sm">
             Đặt sân ngay
         </a>
     </div>
@@ -608,7 +608,7 @@
                 const left = minToPct(selectedStartMin);
                 const w    = minToPct(selectedEndMin) - left;
 
-                const sel = mkDiv("position:absolute;top:0;bottom:0;left:" + left + "%;width:" + w + "%;background:#006e2f;border-radius:6px;opacity:0.85;pointer-events:none;");
+                const sel = mkDiv("position:absolute;top:0;bottom:0;left:" + left + "%;width:" + w + "%;background:#4d7c0f;border-radius:6px;opacity:0.85;pointer-events:none;");
                 bar.appendChild(sel);
 
                 // Drag handles
@@ -624,10 +624,10 @@
                 // Pending-start: show vertical marker + tooltip
                 const left = minToPct(selectedStartMin);
 
-                const marker = mkDiv("position:absolute;top:0;bottom:0;left:" + left + "%;width:3px;background:#006e2f;border-radius:2px;transform:translateX(-50%);pointer-events:none;");
+                const marker = mkDiv("position:absolute;top:0;bottom:0;left:" + left + "%;width:3px;background:#4d7c0f;border-radius:2px;transform:translateX(-50%);pointer-events:none;");
                 bar.appendChild(marker);
 
-                const tip = mkDiv("position:absolute;bottom:calc(100% + 5px);left:" + left + "%;transform:translateX(-50%);background:#006e2f;color:white;font-size:10px;padding:2px 7px;border-radius:4px;white-space:nowrap;pointer-events:none;");
+                const tip = mkDiv("position:absolute;bottom:calc(100% + 5px);left:" + left + "%;transform:translateX(-50%);background:#4d7c0f;color:white;font-size:10px;padding:2px 7px;border-radius:4px;white-space:nowrap;pointer-events:none;");
                 tip.textContent = minToStr(selectedStartMin);
                 bar.appendChild(tip);
             }
@@ -791,7 +791,7 @@
 
         // ── Payment method toggle ──────────────────────────────────────
         function changePayMethod(method) {
-            const activeClass   = "pay-opt border-2 border-[#006e2f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#006e2f] active:scale-95 transition-all";
+            const activeClass   = "pay-opt border-2 border-[#4d7c0f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#4d7c0f] active:scale-95 transition-all";
             const inactiveClass = "pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all";
             document.getElementById("lbl-opt-sau").className   = method === "sau"   ? activeClass : inactiveClass;
             document.getElementById("lbl-opt-payos").className = method === "payos" ? activeClass : inactiveClass;
