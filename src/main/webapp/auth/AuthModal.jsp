@@ -6,10 +6,23 @@
     .auth-modal-scroll::-webkit-scrollbar-track { background: transparent; }
     .auth-modal-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
 
+    #auth-modal {
+        position: fixed;
+        z-index: 130;
+        display: none;
+    }
+    #auth-modal.is-open { display: block; }
     #auth-modal-card {
-        transition: max-width 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
-                    transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
-                    opacity 300ms ease-out;
+        width: 360px;
+        max-width: calc(100vw - 16px);
+        max-height: 85vh;
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: opacity 180ms ease-out, transform 180ms ease-out;
+    }
+    #auth-modal-card.is-visible {
+        opacity: 1;
+        transform: translateY(0);
     }
     .modal-panel { transition: opacity 200ms ease-out, transform 200ms ease-out; }
     :where(#auth-modal button) {
@@ -25,247 +38,169 @@
     @keyframes authLoadingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
     .auth-loading-pulse { animation: authLoadingPulse 1.4s ease-in-out infinite; }
     .btn-submit.is-loading, #modal-login-btn.is-loading { cursor: wait; pointer-events: none; }
+    .auth-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+    .auth-google-btn {
+        width: 100%; height: 40px; border-radius: 10px; border: 1.5px solid #e2e8f0 !important;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        font-size: 12.5px; font-weight: 600; color: #334155; transition: all 150ms ease;
+    }
+    .auth-google-btn:hover { background-color: #f8fafc !important; border-color: #cbd5e1 !important; }
 </style>
 
-<div id="auth-modal" class="fixed inset-0 z-[120] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300" onclick="handleBackdropClick(event)">
-
-    <div id="auth-modal-card" class="bg-white rounded-3xl w-full max-w-[460px] max-h-[95vh] flex flex-col shadow-2xl relative border border-slate-100 transform scale-95 opacity-0">
+<div id="auth-modal">
+    <div id="auth-modal-card" class="bg-white rounded-2xl flex flex-col shadow-xl relative border border-slate-200">
 
         <!-- Loading overlay -->
-        <div id="auth-loading-overlay" class="hidden absolute inset-0 z-[140] bg-white/85 backdrop-blur-sm rounded-3xl flex-col items-center justify-center gap-4">
-            <div class="w-11 h-11 border-[3px] border-[#378b76]/20 border-t-[#378b76] rounded-full animate-spin"></div>
+        <div id="auth-loading-overlay" class="hidden absolute inset-0 z-[140] bg-white/85 backdrop-blur-sm rounded-2xl flex-col items-center justify-center gap-4">
+            <div class="w-9 h-9 border-[3px] border-[#378b76]/20 border-t-[#378b76] rounded-full animate-spin"></div>
             <div class="text-center px-6">
-                <p id="auth-loading-text" class="text-[14px] font-bold text-slate-800 auth-loading-pulse">Đang đăng nhập...</p>
-                <p class="text-[12px] text-slate-400 mt-1">Vui lòng đợi trong giây lát</p>
+                <p id="auth-loading-text" class="text-[13px] font-bold text-slate-800 auth-loading-pulse">Đang đăng nhập...</p>
             </div>
         </div>
 
         <!-- Close Button -->
-        <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors z-[130] w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100">
-            <span class="material-symbols-outlined text-[20px]">close</span>
+        <button onclick="closeAuthModal()" class="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 transition-colors z-[130] w-7 h-7 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100">
+            <span class="material-symbols-outlined text-[18px]">close</span>
         </button>
 
         <!-- Toggle Tabs -->
-        <div id="modal-tabs-header" class="px-8 pt-8 pb-4 border-b border-slate-100 flex items-center justify-start gap-4">
-            <button id="modal-tab-login" onclick="switchAuthTab('login')" class="text-xl font-bold tracking-tight text-slate-900 border-b-2 border-[#378b76] pb-2 transition-all">Đăng nhập</button>
-            <button id="modal-tab-register" onclick="switchAuthTab('register')" class="text-xl font-bold tracking-tight text-slate-400 hover:text-slate-900 border-b-2 border-transparent pb-2 transition-all">Đăng ký</button>
+        <div id="modal-tabs-header" class="px-5 pt-5 pb-3 border-b border-slate-100 flex items-center justify-start gap-4">
+            <button id="modal-tab-login" onclick="switchAuthTab('login')" class="text-[15px] font-bold tracking-tight text-slate-900 border-b-2 border-[#378b76] pb-1.5 transition-all">Đăng nhập</button>
+            <button id="modal-tab-register" onclick="switchAuthTab('register')" class="text-[15px] font-bold tracking-tight text-slate-400 hover:text-slate-900 border-b-2 border-transparent pb-1.5 transition-all">Đăng ký</button>
         </div>
 
         <!-- Content Area -->
-        <div class="flex-grow overflow-y-auto p-8 auth-modal-scroll">
+        <div class="flex-grow overflow-y-auto p-5 auth-modal-scroll">
 
             <!-- LOGIN PANEL -->
             <div id="modal-login-panel" class="modal-panel flex flex-col">
-                <div class="mb-6">
-                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
-                        <span>Hệ thống V-Sport</span>
-                    </div>
-                    <p class="text-[13px] text-slate-400 font-medium">Chào mừng trở lại! Nhập thông tin tài khoản của bạn để tiếp tục.</p>
-                </div>
-
-                <div id="login-error-banner" class="hidden mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-xs font-semibold border border-red-100 flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">error</span>
+                <div id="login-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-[11.5px] font-semibold border border-red-100 flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">error</span>
                     <span class="error-msg"></span>
                 </div>
-                <div id="login-success-banner" class="hidden mb-6 p-4 bg-green-50 text-green-600 rounded-xl text-xs font-semibold border border-green-100 flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                <div id="login-success-banner" class="hidden mb-4 p-3 bg-green-50 text-green-600 rounded-lg text-[11.5px] font-semibold border border-green-100 flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
                     <span class="success-msg"></span>
                 </div>
 
                 <form id="modal-login-form" action="${pageContext.request.contextPath}/dangnhap" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitLoginForm(event)">
                     <input type="hidden" name="loginType" value="customer">
-                    <div class="mb-4 relative">
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Tên đăng nhập hoặc Email</label>
-                        <div class="relative">
-                            <input type="text" name="username" id="modal-login-username" required placeholder="Nhập tên đăng nhập hoặc email" class="w-full h-12 pl-12 pr-12 border-1.5 border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">account_circle</span>
-                        </div>
+                    <div class="mb-3">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Tên đăng nhập hoặc email</label>
+                        <input type="text" name="username" id="modal-login-username" required placeholder="Nhập tên đăng nhập hoặc email" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
                     </div>
-                    <div class="mb-5 relative">
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Mật khẩu</label>
+                    <div class="mb-3 relative">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mật khẩu</label>
                         <div class="relative">
-                            <input type="password" name="password" id="modal-login-pass" required placeholder="Nhập mật khẩu" class="w-full h-12 pl-12 pr-12 border-1.5 border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">key</span>
-                            <button type="button" onclick="togglePassField('modal-login-pass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
-                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            <input type="password" name="password" id="modal-login-pass" required placeholder="Nhập mật khẩu" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <button type="button" onclick="togglePassField('modal-login-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between mb-6">
-                        <label class="flex items-center gap-2 cursor-pointer select-none text-[12px] text-slate-500 font-semibold">
-                            <input type="checkbox" name="rememberMe" class="w-4 h-4 accent-[#378b76] rounded border-slate-300">
-                            <span>Ghi nhớ đăng nhập (7 ngày)</span>
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-slate-500 font-semibold">
+                            <input type="checkbox" name="rememberMe" class="w-3.5 h-3.5 accent-[#378b76] rounded border-slate-300">
+                            <span>Ghi nhớ 7 ngày</span>
                         </label>
-                        <button type="button" onclick="switchAuthTab('forgot-password')" class="text-[12px] font-bold text-[#378b76] hover:underline cursor-pointer">Quên mật khẩu?</button>
+                        <button type="button" onclick="switchAuthTab('forgot-password')" class="text-[11px] font-bold text-[#378b76] hover:underline cursor-pointer">Quên mật khẩu?</button>
                     </div>
-                    <button type="submit" id="modal-login-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden disabled:opacity-70 disabled:cursor-wait">
-                        <span class="btn-text flex items-center gap-1.5 transition-opacity duration-200">
-                            Đăng nhập
-                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                        </span>
-                        <span class="btn-loading hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2.5 text-white">
-                            <span class="w-5 h-5 border-2 border-white/25 border-t-white rounded-full animate-spin"></span>
-                            <span class="btn-loading-text text-[13px] font-semibold">Đang đăng nhập...</span>
+                    <button type="submit" id="modal-login-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden disabled:opacity-70 disabled:cursor-wait">
+                        <span class="btn-text flex items-center gap-1.5 transition-opacity duration-200">Đăng nhập</span>
+                        <span class="btn-loading hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
+                            <span class="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin"></span>
+                            <span class="btn-loading-text text-[12px] font-semibold">Đang đăng nhập...</span>
                         </span>
                     </button>
                 </form>
 
-                <div class="mt-5 text-center border-t border-slate-100 pt-4">
-                    <p class="text-[12px] text-slate-500 font-medium">
-                        Bạn chưa có tài khoản?
-                        <button onclick="switchAuthTab('register')" class="font-bold text-[#378b76] hover:underline ml-1">Đăng ký ngay</button>
+                <div class="auth-divider">
+                    <span class="text-[10.5px] text-slate-400 font-semibold">hoặc</span>
+                </div>
+                <button type="button" class="auth-google-btn" title="Chưa tích hợp OAuth thật">
+                    <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.5 35.4 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.6 5.4C41.5 35.9 44 30.3 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+                    Tiếp tục với Google
+                </button>
+
+                <div class="mt-4 text-center border-t border-slate-100 pt-3">
+                    <p class="text-[11.5px] text-slate-500 font-medium">
+                        Chưa có tài khoản?
+                        <button onclick="switchAuthTab('register')" class="font-bold text-[#378b76] hover:underline ml-1">Tạo tài khoản</button>
                     </p>
                 </div>
             </div>
 
             <!-- REGISTER PANEL -->
             <div id="modal-register-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-5">
-                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
-                        <span>Hệ thống V-Sport</span>
-                    </div>
-                    <p class="text-[13px] text-slate-400 font-medium">Bắt đầu hành trình chinh phục sân đấu và kết nối bạn bè ngay hôm nay.</p>
-                </div>
-
-                <div id="register-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-600 rounded-xl text-xs font-semibold border border-red-100 flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">error</span>
+                <div id="register-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-[11.5px] font-semibold border border-red-100 flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">error</span>
                     <span class="error-msg"></span>
                 </div>
 
                 <form id="modal-register-form" action="${pageContext.request.contextPath}/dangky" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitRegisterForm(event)">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                        <div class="space-y-4">
-                            <span class="text-[11px] font-bold text-[#378b76] uppercase tracking-wider block border-b border-slate-100 pb-2">1. Thông tin tài khoản</span>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Tên đăng nhập</label>
-                                <div class="relative">
-                                    <input type="text" name="username" required placeholder="Tên đăng nhập" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">account_circle</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Email</label>
-                                <div class="relative">
-                                    <input type="email" name="email" required placeholder="Địa chỉ email" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">mail</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Mật khẩu</label>
-                                <div class="relative">
-                                    <input type="password" name="password" id="modal-reg-pass" required placeholder="Tạo mật khẩu" oninput="updateModalPwStrength(this)" class="w-full h-10 pl-10 pr-10 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">key</span>
-                                    <button type="button" onclick="togglePassField('modal-reg-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
-                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Xác nhận mật khẩu</label>
-                                <div class="relative">
-                                    <input type="password" name="confirm_password" id="modal-reg-confirm" required placeholder="Nhập lại mật khẩu" class="w-full h-10 pl-10 pr-10 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">key</span>
-                                    <button type="button" onclick="togglePassField('modal-reg-confirm', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
-                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mt-2 w-full">
-                                <div class="flex gap-1 w-1/2 mb-1.5">
-                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr1"></div>
-                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr2"></div>
-                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr3"></div>
-                                    <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr4"></div>
-                                </div>
-                                <p class="text-[9.5px] text-slate-400 leading-tight">Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
-                            </div>
-                        </div>
+                    <!-- Giới tính không bắt buộc phía backend nhưng lưu mặc định an toàn -->
+                    <input type="hidden" name="gender" value="Khác">
 
-                        <div class="space-y-6">
-                            <div class="space-y-4">
-                                <span class="text-[11px] font-bold text-[#378b76] uppercase tracking-wider block border-b border-slate-100 pb-2">2. Thông tin cá nhân</span>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Họ và Tên</label>
-                                        <div class="relative">
-                                            <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">person</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Số điện thoại</label>
-                                        <div class="relative">
-                                            <input type="tel" name="phone" required placeholder="Nhập số điện thoại" class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">call</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Giới tính</label>
-                                    <div class="relative">
-                                        <select name="gender" required class="w-full h-10 pl-10 pr-10 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none appearance-none" style="border-width: 1.5px;">
-                                            <option value="Nam">Nam</option>
-                                            <option value="Nữ">Nữ</option>
-                                            <option value="Khác">Khác</option>
-                                        </select>
-                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">face</span>
-                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">arrow_drop_down</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="space-y-4">
-                                <span class="text-[11px] font-bold text-[#378b76] uppercase tracking-wider block border-b border-slate-100 pb-2">3. Thể thao & kỹ năng</span>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 mb-1.5 block">Vị trí sở trường</label>
-                                    <div class="relative">
-                                        <input type="text" name="viTriSoTruong" placeholder="Ví dụ: Tiền đạo, Hậu vệ, Đập cầu..." class="w-full h-10 pl-10 pr-4 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">sports_handball</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-400 block mb-2">Môn thể thao yêu thích</label>
-                                    <div class="grid grid-cols-2 gap-2.5">
-                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
-                                            <input type="checkbox" name="sport" value="Bóng đá" class="w-4 h-4 accent-[#378b76] rounded"> Bóng đá
-                                        </label>
-                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
-                                            <input type="checkbox" name="sport" value="Cầu lông" class="w-4 h-4 accent-[#378b76] rounded"> Cầu lông
-                                        </label>
-                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
-                                            <input type="checkbox" name="sport" value="Pickleball" class="w-4 h-4 accent-[#378b76] rounded"> Pickleball
-                                        </label>
-                                        <label class="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:border-[#378b76]/40 transition-colors font-semibold text-[11.5px] text-slate-700 select-none shadow-sm">
-                                            <input type="checkbox" name="sport" value="Tennis" class="w-4 h-4 accent-[#378b76] rounded"> Tennis
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="mb-3">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Tên đăng nhập</label>
+                        <input type="text" name="username" required placeholder="Tên đăng nhập" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Họ và tên</label>
+                        <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Email</label>
+                        <input type="email" name="email" required placeholder="Địa chỉ email" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Số điện thoại</label>
+                        <input type="tel" name="phone" required placeholder="Nhập số điện thoại" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                    </div>
+                    <div class="mb-3 relative">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mật khẩu</label>
+                        <div class="relative">
+                            <input type="password" name="password" id="modal-reg-pass" required placeholder="Tạo mật khẩu" oninput="updateModalPwStrength(this)" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <button type="button" onclick="togglePassField('modal-reg-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            </button>
+                        </div>
+                        <div class="mt-1.5 flex gap-1 w-full">
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr1"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr2"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr3"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalRegStr4"></div>
+                        </div>
+                        <p class="text-[9.5px] text-slate-400 leading-tight mt-1">Tối thiểu 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt.</p>
+                    </div>
+                    <div class="mb-3 relative">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Xác nhận mật khẩu</label>
+                        <div class="relative">
+                            <input type="password" name="confirm_password" id="modal-reg-confirm" required placeholder="Nhập lại mật khẩu" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <button type="button" onclick="togglePassField('modal-reg-confirm', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76] transition-all">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-4">
-                        <div class="flex items-start gap-2.5 select-none">
-                            <input type="checkbox" name="agree" value="Đồng ý" required class="w-4 h-4 mt-0.5 accent-[#378b76] rounded border-slate-300 cursor-pointer">
-                            <span class="text-[11.5px] text-slate-500 font-semibold leading-tight">
-                                Tôi đồng ý với các <a href="#" class="text-[#378b76] font-bold hover:underline">điều khoản</a> và <a href="#" class="text-[#378b76] font-bold hover:underline">chính sách</a> của hệ thống.
-                            </span>
-                        </div>
-                        <button type="submit" id="modal-register-btn" class="w-full h-11 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[13.5px] flex items-center justify-center gap-2 transition-all relative overflow-hidden">
-                            <span class="btn-text flex items-center gap-1.5">
-                                Kích hoạt Athlete Pass
-                                <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
-                            </span>
-                            <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
-                                <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                            </div>
-                        </button>
+                    <div class="flex items-start gap-2 select-none mb-3.5">
+                        <input type="checkbox" name="agree" value="Đồng ý" required class="w-3.5 h-3.5 mt-0.5 accent-[#378b76] rounded border-slate-300 cursor-pointer">
+                        <span class="text-[10.5px] text-slate-500 font-semibold leading-tight">
+                            Tôi đồng ý với <a href="#" class="text-[#378b76] font-bold hover:underline">điều khoản</a> và <a href="#" class="text-[#378b76] font-bold hover:underline">chính sách</a>.
+                        </span>
                     </div>
+                    <button type="submit" id="modal-register-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden">
+                        <span class="btn-text flex items-center gap-1.5">Tạo tài khoản</span>
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
+                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            <span class="text-[12px] font-semibold text-white">Đang gửi OTP...</span>
+                        </div>
+                    </button>
                 </form>
 
-                <div class="mt-5 text-center border-t border-slate-100 pt-4">
-                    <p class="text-[12px] text-slate-500 font-medium">
+                <div class="mt-4 text-center border-t border-slate-100 pt-3">
+                    <p class="text-[11.5px] text-slate-500 font-medium">
                         Đã có tài khoản?
                         <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1">Đăng nhập ngay</button>
                     </p>
@@ -274,90 +209,73 @@
 
             <!-- FORGOT PASSWORD PANEL -->
             <div id="modal-forgot-password-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-6">
-                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
-                        <span>Hệ thống V-Sport</span>
-                    </div>
-                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Quên mật khẩu?</h2>
-                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">Đừng lo lắng, hãy nhập địa chỉ email đã đăng ký của bạn để bắt đầu khôi phục mật khẩu.</p>
+                <div class="mb-4">
+                    <h2 class="text-[15px] font-bold tracking-tight text-slate-900 mb-1">Quên mật khẩu?</h2>
+                    <p class="text-[11.5px] text-slate-400 font-medium leading-relaxed">Nhập email đã đăng ký để khôi phục mật khẩu.</p>
                 </div>
-                <div id="forgot-password-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                <div id="forgot-password-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-600 border border-red-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px] shrink-0">error</span>
                     <span class="error-msg"></span>
                 </div>
                 <form id="modal-forgot-password-form" action="${pageContext.request.contextPath}/quenmatkhau" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitForgotPasswordForm(event)">
-                    <div class="mb-5">
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Email đã đăng ký</label>
-                        <div class="relative">
-                            <input type="email" name="email" required placeholder="Nhập địa chỉ email" class="w-full h-12 pl-12 pr-4 border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">mail</span>
-                        </div>
+                    <div class="mb-4">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Email đã đăng ký</label>
+                        <input type="email" name="email" required placeholder="Nhập địa chỉ email" class="w-full h-10 px-3 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
                     </div>
-                    <button type="submit" id="modal-forgot-password-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
-                        <span class="btn-text flex items-center gap-1.5">
-                            Gửi mã xác thực
-                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                        </span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
-                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <button type="submit" id="modal-forgot-password-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden">
+                        <span class="btn-text flex items-center gap-1.5">Gửi mã xác thực</span>
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
+                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            <span class="text-[12px] font-semibold text-white">Đang gửi mã...</span>
                         </div>
                     </button>
                 </form>
-                <div class="mt-6 text-center border-t border-slate-100 pt-4">
-                    <p class="text-[12px] text-slate-500 font-medium">
-                        Bạn đã nhớ lại mật khẩu?
-                        <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">Đăng nhập ngay</button>
+                <div class="mt-4 text-center border-t border-slate-100 pt-3">
+                    <p class="text-[11.5px] text-slate-500 font-medium">
+                        Nhớ lại mật khẩu?
+                        <button onclick="switchAuthTab('login')" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">Đăng nhập</button>
                     </p>
                 </div>
             </div>
 
             <!-- OTP PANEL -->
             <div id="modal-otp-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-6">
-                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
-                        <span>Xác minh danh tính</span>
-                    </div>
-                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Xác thực OTP</h2>
-                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">
-                        Vui lòng kiểm tra email và nhập mã xác thực OTP 6 chữ số gửi tới <b id="otp-email-display" class="text-slate-800"></b>.
+                <div class="mb-4">
+                    <h2 class="text-[15px] font-bold tracking-tight text-slate-900 mb-1">Xác thực OTP</h2>
+                    <p class="text-[11.5px] text-slate-400 font-medium leading-relaxed">
+                        Nhập mã 6 chữ số đã gửi tới <b id="otp-email-display" class="text-slate-800"></b>.
                     </p>
                 </div>
-                <div id="otp-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                <div id="otp-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-650 border border-red-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px] shrink-0">error</span>
                     <span class="error-msg"></span>
                 </div>
-                <div id="otp-success-banner" class="hidden mb-5 p-4 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+                <div id="otp-success-banner" class="hidden mb-4 p-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px] shrink-0">check_circle</span>
                     <span class="success-msg"></span>
                 </div>
                 <form id="modal-otp-form" action="${pageContext.request.contextPath}/nhapma" method="POST" class="flex flex-col" autocomplete="off" onsubmit="submitOtpForm(event)">
                     <input type="hidden" name="email" id="otp-hidden-email">
-                    <div class="mb-5">
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Nhập mã OTP 6 chữ số</label>
-                        <div class="relative">
-                            <input type="text" name="otp" required maxlength="6" placeholder="••••••" class="w-full h-14 border border-slate-300 rounded-xl text-center text-2xl font-bold tracking-[0.35em] focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                        </div>
+                    <div class="mb-4">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mã OTP 6 chữ số</label>
+                        <input type="text" name="otp" required maxlength="6" placeholder="••••••" class="w-full h-12 border-1.5 border-slate-300 rounded-lg text-center text-xl font-bold tracking-[0.3em] focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
                     </div>
-                    <button type="submit" id="modal-otp-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
-                        <span class="btn-text flex items-center gap-1.5">
-                            Xác minh OTP
-                            <span class="material-symbols-outlined text-[18px]">verified_user</span>
-                        </span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
-                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <button type="submit" id="modal-otp-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden">
+                        <span class="btn-text flex items-center gap-1.5">Xác minh OTP</span>
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
+                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            <span class="text-[12px] font-semibold text-white">Đang xác thực...</span>
                         </div>
                     </button>
                 </form>
-                <div class="mt-6 text-center border-t border-slate-100 pt-4 flex flex-col gap-2">
-                    <p class="text-[12px] text-slate-500 font-medium">
+                <div class="mt-4 text-center border-t border-slate-100 pt-3 flex flex-col gap-1.5">
+                    <p class="text-[11.5px] text-slate-500 font-medium">
                         Không nhận được mã?
-                        <button onclick="resendOtp()" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">Gửi lại ngay</button>
+                        <button onclick="resendOtp()" class="font-bold text-[#378b76] hover:underline ml-1 cursor-pointer">Gửi lại</button>
                     </p>
-                    <p class="text-[12px]">
+                    <p class="text-[11.5px]">
                         <button onclick="goBackFromOtp()" class="font-bold text-slate-400 hover:text-slate-600 hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto">
-                            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Quay lại
+                            <span class="material-symbols-outlined text-[14px]">arrow_back</span> Quay lại
                         </button>
                     </p>
                 </div>
@@ -365,55 +283,44 @@
 
             <!-- RESET PASSWORD PANEL -->
             <div id="modal-reset-password-panel" class="modal-panel hidden flex flex-col">
-                <div class="mb-6">
-                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
-                        <span>Thiết lập mật khẩu</span>
-                    </div>
-                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Mật khẩu mới</h2>
-                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">Đã xác minh danh tính thành công. Vui lòng tạo mật khẩu mới an toàn cho tài khoản của bạn.</p>
+                <div class="mb-4">
+                    <h2 class="text-[15px] font-bold tracking-tight text-slate-900 mb-1">Mật khẩu mới</h2>
+                    <p class="text-[11.5px] text-slate-400 font-medium leading-relaxed">Tạo mật khẩu mới cho tài khoản của bạn.</p>
                 </div>
-                <div id="reset-password-error-banner" class="hidden mb-5 p-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                <div id="reset-password-error-banner" class="hidden mb-4 p-3 bg-red-50 text-red-650 border border-red-100 rounded-lg text-[11.5px] font-semibold flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px] shrink-0">error</span>
                     <span class="error-msg"></span>
                 </div>
-                <form id="modal-reset-password-form" action="${pageContext.request.contextPath}/nhapmatkhaumoi" method="POST" class="flex flex-col gap-4" onsubmit="submitResetPasswordForm(event)">
-                    <div>
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Mật khẩu mới</label>
+                <form id="modal-reset-password-form" action="${pageContext.request.contextPath}/nhapmatkhaumoi" method="POST" class="flex flex-col gap-3" onsubmit="submitResetPasswordForm(event)">
+                    <div class="relative">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Mật khẩu mới</label>
                         <div class="relative">
-                            <input type="password" name="password" id="modal-new-pass" required placeholder="••••••••" oninput="updateModalResetPwStrength(this)" class="w-full h-12 pl-12 pr-12 border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">key</span>
-                            <button type="button" onclick="togglePassField('modal-new-pass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
-                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            <input type="password" name="password" id="modal-new-pass" required placeholder="••••••••" oninput="updateModalResetPwStrength(this)" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <button type="button" onclick="togglePassField('modal-new-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
                             </button>
                         </div>
-                        <div class="mt-2 w-full">
-                            <div class="flex gap-1 w-1/2 mb-1.5">
-                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr1"></div>
-                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr2"></div>
-                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr3"></div>
-                                <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr4"></div>
-                            </div>
-                            <p class="text-[9.5px] text-slate-400 leading-tight">Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+                        <div class="mt-1.5 flex gap-1 w-full">
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr1"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr2"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr3"></div>
+                            <div class="h-1 flex-1 rounded-full bg-slate-200 transition-colors duration-300" id="modalResetStr4"></div>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Xác nhận mật khẩu mới</label>
+                    <div class="relative">
+                        <label class="text-[11.5px] font-bold text-slate-700 mb-1 block">Xác nhận mật khẩu mới</label>
                         <div class="relative">
-                            <input type="password" name="confirm_password" id="modal-new-confirm" required placeholder="••••••••" class="w-full h-12 pl-12 pr-12 border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">key</span>
-                            <button type="button" onclick="togglePassField('modal-new-confirm', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
-                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            <input type="password" name="confirm_password" id="modal-new-confirm" required placeholder="••••••••" class="w-full h-10 pl-3 pr-9 border-1.5 border-slate-300 rounded-lg text-[12.5px] font-medium text-slate-900 focus:border-[#378b76] focus:ring-2 focus:ring-[#378b76]/10 transition-all outline-none" style="border-width: 1.5px;">
+                            <button type="button" onclick="togglePassField('modal-new-confirm', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#378b76]">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
                             </button>
                         </div>
                     </div>
-                    <button type="submit" id="modal-reset-password-btn" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
-                        <span class="btn-text flex items-center gap-1.5">
-                            Lưu mật khẩu mới
-                            <span class="material-symbols-outlined text-[18px]">save</span>
-                        </span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center">
-                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <button type="submit" id="modal-reset-password-btn" class="w-full h-10 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all relative overflow-hidden mt-1">
+                        <span class="btn-text flex items-center gap-1.5">Lưu mật khẩu mới</span>
+                        <div class="loading-spinner hidden absolute inset-0 bg-[#2c6f5e] flex items-center justify-center gap-2">
+                            <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            <span class="text-[12px] font-semibold text-white">Đang cập nhật...</span>
                         </div>
                     </button>
                 </form>
@@ -425,17 +332,44 @@
 
 <script>
     let otpSourceTab = 'login';
+    let authTriggerEl = null;
 
-    function openAuthModal(tab = 'login') {
+    function resolveDefaultTrigger() {
+        return document.getElementById('header-user-btn') || document.querySelector('.btn-register-shimmer');
+    }
+
+    function positionAuthModal(triggerEl) {
+        const card = document.getElementById('auth-modal-card');
+        const trigger = triggerEl || resolveDefaultTrigger();
+        if (!card) return;
+        const cardWidth = 360;
+        let top, right;
+        if (trigger) {
+            const rect = trigger.getBoundingClientRect();
+            top = rect.bottom + 8;
+            right = Math.max(8, window.innerWidth - rect.right);
+        } else {
+            top = 70;
+            right = 24;
+        }
+        if (window.innerWidth - right - cardWidth < 8) {
+            right = Math.max(8, window.innerWidth - cardWidth - 8);
+        }
+        const modal = document.getElementById('auth-modal');
+        modal.style.top = top + 'px';
+        modal.style.right = right + 'px';
+    }
+
+    function openAuthModal(tab = 'login', triggerEl = null) {
         const modal = document.getElementById('auth-modal');
         const card = document.getElementById('auth-modal-card');
         if (!modal || !card) return;
+        authTriggerEl = triggerEl || resolveDefaultTrigger();
         clearModalAlerts();
-        card.classList.remove('max-w-[460px]', 'max-w-[880px]');
-        card.classList.add(tab === 'register' ? 'max-w-[880px]' : 'max-w-[460px]');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => { card.classList.remove('scale-95', 'opacity-0'); card.classList.add('scale-100', 'opacity-100'); }, 10);
+        positionAuthModal(authTriggerEl);
+        modal.classList.add('is-open');
+        requestAnimationFrame(() => { card.classList.add('is-visible'); });
+
         ['modal-login-panel','modal-register-panel','modal-forgot-password-panel','modal-otp-panel','modal-reset-password-panel'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('hidden');
@@ -462,7 +396,6 @@
             const p = document.getElementById(map[tab]);
             if (p) { p.classList.remove('hidden'); p.style.opacity='1'; p.style.transform='translateY(0)'; }
         }
-        document.body.style.overflow = 'hidden';
     }
 
     function closeAuthModal() {
@@ -470,18 +403,28 @@
         const modal = document.getElementById('auth-modal');
         const card = document.getElementById('auth-modal-card');
         if (!modal || !card) return;
-        card.classList.remove('scale-100','opacity-100');
-        card.classList.add('scale-95','opacity-0');
-        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }, 300);
+        card.classList.remove('is-visible');
+        setTimeout(() => { modal.classList.remove('is-open'); }, 180);
     }
 
-    function handleBackdropClick(event) {
+    // Click ra ngoài dropdown thì đóng lại
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('auth-modal');
+        if (!modal || !modal.classList.contains('is-open')) return;
         const card = document.getElementById('auth-modal-card');
-        if (card && !card.contains(event.target)) closeAuthModal();
-    }
+        if (card && card.contains(e.target)) return;
+        if (authTriggerEl && authTriggerEl.contains(e.target)) return;
+        closeAuthModal();
+    });
+
+    // ESC đóng dropdown
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const modal = document.getElementById('auth-modal');
+        if (modal && modal.classList.contains('is-open')) closeAuthModal();
+    });
 
     function switchAuthTab(tab) {
-        const card = document.getElementById('auth-modal-card');
         const tabHeader = document.getElementById('modal-tabs-header');
         const tabLogin = document.getElementById('modal-tab-login');
         const tabRegister = document.getElementById('modal-tab-register');
@@ -493,7 +436,7 @@
             'reset-password': 'modal-reset-password-panel'
         };
         const currentPanel = document.querySelector('.modal-panel:not(.hidden)');
-        if (!currentPanel || !card) return;
+        if (!currentPanel) return;
         const targetPanel = document.getElementById(panelMap[tab]);
         if (!targetPanel || targetPanel === currentPanel) return;
 
@@ -507,9 +450,6 @@
         clearModalAlerts();
         currentPanel.style.opacity = '0';
         currentPanel.style.transform = 'translateY(8px)';
-
-        card.classList.remove('max-w-[460px]', 'max-w-[880px]');
-        card.classList.add(tab === 'register' ? 'max-w-[880px]' : 'max-w-[460px]');
 
         if (tab === 'login' || tab === 'register') {
             if (tabHeader) tabHeader.classList.remove('hidden');
@@ -529,11 +469,11 @@
             targetPanel.classList.remove('hidden');
             targetPanel.style.opacity = '0';
             targetPanel.style.transform = 'translateY(8px)';
-            targetPanel.style.transition = 'opacity 300ms ease-out, transform 300ms ease-out';
+            targetPanel.style.transition = 'opacity 200ms ease-out, transform 200ms ease-out';
             requestAnimationFrame(() => {
                 setTimeout(() => { targetPanel.style.opacity='1'; targetPanel.style.transform='translateY(0)'; }, 20);
             });
-        }, 150);
+        }, 120);
     }
 
     function goBackFromOtp() { switchAuthTab(otpSourceTab); }
@@ -638,7 +578,7 @@
         // ✅ Lấy data TRƯỚC khi loading (input chưa bị disable)
         const searchParams = new URLSearchParams(new FormData(form));
 
-        setLoginFormLoading(true, 'Đang xác thực tài khoản...');
+        setLoginFormLoading(true, 'Đang đăng nhập...');
 
         fetch(form.action, {
             method: 'POST',

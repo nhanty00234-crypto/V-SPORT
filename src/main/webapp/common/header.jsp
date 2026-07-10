@@ -160,6 +160,13 @@
         font-weight: 600;
         color: var(--text-dark);
     }
+    .user-menu-caret {
+        color: var(--text-muted);
+        transition: transform 0.2s ease;
+    }
+    .user-menu-btn[aria-expanded="true"] .user-menu-caret {
+        transform: rotate(180deg);
+    }
     .user-dropdown-menu {
         position: absolute;
         right: 0;
@@ -320,6 +327,7 @@
                             </c:otherwise>
                         </c:choose>
                     </span>
+                    <span class="material-symbols-outlined text-[16px] user-menu-caret">expand_more</span>
                 </button>
 
                 <!-- Dropdown Menu -->
@@ -329,10 +337,10 @@
                         <span class="user-info-email">${user.email}</span>
                     </div>
                     <div class="p-1">
-                        <a href="${pageContext.request.contextPath}/customer/TaiKhoan.jsp" class="user-dropdown-item">
+                        <button type="button" class="user-dropdown-item" style="width:100%;text-align:left;cursor:default;opacity:0.55;" title="Chưa có trang hồ sơ riêng">
                             <span class="material-symbols-outlined text-[18px]">account_circle</span>
                             Hồ sơ cá nhân
-                        </a>
+                        </button>
                         <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="user-dropdown-item">
                             <span class="material-symbols-outlined text-[18px]">history</span>
                             Lịch sử đặt sân
@@ -346,7 +354,7 @@
             </div>
         </c:when>
         <c:otherwise>
-            <button onclick="openAuthModal('login')" class="btn-register-shimmer">
+            <button onclick="openAuthModal('login', this)" class="btn-register-shimmer">
                 Đăng ký / Đăng nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
             </button>
         </c:otherwise>
@@ -371,12 +379,21 @@
         if (userMenuBtn && userDropdown) {
             userMenuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                userDropdown.classList.toggle('show');
+                const isOpen = userDropdown.classList.toggle('show');
+                userMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             });
 
             document.addEventListener('click', (e) => {
                 if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
                     userDropdown.classList.remove('show');
+                    userMenuBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    userDropdown.classList.remove('show');
+                    userMenuBtn.setAttribute('aria-expanded', 'false');
                 }
             });
         }
