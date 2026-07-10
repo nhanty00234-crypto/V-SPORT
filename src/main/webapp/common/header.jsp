@@ -8,14 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 
 <style>
-    /* New Index Header Styles */
     :root {
-        --primary: #10b981; 
-        --primary-dark: #059669;
-        --primary-light: #ecfdf5;
-        --text-dark: #1e293b;
-        --text-muted: #64748b;
-        --bg-light: #f8fafc;
+        --primary: #AFD639; 
+        --primary-hover: #AEDB2B;
+        --secondary-blue: #427CF0;
+        --secondary-blue-hover: #2763DB;
+        --dark: #111827;
         --white: #ffffff;
         --transition: all 0.3s ease;
     }
@@ -29,9 +27,10 @@
         position: sticky;
         top: 0;
         z-index: 100;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-bottom: 1px solid #e2e8f0;
         font-family: 'Poppins', sans-serif;
         box-sizing: border-box;
+        height: 90px;
     }
     .navbar * {
         box-sizing: border-box;
@@ -42,10 +41,27 @@
     .logo {
         font-size: 1.5rem;
         font-weight: 700;
-        color: var(--primary-dark);
+        color: var(--dark);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+    }
+    .logo-icon {
+        font-size: 24px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+    }
+    .logo-text {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+        color: var(--dark);
+    }
+    .logo-text span {
+        color: var(--primary);
     }
     .nav-links {
         list-style: none;
@@ -56,32 +72,54 @@
     }
     .nav-links a {
         text-decoration: none;
-        color: var(--text-dark);
+        color: var(--dark);
         font-size: 0.95rem;
         font-weight: 500;
         transition: var(--transition);
+        position: relative;
+        padding: 8px 0;
     }
     .nav-links a:hover, .nav-links a.active {
         color: var(--primary);
         font-weight: 600;
     }
+    .nav-links a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--primary);
+        transition: width var(--transition);
+    }
+    .nav-links a:hover::after, .nav-links a.active::after {
+        width: 100%;
+    }
+
+    /* Actions Container */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
     /* Shimmering Register Button */
     .btn-register-shimmer {
         position: relative;
-        padding: 12px 32px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        color: #ffffff;
-        font-size: 0.95rem;
-        font-weight: 600;
-        border-radius: 12px;
+        padding: 10px 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        color: var(--dark) !important;
+        font-size: 0.9rem;
+        font-weight: 750;
+        border-radius: 4px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 8px;
         overflow: hidden;
         border: none;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 15px rgba(175, 214, 57, 0.2);
         transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         cursor: pointer;
     }
@@ -105,13 +143,13 @@
 
     .btn-register-shimmer:hover::before { animation: shimmerEffect 1.5s infinite; }
     .btn-register-shimmer:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
-        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(175, 214, 57, 0.4);
+        color: var(--dark) !important;
     }
     .btn-register-shimmer:active {
         transform: translateY(-1px);
-        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 4px 12px rgba(175, 214, 57, 0.3);
     }
     .btn-register-shimmer i {
         font-size: 1rem;
@@ -131,37 +169,38 @@
     .user-menu-btn {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 16px;
-        border-radius: 30px;
+        gap: 9px;
+        padding: 5px 10px 5px 5px;
+        border-radius: 999px;
         background: #ffffff;
         border: 1px solid #e2e8f0;
         cursor: pointer;
         transition: var(--transition);
+        min-height: 42px;
     }
     .user-menu-btn:hover {
-        background-color: var(--primary-light);
-        border-color: var(--primary);
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
     }
     .user-avatar {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background-color: var(--primary-light);
+        background-color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--primary-dark);
+        color: var(--dark);
         font-weight: 700;
-        font-size: 0.78rem;
+        font-size: 12px;
     }
     .user-name {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--text-dark);
+        font-size: 13px;
+        font-weight: 900;
+        color: var(--dark);
     }
     .user-menu-caret {
-        color: var(--text-muted);
+        color: rgba(17, 24, 39, 0.6);
         transition: transform 0.2s ease;
     }
     .user-menu-btn[aria-expanded="true"] .user-menu-caret {
@@ -191,14 +230,14 @@
     }
     .user-info-header {
         padding: 16px;
-        background-color: var(--primary-light);
+        background-color: rgba(175, 214, 57, 0.08);
         border-bottom: 1px solid #e2e8f0;
     }
     .user-info-name {
         display: block;
         font-size: 0.9rem;
         font-weight: 700;
-        color: var(--text-dark);
+        color: var(--dark);
     }
     .user-info-email {
         display: block;
@@ -211,14 +250,14 @@
         align-items: center;
         gap: 10px;
         padding: 12px 16px;
-        color: var(--text-dark);
+        color: var(--dark);
         text-decoration: none;
         font-size: 0.85rem;
         transition: var(--transition);
     }
     .user-dropdown-item:hover {
-        background-color: var(--primary-light);
-        color: var(--primary-dark);
+        background-color: rgba(175, 214, 57, 0.08);
+        color: var(--dark);
     }
     .user-dropdown-item.logout {
         color: #ef4444;
@@ -241,7 +280,7 @@
         border: none;
         cursor: pointer;
         padding: 8px;
-        color: var(--text-dark);
+        color: var(--dark);
         font-size: 1.4rem;
         line-height: 1;
     }
@@ -253,7 +292,7 @@
         right: 0;
         background: #ffffff;
         z-index: 99;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         flex-direction: column;
         padding: 12px 16px 16px;
         gap: 2px;
@@ -265,17 +304,48 @@
         align-items: center;
         padding: 12px 14px;
         border-radius: 10px;
-        color: var(--text-dark);
+        color: var(--dark);
         text-decoration: none;
         font-size: 0.95rem;
         font-weight: 500;
         transition: var(--transition);
     }
     .mobile-nav-link:hover, .mobile-nav-link.active {
-        background-color: var(--primary-light);
-        color: var(--primary-dark);
+        background-color: #f1f5f9;
+        color: var(--primary);
         font-weight: 600;
     }
+
+    /* Book a Court Button */
+    .btn-header-book {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--secondary-blue);
+        color: var(--white) !important;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 10px 24px;
+        border-radius: 4px;
+        transition: var(--transition);
+        box-shadow: 0 4px 10px rgba(66, 124, 240, 0.2);
+        text-decoration: none;
+    }
+    .btn-header-book:hover {
+        background-color: var(--secondary-blue-hover);
+        box-shadow: 0 6px 15px rgba(66, 124, 240, 0.3);
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 1023px) {
+        .btn-header-book {
+            display: none;
+        }
+    }
+
     @media (max-width: 768px) {
         .nav-links { display: none; }
         .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
@@ -285,7 +355,8 @@
 <nav class="navbar fade-down">
     <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container">
         <div class="logo">
-            <i class="fa-solid fa-futbol"></i> V-SPORT
+            <span class="logo-icon"><i class="fa-solid fa-table-tennis-paddle-ball"></i></span>
+            <span class="logo-text">V-<span>SPORT</span></span>
         </div>
     </a>
     <ul class="nav-links">
@@ -296,69 +367,74 @@
         <li><a href="${pageContext.request.contextPath}/index.jsp#pricing" id="nav-pricing">Bảng Giá</a></li>
     </ul>
     
-    <!-- Mobile Hamburger Button -->
-    <button id="mobileNavBtn" class="mobile-menu-btn" aria-label="Mở menu">
-        <i class="fa-solid fa-bars"></i>
-    </button>
+    <div class="header-actions">
+        <c:choose>
+            <c:when test="${user != null}">
+                <!-- User Profile Dropdown -->
+                <div class="user-menu-container">
+                    <button id="user-menu-button" class="user-menu-btn">
+                        <div class="user-avatar">
+                            <c:choose>
+                                <c:when test="${not empty user.fullName}">
+                                    ${fn:substring(user.fullName, 0, 1).toUpperCase()}
+                                </c:when>
+                                <c:otherwise>
+                                    ${fn:substring(user.username, 0, 1).toUpperCase()}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <span class="user-name">
+                            <c:choose>
+                                <c:when test="${not empty user.fullName}">
+                                    <c:set var="parts" value="${fn:split(user.fullName, ' ')}" />
+                                    ${parts[fn:length(parts) - 1]}
+                                </c:when>
+                                <c:otherwise>
+                                    ${user.username}
+                                </c:otherwise>
+                            </c:choose>
+                        </span>
+                        <span class="material-symbols-outlined text-[16px] user-menu-caret">expand_more</span>
+                    </button>
 
-    <c:choose>
-        <c:when test="${user != null}">
-            <!-- User Profile Dropdown -->
-            <div class="user-menu-container">
-                <button id="user-menu-button" class="user-menu-btn">
-                    <div class="user-avatar">
-                        <c:choose>
-                            <c:when test="${not empty user.fullName}">
-                                ${fn:substring(user.fullName, 0, 1).toUpperCase()}
-                            </c:when>
-                            <c:otherwise>
-                                ${fn:substring(user.username, 0, 1).toUpperCase()}
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                    <span class="user-name">
-                        <c:choose>
-                            <c:when test="${not empty user.fullName}">
-                                <c:set var="parts" value="${fn:split(user.fullName, ' ')}" />
-                                ${parts[fn:length(parts) - 1]}
-                            </c:when>
-                            <c:otherwise>
-                                ${user.username}
-                            </c:otherwise>
-                        </c:choose>
-                    </span>
-                    <span class="material-symbols-outlined text-[16px] user-menu-caret">expand_more</span>
-                </button>
-
-                <!-- Dropdown Menu -->
-                <div id="user-dropdown" class="user-dropdown-menu">
-                    <div class="user-info-header">
-                        <span class="user-info-name">${user.fullName}</span>
-                        <span class="user-info-email">${user.email}</span>
-                    </div>
-                    <div class="p-1">
-                        <button type="button" class="user-dropdown-item" style="width:100%;text-align:left;cursor:default;opacity:0.55;" title="Chưa có trang hồ sơ riêng">
-                            <span class="material-symbols-outlined text-[18px]">account_circle</span>
-                            Hồ sơ cá nhân
-                        </button>
-                        <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="user-dropdown-item">
-                            <span class="material-symbols-outlined text-[18px]">history</span>
-                            Lịch sử đặt sân
-                        </a>
-                        <a href="${pageContext.request.contextPath}/logout" class="user-dropdown-item logout">
-                            <span class="material-symbols-outlined text-[18px]">logout</span>
-                            Đăng xuất
-                        </a>
+                    <!-- Dropdown Menu -->
+                    <div id="user-dropdown" class="user-dropdown-menu">
+                        <div class="user-info-header">
+                            <span class="user-info-name">${user.fullName}</span>
+                            <span class="user-info-email">${user.email}</span>
+                        </div>
+                        <div class="p-1">
+                            <button type="button" class="user-dropdown-item" style="width:100%;text-align:left;cursor:default;opacity:0.55;" title="Chưa có trang hồ sơ riêng">
+                                <span class="material-symbols-outlined text-[18px]">account_circle</span>
+                                Hồ sơ cá nhân
+                            </button>
+                            <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="user-dropdown-item">
+                                <span class="material-symbols-outlined text-[18px]">history</span>
+                                Lịch sử đặt sân
+                            </a>
+                            <a href="${pageContext.request.contextPath}/logout" class="user-dropdown-item logout">
+                                <span class="material-symbols-outlined text-[18px]">logout</span>
+                                Đăng xuất
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </c:when>
-        <c:otherwise>
-            <button onclick="openAuthModal('login', this)" class="btn-register-shimmer">
-                Đăng ký / Đăng nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            </button>
-        </c:otherwise>
-    </c:choose>
+            </c:when>
+            <c:otherwise>
+                <button onclick="openAuthModal('login', this)" class="btn-register-shimmer">
+                    Đăng ký / Đăng nhập <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </c:otherwise>
+        </c:choose>
+
+        <!-- Book a Court Button -->
+        <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn-header-book">Đặt Sân</a>
+        
+        <!-- Mobile Hamburger Button -->
+        <button id="mobileNavBtn" class="mobile-menu-btn" aria-label="Mở menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
 </nav>
 
 <!-- Mobile Navigation Drawer -->
@@ -411,7 +487,7 @@
             document.addEventListener('click', (e) => {
                 if (!mobileNav.contains(e.target) && !mobileNavBtn.contains(e.target)) {
                     mobileNav.classList.remove('open');
-                    mobileNavBtn.querySelector('i').className = 'fa-solid fa-bars';
+                    mobileNavBtn.querySelector('i').className = 'fa-bars';
                 }
             });
             mobileNav.querySelectorAll('a').forEach(a => {

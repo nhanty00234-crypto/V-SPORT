@@ -73,7 +73,7 @@
         font-size: 13.5px; font-weight: 600; color: #9ca3af;
         padding-bottom: 10px; border-bottom: 2px solid transparent;
     }
-    .authdd-tab.authdd-tab-active { color: #111827; border-bottom-color: #1f6f52; }
+    .authdd-tab.authdd-tab-active { color: #111827; border-bottom-color: var(--primary, #AFD639); }
 
     .authdd-body { padding: 18px 20px 20px; overflow-y: auto; }
     .authdd-body::-webkit-scrollbar { width: 6px; }
@@ -94,7 +94,7 @@
         background: #fff; outline: none;
         transition: border-color 150ms ease;
     }
-    .authdd-input:focus { border-color: #1f6f52; }
+    .authdd-input:focus { border-color: var(--primary, #AFD639); }
     .authdd-input::placeholder { color: #9ca3af; }
 
     .authdd-pass-wrap { position: relative; }
@@ -104,13 +104,13 @@
         background: none; border: none; cursor: pointer; color: #9ca3af;
         display: flex; align-items: center; justify-content: center; padding: 4px;
     }
-    .authdd-pass-toggle:hover { color: #1f6f52; }
+    .authdd-pass-toggle:hover { color: var(--primary, #AFD639); }
 
     .authdd-row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .authdd-checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6b7280; font-weight: 500; cursor: pointer; user-select: none; }
-    .authdd-checkbox-label input { width: 14px; height: 14px; accent-color: #1f6f52; }
+    .authdd-checkbox-label input { width: 14px; height: 14px; accent-color: var(--primary, #AFD639); }
 
-    .authdd-link-btn { background: none; border: none; padding: 0; cursor: pointer; font-size: 11px; font-weight: 600; color: #1f6f52; }
+    .authdd-link-btn { background: none; border: none; padding: 0; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--primary, #AFD639); }
     .authdd-link-btn:hover { text-decoration: underline; }
 
     .authdd-strength { display: flex; gap: 4px; margin-top: 6px; }
@@ -118,27 +118,27 @@
     .authdd-hint { font-size: 9.5px; color: #9ca3af; line-height: 1.4; margin-top: 5px; }
 
     .authdd-agree { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
-    .authdd-agree input { width: 14px; height: 14px; margin-top: 2px; accent-color: #1f6f52; }
+    .authdd-agree input { width: 14px; height: 14px; margin-top: 2px; accent-color: var(--primary, #AFD639); }
     .authdd-agree span { font-size: 10.5px; color: #6b7280; font-weight: 500; line-height: 1.4; }
-    .authdd-agree a { color: #1f6f52; font-weight: 600; }
+    .authdd-agree a { color: var(--primary, #AFD639); font-weight: 600; }
 
     .authdd-btn {
         width: 100%; height: 37px; border: none; border-radius: 8px;
-        background: #1f6f52; color: #fff; font-size: 13px; font-weight: 600;
+        background: var(--primary, #AFD639); color: var(--dark, #111827); font-size: 13px; font-weight: 600;
         cursor: pointer; position: relative; overflow: hidden;
         display: flex; align-items: center; justify-content: center; gap: 8px;
         transition: background-color 150ms ease;
     }
-    .authdd-btn:hover { background: #195a42; }
+    .authdd-btn:hover { background: var(--primary-hover, #AEDB2B); }
     .authdd-btn:disabled { cursor: wait; opacity: 0.85; }
     .authdd-btn-loading {
-        position: absolute; inset: 0; background: #195a42; color: #fff;
+        position: absolute; inset: 0; background: var(--primary-hover, #AEDB2B); color: var(--dark, #111827);
         display: none; align-items: center; justify-content: center; gap: 8px;
     }
     .authdd-btn-loading.authdd-show { display: flex; }
     .authdd-spinner {
         width: 14px; height: 14px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+        border: 2px solid rgba(17, 24, 39, 0.2); border-top-color: var(--dark, #111827);
         animation: authdd-spin 0.7s linear infinite;
     }
     @keyframes authdd-spin { to { transform: rotate(360deg); } }
@@ -170,7 +170,7 @@
         width: 100%; height: 44px; text-align: center; font-size: 19px; font-weight: 600; letter-spacing: 0.3em;
         border: 1px solid #d1d5db; border-radius: 8px; outline: none; color: #111827;
     }
-    .authdd-otp-input:focus { border-color: #1f6f52; }
+    .authdd-otp-input:focus { border-color: var(--primary, #AFD639); }
 
     .authdd-back-link { display: flex; align-items: center; justify-content: center; gap: 4px; }
 </style>

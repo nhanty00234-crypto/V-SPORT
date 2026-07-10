@@ -278,6 +278,11 @@ ul {
     position: relative;
 }
 
+.menu-item > a:hover,
+.menu-item.active > a {
+    color: var(--primary) !important;
+}
+
 .menu-item > a i {
     font-size: 10px;
     transition: transform var(--transition-fast);
@@ -375,38 +380,34 @@ ul {
 .action-btn {
     width: 44px;
     height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--dark);
-    font-size: 16px;
+    font-size: 20px;
     position: relative;
     transition: var(--transition-normal);
 }
 
 .action-btn:hover {
-    background-color: var(--primary);
-    border-color: var(--primary);
-    color: var(--white);
+    color: var(--primary);
 }
 
 .auth-trigger-btn {
-    background: linear-gradient(135deg, #ffffff, #f6faef);
+    background: transparent;
 }
 
 .auth-trigger-btn::after {
     content: "";
     position: absolute;
-    right: 4px;
-    bottom: 4px;
-    width: 9px;
-    height: 9px;
+    right: 10px;
+    bottom: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--primary);
     border: 2px solid var(--white);
-    box-shadow: 0 0 0 3px rgba(175, 214, 57, .18);
+    box-shadow: 0 0 0 2px rgba(175, 214, 57, .18);
 }
 
 .header-user-menu {
@@ -612,8 +613,8 @@ ul {
 
 .cart-trigger .cart-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 2px;
+    right: 2px;
     width: 20px;
     height: 20px;
     background-color: var(--primary);
@@ -645,252 +646,435 @@ ul {
     display: none;
 }
 
-/* 4. HERO SECTION */
-.hero-section {
-    width: 100vw;
-    height: 75vh;
-    min-height: 550px;
-    position: relative;
-    background-color: var(--dark);
-}
-
-.hero-swiper {
-    width: 100%;
-    height: 100%;
-}
-
-.hero-slide {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
+.btn-header-book {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    background-color: var(--secondary-blue);
+    color: var(--white) !important;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border-radius: 4px;
+    transition: var(--transition-normal);
+    box-shadow: 0 4px 10px rgba(66, 124, 240, 0.2);
+    margin-left: 15px;
 }
 
-.slide-bg-placeholder {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #18191d 0%, #292d35 100%);
-    z-index: 1;
+.btn-header-book:hover {
+    background-color: var(--secondary-blue-hover);
+    color: var(--white) !important;
+    box-shadow: 0 6px 15px rgba(66, 124, 240, 0.3);
+    transform: translateY(-1px);
 }
 
-/* Sports mesh grid styling */
-.slide-bg-placeholder::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 15px 15px;
-    z-index: 2;
-}
-
-.slide-content {
+/* 4. HERO DARK SECTION */
+.hero-dark-section {
+    width: 100vw;
+    height: 80vh;
+    min-height: 600px;
+    background: linear-gradient(135deg, #11150f 0%, #080a08 100%);
     position: relative;
-    z-index: 3;
-    max-width: 900px;
-    padding: 0 40px;
-    text-align: center;
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
     align-items: center;
 }
 
-.slide-subtitle {
+.hero-dark-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: center;
+    position: relative;
+    z-index: 5;
+}
+
+.hero-dark-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: var(--white);
+    opacity: 0;
+    transform: translateX(-50px);
+    animation: slideInLeft 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
+}
+
+@keyframes slideInLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.hero-dark-subtitle {
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 18px;
     letter-spacing: 4px;
     text-transform: uppercase;
     color: var(--primary);
-    margin-bottom: 20px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s ease;
+    margin-bottom: 25px;
 }
 
-.slide-title {
+.hero-dark-title {
     font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 5vw;
-    line-height: 1.1;
+    font-weight: 800;
+    font-size: 6vw;
+    line-height: 1.05;
     text-transform: uppercase;
     color: var(--white);
-    margin-bottom: 35px;
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease 0.2s;
+    margin-bottom: 45px;
 }
 
-.slide-content .btn {
-    opacity: 0;
-    transform: translateY(25px);
-    transition: all 0.8s ease 0.4s;
-}
-
-/* Active Swiper Slide Animations */
-.swiper-slide-active .slide-subtitle,
-.swiper-slide-active .slide-title,
-.swiper-slide-active .btn {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Slider Controls */
-.hero-pagination {
-    bottom: 30px !important;
-}
-
-.hero-pagination .swiper-pagination-bullet {
-    width: 35px;
-    height: 4px;
-    border-radius: 0;
-    background-color: rgba(255,255,255,0.3);
-    opacity: 1;
+.hero-dark-scroll {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
     transition: var(--transition-normal);
 }
 
-.hero-pagination .swiper-pagination-bullet-active {
-    background-color: var(--primary);
-    width: 50px;
+.hero-dark-scroll:hover {
+    color: var(--primary);
 }
 
-.hero-prev, .hero-next {
-    color: var(--white) !important;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.15);
-    background-color: rgba(0,0,0,0.2);
-    transition: var(--transition-normal);
+.hero-dark-scroll i {
+    animation: bounceDown 1.5s infinite;
 }
 
-.hero-prev::after, .hero-next::after {
-    font-size: 18px !important;
+@keyframes bounceDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
 }
 
-.hero-prev:hover, .hero-next:hover {
-    background-color: var(--primary);
-    border-color: var(--primary);
-    color: var(--dark) !important;
-}
-
-/* 5. MARQUEE STRIP */
-.marquee-section {
-    background-color: var(--secondary-blue);
-    height: 65px;
-    width: 100vw;
+.hero-dark-image-wrapper {
+    position: relative;
+    height: 100%;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    justify-content: flex-end;
+    opacity: 0;
+    transform: translateX(50px);
+    animation: slideInRight 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.4s forwards;
+}
+
+@keyframes slideInRight {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.hero-dark-img {
+    max-width: 100%;
+    height: 80vh;
+    min-height: 600px;
+    object-fit: cover;
+    object-position: center;
+    mask-image: linear-gradient(to left, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+}
+
+.hero-dark-pagination {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--white);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 10;
+}
+
+.hero-dark-pagination-line {
+    width: 60px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.2);
     position: relative;
 }
 
-.marquee-wrap {
-    width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
+.hero-dark-pagination-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;
+    background-color: var(--primary);
 }
 
-.marquee-content {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee-scroll 25s linear infinite;
+.hero-dark-buttons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.hero-dark-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary);
+    color: var(--dark) !important;
     font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 21px;
+    font-weight: 750;
+    font-size: 14px;
     letter-spacing: 1px;
-    color: var(--white);
     text-transform: uppercase;
+    padding: 16px 40px;
+    border-radius: 4px;
+    transition: var(--transition-normal);
+    box-shadow: 0 4px 15px rgba(175, 214, 57, 0.3);
+    text-decoration: none;
 }
 
-.marquee-content span {
-    display: inline-block;
+.hero-dark-btn-primary:hover {
+    background-color: var(--primary-hover);
+    box-shadow: 0 8px 25px rgba(175, 214, 57, 0.5);
+    transform: translateY(-2px);
 }
 
-@keyframes marquee-scroll {
-    0% { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(-100%, 0, 0); }
+.hero-dark-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--white) !important;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 40px;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: var(--transition-normal);
+    text-decoration: none;
 }
 
-/* 6. PARTNERS SECTION */
-.partners-section {
+.hero-dark-btn-secondary:hover {
+    border-color: var(--white);
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+/* 7.5 STEPS BOOKING SECTION */
+.steps-section {
     padding: 100px 0;
+    background-color: var(--white);
 }
 
-.partners-grid-layout {
+.steps-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.step-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px;
+    background-color: var(--light-gray);
+    border-radius: 12px;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.step-num {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 64px;
+    color: var(--primary);
+    opacity: 0.15;
+    line-height: 1;
+    margin-bottom: 20px;
+    transition: var(--transition-normal);
+}
+
+.step-card:hover .step-num {
+    opacity: 0.3;
+    transform: scale(1.1);
+}
+
+.step-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 22px;
+    text-transform: uppercase;
+    color: var(--dark);
+    margin-bottom: 15px;
+}
+
+.step-description {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* 4.5 WELCOME SECTION */
+.welcome-section {
+    padding: 100px 0;
+    background-color: var(--white);
+}
+
+.welcome-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
     gap: 60px;
     align-items: center;
 }
 
-.partners-brands-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.brand-item {
-    aspect-ratio: 1.7;
-    background-color: var(--light-gray);
+.welcome-images-left {
+    position: relative;
+    height: 480px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    padding: 15px;
-    transition: var(--transition-normal);
 }
 
-.brand-placeholder {
+.welcome-img-back {
+    width: 65%;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.welcome-img-front {
+    width: 55%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    border: 8px solid var(--white);
+}
+
+.welcome-content-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.welcome-hello {
     font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 20px;
-    color: var(--dark);
-    letter-spacing: 2px;
-    opacity: 0.2;
-    transition: var(--transition-normal);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary-hover);
+    margin-bottom: 15px;
 }
 
-.brand-item:hover {
-    background-color: var(--white);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
-.brand-item:hover .brand-placeholder {
-    opacity: 1;
-    transform: scale(1.05);
-}
-
-.partners-heading-area {
-    padding-left: 20px;
-}
-
-.partners-title {
+.welcome-title {
     font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 40px;
-    line-height: 1.1;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1.15;
     text-transform: uppercase;
     color: var(--dark);
+    margin-bottom: 25px;
+}
+
+.welcome-desc {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
+
+.welcome-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+.welcome-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.welcome-feature-item i {
+    color: var(--primary-hover);
+    font-size: 16px;
+}
+
+/* 6. STATS SECTION (REPLACES PARTNERS) */
+.stats-section {
+    padding: 80px 0;
+    background-color: var(--light-gray);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    text-align: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-number {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 48px;
+    color: var(--dark);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
 }
 
 /* 7. CATEGORIES GRID */
 .categories-section {
-    padding: 0 40px 100px;
+    padding: 100px 20px;
+    background-color: var(--white);
 }
 
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
 }
 
 .category-card {
@@ -907,7 +1091,9 @@ ul {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #4b4e54 0%, #232529 100%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     transition: transform var(--transition-slow);
 }
 
@@ -928,17 +1114,17 @@ ul {
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 30px;
+    padding: 20px;
     z-index: 3;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .category-name {
     font-family: var(--font-heading);
     font-weight: 600;
-    font-size: 26px;
+    font-size: 22px;
     text-transform: uppercase;
     color: var(--white);
     letter-spacing: 0.5px;
@@ -947,8 +1133,8 @@ ul {
 .category-link {
     font-family: var(--font-heading);
     font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 1.5px;
+    font-size: 12px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--primary);
     align-self: flex-start;
@@ -974,6 +1160,59 @@ ul {
 
 .category-card:hover .category-link::after {
     transform: scaleX(1);
+}
+
+/* Responsiveness adjustments */
+@media (max-width: 1279px) {
+    .categories-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1023px) {
+    .hero-dark-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 40px;
+    }
+    .hero-dark-content {
+        align-items: center;
+    }
+    .hero-dark-image-wrapper {
+        justify-content: center;
+    }
+    .hero-dark-img {
+        height: 50vh;
+        min-height: auto;
+    }
+    .welcome-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .welcome-images-left {
+        height: 380px;
+        justify-content: center;
+    }
+    .welcome-img-back {
+        width: 80%;
+        height: 320px;
+    }
+    .welcome-img-front {
+        width: 60%;
+        height: 220px;
+        right: 0;
+        bottom: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* 8. PRODUCTS GRID */
@@ -3007,46 +3246,27 @@ ul {
                 <div class="logo-area">
                     <a href="#" class="logo-link">
                         <span class="logo-icon"><i class="fa-solid fa-table-tennis-paddle-ball"></i></span>
-                        <span class="logo-text">Tennis<span>Club</span></span>
+                        <span class="logo-text">V-<span>SPORT</span></span>
                     </a>
                 </div>
 
                 <!-- Navigation Menu (Desktop) -->
                 <nav class="desktop-nav">
                     <ul class="main-menu">
-                        <li class="menu-item has-children active">
-                            <a href="#">Home <i class="fa-solid fa-chevron-down"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#" class="active">Court Booking Portal</a></li>
-                                <li><a href="#">Coaching</a></li>
-                                <li><a href="#">Equipment Store</a></li>
-                                <li><a href="#">Squash <span class="badge badge-new">New</span></a></li>
-                                <li><a href="#">Table Tennis <span class="badge badge-new">New</span></a></li>
-                                <li><a href="#">Badminton <span class="badge badge-new">New</span></a></li>
-                            </ul>
+                        <li class="menu-item active">
+                            <a href="#">Trang Chủ</a>
                         </li>
                         <li class="menu-item">
-                            <a href="#courts-section">Book a Court</a>
-                        </li>
-                        <li class="menu-item has-children">
-                            <a href="#">Pages <i class="fa-solid fa-chevron-down"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">About Us</a></li>
-                                <li><a href="#">Our Programs</a></li>
-                                <li><a href="#">Our Team</a></li>
-                                <li><a href="#">FAQs</a></li>
-                                <li><a href="#">Membership</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-item has-children">
-                            <a href="#">Events <i class="fa-solid fa-chevron-down"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Events List</a></li>
-                                <li><a href="#">Events Calendar</a></li>
-                            </ul>
+                            <a href="${pageContext.request.contextPath}/customer/dat-san">Tìm Sân</a>
                         </li>
                         <li class="menu-item">
-                            <a href="#">Contact</a>
+                            <a href="#">Giải Đấu</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#">Cộng Đồng</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#">Bảng Giá</a>
                         </li>
                     </ul>
                 </nav>
@@ -3128,6 +3348,8 @@ ul {
                             </g>
                         </svg>
                     </button>
+                    <!-- Book a Court Button -->
+                    <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn-header-book">Đặt Sân</a>
                     <!-- Mobile Hamburger Button -->
                     <button class="action-btn mobile-menu-trigger" aria-label="Open Menu">
                         <i class="fa-solid fa-bars"></i>
@@ -3139,33 +3361,56 @@ ul {
         <!-- MAIN CONTENT AREA -->
         <main id="main-content">
             
-            <!-- HERO SLIDER SECTION -->
-            <section class="hero-section">
-                <div class="swiper hero-swiper">
-                    <div class="swiper-wrapper">
-                        <!-- Slide 1 -->
-                        <div class="swiper-slide hero-slide">
-                            <div class="slide-bg-placeholder"></div>
-                            <div class="slide-content">
-                                <span class="slide-subtitle">Premium Tennis Courts</span>
-                                <h2 class="slide-title">Book your perfect court yard in seconds</h2>
-                                <a href="#courts-section" class="btn btn-primary">Book a court yard</a>
-                            </div>
-                        </div>
-                        <!-- Slide 2 -->
-                        <div class="swiper-slide hero-slide">
-                            <div class="slide-bg-placeholder"></div>
-                            <div class="slide-content">
-                                <span class="slide-subtitle">Professional Training</span>
-                                <h2 class="slide-title">Sharpen your tennis skills with top coaches</h2>
-                                <a href="#" class="btn btn-primary">Join coaching</a>
-                            </div>
+            <!-- HERO DARK SECTION -->
+            <section class="hero-dark-section">
+                <div class="hero-dark-container">
+                    <!-- Left Side Content -->
+                    <div class="hero-dark-content">
+                        <span class="hero-dark-subtitle" style="color: var(--primary); font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">ĐẶT SÂN THỂ THAO</span>
+                        <h1 class="hero-dark-title" style="margin-top: 15px; margin-bottom: 25px;">TÌM SÂN PHÙ HỢP<br>ĐẶT LỊCH NHANH CHÓNG</h1>
+                        <div class="hero-dark-buttons">
+                            <a href="${pageContext.request.contextPath}/customer/dat-san" class="hero-dark-btn-primary">ĐẶT SÂN NGAY</a>
+                            <a href="#welcome-section" class="hero-dark-btn-secondary">KHÁM PHÁ SÂN</a>
                         </div>
                     </div>
-                    <!-- Swiper controls -->
-                    <div class="swiper-pagination hero-pagination"></div>
-                    <div class="swiper-button-prev hero-prev"></div>
-                    <div class="swiper-button-next hero-next"></div>
+                    <!-- Right Side Image -->
+                    <div class="hero-dark-image-wrapper">
+                        <img class="hero-dark-img" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=800" alt="Tennis Player">
+                    </div>
+                </div>
+                
+                <!-- Pagination Indicators -->
+                <div class="hero-dark-pagination">
+                    <span>02</span>
+                    <div class="hero-dark-pagination-line">
+                        <div class="hero-dark-pagination-active"></div>
+                    </div>
+                    <span>01</span>
+                </div>
+            </section>
+
+            <!-- WELCOME SECTION -->
+            <section class="welcome-section" id="welcome-section">
+                <div class="welcome-container">
+                    <!-- Left: Overlapping Images -->
+                    <div class="welcome-images-left">
+                        <img class="welcome-img-back" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=600" alt="Sân tennis">
+                        <img class="welcome-img-front" src="https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?auto=format&fit=crop&q=80&w=600" alt="Người chơi tennis">
+                    </div>
+                    <!-- Right: Content -->
+                    <div class="welcome-content-right">
+                        <span class="welcome-hello">Chào mừng đến với V-SPORT</span>
+                        <h2 class="welcome-title">Hệ thống đặt sân hàng đầu dành cho bạn</h2>
+                        <p class="welcome-desc">
+                            V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp trên toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ và trải nghiệm những trận đấu thăng hoa cùng bạn bè, gia đình.
+                        </p>
+                        <div class="welcome-features">
+                            <div class="welcome-feature-item"><i class="fa-solid fa-circle-check"></i>Đặt chỗ nhanh trong 30s</div>
+                            <div class="welcome-feature-item"><i class="fa-solid fa-circle-check"></i>Thanh toán PayOS bảo mật</div>
+                            <div class="welcome-feature-item"><i class="fa-solid fa-circle-check"></i>Hủy lịch linh hoạt</div>
+                            <div class="welcome-feature-item"><i class="fa-solid fa-circle-check"></i>Hỗ trợ 24/7</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -3173,71 +3418,116 @@ ul {
             <section class="marquee-section">
                 <div class="marquee-wrap">
                     <div class="marquee-content">
-                        <span>FREE DELIVERY FROM $50.00. RETURNS WITHIN 15 DAYS</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
-                        <span>FREE DELIVERY FROM $50.00. RETURNS WITHIN 15 DAYS</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
-                        <span>FREE DELIVERY FROM $50.00. RETURNS WITHIN 15 DAYS</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
-                        <span>FREE DELIVERY FROM $50.00. RETURNS WITHIN 15 DAYS</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
                     </div>
                 </div>
             </section>
 
-            <!-- PARTNERS / CLIENTS SECTION -->
-            <section class="partners-section container">
-                <div class="partners-grid-layout">
-                    <!-- Left: Brand Grid -->
-                    <div class="partners-brands-grid">
-                        <div class="brand-item"><div class="brand-placeholder"><span>WILSON</span></div></div>
-                        <div class="brand-item"><div class="brand-placeholder"><span>BABOLAT</span></div></div>
-                        <div class="brand-item"><div class="brand-placeholder"><span>HEAD</span></div></div>
-                        <div class="brand-item"><div class="brand-placeholder"><span>YONEX</span></div></div>
-                        <div class="brand-item"><div class="brand-placeholder"><span>NIKE</span></div></div>
-                        <div class="brand-item"><div class="brand-placeholder"><span>ADIDAS</span></div></div>
-                    </div>
-                    <!-- Right: Partners Title -->
-                    <div class="partners-heading-area">
-                        <h3 class="partners-title">Check our best <br>clients and partners</h3>
+            <!-- STATS SECTION -->
+            <section class="stats-section">
+                <div class="container">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number">3K+</span>
+                            <span class="stat-label">Người chơi</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">60</span>
+                            <span class="stat-label">Sân khả dụng</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">8K+</span>
+                            <span class="stat-label">Lượt đặt thành công</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">12K+</span>
+                            <span class="stat-label">Thành viên</span>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- CATEGORY LIST SECTION -->
-            <section class="categories-section">
+            <!-- CATEGORIES SECTION -->
+            <section class="categories-section container">
+                <div class="section-header text-center">
+                    <span class="section-subtitle">Danh mục thể thao</span>
+                    <h2 class="section-title">Chọn môn thể thao bạn muốn chơi</h2>
+                </div>
                 <div class="categories-grid">
-                    <!-- Category Item 1 -->
-                    <div class="category-card">
-                        <div class="category-image-placeholder"></div>
+                    <!-- Category Item 1: Bóng đá -->
+                    <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
+                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=500');"></div>
                         <div class="category-content">
-                            <h4 class="category-name">Acrylic Hard</h4>
-                            <span class="category-link">Sân Cứng chuyên nghiệp</span>
+                            <h4 class="category-name">Bóng đá</h4>
+                            <span class="category-link">Đặt Sân Ngay</span>
                         </div>
                     </div>
-                    <!-- Category Item 2 -->
-                    <div class="category-card">
-                        <div class="category-image-placeholder"></div>
+                    <!-- Category Item 2: Cầu lông -->
+                    <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
+                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=500');"></div>
                         <div class="category-content">
-                            <h4 class="category-name">Clay Court</h4>
-                            <span class="category-link">Sân Đất Nện truyền thống</span>
+                            <h4 class="category-name">Cầu lông</h4>
+                            <span class="category-link">Đặt Sân Ngay</span>
                         </div>
                     </div>
-                    <!-- Category Item 3 -->
-                    <div class="category-card">
-                        <div class="category-image-placeholder"></div>
+                    <!-- Category Item 3: Tennis -->
+                    <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
+                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=500');"></div>
                         <div class="category-content">
-                            <h4 class="category-name">Natural Grass</h4>
-                            <span class="category-link">Sân Cỏ tự nhiên cao cấp</span>
+                            <h4 class="category-name">Tennis</h4>
+                            <span class="category-link">Đặt Sân Ngay</span>
                         </div>
                     </div>
-                    <!-- Category Item 4 -->
-                    <div class="category-card">
-                        <div class="category-image-placeholder"></div>
+                    <!-- Category Item 4: Pickleball -->
+                    <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
+                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=500');"></div>
                         <div class="category-content">
-                            <h4 class="category-name">Indoor Carpet</h4>
-                            <span class="category-link">Sân Thảm có điều hòa</span>
+                            <h4 class="category-name">Pickleball</h4>
+                            <span class="category-link">Đặt Sân Ngay</span>
                         </div>
+                    </div>
+                    <!-- Category Item 5: Bóng bàn -->
+                    <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
+                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&q=80&w=500');"></div>
+                        <div class="category-content">
+                            <h4 class="category-name">Bóng bàn</h4>
+                            <span class="category-link">Đặt Sân Ngay</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEPS SECTION -->
+            <section class="steps-section container">
+                <div class="section-header text-center">
+                    <span class="section-subtitle">Quy trình đơn giản</span>
+                    <h2 class="section-title">Đặt sân trong 3 bước</h2>
+                </div>
+                <div class="steps-grid">
+                    <!-- Step 1 -->
+                    <div class="step-card">
+                        <span class="step-num">01</span>
+                        <h3 class="step-title">Chọn môn thể thao</h3>
+                        <p class="step-description">Lựa chọn bộ môn bạn mong muốn: Bóng đá, Cầu lông, Tennis, Pickleball hoặc Bóng bàn phù hợp với sở thích của bạn.</p>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="step-card">
+                        <span class="step-num">02</span>
+                        <h3 class="step-title">Lựa chọn sân & giờ</h3>
+                        <p class="step-description">Tìm kiếm các sân đấu khả dụng gần nhất, lựa chọn khung giờ lý tưởng và đặt lịch giữ chỗ giữ sân ngay lập tức.</p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="step-card">
+                        <span class="step-num">03</span>
+                        <h3 class="step-title">Thanh toán & Chơi</h3>
+                        <p class="step-description">Thanh toán an toàn, nhanh chóng qua cổng PayOS, nhận mã xác nhận đặt sân qua email và sẵn sàng ra sân tỏa sáng.</p>
                     </div>
                 </div>
             </section>
@@ -3710,24 +4000,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. SWIPER SLIDERS INITIALIZATION
     // ==========================================================================
     
-    // Hero Swiper
-    const heroSwiper = new Swiper('.hero-swiper', {
-        loop: true,
-        autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-        },
-        pagination: {
-            el: '.hero-pagination',
-            clickable: true,
-        },
-        navigation: {
-            nextEl: '.hero-next',
-            prevEl: '.hero-prev',
-        },
-        effect: 'slide',
-        speed: 800,
-    });
+    // Hero Swiper replaced with static 3-column banner showcase
 
     // Testimonials custom avatar bullets logic
     // (khai báo TRƯỚC khi khởi tạo Swiper vì slideChange có thể bắn đồng bộ ngay khi init)
