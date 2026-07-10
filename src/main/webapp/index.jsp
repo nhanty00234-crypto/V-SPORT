@@ -611,29 +611,6 @@ ul {
     transform: none;
 }
 
-.cart-trigger .cart-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 20px;
-    height: 20px;
-    background-color: var(--primary);
-    color: var(--dark);
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--white);
-}
-
-.action-btn:hover .cart-badge {
-    background-color: var(--dark);
-    color: var(--white);
-    border-color: var(--primary);
-}
-
 .hamburger-svg {
     transition: transform var(--transition-normal);
 }
@@ -1215,11 +1192,7 @@ ul {
     }
 }
 
-/* 8. PRODUCTS GRID */
-.products-section {
-    padding: 100px 0;
-}
-
+/* 8. SECTION HEADERS (shared by Categories / Steps sections) */
 .section-header {
     margin-bottom: 60px;
 }
@@ -1240,149 +1213,6 @@ ul {
     text-transform: uppercase;
     color: var(--dark);
     margin-top: 5px;
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-    margin-bottom: 60px;
-}
-
-.product-card {
-    display: flex;
-    flex-direction: column;
-}
-
-.product-image-container {
-    position: relative;
-    aspect-ratio: 1;
-    background-color: var(--light-gray);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.product-image-placeholder {
-    width: 100%;
-    height: 100%;
-    background-color: #eef0f4;
-    position: relative;
-}
-
-/* Subtle cross pattern on product placeholder */
-.product-image-placeholder::after {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 10%;
-    width: 80%;
-    height: 80%;
-    border: 1px dashed rgba(0,0,0,0.05);
-}
-
-.product-hover-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(15,15,15,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity var(--transition-normal);
-    z-index: 2;
-}
-
-.overlay-icons {
-    display: flex;
-    gap: 12px;
-    transform: translateY(15px);
-    transition: transform var(--transition-normal);
-}
-
-.overlay-icons button,
-.overlay-icons a {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background-color: var(--white);
-    color: var(--dark);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: var(--transition-normal);
-}
-
-.overlay-icons button:hover,
-.overlay-icons a:hover {
-    background-color: var(--primary);
-    color: var(--white);
-}
-
-.product-card:hover .product-hover-overlay {
-    opacity: 1;
-}
-
-.product-card:hover .overlay-icons {
-    transform: translateY(0);
-}
-
-.product-info {
-    padding: 20px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex-grow: 1;
-}
-
-.product-title {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 20px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-
-.product-title a:hover {
-    color: var(--primary);
-}
-
-.product-rating {
-    display: flex;
-    gap: 4px;
-    color: var(--primary);
-    font-size: 11px;
-    margin-bottom: 10px;
-}
-
-.product-price {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--dark);
-    margin-bottom: 15px;
-}
-
-.buy-now-btn {
-    width: auto;
-    padding: 10px 24px;
-    font-size: 12px;
-    letter-spacing: 1px;
-    opacity: 0;
-    transform: translateY(10px);
-}
-
-.product-card:hover .buy-now-btn {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.products-footer-btn {
-    margin-top: 20px;
 }
 
 /* 9. PARALLAX MAKE GAME SECTION */
@@ -1927,22 +1757,6 @@ ul {
     overflow-y: auto;
 }
 
-/* Cart Drawer Content */
-.empty-cart-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    gap: 15px;
-}
-
-.empty-cart-message i {
-    font-size: 48px;
-    color: var(--border);
-}
-
 /* Info Drawer Content */
 .info-drawer {
     background-color: var(--dark);
@@ -2283,11 +2097,7 @@ ul {
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
     }
-    
-    .products-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
+
     .footer-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 40px;
@@ -2308,11 +2118,7 @@ ul {
     .action-btn.info-panel-trigger {
         display: none; /* Side panel widget moves to mobile menu */
     }
-    
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
+
     .newsletter-grid {
         grid-template-columns: 1fr;
         gap: 25px;
@@ -2363,21 +2169,6 @@ ul {
     .categories-grid {
         grid-template-columns: 1fr;
         gap: 20px;
-    }
-    
-    .products-grid {
-        grid-template-columns: 1fr;
-        gap: 25px;
-    }
-    
-    .product-card {
-        max-width: 320px;
-        margin: 0 auto;
-    }
-    
-    .buy-now-btn {
-        opacity: 1;
-        transform: translateY(0);
     }
     
     .parallax-text {
@@ -2435,56 +2226,8 @@ ul {
 }
 
 /* ==========================================================================
-   16. COURT CARDS & SPECIFICATIONS
+   16. STATUS INDICATORS
    ========================================================================== */
-.court-placeholder.clay {
-    background: linear-gradient(135deg, #e07a5f 0%, #b54a30 100%) !important;
-}
-.court-placeholder.grass {
-    background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%) !important;
-}
-.court-placeholder.hard {
-    background: linear-gradient(135deg, #4ea8de 0%, #0077b6 100%) !important;
-}
-.court-placeholder.carpet {
-    background: linear-gradient(135deg, #b5179e 0%, #7209b7 100%) !important;
-}
-
-/* Tennis court nets simulation pattern on placeholders */
-.court-placeholder::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: rgba(255,255,255,0.4);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.court-specs {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 15px 0;
-    text-align: left;
-    width: 100%;
-}
-
-.court-specs li {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.court-specs li i {
-    color: var(--primary);
-    width: 16px;
-    text-align: center;
-}
-
 .user-status-dot {
     position: absolute;
     top: 2px;
@@ -2884,351 +2627,6 @@ ul {
     margin-right: 5px;
 }
 
-/* ==========================================================================
-   19. INTERACTIVE COURT BOOKING SCHEDULER MODAL
-   ========================================================================== */
-.booking-modal-card {
-    background-color: var(--white);
-    width: 900px;
-    max-width: 95%;
-    border-radius: 12px;
-    padding: 35px;
-    position: relative;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-    transform: scale(0.9);
-    transition: transform var(--transition-normal);
-    max-height: 95vh;
-    overflow-y: auto;
-}
-
-.modal-overlay.active .booking-modal-card {
-    transform: scale(1);
-}
-
-.booking-modal-title {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 26px;
-    text-transform: uppercase;
-    color: var(--dark);
-    margin-bottom: 25px;
-    padding-right: 30px;
-}
-
-.booking-modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 35px;
-}
-
-/* Left Panel details & custom calendar */
-.booking-modal-left {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.booking-court-details-card {
-    background-color: var(--light-gray);
-    padding: 15px 20px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.court-tag {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    background-color: var(--primary);
-    color: var(--dark);
-    padding: 4px 10px;
-    border-radius: 4px;
-}
-
-.court-pricing-rate {
-    font-size: 15px;
-    color: var(--text-muted);
-}
-
-.court-pricing-rate span {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 22px;
-    color: var(--dark);
-}
-
-.selected-date-indicator {
-    font-size: 14px;
-    color: var(--dark);
-}
-
-.selected-date-indicator strong {
-    color: var(--secondary-blue);
-}
-
-/* Custom Calendar Styling */
-.custom-calendar-widget {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 15px;
-    background-color: var(--white);
-}
-
-.calendar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.calendar-nav-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dark);
-    transition: var(--transition-fast);
-}
-
-.calendar-nav-btn:hover {
-    background-color: var(--light-gray);
-    color: var(--primary);
-}
-
-.calendar-current-month {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    font-weight: 700;
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-}
-
-.calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    row-gap: 8px;
-}
-
-.calendar-day-cell {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-
-.calendar-day-cell:hover:not(.disabled):not(.active) {
-    background-color: var(--light-gray);
-}
-
-.calendar-day-cell.active {
-    background-color: var(--primary);
-    color: var(--dark);
-    font-weight: 700;
-}
-
-.calendar-day-cell.disabled {
-    opacity: 0.2;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-/* Right Panel: Time slot picker */
-.booking-modal-right {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.slot-column-title {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--dark);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-}
-
-.time-slots-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-height: 280px;
-    overflow-y: auto;
-    padding-right: 5px;
-}
-
-.slot-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.slot-group-header {
-    font-size: 12.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.slots-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.time-slot-btn {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px;
-    text-align: center;
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 14px;
-    background-color: var(--white);
-    transition: var(--transition-fast);
-}
-
-.time-slot-btn:hover:not(.booked):not(.selected) {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-.time-slot-btn.selected {
-    background-color: var(--primary);
-    border-color: var(--primary);
-    color: var(--dark);
-}
-
-.time-slot-btn.booked {
-    background-color: #f1f2f6;
-    border-color: #f1f2f6;
-    color: #ced6e0;
-    text-decoration: line-through;
-    cursor: not-allowed;
-}
-
-/* Summary Panel styling */
-.booking-summary-box {
-    border-top: 1px solid var(--border);
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.summary-line {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-    color: var(--text-muted);
-}
-
-.summary-line.highlight {
-    font-size: 16px;
-    color: var(--dark);
-    font-weight: 700;
-}
-
-.summary-line.highlight span:last-child {
-    font-family: var(--font-heading);
-    font-size: 24px;
-    color: var(--primary);
-}
-
-/* 20. BOOKING CART ITEM LIST (RIGHT BAR) */
-.cart-items-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    height: 100%;
-}
-
-.booking-cart-item {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    position: relative;
-    background-color: var(--light-gray);
-}
-
-.booking-cart-item .delete-item-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 14px;
-    color: var(--text-muted);
-}
-
-.booking-cart-item .delete-item-btn:hover {
-    color: #ff4757;
-}
-
-.cart-item-title {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 16px;
-    text-transform: uppercase;
-    padding-right: 20px;
-}
-
-.cart-item-meta {
-    font-size: 12.5px;
-    color: var(--text-muted);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.cart-item-meta span i {
-    margin-right: 6px;
-    color: var(--primary);
-}
-
-.cart-item-price {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 16px;
-    margin-top: 4px;
-}
-
-/* Responsiveness for Booking Modal */
-@media (max-width: 991px) {
-    .booking-modal-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-}
 </style>
 </head>
 <body>
@@ -3323,11 +2721,6 @@ ul {
                         </div>
                     </div>
                     <% } %>
-                    <!-- Shopping Cart Trigger -->
-                    <button class="action-btn cart-trigger" aria-label="Open Cart">
-                        <i class="fa-solid fa-basket-shopping"></i>
-                        <span class="cart-badge">0</span>
-                    </button>
                     <!-- Search Trigger -->
                     <button class="action-btn search-trigger" aria-label="Open Search">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -3375,7 +2768,7 @@ ul {
                     </div>
                     <!-- Right Side Image -->
                     <div class="hero-dark-image-wrapper">
-                        <img class="hero-dark-img" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=800" alt="Tennis Player">
+                        <img class="hero-dark-img" src="${pageContext.request.contextPath}/resources/436417.jpg" alt="Cầu thủ thi đấu">
                     </div>
                 </div>
                 
@@ -3394,8 +2787,8 @@ ul {
                 <div class="welcome-container">
                     <!-- Left: Overlapping Images -->
                     <div class="welcome-images-left">
-                        <img class="welcome-img-back" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=600" alt="Sân tennis">
-                        <img class="welcome-img-front" src="https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?auto=format&fit=crop&q=80&w=600" alt="Người chơi tennis">
+                        <img class="welcome-img-back" src="${pageContext.request.contextPath}/resources/hinh-nen-bong-da-thumb.jpg" alt="Sân bóng đá">
+                        <img class="welcome-img-front" src="${pageContext.request.contextPath}/resources/velocity_hero_bg.png" alt="Người chơi thể thao">
                     </div>
                     <!-- Right: Content -->
                     <div class="welcome-content-right">
@@ -3418,13 +2811,13 @@ ul {
             <section class="marquee-section">
                 <div class="marquee-wrap">
                     <div class="marquee-content">
-                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
-                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
-                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
-                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; HỦY THANH TOÁN DỄ DÀNG</span>
+                        <span>ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
                         <span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</span>
                     </div>
                 </div>
@@ -3463,15 +2856,15 @@ ul {
                 <div class="categories-grid">
                     <!-- Category Item 1: Bóng đá -->
                     <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
-                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=500');"></div>
+                        <div class="category-image-placeholder" style="background-image: url('${pageContext.request.contextPath}/resources/hinh-nen-bong-da-7.png');"></div>
                         <div class="category-content">
                             <h4 class="category-name">Bóng đá</h4>
                             <span class="category-link">Đặt Sân Ngay</span>
                         </div>
                     </div>
-                    <!-- Category Item 2: Cầu lông -->
+                    <!-- Category Item 2: Cầu lông (chưa có ảnh riêng trong project — dùng placeholder gradient) -->
                     <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
-                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=500');"></div>
+                        <div class="category-image-placeholder" style="background-image: linear-gradient(135deg, #14210a 0%, #427CF0 100%);"></div>
                         <div class="category-content">
                             <h4 class="category-name">Cầu lông</h4>
                             <span class="category-link">Đặt Sân Ngay</span>
@@ -3479,23 +2872,23 @@ ul {
                     </div>
                     <!-- Category Item 3: Tennis -->
                     <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
-                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=500');"></div>
+                        <div class="category-image-placeholder" style="background-image: url('${pageContext.request.contextPath}/resources/436417.jpg');"></div>
                         <div class="category-content">
                             <h4 class="category-name">Tennis</h4>
                             <span class="category-link">Đặt Sân Ngay</span>
                         </div>
                     </div>
-                    <!-- Category Item 4: Pickleball -->
+                    <!-- Category Item 4: Pickleball (chưa có ảnh riêng trong project — dùng placeholder gradient) -->
                     <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
-                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=500');"></div>
+                        <div class="category-image-placeholder" style="background-image: linear-gradient(135deg, #0F0F0F 0%, #AFD639 100%);"></div>
                         <div class="category-content">
                             <h4 class="category-name">Pickleball</h4>
                             <span class="category-link">Đặt Sân Ngay</span>
                         </div>
                     </div>
-                    <!-- Category Item 5: Bóng bàn -->
+                    <!-- Category Item 5: Bóng bàn (chưa có ảnh riêng trong project — dùng placeholder gradient) -->
                     <div class="category-card" onclick="location.href='${pageContext.request.contextPath}/customer/dat-san'">
-                        <div class="category-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&q=80&w=500');"></div>
+                        <div class="category-image-placeholder" style="background-image: linear-gradient(135deg, #1a1a1a 0%, #6b8f1f 100%);"></div>
                         <div class="category-content">
                             <h4 class="category-name">Bóng bàn</h4>
                             <span class="category-link">Đặt Sân Ngay</span>
@@ -3532,125 +2925,14 @@ ul {
                 </div>
             </section>
 
-            <!-- AVAILABLE COURTS SECTION (REPLACES PRODUCTS) -->
-            <section class="products-section container" id="courts-section">
-                <div class="section-header text-center">
-                    <span class="section-subtitle">Court Booking</span>
-                    <h2 class="section-title">Available Tennis Courts</h2>
-                </div>
-
-                <div class="products-grid" id="courts-grid">
-                    <!-- Court 1 -->
-                    <div class="product-card court-card" data-court-id="clay-1" data-court-name="Premium Clay Court - Sân Đất Nện" data-price="25.00">
-                        <div class="product-image-container">
-                            <div class="product-image-placeholder court-placeholder clay"></div>
-                            <div class="product-hover-overlay">
-                                <div class="overlay-icons">
-                                    <button class="wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
-                                    <button class="court-book-now-btn" aria-label="Book Court"><i class="fa-solid fa-calendar-days"></i></button>
-                                    <a href="#" class="details-link" aria-label="View Details"><i class="fa-solid fa-link"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-info text-center">
-                            <h3 class="product-title"><a href="#">Premium Clay Court (Sân Đất Nện)</a></h3>
-                            <ul class="court-specs">
-                                <li><i class="fa-solid fa-location-dot"></i> Outdoor (Ngoài trời)</li>
-                                <li><i class="fa-solid fa-bolt"></i> Professional Lighting System</li>
-                                <li><i class="fa-solid fa-droplet"></i> Free mineral water & towels</li>
-                            </ul>
-                            <span class="product-price">$25.00 <small>/ hour</small></span>
-                            <button class="btn btn-outline buy-now-btn book-btn">Book now</button>
-                        </div>
-                    </div>
-
-                    <!-- Court 2 -->
-                    <div class="product-card court-card" data-court-id="grass-1" data-court-name="Wimbledon Grass Court - Sân Cỏ Tự Nhiên" data-price="30.00">
-                        <div class="product-image-container">
-                            <div class="product-image-placeholder court-placeholder grass"></div>
-                            <div class="product-hover-overlay">
-                                <div class="overlay-icons">
-                                    <button class="wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
-                                    <button class="court-book-now-btn" aria-label="Book Court"><i class="fa-solid fa-calendar-days"></i></button>
-                                    <a href="#" class="details-link" aria-label="View Details"><i class="fa-solid fa-link"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-info text-center">
-                            <h3 class="product-title"><a href="#">Wimbledon Grass Court (Sân Cỏ)</a></h3>
-                            <ul class="court-specs">
-                                <li><i class="fa-solid fa-location-dot"></i> Outdoor (Cỏ tự nhiên cao cấp)</li>
-                                <li><i class="fa-solid fa-users"></i> Tournament Standard</li>
-                                <li><i class="fa-solid fa-hand-holding-heart"></i> Ball boy service available</li>
-                            </ul>
-                            <span class="product-price">$30.00 <small>/ hour</small></span>
-                            <button class="btn btn-outline buy-now-btn book-btn">Book now</button>
-                        </div>
-                    </div>
-
-                    <!-- Court 3 -->
-                    <div class="product-card court-card" data-court-id="hard-1" data-court-name="Acrylic Hard Court - Sân Cứng Đạt Chuẩn" data-price="20.00">
-                        <div class="product-image-container">
-                            <div class="product-image-placeholder court-placeholder hard"></div>
-                            <div class="product-hover-overlay">
-                                <div class="overlay-icons">
-                                    <button class="wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
-                                    <button class="court-book-now-btn" aria-label="Book Court"><i class="fa-solid fa-calendar-days"></i></button>
-                                    <a href="#" class="details-link" aria-label="View Details"><i class="fa-solid fa-link"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-info text-center">
-                            <h3 class="product-title"><a href="#">Acrylic Hard Court (Sân Cứng)</a></h3>
-                            <ul class="court-specs">
-                                <li><i class="fa-solid fa-location-dot"></i> Indoor/Outdoor Hybrid</li>
-                                <li><i class="fa-solid fa-circle-chevron-up"></i> US Open standard bounce</li>
-                                <li><i class="fa-solid fa-baseball"></i> Practice wall access</li>
-                            </ul>
-                            <span class="product-price">$20.00 <small>/ hour</small></span>
-                            <button class="btn btn-outline buy-now-btn book-btn">Book now</button>
-                        </div>
-                    </div>
-
-                    <!-- Court 4 -->
-                    <div class="product-card court-card" data-court-id="carpet-1" data-court-name="VIP Indoor Carpet Court - Sân Thảm Máy Lạnh" data-price="22.00">
-                        <div class="product-image-container">
-                            <div class="product-image-placeholder court-placeholder carpet"></div>
-                            <div class="product-hover-overlay">
-                                <div class="overlay-icons">
-                                    <button class="wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
-                                    <button class="court-book-now-btn" aria-label="Book Court"><i class="fa-solid fa-calendar-days"></i></button>
-                                    <a href="#" class="details-link" aria-label="View Details"><i class="fa-solid fa-link"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-info text-center">
-                            <h3 class="product-title"><a href="#">VIP Indoor Carpet Court (Sân Thảm)</a></h3>
-                            <ul class="court-specs">
-                                <li><i class="fa-solid fa-location-dot"></i> Indoor (Có máy lạnh)</li>
-                                <li><i class="fa-solid fa-wind"></i> Air conditioned environment</li>
-                                <li><i class="fa-solid fa-shoe-prints"></i> Low joint impact rubber base</li>
-                            </ul>
-                            <span class="product-price">$22.00 <small>/ hour</small></span>
-                            <button class="btn btn-outline buy-now-btn book-btn">Book now</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Section Button -->
-                <div class="products-footer-btn text-center">
-                    <a href="#courts-section" class="btn btn-black">View all yards</a>
-                </div>
-            </section>
-
             <!-- MAKE YOUR GAME PARALLAX SECTION -->
             <section class="make-game-section">
                 <div class="parallax-container">
-                    <span class="parallax-text stroke-text">Make your</span>
+                    <span class="parallax-text stroke-text">Nâng tầm</span>
                     <div class="parallax-interactive-element">
                         <div class="tennis-ball-interactive"></div>
                     </div>
-                    <span class="parallax-text fill-text">game</span>
+                    <span class="parallax-text fill-text">trận đấu</span>
                 </div>
             </section>
 
@@ -3661,30 +2943,30 @@ ul {
                         <!-- Testimonial 1 -->
                         <div class="swiper-slide testimonial-slide">
                             <div class="testimonial-content">
-                                <p>"Consectetur adipiscing elit, sed do eiusm onsectetur adipiscing elit, sed do eiusm od tempor incididunt ut labore. Consectetur adipiscing elit, sed do eiusm onsectetur adipiscing elit, sed do eiusm unde."</p>
+                                <p>"Đặt sân chỉ mất chưa đầy một phút, thanh toán qua PayOS cực nhanh và luôn có mã xác nhận rõ ràng. Không còn cảnh gọi điện hỏi sân trống nữa."</p>
                                 <div class="testimonial-author">
-                                    <h4 class="author-name">Christine Merton</h4>
-                                    <span class="author-location">Lowell, MS</span>
+                                    <h4 class="author-name">Minh Khang</h4>
+                                    <span class="author-location">Quận 7, TP.HCM</span>
                                 </div>
                             </div>
                         </div>
                         <!-- Testimonial 2 -->
                         <div class="swiper-slide testimonial-slide">
                             <div class="testimonial-content">
-                                <p>"Consectetur adipiscing elit, sed do eiusm onsectetur adipiscing elit, sed do eiusm od tempor incididunt ut labore. Consectetur adipiscing elit, sed do eiusm onsectetur adipiscing elit, sed do eiusm unde."</p>
+                                <p>"Nhóm mình chơi cầu lông cuối tuần, từ ngày dùng V-SPORT việc giữ chỗ và chia tiền sân với bạn bè nhẹ nhàng hơn hẳn."</p>
                                 <div class="testimonial-author">
-                                    <h4 class="author-name">James Parker</h4>
-                                    <span class="author-location">Edison, NJ</span>
+                                    <h4 class="author-name">Thanh Hà</h4>
+                                    <span class="author-location">Cầu Giấy, Hà Nội</span>
                                 </div>
                             </div>
                         </div>
                         <!-- Testimonial 3 -->
                         <div class="swiper-slide testimonial-slide">
                             <div class="testimonial-content">
-                                <p>"Consectetur adipiscing elit, sed do eiusm onsectetur adipiscing elit, sed do eiusm od tempor incididunt ut labore. Consectetur adipiscing elit, sed do eiusm onsectetur adipiscing elit, sed do eiusm unde."</p>
+                                <p>"Giao diện rõ ràng, chọn khung giờ trống trực quan, hủy lịch cũng dễ dàng khi có việc đột xuất."</p>
                                 <div class="testimonial-author">
-                                    <h4 class="author-name">Helen Miles</h4>
-                                    <span class="author-location">Phoenix, AZ</span>
+                                    <h4 class="author-name">Quốc Bảo</h4>
+                                    <span class="author-location">Hải Châu, Đà Nẵng</span>
                                 </div>
                             </div>
                         </div>
@@ -3702,7 +2984,7 @@ ul {
             <section class="video-banner-section">
                 <div class="video-bg-placeholder"></div>
                 <div class="video-overlay">
-                    <button class="play-video-btn" aria-label="Play video">PLAY</button>
+                    <button class="play-video-btn" aria-label="Xem video">XEM</button>
                 </div>
             </section>
 
@@ -3711,12 +2993,12 @@ ul {
                 <div class="newsletter-container container">
                     <div class="newsletter-grid">
                         <div class="newsletter-heading">
-                            <h2 class="newsletter-title">Subscribe for the exclusive updates!</h2>
+                            <h2 class="newsletter-title">Đăng ký nhận ưu đãi độc quyền!</h2>
                         </div>
                         <div class="newsletter-form-wrapper">
                             <form class="newsletter-form" onsubmit="event.preventDefault();">
                                 <div class="input-group">
-                                    <input type="email" placeholder="Your email address..." required aria-label="Email address">
+                                    <input type="email" placeholder="Nhập email của bạn..." required aria-label="Địa chỉ email">
                                     <button type="submit" class="newsletter-submit-btn" aria-label="Subscribe">
                                         <i class="fa-solid fa-arrow-right"></i>
                                     </button>
@@ -3735,33 +3017,33 @@ ul {
                 <div class="footer-grid">
                     <!-- Column 1: Intro -->
                     <div class="footer-col intro-col">
-                        <h4 class="footer-title">Hello, We Are TennisClub</h4>
-                        <p class="footer-text">Inissimos ducimos qui blandiitis praesentium voluptatum deleniti.</p>
+                        <h4 class="footer-title">Xin Chào, Chúng Tôi Là V-SPORT</h4>
+                        <p class="footer-text">Nền tảng đặt sân thể thao nhanh chóng, minh bạch, thanh toán an toàn qua PayOS.</p>
                     </div>
                     <!-- Column 2: Address -->
                     <div class="footer-col address-col">
-                        <h4 class="footer-title">Office</h4>
-                        <p class="footer-text">The USA —<br>11792 London Rd, Derby,<br>OH 43117, US</p>
-                        <a href="mailto:info@email.com" class="footer-link-underline">info@email.com</a>
-                        <a href="tel:+18005554565" class="footer-phone-link">+1 800 555 45 65</a>
+                        <h4 class="footer-title">Văn phòng</h4>
+                        <p class="footer-text">Việt Nam —<br>Hệ thống sân đối tác<br>trên toàn quốc</p>
+                        <a href="mailto:hotro@vsport.vn" class="footer-link-underline">hotro@vsport.vn</a>
+                        <a href="tel:19001234" class="footer-phone-link">1900 1234</a>
                     </div>
                     <!-- Column 3: Links -->
                     <div class="footer-col links-col">
-                        <h4 class="footer-title">Links</h4>
+                        <h4 class="footer-title">Liên Kết</h4>
                         <ul class="footer-links-list">
-                            <li><a href="#">Home</a></li>
-                            <li><a href="#courts-section">Courts</a></li>
-                            <li><a href="#">About</a></li>
-                            <li><a href="#">Contact</a></li>
+                            <li><a href="${pageContext.request.contextPath}/index.jsp">Trang Chủ</a></li>
+                            <li><a href="${pageContext.request.contextPath}/customer/dat-san">Đặt Sân</a></li>
+                            <li><a href="${pageContext.request.contextPath}/index.jsp#welcome-section">Giới Thiệu</a></li>
+                            <li><a href="#pricing">Bảng Giá</a></li>
                         </ul>
                     </div>
                     <!-- Column 4: Socials -->
                     <div class="footer-col socials-col">
-                        <h4 class="footer-title">Get in Touch</h4>
+                        <h4 class="footer-title">Kết Nối</h4>
                         <div class="footer-social-wrap">
                             <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-facebook-f"></i></span> Facebook</a>
                             <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-x-twitter"></i></span> Twitter</a>
-                            <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-dribbble"></i></span> Dribble</a>
+                            <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-tiktok"></i></span> TikTok</a>
                             <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-instagram"></i></span> Instagram</a>
                         </div>
                     </div>
@@ -3771,36 +3053,19 @@ ul {
             <!-- Bottom Copyright Bar -->
             <div class="footer-bottom-bar container">
                 <div class="copyright-content">
-                    <p><a href="#" class="footer-tm-link">ThemeRex</a> © 2026. All Rights Reserved.</p>
+                    <p>V-SPORT © 2026. Bảo lưu mọi quyền.</p>
                 </div>
             </div>
         </footer>
 
         <!-- INTERACTIVE PANELS AND DRAWERS -->
 
-        <!-- Shopping Cart Drawer (Right Side) -->
-        <div class="drawer-panel cart-drawer" id="cart-drawer">
-            <div class="drawer-header">
-                <span class="drawer-title">Selected Bookings</span>
-                <button class="drawer-close-btn" aria-label="Close Cart"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="drawer-body">
-                <div class="empty-cart-message" id="cart-empty-state">
-                    <i class="fa-solid fa-calendar-xmark"></i>
-                    <p>No court yard reservation selected.</p>
-                </div>
-                <div class="cart-items-list" id="cart-items-list" style="display:none">
-                    <!-- Dynamic bookings will list here -->
-                </div>
-            </div>
-        </div>
-
         <!-- Info Drawer (Right Side) -->
         <div class="drawer-panel info-drawer" id="info-drawer">
             <div class="drawer-header">
-                <a href="#" class="logo-link">
+                <a href="${pageContext.request.contextPath}/index.jsp" class="logo-link">
                     <span class="logo-icon"><i class="fa-solid fa-table-tennis-paddle-ball"></i></span>
-                    <span class="logo-text">Tennis<span>Club</span></span>
+                    <span class="logo-text">V-<span>SPORT</span></span>
                 </a>
                 <button class="drawer-close-btn" aria-label="Close Panel"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -3808,12 +3073,12 @@ ul {
                 <div class="drawer-socials">
                     <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-facebook-f"></i></span> Facebook</a>
                     <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-x-twitter"></i></span> Twitter</a>
-                    <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-dribbble"></i></span> Dribble</a>
+                    <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-tiktok"></i></span> TikTok</a>
                     <a href="#" class="social-item"><span class="social-icon-wrapper"><i class="fa-brands fa-instagram"></i></span> Instagram</a>
                 </div>
                 <div class="drawer-contacts">
-                    <a href="tel:+18408412569" class="phone-link">+1 840 841 25 69</a>
-                    <a href="mailto:info@email.com" class="email-link">info@email.com</a>
+                    <a href="tel:19001234" class="phone-link">1900 1234</a>
+                    <a href="mailto:hotro@vsport.vn" class="email-link">hotro@vsport.vn</a>
                 </div>
             </div>
         </div>
@@ -3821,15 +3086,15 @@ ul {
         <!-- Fullscreen Search Overlay -->
         <div class="search-overlay" id="search-overlay">
             <div class="search-overlay-header container">
-                <a href="#" class="logo-link">
+                <a href="${pageContext.request.contextPath}/index.jsp" class="logo-link">
                     <span class="logo-icon"><i class="fa-solid fa-table-tennis-paddle-ball"></i></span>
-                    <span class="logo-text">Tennis<span>Club</span></span>
+                    <span class="logo-text">V-<span>SPORT</span></span>
                 </a>
                 <button class="search-close-btn" aria-label="Close Search"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="search-overlay-body">
                 <form class="search-form-overlay" onsubmit="event.preventDefault();">
-                    <input type="text" class="search-input-field" placeholder="Type words and hit enter" autofocus aria-label="Search site">
+                    <input type="text" class="search-input-field" placeholder="Nhập từ khoá và nhấn Enter" autofocus aria-label="Search site">
                     <button type="submit" class="search-submit-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
             </div>
@@ -3838,9 +3103,9 @@ ul {
         <!-- Mobile Menu Drawer -->
         <div class="drawer-panel mobile-menu-drawer" id="mobile-menu-drawer">
             <div class="drawer-header">
-                <a href="#" class="logo-link">
+                <a href="${pageContext.request.contextPath}/index.jsp" class="logo-link">
                     <span class="logo-icon"><i class="fa-solid fa-table-tennis-paddle-ball"></i></span>
-                    <span class="logo-text">Tennis<span>Club</span></span>
+                    <span class="logo-text">V-<span>SPORT</span></span>
                 </a>
                 <button class="drawer-close-btn" aria-label="Close Menu"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -3850,8 +3115,8 @@ ul {
                 <div class="mobile-socials-area"></div>
                 <div class="mobile-additional-widgets">
                     <div class="extra-widget-item">
-                        <h6>Have a Project?</h6>
-                        <a href="mailto:info@website.com">info@website.com</a>
+                        <h6>Cần hỗ trợ?</h6>
+                        <a href="mailto:hotro@vsport.vn">hotro@vsport.vn</a>
                     </div>
                 </div>
             </div>
@@ -3871,91 +3136,6 @@ ul {
         
         <!-- Authentication Modal (Login / Register / OTP) — shared real modal, wired to backend -->
         <jsp:include page="/auth/AuthModal.jsp" />
-
-        <!-- Interactive Court Booking Scheduler Modal -->
-        <div class="modal-overlay" id="booking-modal">
-            <div class="booking-modal-card">
-                <button class="modal-close-btn" id="booking-close-btn"><i class="fa-solid fa-xmark"></i></button>
-                
-                <h3 class="booking-modal-title" id="booking-modal-court-name">Reserve Tennis Court</h3>
-                
-                <div class="booking-modal-grid">
-                    <!-- Left Column: Calendar & Court Info -->
-                    <div class="booking-modal-left">
-                        <div class="booking-court-details-card">
-                            <span class="court-tag">Lựa chọn hàng đầu</span>
-                            <p class="court-pricing-rate"><span id="booking-modal-court-price">$25.00</span> / giờ</p>
-                        </div>
-                        
-                        <div class="custom-calendar-widget">
-                            <div class="calendar-header">
-                                <button class="calendar-nav-btn" id="cal-prev"><i class="fa-solid fa-chevron-left"></i></button>
-                                <span class="calendar-current-month" id="cal-month-year">July 2026</span>
-                                <button class="calendar-nav-btn" id="cal-next"><i class="fa-solid fa-chevron-right"></i></button>
-                            </div>
-                            <div class="calendar-weekdays">
-                                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-                            </div>
-                            <div class="calendar-days" id="calendar-days-grid">
-                                <!-- Days injected via javascript -->
-                            </div>
-                        </div>
-                        <p class="selected-date-indicator">Ngày đã chọn: <strong id="selected-date-txt">Chưa chọn</strong></p>
-                    </div>
-
-                    <!-- Right Column: Time Slots & Summary -->
-                    <div class="booking-modal-right">
-                        <h4 class="slot-column-title">Chọn khung giờ trống (Available Slots)</h4>
-                        
-                        <div class="time-slots-container">
-                            <!-- Morning Slots -->
-                            <div class="slot-group">
-                                <span class="slot-group-header"><i class="fa-regular fa-sun"></i> Buổi Sáng (Morning)</span>
-                                <div class="slots-grid">
-                                    <button class="time-slot-btn" data-time="08:00">08:00 - 09:00</button>
-                                    <button class="time-slot-btn" data-time="09:00">09:00 - 10:00</button>
-                                    <button class="time-slot-btn booked" disabled data-time="10:00">10:00 - 11:00</button>
-                                    <button class="time-slot-btn" data-time="11:00">11:00 - 12:00</button>
-                                </div>
-                            </div>
-                            <!-- Afternoon Slots -->
-                            <div class="slot-group">
-                                <span class="slot-group-header"><i class="fa-solid fa-cloud-sun"></i> Buổi Chiều (Afternoon)</span>
-                                <div class="slots-grid">
-                                    <button class="time-slot-btn" data-time="13:00">13:00 - 14:00</button>
-                                    <button class="time-slot-btn booked" disabled data-time="14:00">14:00 - 15:00</button>
-                                    <button class="time-slot-btn" data-time="15:00">15:00 - 16:00</button>
-                                    <button class="time-slot-btn" data-time="16:00">16:00 - 17:00</button>
-                                </div>
-                            </div>
-                            <!-- Evening Slots -->
-                            <div class="slot-group">
-                                <span class="slot-group-header"><i class="fa-solid fa-moon"></i> Buổi Tối (Evening)</span>
-                                <div class="slots-grid">
-                                    <button class="time-slot-btn" data-time="17:00">17:00 - 18:00</button>
-                                    <button class="time-slot-btn" data-time="18:00">18:00 - 19:00</button>
-                                    <button class="time-slot-btn" data-time="19:00">19:00 - 20:00</button>
-                                    <button class="time-slot-btn" data-time="20:00">20:00 - 21:00</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Booking Summary -->
-                        <div class="booking-summary-box">
-                            <div class="summary-line">
-                                <span>Tổng thời gian:</span>
-                                <span id="summary-total-hours">0 giờ</span>
-                            </div>
-                            <div class="summary-line highlight">
-                                <span>Thành tiền (Total):</span>
-                                <span id="summary-total-price">$0.00</span>
-                            </div>
-                            <button class="btn btn-black btn-full" id="confirm-booking-btn" style="margin-top:15px">Xác Nhận Đặt Sân</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Backdrop overlay for click-away -->
         <div class="overlay-backdrop" id="overlay-backdrop"></div>
@@ -3980,22 +3160,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     // 1. STATE VARIABLES
     // ==========================================================================
-    const currentUser = <%= loggedInUser != null ? "{ authenticated: true }" : "null" %>;
-    let cartBookings = JSON.parse(localStorage.getItem('cartBookings')) || [];
-    
-    let selectedCourt = null;
-    let selectedDate = null;
-    let selectedSlots = [];
-    
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June", 
-        "July", "August", "September", "October", "November", "December"
-    ];
-
-
     // ==========================================================================
     // 2. SWIPER SLIDERS INITIALIZATION
     // ==========================================================================
@@ -4046,17 +3210,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const backdrop = document.getElementById('overlay-backdrop');
     
     // Panel triggers
-    const cartTrigger = document.querySelector('.cart-trigger');
     const infoTrigger = document.querySelector('.info-panel-trigger');
     const searchTrigger = document.querySelector('.search-trigger');
     const mobileMenuTrigger = document.querySelector('.mobile-menu-trigger');
-    
+
     // Panels
-    const cartDrawer = document.getElementById('cart-drawer');
     const infoDrawer = document.getElementById('info-drawer');
     const searchOverlay = document.getElementById('search-overlay');
     const mobileMenuDrawer = document.getElementById('mobile-menu-drawer');
-    
+
     // Close triggers
     const closeBtns = document.querySelectorAll('.drawer-close-btn, .search-close-btn');
 
@@ -4068,24 +3230,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeAllPanels() {
-        cartDrawer.classList.remove('active');
         infoDrawer.classList.remove('active');
         searchOverlay.classList.remove('active');
         mobileMenuDrawer.classList.remove('active');
         backdrop.classList.remove('active');
         body.classList.remove('panel-open');
-        
+
         // Hide overlay modals
         if (window.closeAuthModal) window.closeAuthModal();
-        document.getElementById('booking-modal').classList.remove('active');
     }
-
-    // Bind triggers
-    cartTrigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        openPanel(cartDrawer);
-        renderCartBookings();
-    });
 
     if (infoTrigger) {
         infoTrigger.addEventListener('click', (e) => {
@@ -4281,257 +3434,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 8. INTERACTIVE COURT BOOKING SCHEDULER MODAL
-    // ==========================================================================
-    
-    const bookingModal = document.getElementById('booking-modal');
-    const bookingCloseBtn = document.getElementById('booking-close-btn');
-    const calendarDaysGrid = document.getElementById('calendar-days-grid');
-    const calMonthYear = document.getElementById('cal-month-year');
-    
-    // Scheduler inputs
-    const confirmBookingBtn = document.getElementById('confirm-booking-btn');
-    const timeSlots = document.querySelectorAll('.time-slot-btn');
-    const summaryTotalHours = document.getElementById('summary-total-hours');
-    const summaryTotalPrice = document.getElementById('summary-total-price');
-
-    // Calendar navigation
-    document.getElementById('cal-prev').addEventListener('click', () => {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
-        }
-        buildCalendar();
-    });
-
-    document.getElementById('cal-next').addEventListener('click', () => {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        }
-        buildCalendar();
-    });
-
-    // Opening scheduler modal
-    function openBookingModal(court) {
-        selectedCourt = court;
-        document.getElementById('booking-modal-court-name').textContent = court.name;
-        document.getElementById('booking-modal-court-price').textContent = `$\${parseFloat(court.price).toFixed(2)}`;
-        
-        // Reset selections
-        selectedDate = null;
-        selectedSlots = [];
-        document.getElementById('selected-date-txt').textContent = "Chưa chọn";
-        resetSlotsVisualState();
-        updateSummaryBox();
-        
-        buildCalendar();
-        
-        bookingModal.classList.add('active');
-        body.classList.add('panel-open');
-    }
-
-    // Court cards Book action triggers
-    document.querySelectorAll('.court-card').forEach(card => {
-        const bookBtn = card.querySelector('.book-btn');
-        const overlayBookBtn = card.querySelector('.court-book-now-btn');
-        
-        const courtDetails = {
-            id: card.dataset.courtId,
-            name: card.dataset.courtName,
-            price: parseFloat(card.dataset.price)
-        };
-
-        const triggerAction = (e) => {
-            e.preventDefault();
-            openBookingModal(courtDetails);
-        };
-
-        if (bookBtn) bookBtn.addEventListener('click', triggerAction);
-        if (overlayBookBtn) overlayBookBtn.addEventListener('click', triggerAction);
-    });
-
-    bookingCloseBtn.addEventListener('click', () => {
-        bookingModal.classList.remove('active');
-        body.classList.remove('panel-open');
-    });
-
-    // CALENDAR DAYS GENERATOR
-    function buildCalendar() {
-        calendarDaysGrid.innerHTML = '';
-        calMonthYear.textContent = `\${monthNames[currentMonth]} \${currentYear}`;
-
-        const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-        const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
-        const today = new Date();
-        today.setHours(0,0,0,0);
-
-        // Blank days (padding offset)
-        for (let i = 0; i < firstDayIndex; i++) {
-            const blank = document.createElement('div');
-            calendarDaysGrid.appendChild(blank);
-        }
-
-        // Active calendar days
-        for (let day = 1; day <= totalDays; day++) {
-            const cell = document.createElement('div');
-            cell.className = "calendar-day-cell";
-            cell.textContent = day;
-
-            const cellDate = new Date(currentYear, currentMonth, day);
-            cellDate.setHours(0,0,0,0);
-
-            // Disable past dates
-            if (cellDate < today) {
-                cell.classList.add('disabled');
-            } else {
-                // If matched selected date
-                const dateStr = `\${currentYear}-\${String(currentMonth + 1).padStart(2, '0')}-\${String(day).padStart(2, '0')}`;
-                if (selectedDate === dateStr) {
-                    cell.classList.add('active');
-                }
-                
-                cell.addEventListener('click', () => {
-                    // Remove active from other days
-                    document.querySelectorAll('.calendar-day-cell').forEach(c => c.classList.remove('active'));
-                    cell.classList.add('active');
-                    
-                    selectedDate = dateStr;
-                    document.getElementById('selected-date-txt').textContent = `\${day} \${monthNames[currentMonth]} \${currentYear}`;
-                    
-                    // Reset selected slots on date change
-                    selectedSlots = [];
-                    resetSlotsVisualState();
-                    updateSummaryBox();
-                });
-            }
-
-            calendarDaysGrid.appendChild(cell);
-        }
-    }
-
-    // Slots selections
-    timeSlots.forEach(slot => {
-        slot.addEventListener('click', () => {
-            if (!selectedDate) {
-                alert("Vui lòng chọn ngày trên lịch trước khi chọn giờ đặt sân!");
-                return;
-            }
-            
-            const time = slot.dataset.time;
-            if (slot.classList.contains('selected')) {
-                slot.classList.remove('selected');
-                selectedSlots = selectedSlots.filter(s => s !== time);
-            } else {
-                slot.classList.add('selected');
-                selectedSlots.push(time);
-            }
-            
-            updateSummaryBox();
-        });
-    });
-
-    function resetSlotsVisualState() {
-        timeSlots.forEach(slot => {
-            slot.classList.remove('selected');
-        });
-    }
-
-    function updateSummaryBox() {
-        summaryTotalHours.textContent = `\${selectedSlots.length} giờ`;
-        const totalCost = selectedSlots.length * (selectedCourt ? selectedCourt.price : 0);
-        summaryTotalPrice.textContent = `$\${totalCost.toFixed(2)}`;
-    }
-
-    // CONFIRM COURT BOOKING TRIGGER (AUTHENTICATION CHECKPOINT)
-    confirmBookingBtn.addEventListener('click', () => {
-        if (!selectedDate) {
-            alert("Vui lòng chọn ngày đặt sân trên lịch!");
-            return;
-        }
-        if (selectedSlots.length === 0) {
-            alert("Vui lòng lựa chọn ít nhất một khung giờ trống!");
-            return;
-        }
-
-        // Lock check: User must be signed in
-        if (!currentUser) {
-            alert("Bạn cần Đăng Nhập / Đăng Ký để thực hiện đặt sân!");
-            // Hide booking modal and pop open the real auth modal
-            bookingModal.classList.remove('active');
-            openAuthModal('login');
-            return;
-        }
-
-        // No real backend endpoint exists to book an arbitrary homepage court by id —
-        // hand off to the real search/booking page instead of faking success.
-        window.location.href = (window.contextPath || '') + '/customer/dat-san';
-    });
-
-
-    // ==========================================================================
-    // 9. BOOKING CART ITEM DRAWERS LIST
-    // ==========================================================================
-    
-    const cartEmptyState = document.getElementById('cart-empty-state');
-    const cartItemsList = document.getElementById('cart-items-list');
-
-    function updateCartBadge() {
-        const badges = document.querySelectorAll('.cart-badge');
-        badges.forEach(badge => {
-            badge.textContent = cartBookings.length;
-        });
-    }
-    updateCartBadge();
-
-    function renderCartBookings() {
-        if (cartBookings.length === 0) {
-            cartEmptyState.style.display = 'flex';
-            cartItemsList.style.display = 'none';
-        } else {
-            cartEmptyState.style.display = 'none';
-            cartItemsList.style.display = 'flex';
-            
-            cartItemsList.innerHTML = '';
-            cartBookings.forEach(booking => {
-                const item = document.createElement('div');
-                item.className = "booking-cart-item";
-                
-                // Formatted slots text
-                const slotsTxt = booking.slots.map(s => `\${s}:00`).join(', ');
-
-                item.innerHTML = `
-                    <button class="delete-item-btn" aria-label="Delete Booking" data-id="\${booking.id}">
-                        <i class="fa-regular fa-trash-can"></i>
-                    </button>
-                    <h4 class="cart-item-title">\${booking.courtName}</h4>
-                    <div class="cart-item-meta">
-                        <span><i class="fa-regular fa-calendar"></i> Ngày đặt: \${booking.date}</span>
-                        <span><i class="fa-regular fa-clock"></i> Khung giờ: \${slotsTxt}</span>
-                    </div>
-                    <span class="cart-item-price">Tổng cộng: $\${parseFloat(booking.totalPrice).toFixed(2)}</span>
-                `;
-                
-                // Remove button logic
-                item.querySelector('.delete-item-btn').addEventListener('click', (e) => {
-                    const id = e.currentTarget.dataset.id;
-                    cartBookings = cartBookings.filter(b => b.id !== id);
-                    localStorage.setItem('cartBookings', JSON.stringify(cartBookings));
-                    updateCartBadge();
-                    renderCartBookings();
-                });
-
-                cartItemsList.appendChild(item);
-            });
-        }
-    }
-
-
-    // ==========================================================================
-    // 10. SCROLL TO TOP ACTION
+    // 8. SCROLL TO TOP ACTION
     // ==========================================================================
     
     const scrollTopBtn = document.getElementById('scroll-to-top');
