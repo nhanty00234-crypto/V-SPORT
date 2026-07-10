@@ -89,7 +89,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         updateExpiredBookingsAndFields();
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT * FROM LichDatSan WHERE AccountID = ? AND IsDeleted = 0 ORDER BY NgayDat DESC, GioBatDau DESC";
+        String sql = "SELECT * FROM LichDatSan WHERE AccountID = ? AND IsDeleted = 0 ORDER BY ISNULL(CreatedTime, CAST('1900-01-01' AS DATETIME)) DESC, DatSanID DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);

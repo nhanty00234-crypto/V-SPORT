@@ -278,13 +278,13 @@
     </footer>
 
     <!-- ════ HISTORY MODAL ════ -->
-    <div id="historyModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+    <div id="historyModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
         <div id="historyPanel" class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
             <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <h3 class="font-bold text-lg flex items-center gap-2">
                     <span class="material-symbols-outlined">history</span> Lịch sử đặt sân của bạn
                 </h3>
-                <button onclick="closeHistoryModal()" class="text-white/80 hover:text-white p-1">
+                <button type="button" onclick="closeHistoryModal()" class="text-white/80 hover:text-white p-1">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -320,14 +320,14 @@
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold sticky top-0 z-10">
                                 <th class="p-4 bg-slate-50">Chi tiết sân</th>
-                                <th class="p-4 bg-slate-50 text-center">Thời gian</th>
+                                <th class="p-4 bg-slate-50 text-center">Thời gian chơi</th>
                                 <th class="p-4 bg-slate-50 text-right">Chi phí</th>
                                 <th class="p-4 bg-slate-50 text-center">Trạng thái</th>
                                 <th class="p-4 bg-slate-50 text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
-                            <c:forEach var="lich" items="${dsLich}">
+                            <c:forEach var="lich" items="${dsLich}" varStatus="lichStatus">
                                 <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
                                 <c:set var="branchHienThi" value="" />
                                 <c:forEach var="s" items="${dsSan}">
@@ -340,15 +340,28 @@
                                         </c:forEach>
                                     </c:if>
                                 </c:forEach>
-                                <tr class="hover:bg-slate-50/40 transition-colors">
+                                <tr class="hover:bg-slate-50/40 transition-colors${lichStatus.first ? ' ring-1 ring-inset ring-emerald-200' : ''}">
                                     <td class="p-4">
-                                        <span class="font-extrabold text-sm text-slate-900 block">${tenSanHienThi}</span>
+                                        <div class="flex items-start gap-1.5 flex-wrap mb-0.5">
+                                            <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
+                                            <c:if test="${lichStatus.first}">
+                                                <span class="inline-flex items-center gap-0.5 bg-emerald-600 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-full tracking-wide">
+                                                    <span class="material-symbols-outlined text-[10px]">new_releases</span>MỚI NHẤT
+                                                </span>
+                                            </c:if>
+                                        </div>
                                         <span class="text-[10px] text-slate-400 font-bold flex items-center gap-1">
                                             <c:if test="${not empty branchHienThi}">
                                                 <span class="material-symbols-outlined text-[12px]">location_on</span>${branchHienThi} &middot;
                                             </c:if>
-                                            Mã ĐS: #${lich.datSanId}
+                                            Mã #${lich.datSanId}
                                         </span>
+                                        <c:if test="${not empty lich.createdTime}">
+                                            <span class="text-[10px] text-slate-400 font-bold flex items-center gap-0.5 mt-0.5">
+                                                <span class="material-symbols-outlined text-[11px]">schedule</span>
+                                                Đặt lúc: ${fn:replace(fn:substring(lich.createdTime.toString(), 0, 16), 'T', ' ')}
+                                            </span>
+                                        </c:if>
                                     </td>
                                     <td class="p-4 text-center">
                                         <span class="font-bold text-slate-700 block">${lich.ngayDat}</span>
@@ -359,26 +372,46 @@
                                     </td>
                                     <td class="p-4 text-center">
                                         <c:choose>
-                                            <c:when test="${lich.trangThai == 'Chờ xác nhận'}"><span class="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Chờ duyệt</span></c:when>
+                                            <c:when test="${lich.trangThai == 'Chờ thanh toán'}">
+                                                <span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[11px]">hourglass_top</span>Chờ TT
+                                                </span>
+                                                <span class="block text-[9px] text-blue-400 font-bold mt-0.5">Chờ thanh toán PayOS</span>
+                                            </c:when>
+                                            <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
+                                                <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Chờ duyệt</span>
+                                                <span class="block text-[9px] text-amber-400 font-bold mt-0.5">Đợi sân xác nhận</span>
+                                            </c:when>
                                             <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}"><span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã duyệt</span></c:when>
                                             <c:when test="${lich.trangThai == 'Đang sử dụng'}"><span class="bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đang đá</span></c:when>
-                                            <c:when test="${lich.trangThai == 'Đã hủy'}"><span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã hủy</span></c:when>
+                                            <c:when test="${lich.trangThai == 'Đã hoàn thành'}"><span class="bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Hoàn thành</span></c:when>
+                                            <c:when test="${lich.trangThai == 'Đã hủy'}">
+                                                <span class="bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[11px]">cancel</span>Đã hủy
+                                                </span>
+                                            </c:when>
                                             <c:otherwise><span class="bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">${lich.trangThai}</span></c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td class="p-4 text-center">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
-                                                <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu này?');" class="inline-block">
+                                                <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn chắc chắn muốn hủy lịch đặt sân này?');" class="inline-block">
                                                     <input type="hidden" name="id" value="${lich.datSanId}">
-                                                    <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px]">Hủy</button>
+                                                    <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px]">Hủy đặt sân</button>
+                                                </form>
+                                            </c:if>
+                                            <c:if test="${lich.trangThai == 'Chờ thanh toán'}">
+                                                <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn thanh toán PayOS này?');" class="inline-block">
+                                                    <input type="hidden" name="id" value="${lich.datSanId}">
+                                                    <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px]">Hủy thanh toán</button>
                                                 </form>
                                             </c:if>
                                             <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
                                                 <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 text-[10px]">Dịch vụ</button>
                                             </c:if>
-                                            <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px] line-through">Không khả dụng</span></c:if>
-                                            <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-green-600 text-[10px] font-bold">Hoàn thành</span></c:if>
+                                            <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px]">—</span></c:if>
+                                            <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-teal-600 text-[10px] font-bold">✓ Đã chơi</span></c:if>
                                         </div>
                                     </td>
                                 </tr>
@@ -397,7 +430,7 @@
     </div>
 
     <!-- ════ BOOKING MODAL FLOW ════ -->
-    <div id="bookingModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+    <div id="bookingModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
         <!-- Step 1: Form -->
         <div id="bookingFormPanel" class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
             <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 flex items-center justify-between text-white">
@@ -539,7 +572,7 @@
     <jsp:include page="/common/footer.jsp" />
 
     <!-- ════ CUSTOMER SERVICE MODAL ════ -->
-    <div id="customerServiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+    <div id="customerServiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[210] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
         <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
             <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 flex items-center justify-between text-white">
                 <h3 class="font-bold text-lg flex items-center gap-2"><span class="material-symbols-outlined">coffee</span> Đặt thêm Dịch vụ / Nước uống</h3>

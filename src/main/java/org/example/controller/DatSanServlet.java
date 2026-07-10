@@ -682,6 +682,8 @@ public class DatSanServlet extends HttpServlet {
      */
     private void handleHuyDatSan(HttpServletRequest req, HttpServletResponse resp,
             HttpSession session, TaiKhoan user) throws IOException {
+        LOGGER.info(String.format("[huy-dat-san] request nhận: servletPath=%s, pathInfo=%s, accountId=%d, rawId=%s",
+                req.getServletPath(), req.getPathInfo(), user.getAccountId(), req.getParameter("id")));
         try {
             int id = Integer.parseInt(req.getParameter("id"));
             Lichdatsan lich = lichDatSanDAO.getLichById(id);
@@ -696,14 +698,39 @@ public class DatSanServlet extends HttpServlet {
             } else if ("Chờ xác nhận".equals(lich.getTrangThai())) {
                 LocalDateTime startDateTime = LocalDateTime.of(lich.getNgayDat(), lich.getGioBatDau());
                 if (LocalDateTime.now().plusHours(6).isAfter(startDateTime)) {
-                    session.setAttribute("error", "Không thể hủy đơn đặt sân. Khách hàng chỉ được phép hủy trước giờ bắt đầu tối thiểu 6 tiếng.");
+                    session.setAttribute("error", "Không thể hủy lịch đặt sân này vì còn dưới 6 tiếng trước giờ chơi.");
                 } else {
                     lichDatSanDAO.updateTrangThai(id, "Đã hủy");
                     session.setAttribute("message", "Đã hủy yêu cầu đặt sân #" + id + " thành công.");
                 }
+            } else if ("Chờ thanh toán".equals(lich.getTrangThai())) {
+                // Hủy đơn chờ thanh toán: dùng SQL với điều kiện AccountID + TrangThai để đảm bảo an toàn
+                try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
+                    String sql = "UPDATE LichDatSan " +
+                            "SET TrangThai = N'Đã hủy', " +
+                            "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Khách tự hủy đơn chờ thanh toán]') " +
+                            "WHERE DatSanID = ? AND AccountID = ? AND TrangThai = N'Chờ thanh toán'";
+                    try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                        ps.setInt(1, id);
+                        ps.setInt(2, user.getAccountId());
+                        int rows = ps.executeUpdate();
+                        if (rows > 0) {
+                            session.setAttribute("message", "Đã hủy đơn thanh toán PayOS thành công.");
+                            LOGGER.info(String.format("[huy-dat-san] THANH CONG: AccountID=%d, DatSanID=%d, rowsUpdated=%d",
+                                    user.getAccountId(), id, rows));
+                        } else {
+                            session.setAttribute("error", "Không thể hủy đơn này. Đơn có thể đã được xử lý, đã hủy hoặc không thuộc về bạn.");
+                            LOGGER.info(String.format("[huy-dat-san] THAT BAI (rows=0): AccountID=%d, DatSanID=%d, trangThaiHienTai=%s",
+                                    user.getAccountId(), id, lich.getTrangThai()));
+                        }
+                    }
+                } catch (java.sql.SQLException e) {
+                    LOGGER.log(Level.WARNING, "Lỗi SQL khi hủy đơn chờ thanh toán ID=" + id, e);
+                    session.setAttribute("error", "Hệ thống gặp lỗi khi hủy đơn. Vui lòng thử lại.");
+                }
             } else {
                 session.setAttribute("error",
-                        "Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận'. " +
+                        "Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận' hoặc 'Chờ thanh toán'. " +
                                 "Đơn của bạn hiện đang ở trạng thái '" + lich.getTrangThai() + "'.");
             }
 
@@ -711,7 +738,7 @@ public class DatSanServlet extends HttpServlet {
             session.setAttribute("error", "Yêu cầu không hợp lệ.");
         }
 
-        resp.sendRedirect(req.getContextPath() + "/customer/lich-su-dat-san");
+        resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
     }
 
     // =========================================================================
