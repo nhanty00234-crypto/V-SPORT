@@ -3,6 +3,7 @@ package org.example.service;
 import vn.payos.PayOS;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.webhooks.WebhookData;
 
 public class PayOSService {
 
@@ -52,5 +53,16 @@ public class PayOSService {
                 .build();
         CreatePaymentLinkResponse result = payOS.paymentRequests().create(request);
         return result.getCheckoutUrl();
+    }
+
+    /**
+     * Xác thực webhook PayOS bằng SDK (kiểm tra chữ ký HMAC nội bộ).
+     * Ném vn.payos.exception.PayOSException (unchecked) nếu chữ ký không hợp lệ.
+     *
+     * @param rawBody raw JSON body của request webhook
+     * @return WebhookData đã được xác thực (orderCode, amount, code, ...)
+     */
+    public WebhookData verifyWebhook(String rawBody) {
+        return payOS.webhooks().verify(rawBody);
     }
 }
