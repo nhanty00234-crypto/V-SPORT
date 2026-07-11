@@ -885,83 +885,74 @@
 
 <!-- Testimonials -->
 <section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20 md:py-24 overflow-hidden">
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-<div class="scroll-reveal">
-<span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-3">VỀ CHÚNG TÔI</span>
-<h2 class="font-headline-lg text-headline-lg text-on-surface uppercase mb-10">CẢM NHẬN KHÁCH HÀNG</h2>
-<div class="flex gap-3 mb-6" id="testi-avatars">
-<button type="button" onclick="vsGoToTesti(0)" data-testi-avatar="0" class="relative w-[72px] h-[72px] rounded-full border-[3px] border-on-surface p-0 cursor-pointer transition-transform">
-<img class="w-full h-full rounded-full object-cover" alt="Khách hàng V-SPORT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZg3AoA6AEoYuJHVQm8eDr5_KJaEfoJf7IjdPd909yrQ13UzEGmS35rBkMz0NwQOhLroGtgtIorWGaQPbbnP8Xa2XStS-P-cmIL-vqMgEURd0zzwlzz1y_zQlFrySB7HQ4WAPARw_XmR3UaR9FRdrYfaWh80dCqaRmPjz4ORCR9FlkLLTOPsFqacukfbrJz2iMM6VF70MZvJKy90-1vSHtvTC9RXHXAsM2VpPZUyDqTKlwu266YHP3"/>
-<span data-testi-badge="0" class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-primary-container text-on-surface text-xs font-bold flex items-center justify-center">&rdquo;</span>
-</button>
-<button type="button" onclick="vsGoToTesti(1)" data-testi-avatar="1" class="relative w-[72px] h-[72px] rounded-full border-[3px] border-transparent p-0 cursor-pointer opacity-50 scale-90 transition-transform">
-<img class="w-full h-full rounded-full object-cover" alt="Khách hàng V-SPORT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmu54KJzg42CGnwOVK8JMJBxKSL1NcQEXwiHq8SJYlqu30VIukeHAqKJtjY2bV5lFizEZxFP5u0Whse3W0e15EEvg8mR7tJVkFjIGve73Iruzu4YKLmGeiH66TWo5MtiU4qJHB5TIZm0UL_cxsN-FWl5edcAhb4Zl2iguPsea-dWHZyGX9jFl8o_ZGMUdEkVF9NVCxJ3lVmosITKh75vSmni9xwBGFA0cHwF9nOdWeYEejDRSGoMdm"/>
-</button>
-<button type="button" onclick="vsGoToTesti(2)" data-testi-avatar="2" class="relative w-[72px] h-[72px] rounded-full border-[3px] border-transparent p-0 cursor-pointer opacity-50 scale-90 transition-transform">
-<img class="w-full h-full rounded-full object-cover" alt="Khách hàng V-SPORT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv06aMFJYR3sOdfCnuOAUtbt0Te9kIQPzs6DKqRclM1BzX3LmhysNMm2hlM0rzDy8peJBU4ry2QyoGpSsraCkCvwTJj3-x9TYbNr_3-g24eEwE2hPH7P-f5uSTEfpsX8XQc20eZ3PsvmJSuDU5g8thzC-bX2tzkpiRsJvoO4PVrulDkc_bv56QTh_aQgsUUdad5MYauX07tx_B-YdvNqGYBBzlWub22aw_1WM8CkuN37jaLA921-kW"/>
-</button>
-</div>
-<h4 id="testi-name" class="font-label-lg text-label-lg text-on-surface uppercase">NGUYỄN VĂN AN</h4>
-<p id="testi-location" class="font-label-md text-label-md text-on-surface-variant">Hà Nội, Việt Nam</p>
-</div>
-<div class="flex flex-col justify-center scroll-reveal delay-150">
-<div id="testi-quote" class="font-body-lg text-body-lg text-on-surface-variant space-y-4 mb-10">
-<p>V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ.</p>
-<p>Trải nghiệm những trận đấu thắng hoa cùng bạn bè, gia đình — mọi lúc, mọi nơi, chỉ với vài thao tác đơn giản trên V-SPORT.</p>
-</div>
-<div class="flex items-center gap-2">
-<button type="button" onclick="vsTestiPrev()" aria-label="Trước" class="w-11 h-11 rounded-full border border-outline flex items-center justify-center hover:bg-on-surface hover:text-white hover:border-on-surface transition-colors">
-<span class="material-symbols-outlined text-[18px]">arrow_back</span>
-</button>
-<button type="button" onclick="vsTestiNext()" aria-label="Tiếp" class="w-11 h-11 rounded-full border border-outline flex items-center justify-center hover:bg-on-surface hover:text-white hover:border-on-surface transition-colors">
-<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-</button>
-<div id="testi-dots" class="flex gap-1.5 ml-2">
-<span data-testi-dot="0" class="w-1.5 h-1.5 rounded-full bg-on-surface"></span>
-<span data-testi-dot="1" class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
-<span data-testi-dot="2" class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
-</div>
-</div>
-</div>
-</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+        <!-- Left Side: Header & Avatars -->
+        <div class="scroll-reveal flex flex-col justify-start">
+            <span class="font-['Barlow_Condensed'] text-[14px] font-bold text-neutral-400 uppercase tracking-[0.15em] block mb-2">ABOUT US</span>
+            <h2 class="font-['Barlow_Condensed'] text-[48px] font-bold text-neutral-900 uppercase leading-[1.1] mb-8">TESTIMONIALS</h2>
+            
+            <!-- Avatars & Dynamic Name Block -->
+            <div class="flex flex-col items-start gap-4">
+                <!-- Avatars Row -->
+                <div class="flex gap-4 items-center" id="testi-avatars">
+                    <button type="button" onclick="vsGoToTesti(0)" data-testi-avatar="0" class="relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer transition-all duration-300 outline-none">
+                        <img class="w-full h-full rounded-full object-cover" alt="Henry Phillips" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZg3AoA6AEoYuJHVQm8eDr5_KJaEfoJf7IjdPd909yrQ13UzEGmS35rBkMz0NwQOhLroGtgtIorWGaQPbbnP8Xa2XStS-P-cmIL-vqMgEURd0zzwlzz1y_zQlFrySB7HQ4WAPARw_XmR3UaR9FRdrYfaWh80dCqaRmPjz4ORCR9FlkLLTOPsFqacukfbrJz2iMM6VF70MZvJKy90-1vSHtvTC9RXHXAsM2VpPZUyDqTKlwu266YHP3"/>
+                        <span data-testi-badge="0" class="absolute -bottom-1 -right-1 w-[20px] h-[20px] rounded-full bg-[#afd639] border border-white flex items-center justify-center shadow-sm">
+                            <svg class="w-2.5 h-2.5 text-black font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </span>
+                    </button>
+                    <button type="button" onclick="vsGoToTesti(1)" data-testi-avatar="1" class="relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer opacity-40 scale-[0.85] transition-all duration-300 outline-none">
+                        <img class="w-full h-full rounded-full object-cover" alt="Blonde Woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmu54KJzg42CGnwOVK8JMJBxKSL1NcQEXwiHq8SJYlqu30VIukeHAqKJtjY2bV5lFizEZxFP5u0Whse3W0e15EEvg8mR7tJVkFjIGve73Iruzu4YKLmGeiH66TWo5MtiU4qJHB5TIZm0UL_cxsN-FWl5edcAhb4Zl2iguPsea-dWHZyGX9jFl8o_ZGMUdEkVF9NVCxJ3lVmosITKh75vSmni9xwBGFA0cHwF9nOdWeYEejDRSGoMdm"/>
+                        <span data-testi-badge="1" class="hidden absolute -bottom-1 -right-1 w-[20px] h-[20px] rounded-full bg-[#afd639] border border-white flex items-center justify-center shadow-sm">
+                            <svg class="w-2.5 h-2.5 text-black font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </span>
+                    </button>
+                    <button type="button" onclick="vsGoToTesti(2)" data-testi-avatar="2" class="relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer opacity-40 scale-[0.85] transition-all duration-300 outline-none">
+                        <img class="w-full h-full rounded-full object-cover" alt="Visor Woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv06aMFJYR3sOdfCnuOAUtbt0Te9kIQPzs6DKqRclM1BzX3LmhysNMm2hlM0rzDy8peJBU4ry2QyoGpSsraCkCvwTJj3-x9TYbNr_3-g24eEwE2hPH7P-f5uSTEfpsX8XQc20eZ3PsvmJSuDU5g8thzC-bX2tzkpiRsJvoO4PVrulDkc_bv56QTh_aQgsUUdad5MYauX07tx_B-YdvNqGYBBzlWub22aw_1WM8CkuN37jaLA921-kW"/>
+                        <span data-testi-badge="2" class="hidden absolute -bottom-1 -right-1 w-[20px] h-[20px] rounded-full bg-[#afd639] border border-white flex items-center justify-center shadow-sm">
+                            <svg class="w-2.5 h-2.5 text-black font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </span>
+                    </button>
+                </div>
+                
+                <!-- Active Info Block -->
+                <div class="mt-2 min-h-[50px]">
+                    <h4 id="testi-name" class="font-['Barlow_Condensed'] text-[15px] font-bold text-neutral-900 uppercase tracking-wide m-0">HENRY PHILLIPS</h4>
+                    <p id="testi-location" class="font-['DM_Sans'] text-[12px] text-neutral-400 m-0">Sacramento</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Testimonial Text & Navigation -->
+        <div class="flex flex-col justify-center scroll-reveal delay-150">
+            <div id="testi-quote" class="font-['DM_Sans'] text-[16px] leading-[1.65] text-neutral-600 space-y-4 mb-8">
+                <p>Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit fugit, sed. Beatae vitae dicta. Adipiscing elit, sed do eiusmod tempor incididunt.</p>
+                <p>Labore et dolore magna aliqua ut enim ad minim. Adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="vsTestiPrev()" aria-label="Trước" class="w-[42px] h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-all duration-300 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                </button>
+                <button type="button" onclick="vsTestiNext()" aria-label="Tiếp" class="w-[42px] h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-all duration-300 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
 </section>
 
 <!-- Make Your Game -->
 <section class="py-16 md:py-24 text-center overflow-hidden">
-<div class="max-w-container-max mx-auto px-margin-mobile scroll-reveal">
-<h2 class="font-display-lg text-[10vw] leading-none text-on-surface uppercase font-bold tracking-tighter flex items-center justify-center flex-wrap gap-2">
-                NÂNG T<span class="inline-block w-[8vw] h-[8vw] mx-1 relative align-middle animate-float" style="filter:drop-shadow(0 8px 20px rgba(0,0,0,0.25));">
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-<defs>
-<radialGradient id="vsBallBase" cx="40%" cy="35%" r="60%">
-<stop offset="0%" stop-color="#d6f040"/>
-<stop offset="40%" stop-color="#a8cc00"/>
-<stop offset="75%" stop-color="#7aaa00"/>
-<stop offset="100%" stop-color="#4d7a00"/>
-</radialGradient>
-<radialGradient id="vsBallShine" cx="38%" cy="30%" r="35%">
-<stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
-<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-</radialGradient>
-<radialGradient id="vsBallShadow" cx="55%" cy="65%" r="45%">
-<stop offset="0%" stop-color="rgba(0,0,0,0.30)"/>
-<stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-</radialGradient>
-<clipPath id="vsBallClip">
-<circle cx="100" cy="100" r="96"/>
-</clipPath>
-</defs>
-<circle cx="100" cy="100" r="96" fill="url(#vsBallBase)"/>
-<g clip-path="url(#vsBallClip)" fill="none" stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.75">
-<path d="M 60 30 Q 110 80 60 130 Q 30 160 55 185"/>
-<path d="M 140 30 Q 90 80 140 130 Q 170 160 145 185"/>
-</g>
-<circle cx="100" cy="100" r="96" fill="url(#vsBallShadow)"/>
-<ellipse cx="78" cy="68" rx="28" ry="18" fill="url(#vsBallShine)" transform="rotate(-30 78 68)"/>
-</svg>
-</span>ẦM GAME
-            </h2>
-</div>
+    <div class="max-w-container-max mx-auto px-margin-mobile scroll-reveal">
+        <h2 class="font-['Barlow_Condensed'] text-[9.5vw] font-bold uppercase leading-none text-neutral-900 tracking-tight flex items-center justify-center flex-wrap select-none">
+            MAKE YOUR
+            <span class="inline-block w-[7.8vw] h-[7.8vw] mx-[1.5vw] relative align-middle" style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));">
+                <img src="<%= ctx %>/resources/tennis_ball.png" alt="Tennis Ball" class="w-full h-full object-contain animate-float" />
+            </span>
+            GAME
+        </h2>
+    </div>
 </section>
 
 <!-- Programs -->
@@ -1043,27 +1034,27 @@
     (function() {
         var vsTestimonials = [
             {
-                name: 'NGUYỄN VĂN AN',
-                location: 'Hà Nội, Việt Nam',
+                name: 'HENRY PHILLIPS',
+                location: 'Sacramento',
                 quote: [
-                    'V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ.',
-                    'Trải nghiệm những trận đấu thắng hoa cùng bạn bè, gia đình — mọi lúc, mọi nơi, chỉ với vài thao tác đơn giản trên V-SPORT.'
+                    'Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit fugit, sed. Beatae vitae dicta. Adipiscing elit, sed do eiusmod tempor incididunt.',
+                    'Labore et dolore magna aliqua ut enim ad minim. Adipiscing elit, sed do eiusmod tempor incididunt ut labore.'
                 ]
             },
             {
-                name: 'TRẦN THỊ BÍCH',
-                location: 'TP. Hồ Chí Minh, Việt Nam',
+                name: 'SARAH JENKINS',
+                location: 'Los Angeles',
                 quote: [
-                    'Đặt sân trên V-SPORT cực kỳ đơn giản, chỉ mất vài phút là xong. Giao diện thân thiện, thanh toán PayOS an toàn và xác nhận tức thì.',
-                    'Tôi đã giới thiệu cho cả nhóm bạn cùng dùng và ai cũng hài lòng với trải nghiệm đặt sân tiện lợi này.'
+                    'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+                    'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.'
                 ]
             },
             {
-                name: 'LÊ MINH TUẤN',
-                location: 'Đà Nẵng, Việt Nam',
+                name: 'AMANDA CLARK',
+                location: 'Miami',
                 quote: [
-                    'Ứng dụng V-SPORT giúp tôi tiết kiệm rất nhiều thời gian khi đặt sân cầu lông cuối tuần. Hệ thống luôn cập nhật lịch sân theo thời gian thực.',
-                    'Dịch vụ hỗ trợ khách hàng nhiệt tình, chuyên nghiệp. Rất đáng để trải nghiệm!'
+                    'Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.',
+                    'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.'
                 ]
             }
         ];
@@ -1075,13 +1066,23 @@
             document.getElementById('testi-name').textContent = t.name;
             document.getElementById('testi-location').textContent = t.location;
             document.getElementById('testi-quote').innerHTML = t.quote.map(function(p) { return '<p>' + p + '</p>'; }).join('');
-            document.querySelectorAll('[data-testi-dot]').forEach(function(dot) {
-                var isActive = Number(dot.getAttribute('data-testi-dot')) === vsTestiIndex;
-                dot.className = 'w-1.5 h-1.5 rounded-full ' + (isActive ? 'bg-on-surface' : 'bg-outline-variant');
-            });
+            
             document.querySelectorAll('[data-testi-avatar]').forEach(function(btn) {
                 var isActive = Number(btn.getAttribute('data-testi-avatar')) === vsTestiIndex;
-                btn.className = 'relative w-[72px] h-[72px] rounded-full border-[3px] p-0 cursor-pointer transition-transform ' + (isActive ? 'border-on-surface' : 'border-transparent opacity-50 scale-90');
+                if (isActive) {
+                    btn.className = 'relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer transition-all duration-300 outline-none';
+                } else {
+                    btn.className = 'relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer opacity-40 scale-[0.85] transition-all duration-300 outline-none';
+                }
+            });
+            
+            document.querySelectorAll('[data-testi-badge]').forEach(function(badge) {
+                var isActive = Number(badge.getAttribute('data-testi-badge')) === vsTestiIndex;
+                if (isActive) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
             });
         };
         window.vsTestiPrev = function() { vsGoToTesti(vsTestiIndex - 1); };
