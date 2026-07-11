@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V-SPORT — Book Your Court</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+    <div class="header-inner">
+        <a href="#" class="logo">
+            <span class="logo-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M5 6.5c3 2 3 9 0 11M19 6.5c-3 2-3 9 0 11"/>
+                </svg>
+            </span>
+            <span class="logo-word">V-SPORT</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Main">
+            <ul>
+                <li><a href="#" class="is-active">Home</a></li>
+                <li><a href="#">Book a Court</a></li>
+                <li><a href="#">Events</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-icons">
+            <button type="button" aria-label="Account">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>
+            </button>
+            <button type="button" aria-label="My bookings">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+            </button>
+            <button type="button" aria-label="Search">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+            </button>
+            <button type="button" aria-label="Menu">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="5" cy="5" r="1.7"/><circle cx="12" cy="5" r="1.7"/><circle cx="19" cy="5" r="1.7"/><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/><circle cx="5" cy="19" r="1.7"/><circle cx="12" cy="19" r="1.7"/><circle cx="19" cy="19" r="1.7"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main>
+
+    <!-- ============ HERO: 3 PANELS ============ -->
+    <section class="hero" aria-label="Intro">
+        <div class="hero-panel hero-panel--img hero-panel--left">
+            <span class="img-slot-label">Image slot</span>
+        </div>
+
+        <div class="hero-panel hero-panel--cta">
+            <div class="hero-cta-content">
+                <span class="hero-eyebrow">Sports Court Booking</span>
+                <h1 class="hero-title">Find Your Perfect Court<br>Book In Seconds</h1>
+                <p class="hero-desc">Discover nearby courts, choose your time slot, and confirm your booking in just a few steps.</p>
+                <span class="hero-btn-mask"><a href="#" class="hero-btn">Book a Court</a></span>
+            </div>
+        </div>
+
+        <div class="hero-panel hero-panel--img hero-panel--right">
+            <span class="img-slot-label">Image slot</span>
+        </div>
+    </section>
+
+    <!-- ============ PROMO MARQUEE ============ -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+            <span>Fast booking</span><i>•</i>
+            <span>Secure court hold</span><i>•</i>
+            <span>PayOS payment</span><i>•</i>
+            <span>Instant confirmation</span><i>•</i>
+            <span>Easy booking history</span><i>•</i>
+        </div>
+    </div>
+
+    <!-- ============ STATS ============ -->
+    <section class="stats" aria-label="V-SPORT in numbers">
+        <div class="stats-inner">
+            <div class="stat reveal">
+                <span class="stat-number">3K+</span>
+                <span class="stat-label">Active players</span>
+            </div>
+            <div class="stat reveal">
+                <span class="stat-number">60</span>
+                <span class="stat-label">Available courts</span>
+            </div>
+            <div class="stat reveal">
+                <span class="stat-number">8K</span>
+                <span class="stat-label">Successful bookings</span>
+            </div>
+            <div class="stat reveal">
+                <span class="stat-number">12K</span>
+                <span class="stat-label">Members</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ SPORTS CATEGORIES ============ -->
+    <section class="categories" aria-label="Sports">
+        <div class="section-head reveal">
+            <span class="section-eyebrow">Pick your game</span>
+            <h2 class="section-title">Courts For Every Sport</h2>
+        </div>
+
+        <div class="category-grid">
+            <article class="category-card reveal">
+                <div class="category-media"><span class="img-slot-label">Image slot</span></div>
+                <h3 class="category-name">Football</h3>
+                <p class="category-desc">5-a-side and 7-a-side turf pitches with evening floodlights.</p>
+                <a href="#" class="category-link">Explore courts</a>
+            </article>
+            <article class="category-card reveal">
+                <div class="category-media"><span class="img-slot-label">Image slot</span></div>
+                <h3 class="category-name">Badminton</h3>
+                <p class="category-desc">Indoor wooden courts with pro-grade nets and lighting.</p>
+                <a href="#" class="category-link">Explore courts</a>
+            </article>
+            <article class="category-card reveal">
+                <div class="category-media"><span class="img-slot-label">Image slot</span></div>
+                <h3 class="category-name">Tennis</h3>
+                <p class="category-desc">Hard courts maintained daily, singles or doubles ready.</p>
+                <a href="#" class="category-link">Explore courts</a>
+            </article>
+            <article class="category-card reveal">
+                <div class="category-media"><span class="img-slot-label">Image slot</span></div>
+                <h3 class="category-name">Pickleball</h3>
+                <p class="category-desc">The fastest-growing game in town — courts for all levels.</p>
+                <a href="#" class="category-link">Explore courts</a>
+            </article>
+            <article class="category-card reveal">
+                <div class="category-media"><span class="img-slot-label">Image slot</span></div>
+                <h3 class="category-name">Table Tennis</h3>
+                <p class="category-desc">Climate-controlled halls with tournament tables.</p>
+                <a href="#" class="category-link">Explore courts</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- ============ BOOKING STEPS ============ -->
+    <section class="steps" aria-label="How booking works">
+        <div class="section-head reveal">
+            <span class="section-eyebrow">How it works</span>
+            <h2 class="section-title">Book Your Court In 3 Steps</h2>
+        </div>
+
+        <ol class="steps-grid">
+            <li class="step reveal">
+                <span class="step-num">1</span>
+                <h3 class="step-name">Choose Sport</h3>
+                <p class="step-desc">Pick from football, badminton, tennis, pickleball, or table tennis.</p>
+            </li>
+            <li class="step reveal">
+                <span class="step-num">2</span>
+                <h3 class="step-name">Pick Court &amp; Time</h3>
+                <p class="step-desc">See live availability and hold the slot that fits your schedule.</p>
+            </li>
+            <li class="step reveal">
+                <span class="step-num">3</span>
+                <h3 class="step-name">Pay &amp; Play</h3>
+                <p class="step-desc">Pay securely with PayOS and get instant confirmation.</p>
+            </li>
+        </ol>
+    </section>
+
+</main>
+
+<footer class="site-footer">
+    <p>V-SPORT — Sports court booking, made simple.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

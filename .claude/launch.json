@@ -14,6 +14,12 @@
       "port": 8791
     },
     {
+      "name": "prototype",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8793", "--directory", "/home/nhan/Downloads/V-SPORT/prototype"],
+      "port": 8793
+    },
+    {
       "name": "vsport-tomcat-preview",
       "runtimeExecutable": "bash",
       "runtimeArgs": ["/tmp/claude-1000/-home-nhan-Downloads-V-SPORT/7ef0981e-9f2b-4be9-b29b-ef61d064146c/scratchpad/run-tomcat-preview.sh"],
