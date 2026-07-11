@@ -95,169 +95,8 @@
             <!-- Main Content — info first on mobile, booking widget second -->
             <div class="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
-                <!-- BOOKING WIDGET — order-2 on mobile (below info), order-2 on desktop (right sidebar) -->
-                <div class="w-full lg:w-[38%] order-2 lg:order-2" id="booking-widget">
-                    <div class="lg:sticky lg:top-24 bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[#e0e3e5] p-4 md:p-5 flex flex-col gap-4">
-
-                        <!-- Price Header -->
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <span class="text-2xl font-bold text-[#191c1e]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ</span>
-                                <span class="text-sm text-[#6d7b6c]">/giờ</span>
-                            </div>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                  ${san.trangThai == 'Sẵn sàng' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
-                                ${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}
-                            </span>
-                        </div>
-
-                        <!-- Flash messages -->
-                        <c:if test="${not empty sessionScope.error}">
-                            <div class="p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg flex items-start gap-2">
-                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">error</span>
-                                <span>${sessionScope.error}</span>
-                            </div>
-                            <% session.removeAttribute("error"); %>
-                        </c:if>
-                        <c:if test="${not empty sessionScope.message}">
-                            <div class="p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-lg flex items-start gap-2">
-                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">check_circle</span>
-                                <span>${sessionScope.message}</span>
-                            </div>
-                            <% session.removeAttribute("message"); %>
-                        </c:if>
-
-                        <form id="quick-booking-form" action="${pageContext.request.contextPath}/customer/dat-san" method="post" class="flex flex-col gap-4">
-                            <input type="hidden" name="sanId" value="${san.sanID}">
-                            <input type="hidden" name="gioBatDau" id="gioBatDau">
-                            <input type="hidden" name="gioKetThuc" id="gioKetThuc">
-                            <input type="hidden" name="ngayDat" id="ngayDat">
-
-                            <!-- Date Navigation -->
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-semibold text-[#191c1e]">Ngày đặt sân</label>
-                                <div class="flex items-center justify-between bg-green-50 border border-[#d1fae5] rounded-lg px-2 py-2">
-                                    <button type="button" id="prev-day-btn" onclick="prevDay()"
-                                            class="p-1 rounded-full hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[#4d7c0f]"
-                                            disabled aria-label="Ngày trước">
-                                        <span class="material-symbols-outlined text-[22px]">chevron_left</span>
-                                    </button>
-                                    <span id="date-display" class="text-sm font-semibold text-[#4d7c0f] select-none"></span>
-                                    <button type="button" onclick="nextDay()"
-                                            class="p-1 rounded-full hover:bg-green-100 transition-colors text-[#4d7c0f]"
-                                            aria-label="Ngày tiếp theo">
-                                        <span class="material-symbols-outlined text-[22px]">chevron_right</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Timeline Time Picker -->
-                            <div class="flex flex-col gap-2">
-                                <div class="flex justify-between items-center">
-                                    <label class="text-sm font-semibold text-[#191c1e]">Khung giờ</label>
-                                    <span class="text-xs text-[#6d7b6c]">${coSo.gioMoCua != null ? coSo.gioMoCua : '06:00'} – ${coSo.gioDongCua != null ? coSo.gioDongCua : '23:00'}</span>
-                                </div>
-
-                                <!-- Timeline bar -->
-                                <div id="tl-bar" role="group" aria-label="Chọn khung giờ đặt sân"></div>
-
-                                <!-- Hour labels -->
-                                <div id="tl-labels" class="flex justify-between text-[9px] sm:text-[10px] text-[#9ca3af] px-0.5 -mt-1 overflow-hidden"></div>
-
-                                <!-- Legend -->
-                                <div class="flex gap-3 text-[11px] text-[#6d7b6c]">
-                                    <span class="flex items-center gap-1.5">
-                                        <span class="inline-block w-3 h-3 rounded bg-green-50 border border-green-200 flex-shrink-0"></span>Trống
-                                    </span>
-                                    <span class="flex items-center gap-1.5">
-                                        <span class="inline-block w-3 h-3 rounded bg-red-100 border border-red-200 flex-shrink-0"></span>Đã đặt
-                                    </span>
-                                    <span class="flex items-center gap-1.5">
-                                        <span class="inline-block w-3 h-3 rounded bg-[#4d7c0f] flex-shrink-0"></span>Đang chọn
-                                    </span>
-                                </div>
-
-                                <!-- Instruction hint -->
-                                <p id="tl-hint" class="text-[11px] text-[#6d7b6c] text-center italic">
-                                    Nhấn vào thanh để chọn giờ bắt đầu
-                                </p>
-
-                                <!-- Selection display -->
-                                <div id="tl-selection-display" class="hidden bg-green-50 border border-green-200 rounded-lg px-3 py-2.5 flex items-center justify-between">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-[16px] text-[#4d7c0f]">schedule</span>
-                                        <span id="tl-sel-text" class="text-sm font-semibold text-[#4d7c0f]"></span>
-                                    </div>
-                                    <button type="button" onclick="resetSelection()"
-                                            class="text-[11px] text-[#6d7b6c] hover:text-red-500 transition-colors">
-                                        Xóa
-                                    </button>
-                                </div>
-
-                                <div id="overlap-warning" class="hidden bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-xs flex gap-2 items-start">
-                                    <span class="material-symbols-outlined text-[15px] mt-0.5 shrink-0">warning</span>
-                                    <span id="overlap-warning-text">Trùng lịch đặt sân!</span>
-                                </div>
-                            </div>
-
-                            <!-- Notes -->
-                            <div class="flex flex-col gap-1.5">
-                                <label for="ghiChu" class="text-sm font-semibold text-[#191c1e]">Ghi chú</label>
-                                <textarea name="ghiChu" id="ghiChu" rows="2"
-                                          class="border border-[#bccbb9] rounded-lg px-3 py-2.5 text-sm bg-[#f7f9fb] text-[#191c1e] placeholder-[#6d7b6c] resize-none outline-none hover:border-[#4d7c0f] focus:border-[#4d7c0f] focus:ring-2 focus:ring-[#4d7c0f]/20 transition-all"
-                                          placeholder="Thuê bóng, mượn áo tập..."></textarea>
-                            </div>
-
-                            <!-- Payment Method -->
-                            <div class="grid grid-cols-2 gap-2">
-                                <label class="pay-opt border-2 border-[#4d7c0f] bg-green-50/30 rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#4d7c0f] active:scale-95 transition-all" id="lbl-opt-sau">
-                                    <input type="radio" name="paymentMethod" value="sau" checked class="hidden" onchange="changePayMethod('sau')">
-                                    Trả tại quầy
-                                </label>
-                                <label class="pay-opt border-2 border-[#e0e3e5] rounded-lg p-2.5 flex items-center justify-center cursor-pointer font-semibold text-xs text-[#6d7b6c] hover:border-[#bccbb9] active:scale-95 transition-all" id="lbl-opt-payos">
-                                    <input type="radio" name="paymentMethod" value="payos" class="hidden" onchange="changePayMethod('payos')">
-                                    PayOS Online
-                                </label>
-                            </div>
-
-                            <hr class="border-[#e6e8ea]">
-
-                            <!-- Price Breakdown -->
-                            <div id="price-breakdown" class="hidden flex-col gap-2">
-                                <div class="flex justify-between text-sm text-[#6d7b6c]">
-                                    <span id="price-line-desc"></span>
-                                    <span id="price-line-amount"></span>
-                                </div>
-                                <div class="flex justify-between font-bold text-base text-[#191c1e] pt-2 border-t border-[#e6e8ea] mt-1">
-                                    <span>Tổng cộng</span>
-                                    <span id="price-total" class="text-[#4d7c0f]"></span>
-                                </div>
-                            </div>
-
-                            <!-- Submit / Login CTA -->
-                            <c:choose>
-                                <c:when test="${sessionScope.user != null}">
-                                    <button type="submit" id="btn-submit-booking" disabled
-                                            class="w-full bg-[#4d7c0f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#3f6212] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                                        Đặt Sân Ngay
-                                    </button>
-                                </c:when>
-                                <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/dangnhap"
-                                       class="w-full bg-[#4d7c0f] text-white font-semibold text-base py-4 rounded-lg hover:bg-[#3f6212] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2 text-center">
-                                        Đăng Nhập Để Đặt Sân
-                                        <span class="material-symbols-outlined text-[18px]">login</span>
-                                    </a>
-                                </c:otherwise>
-                            </c:choose>
-
-                            <p class="text-center text-xs text-[#6d7b6c]">Chưa tính phí cho đến khi đặt thành công</p>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- INFO COLUMN — order-1 on mobile (shows first), order-1 on desktop (left side) -->
-                <div class="w-full lg:w-[62%] order-1 lg:order-1 flex flex-col gap-8 lg:gap-10">
+                <!-- INFO COLUMN — full width sau khi xóa booking widget -->
+                <div class="w-full flex flex-col gap-8 lg:gap-10">
 
                     <!-- Header Info -->
                     <div>
@@ -420,15 +259,16 @@
 
     </main>
 
-    <!-- Mobile sticky bottom CTA — hidden on lg+ -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#e0e3e5] px-4 py-3 flex items-center justify-between lg:hidden z-40 shadow-[0_-2px_12px_rgba(0,0,0,0.08)]">
+    <!-- Sticky bottom CTA -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#e0e3e5] px-4 py-3 flex items-center justify-between z-40 shadow-[0_-2px_12px_rgba(0,0,0,0.08)]">
         <div class="flex flex-col">
             <span class="text-base font-bold text-[#191c1e]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ<span class="text-xs font-normal text-[#6d7b6c]">/giờ</span></span>
             <span class="text-[10px] text-[#6d7b6c]">${san.trangThai == 'Sẵn sàng' ? 'Còn trống' : 'Đang dùng'}</span>
         </div>
-        <a href="#booking-widget"
-           class="px-5 py-2.5 bg-[#4d7c0f] text-white font-semibold text-sm rounded-xl hover:bg-[#3f6212] active:scale-95 transition-all shadow-sm">
-            Đặt sân ngay
+        <a href="${pageContext.request.contextPath}/customer/dat-san?open=${san.sanID}"
+           class="px-5 py-2.5 bg-[#AFD639] text-[#111827] font-semibold text-sm rounded-xl hover:bg-[#AEDB2B] active:scale-95 transition-all shadow-sm flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">sports_soccer</span>
+            Đặt Sân
         </a>
     </div>
 

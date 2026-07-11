@@ -503,6 +503,7 @@ public class CheckInServlet extends HttpServlet {
             if (hoaDonId != -1) {
                 ordered = hdDao.getChiTietByHoaDonId(hoaDonId);
             }
+            List<java.util.Map<String, Object>> orderedMaps = chiTietHoaDonToMaps(ordered);
 
             // Lấy danh sách split bills và chi tiết của chúng
             boolean mainBillPaid = "Đã thanh toán".equals(trangThaiThanhToan);
@@ -527,7 +528,7 @@ public class CheckInServlet extends HttpServlet {
                         sb.put("ghiChu", rsSplit.getString("GhiChu"));
                         sb.put("ngayLap", rsSplit.getTimestamp("NgayLap") != null
                                 ? rsSplit.getTimestamp("NgayLap").toString().substring(0, 16) : "");
-                        sb.put("items", hdDao.getChiTietByHoaDonId(sbHdId));
+                        sb.put("items", chiTietHoaDonToMaps(hdDao.getChiTietByHoaDonId(sbHdId)));
                         splitBills.add(sb);
                     }
                 }
@@ -539,7 +540,7 @@ public class CheckInServlet extends HttpServlet {
             resp.setContentType("application/json;charset=UTF-8");
             java.util.Map<String, Object> data = new java.util.HashMap<>();
             data.put("products", products);
-            data.put("ordered", ordered);
+            data.put("ordered", orderedMaps);
             data.put("donGiaGio", donGiaGio);
             data.put("minutesOver", minutesOver);
             data.put("phuThuQuaGio", phuThuQuaGio);
@@ -570,5 +571,24 @@ public class CheckInServlet extends HttpServlet {
             err.put("error", e.getMessage() != null ? e.getMessage() : "Lỗi hệ thống");
             resp.getWriter().write(gson.toJson(err));
         }
+    }
+
+    /**
+     * Chuyển ChiTietHoaDon (JPA entity với lazy relationships) sang plain map
+     * để tránh LazyInitializationException khi Gson serialize.
+     */
+    private java.util.List<java.util.Map<String, Object>> chiTietHoaDonToMaps(List<org.example.model.ChiTietHoaDon> list) {
+        java.util.List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
+        for (org.example.model.ChiTietHoaDon ct : list) {
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("ChiTietID", ct.getChiTietID());
+            m.put("HoaDonID", ct.getHoaDonID());
+            m.put("SanPhamID", ct.getSanPhamID());
+            m.put("SoLuong", ct.getSoLuong());
+            m.put("DonGiaTaiThoiDiemBan", ct.getDonGiaTaiThoiDiemBan());
+            m.put("ThanhTien", ct.getThanhTien());
+            result.add(m);
+        }
+        return result;
     }
 }

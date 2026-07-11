@@ -23,7 +23,7 @@
 <title>V-SPORT – Hệ Thống Đặt Sân Thể Thao</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=DM+Sans:wght@400;500;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -94,14 +94,14 @@
                     },
                     fontFamily: {
                         "headline-sm": ["Barlow Condensed", "sans-serif"],
-                        "body-md": ["DM Sans", "sans-serif"],
+                        "body-md": ["Barlow", "sans-serif"],
                         "headline-lg": ["Barlow Condensed", "sans-serif"],
-                        "label-md": ["DM Sans", "sans-serif"],
+                        "label-md": ["Barlow", "sans-serif"],
                         "headline-md": ["Barlow Condensed", "sans-serif"],
                         "headline-lg-mobile": ["Barlow Condensed", "sans-serif"],
                         "display-lg": ["Barlow Condensed", "sans-serif"],
-                        "label-lg": ["DM Sans", "sans-serif"],
-                        "body-lg": ["DM Sans", "sans-serif"]
+                        "label-lg": ["Barlow", "sans-serif"],
+                        "body-lg": ["Barlow", "sans-serif"]
                     },
                     fontSize: {
                         "headline-sm": ["24px", { lineHeight: "1.2", fontWeight: "600" }],
@@ -376,18 +376,19 @@
 <!-- TopNavBar -->
 <nav class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 w-full sticky top-0 z-50 bg-white border-b border-outline-variant select-none">
     <!-- Logo -->
-    <a class="flex items-center" href="<%= ctx %>/index.jsp">
-        <img alt="V-SPORT Logo" class="h-8 md:h-10" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
+    <a href="<%= ctx %>/index.jsp" class="flex items-center gap-2 no-underline">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Tennis_ball.svg" alt="V-SPORT Icon" class="h-8 w-8 md:h-9 md:w-9 select-none"/>
+        <span class="font-['Poppins'] font-bold text-xl md:text-2xl uppercase text-[#111827] tracking-tight">V-SPORT<span class="text-[#afd639]">.</span></span>
     </a>
     
     <!-- Navigation Links -->
-    <div class="hidden md:flex gap-10 items-center">
-        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="<%= ctx %>/index.jsp">Home</a>
-        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Pages</a>
-        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Events</a>
-        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Blog</a>
-        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="<%= ctx %>/customer/dat-san">Shop</a>
-        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Contact</a>
+    <div class="hidden md:flex gap-6 items-center">
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="<%= ctx %>/index.jsp">Trang chủ</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Giới thiệu</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Sự kiện</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Tin tức</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="<%= ctx %>/customer/dat-san">Đặt sân</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Liên hệ</a>
     </div>
     
     <!-- Action Icons -->

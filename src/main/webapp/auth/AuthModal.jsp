@@ -143,6 +143,63 @@
     }
     @keyframes authdd-spin { to { transform: rotate(360deg); } }
 
+    /* ── Redirect overlay ── */
+    #authdd-redirect-overlay {
+        position: fixed; inset: 0; z-index: 99999;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(6px);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+        opacity: 0; pointer-events: none;
+        transition: opacity 280ms ease;
+    }
+    #authdd-redirect-overlay.authdd-redir-show { opacity: 1; pointer-events: all; }
+
+    .authdd-redir-circle {
+        width: 72px; height: 72px; border-radius: 50%;
+        background: #AFD639;
+        display: flex; align-items: center; justify-content: center;
+        transform: scale(0.4); opacity: 0;
+        transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1), opacity 280ms ease;
+    }
+    #authdd-redirect-overlay.authdd-redir-show .authdd-redir-circle {
+        transform: scale(1); opacity: 1;
+    }
+    .authdd-redir-circle svg { width: 36px; height: 36px; }
+    .authdd-redir-checkpath {
+        stroke-dasharray: 52; stroke-dashoffset: 52;
+        transition: stroke-dashoffset 420ms ease 320ms;
+    }
+    #authdd-redirect-overlay.authdd-redir-show .authdd-redir-checkpath {
+        stroke-dashoffset: 0;
+    }
+
+    .authdd-redir-texts { text-align: center; }
+    .authdd-redir-title {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 18px; font-weight: 700; color: #111827;
+        opacity: 0; transform: translateY(8px);
+        transition: opacity 300ms ease 200ms, transform 300ms ease 200ms;
+    }
+    #authdd-redirect-overlay.authdd-redir-show .authdd-redir-title { opacity: 1; transform: translateY(0); }
+    .authdd-redir-sub {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 13px; color: #6b7280; margin-top: 4px;
+        opacity: 0; transform: translateY(6px);
+        transition: opacity 300ms ease 350ms, transform 300ms ease 350ms;
+    }
+    #authdd-redirect-overlay.authdd-redir-show .authdd-redir-sub { opacity: 1; transform: translateY(0); }
+
+    .authdd-redir-bar {
+        width: 160px; height: 3px; background: #e5e7eb; border-radius: 99px; overflow: hidden;
+        opacity: 0; transition: opacity 200ms ease 400ms;
+    }
+    #authdd-redirect-overlay.authdd-redir-show .authdd-redir-bar { opacity: 1; }
+    .authdd-redir-bar-fill {
+        height: 100%; width: 0; background: #AFD639; border-radius: 99px;
+        transition: width 900ms cubic-bezier(0.4,0,0.2,1) 450ms;
+    }
+    #authdd-redirect-overlay.authdd-redir-show .authdd-redir-bar-fill { width: 100%; }
+
     /* Alert: chỉ hiện khi có nội dung thật (điều khiển bằng [hidden] ở JS),
        nền rất nhạt + chữ nhỏ, không viền đậm để tránh nặng mắt. */
     .authdd-banner {
@@ -174,6 +231,21 @@
 
     .authdd-back-link { display: flex; align-items: center; justify-content: center; gap: 4px; }
 </style>
+
+<!-- Redirect success overlay -->
+<div id="authdd-redirect-overlay">
+    <div class="authdd-redir-circle">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polyline class="authdd-redir-checkpath" points="4,13 9,18 20,7"
+                stroke="#111827" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+    <div class="authdd-redir-texts">
+        <p class="authdd-redir-title">Đăng nhập thành công!</p>
+        <p class="authdd-redir-sub">Đang chuyển trang cho bạn...</p>
+    </div>
+    <div class="authdd-redir-bar"><div class="authdd-redir-bar-fill"></div></div>
+</div>
 
 <div id="authdd-root">
     <div id="authdd-card" class="authdd-card">
@@ -552,9 +624,13 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                setLoginFormLoading(true, 'Đăng nhập thành công! Đang chuyển hướng...');
-                if (successBanner) { successBanner.querySelector('.success-msg').textContent = 'Đăng nhập thành công! Đang chuyển hướng...'; successBanner.hidden = false; }
-                setTimeout(() => { window.location.href = data.redirectUrl; }, 600);
+                setLoginFormLoading(false);
+                closeAuthModal();
+                const overlay = document.getElementById('authdd-redirect-overlay');
+                if (overlay) {
+                    overlay.classList.add('authdd-redir-show');
+                }
+                setTimeout(() => { window.location.href = data.redirectUrl; }, 1200);
             } else {
                 setLoginFormLoading(false);
                 if (errorBanner) { errorBanner.querySelector('.error-msg').textContent = data.loi || 'Đăng nhập không thành công.'; errorBanner.hidden = false; }

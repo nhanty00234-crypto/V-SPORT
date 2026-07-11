@@ -22,15 +22,14 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0 8%;
+        padding: 0 32px;
         background: #ffffff;
         position: sticky;
         top: 0;
         z-index: 100;
-        border-bottom: 1px solid #e2e8f0;
-        font-family: 'Poppins', sans-serif;
+        border-bottom: 1px solid #c5c9b0;
         box-sizing: border-box;
-        height: 80px;
+        height: 64px;
     }
     .navbar * {
         box-sizing: border-box;
@@ -66,17 +65,17 @@
     .nav-links {
         list-style: none;
         display: flex;
-        gap: 40px;
+        gap: 24px;
         margin: 0;
         padding: 0;
     }
     .nav-links a {
         text-decoration: none;
         color: #333333;
-        font-family: 'Barlow Condensed', sans-serif;
-        font-size: 16px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.04em;
         font-weight: 600;
         transition: var(--transition);
         position: relative;
@@ -706,16 +705,16 @@
 </style>
 
 <nav class="navbar fade-down">
-    <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container" style="display: flex; align-items: center;">
-        <img alt="V-SPORT Logo" style="height: 40px;" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
+    <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container" style="display: flex; align-items: center; text-decoration: none;">
+        <img alt="V-SPORT Logo" style="height: 32px;" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
     </a>
     <ul class="nav-links">
-        <li><a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">Home</a></li>
-        <li><a href="#" id="nav-pages">Pages</a></li>
-        <li><a href="#" id="nav-events">Events</a></li>
-        <li><a href="#" id="nav-blog">Blog</a></li>
-        <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">Shop</a></li>
-        <li><a href="#" id="nav-contact">Contact</a></li>
+        <li><a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">TRANG CHỦ</a></li>
+        <li><a href="#" id="nav-pages">GIỚI THIỆU</a></li>
+        <li><a href="#" id="nav-events">SỰ KIỆN</a></li>
+        <li><a href="#" id="nav-blog">TIN TỨC</a></li>
+        <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">ĐẶT SÂN</a></li>
+        <li><a href="#" id="nav-contact">LIÊN HỆ</a></li>
     </ul>
     
     <div class="header-icons">
@@ -853,33 +852,23 @@
 
         // Auto active link based on URL
         const currentPath = window.location.pathname;
-        const currentHash = window.location.hash;
-        
-        const navHome = document.getElementById('nav-home');
-        const navBooking = document.getElementById('nav-booking');
-        const navPricing = document.getElementById('nav-pricing');
-        
-        if (navHome && navBooking && navPricing) {
-            navHome.classList.remove('active');
-            navBooking.classList.remove('active');
-            navPricing.classList.remove('active');
 
-            if (currentPath.includes('dat-san')) {
-                navBooking.classList.add('active');
-            } else if (currentHash.includes('pricing') || currentPath.includes('pricing')) {
-                navPricing.classList.add('active');
-            } else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/') || currentPath.includes('TrangChu')) {
-                navHome.classList.add('active');
-            }
+        const navHome    = document.getElementById('nav-home');
+        const navBooking = document.getElementById('nav-booking');
+
+        if (currentPath.includes('dat-san') || currentPath.includes('ChiTietSan') || currentPath.includes('LichSuDatSan')) {
+            if (navBooking) navBooking.classList.add('active');
+        } else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) {
+            if (navHome) navHome.classList.add('active');
         }
-        // Sync mobile nav active state
-        const mnavHome = document.getElementById('mnav-home');
+
+        // Mobile nav active
+        const mnavHome    = document.getElementById('mnav-home');
         const mnavBooking = document.getElementById('mnav-booking');
-        const mnavPricing = document.getElementById('mnav-pricing');
-        if (mnavHome && mnavBooking && mnavPricing) {
-            if (currentPath.includes('dat-san')) mnavBooking.classList.add('active');
-            else if (currentHash.includes('pricing') || currentPath.includes('pricing')) mnavPricing.classList.add('active');
-            else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) mnavHome.classList.add('active');
+        if (currentPath.includes('dat-san')) {
+            if (mnavBooking) mnavBooking.classList.add('active');
+        } else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) {
+            if (mnavHome) mnavHome.classList.add('active');
         }
     })();
 </script>

@@ -867,10 +867,30 @@ public class DatSanServlet extends HttpServlet {
                 ordered = hdDao.getChiTietByHoaDonId(hoaDonId);
             }
 
+            // Build plain maps to avoid Gson serializing lazy JPA relationships
+            List<java.util.Map<String, Object>> productMaps = new java.util.ArrayList<>();
+            for (org.example.model.SanPham_DichVu sp : products) {
+                java.util.Map<String, Object> m = new java.util.HashMap<>();
+                m.put("SanPhamID", sp.getSanPhamID());
+                m.put("TenSanPham", sp.getTenSanPham());
+                m.put("DonGia", sp.getDonGia());
+                m.put("DonViTinh", sp.getDonViTinh());
+                m.put("SoLuongTon", sp.getSoLuongTon());
+                productMaps.add(m);
+            }
+
+            List<java.util.Map<String, Object>> orderedMaps = new java.util.ArrayList<>();
+            for (org.example.model.ChiTietHoaDon ct : ordered) {
+                java.util.Map<String, Object> m = new java.util.HashMap<>();
+                m.put("SanPhamID", ct.getSanPhamID());
+                m.put("SoLuong", ct.getSoLuong());
+                orderedMaps.add(m);
+            }
+
             resp.setContentType("application/json;charset=UTF-8");
             java.util.Map<String, Object> data = new java.util.HashMap<>();
-            data.put("products", products);
-            data.put("ordered", ordered);
+            data.put("products", productMaps);
+            data.put("ordered", orderedMaps);
             resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách dịch vụ", e);
