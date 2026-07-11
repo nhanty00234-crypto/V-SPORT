@@ -36,20 +36,21 @@
     }
     .logo-container {
         text-decoration: none;
-    }
-    .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--dark);
         display: flex;
         align-items: center;
         gap: 10px;
+        transition: transform 0.2s ease;
     }
-    .logo-icon {
-        font-size: 24px;
-        color: var(--primary);
-        display: flex;
-        align-items: center;
+    .logo-container:hover {
+        transform: scale(1.03);
+    }
+    .logo-img {
+        height: 36px;
+        width: 36px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #f0f0f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .logo-text {
         font-family: 'Poppins', sans-serif;
@@ -65,38 +66,48 @@
     .nav-links {
         list-style: none;
         display: flex;
-        gap: 24px;
+        gap: 8px;
         margin: 0;
         padding: 0;
+        align-items: center;
     }
     .nav-links a {
         text-decoration: none;
-        color: #333333;
+        color: #4b5563;
         font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        font-weight: 600;
-        transition: var(--transition);
+        font-size: 15px;
+        text-transform: none;
+        letter-spacing: -0.1px;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
-        padding: 4px 0;
+        display: inline-block;
     }
     .nav-links a:hover, .nav-links a.active {
         color: #000000;
-        opacity: 1;
     }
     .nav-links a::after {
         content: '';
         position: absolute;
-        bottom: 0;
-        left: 0;
+        bottom: 4px;
+        left: 50%;
         width: 0;
         height: 2px;
-        background-color: #333333;
-        transition: width 0.2s ease;
+        background-color: #afd639;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateX(-50%);
     }
     .nav-links a:hover::after, .nav-links a.active::after {
-        width: 100%;
+        width: 30%;
+    }
+    .nav-links a:hover {
+        background-color: #f3f4f6;
+    }
+    .nav-links a.active {
+        font-weight: 600;
+        background-color: #f3f4f6;
     }
 
     /* Actions Container */
@@ -705,16 +716,17 @@
 </style>
 
 <nav class="navbar fade-down">
-    <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container" style="display: flex; align-items: center; text-decoration: none;">
-        <img alt="V-SPORT Logo" style="height: 32px;" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
+    <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container">
+        <img src="${pageContext.request.contextPath}/resources/logo.png" alt="V-SPORT Logo" class="logo-img" />
+        <span class="logo-text">V-SPORT<span>.</span></span>
     </a>
     <ul class="nav-links">
-        <li><a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">TRANG CHỦ</a></li>
-        <li><a href="#" id="nav-pages">GIỚI THIỆU</a></li>
-        <li><a href="#" id="nav-events">SỰ KIỆN</a></li>
-        <li><a href="#" id="nav-blog">TIN TỨC</a></li>
-        <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">ĐẶT SÂN</a></li>
-        <li><a href="#" id="nav-contact">LIÊN HỆ</a></li>
+        <li><a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">Trang chủ</a></li>
+        <li><a href="#" id="nav-pages">Giới thiệu</a></li>
+        <li><a href="#" id="nav-events">Sự kiện</a></li>
+        <li><a href="#" id="nav-blog">Tin tức</a></li>
+        <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">Đặt sân</a></li>
+        <li><a href="#" id="nav-contact">Liên hệ</a></li>
     </ul>
     
     <div class="header-icons">
@@ -879,8 +891,9 @@
     <div class="side-drawer-content">
         <!-- Close button & Logo -->
         <div class="side-drawer-header">
-            <a href="${pageContext.request.contextPath}/index.jsp" class="side-drawer-logo">
-                <img alt="V-SPORT Logo" style="height: 36px;" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="side-drawer-logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                <img alt="V-SPORT Logo" style="height: 36px; border-radius: 4px;" src="${pageContext.request.contextPath}/resources/logo.png"/>
+                <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; color: #111827; letter-spacing: -0.5px;">V-SPORT<span style="color: #afd639;">.</span></span>
             </a>
             <button class="side-drawer-close" onclick="closeSideDrawer()">&times;</button>
         </div>
