@@ -164,6 +164,177 @@
         </ol>
     </section>
 
+    <!-- ============ TESTIMONIALS ============ -->
+    <section class="testimonials" aria-label="Testimonials">
+        <div class="testimonials-header reveal">
+            <span class="section-eyebrow">Về chúng tôi</span>
+            <h2 class="testimonials-heading">Testimonials</h2>
+        </div>
+
+        <div class="testimonials-inner">
+            <div class="testimonials-left reveal">
+                <div class="testi-avatars" id="testiAvatars">
+                    <button class="testi-avatar-btn is-active" data-index="0" aria-label="Nguyễn Văn An">
+                        <img src="https://i.pravatar.cc/80?img=11" alt="Nguyễn Văn An" width="72" height="72">
+                        <span class="testi-quote-badge" aria-hidden="true">"</span>
+                    </button>
+                    <button class="testi-avatar-btn" data-index="1" aria-label="Trần Thị Bích">
+                        <img src="https://i.pravatar.cc/80?img=5" alt="Trần Thị Bích" width="72" height="72">
+                    </button>
+                    <button class="testi-avatar-btn" data-index="2" aria-label="Lê Minh Tuấn">
+                        <img src="https://i.pravatar.cc/80?img=3" alt="Lê Minh Tuấn" width="72" height="72">
+                    </button>
+                </div>
+
+                <p class="testi-name" id="testiName">NGUYỄN VĂN AN</p>
+                <p class="testi-location" id="testiLocation">Hà Nội, Việt Nam</p>
+            </div>
+
+            <div class="testimonials-right">
+                <div class="testi-quote reveal" id="testiQuote">
+                    <p>V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ.</p>
+                    <p>Trải nghiệm những trận đấu thắng hoa cùng bạn bè, gia đình — mọi lúc, mọi nơi, chỉ với vài thao tác đơn giản trên V-SPORT.</p>
+                </div>
+
+                <div class="testi-nav">
+                    <button class="testi-arrow" id="testiPrev" aria-label="Trước">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button class="testi-arrow" id="testiNext" aria-label="Tiếp">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <div class="testi-dots" id="testiDots">
+                        <span class="testi-dot testi-dot--active"></span>
+                        <span class="testi-dot"></span>
+                        <span class="testi-dot"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ MAKE YOUR GAME BANNER ============ -->
+    <section class="make-your-game" aria-label="Make your game">
+        <div class="myg-text" aria-label="Make Your Game">
+            <span class="myg-word">MAKE</span>
+            <span class="myg-word myg-your">Y</span><span class="myg-ball-wrap" aria-hidden="true">
+                <svg class="myg-ball-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="ballBase" cx="40%" cy="35%" r="60%">
+                            <stop offset="0%"   stop-color="#d6f040"/>
+                            <stop offset="40%"  stop-color="#a8cc00"/>
+                            <stop offset="75%"  stop-color="#7aaa00"/>
+                            <stop offset="100%" stop-color="#4d7a00"/>
+                        </radialGradient>
+                        <radialGradient id="ballShine" cx="38%" cy="30%" r="35%">
+                            <stop offset="0%"  stop-color="rgba(255,255,255,0.55)"/>
+                            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                        </radialGradient>
+                        <radialGradient id="ballShadow" cx="55%" cy="65%" r="45%">
+                            <stop offset="0%"  stop-color="rgba(0,0,0,0.30)"/>
+                            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+                        </radialGradient>
+                        <filter id="fuzz" x="-5%" y="-5%" width="110%" height="110%">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise"/>
+                            <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+                            <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="textured"/>
+                            <feComposite in="textured" in2="SourceGraphic" operator="in"/>
+                        </filter>
+                        <clipPath id="ballClip">
+                            <circle cx="100" cy="100" r="96"/>
+                        </clipPath>
+                    </defs>
+                    <!-- Base ball -->
+                    <circle cx="100" cy="100" r="96" fill="url(#ballBase)" filter="url(#fuzz)"/>
+                    <!-- Seam lines (white felt curves) -->
+                    <g clip-path="url(#ballClip)" fill="none" stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.75">
+                        <path d="M 60 30 Q 110 80 60 130 Q 30 160 55 185"/>
+                        <path d="M 140 30 Q 90 80 140 130 Q 170 160 145 185"/>
+                    </g>
+                    <!-- Shadow -->
+                    <circle cx="100" cy="100" r="96" fill="url(#ballShadow)"/>
+                    <!-- Specular highlight -->
+                    <ellipse cx="78" cy="68" rx="28" ry="18" fill="url(#ballShine)" transform="rotate(-30 78 68)"/>
+                </svg>
+            </span><span class="myg-word myg-ur">UR</span>
+            <span class="myg-word">GAME</span>
+        </div>
+    </section>
+
+    <!-- ============ DARK ZONE: PROGRAMS + NEWS ============ -->
+    <div class="dark-zone">
+
+        <!-- ============ PROGRAMS ============ -->
+        <section class="programs" aria-label="Our programs">
+            <div class="dark-section-head reveal">
+                <span class="dark-eyebrow">Our Programs</span>
+                <h2 class="dark-title">Find The One For You</h2>
+            </div>
+            <div class="programs-grid">
+                <a href="#" class="program-card reveal">
+                    <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?auto=format&fit=crop&w=500&q=80" alt="Football 5-a-side">
+                    <span class="program-label">Football 5-a-side</span>
+                </a>
+                <a href="#" class="program-card reveal">
+                    <img src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=500&q=80" alt="Badminton Coaching">
+                    <span class="program-label">Badminton Coaching</span>
+                </a>
+                <a href="#" class="program-card reveal">
+                    <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=500&q=80" alt="Tennis For Kids">
+                    <span class="program-label">Tennis For Kids</span>
+                </a>
+                <a href="#" class="program-card reveal">
+                    <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=500&q=80" alt="Private Group">
+                    <span class="program-label">Private Group</span>
+                </a>
+            </div>
+            <div class="programs-cta reveal">
+                <a href="#" class="programs-btn">Join Now</a>
+            </div>
+        </section>
+
+        <!-- ============ NEWS / BLOG ============ -->
+        <section class="news" aria-label="From our blog">
+            <div class="dark-section-head reveal">
+                <span class="dark-eyebrow">From Our Blog</span>
+                <h2 class="dark-title">Interesting News</h2>
+            </div>
+            <div class="news-grid">
+                <article class="news-card reveal">
+                    <div class="news-head">
+                        <p class="news-meta"><span class="news-tag">Featured</span><i>·</i><time datetime="2026-07-08">Jul 8, 2026</time></p>
+                        <h3 class="news-title">5 bài tập giúp bạn bứt tốc trên sân cầu lông</h3>
+                    </div>
+                    <div class="news-img">
+                        <img src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80" alt="Cầu lông" loading="lazy">
+                    </div>
+                    <a href="#" class="news-more"><span>Read more</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                </article>
+                <article class="news-card reveal">
+                    <div class="news-head">
+                        <p class="news-meta"><span class="news-tag">Featured</span><i>·</i><time datetime="2026-07-05">Jul 5, 2026</time></p>
+                        <h3 class="news-title">Vì sao pickleball đang phủ sóng khắp Việt Nam?</h3>
+                    </div>
+                    <div class="news-img">
+                        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=600&q=80" alt="Pickleball" loading="lazy">
+                    </div>
+                    <a href="#" class="news-more"><span>Read more</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                </article>
+                <article class="news-card reveal">
+                    <div class="news-head">
+                        <p class="news-meta"><span class="news-tag">Featured</span><i>·</i><time datetime="2026-07-02">Jul 2, 2026</time></p>
+                        <h3 class="news-title">Đặt sân nhóm: mẹo chia chi phí cùng bạn bè</h3>
+                    </div>
+                    <div class="news-img">
+                        <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80" alt="Đặt sân nhóm" loading="lazy">
+                    </div>
+                    <a href="#" class="news-more"><span>Read more</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                </article>
+            </div>
+        </section>
+
+    </div>
+
 </main>
 
 <footer class="site-footer">

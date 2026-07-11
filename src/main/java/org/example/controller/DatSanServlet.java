@@ -80,6 +80,7 @@ public class DatSanServlet extends HttpServlet {
     private final SanDAO sanDAO = new SanDAOImpl();
     private final LoaiSanDAO loaiSanDAO = new LoaiSanDAOImpl();
     private final org.example.dao.CoSoDAO coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
+    private final org.example.dao.LichDatSanDichVuDAO lichDatSanDichVuDAO = new org.example.dao.impl.LichDatSanDichVuDAOImpl();
 
     // =========================================================================
     // PHẦN 1: XỬ LÝ GET - Hiển thị trang
@@ -245,6 +246,10 @@ public class DatSanServlet extends HttpServlet {
         String ghiChu;
         String paymentMethod;
 
+        // --- Dịch vụ đi kèm đặt trước (Phase 8A) — tham số MỚI, không đụng input cũ ---
+        int[] serviceIds;
+        int[] serviceQtys;
+
         try {
             sanId = Integer.parseInt(req.getParameter("sanId"));
             ngayDat = LocalDate.parse(req.getParameter("ngayDat"));
@@ -255,11 +260,34 @@ public class DatSanServlet extends HttpServlet {
             if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
                 paymentMethod = "sau";
             }
+
+            String[] serviceIdParams = req.getParameterValues("serviceId");
+            String[] serviceQtyParams = req.getParameterValues("serviceQty");
+            if (serviceIdParams != null && serviceQtyParams != null && serviceIdParams.length == serviceQtyParams.length) {
+                serviceIds = new int[serviceIdParams.length];
+                serviceQtys = new int[serviceQtyParams.length];
+                for (int i = 0; i < serviceIdParams.length; i++) {
+                    serviceIds[i] = Integer.parseInt(serviceIdParams[i].trim());
+                    serviceQtys[i] = Integer.parseInt(serviceQtyParams[i].trim());
+                }
+            } else {
+                serviceIds = new int[0];
+                serviceQtys = new int[0];
+            }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Dữ liệu đặt sân không hợp lệ", e);
             session.setAttribute("error", "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.");
             resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
             return;
+        }
+
+        // --- Validate số lượng dịch vụ trước khi vào transaction ---
+        for (int qty : serviceQtys) {
+            if (qty <= 0) {
+                session.setAttribute("error", "Số lượng dịch vụ phải lớn hơn 0.");
+                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                return;
+            }
         }
 
         // Validate paymentMethod enum value
@@ -553,6 +581,57 @@ public class DatSanServlet extends HttpServlet {
                         insertPs.executeUpdate();
                         try (java.sql.ResultSet genKeys = insertPs.getGeneratedKeys()) {
                             if (genKeys.next()) newDatSanId = genKeys.getInt(1);
+                        }
+                    }
+
+                    // ── 3f-1. Lưu dịch vụ đặt trước (Phase 8A) ──
+                    // Dịch vụ được đặt trước, thanh toán tại quầy — KHÔNG cộng vào tongTien/PayOS.
+                    // Giá lấy từ DB (không tin client). Nếu bất kỳ dòng nào không hợp lệ (sai cơ sở,
+                    // ngừng kinh doanh, vượt tồn kho) → rollback toàn bộ booking, báo lỗi rõ ràng.
+                    if (serviceIds.length > 0) {
+                        String svcSql = "SELECT SanPhamID, TenSanPham, DonGia, SoLuongTon, TrangThai, CoSoID " +
+                                "FROM SanPham_DichVu WHERE SanPhamID = ?";
+                        try (java.sql.PreparedStatement svcPs = conn.prepareStatement(svcSql)) {
+                            for (int i = 0; i < serviceIds.length; i++) {
+                                int spId = serviceIds[i];
+                                int qty = serviceQtys[i];
+                                svcPs.setInt(1, spId);
+                                try (java.sql.ResultSet rsSvc = svcPs.executeQuery()) {
+                                    if (!rsSvc.next()) {
+                                        conn.rollback();
+                                        session.setAttribute("error", "Một dịch vụ bạn chọn không tồn tại. Vui lòng thử lại.");
+                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                                        return;
+                                    }
+                                    int spCoSoId = rsSvc.getInt("CoSoID");
+                                    String spTrangThai = rsSvc.getString("TrangThai");
+                                    int soLuongTon = rsSvc.getInt("SoLuongTon");
+                                    String tenSp = rsSvc.getString("TenSanPham");
+                                    BigDecimal donGia = rsSvc.getBigDecimal("DonGia");
+
+                                    if (spCoSoId != sanCoSoID) {
+                                        conn.rollback();
+                                        session.setAttribute("error", "Dịch vụ '" + tenSp + "' không thuộc cơ sở của sân bạn đang đặt.");
+                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                                        return;
+                                    }
+                                    if (!org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH.equals(spTrangThai)) {
+                                        conn.rollback();
+                                        session.setAttribute("error", "Dịch vụ '" + tenSp + "' hiện không kinh doanh.");
+                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                                        return;
+                                    }
+                                    if (qty > soLuongTon) {
+                                        conn.rollback();
+                                        session.setAttribute("error", "Dịch vụ '" + tenSp + "' chỉ còn " + soLuongTon + " trong kho, không đủ số lượng bạn chọn.");
+                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                                        return;
+                                    }
+
+                                    BigDecimal totalPrice = donGia.multiply(BigDecimal.valueOf(qty));
+                                    lichDatSanDichVuDAO.insertPreOrder(conn, newDatSanId, spId, qty, donGia, totalPrice);
+                                }
+                            }
                         }
                     }
 

@@ -574,6 +574,11 @@
                             Đã xong hôm nay
                             <span id="badge-count-completed" class="bg-zinc-400 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
                         </button>
+                        <button type="button" id="tab-btn-preorders" onclick="switchBookingTab('preorders')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-500 hover:text-zinc-700">
+                            <span class="material-symbols-outlined text-[16px]">local_cafe</span>
+                            Dịch vụ đặt trước
+                            <span id="badge-count-preorders" class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
+                        </button>
                     </div>
                 </div>
 
@@ -605,6 +610,13 @@
                     <div id="list-completed" class="flex flex-col gap-2.5">
                         <!-- Filled by JS -->
                     </div>
+                </div>
+
+                <!-- Tab 4: Dịch vụ khách đặt trước (Phase 8A) -->
+                <div id="tab-content-preorders" class="tab-pane hidden">
+                    <div id="preorders-loading" class="text-xs text-zinc-400 py-4 text-center hidden">Đang tải...</div>
+                    <div id="preorders-empty" class="text-xs text-zinc-400 py-4 text-center hidden">Chưa có dịch vụ nào được khách đặt trước hôm nay.</div>
+                    <div id="list-preorders" class="flex flex-col gap-2.5"></div>
                 </div>
             </div>
 
@@ -681,10 +693,103 @@
                 activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-emerald-500 text-white shadow-md";
             } else if (tabName === 'waiting') {
                 activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all " + themeBg + " text-white shadow-md";
+            } else if (tabName === 'preorders') {
+                activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-amber-500 text-white shadow-md";
+                loadPreOrders();
             } else {
                 activeBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-zinc-650 text-white shadow-md";
             }
         }
+    }
+
+    // ===== Dịch vụ khách đặt trước (Phase 8A) — độc lập với panel "Dịch vụ & Thanh toán" cũ =====
+    function loadPreOrders() {
+        const loadingEl = document.getElementById("preorders-loading");
+        const emptyEl = document.getElementById("preorders-empty");
+        const listEl = document.getElementById("list-preorders");
+        if (!listEl) return;
+        listEl.innerHTML = "";
+        emptyEl.classList.add("hidden");
+        loadingEl.classList.remove("hidden");
+        fetch("<c:url value='/staff/booking-service/update-status'/>?action=list")
+            .then(r => r.json())
+            .then(data => {
+                loadingEl.classList.add("hidden");
+                renderPreOrders(data.items || []);
+            })
+            .catch(() => {
+                loadingEl.classList.add("hidden");
+                emptyEl.textContent = "Không tải được danh sách dịch vụ đặt trước.";
+                emptyEl.classList.remove("hidden");
+            });
+    }
+
+    function preOrderStatusBadge(status) {
+        if (status === 'Đã giao') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Đã giao</span>';
+        if (status === 'Đã hủy') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-500">Đã hủy</span>';
+        return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Chờ chuẩn bị</span>';
+    }
+
+    function renderPreOrders(items) {
+        const emptyEl = document.getElementById("preorders-empty");
+        const listEl = document.getElementById("list-preorders");
+        const badge = document.getElementById("badge-count-preorders");
+        const pendingCount = items.filter(it => it.status === 'Chờ chuẩn bị').length;
+        if (badge) badge.textContent = pendingCount;
+
+        if (!items.length) {
+            listEl.innerHTML = "";
+            emptyEl.textContent = "Chưa có dịch vụ nào được khách đặt trước hôm nay.";
+            emptyEl.classList.remove("hidden");
+            return;
+        }
+        emptyEl.classList.add("hidden");
+
+        // Gộp theo DatSanID để lễ tân dễ nhìn theo từng đơn
+        const grouped = {};
+        items.forEach(it => {
+            if (!grouped[it.datSanId]) grouped[it.datSanId] = { info: it, lines: [] };
+            grouped[it.datSanId].lines.push(it);
+        });
+
+        listEl.innerHTML = Object.values(grouped).map(g => {
+            const info = g.info;
+            const linesHtml = g.lines.map(it => `
+                <div class="flex items-center justify-between gap-2 py-1.5 border-b border-zinc-100 last:border-0">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-zinc-800">\${it.tenSanPham} <span class="text-zinc-400 font-normal">x\${it.quantity}</span></p>
+                        <p class="text-[10px] text-zinc-400">\${Math.round(it.totalPrice).toLocaleString('vi-VN')} đ \${preOrderStatusBadge(it.status)}</p>
+                    </div>
+                    \${it.status === 'Chờ chuẩn bị' ? `
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <button type="button" onclick="updatePreOrderStatus(\${it.id}, 'deliver')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">Đã giao</button>
+                        <button type="button" onclick="updatePreOrderStatus(\${it.id}, 'cancel')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-zinc-200 text-zinc-600 hover:bg-zinc-300">Hủy</button>
+                    </div>` : ''}
+                </div>`).join("");
+            return `
+            <div class="p-3 border border-zinc-200 rounded-xl bg-white">
+                <div class="flex items-center justify-between mb-1.5">
+                    <p class="text-xs font-black text-zinc-800">\${info.tenKhachHang} · \${info.tenSan}</p>
+                    <p class="text-[10px] text-zinc-400 font-bold">\${info.gioBatDau || ''} - \${info.gioKetThuc || ''}</p>
+                </div>
+                \${linesHtml}
+            </div>`;
+        }).join("");
+    }
+
+    function updatePreOrderStatus(id, action) {
+        if (action === 'cancel' && !confirm('Xác nhận hủy dịch vụ này?')) return;
+        fetch("<c:url value='/staff/booking-service/update-status'/>", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ action: action, id: id }).toString()
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                loadPreOrders();
+            } else {
+                alert(data.error || "Không thể cập nhật trạng thái dịch vụ.");
+            }
+        }).catch(() => alert("Có lỗi xảy ra khi cập nhật trạng thái dịch vụ."));
     }
 
     function copyToClipboard(text, btnEl) {

@@ -684,9 +684,6 @@
                                                     <button type="submit" class="px-3 py-1 border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px] rounded-none">Hủy thanh toán</button>
                                                 </form>
                                             </c:if>
-                                            <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
-                                                <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="px-3 py-1 border border-[#506600] text-[#506600] hover:bg-[#506600]/5 font-bold text-[10px] rounded-none">Dịch vụ</button>
-                                            </c:if>
                                             <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px]">—</span></c:if>
                                             <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-teal-600 text-[10px] font-bold">✓ Đã chơi</span></c:if>
                                         </div>
@@ -828,6 +825,43 @@
                         </div>
                     </div>
 
+                    <!-- Dịch vụ đi kèm (Phase 8A / 8A.2 redesign) -->
+                    <div>
+                        <label class="mb-0.5 flex items-center gap-1.5 text-[13px] font-bold text-neutral-900 font-['Barlow_Condensed'] uppercase tracking-wide">
+                            <span class="material-symbols-outlined text-[16px] text-[#506600]">local_cafe</span>
+                            Dịch vụ đi kèm <span class="text-neutral-400 font-medium normal-case tracking-normal">(không bắt buộc)</span>
+                        </label>
+                        <p class="text-[11px] text-neutral-500 mb-2.5 ml-[22px]">Chọn trước dịch vụ để cơ sở chuẩn bị. Thanh toán tại quầy.</p>
+
+                        <div id="booking-services-loading" class="flex items-center gap-2 text-xs text-neutral-500 py-4 justify-center border border-neutral-200 rounded-lg bg-neutral-50 hidden">
+                            <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Đang tải dịch vụ...
+                        </div>
+
+                        <div id="booking-services-error" class="flex flex-col items-center gap-2 text-center py-4 px-3 border border-red-200 rounded-lg bg-red-50 hidden">
+                            <span class="text-xs font-semibold text-red-600">Không tải được dịch vụ. Vui lòng thử lại.</span>
+                            <button type="button" onclick="loadBookingServices(selectedCourtId)"
+                                class="text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 border border-red-300 text-red-600 hover:bg-red-100 rounded-md transition-colors">
+                                Tải lại
+                            </button>
+                        </div>
+
+                        <div id="booking-services-empty" class="text-xs text-neutral-500 py-4 px-3 text-center border border-dashed border-neutral-200 rounded-lg bg-neutral-50 hidden">
+                            Cơ sở này chưa có dịch vụ đi kèm.
+                        </div>
+
+                        <div id="booking-services-list" class="border border-neutral-200 rounded-lg divide-y divide-neutral-100 max-h-64 overflow-y-auto bg-white shadow-sm hidden"></div>
+
+                        <div id="booking-services-total-row" class="hidden flex items-center justify-between mt-2.5 px-3.5 py-2.5 bg-[#f4f9e6] border border-[#afd639]/40 rounded-lg">
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-[#3d4d00] font-['Barlow_Condensed']">Tổng dịch vụ</span>
+                            <span id="booking-services-total" class="text-base font-bold text-[#506600] font-['Barlow_Condensed']">0 đ</span>
+                        </div>
+
+                        <p class="text-[11px] text-neutral-500 mt-2 leading-relaxed flex items-start gap-1.5">
+                            <span class="material-symbols-outlined text-[13px] mt-0.5 text-neutral-400">info</span>
+                            Dịch vụ sẽ được chuẩn bị tại cơ sở và thanh toán tại quầy.
+                        </p>
+                    </div>
+
                     <!-- Notes -->
                     <div>
                         <label for="ghiChu" class="form-label mb-2 flex items-center gap-1.5">
@@ -897,8 +931,16 @@
                             <span class="font-bold text-xs">Có áp dụng</span>
                         </div>
                         <div class="pt-3 mt-1 border-t border-neutral-200 flex justify-between items-center">
-                            <span class="text-xs font-bold uppercase text-neutral-500 tracking-wider font-['Barlow_Condensed']">Tổng cộng</span>
+                            <span class="text-xs font-bold uppercase text-neutral-500 tracking-wider font-['Barlow_Condensed']">Tiền sân</span>
                             <span id="summary-total" class="text-2xl font-bold text-[#506600] font-['Barlow_Condensed']">-</span>
+                        </div>
+                        <div id="summary-services-row" class="hidden flex justify-between items-center text-neutral-600">
+                            <span class="flex items-center gap-1.5 text-xs"><span class="material-symbols-outlined text-[14px]">local_cafe</span>Dịch vụ đi kèm <span class="text-[9px] text-neutral-400">(tại quầy)</span></span>
+                            <span id="summary-services-total" class="font-bold text-neutral-800 font-['Barlow_Condensed']">-</span>
+                        </div>
+                        <div id="summary-grand-total-row" class="hidden pt-2 border-t border-dashed border-neutral-200 flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase text-neutral-500 tracking-wider font-['Barlow_Condensed']">Tổng dự kiến</span>
+                            <span id="summary-grand-total" class="text-lg font-bold text-neutral-800 font-['Barlow_Condensed']">-</span>
                         </div>
                     </div>
                 </div>
@@ -1130,6 +1172,176 @@
         let selectedCourtId = null;
         let currentTotalCost = 0;
         let selectedLocationQuery = "";
+
+        // ===== Dịch vụ đi kèm (Phase 8A) =====
+        let bookingServicesCatalog = [];   // [{sanPhamId, tenSanPham, donGia, donViTinh, soLuongTon}]
+        let selectedServiceQty = {};       // { [sanPhamId]: qty }
+
+        // Đơn vị tính (DonViTinh) đôi khi chứa dữ liệu rác trong DB (vd: "-5452").
+        // Chỉ hiển thị nếu là chuỗi chữ hợp lệ, không phải số/số âm.
+        function isSaneUnit(donViTinh) {
+            if (donViTinh === null || donViTinh === undefined) return false;
+            const s = String(donViTinh).trim();
+            if (s === '') return false;
+            if (/^-?\d+(\.\d+)?$/.test(s)) return false;
+            return true;
+        }
+
+        function formatServicePrice(sp) {
+            const priceStr = Math.round(sp.donGia).toLocaleString('vi-VN') + ' đ';
+            return isSaneUnit(sp.donViTinh) ? priceStr + ' / ' + sp.donViTinh : priceStr;
+        }
+
+        function formatServiceStock(sp) {
+            if (sp.soLuongTon === null || sp.soLuongTon === undefined) return null;
+            return sp.soLuongTon > 0 ? ('Còn ' + sp.soLuongTon) : 'Hết hàng';
+        }
+
+        function loadBookingServices(courtId) {
+            selectedServiceQty = {};
+            bookingServicesCatalog = [];
+            const listEl = document.getElementById("booking-services-list");
+            const loadingEl = document.getElementById("booking-services-loading");
+            const emptyEl = document.getElementById("booking-services-empty");
+            const errorEl = document.getElementById("booking-services-error");
+            if (!listEl) return;
+            listEl.innerHTML = "";
+            listEl.classList.add("hidden");
+            emptyEl.classList.add("hidden");
+            errorEl.classList.add("hidden");
+            document.getElementById("booking-services-total-row").classList.add("hidden");
+            loadingEl.classList.remove("hidden");
+            fetch(`${pageContext.request.contextPath}/customer/booking-services?sanId=\${courtId}`)
+                .then(r => {
+                    if (!r.ok) {
+                        console.error('[BookingServices] HTTP', r.status, r.statusText);
+                        throw new Error('HTTP ' + r.status);
+                    }
+                    return r.json();
+                })
+                .then(data => {
+                    loadingEl.classList.add("hidden");
+                    bookingServicesCatalog = data.services || [];
+                    renderBookingServices();
+                })
+                .catch(err => {
+                    console.error('[BookingServices] Lỗi tải dịch vụ:', err);
+                    loadingEl.classList.add("hidden");
+                    errorEl.classList.remove("hidden");
+                });
+        }
+
+        function renderBookingServices() {
+            const listEl = document.getElementById("booking-services-list");
+            const emptyEl = document.getElementById("booking-services-empty");
+            if (!listEl) return;
+            if (!bookingServicesCatalog.length) {
+                listEl.innerHTML = "";
+                listEl.classList.add("hidden");
+                emptyEl.classList.remove("hidden");
+                updateServiceTotal();
+                return;
+            }
+            emptyEl.classList.add("hidden");
+            listEl.classList.remove("hidden");
+            listEl.innerHTML = bookingServicesCatalog.map(sp => {
+                const qty = selectedServiceQty[sp.sanPhamId] || 0;
+                const outOfStock = sp.soLuongTon !== undefined && sp.soLuongTon !== null && sp.soLuongTon <= 0;
+                const atMax = sp.soLuongTon !== undefined && sp.soLuongTon !== null && qty >= sp.soLuongTon;
+                const isSelected = qty > 0;
+                const stockText = formatServiceStock(sp);
+                const rowClasses = outOfStock
+                    ? 'bg-neutral-50 opacity-60'
+                    : (isSelected ? 'bg-[#f4f9e6] border-l-4 border-l-[#7a9a00]' : 'bg-white hover:bg-neutral-50');
+                const lineTotal = qty > 0 ? Math.round(sp.donGia * qty).toLocaleString('vi-VN') + ' đ' : null;
+                return `
+                <div class="flex items-center justify-between gap-3 px-3.5 py-3 transition-colors \${rowClasses}">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-bold text-neutral-900 truncate">\${sp.tenSanPham}</p>
+                        <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span class="text-xs font-semibold text-neutral-600">\${formatServicePrice(sp)}</span>
+                            \${stockText ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded \${outOfStock ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-100 text-neutral-600'}">\${stockText}</span>` : ''}
+                        </div>
+                        \${lineTotal ? `<p class="text-[11px] font-bold text-[#506600] mt-1">Thành tiền: \${lineTotal}</p>` : ''}
+                    </div>
+                    <div class="flex items-center gap-2.5 flex-shrink-0">
+                        <button type="button" onclick="changeServiceQty(\${sp.sanPhamId}, -1)" \${(outOfStock || qty === 0) ? 'disabled' : ''}
+                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || qty === 0) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#506600] hover:bg-[#506600] hover:text-white active:scale-95'}">−</button>
+                        <span class="w-6 text-center text-sm font-bold text-neutral-900">\${qty}</span>
+                        <button type="button" onclick="changeServiceQty(\${sp.sanPhamId}, 1)" \${(outOfStock || atMax) ? 'disabled' : ''}
+                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || atMax) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#506600] hover:bg-[#506600] hover:text-white active:scale-95'}">+</button>
+                    </div>
+                </div>`;
+            }).join("");
+            updateServiceTotal();
+        }
+
+        function changeServiceQty(sanPhamId, delta) {
+            const sp = bookingServicesCatalog.find(s => s.sanPhamId === sanPhamId);
+            if (!sp) return;
+            const maxQty = (sp.soLuongTon !== undefined && sp.soLuongTon !== null) ? sp.soLuongTon : 999;
+            let qty = (selectedServiceQty[sanPhamId] || 0) + delta;
+            if (qty < 0) qty = 0;
+            if (qty > maxQty) qty = maxQty;
+            if (qty === 0) delete selectedServiceQty[sanPhamId];
+            else selectedServiceQty[sanPhamId] = qty;
+            renderBookingServices();
+        }
+
+        function getServicesTotal() {
+            return Object.entries(selectedServiceQty).reduce((sum, [id, qty]) => {
+                const sp = bookingServicesCatalog.find(s => s.sanPhamId === Number(id));
+                return sum + (sp ? sp.donGia * qty : 0);
+            }, 0);
+        }
+
+        function updateServiceTotal() {
+            const total = getServicesTotal();
+            const rowEl = document.getElementById("booking-services-total-row");
+            const totalEl = document.getElementById("booking-services-total");
+            if (rowEl && totalEl) {
+                if (total > 0) {
+                    rowEl.classList.remove("hidden");
+                    totalEl.textContent = Math.round(total).toLocaleString('vi-VN') + ' đ';
+                } else {
+                    rowEl.classList.add("hidden");
+                }
+            }
+            // Đồng bộ sang tóm tắt bước 2 (checkout)
+            const svcRow = document.getElementById("summary-services-row");
+            const svcTotalEl = document.getElementById("summary-services-total");
+            const grandRow = document.getElementById("summary-grand-total-row");
+            const grandEl = document.getElementById("summary-grand-total");
+            if (svcRow && svcTotalEl) {
+                if (total > 0) {
+                    svcRow.classList.remove("hidden");
+                    svcTotalEl.textContent = Math.round(total).toLocaleString('vi-VN') + ' đ';
+                } else {
+                    svcRow.classList.add("hidden");
+                }
+            }
+            if (grandRow && grandEl) {
+                if (total > 0) {
+                    grandRow.classList.remove("hidden");
+                    grandEl.textContent = Math.round(currentTotalCost + total).toLocaleString('vi-VN') + ' đ';
+                } else {
+                    grandRow.classList.add("hidden");
+                }
+            }
+        }
+
+        function injectServiceInputsIntoForm(form) {
+            form.querySelectorAll('input[name="serviceId"], input[name="serviceQty"]').forEach(el => el.remove());
+            Object.entries(selectedServiceQty).forEach(([sanPhamId, qty]) => {
+                if (qty <= 0) return;
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden'; idInput.name = 'serviceId'; idInput.value = sanPhamId;
+                form.appendChild(idInput);
+                const qtyInput = document.createElement('input');
+                qtyInput.type = 'hidden'; qtyInput.name = 'serviceQty'; qtyInput.value = qty;
+                form.appendChild(qtyInput);
+            });
+        }
 
         const urlParams = new URLSearchParams(window.location.search);
         const paramSportId = parseInt(urlParams.get('sportId')) || 0;
@@ -1397,6 +1609,7 @@
             document.getElementById("input-san-id").value = courtId;
             const court = courts.find(c => c.id === courtId);
             if (!court) { console.warn('[Booking] Court not found:', courtId); return; }
+            loadBookingServices(courtId);
             const type = courtTypes[court.typeId] || { name: "Không rõ", priceDay: 0, priceNight: 0, sportId: 0, lightTime: "17:30:00" };
             const branch = branches[court.branchId] || { name: "Cơ sở", address: "", openTime: DEFAULT_OPEN_TIME, closeTime: DEFAULT_CLOSE_TIME };
             document.getElementById("modal-court-name").textContent = court.name;
@@ -1547,6 +1760,7 @@
                 document.getElementById("summary-rate").textContent = `\${hourlyRate.toLocaleString('vi-VN')} đ/giờ`;
                 document.getElementById("summary-lights-row").classList.toggle("hidden", !applyLights);
                 document.getElementById("summary-total").textContent = `\${currentTotalCost.toLocaleString('vi-VN')} đ`;
+                updateServiceTotal();
                 // Live cost preview in form panel
                 const preview = document.getElementById("live-cost-preview");
                 if (preview) {
@@ -1576,6 +1790,7 @@
         function confirmBooking() {
             const form = document.getElementById('booking-form');
             if (!form) return;
+            injectServiceInputsIntoForm(form);
             const btn = document.querySelector('button[onclick="confirmBooking()"]');
             const paymentMethod = document.getElementById('input-payment-method').value;
             const isPayOS = paymentMethod === 'payos';
