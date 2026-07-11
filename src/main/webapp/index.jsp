@@ -721,40 +721,207 @@
 </div>
 </section>
 
-<!-- Make Your Game -->
-<section class="py-24 text-center">
-<div class="max-w-container-max mx-auto px-margin-mobile">
-<h2 class="font-display-lg text-[10vw] leading-none text-on-surface uppercase font-bold tracking-tighter flex items-center justify-center flex-wrap gap-2">
-                NÂNG T<span class="inline-block w-[8vw] h-[8vw] bg-primary-container rounded-full mx-1 shadow-[inset_-10px_-10px_20px_rgba(0,0,0,0.1)] relative overflow-hidden before:absolute before:inset-0 before:border-[3px] before:border-white/30 before:rounded-full before:curve-pattern"></span>ẦM GAME
-            </h2>
-<style>
-                .curve-pattern {
-                    clip-path: path('M10 50 Q 50 10 90 50');
-                }
-            </style>
-<div class="max-w-2xl mx-auto mt-16">
-<span class="material-symbols-outlined text-primary-container text-4xl mb-6 block">format_quote</span>
-<p class="font-body-lg text-body-lg text-on-surface-variant mb-8 italic">V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ và trải nghiệm những trận đấu thắng hoa cùng bạn bè, gia đình.</p>
-<h4 class="font-label-lg text-label-lg text-on-surface uppercase">NGUYỄN VĂN AN</h4>
-<p class="font-label-md text-label-md text-on-surface-variant">Hà Nội, Việt Nam</p>
-<div class="flex justify-center gap-4 mt-8">
-<div class="w-12 h-12 rounded-full bg-surface-variant overflow-hidden border-2 border-primary-container cursor-pointer"><img class="w-full h-full object-cover" alt="Headshot of a smiling female athlete wearing a white visor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZg3AoA6AEoYuJHVQm8eDr5_KJaEfoJf7IjdPd909yrQ13UzEGmS35rBkMz0NwQOhLroGtgtIorWGaQPbbnP8Xa2XStS-P-cmIL-vqMgEURd0zzwlzz1y_zQlFrySB7HQ4WAPARw_XmR3UaR9FRdrYfaWh80dCqaRmPjz4ORCR9FlkLLTOPsFqacukfbrJz2iMM6VF70MZvJKy90-1vSHtvTC9RXHXAsM2VpPZUyDqTKlwu266YHP3"/></div>
-<div class="w-12 h-12 rounded-full bg-surface-variant overflow-hidden opacity-50 cursor-pointer"><img class="w-full h-full object-cover" alt="Headshot of a male tennis coach smiling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmu54KJzg42CGnwOVK8JMJBxKSL1NcQEXwiHq8SJYlqu30VIukeHAqKJtjY2bV5lFizEZxFP5u0Whse3W0e15EEvg8mR7tJVkFjIGve73Iruzu4YKLmGeiH66TWo5MtiU4qJHB5TIZm0UL_cxsN-FWl5edcAhb4Zl2iguPsea-dWHZyGX9jFl8o_ZGMUdEkVF9NVCxJ3lVmosITKh75vSmni9xwBGFA0cHwF9nOdWeYEejDRSGoMdm"/></div>
-<div class="w-12 h-12 rounded-full bg-surface-variant overflow-hidden opacity-50 cursor-pointer"><img class="w-full h-full object-cover" alt="Headshot of a female tennis player looking determined." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv06aMFJYR3sOdfCnuOAUtbt0Te9kIQPzs6DKqRclM1BzX3LmhysNMm2hlM0rzDy8peJBU4ry2QyoGpSsraCkCvwTJj3-x9TYbNr_3-g24eEwE2hPH7P-f5uSTEfpsX8XQc20eZ3PsvmJSuDU5g8thzC-bX2tzkpiRsJvoO4PVrulDkc_bv56QTh_aQgsUUdad5MYauX07tx_B-YdvNqGYBBzlWub22aw_1WM8CkuN37jaLA921-kW"/></div>
+<!-- Testimonials -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20 md:py-24">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+<div>
+<span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-3">VỀ CHÚNG TÔI</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface uppercase mb-10">CẢM NHẬN KHÁCH HÀNG</h2>
+<div class="flex gap-3 mb-6" id="testi-avatars">
+<button type="button" onclick="vsGoToTesti(0)" data-testi-avatar="0" class="relative w-[72px] h-[72px] rounded-full border-[3px] border-on-surface p-0 cursor-pointer transition-transform">
+<img class="w-full h-full rounded-full object-cover" alt="Khách hàng V-SPORT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZg3AoA6AEoYuJHVQm8eDr5_KJaEfoJf7IjdPd909yrQ13UzEGmS35rBkMz0NwQOhLroGtgtIorWGaQPbbnP8Xa2XStS-P-cmIL-vqMgEURd0zzwlzz1y_zQlFrySB7HQ4WAPARw_XmR3UaR9FRdrYfaWh80dCqaRmPjz4ORCR9FlkLLTOPsFqacukfbrJz2iMM6VF70MZvJKy90-1vSHtvTC9RXHXAsM2VpPZUyDqTKlwu266YHP3"/>
+<span data-testi-badge="0" class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-primary-container text-on-surface text-xs font-bold flex items-center justify-center">&rdquo;</span>
+</button>
+<button type="button" onclick="vsGoToTesti(1)" data-testi-avatar="1" class="relative w-[72px] h-[72px] rounded-full border-[3px] border-transparent p-0 cursor-pointer opacity-50 scale-90 transition-transform">
+<img class="w-full h-full rounded-full object-cover" alt="Khách hàng V-SPORT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmu54KJzg42CGnwOVK8JMJBxKSL1NcQEXwiHq8SJYlqu30VIukeHAqKJtjY2bV5lFizEZxFP5u0Whse3W0e15EEvg8mR7tJVkFjIGve73Iruzu4YKLmGeiH66TWo5MtiU4qJHB5TIZm0UL_cxsN-FWl5edcAhb4Zl2iguPsea-dWHZyGX9jFl8o_ZGMUdEkVF9NVCxJ3lVmosITKh75vSmni9xwBGFA0cHwF9nOdWeYEejDRSGoMdm"/>
+</button>
+<button type="button" onclick="vsGoToTesti(2)" data-testi-avatar="2" class="relative w-[72px] h-[72px] rounded-full border-[3px] border-transparent p-0 cursor-pointer opacity-50 scale-90 transition-transform">
+<img class="w-full h-full rounded-full object-cover" alt="Khách hàng V-SPORT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv06aMFJYR3sOdfCnuOAUtbt0Te9kIQPzs6DKqRclM1BzX3LmhysNMm2hlM0rzDy8peJBU4ry2QyoGpSsraCkCvwTJj3-x9TYbNr_3-g24eEwE2hPH7P-f5uSTEfpsX8XQc20eZ3PsvmJSuDU5g8thzC-bX2tzkpiRsJvoO4PVrulDkc_bv56QTh_aQgsUUdad5MYauX07tx_B-YdvNqGYBBzlWub22aw_1WM8CkuN37jaLA921-kW"/>
+</button>
+</div>
+<h4 id="testi-name" class="font-label-lg text-label-lg text-on-surface uppercase">NGUYỄN VĂN AN</h4>
+<p id="testi-location" class="font-label-md text-label-md text-on-surface-variant">Hà Nội, Việt Nam</p>
+</div>
+<div class="flex flex-col justify-center">
+<div id="testi-quote" class="font-body-lg text-body-lg text-on-surface-variant space-y-4 mb-10">
+<p>V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ.</p>
+<p>Trải nghiệm những trận đấu thắng hoa cùng bạn bè, gia đình — mọi lúc, mọi nơi, chỉ với vài thao tác đơn giản trên V-SPORT.</p>
+</div>
+<div class="flex items-center gap-2">
+<button type="button" onclick="vsTestiPrev()" aria-label="Trước" class="w-11 h-11 rounded-full border border-outline flex items-center justify-center hover:bg-on-surface hover:text-white hover:border-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+</button>
+<button type="button" onclick="vsTestiNext()" aria-label="Tiếp" class="w-11 h-11 rounded-full border border-outline flex items-center justify-center hover:bg-on-surface hover:text-white hover:border-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<div id="testi-dots" class="flex gap-1.5 ml-2">
+<span data-testi-dot="0" class="w-1.5 h-1.5 rounded-full bg-on-surface"></span>
+<span data-testi-dot="1" class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span data-testi-dot="2" class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+</div>
 </div>
 </div>
 </div>
 </section>
 
-<!-- Action Video Section -->
-<section class="w-full h-[60vh] relative group cursor-pointer overflow-hidden">
-<img class="w-full h-full object-cover object-bottom transition-transform duration-700 group-hover:scale-105" alt="A male tennis player stretching his leg on a dark green hard court. Cinematic lighting, low angle shot focusing on his white sneakers." src="https://lh3.googleusercontent.com/aida/AP1WRLurkbNByQ_0p5vK_lXrG_TpR2kuF1BNR0_kAgR4sL_3iHmrRL6NLup8wuCpe0okoeb_78Bk-6mdffNV9SnOnJc8p3N8rkST9LCEiGhqADr4CqwX64NnBxDNC1QlklTwMf5-5S1zPnneEY4UCgmuQcR5F36G-wS-Q50rPGD5yxlfK7F5XtU4NU7axDNxf3O-2VIjBrOFABFp-EoLY2MG-VOZDztWSJl3YfDGqFAP2RkOYK5MqM-r2bc9Bw"/>
-<div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-<button class="w-20 h-20 rounded-full border-2 border-white text-white flex items-center justify-center font-label-lg text-label-lg uppercase hover:bg-white/10 transition-colors backdrop-blur-sm">
-                PHÁT
-            </button>
+<!-- Make Your Game -->
+<section class="py-16 md:py-24 text-center overflow-hidden">
+<div class="max-w-container-max mx-auto px-margin-mobile">
+<h2 class="font-display-lg text-[10vw] leading-none text-on-surface uppercase font-bold tracking-tighter flex items-center justify-center flex-wrap gap-2">
+                NÂNG T<span class="inline-block w-[8vw] h-[8vw] mx-1 relative align-middle" style="filter:drop-shadow(0 8px 20px rgba(0,0,0,0.25));">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+<defs>
+<radialGradient id="vsBallBase" cx="40%" cy="35%" r="60%">
+<stop offset="0%" stop-color="#d6f040"/>
+<stop offset="40%" stop-color="#a8cc00"/>
+<stop offset="75%" stop-color="#7aaa00"/>
+<stop offset="100%" stop-color="#4d7a00"/>
+</radialGradient>
+<radialGradient id="vsBallShine" cx="38%" cy="30%" r="35%">
+<stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+</radialGradient>
+<radialGradient id="vsBallShadow" cx="55%" cy="65%" r="45%">
+<stop offset="0%" stop-color="rgba(0,0,0,0.30)"/>
+<stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+</radialGradient>
+<clipPath id="vsBallClip">
+<circle cx="100" cy="100" r="96"/>
+</clipPath>
+</defs>
+<circle cx="100" cy="100" r="96" fill="url(#vsBallBase)"/>
+<g clip-path="url(#vsBallClip)" fill="none" stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.75">
+<path d="M 60 30 Q 110 80 60 130 Q 30 160 55 185"/>
+<path d="M 140 30 Q 90 80 140 130 Q 170 160 145 185"/>
+</g>
+<circle cx="100" cy="100" r="96" fill="url(#vsBallShadow)"/>
+<ellipse cx="78" cy="68" rx="28" ry="18" fill="url(#vsBallShine)" transform="rotate(-30 78 68)"/>
+</svg>
+</span>ẦM GAME
+            </h2>
 </div>
 </section>
+
+<!-- Programs -->
+<section class="relative bg-gradient-to-br from-[#4a5424] via-[#232a12] to-[#0a0a09] text-white py-20 md:py-24 px-margin-mobile md:px-margin-desktop overflow-hidden">
+<div class="relative max-w-[960px] mx-auto text-center">
+<span class="font-label-lg text-label-lg uppercase tracking-widest block mb-3 text-white/85">CHƯƠNG TRÌNH CỦA CHÚNG TÔI</span>
+<h2 class="font-headline-lg text-headline-lg uppercase mb-14 text-white">TÌM CHƯƠNG TRÌNH PHÙ HỢP</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter text-left">
+<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Bóng đá 5 người" src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?auto=format&fit=crop&w=500&q=80"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
+<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Bóng Đá 5 Người</span>
+</a>
+<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Cầu lông" src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=500&q=80"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
+<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Cầu Lông</span>
+</a>
+<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Tennis thiếu nhi" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=500&q=80"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
+<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Tennis Thiếu Nhi</span>
+</a>
+<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Nhóm riêng tư" src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=500&q=80"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
+<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Nhóm Riêng Tư</span>
+</a>
+</div>
+<a href="<%= ctx %>/customer/dat-san" class="inline-block bg-primary-container text-on-surface font-label-lg text-label-lg uppercase py-4 px-10 tracking-widest hover:opacity-90 transition-opacity mt-14">THAM GIA NGAY</a>
+</div>
+</section>
+
+<!-- News -->
+<section class="relative bg-gradient-to-br from-[#4a5424] via-[#232a12] to-[#0a0a09] text-white py-20 md:py-24 px-margin-mobile md:px-margin-desktop border-t border-white/10 overflow-hidden">
+<div class="relative max-w-[1180px] mx-auto text-center">
+<span class="font-label-lg text-label-lg uppercase tracking-widest block mb-3 text-white/85">TIN TỨC</span>
+<h2 class="font-headline-lg text-headline-lg uppercase mb-14 text-white">TIN TỨC NỔI BẬT</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter text-left">
+<article class="bg-white text-on-surface flex flex-col">
+<div class="p-6 pb-4">
+<p class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-3"><span class="font-bold uppercase text-on-surface">Nổi Bật</span><i class="not-italic text-outline-variant">&middot;</i><time datetime="2026-07-08">08/07/2026</time></p>
+<h3 class="font-headline-sm text-headline-sm uppercase leading-tight min-h-[2.3em]">5 Bài Tập Giúp Bạn Bứt Tốc Trên Sân Cầu Lông</h3>
+</div>
+<div class="aspect-square overflow-hidden">
+<img class="w-full h-full object-cover" alt="Cầu lông" loading="lazy" src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80"/>
+</div>
+<a href="#" class="flex items-center gap-2 p-6 font-label-lg text-label-lg uppercase hover:text-primary transition-colors">Đọc thêm <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+</article>
+<article class="bg-white text-on-surface flex flex-col">
+<div class="p-6 pb-4">
+<p class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-3"><span class="font-bold uppercase text-on-surface">Nổi Bật</span><i class="not-italic text-outline-variant">&middot;</i><time datetime="2026-07-05">05/07/2026</time></p>
+<h3 class="font-headline-sm text-headline-sm uppercase leading-tight min-h-[2.3em]">Vì Sao Pickleball Đang Phủ Sóng Khắp Việt Nam?</h3>
+</div>
+<div class="aspect-square overflow-hidden">
+<img class="w-full h-full object-cover" alt="Pickleball" loading="lazy" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=600&q=80"/>
+</div>
+<a href="#" class="flex items-center gap-2 p-6 font-label-lg text-label-lg uppercase hover:text-primary transition-colors">Đọc thêm <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+</article>
+<article class="bg-white text-on-surface flex flex-col">
+<div class="p-6 pb-4">
+<p class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-3"><span class="font-bold uppercase text-on-surface">Nổi Bật</span><i class="not-italic text-outline-variant">&middot;</i><time datetime="2026-07-02">02/07/2026</time></p>
+<h3 class="font-headline-sm text-headline-sm uppercase leading-tight min-h-[2.3em]">Đặt Sân Nhóm: Mẹo Chia Chi Phí Cùng Bạn Bè</h3>
+</div>
+<div class="aspect-square overflow-hidden">
+<img class="w-full h-full object-cover" alt="Đặt sân nhóm" loading="lazy" src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80"/>
+</div>
+<a href="#" class="flex items-center gap-2 p-6 font-label-lg text-label-lg uppercase hover:text-primary transition-colors">Đọc thêm <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+</article>
+</div>
+</div>
+</section>
+
+<script>
+    (function() {
+        var vsTestimonials = [
+            {
+                name: 'NGUYỄN VĂN AN',
+                location: 'Hà Nội, Việt Nam',
+                quote: [
+                    'V-SPORT mang đến giải pháp đặt sân thể thao nhanh chóng, tin cậy và tiện lợi. Với hệ thống đối tác sân bãi rộng khắp toàn quốc cùng quy trình thanh toán tích hợp PayOS thông minh, bạn có thể tự tin đặt lịch giữ chỗ.',
+                    'Trải nghiệm những trận đấu thắng hoa cùng bạn bè, gia đình — mọi lúc, mọi nơi, chỉ với vài thao tác đơn giản trên V-SPORT.'
+                ]
+            },
+            {
+                name: 'TRẦN THỊ BÍCH',
+                location: 'TP. Hồ Chí Minh, Việt Nam',
+                quote: [
+                    'Đặt sân trên V-SPORT cực kỳ đơn giản, chỉ mất vài phút là xong. Giao diện thân thiện, thanh toán PayOS an toàn và xác nhận tức thì.',
+                    'Tôi đã giới thiệu cho cả nhóm bạn cùng dùng và ai cũng hài lòng với trải nghiệm đặt sân tiện lợi này.'
+                ]
+            },
+            {
+                name: 'LÊ MINH TUẤN',
+                location: 'Đà Nẵng, Việt Nam',
+                quote: [
+                    'Ứng dụng V-SPORT giúp tôi tiết kiệm rất nhiều thời gian khi đặt sân cầu lông cuối tuần. Hệ thống luôn cập nhật lịch sân theo thời gian thực.',
+                    'Dịch vụ hỗ trợ khách hàng nhiệt tình, chuyên nghiệp. Rất đáng để trải nghiệm!'
+                ]
+            }
+        ];
+        var vsTestiIndex = 0;
+
+        window.vsGoToTesti = function(idx) {
+            vsTestiIndex = (idx + vsTestimonials.length) % vsTestimonials.length;
+            var t = vsTestimonials[vsTestiIndex];
+            document.getElementById('testi-name').textContent = t.name;
+            document.getElementById('testi-location').textContent = t.location;
+            document.getElementById('testi-quote').innerHTML = t.quote.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+            document.querySelectorAll('[data-testi-dot]').forEach(function(dot) {
+                var isActive = Number(dot.getAttribute('data-testi-dot')) === vsTestiIndex;
+                dot.className = 'w-1.5 h-1.5 rounded-full ' + (isActive ? 'bg-on-surface' : 'bg-outline-variant');
+            });
+            document.querySelectorAll('[data-testi-avatar]').forEach(function(btn) {
+                var isActive = Number(btn.getAttribute('data-testi-avatar')) === vsTestiIndex;
+                btn.className = 'relative w-[72px] h-[72px] rounded-full border-[3px] p-0 cursor-pointer transition-transform ' + (isActive ? 'border-on-surface' : 'border-transparent opacity-50 scale-90');
+            });
+        };
+        window.vsTestiPrev = function() { vsGoToTesti(vsTestiIndex - 1); };
+        window.vsTestiNext = function() { vsGoToTesti(vsTestiIndex + 1); };
+    })();
+</script>
 
 <!-- Footer -->
 <footer class="bg-on-background dark:bg-surface-container-lowest grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop py-16 w-full text-white flat no shadows">
