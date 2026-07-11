@@ -20,5 +20,9 @@ if (reduceMotion || !('IntersectionObserver' in window)) {
         });
     }, { threshold: 0.15 });
 
-    revealEls.forEach(el => observer.observe(el));
+    revealEls.forEach(el => {
+        const delay = el.style.getPropertyValue('--reveal-delay');
+        if (delay) el.style.transitionDelay = delay;
+        observer.observe(el);
+    });
 }

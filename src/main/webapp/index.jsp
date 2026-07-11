@@ -87,8 +87,8 @@
                     },
                     spacing: {
                         base: "8px",
-                        "container-max": "1280px",
-                        "margin-desktop": "64px",
+                        "container-max": "1680px",
+                        "margin-desktop": "32px",
                         "margin-mobile": "16px",
                         gutter: "24px"
                     },
@@ -131,68 +131,337 @@
         .hover-outline:hover { box-shadow: 0 0 0 1px #0F0F0F; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Side Drawer Offcanvas CSS */
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            visibility: hidden;
+            transition: visibility 0.3s ease;
+        }
+        .side-drawer.open {
+            visibility: visible;
+        }
+        .side-drawer-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .side-drawer.open .side-drawer-overlay {
+            opacity: 1;
+        }
+        .side-drawer-content {
+            position: absolute;
+            top: 0;
+            right: -360px;
+            width: 360px;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s ease;
+            padding: 24px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .side-drawer.open .side-drawer-content {
+            right: 0;
+        }
+        .side-drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .side-drawer-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999999;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+        .side-drawer-close:hover {
+            color: #333333;
+        }
+        .side-drawer-section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #999999;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
+            margin-top: 0;
+            text-transform: uppercase;
+        }
+        .user-section {
+            background-color: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+        .drawer-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #9dc93c;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .user-details {
+            flex: 1;
+        }
+        .user-name {
+            font-weight: 600;
+            color: #333333;
+            margin: 0;
+            font-size: 15px;
+        }
+        .user-role {
+            font-size: 12px;
+            color: #999999;
+            margin: 0;
+        }
+        .drawer-user-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-drawer-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #444444;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .btn-drawer-action:hover {
+            background-color: #f0f0f0;
+            color: #000000;
+        }
+        .drawer-guest-info {
+            text-align: center;
+            padding: 8px 0;
+        }
+        .guest-msg {
+            font-size: 13px;
+            color: #666666;
+            margin-bottom: 14px;
+        }
+        .btn-drawer-login {
+            background-color: #333333;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        .btn-drawer-login:hover {
+            background-color: #000000;
+        }
+        .drawer-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #333333;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 0;
+            border-bottom: 1px solid #f9f9f9;
+            transition: color 0.2s, padding-left 0.2s;
+        }
+        .drawer-link:hover {
+            color: #9dc93c;
+            padding-left: 6px;
+        }
+        .support-channels {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .channel-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #333333;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        .channel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .zalo-btn {
+            background-color: #f4f8ff;
+            border-color: #cbdcff;
+        }
+        .zalo-btn:hover {
+            background-color: #e8f1ff;
+            border-color: #a3c3ff;
+        }
+        .messenger-btn {
+            background-color: #fff2f9;
+            border-color: #ffdceb;
+        }
+        .messenger-btn:hover {
+            background-color: #ffe6f3;
+            border-color: #ffb8d9;
+        }
+        .channel-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .side-drawer-footer {
+            margin-top: auto;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+        }
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+        .contact-item .label {
+            font-size: 12px;
+            color: #999999;
+        }
+        .contact-item .value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333333;
+        }
     </style>
 </head>
 <body class="bg-surface text-on-surface font-body-md antialiased overflow-x-hidden">
 
 <!-- TopNavBar -->
-<nav class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 w-full sticky top-0 z-50 bg-surface/95 backdrop-blur-sm border-b border-outline-variant dark:border-outline flat no shadows">
-    <a class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface uppercase tracking-tighter" href="<%= ctx %>/index.jsp">
-        <img alt="V-SPORT Logo" class="h-10" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
+<nav class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 w-full sticky top-0 z-50 bg-white border-b border-outline-variant select-none">
+    <!-- Logo -->
+    <a class="flex items-center" href="<%= ctx %>/index.jsp">
+        <img alt="V-SPORT Logo" class="h-8 md:h-10" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
     </a>
-    <div class="hidden md:flex gap-8">
-        <a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary pb-1 font-label-lg text-label-lg uppercase" href="<%= ctx %>/index.jsp">Trang Chủ</a>
-        <a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-lg text-label-lg uppercase" href="<%= ctx %>/customer/dat-san">Tìm Sân</a>
-        <a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-lg text-label-lg uppercase" href="#">Giải Đấu</a>
-        <a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-lg text-label-lg uppercase" href="#">Cộng Đồng</a>
-        <a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-lg text-label-lg uppercase" href="#">Bảng Giá</a>
-        <a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-lg text-label-lg uppercase" href="#">Liên Hệ</a>
+    
+    <!-- Navigation Links -->
+    <div class="hidden md:flex gap-10 items-center">
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="<%= ctx %>/index.jsp">Home</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Pages</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Events</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Blog</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="<%= ctx %>/customer/dat-san">Shop</a>
+        <a class="text-[#333333] hover:text-[#000000] font-semibold border-b-[2px] border-transparent hover:border-[#333333] pb-1 font-['Barlow_Condensed'] text-[16px] uppercase tracking-widest transition-colors duration-200" href="#">Contact</a>
     </div>
-    <div class="flex items-center gap-4 text-primary dark:text-primary-fixed">
-        <% if (loggedInUser != null) { %>
-        <!-- Đã đăng nhập: hiện tên + dropdown -->
+    
+    <!-- Action Icons -->
+    <div class="flex items-center gap-6">
+        <!-- Cart / Booking Bag -->
+        <a href="<%= ctx %>/customer/dat-san" class="relative group flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
+            <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <span class="absolute -bottom-0.5 -right-0.5 w-[15px] h-[15px] bg-[#9dc93c] rounded-full border border-white flex items-center justify-center text-[9px] font-bold text-white leading-none">0</span>
+        </a>
+        
+        <!-- User Icon -->
         <div class="relative group">
-            <button class="flex items-center gap-2 scale-95 active:opacity-80 transition-all hover:text-primary transition-colors duration-200">
-                <span class="material-symbols-outlined">account_circle</span>
-                <span class="hidden md:inline font-label-lg text-label-lg text-on-surface truncate max-w-[120px]">
-                    <%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName() : loggedInUser.getEmail() %>
-                </span>
+            <button id="header-user-btn" onclick="handleUserClick(this)" class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
+                <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
             </button>
-            <div class="absolute right-0 top-full mt-2 w-44 bg-surface-container-lowest shadow-lg rounded-lg overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-outline-variant">
-                <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-3 text-sm font-label-lg text-on-surface hover:bg-surface-container transition-colors">Tài Khoản</a>
-                <a href="<%= ctx %>/customer/lich-su-dat" class="block px-4 py-3 text-sm font-label-lg text-on-surface hover:bg-surface-container transition-colors">Lịch Sử Đặt Sân</a>
-                <a href="<%= ctx %>/dangnhap?action=logout" class="block px-4 py-3 text-sm font-label-lg text-error hover:bg-error-container transition-colors border-t border-outline-variant">Đăng Xuất</a>
-            </div>
+            <% if (loggedInUser != null) { %>
+                <!-- Dropdown for Logged-In User -->
+                <div id="user-profile-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-md overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-neutral-100">
+                    <div class="px-4 py-2.5 bg-neutral-50 border-b border-neutral-100">
+                        <p class="text-xs text-neutral-400">Tài khoản</p>
+                        <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName() : loggedInUser.getEmail() %></p>
+                    </div>
+                    <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Tài Khoản</a>
+                    <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch Sử Đặt Sân</a>
+                    <a href="<%= ctx %>/dangnhap?action=logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng Xuất</a>
+                </div>
+            <% } %>
         </div>
-        <% } else { %>
-        <!-- Chưa đăng nhập: nút Đăng Nhập + Đăng Ký -->
-        <a href="<%= ctx %>/dangnhap" class="hidden md:inline-block scale-95 active:opacity-80 transition-all hover:text-primary transition-colors duration-200 font-label-lg text-label-lg uppercase">
-            Đăng Nhập
-        </a>
-        <a href="<%= ctx %>/dangky" class="scale-95 active:opacity-80 transition-all bg-primary-container text-on-surface font-label-lg text-label-lg uppercase py-2 px-4 hover:opacity-90 transition-opacity">
-            Đăng Ký
-        </a>
-        <% } %>
-        <button class="scale-95 active:opacity-80 transition-all hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200 md:hidden">
-            <span class="material-symbols-outlined">grid_view</span>
+        
+        <!-- Search Icon -->
+        <button class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
+            <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </button>
+        
+        <!-- Nine-dots grid -->
+        <button onclick="openSideDrawer()" class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
+            <svg class="w-[20px] h-[20px]" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="4" height="4" rx="0.5" />
+                <rect x="10" y="3" width="4" height="4" rx="0.5" />
+                <rect x="17" y="3" width="4" height="4" rx="0.5" />
+                <rect x="3" y="10" width="4" height="4" rx="0.5" />
+                <rect x="10" y="10" width="4" height="4" rx="0.5" />
+                <rect x="17" y="10" width="4" height="4" rx="0.5" />
+                <rect x="3" y="17" width="4" height="4" rx="0.5" />
+                <rect x="10" y="17" width="4" height="4" rx="0.5" />
+                <rect x="17" y="17" width="4" height="4" rx="0.5" />
+            </svg>
         </button>
     </div>
 </nav>
 
 <!-- Hero Section -->
-<section class="grid grid-cols-1 md:grid-cols-3 w-full h-[80vh] md:h-[90vh]">
+<section class="grid grid-cols-1 md:grid-cols-3 w-full h-[55vh] md:h-[65vh]">
 <div class="hidden md:block w-full h-full bg-surface-container">
-<img class="w-full h-full object-cover object-center" alt="A focused female tennis player looking to the side, wearing a white sleeveless top, holding a racket over her shoulder. Dark background, professional studio lighting, high contrast." src="https://lh3.googleusercontent.com/aida/AP1WRLvo77UDjXpr0TZMrxk7X1PU9Muz3gts3avCdig8V5q83DSdM-4HdKFDjoLBiWWb2N41bbQTHwKSRx3oFykpWYD71D0wPzd_Pn3kiAGIsX1LDKAgDfkkQZKHgFFEiF7Z7A86r4vAFHSTSffbM4wXzBf0YVWBEEhXiYkhoE6InL3lo58Py9FMRRgY77nuZ7IeucA2AU5SXzEalG4VgfA-waIPzzSh8PgHmw8l8OZ4nYqNWEnqahrWQZEDFs4"/>
+<img class="w-full h-full object-cover object-center" alt="A focused female tennis player looking to the side, wearing a white sleeveless top, holding a racket over her shoulder. Dark background, professional studio lighting, high contrast." src="https://images.unsplash.com/photo-1622279457486-62dcc4a4db13?q=80&w=800&auto=format&fit=crop"/>
 </div>
-<div class="w-full h-full bg-primary-container flex flex-col justify-center items-center text-center p-8">
-<span class="font-label-lg text-label-lg text-on-surface uppercase mb-4 tracking-widest">HỆ THỐNG ĐẶT SÂN HÀNG ĐẦU</span>
-<h1 class="font-display-lg text-display-lg text-on-surface uppercase mb-8 max-w-sm mx-auto">ĐẶT SÂN THỂ THAO NHANH CHÓNG, TIN CẬY VÀ TIỆN LỢI</h1>
-<a class="inline-block bg-on-surface text-surface font-label-lg text-label-lg uppercase py-4 px-8 tracking-widest hover:opacity-90 transition-opacity" href="<%= ctx %>/customer/dat-san">ĐẶT SÂN NGAY</a>
+<div class="w-full h-full bg-primary-container flex flex-col justify-center items-center text-center p-6">
+<span class="font-label-lg text-label-lg text-on-surface uppercase mb-3 tracking-widest text-xs md:text-sm">HỆ THỐNG ĐẶT SÂN HÀNG ĐẦU</span>
+<h1 class="font-display-lg text-display-lg text-on-surface uppercase mb-6 max-w-xs md:max-w-sm mx-auto text-2xl md:text-3xl lg:text-4xl leading-tight">ĐẶT SÂN THỂ THAO NHANH CHÓNG, TIN CẬY VÀ TIỆN LỢI</h1>
+<a class="inline-block bg-on-surface text-surface font-label-lg text-label-lg uppercase py-3 px-6 tracking-widest hover:opacity-90 transition-opacity text-sm" href="<%= ctx %>/customer/dat-san">ĐẶT SÂN NGAY</a>
 </div>
 <div class="hidden md:block w-full h-full bg-surface-container">
-<img class="w-full h-full object-cover object-center" alt="Close up of a tennis player tying white shoelaces on a blue court. Wearing white socks and a pleated skirt. Bright, outdoor daylight, crisp shadows." src="https://lh3.googleusercontent.com/aida/AP1WRLub-X1tJGfWs2nbFLV8a-9l1hp5d92y8d3YxmrzMOWrMij0pSaiv-1S7ANr_AAdD6Qjx3LDGx4f-EouqL719vJ-KFiLcQLZI0EgAa0a_L3bs4xY1joGESaOCYHaGPlfcHD9a8aAhBygxdoSe_Sj2qrXG5o1C4VF-6WTO9_2x4uBCO--l5gfiG-Tf14oxAJGEM-7pbHxPbB5hXVISGA0SVKpi4CgyIyXKLCBdVZpwJexOy6YSoFRDsUIw1A"/>
+<img class="w-full h-full object-cover object-center" alt="Close up of a tennis player tying white shoelaces on a blue court. Wearing white socks and a pleated skirt. Bright, outdoor daylight, crisp shadows." src="https://images.unsplash.com/photo-1542144566-d4059fc1ae14?q=80&w=800&auto=format&fit=crop"/>
 </div>
 </section>
+
 
 <!-- Trust Bar -->
 <div class="bg-court-blue text-on-primary py-4 overflow-hidden whitespace-nowrap border-b border-surface">
@@ -211,41 +480,126 @@
 </div>
 
 <!-- Partner Logos -->
-<div class="w-full bg-surface py-8 border-b border-surface-variant flex justify-center items-center gap-8 md:gap-16 px-margin-mobile flex-wrap opacity-60">
-<span class="font-headline-sm text-headline-sm text-on-surface-variant uppercase grayscale">Deltab</span>
-<span class="font-headline-sm text-headline-sm text-on-surface-variant uppercase grayscale">Ausgrid</span>
-<span class="font-headline-sm text-headline-sm text-on-surface-variant uppercase grayscale">Quizlet</span>
-<span class="font-headline-sm text-headline-sm text-on-surface-variant uppercase grayscale">LEAGO</span>
-<div class="text-right ml-auto hidden md:block max-w-[200px]">
-<p class="font-label-lg text-label-lg uppercase text-on-surface leading-tight">ĐỐI TÁC VÀ KHÁCH HÀNG TIÊU BIỂU</p>
-</div>
+<div class="w-full bg-white py-12 border-b border-surface-variant px-margin-mobile md:px-margin-desktop select-none">
+    <div class="max-w-[95%] xl:max-w-[92%] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+        <!-- Left Spacer to balance the text on the right and center the logos -->
+        <div class="hidden lg:block w-[220px] flex-shrink-0"></div>
+        
+        <!-- Logos Centered -->
+        <div class="flex flex-wrap lg:flex-nowrap items-center justify-center gap-8 xl:gap-12 text-[#cccccc] flex-grow">
+            <!-- Deltab -->
+            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
+                <svg class="h-10 w-auto fill-none stroke-current" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 6v20 M14 6v20 M14 6h4a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10h-4"/>
+                    <text x="38" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="700" font-size="19" fill="currentColor" stroke="none" letter-spacing="-0.03em">Deltab</text>
+                </svg>
+            </div>
+            
+            <!-- Tennis Ball -->
+            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
+                <svg class="h-12 w-12 fill-none stroke-current" stroke-width="2" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="13"/>
+                    <path d="M10 6 A 13 13 0 0 0 10 26" stroke-width="1.8"/>
+                    <path d="M22 6 A 13 13 0 0 1 22 26" stroke-width="1.8"/>
+                </svg>
+            </div>
+            
+            <!-- Ausgrid -->
+            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
+                <svg class="h-10 w-auto fill-none stroke-current" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 22l6-6-6-6 M12 22l6-6-6-6 M18 22l6-6-6-6"/>
+                    <text x="38" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="700" font-size="19" fill="currentColor" stroke="none" letter-spacing="-0.02em">Ausgrid</text>
+                </svg>
+            </div>
+            
+            <!-- Crossed Tennis Rackets -->
+            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
+                <svg class="h-12 w-12 fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(16,16) rotate(45) translate(-16,-16)">
+                        <path d="M16 19v9"/>
+                        <ellipse cx="16" cy="11" rx="4.5" ry="6"/>
+                        <path d="M13 11h6 M12.5 8.5h7 M12.5 13.5h7 M16 5v12 M14 6v10 M18 6v10" stroke-width="0.8"/>
+                    </g>
+                    <g transform="translate(16,16) rotate(-45) translate(-16,-16)">
+                        <path d="M16 19v9"/>
+                        <ellipse cx="16" cy="11" rx="4.5" ry="6"/>
+                        <path d="M13 11h6 M12.5 8.5h7 M12.5 13.5h7 M16 5v12 M14 6v10 M18 6v10" stroke-width="0.8"/>
+                    </g>
+                </svg>
+            </div>
+            
+            <!-- Quizlet -->
+            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
+                <svg class="h-10 w-auto" viewBox="0 0 90 32" xmlns="http://www.w3.org/2000/svg">
+                    <text x="5" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="700" font-size="21" fill="currentColor" letter-spacing="-0.02em">Quizlet</text>
+                </svg>
+            </div>
+            
+            <!-- LEAGO -->
+            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
+                <svg class="h-10 w-auto fill-none stroke-current" stroke-width="2.5" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
+                    <text x="5" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="900" font-size="19" fill="currentColor" stroke="none" letter-spacing="0.05em">LEAGO</text>
+                    <circle cx="94" cy="16" r="7" stroke-width="2"/>
+                    <circle cx="94" cy="16" r="2.5" fill="currentColor" stroke="none"/>
+                    <path d="M87 16h14 M94 9v14" stroke-width="1"/>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Text -->
+        <div class="text-center lg:text-right w-full lg:w-[220px] mt-4 lg:mt-0 flex-shrink-0">
+            <h4 class="font-bold text-sm text-[#111111] tracking-wider leading-tight uppercase font-body-md">
+                CHECK OUR BEST<br/>CLIENTS AND PARTNERS
+            </h4>
+        </div>
+    </div>
 </div>
 
 <!-- Categories Grid -->
-<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-24">
-<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
-<div class="group relative overflow-hidden aspect-[1.14] bg-surface-container cursor-pointer">
+<section class="max-w-[95%] xl:max-w-[92%] mx-auto px-margin-mobile md:px-margin-desktop py-16">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer">
 <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A tennis racket lying on a green grass court with several yellow tennis balls nearby. Bright sunlight." src="https://lh3.googleusercontent.com/aida/AP1WRLvWebT7ZNHs6ZdkCWKS9U-MazznW5ERpv32DFU3jHF_YyUANkNUkRCIcgok_P8A0t0nO9-aswBrwjCbFcneyFuSl1BpKMFkUxH-_z-9oYPFqF13Vtc3_88AM7Kt6Cx-zH0beU9IPzqLhLVBkyeQNzslJ8noEmjOpVsOycOG_sp3fg96phuIWrq3clPldYv_69RBQ1PLSkb5Lnm6qp-TKWHWyTsdLedtuEd_QZMp5LWIJ4jVWdVJHGAgwA"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-<h3 class="font-headline-md text-headline-md text-on-primary uppercase">BÓNG ĐÁ</h3>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
+<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
+<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">RACKETS</h3>
+<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
+    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
+</span>
 </div>
 </div>
-<div class="group relative overflow-hidden aspect-[1.14] bg-surface-container cursor-pointer">
+</div>
+<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer">
 <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A male tennis player running to hit a backhand on a blue hard court. Wearing dark apparel." src="https://lh3.googleusercontent.com/aida/AP1WRLtdxurZ6J7ydy2eP7rqXeqTMhJ1n-EjW8nfWwJkvbGMUi5RQHxU55fmhZVw5i_VnfFg8blm35yCB5KohihuvF_CdHZW5qOmOYHvVhoGdDUSi3M0PuEq3Q2oJHI5tCUSjHY9y798KfWcib0vQwLzjCLMro59hkSvU2rCVsyg9PM9E11U5zoXG8JCUsbT33Ujq-gW11BASrUAf_TJqvj-OzvnYHeWkP79IEyqK_kPfKayIOBOGTGyt6zS_w"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-<h3 class="font-headline-md text-headline-md text-on-primary uppercase">CẦU LÔNG</h3>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
+<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
+<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">APPAREL</h3>
+<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
+    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
+</span>
 </div>
 </div>
-<div class="group relative overflow-hidden aspect-[1.14] bg-surface-container cursor-pointer">
+</div>
+<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer">
 <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A female tennis player running on a clay court. View from above." src="https://lh3.googleusercontent.com/aida/AP1WRLsCif0ca5AJK-rv5YXnylO3sQExKc8APL8Q_C-ogNla22Bshc-uTcpSSeHIgnWOgWZWpEhIFxgjTYz748HOgQorLtAgjdyItKzpv1vdCnwUgC7vzVSG2R2wi9OLkEA4S9kTO-jyLOyRATtqAAjqNm_HSHb2b8qb1RZM4-pUOa-06s-ap4FkDdDbfOJnZ1lyflidEJS1VNGvoFAuVjyBsdkOok8NS9rmubEbCeiM9ey564vFFprktPmLRP0"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-<h3 class="font-headline-md text-headline-md text-on-primary uppercase">TENNIS</h3>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
+<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
+<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">SHOES</h3>
+<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
+    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
+</span>
 </div>
 </div>
-<div class="group relative overflow-hidden aspect-[1.14] bg-surface-container cursor-pointer">
+</div>
+<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer">
 <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A yellow tennis ball caught in the black netting of a tennis net. Close up shot." src="https://lh3.googleusercontent.com/aida/AP1WRLsxuq5CEbyLge_0n5xxq6dFz5gcZD_mhi9pDI-6CcMIFHUD_58vqcZsqY8x6lJnQq16-vNHvWyz02q_V1ChrVcajhVFbmWa9Hd2SG6YGQFPgtNlGT6CF5jZIek0mqmH9eYugfV6tA6ZQzyeNl3MTBlS6Hlvhqc3LiNjWO32PTDYBxLWnjkzL8yBf7PQb49cRlPG79pe2I-gIVupqXKgaalQsGKy3sc-AbmA7wGSAbylJ9IaNEkr6Dd1LQ"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-<h3 class="font-headline-md text-headline-md text-on-primary uppercase">PICKLEBALL</h3>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
+<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
+<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">ACCESSORIES</h3>
+<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
+    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
+</span>
+</div>
 </div>
 </div>
 </div>
@@ -443,5 +797,115 @@
 </button>
 </div>
 </footer>
+
+<script>
+    window.handleUserClick = function(btn) {
+        const isLoggedIn = <%= loggedInUser != null ? "true" : "false" %>;
+        if (isLoggedIn) {
+            const userDropdown = document.getElementById('user-profile-dropdown');
+            if (userDropdown) {
+                userDropdown.classList.toggle('opacity-0');
+                userDropdown.classList.toggle('invisible');
+            }
+        } else {
+            openAuthModal('login', btn);
+        }
+    };
+    
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        const userDropdown = document.getElementById('user-profile-dropdown');
+        const userBtn = document.getElementById('header-user-btn');
+        if (userDropdown && userBtn && !userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
+            userDropdown.classList.add('opacity-0', 'invisible');
+        }
+    });
+</script>
+
+<!-- Right Sidebar Drawer (Offcanvas Menu) -->
+<div id="side-drawer" class="side-drawer">
+    <div class="side-drawer-overlay" onclick="closeSideDrawer()"></div>
+    <div class="side-drawer-content">
+        <!-- Close button & Logo -->
+        <div class="side-drawer-header">
+            <a href="<%= ctx %>/index.jsp" class="side-drawer-logo">
+                <img alt="V-SPORT Logo" style="height: 36px;" src="https://lh3.googleusercontent.com/aida/AP1WRLtyy5ngijEjLBX_YOA_Ts3twvpLdTO1-x8HhUbaRE3ayGwxmZqTmMdOPgkSxp3Gnai-ORx2r7qPgrNxy6yk6ztZTBgI1XXVzVEB5bn7AgFWSjBPzfP8R3ugGvn48RYkumfZ6-zQSic5lvBvbn5dnpjKkhbtSwklEmzxIE4-gxeD0915FBcWuBM04fodM4DrJcbESbs2lnyzwC1SmKNI8jNPoXyGnyzZZcXu4snr7JUeBFLdILYATdK4yT4"/>
+            </a>
+            <button class="side-drawer-close" onclick="closeSideDrawer()">&times;</button>
+        </div>
+
+        <!-- User Profile Section -->
+        <div class="side-drawer-section user-section">
+            <% if (loggedInUser != null) { %>
+                <div class="drawer-user-info">
+                    <div class="avatar-circle">
+                        <%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName().substring(0, 1).toUpperCase() : loggedInUser.getEmail().substring(0, 1).toUpperCase() %>
+                    </div>
+                    <div class="user-details">
+                        <p class="user-name"><%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName() : loggedInUser.getEmail() %></p>
+                        <p class="user-role">Thành viên</p>
+                    </div>
+                </div>
+                <div class="drawer-user-actions">
+                    <a href="<%= ctx %>/customer/tai-khoan" class="btn-drawer-action"><i class="fa-regular fa-user"></i> Chỉnh sửa Profile</a>
+                    <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="btn-drawer-action"><i class="fa-regular fa-calendar-check"></i> Lịch sử đặt sân</a>
+                </div>
+            <% } else { %>
+                <div class="drawer-guest-info">
+                    <p class="guest-msg">Đăng nhập để xem lịch sử đặt sân và quản lý hồ sơ của bạn.</p>
+                    <button class="btn-drawer-login" onclick="closeSideDrawer(); openAuthModal('login')">Đăng Nhập Ngay</button>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="side-drawer-section links-section">
+            <h4 class="section-title">TIỆN ÍCH HỆ THỐNG</h4>
+            <a href="<%= ctx %>/index.jsp" class="drawer-link"><i class="fa-solid fa-house"></i> Trang Chủ</a>
+            <a href="<%= ctx %>/customer/dat-san" class="drawer-link"><i class="fa-solid fa-calendar-days"></i> Tìm Sân Đặt Lịch</a>
+            <a href="<%= ctx %>/index.jsp#pricing" class="drawer-link"><i class="fa-solid fa-tags"></i> Bảng Giá Dịch Vụ</a>
+        </div>
+
+        <!-- Support Channels (Zalo & Messenger) -->
+        <div class="side-drawer-section support-section">
+            <h4 class="section-title">HỖ TRỢ TRỰC TUYẾN</h4>
+            <div class="support-channels">
+                <a href="https://zalo.me/0987654321" target="_blank" class="channel-btn zalo-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" class="channel-icon" />
+                    <span>Hỗ trợ qua Zalo</span>
+                </a>
+                <a href="https://m.me/vsport" target="_blank" class="channel-btn messenger-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Facebook_Messenger_logo_2020.svg" alt="Messenger" class="channel-icon" />
+                    <span>Hỗ trợ qua Messenger</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer / Contact Info -->
+        <div class="side-drawer-footer">
+            <div class="contact-item">
+                <span class="label">Hotline hỗ trợ:</span>
+                <span class="value">1900 1234</span>
+            </div>
+            <div class="contact-item">
+                <span class="label">Email liên hệ:</span>
+                <span class="value">support@vsport.vn</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.openSideDrawer = function() {
+        const drawer = document.getElementById('side-drawer');
+        if (drawer) drawer.classList.add('open');
+    };
+    window.closeSideDrawer = function() {
+        const drawer = document.getElementById('side-drawer');
+        if (drawer) drawer.classList.remove('open');
+    };
+</script>
+
+<jsp:include page="/auth/AuthModal.jsp" />
 </body>
 </html>
