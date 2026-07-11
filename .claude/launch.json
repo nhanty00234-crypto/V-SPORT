@@ -8,6 +8,12 @@
       "port": 5500
     },
     {
+      "name": "header-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "/tmp/claude-1000/-home-nhan-Downloads-V-SPORT/d4e6eb6d-696c-4de2-b25e-c5b6ec885a10/scratchpad"],
+      "port": 8791
+    },
+    {
       "name": "vsport-tomcat-preview",
       "runtimeExecutable": "bash",
       "runtimeArgs": ["/tmp/claude-1000/-home-nhan-Downloads-V-SPORT/7ef0981e-9f2b-4be9-b29b-ef61d064146c/scratchpad/run-tomcat-preview.sh"],

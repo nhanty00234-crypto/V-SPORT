@@ -209,9 +209,8 @@ ul {
 }
 
 .header-container {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 20px;
+    width: 100%;
+    padding: 0 32px;
     height: 90px;
     display: flex;
     align-items: center;
@@ -226,15 +225,22 @@ ul {
 }
 
 .logo-icon {
-    font-size: 32px;
-    color: var(--primary);
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    font-size: 22px;
+    color: var(--white);
+    background-color: var(--primary);
+    border: 2px solid var(--dark);
+    border-radius: 50%;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .logo-text {
     font-family: var(--font-heading);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 26px;
     text-transform: uppercase;
     letter-spacing: -0.5px;
@@ -242,7 +248,7 @@ ul {
 }
 
 .logo-text span {
-    color: var(--primary);
+    color: var(--dark);
 }
 
 /* Desktop Menu Navigation */
@@ -280,7 +286,7 @@ ul {
 
 .menu-item > a:hover,
 .menu-item.active > a {
-    color: var(--primary) !important;
+    color: var(--dark) !important;
 }
 
 .menu-item > a i {
@@ -296,7 +302,7 @@ ul {
     left: 0;
     width: 0;
     height: 2px;
-    background-color: var(--primary);
+    background-color: var(--dark);
     transition: width var(--transition-normal);
 }
 
@@ -623,229 +629,161 @@ ul {
     display: none;
 }
 
-.btn-header-book {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--secondary-blue);
-    color: var(--white) !important;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 10px 24px;
-    border-radius: 4px;
-    transition: var(--transition-normal);
-    box-shadow: 0 4px 10px rgba(66, 124, 240, 0.2);
-    margin-left: 15px;
-}
-
-.btn-header-book:hover {
-    background-color: var(--secondary-blue-hover);
-    color: var(--white) !important;
-    box-shadow: 0 6px 15px rgba(66, 124, 240, 0.3);
-    transform: translateY(-1px);
-}
-
 /* 4. HERO DARK SECTION */
-.hero-dark-section {
-    width: 100vw;
-    height: 80vh;
-    min-height: 600px;
-    background: linear-gradient(135deg, #11150f 0%, #080a08 100%);
+/* Hero Tri-Panel Section — thông số lấy từ Revolution Slider của theme gốc:
+   gridheight 864@1920 (45vw), gutter 30px, title 86/84 Barlow Condensed 600 */
+.hero-tri-section {
+    width: 100%;
+    height: min(45vw, 864px);
+    padding: min(2.6vw, 50px) 0;
+    display: flex;
+    gap: min(1.56vw, 30px);
+    overflow: hidden;
+    background-color: var(--white);
+}
+
+.hero-tri-panel {
+    flex: 1;
     position: relative;
     overflow: hidden;
-    display: flex;
-    align-items: center;
 }
 
-.hero-dark-container {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 20px;
+.hero-tri-panel--left {
+    animation: heroTriRise 1s cubic-bezier(0.215, 0.61, 0.355, 1) 0.08s both;
+}
+
+.hero-tri-panel--right {
+    animation: heroTriRise 1s cubic-bezier(0.215, 0.61, 0.355, 1) 0.84s both;
+}
+
+@keyframes heroTriRise {
+    from { opacity: 0; transform: translateY(50px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-tri-img {
     width: 100%;
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    align-items: center;
-    position: relative;
-    z-index: 5;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
 }
 
-.hero-dark-content {
+.hero-tri-panel--middle {
+    background-color: var(--primary);
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    color: var(--white);
-    opacity: 0;
-    transform: translateX(-50px);
-    animation: slideInLeft 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
-}
-
-@keyframes slideInLeft {
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.hero-dark-subtitle {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 18px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--primary);
-    margin-bottom: 25px;
-}
-
-.hero-dark-title {
-    font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 6vw;
-    line-height: 1.05;
-    text-transform: uppercase;
-    color: var(--white);
-    margin-bottom: 45px;
-}
-
-.hero-dark-scroll {
-    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 13px;
+    justify-content: center;
+    padding: 40px 5%;
+    animation: heroTriMaskUp 1s cubic-bezier(0.215, 0.61, 0.355, 1) 0.59s both;
+}
+
+@keyframes heroTriMaskUp {
+    from { transform: translateY(120%); }
+    to   { transform: translateY(0); }
+}
+
+.hero-tri-content {
+    text-align: center;
+    width: 100%;
+}
+
+.hero-tri-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: clamp(11px, 0.73vw, 14px);
+    font-weight: 700;
+    line-height: 1.7;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.5);
-    transition: var(--transition-normal);
+    color: var(--dark);
+    margin-bottom: min(0.73vw, 14px);
+    animation: heroTriScaleIn 1s cubic-bezier(0.215, 0.61, 0.355, 1) 0.6s both;
 }
 
-.hero-dark-scroll:hover {
-    color: var(--primary);
+.hero-tri-title {
+    font-family: var(--font-heading);
+    font-size: min(4.48vw, 86px);
+    font-weight: 600;
+    line-height: 1.02;
+    text-transform: uppercase;
+    color: var(--dark);
+    width: 90%;
+    margin: 0 auto min(1.67vw, 32px);
+    animation: heroTriScaleIn 1s cubic-bezier(0.215, 0.61, 0.355, 1) 1.03s both;
 }
 
-.hero-dark-scroll i {
-    animation: bounceDown 1.5s infinite;
+@keyframes heroTriScaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
-@keyframes bounceDown {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(5px); }
+.hero-tri-btn-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
 }
 
-.hero-dark-image-wrapper {
-    position: relative;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    opacity: 0;
-    transform: translateX(50px);
-    animation: slideInRight 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.4s forwards;
+.hero-tri-btn {
+    display: inline-block;
+    background-color: var(--white);
+    color: var(--dark) !important;
+    font-family: var(--font-body);
+    font-size: clamp(11px, 0.73vw, 14px);
+    font-weight: 500;
+    line-height: clamp(42px, 2.81vw, 54px);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0 clamp(32px, 2.6vw, 50px);
+    text-decoration: none;
+    transition: color var(--transition-normal), background-color var(--transition-normal);
+    animation: heroTriBtnUp 1.2s cubic-bezier(0.215, 0.61, 0.355, 1) 1.1s both;
 }
 
-@keyframes slideInRight {
-    to {
-        opacity: 1;
-        transform: translateX(0);
+@keyframes heroTriBtnUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+.hero-tri-btn:hover {
+    background-color: var(--dark);
+    color: var(--white) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-tri-panel--left,
+    .hero-tri-panel--right,
+    .hero-tri-panel--middle,
+    .hero-tri-label,
+    .hero-tri-title,
+    .hero-tri-btn {
+        animation: none;
     }
 }
 
-.hero-dark-img {
-    max-width: 100%;
-    height: 80vh;
-    min-height: 600px;
-    object-fit: cover;
-    object-position: center;
-    mask-image: linear-gradient(to left, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
-    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+@media (max-width: 1239px) {
+    .hero-tri-section {
+        height: min(39.6vw, 570px);
+    }
+    .hero-tri-title {
+        font-size: min(3.89vw, 56px);
+        margin-bottom: 26px;
+    }
 }
 
-.hero-dark-pagination {
-    position: absolute;
-    bottom: 40px;
-    right: 40px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    color: var(--white);
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 14px;
-    z-index: 10;
-}
-
-.hero-dark-pagination-line {
-    width: 60px;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.2);
-    position: relative;
-}
-
-.hero-dark-pagination-active {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 50%;
-    background-color: var(--primary);
-}
-
-.hero-dark-buttons {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.hero-dark-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--primary);
-    color: var(--dark) !important;
-    font-family: var(--font-heading);
-    font-weight: 750;
-    font-size: 14px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 16px 40px;
-    border-radius: 4px;
-    transition: var(--transition-normal);
-    box-shadow: 0 4px 15px rgba(175, 214, 57, 0.3);
-    text-decoration: none;
-}
-
-.hero-dark-btn-primary:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 8px 25px rgba(175, 214, 57, 0.5);
-    transform: translateY(-2px);
-}
-
-.hero-dark-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: transparent;
-    color: var(--white) !important;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 16px 40px;
-    border-radius: 4px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    transition: var(--transition-normal);
-    text-decoration: none;
-}
-
-.hero-dark-btn-secondary:hover {
-    border-color: var(--white);
-    background-color: rgba(255, 255, 255, 0.05);
-    transform: translateY(-2px);
+/* Theme gốc ẩn 2 panel ảnh trên mobile, chỉ giữ panel xanh */
+@media (max-width: 540px) {
+    .hero-tri-section {
+        height: 530px;
+        gap: 0;
+    }
+    .hero-tri-panel--left,
+    .hero-tri-panel--right {
+        display: none;
+    }
+    .hero-tri-title {
+        font-size: 60px;
+    }
 }
 
 /* 7.5 STEPS BOOKING SECTION */
@@ -1147,20 +1085,26 @@ ul {
 }
 
 @media (max-width: 1023px) {
-    .hero-dark-container {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 40px;
+    .hero-tri-section {
+        height: min(60.4vw, 470px);
+        gap: 10px;
     }
-    .hero-dark-content {
-        align-items: center;
+    .hero-tri-title {
+        font-size: min(4.88vw, 38px);
     }
-    .hero-dark-image-wrapper {
-        justify-content: center;
+    .hero-tri-btn {
+        line-height: 46px;
+        padding: 0 30px;
+        font-size: 12px;
     }
-    .hero-dark-img {
-        height: 50vh;
-        min-height: auto;
+    @media (max-width: 540px) {
+        .hero-tri-section {
+            height: 530px;
+            gap: 0;
+        }
+        .hero-tri-title {
+            font-size: 60px;
+        }
     }
     .welcome-container {
         grid-template-columns: 1fr;
@@ -2146,7 +2090,9 @@ ul {
     }
     
     .logo-icon {
-        font-size: 26px;
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
     }
     
     .hero-section {
@@ -2741,8 +2687,6 @@ ul {
                             </g>
                         </svg>
                     </button>
-                    <!-- Book a Court Button -->
-                    <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn-header-book">Đặt Sân</a>
                     <!-- Mobile Hamburger Button -->
                     <button class="action-btn mobile-menu-trigger" aria-label="Open Menu">
                         <i class="fa-solid fa-bars"></i>
@@ -2755,30 +2699,24 @@ ul {
         <main id="main-content">
             
             <!-- HERO DARK SECTION -->
-            <section class="hero-dark-section">
-                <div class="hero-dark-container">
-                    <!-- Left Side Content -->
-                    <div class="hero-dark-content">
-                        <span class="hero-dark-subtitle" style="color: var(--primary); font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">ĐẶT SÂN THỂ THAO</span>
-                        <h1 class="hero-dark-title" style="margin-top: 15px; margin-bottom: 25px;">TÌM SÂN PHÙ HỢP<br>ĐẶT LỊCH NHANH CHÓNG</h1>
-                        <div class="hero-dark-buttons">
-                            <a href="${pageContext.request.contextPath}/customer/dat-san" class="hero-dark-btn-primary">ĐẶT SÂN NGAY</a>
-                            <a href="#welcome-section" class="hero-dark-btn-secondary">KHÁM PHÁ SÂN</a>
-                        </div>
-                    </div>
-                    <!-- Right Side Image -->
-                    <div class="hero-dark-image-wrapper">
-                        <img class="hero-dark-img" src="${pageContext.request.contextPath}/resources/436417.jpg" alt="Cầu thủ thi đấu">
+            <section class="hero-tri-section">
+                <!-- Left Panel: Action photo -->
+                <div class="hero-tri-panel hero-tri-panel--left">
+                    <img class="hero-tri-img" src="${pageContext.request.contextPath}/resources/436417.jpg" alt="Vận động viên thi đấu">
+                </div>
+
+                <!-- Middle Panel: CTA -->
+                <div class="hero-tri-panel hero-tri-panel--middle">
+                    <div class="hero-tri-content">
+                        <span class="hero-tri-label">Đặt Sân Thể Thao</span>
+                        <h1 class="hero-tri-title">Tìm Sân Phù Hợp Đặt Lịch Nhanh Chóng</h1>
+                        <span class="hero-tri-btn-mask"><a href="${pageContext.request.contextPath}/customer/dat-san" class="hero-tri-btn">Đặt Sân Ngay</a></span>
                     </div>
                 </div>
-                
-                <!-- Pagination Indicators -->
-                <div class="hero-dark-pagination">
-                    <span>02</span>
-                    <div class="hero-dark-pagination-line">
-                        <div class="hero-dark-pagination-active"></div>
-                    </div>
-                    <span>01</span>
+
+                <!-- Right Panel: Second photo -->
+                <div class="hero-tri-panel hero-tri-panel--right">
+                    <img class="hero-tri-img" src="${pageContext.request.contextPath}/resources/velocity_hero_bg.png" alt="Sân thể thao">
                 </div>
             </section>
 
