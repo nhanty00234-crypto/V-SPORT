@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author DatN (Senior refactor)
  * @version 2.0
  */
-@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel" })
+@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel", "/customer/payos-status" })
 public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
@@ -112,6 +112,8 @@ public class DatSanServlet extends HttpServlet {
             handlePayOSReturn(req, resp, session);
         } else if (path.equals("/customer/payos-cancel")) {
             handlePayOSCancel(req, resp, session);
+        } else if (path.equals("/customer/payos-status")) {
+            handlePayOSStatus(req, resp, user);
         }
     }
 
@@ -251,10 +253,32 @@ public class DatSanServlet extends HttpServlet {
         int[] serviceQtys;
 
         try {
-            sanId = Integer.parseInt(req.getParameter("sanId"));
-            ngayDat = LocalDate.parse(req.getParameter("ngayDat"));
-            gioBatDau = LocalTime.parse(req.getParameter("gioBatDau"));
-            gioKetThuc = LocalTime.parse(req.getParameter("gioKetThuc"));
+            String pSanId = req.getParameter("sanId");
+            String pNgayDat = req.getParameter("ngayDat");
+            String pGioBatDau = req.getParameter("gioBatDau");
+            String pGioKetThuc = req.getParameter("gioKetThuc");
+
+            String missingParam = null;
+            if (pSanId == null || pSanId.trim().isEmpty()) {
+                missingParam = "sanId";
+            } else if (pNgayDat == null || pNgayDat.trim().isEmpty()) {
+                missingParam = "ngayDat";
+            } else if (pGioBatDau == null || pGioBatDau.trim().isEmpty()) {
+                missingParam = "gioBatDau";
+            } else if (pGioKetThuc == null || pGioKetThuc.trim().isEmpty()) {
+                missingParam = "gioKetThuc";
+            }
+            if (missingParam != null) {
+                LOGGER.log(Level.WARNING, "Thiếu tham số đặt sân bắt buộc: {0}", missingParam);
+                session.setAttribute("error", "Thiếu thông tin đặt sân. Vui lòng chọn lại sân, ngày và khung giờ.");
+                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                return;
+            }
+
+            sanId = Integer.parseInt(pSanId);
+            ngayDat = LocalDate.parse(pNgayDat);
+            gioBatDau = LocalTime.parse(pGioBatDau);
+            gioKetThuc = LocalTime.parse(pGioKetThuc);
             ghiChu = req.getParameter("ghiChu");
             paymentMethod = req.getParameter("paymentMethod");
             if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
@@ -655,8 +679,10 @@ public class DatSanServlet extends HttpServlet {
                             "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s, tổng submit=%dms",
                             user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod, System.currentTimeMillis() - tSubmit0));
 
+                    boolean isAjax = "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
+
                     if (isOnlineDeposit) {
-                        // ── PayOS: tạo payment link và redirect sang trang thanh toán ──
+                        // ── PayOS: tạo QR hoặc redirect tùy request type ──
                         String scheme = req.getScheme();
                         String serverName = req.getServerName();
                         int port = req.getServerPort();
@@ -673,10 +699,24 @@ public class DatSanServlet extends HttpServlet {
 
                         try {
                             long tPayOS0 = System.currentTimeMillis();
-                            String checkoutUrl = org.example.service.PayOSService.getInstance()
-                                    .createCheckoutUrl(newDatSanId, amount, description, returnUrl, cancelUrl);
-                            LOGGER.info(String.format("handleDatSan: PayOS createCheckoutUrl=%dms", System.currentTimeMillis() - tPayOS0));
-                            resp.sendRedirect(checkoutUrl);
+                            org.example.service.PayOSCheckoutSession checkoutSession =
+                                    org.example.service.PayOSService.getInstance()
+                                            .createCheckoutSession(newDatSanId, amount, description, returnUrl, cancelUrl);
+                            LOGGER.info(String.format("handleDatSan: PayOS createCheckoutSession=%dms",
+                                    System.currentTimeMillis() - tPayOS0));
+
+                            if (isAjax) {
+                                resp.setContentType("application/json; charset=UTF-8");
+                                resp.getWriter().write(String.format(
+                                        "{\"success\":true,\"datSanId\":%d,\"qrCode\":\"%s\",\"amount\":%d,\"expiredAt\":%s}",
+                                        newDatSanId,
+                                        checkoutSession.qrCode.replace("\\", "\\\\").replace("\"", "\\\""),
+                                        checkoutSession.amount,
+                                        checkoutSession.expiredAt != null ? checkoutSession.expiredAt.toString() : "null"
+                                ));
+                            } else {
+                                resp.sendRedirect(checkoutSession.checkoutUrl);
+                            }
                         } catch (Exception payosEx) {
                             LOGGER.log(Level.SEVERE, "PayOS tạo link thất bại, DatSanID=" + newDatSanId, payosEx);
                             if (newDatSanId != -1) {
@@ -690,9 +730,14 @@ public class DatSanServlet extends HttpServlet {
                                     }
                                 } catch (Exception ignored) {}
                             }
-                            session.setAttribute("error",
-                                    "Không thể tạo link thanh toán PayOS. Vui lòng thử lại hoặc chọn thanh toán tại quầy.");
-                            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                            if (isAjax) {
+                                resp.setContentType("application/json; charset=UTF-8");
+                                resp.getWriter().write("{\"success\":false,\"error\":\"Không thể tạo mã QR thanh toán. Vui lòng thử lại hoặc chọn thanh toán tại quầy.\"}");
+                            } else {
+                                session.setAttribute("error",
+                                        "Không thể tạo link thanh toán PayOS. Vui lòng thử lại hoặc chọn thanh toán tại quầy.");
+                                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                            }
                         }
                     } else {
                         session.setAttribute("message",
@@ -833,6 +878,42 @@ public class DatSanServlet extends HttpServlet {
     // =========================================================================
     // PHẦN 5: PAYOS RETURN / CANCEL
     // =========================================================================
+
+    private void handlePayOSStatus(HttpServletRequest req, HttpServletResponse resp,
+            TaiKhoan user) throws IOException {
+        resp.setContentType("application/json; charset=UTF-8");
+        if (user == null) {
+            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Chưa đăng nhập\"}");
+            return;
+        }
+        String paramId = req.getParameter("datSanId");
+        if (paramId == null || paramId.isBlank()) {
+            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
+            return;
+        }
+        int datSanId;
+        try {
+            datSanId = Integer.parseInt(paramId.trim());
+        } catch (NumberFormatException e) {
+            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
+            return;
+        }
+        org.example.model.Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
+        if (lich == null || lich.getAccountId() == null || !lich.getAccountId().equals(user.getAccountId())) {
+            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Không tìm thấy đơn\"}");
+            return;
+        }
+        String trangThai = lich.getTrangThai();
+        String status;
+        if ("Đã xác nhận".equals(trangThai)) {
+            status = "paid";
+        } else if ("Đã hủy".equals(trangThai)) {
+            status = "cancelled";
+        } else {
+            status = "pending";
+        }
+        resp.getWriter().write("{\"status\":\"" + status + "\"}");
+    }
 
     private void handlePayOSReturn(HttpServletRequest req, HttpServletResponse resp,
             HttpSession session) throws IOException {

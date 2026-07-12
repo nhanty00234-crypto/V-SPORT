@@ -55,6 +55,24 @@ public class PayOSService {
         return result.getCheckoutUrl();
     }
 
+    public PayOSCheckoutSession createCheckoutSession(int datSanId, long amount, String description,
+                                                       String returnUrl, String cancelUrl) throws Exception {
+        CreatePaymentLinkRequest request = CreatePaymentLinkRequest.builder()
+                .orderCode((long) datSanId)
+                .amount(amount)
+                .description(description)
+                .returnUrl(returnUrl)
+                .cancelUrl(cancelUrl)
+                .build();
+        CreatePaymentLinkResponse result = payOS.paymentRequests().create(request);
+        return new PayOSCheckoutSession(
+                result.getCheckoutUrl(),
+                result.getQrCode(),
+                result.getExpiredAt(),
+                result.getAmount()
+        );
+    }
+
     /**
      * Xác thực webhook PayOS bằng SDK (kiểm tra chữ ký HMAC nội bộ).
      * Ném vn.payos.exception.PayOSException (unchecked) nếu chữ ký không hợp lệ.

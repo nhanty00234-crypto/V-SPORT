@@ -1691,6 +1691,23 @@
             }
         }
 
+        function isConflictStatus(status) {
+            if (!status) return false;
+            const s = status.trim().toLowerCase();
+            // Blacklist: Exclude Cancelled, Expired, No-show
+            if (s.includes("hủy") || s.includes("huy") || s.includes("h?y")) return false;
+            if (s.includes("quá") || s.includes("qua") || s.includes("qu ") || s.includes("qu?")) return false;
+            if (s.includes("không") || s.includes("khong") || s.includes("kh ") || s.includes("kh?")) return false;
+            
+            // Whitelist: Include active or completed statuses
+            const isConfirmed = s.includes("xác nhận") || s.includes("xac nhan") || s.includes("xac") || s.includes("x?c");
+            const isPendingPayment = s.includes("thanh toán") || s.includes("thanh toan") || s.includes("thanh") || s.includes("to n");
+            const isUsing = s.includes("sử dụng") || s.includes("su dung") || s.includes("dụng") || s.includes("d?ng");
+            const isCompleted = s.includes("hoàn thành") || s.includes("hoan thanh") || s.includes("thành") || s.includes("th nh");
+            
+            return isConfirmed || isPendingPayment || isUsing || isCompleted;
+        }
+
         let lastHoldKey = null;
         function requestSoftHold(courtId, dateVal, startVal, endVal) {
             const holdKey = `\${courtId}|\${dateVal}|\${startVal}|\${endVal}`;
@@ -1724,7 +1741,7 @@
             const timelineSlots = document.getElementById("timeline-slots");
             const warningBox = document.getElementById("overlap-warning");
             const warningText = document.getElementById("overlap-warning-text");
-            const conflicts = activeBookings.filter(b => b.sanId === courtId && b.date === dateVal && b.status !== "Đã hủy");
+            const conflicts = activeBookings.filter(b => b.sanId === courtId && b.date === dateVal && isConflictStatus(b.status));
             if (conflicts.length > 0) {
                 timetableBlock.classList.remove("hidden");
                 timelineSlots.innerHTML = "";
@@ -1744,9 +1761,25 @@
                 const now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
                 if (startMin < nowMin) { warningText.textContent = "Không thể đặt sân cho giờ đã qua hôm nay."; warningBox.classList.remove("hidden"); if (btnNext) btnNext.disabled = true; return; }
             }
-            let isOverlap = false;
-            conflicts.forEach(b => { const bS = timeToMinutes(b.start), bE = timeToMinutes(b.end); if (!(endMin <= bS || startMin >= bE)) isOverlap = true; });
-            if (isOverlap) { warningText.textContent = "Khung giờ bạn chọn đã bị trùng lịch."; warningBox.classList.remove("hidden"); if (btnNext) btnNext.disabled = true; return; }
+            
+            let overlappingSlot = null;
+            for (let i = 0; i < conflicts.length; i++) {
+                const b = conflicts[i];
+                const bS = timeToMinutes(b.start);
+                const bE = timeToMinutes(b.end);
+                if (!(endMin <= bS || startMin >= bE)) {
+                    overlappingSlot = b;
+                    break;
+                }
+            }
+            
+            if (overlappingSlot) {
+                warningText.textContent = `Khung giờ này đã có người đặt (${overlappingSlot.start.substring(0, 5)} - ${overlappingSlot.end.substring(0, 5)}). Vui lòng chọn khung giờ khác.`;
+                warningBox.classList.remove("hidden");
+                if (btnNext) btnNext.disabled = true;
+                return;
+            }
+            
             warningBox.classList.add("hidden"); if (btnNext) btnNext.disabled = false;
             requestSoftHold(courtId, dateVal, startVal, endVal);
             const type = courtTypes[court.typeId];
@@ -1818,7 +1851,7 @@
             if (hoursLabel) hoursLabel.textContent = openTime.substring(0, 5) + " - " + closeTime.substring(0, 5);
             const openMin = timeToMinutes(openTime), closeMin = timeToMinutes(closeTime);
             const dateVal = document.getElementById("ngayDat").value;
-            const conflicts = activeBookings.filter(b => b.sanId === selectedCourtId && b.date === dateVal && b.status !== "Đã hủy");
+            const conflicts = activeBookings.filter(b => b.sanId === selectedCourtId && b.date === dateVal && isConflictStatus(b.status));
             const startSelect = document.getElementById("gioBatDau");
             startSelect.innerHTML = '<option value="">-- Chọn giờ bắt đầu --</option>';
             let currentTotalMin = -1;
@@ -1847,7 +1880,7 @@
             const { closeTime } = getBranchHours(court ? court.branchId : null);
             const closeMin = timeToMinutes(closeTime);
             const dateVal = document.getElementById("ngayDat").value;
-            const conflicts = activeBookings.filter(b => b.sanId === selectedCourtId && b.date === dateVal && b.status !== "Đã hủy");
+            const conflicts = activeBookings.filter(b => b.sanId === selectedCourtId && b.date === dateVal && isConflictStatus(b.status));
             let maxMin = closeMin;
             conflicts.forEach(b => { const bs = timeToMinutes(b.start); if (bs > startMin && bs < maxMin) maxMin = bs; });
             endSelectEl.innerHTML = '<option value="">-- Chọn giờ kết thúc --</option>';
