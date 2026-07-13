@@ -599,16 +599,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
     }
 
     private void writeKhoAuditLog(int actorId, int spId, String sku, int qty, String type, int newStock) {
-        String logFilePath = "d:/New folder/V-SPORT/logs/kho_audit.log";
-        java.io.File logFile = new java.io.File(logFilePath);
-        logFile.getParentFile().mkdirs();
-        try (java.io.FileWriter fw = new java.io.FileWriter(logFile, true);
-             java.io.PrintWriter pw = new java.io.PrintWriter(fw)) {
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            pw.printf("[%s] TYPE: %s | Actor ID: %d | Product ID: %d | SKU: %s | Qty Changed: %d | New Stock: %d%n",
-                    now, type, actorId, spId, sku, qty, newStock);
-        } catch (java.io.IOException e) {
-            logger.error("Lỗi ghi log audit kho: ", e);
-        }
+        logger.info("[AUDIT KHO] TYPE: {} | Actor ID: {} | Product ID: {} | SKU: {} | Qty Changed: {} | New Stock: {}",
+                type, actorId, spId, sku, qty, newStock);
     }
 }

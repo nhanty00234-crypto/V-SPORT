@@ -9,15 +9,30 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DBUtil {
-    private static final String URL = "jdbc:sqlserver://14.225.217.109:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;";
-    private static final String USER = "sa";
-    private static final String PASSWORD = "TOP1@iyounguru!";
+    private static final String URL;
+    private static final String USER;
+    private static final String PASSWORD;
 
     private static HikariDataSource dataSource;
     private static final Logger logger = LogManager.getLogger(DBUtil.class);
 
+    private static String getConfig(String envName, String propertyName) {
+        String val = System.getenv(envName);
+        if (val == null || val.trim().isEmpty()) {
+            val = System.getProperty(propertyName);
+        }
+        if (val == null || val.trim().isEmpty()) {
+            throw new IllegalStateException("Cấu hình bắt buộc bị thiếu: env " + envName + " hoặc system property " + propertyName);
+        }
+        return val.trim();
+    }
+
     static {
         try {
+            URL = getConfig("DB_URL", "db.url");
+            USER = getConfig("DB_USERNAME", "db.username");
+            PASSWORD = getConfig("DB_PASSWORD", "db.password");
+
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(URL);
             config.setUsername(USER);
@@ -52,5 +67,9 @@ public class DBUtil {
             return null;
         }
     }
+
+    public static String getURL() { return URL; }
+    public static String getUSER() { return USER; }
+    public static String getPASSWORD() { return PASSWORD; }
 }
 

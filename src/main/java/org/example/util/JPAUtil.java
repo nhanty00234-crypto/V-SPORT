@@ -12,7 +12,12 @@ public class JPAUtil {
 
     static {
         try {
-            factory = Persistence.createEntityManagerFactory("SportPU");
+            java.util.Map<String, String> properties = new java.util.HashMap<>();
+            properties.put("jakarta.persistence.jdbc.url", DBUtil.getURL());
+            properties.put("jakarta.persistence.jdbc.user", DBUtil.getUSER());
+            properties.put("jakarta.persistence.jdbc.password", DBUtil.getPASSWORD());
+
+            factory = Persistence.createEntityManagerFactory("SportPU", properties);
             logger.info("JPAUtil: EntityManagerFactory created successfully for SportPU");
         } catch (Throwable ex) {
             logger.error("JPAUtil: Initial EntityManagerFactory creation failed: {}", ex.getMessage(), ex);
