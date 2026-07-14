@@ -407,10 +407,10 @@
 
             <!-- Action buttons -->
             <div class="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100 mt-auto">
-              <a href="?action=duyet&id=${cs.coSoID}"
-                 onclick="return confirm('Duyệt lại cơ sở \'${cs.tenCoSo}\' và kích hoạt tài khoản?')"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">
-                <i class="ti ti-refresh text-sm"></i>Duyệt lại đơn
+              <a href="?action=thu-hoi&id=${cs.coSoID}"
+                 onclick="return confirm('Thu hồi từ chối và đưa cơ sở \'${cs.tenCoSo}\' về chờ duyệt?')"
+                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 transition-all shadow-md shadow-amber-100">
+                <i class="ti ti-arrow-back-up text-sm"></i>Thu hồi
               </a>
             </div>
 

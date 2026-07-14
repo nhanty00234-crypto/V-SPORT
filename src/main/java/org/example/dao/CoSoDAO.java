@@ -16,4 +16,7 @@ public interface CoSoDAO {
     boolean hardDeleteCascade(int coSoId);
     List<CoSo> findDeleted();
     List<Integer> findDeletedIdsOlderThan(int days);
+
+    // Soft-archive all rejected CoSo for an account except the one being approved
+    boolean archiveRejectedForAccount(int accountId, int excludeCoSoId, int actorId);
 }

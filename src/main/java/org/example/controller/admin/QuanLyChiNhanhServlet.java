@@ -8,7 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.service.AuditLogService;
+import org.example.dao.AdminTrashDAO;
 import org.example.dao.CoSoDAO;
+import org.example.dao.impl.AdminTrashDAOImpl;
 import org.example.dao.impl.CoSoDAOImpl;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
@@ -16,6 +18,7 @@ import org.example.model.CoSo;
 import org.example.model.TaiKhoan;
 import org.example.util.DBUtil;
 import org.example.util.EmailUtil;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,6 +37,7 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(QuanLyChiNhanhServlet.class);
     private CoSoDAO chiNhanhDAO = new CoSoDAOImpl();
+    private final AdminTrashDAO adminTrashDAO = new AdminTrashDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -187,10 +191,18 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             req.getRequestDispatcher("/admin/SuaChiNhanh.jsp").forward(req, resp);
         } else if (path.equals("/admin/chi-nhanh/xoa")) {
             int id = Integer.parseInt(req.getParameter("id"));
-            if (chiNhanhDAO.deleteCoSo(id)) {
-                req.getSession().setAttribute("message", "Xóa cơ sở và toàn bộ tài khoản nhân sự liên quan thành công!");
+            HttpSession session = req.getSession();
+            TaiKhoan admin = (TaiKhoan) session.getAttribute("user");
+            CoSo coSo = chiNhanhDAO.getCoSoById(id);
+
+            if (coSo != null && admin != null && chiNhanhDAO.softDelete(id, admin.getAccountId())) {
+                adminTrashDAO.log("CoSo", id, coSo.getTenCoSo(), "CoSo", coSo.getTrangThai(),
+                        admin.getAccountId(), null);
+                session.setAttribute("trashMessage", "Đã chuyển vào thùng rác.");
+                session.setAttribute("trashUrl", req.getContextPath() + "/admin/thung-rac");
+                session.setAttribute("trashCountdownSeconds", 10);
             } else {
-                req.getSession().setAttribute("error", "Lỗi khi xóa cơ sở!");
+                session.setAttribute("error", "Lỗi khi xóa cơ sở!");
             }
             resp.sendRedirect(req.getContextPath() + "/admin/chi-nhanh");
         }

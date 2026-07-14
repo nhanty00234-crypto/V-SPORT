@@ -236,12 +236,12 @@ body { font-family: 'Inter', sans-serif; }
     <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
       <i class="ti ti-trash text-red-500 text-3xl"></i>
     </div>
-    <h3 class="text-base font-bold text-zinc-900 mb-1">Xác nhận xóa cơ sở</h3>
-    <p class="text-sm text-zinc-500 mb-6" id="deleteMsg">Bạn có chắc muốn xóa cơ sở này?</p>
+    <h3 class="text-base font-bold text-zinc-900 mb-1">Chuyển cơ sở vào thùng rác?</h3>
+    <p class="text-sm text-zinc-500 mb-6" id="deleteMsg">Bạn chắc chắn muốn chuyển mục này vào thùng rác? Bạn có thể thu hồi lại trong trang Thùng rác.</p>
     <div class="flex gap-3">
       <button onclick="closeDelete()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
       <a id="deleteBtn" href="#" class="flex-1 h-10 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-red-200">
-        <i class="ti ti-trash text-sm"></i>Xóa
+        <i class="ti ti-trash text-sm"></i>Chuyển vào thùng rác
       </a>
     </div>
   </div>
@@ -483,7 +483,7 @@ body { font-family: 'Inter', sans-serif; }
 
   // ── Delete confirmation ──
   function confirmDelete(id, name) {
-    document.getElementById('deleteMsg').textContent = 'Bạn có chắc muốn xóa cơ sở "' + name + '"? Hành động này không thể hoàn tác.';
+    document.getElementById('deleteMsg').textContent = 'Bạn chắc chắn muốn chuyển cơ sở "' + name + '" vào thùng rác? Bạn có thể thu hồi lại trong trang Thùng rác.';
     document.getElementById('deleteBtn').href = '${pageContext.request.contextPath}/admin/chi-nhanh/xoa?id=' + id;
     document.getElementById('modalDelete').classList.remove('hidden');
   }

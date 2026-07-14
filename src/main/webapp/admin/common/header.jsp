@@ -114,3 +114,4 @@
     <jsp:include page="/admin/common/profile_dropdown.jsp"/>
   </div>
 </header>
+<jsp:include page="/admin/common/admin_toast.jsp"/>

@@ -233,14 +233,20 @@ public class OwnerRegisterServlet extends HttpServlet {
                     .setParameter("email", email)
                     .setParameter("username", email)
                     .getSingleResult();
+            int reusedAccountId = -1;
             if (existingCount > 0) {
                 if (!isRejectedOwnerEmail(email)) {
                     out.print("{\"success\":false,\"message\":\"Email đã được đăng ký trên hệ thống.\"}");
                     trans.rollback();
                     return;
                 }
-                // Delete old rejected records so we can re-create cleanly
-                deleteRejectedOwnerRecords(em, email);
+                // Soft-archive old rejected CoSo; reuse existing Account
+                reusedAccountId = softArchiveRejectedOwnerCoSo(em, email);
+                if (reusedAccountId < 0) {
+                    out.print("{\"success\":false,\"message\":\"Không thể xử lý đăng ký lại. Vui lòng thử lại.\"}");
+                    trans.rollback();
+                    return;
+                }
             }
 
             // Parse sportsData to obtain loaiHinhKinhDoanh and total count
@@ -280,22 +286,38 @@ public class OwnerRegisterServlet extends HttpServlet {
             em.persist(coSo);
             em.flush(); // To retrieve generated CoSoID
 
-            // Create locked manager Account
-            TaiKhoan managerAcc = new TaiKhoan();
-            managerAcc.setUsername(email);
-            managerAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw("123456", org.mindrot.jbcrypt.BCrypt.gensalt(12)));
-            managerAcc.setFullName(ownerName);
-            managerAcc.setPhoneNumber(phone);
-            managerAcc.setEmail(email);
-            managerAcc.setRoleId(2); // Manager (Owner) role
-            managerAcc.setCoSoId(coSo.getCoSoID());
-            managerAcc.setIsLocked(true); // Locked until approved by admin
-            managerAcc.setDiemUyTin(100);
-            managerAcc.setDiemTrinhDo(1000);
-            managerAcc.setNhanThongBaoSos(true);
-
-            em.persist(managerAcc);
-            em.flush(); // To retrieve generated AccountID
+            // Create or reuse locked manager Account
+            TaiKhoan managerAcc;
+            if (reusedAccountId > 0) {
+                // Re-registration: reuse existing Account, update profile fields
+                managerAcc = em.find(TaiKhoan.class, reusedAccountId);
+                if (managerAcc == null) {
+                    out.print("{\"success\":false,\"message\":\"Không tìm thấy tài khoản. Vui lòng thử lại.\"}");
+                    trans.rollback();
+                    return;
+                }
+                managerAcc.setFullName(ownerName);
+                managerAcc.setPhoneNumber(phone);
+                managerAcc.setIsLocked(true);
+                managerAcc.setCoSoId(coSo.getCoSoID());
+                em.merge(managerAcc);
+            } else {
+                // First-time registration: create new Account
+                managerAcc = new TaiKhoan();
+                managerAcc.setUsername(email);
+                managerAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw("123456", org.mindrot.jbcrypt.BCrypt.gensalt(12)));
+                managerAcc.setFullName(ownerName);
+                managerAcc.setPhoneNumber(phone);
+                managerAcc.setEmail(email);
+                managerAcc.setRoleId(2);
+                managerAcc.setCoSoId(coSo.getCoSoID());
+                managerAcc.setIsLocked(true);
+                managerAcc.setDiemUyTin(100);
+                managerAcc.setDiemTrinhDo(1000);
+                managerAcc.setNhanThongBaoSos(true);
+                em.persist(managerAcc);
+                em.flush();
+            }
 
             // Link CoSo to Manager Account
             coSo.setAccountID_QuanLy(managerAcc.getAccountId());
@@ -334,6 +356,7 @@ public class OwnerRegisterServlet extends HttpServlet {
         try {
             Long count = em.createQuery(
                     "SELECT COUNT(c) FROM CoSo c WHERE c.TrangThai = 'Từ chối' " +
+                    "AND (c.isDeleted = false OR c.isDeleted IS NULL) " +
                     "AND c.AccountID_QuanLy IN " +
                     "(SELECT a.accountId FROM TaiKhoan a WHERE (a.email = :email OR a.username = :email) AND a.isLocked = true)",
                     Long.class)
@@ -349,35 +372,33 @@ public class OwnerRegisterServlet extends HttpServlet {
     }
 
     /**
-     * Deletes the TaiKhoan and CoSo records belonging to a rejected owner registration
-     * so the email can be re-used for a fresh registration attempt.
+     * Soft-archives all non-deleted rejected CoSo for the locked account with the given email.
+     * Returns the accountId to reuse, or -1 if not found.
      */
-    private void deleteRejectedOwnerRecords(EntityManager em, String email) {
+    private int softArchiveRejectedOwnerCoSo(EntityManager em, String email) {
         try {
-            // Find the locked account with this email
             java.util.List<TaiKhoan> accounts = em.createQuery(
                     "SELECT a FROM TaiKhoan a WHERE (a.email = :email OR a.username = :email) AND a.isLocked = true",
                     TaiKhoan.class)
                     .setParameter("email", email)
                     .getResultList();
 
-            for (TaiKhoan acc : accounts) {
-                // Find rejected CoSo linked to this account
-                java.util.List<CoSo> coSoList = em.createQuery(
-                        "SELECT c FROM CoSo c WHERE c.AccountID_QuanLy = :accId AND c.TrangThai = 'Từ chối'",
-                        CoSo.class)
-                        .setParameter("accId", acc.getAccountId())
-                        .getResultList();
+            if (accounts.isEmpty()) return -1;
 
-                for (CoSo coSo : coSoList) {
-                    em.remove(em.contains(coSo) ? coSo : em.merge(coSo));
-                }
-                em.remove(em.contains(acc) ? acc : em.merge(acc));
-            }
-            em.flush();
-            logger.info("[OwnerRegister] Cleaned up rejected registration for email: {}", email);
+            TaiKhoan acc = accounts.get(0);
+            em.createQuery(
+                    "UPDATE CoSo c SET c.isDeleted = true, c.deletedAt = :now, c.deletedBy = :by " +
+                    "WHERE c.AccountID_QuanLy = :accId AND c.TrangThai = 'Từ chối' " +
+                    "AND (c.isDeleted = false OR c.isDeleted IS NULL)")
+                    .setParameter("now", java.time.LocalDateTime.now())
+                    .setParameter("by", acc.getAccountId())
+                    .setParameter("accId", acc.getAccountId())
+                    .executeUpdate();
+
+            logger.info("[OwnerRegister] Soft-archived rejected CoSo for email: {}, accountId: {}", email, acc.getAccountId());
+            return acc.getAccountId();
         } catch (Exception e) {
-            logger.error("[OwnerRegister] deleteRejectedOwnerRecords error for {}", email, e);
+            logger.error("[OwnerRegister] softArchiveRejectedOwnerCoSo error for {}", email, e);
             throw e;
         }
     }

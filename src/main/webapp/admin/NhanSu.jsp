@@ -96,7 +96,7 @@ body { font-family: 'Inter', sans-serif; }
   <div id="sectionThungRac" class="hidden w-full flex flex-col gap-4">
     <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-medium flex items-center gap-2">
       <span class="material-symbols-outlined text-[16px]">info</span>
-      Các tài khoản trong thùng rác đã bị vô hiệu hóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn.
+      Các tài khoản trong thùng rác đã bị vô hiệu hóa. Bạn có thể khôi phục lại.
     </div>
     <div id="trashGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </div>
@@ -117,30 +117,6 @@ body { font-family: 'Inter', sans-serif; }
     <div class="flex gap-3 mt-6">
       <button onclick="closeSoftDeleteModal()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Hủy</button>
       <button onclick="confirmSoftDelete()" class="flex-1 h-10 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">Chuyển vào thùng rác</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal xác nhận xóa vĩnh viễn -->
-<div id="permanentDeleteModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePermanentDeleteModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6">
-    <div class="flex flex-col items-center text-center gap-3">
-      <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-        <span class="material-symbols-outlined text-[24px] text-red-600">delete_forever</span>
-      </div>
-      <h3 class="text-base font-bold text-zinc-900">Xóa vĩnh viễn?</h3>
-      <p class="text-sm text-zinc-500">Tài khoản <span id="permanentDeleteName" class="font-semibold text-zinc-800"></span> sẽ bị <strong class="text-red-600">xóa vĩnh viễn</strong> khỏi hệ thống.<br><br>
-        <span class="p-2.5 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-semibold block text-left leading-normal">
-          <span class="material-symbols-outlined text-[14px] align-middle mr-1">warning</span>
-          <strong>Cảnh báo quan trọng:</strong> Tài khoản này có thể đang liên kết với các dữ liệu khác (như hóa đơn, lịch đặt sân, ca làm việc,...). Việc tiếp tục xóa sẽ gỡ bỏ hoặc làm sạch các liên kết liên quan khỏi database. Hành động này <strong>không thể hoàn tác</strong>.
-        </span>
-      </p>
-    </div>
-    <input type="hidden" id="permanentDeleteId" value="">
-    <div class="flex gap-3 mt-6">
-      <button onclick="closePermanentDeleteModal()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Hủy</button>
-      <button onclick="confirmPermanentDelete()" class="flex-1 h-10 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700">Vẫn tiếp tục xóa</button>
     </div>
   </div>
 </div>
@@ -555,25 +531,6 @@ function confirmSoftDelete() {
   document.body.appendChild(form); form.submit();
 }
 
-// ---- Xóa vĩnh viễn ----
-function promptPermanentDelete(id, name) {
-  document.getElementById('permanentDeleteId').value = id;
-  document.getElementById('permanentDeleteName').innerText = name;
-  document.getElementById('permanentDeleteModal').classList.remove('hidden');
-}
-function closePermanentDeleteModal() {
-  document.getElementById('permanentDeleteModal').classList.add('hidden');
-}
-function confirmPermanentDelete() {
-  const id = document.getElementById('permanentDeleteId').value;
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '${pageContext.request.contextPath}/admin/nhan-su';
-  const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
-  add('action', 'permanentDelete'); add('id', id);
-  document.body.appendChild(form); form.submit();
-}
-
 // ---- Khôi phục từ thùng rác ----
 function restoreStaff(id) {
   const form = document.createElement('form');
@@ -645,9 +602,6 @@ function renderTrash() {
         <div class="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 w-full justify-between">
           <button onclick="restoreStaff('\${s.id}')" title="Khôi phục tài khoản" class="flex-1 h-8 rounded-lg bg-green-600 text-white hover:bg-green-700 text-[11px] font-bold shadow-sm transition-all flex items-center justify-center gap-1">
             <span class="material-symbols-outlined text-[14px]">restore</span>Khôi phục
-          </button>
-          <button onclick="promptPermanentDelete('\${s.id}', '\${s.name}')" title="Xóa vĩnh viễn" class="flex-1 h-8 rounded-lg bg-red-600 text-white hover:bg-red-700 text-[11px] font-bold shadow-sm transition-all flex items-center justify-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">delete_forever</span>Xóa vĩnh viễn
           </button>
         </div>
       </div>
