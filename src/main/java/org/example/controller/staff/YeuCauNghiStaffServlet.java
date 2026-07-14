@@ -101,6 +101,23 @@ public class YeuCauNghiStaffServlet extends HttpServlet {
         }
 
         try {
+            String action = req.getParameter("action");
+
+            // Hủy đơn nghỉ phép (chỉ khi đang ChoDuyet, chỉ chủ đơn)
+            if ("cancel".equals(action)) {
+                String idStr = req.getParameter("id");
+                if (idStr == null || idStr.isEmpty()) {
+                    session.setAttribute("error", "ID đơn nghỉ không hợp lệ.");
+                    resp.sendRedirect(req.getContextPath() + "/staff/yeu-cau-nghi");
+                    return;
+                }
+                int yeuCauNghiId = Integer.parseInt(idStr);
+                yeuCauNghiService.cancelYeuCauNghi(yeuCauNghiId, accountID);
+                session.setAttribute("success", "Đã hủy yêu cầu nghỉ phép.");
+                resp.sendRedirect(req.getContextPath() + "/staff/yeu-cau-nghi");
+                return;
+            }
+
             // Lấy parameters từ form
             String ngayNghiStr = req.getParameter("ngayNghi");
             String loaiNghi = req.getParameter("loaiNghi");

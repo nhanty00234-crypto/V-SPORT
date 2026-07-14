@@ -75,7 +75,7 @@
     <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">Tất cả</a>
     <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi?status=ChoDuyet" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-yellow-50 text-yellow-750 hover:bg-yellow-100 transition-colors">Chờ duyệt</a>
     <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi?status=DaDuyet" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-green-50 text-green-750 hover:bg-green-100 transition-colors">Đã duyệt</a>
-    <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi?status=TuChoi" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-750 hover:bg-red-100 transition-colors">Từ từ chối</a>
+    <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi?status=TuChoi" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-750 hover:bg-red-100 transition-colors">Từ chối</a>
   </div>
 
   <!-- Table View -->
@@ -91,6 +91,7 @@
             <th class="px-5 py-3.5 text-left font-semibold text-orange-900 text-xs">Độ khẩn cấp</th>
             <th class="px-5 py-3.5 text-left font-semibold text-orange-900 text-xs">Trạng thái</th>
             <th class="px-5 py-3.5 text-left font-semibold text-orange-900 text-xs">Ngày gửi đơn</th>
+            <th class="px-5 py-3.5 text-left font-semibold text-orange-900 text-xs">Hành động</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-orange-50/70">
@@ -98,7 +99,7 @@
             <tr class="hover:bg-orange-50/35 transition-colors">
               <td class="px-5 py-4 text-xs text-zinc-500">${st.index + 1}</td>
               <td class="px-5 py-4 text-xs font-bold text-orange-900">
-                <fmt:formatDate value="${req.ngayNghi}" pattern="dd/MM/yyyy"/>
+                ${req.ngayNghiDisplay}
               </td>
               <td class="px-5 py-4 text-xs font-medium text-zinc-700">
                 <c:choose>
@@ -133,13 +134,29 @@
                 </span>
               </td>
               <td class="px-5 py-4 text-xs text-zinc-400">
-                <fmt:formatDate value="${req.ngayGui}" pattern="dd/MM/yyyy HH:mm"/>
+                ${req.ngayGuiDisplay}
+              </td>
+              <td class="px-5 py-4">
+                <c:if test="${req.trangThai == 'ChoDuyet'}">
+                  <form method="post" action="${pageContext.request.contextPath}/staff/yeu-cau-nghi"
+                        onsubmit="return confirm('Bạn có chắc muốn hủy đơn nghỉ ngày ${req.ngayNghiDisplay}?')">
+                    <input type="hidden" name="action" value="cancel"/>
+                    <input type="hidden" name="id" value="${req.yeuCauNghiID}"/>
+                    <button type="submit"
+                            class="text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition-colors">
+                      Hủy đơn
+                    </button>
+                  </form>
+                </c:if>
+                <c:if test="${req.trangThai != 'ChoDuyet'}">
+                  <span class="text-[11px] text-zinc-300">—</span>
+                </c:if>
               </td>
             </tr>
           </c:forEach>
           <c:if test="${empty requests}">
             <tr>
-              <td colspan="7" class="px-5 py-12 text-center text-zinc-400 italic">
+              <td colspan="8" class="px-5 py-12 text-center text-zinc-400 italic">
                 Bạn chưa gửi yêu cầu nghỉ phép nào.
               </td>
             </tr>

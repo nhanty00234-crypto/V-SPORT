@@ -5,6 +5,8 @@ import org.example.model.TaiKhoan;
 import org.example.model.CaLamViecAvailability;
 import org.example.model.CaLamViecSwapRequest;
 import org.example.service.manager.CaLamService;
+import org.example.dao.CaLamViecDAO;
+import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.util.Constants;
 
 import jakarta.servlet.ServletException;
@@ -27,6 +29,7 @@ public class StaffCaLamServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(StaffCaLamServlet.class);
     private final CaLamService caLamService = new CaLamService();
+    private final CaLamViecDAO caLamViecDAO = new CaLamViecDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -46,12 +49,15 @@ public class StaffCaLamServlet extends HttpServlet {
                 int coSoId = user.getCoSoId();
                 int accountId = user.getAccountId();
 
-                // 1. Only published shifts for the branch
-                List<CaLamViec> shifts = caLamService.getShiftsByBranch(coSoId).stream()
+                // 1. Only THIS staff's own published shifts — ±4 weeks window for week navigation
+                LocalDate windowStart = LocalDate.now().minusWeeks(4);
+                LocalDate windowEnd = LocalDate.now().plusWeeks(8);
+                List<CaLamViec> shifts = caLamViecDAO.getCaByAccountIDAndDateRange(accountId, windowStart, windowEnd)
+                        .stream()
                         .filter(s -> s.isPublished())
                         .collect(Collectors.toList());
 
-                // 2. Coworkers list (for trading shifts)
+                // 2. Coworkers list (for swap requests)
                 List<TaiKhoan> coworkers = caLamService.getStaffAvailableForShift(coSoId).stream()
                         .filter(st -> st.getAccountId() != accountId)
                         .collect(Collectors.toList());
@@ -113,8 +119,42 @@ public class StaffCaLamServlet extends HttpServlet {
                 session.setAttribute("message", "ÄÃ£ xÃ¡c nháº­n ca lÃ m viá»‡c thÃ nh cÃ´ng!");
             } else if ("checkIn".equals(action)) {
                 int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
+                // Server-side validation bắt buộc cho điểm danh
+                CaLamViec ca = caLamViecDAO.getCaById(caLamViecId);
+                if (ca == null) {
+                    throw new IllegalArgumentException("Ca làm việc không tồn tại.");
+                }
+                if (ca.getAccountId() != user.getAccountId()) {
+                    throw new IllegalArgumentException("Ca làm việc này không thuộc về bạn.");
+                }
+                if (ca.isDeleted()) {
+                    throw new IllegalArgumentException("Ca làm việc đã bị xóa.");
+                }
+                if ("Cancelled".equals(ca.getTrangThai())) {
+                    throw new IllegalArgumentException("Ca làm việc đã bị hủy.");
+                }
+                if ("CheckedIn".equals(ca.getTrangThai()) || "CheckedOut".equals(ca.getTrangThai())) {
+                    throw new IllegalArgumentException("Bạn đã điểm danh ca này rồi.");
+                }
+                if (!"Confirmed".equals(ca.getTrangThai())) {
+                    throw new IllegalArgumentException("Vui lòng xác nhận lịch làm trước khi điểm danh.");
+                }
+                if (!LocalDate.now().equals(ca.getNgayLam())) {
+                    throw new IllegalArgumentException("Điểm danh chỉ được thực hiện vào ngày làm việc (" + ca.getNgayLam() + ").");
+                }
+                LocalTime nowTime = LocalTime.now();
+                LocalTime windowOpen = ca.getGioBatDau().minusMinutes(30);
+                LocalTime windowClose = ca.getGioBatDau().plusMinutes(30);
+                if (nowTime.isBefore(windowOpen)) {
+                    throw new IllegalArgumentException("Điểm danh chưa mở. Khung giờ hợp lệ: "
+                        + windowOpen.toString().substring(0, 5) + " - " + windowClose.toString().substring(0, 5) + ".");
+                }
+                if (nowTime.isAfter(windowClose)) {
+                    throw new IllegalArgumentException("Đã quá giờ điểm danh. Khung giờ hợp lệ: "
+                        + windowOpen.toString().substring(0, 5) + " - " + windowClose.toString().substring(0, 5) + ".");
+                }
                 caLamService.checkInShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "Äiá»ƒm danh ca lÃ m thÃ nh cÃ´ng!");
+                session.setAttribute("message", "Điểm danh ca làm thành công!");
             } else if ("checkOut".equals(action)) {
                 int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
                 caLamService.checkOutShift(caLamViecId, user.getAccountId());

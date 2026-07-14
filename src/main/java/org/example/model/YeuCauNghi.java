@@ -309,4 +309,14 @@ public class YeuCauNghi {
                 return "bg-blue-100 text-blue-800";
         }
     }
+
+    public String getNgayNghiDisplay() {
+        if (NgayNghi == null) return "";
+        return NgayNghi.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public String getNgayGuiDisplay() {
+        if (NgayGui == null) return "";
+        return NgayGui.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
 }
