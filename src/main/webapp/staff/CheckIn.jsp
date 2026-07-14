@@ -443,75 +443,10 @@
                                     <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
                                     <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
                                     <span class="badge badge-green mt-2 uppercase text-[10px]">Sẵn sàng</span>
-                                    
-                                    <button type="button" onclick="toggleCardCollapse(event, ${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
+
+                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
                                         Mở sân
                                     </button>
-
-                                    <!-- Collapsible walk-in form inline -->
-                                    <div id="collapse-walkin-${san.sanID}" class="hidden w-full mt-3 pt-3 border-t border-zinc-150 text-left space-y-3" onclick="event.stopPropagation()">
-                                        <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="space-y-3">
-                                            <input type="hidden" name="action" value="checkInWalkIn">
-                                            <input type="hidden" name="sanId" value="${san.sanID}">
-                                            <input type="hidden" id="card-walkin-duration-${san.sanID}" name="duration" value="120">
-                                            
-                                            <!-- Prebooked list if any -->
-                                            <div id="card-prebooked-section-${san.sanID}" class="hidden space-y-1">
-                                                <label class="block text-[9px] font-black ${themeText} uppercase tracking-wider">Khách đặt trước hôm nay:</label>
-                                                <div id="card-prebooked-list-${san.sanID}" class="space-y-1"></div>
-                                            </div>
-
-                                            <div class="space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Kiểu giờ chơi:</label>
-                                                <div class="grid grid-cols-2 gap-1">
-                                                    <label id="card-mode-fixed-label-${san.sanID}" class="border ${themeBorderStrong} ${themeBgLight} rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold ${themeTextMedium} transition-all text-center">
-                                                        <input type="radio" class="sr-only" name="playMode" value="FIXED" checked onchange="setCardPlayMode(${san.sanID}, 'FIXED')">
-                                                        Cố định
-                                                    </label>
-                                                    <label id="card-mode-open-label-${san.sanID}" class="border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center">
-                                                        <input type="radio" class="sr-only" name="playMode" value="OPEN" onchange="setCardPlayMode(${san.sanID}, 'OPEN')">
-                                                        Không cố định
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <div id="card-fixed-panel-${san.sanID}" class="space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Mốc giờ chơi:</label>
-                                                <div class="grid grid-cols-3 gap-1 mb-1">
-                                                    <button type="button" data-card-duration-btn="${san.sanID}-60" onclick="setCardDuration(${san.sanID}, 60)" class="card-duration-btn-${san.sanID} py-1 rounded border border-zinc-200 text-[8px] font-extrabold text-zinc-700 hover:bg-zinc-50">60p</button>
-                                                    <button type="button" data-card-duration-btn="${san.sanID}-120" onclick="setCardDuration(${san.sanID}, 120)" class="card-duration-btn-${san.sanID} py-1 rounded border ${themeBorderStrong} ${themeBgLight} text-[8px] font-extrabold ${themeTextMedium}">2h</button>
-                                                    <button type="button" data-card-duration-btn="${san.sanID}-180" onclick="setCardDuration(${san.sanID}, 180)" class="card-duration-btn-${san.sanID} py-1 rounded border border-zinc-200 text-[8px] font-extrabold text-zinc-700 hover:bg-zinc-50">3h</button>
-                                                </div>
-                                                <select name="duration_select" onchange="setCardSelectDuration(${san.sanID}, this.value)" class="w-full text-[9px] p-1 border border-zinc-200 rounded bg-white focus:outline-none">
-                                                    <option value="60">60 phút (1 giờ)</option>
-                                                    <option value="90">90 phút (1.5 giờ)</option>
-                                                    <option value="120" selected>120 phút (2 giờ)</option>
-                                                    <option value="150">150 phút (2.5 giờ)</option>
-                                                    <option value="180">180 phút (3 giờ)</option>
-                                                </select>
-                                            </div>
-
-                                            <div id="card-open-note-${san.sanID}" class="hidden p-1.5 rounded border ${themeBorder} ${themeBgLight} text-[8px] ${themeTextMedium} font-semibold leading-tight">
-                                                Tính tiền thực tế khi trả sân.
-                                            </div>
-
-                                            <div class="space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Đơn giá (VND/h):</label>
-                                                <input type="number" id="card-rate-${san.sanID}" name="donGia" step="10000" class="w-full text-[10px] p-1 border border-zinc-150 rounded bg-zinc-50 cursor-not-allowed focus:outline-none" required readonly oninput="calculateCardPrice(${san.sanID})">
-                                                <span id="card-rate-type-${san.sanID}" class="text-[8px] text-zinc-450 block italic"></span>
-                                            </div>
-
-                                            <div class="p-1.5 bg-zinc-50 rounded border border-zinc-150 flex items-center justify-between text-[9px]">
-                                                <span class="text-zinc-550 font-bold">Tạm tính:</span>
-                                                <span id="card-subtotal-val-${san.sanID}" class="font-extrabold text-[10px] ${themeTextMedium}">0đ</span>
-                                            </div>
-
-                                            <button type="submit" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-[9px] py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all flex items-center justify-center gap-1">
-                                                <span class="material-symbols-outlined text-[10px]">play_circle</span>
-                                                Mở sân ngay
-                                            </button>
-                                        </form>
-                                    </div>
                                 </c:when>
                                 <c:when test="${san.trangThai == 'Bảo trì'}">
                                     <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
@@ -1395,75 +1330,12 @@
                                     <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
                                     <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
                                     <span class="badge badge-green mt-2 uppercase text-[10px]">Sẵn sàng</span>
-                                    
-                                    <button type="button" onclick="toggleCardCollapse(event, \${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
+
+                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
                                         Mở sân
                                     </button>
-
-                                    <!-- Collapsible walk-in form inline -->
-                                    <div id="collapse-walkin-\${san.sanID}" class="hidden w-full mt-3 pt-3 border-t border-zinc-150 text-left space-y-3" onclick="event.stopPropagation()">
-                                        <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="space-y-3">
-                                            <input type="hidden" name="action" value="checkInWalkIn">
-                                            <input type="hidden" name="sanId" value="\${san.sanID}">
-                                            <input type="hidden" id="card-walkin-duration-\${san.sanID}" name="duration" value="120">
-                                            
-                                            <!-- Prebooked list if any -->
-                                            <div id="card-prebooked-section-\${san.sanID}" class="hidden space-y-1">
-                                                <label class="block text-[9px] font-black \${themeText} uppercase tracking-wider">Khách đặt trước hôm nay:</label>
-                                                <div id="card-prebooked-list-\${san.sanID}" class="space-y-1"></div>
-                                            </div>
-
-                                            <div class="space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Kiểu giờ chơi:</label>
-                                                <div class="grid grid-cols-2 gap-1">
-                                                    <label id="card-mode-fixed-label-\${san.sanID}" class="border \${themeBorderStrong} \${themeBgLight} rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold \${themeTextMedium} transition-all text-center">
-                                                        <input type="radio" class="sr-only" name="playMode" value="FIXED" checked onchange="setCardPlayMode(\${san.sanID}, 'FIXED')">
-                                                        Cố định
-                                                    </label>
-                                                    <label id="card-mode-open-label-\${san.sanID}" class="border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center">
-                                                        <input type="radio" class="sr-only" name="playMode" value="OPEN" onchange="setCardPlayMode(\${san.sanID}, 'OPEN')">
-                                                        Không cố định
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <div id="card-fixed-panel-\${san.sanID}" class="space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Mốc giờ chơi:</label>
-                                                <div class="grid grid-cols-3 gap-1 mb-1">
-                                                    <button type="button" data-card-duration-btn="\${san.sanID}-60" onclick="setCardDuration(\${san.sanID}, 60)" class="card-duration-btn-\${san.sanID} py-1 rounded border border-zinc-200 text-[8px] font-extrabold text-zinc-700 hover:bg-zinc-50">60p</button>
-                                                    <button type="button" data-card-duration-btn="\${san.sanID}-120" onclick="setCardDuration(\${san.sanID}, 120)" class="card-duration-btn-\${san.sanID} py-1 rounded border \${themeBorderStrong} \${themeBgLight} text-[8px] font-extrabold \${themeTextMedium}">2h</button>
-                                                    <button type="button" data-card-duration-btn="\${san.sanID}-180" onclick="setCardDuration(\${san.sanID}, 180)" class="card-duration-btn-\${san.sanID} py-1 rounded border border-zinc-200 text-[8px] font-extrabold text-zinc-700 hover:bg-zinc-50">3h</button>
-                                                </div>
-                                                <select name="duration_select" onchange="setCardSelectDuration(\${san.sanID}, this.value)" class="w-full text-[9px] p-1 border border-zinc-200 rounded bg-white focus:outline-none">
-                                                    <option value="60">60 phút (1 giờ)</option>
-                                                    <option value="90">90 phút (1.5 giờ)</option>
-                                                    <option value="120" selected>120 phút (2 giờ)</option>
-                                                    <option value="150">150 phút (2.5 giờ)</option>
-                                                    <option value="180">180 phút (3 giờ)</option>
-                                                </select>
-                                            </div>
-
-                                            <div id="card-open-note-\${san.sanID}" class="hidden p-1.5 rounded border \${themeBorder} \${themeBgLight} text-[8px] \${themeTextMedium} font-semibold leading-tight">
-                                                Tính tiền thực tế khi trả sân.
-                                            </div>
-
-                                            <div class="space-y-1">
-                                                <label class="block text-[9px] font-black text-zinc-500 uppercase tracking-wider">Đơn giá (VND/h):</label>
-                                                <input type="number" id="card-rate-\${san.sanID}" name="donGia" step="10000" class="w-full text-[10px] p-1 border border-zinc-150 rounded bg-zinc-50 cursor-not-allowed focus:outline-none" required readonly oninput="calculateCardPrice(\${san.sanID})">
-                                                <span id="card-rate-type-\${san.sanID}" class="text-[8px] text-zinc-450 block italic"></span>
-                                            </div>
-
-                                            <div class="p-1.5 bg-zinc-50 rounded border border-zinc-150 flex items-center justify-between text-[9px]">
-                                                <span class="text-zinc-550 font-bold">Tạm tính:</span>
-                                                <span id="card-subtotal-val-\${san.sanID}" class="font-extrabold text-[10px] ${themeTextMedium}">0đ</span>
-                                            </div>
-
-                                            <button type="submit" class="w-full \${themeBg} \${themeBgHover} text-white font-extrabold text-[9px] py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all flex items-center justify-center gap-1">
-                                                <span class="material-symbols-outlined text-[10px]">play_circle</span>
-                                                Mở sân ngay
-                                            </button>
-                                        </form>
-                                    </div>
+                                </div>
+                            </div>
                         `;
                     } else if (san.trangThai === 'Bảo trì') {
                         htmlGrid += `
@@ -1821,32 +1693,36 @@
 </div><!-- End of staffInvoiceModal -->
 
 <!-- Court Detail Side Drawer -->
-<div id="drawerOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="closeCourtDetailDrawer()"></div>
-<div id="courtDetailDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white border-l border-zinc-200 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col hidden">
-    <!-- Header -->
-    <div class="p-5 border-b border-zinc-100 flex items-center justify-between">
-        <div>
-            <h3 id="drawer-court-name" class="text-base font-extrabold text-zinc-900 tracking-tight">Tên sân</h3>
-            <div class="flex items-center gap-1.5 mt-1">
-                <span id="drawer-court-type" class="text-[10px] text-zinc-550 font-bold uppercase">Loại sân</span>
-                <span class="text-zinc-300">•</span>
-                <span id="drawer-court-status-badge" class="badge">Sẵn sàng</span>
+<div id="drawerOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-200" onclick="closeCourtDetailDrawer()"></div>
+<div id="courtDetailDrawer" class="fixed inset-0 z-50 hidden p-4 overflow-y-auto" onclick="if (event.target === this) closeCourtDetailDrawer()">
+  <div class="min-h-full flex items-center justify-center">
+    <div id="courtDetailDrawerPanel" role="dialog" aria-modal="true" aria-labelledby="drawer-court-name" tabindex="-1"
+         class="bg-white rounded-2xl shadow-2xl w-full max-w-[880px] max-h-[90vh] flex flex-col overflow-hidden transform scale-95 opacity-0 transition-all duration-200 ease-out">
+        <!-- Header -->
+        <div class="p-5 sm:p-6 border-b border-zinc-100 flex items-center justify-between shrink-0">
+            <div>
+                <h3 id="drawer-court-name" class="text-lg sm:text-xl font-black text-zinc-900 tracking-tight">Tên sân</h3>
+                <div class="flex items-center gap-1.5 mt-1">
+                    <span id="drawer-court-type" class="text-[11px] text-zinc-550 font-bold uppercase">Loại sân</span>
+                    <span class="text-zinc-300">•</span>
+                    <span id="drawer-court-status-badge" class="badge">Sẵn sàng</span>
+                </div>
             </div>
+            <button type="button" onclick="closeCourtDetailDrawer()" aria-label="Đóng" class="p-2.5 rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-zinc-650 transition-colors">
+                <span class="material-symbols-outlined text-[22px]">close</span>
+            </button>
         </div>
-        <button type="button" onclick="closeCourtDetailDrawer()" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-zinc-650 transition-colors">
-            <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-    </div>
-    
-    <!-- Content (Scrollable) -->
-    <div class="flex-1 overflow-y-auto p-5 space-y-6">
+
+        <!-- Content (Scrollable) -->
+        <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 sm:grid sm:grid-cols-2 sm:gap-6 sm:space-y-0 sm:items-start">
+        <div class="space-y-6">
         <!-- Court Specifications -->
         <div class="bg-zinc-50 rounded-2xl p-4 border border-zinc-150 space-y-3">
-            <h4 class="text-[11px] font-bold text-zinc-450 uppercase tracking-wider">Thông số chi tiết</h4>
+            <h4 class="text-[11px] font-bold text-zinc-450 uppercase tracking-wider">Thông tin nhanh</h4>
             <div class="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                    <span class="text-zinc-550 block">Mã sân (SanID):</span>
-                    <span id="drawer-court-id" class="font-extrabold text-zinc-800">-</span>
+                    <span class="text-zinc-550 block">Thời gian hiện tại:</span>
+                    <span id="drawer-current-time" class="font-extrabold text-zinc-800">-</span>
                 </div>
                 <div>
                     <span class="text-zinc-550 block">Cơ sở chi nhánh:</span>
@@ -1870,9 +1746,7 @@
                 <p id="drawer-court-desc" class="text-xs text-zinc-650 mt-1 italic"></p>
             </div>
         </div>
-        
-        <!-- Action Sections -->
-        
+
         <!-- Section D: Danh sách đặt lịch hôm nay (Khách đặt trước) -->
         <div id="drawer-action-prebooked" class="hidden space-y-4">
             <div class="flex items-center gap-2 text-zinc-850 font-extrabold text-sm border-b pb-2">
@@ -1883,6 +1757,10 @@
                 <!-- Will be dynamically populated via JS -->
             </div>
         </div>
+        </div>
+
+        <!-- Action Sections -->
+        <div class="space-y-6">
 
         <!-- Section A: Sẵn sàng -> Mở sân nhanh -->
         <div id="drawer-action-walkin" class="hidden space-y-4">
@@ -1890,43 +1768,54 @@
                 <span class="material-symbols-outlined text-green-600">bolt</span>
                 <span>Mở sân nhanh cho Khách vãng lai</span>
             </div>
-            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="space-y-4">
+            <form id="drawer-walkin-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" class="space-y-4">
                 <input type="hidden" name="action" value="checkInWalkIn">
                 <input type="hidden" id="drawer-walkin-san-id" name="sanId">
                 <input type="hidden" id="drawer-walkin-duration" name="duration" value="120">
-                
+
+                <div id="drawer-next-booking-info" class="hidden p-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-[11px] font-semibold flex items-start gap-2">
+                    <span class="material-symbols-outlined text-[16px] mt-px">info</span>
+                    <span id="drawer-next-booking-text">Lịch tiếp theo bắt đầu lúc --:--.</span>
+                </div>
+
                 <div class="space-y-2">
-                    <label class="block text-[11px] font-bold text-zinc-500">Kiểu giờ chơi:</label>
+                    <label class="block text-[11px] font-bold text-zinc-500">Chọn kiểu chơi:</label>
                     <div class="grid grid-cols-2 gap-2">
                         <label id="drawer-mode-fixed-label" class="border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 cursor-pointer text-xs font-bold ${themeTextMedium} transition-all text-center">
                             <input type="radio" class="sr-only" name="playMode" value="FIXED" checked onchange="setDrawerPlayMode('FIXED')">
-                            Giờ cố định
+                            <span class="block text-sm">Giờ cố định</span>
+                            <span class="block mt-0.5 text-[10px] font-semibold opacity-80">Chọn trước thời lượng chơi</span>
                         </label>
                         <label id="drawer-mode-open-label" class="border-2 border-zinc-150 rounded-xl p-3 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all text-center">
                             <input type="radio" class="sr-only" name="playMode" value="OPEN" onchange="setDrawerPlayMode('OPEN')">
-                            Không cố định
+                            <span class="block text-sm">Giờ linh hoạt</span>
+                            <span class="block mt-0.5 text-[10px] font-semibold opacity-70">Bắt đầu ngay, kết thúc khi khách yêu cầu</span>
                         </label>
                     </div>
                     <div id="drawer-fixed-duration-panel" class="space-y-2 mt-2">
-                        <label class="block text-[11px] font-bold text-zinc-500">Mốc thời gian chơi:</label>
-                        <div class="grid grid-cols-5 gap-1.5">
-                            <button type="button" data-duration-btn="60" onclick="setDrawerDuration(60)" class="drawer-duration-btn py-2 px-1 rounded-lg border border-zinc-200 text-[10px] font-bold text-zinc-700 hover:bg-zinc-50">60p</button>
-                            <button type="button" data-duration-btn="90" onclick="setDrawerDuration(90)" class="drawer-duration-btn py-2 px-1 rounded-lg border border-zinc-200 text-[10px] font-bold text-zinc-700 hover:bg-zinc-50">90p</button>
-                            <button type="button" data-duration-btn="120" onclick="setDrawerDuration(120)" class="drawer-duration-btn py-2 px-1 rounded-lg border ${themeBorderStrong} ${themeBgLight} text-[10px] font-bold ${themeTextMedium}">120p</button>
-                            <button type="button" data-duration-btn="150" onclick="setDrawerDuration(150)" class="drawer-duration-btn py-2 px-1 rounded-lg border border-zinc-200 text-[10px] font-bold text-zinc-700 hover:bg-zinc-50">150p</button>
-                            <button type="button" data-duration-btn="180" onclick="setDrawerDuration(180)" class="drawer-duration-btn py-2 px-1 rounded-lg border border-zinc-200 text-[10px] font-bold text-zinc-700 hover:bg-zinc-50">180p</button>
+                        <label class="block text-[11px] font-bold text-zinc-500">Chọn thời lượng:</label>
+                        <div class="grid grid-cols-4 gap-1.5">
+                            <button type="button" data-duration-btn="60" onclick="setDrawerDuration(60)" class="drawer-duration-btn py-2.5 px-1 rounded-lg border ${themeBorderStrong} ${themeBgLight} text-xs font-bold ${themeTextMedium}">1 giờ</button>
+                            <button type="button" data-duration-btn="120" onclick="setDrawerDuration(120)" class="drawer-duration-btn py-2.5 px-1 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50">2 giờ</button>
+                            <button type="button" data-duration-btn="180" onclick="setDrawerDuration(180)" class="drawer-duration-btn py-2.5 px-1 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50">3 giờ</button>
+                            <button type="button" id="drawer-duration-custom-btn" onclick="showDrawerCustomDuration()" class="py-2.5 px-1 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50">Khác</button>
                         </div>
-                        <div class="mt-2">
-                            <label class="block text-[11px] font-bold text-zinc-500 mb-1">Tự chọn số giờ chơi:</label>
+                        <div id="drawer-custom-hours-wrap" class="hidden mt-2">
+                            <label class="block text-[11px] font-bold text-zinc-500 mb-1">Nhập số giờ chơi:</label>
                             <input type="number" id="drawer-custom-hours" min="0.5" max="12" step="0.5" placeholder="VD: 1.5"
                                    oninput="setDrawerCustomDuration()"
                                    class="w-full text-xs p-2.5 border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none ${focusRing} focus:bg-white">
                         </div>
                     </div>
-                    
+
                     <div id="drawer-open-duration-note" class="hidden p-3 rounded-xl border ${themeBorder} ${themeBgLight} text-[11px] ${themeTextMedium} font-semibold mt-2">
-                        Phiên không cố định sẽ hiển thị đồng hồ đếm tới trong màn hình chi tiết sân.
+                        Phiên chơi bắt đầu ngay và chưa có giờ kết thúc. Tạm tính sẽ được cập nhật theo thời gian sử dụng.
                     </div>
+                </div>
+
+                <div id="drawer-walkin-overlap-warning" class="hidden p-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-[11px] font-semibold flex items-start gap-2">
+                    <span class="material-symbols-outlined text-[16px] mt-px">error</span>
+                    <span id="drawer-walkin-overlap-text"></span>
                 </div>
 
                 <div>
@@ -1934,26 +1823,41 @@
                     <input type="number" id="drawer-walkin-rate" name="donGia" step="10000" class="w-full text-xs p-2.5 border border-zinc-150 rounded-xl bg-zinc-100 cursor-not-allowed focus:outline-none" required readonly oninput="calculateDrawerPrice()">
                     <span id="drawer-walkin-rate-type" class="text-[10px] text-zinc-500 mt-1 block">Áp dụng: Giá không đèn</span>
                 </div>
-                
-                <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-150 flex items-center justify-between text-xs">
-                    <span class="text-zinc-550">Tạm tính tiền sân:</span>
-                    <span id="drawer-walkin-total" class="font-extrabold text-sm ${themeTextMedium}">0 đ</span>
+
+                <div class="p-3.5 bg-zinc-50 rounded-xl border border-zinc-150 space-y-1.5 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-zinc-550">Bắt đầu:</span>
+                        <span id="drawer-walkin-start-time" class="font-bold text-zinc-800">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-zinc-550">Kết thúc dự kiến:</span>
+                        <span id="drawer-walkin-end-time" class="font-bold text-zinc-800">-</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-1.5 border-t border-zinc-150">
+                        <span class="text-zinc-550 font-bold">Tạm tính tiền sân:</span>
+                        <span id="drawer-walkin-total" class="font-extrabold text-sm ${themeTextMedium}">0 đ</span>
+                    </div>
                 </div>
-                
-                <button type="submit" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-xs py-3 rounded-xl shadow hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px]">play_circle</span>
-                    Mở sân ngay
-                </button>
+
+                <div class="flex items-center gap-3 pt-1">
+                    <button type="button" onclick="closeCourtDetailDrawer()" class="shrink-0 px-5 py-3 rounded-xl border border-zinc-200 text-zinc-600 font-extrabold text-xs hover:bg-zinc-50 transition-all active:scale-95">
+                        Hủy
+                    </button>
+                    <button type="submit" id="drawer-walkin-submit-btn" class="flex-1 ${themeBg} ${themeBgHover} text-white font-extrabold text-sm py-3 rounded-xl shadow hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                        <span id="drawer-walkin-submit-label">Mở sân ngay</span>
+                    </button>
+                </div>
             </form>
         </div>
-        
+
         <!-- Section B: Đang sử dụng -> Phiên chơi hiện tại -->
         <div id="drawer-action-active" class="hidden space-y-4">
             <div class="flex items-center gap-2 text-zinc-850 font-extrabold text-sm">
                 <span class="material-symbols-outlined ${themeText}">sports_tennis</span>
                 <span>Phiên chơi hiện tại</span>
             </div>
-            
+
             <div class="space-y-3 ${themeBgLight} border ${themeBorder} rounded-2xl p-4 text-xs">
                 <div class="flex justify-between">
                     <span class="text-zinc-550">Mã đơn đặt (DatSanID):</span>
@@ -1987,19 +1891,22 @@
                     Dừng chơi & Tính tiền
                 </button>
             </form>
-            
+
             <button type="button" id="drawer-btn-invoice" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-xs py-3 rounded-xl shadow hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5">
                 <span class="material-symbols-outlined text-[18px]">payments</span>
                 Dịch vụ & Thanh toán
             </button>
         </div>
-        
+
         <!-- Section C: Bảo trì / Tạm đóng -> Không thể mở -->
         <div id="drawer-action-disabled" class="hidden bg-red-50/40 border border-red-100 text-red-900 rounded-xl p-4 text-xs flex items-center gap-2">
             <span class="material-symbols-outlined text-red-600 text-[18px]">warning</span>
             <span>Sân hiện đang bảo trì hoặc tạm đóng, không thể mở cho khách chơi.</span>
         </div>
+        </div>
+        </div>
     </div>
+  </div>
 </div>
 
 <script>
@@ -2508,224 +2415,6 @@
     }
 
 
-    function toggleCardCollapse(event, sanId) {
-        if (event) {
-            event.stopPropagation();
-        }
-        const collapseEl = document.getElementById(`collapse-walkin-\${sanId}`);
-        if (!collapseEl) return;
-        
-        const isCurrentlyHidden = collapseEl.classList.contains('hidden');
-        
-        // Hide all other collapsible sections first
-        document.querySelectorAll('[id^="collapse-walkin-"]').forEach(el => {
-            el.classList.add('hidden');
-        });
-        
-        if (isCurrentlyHidden) {
-            collapseEl.classList.remove('hidden');
-            
-            // Set prices and render prebooked
-            const cardEl = document.querySelector(`.card[data-sanid="\${sanId}"]`);
-            if (cardEl) {
-                const giaKhongDen = parseFloat(cardEl.getAttribute('data-giakhongden')) || 0;
-                const giaCoDen = parseFloat(cardEl.getAttribute('data-giacoden')) || 0;
-                const gioBatDauLenDen = cardEl.getAttribute('data-giobatdaulenden') || '';
-                const gioKetThucLenDen = cardEl.getAttribute('data-giokethuclenden') || '';
-                
-                const now = new Date();
-                const currentTimeStr = now.toTimeString().split(' ')[0];
-                let rate = giaKhongDen;
-                let isLite = false;
-                
-                if (gioBatDauLenDen && gioKetThucLenDen) {
-                    if (currentTimeStr >= gioBatDauLenDen && currentTimeStr <= gioKetThucLenDen) {
-                        rate = giaCoDen;
-                        isLite = true;
-                    }
-                }
-                
-                const rateInput = document.getElementById(`card-rate-\${sanId}`);
-                if (rateInput) {
-                    rateInput.value = rate;
-                    rateInput.setAttribute('data-base', rate);
-                    rateInput.setAttribute('data-giakhongden', giaKhongDen);
-                    rateInput.setAttribute('data-giacoden', giaCoDen);
-                    rateInput.setAttribute('data-giobatdaulenden', gioBatDauLenDen);
-                    rateInput.setAttribute('data-giokethuclenden', gioKetThucLenDen);
-                }
-                
-                const rateTypeSpan = document.getElementById(`card-rate-type-\${sanId}`);
-                if (rateTypeSpan) {
-                    rateTypeSpan.textContent = `Áp dụng: \${isLite ? 'Giá có đèn' : 'Giá không đèn'}`;
-                }
-                
-                // Initialize default playMode to FIXED and duration to 120
-                setCardPlayMode(sanId, 'FIXED');
-                setCardDuration(sanId, 120);
-                
-                // Render today's bookings for this court
-                renderCardPrebookedBookings(sanId);
-            }
-        }
-    }
-
-    function setCardPlayMode(sanId, mode) {
-        const lblFixed = document.getElementById(`card-mode-fixed-label-\${sanId}`);
-        const lblOpen = document.getElementById(`card-mode-open-label-\${sanId}`);
-        const fixedPanel = document.getElementById(`card-fixed-panel-\${sanId}`);
-        const openNote = document.getElementById(`card-open-note-\${sanId}`);
-        const durationInput = document.getElementById(`card-walkin-duration-\${sanId}`);
-        
-        if (mode === 'FIXED') {
-            if (lblFixed) lblFixed.className = `border ${themeBorderStrong} ${themeBgLight} rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold ${themeTextMedium} transition-all text-center`;
-            if (lblOpen) lblOpen.className = "border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center";
-            if (fixedPanel) fixedPanel.classList.remove('hidden');
-            if (openNote) openNote.classList.add('hidden');
-            
-            // Revert duration input to the active button's value
-            let activeFixedBtn = document.querySelector(`.card-duration-btn-\${sanId}.\${themeBorderStrong}`);
-            if (activeFixedBtn) {
-                const dur = parseInt(activeFixedBtn.getAttribute('data-card-duration-btn').split('-')[1]) || 120;
-                if (durationInput) durationInput.value = dur;
-            } else {
-                if (durationInput) durationInput.value = 120;
-            }
-        } else {
-            if (lblFixed) lblFixed.className = "border border-zinc-150 rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold text-zinc-700 hover:border-zinc-300 transition-all text-center";
-            if (lblOpen) lblOpen.className = `border ${themeBorderStrong} ${themeBgLight} rounded-lg py-1 px-1 cursor-pointer text-[9px] font-extrabold ${themeTextMedium} transition-all text-center`;
-            if (fixedPanel) fixedPanel.classList.add('hidden');
-            if (openNote) {
-                openNote.classList.remove('hidden');
-                const rateEl = document.getElementById("card-rate-${sanId}");
-                const rateVal = rateEl ? parseFloat(rateEl.value) || 0 : 0;
-                openNote.innerHTML = `Đơn giá áp dụng: <strong>\${formatCurrency(rateVal)}/giờ</strong><br><span style="opacity:.75">Tính tiền thực tế khi trả sân.</span>`;
-            }
-            
-            // Set 120 default for conflict checks in open mode
-            if (durationInput) durationInput.value = 120;
-        }
-        calculateCardPrice(sanId);
-    }
-
-    function setCardDuration(sanId, mins) {
-        const durationInput = document.getElementById(`card-walkin-duration-\${sanId}`);
-        if (durationInput) {
-            durationInput.value = mins;
-        }
-        
-        // Highlight active button
-        const buttons = document.querySelectorAll(`.card-duration-btn-\${sanId}`);
-        buttons.forEach(btn => {
-            const btnDur = parseInt(btn.getAttribute('data-card-duration-btn').split('-')[1]);
-            if (btnDur === mins) {
-                btn.className = `card-duration-btn-\${sanId} py-1 rounded border \${themeBorderStrong} \${themeBgLight} text-[8px] font-extrabold \${themeTextMedium}`;
-            } else {
-                btn.className = `card-duration-btn-\${sanId} py-1 rounded border border-zinc-200 text-[8px] font-extrabold text-zinc-700 hover:bg-zinc-50`;
-            }
-        });
-        
-        // Update select value if matching
-        const select = document.querySelector(`#collapse-walkin-\${sanId} select[name="duration_select"]`);
-        if (select) {
-            select.value = mins;
-        }
-        
-        calculateCardPrice(sanId);
-    }
-
-    function setCardSelectDuration(sanId, mins) {
-        const durationInput = document.getElementById(`card-walkin-duration-\${sanId}`);
-        if (durationInput) {
-            durationInput.value = mins;
-        }
-        
-        // Highlight corresponding button (or clear highlights if not found)
-        const buttons = document.querySelectorAll(`.card-duration-btn-\${sanId}`);
-        buttons.forEach(btn => {
-            const btnDur = parseInt(btn.getAttribute('data-card-duration-btn').split('-')[1]);
-            if (btnDur === parseInt(mins)) {
-                btn.className = `card-duration-btn-\${sanId} py-1 rounded border \${themeBorderStrong} \${themeBgLight} text-[8px] font-extrabold \${themeTextMedium}`;
-            } else {
-                btn.className = `card-duration-btn-\${sanId} py-1 rounded border border-zinc-200 text-[8px] font-extrabold text-zinc-700 hover:bg-zinc-50`;
-            }
-        });
-        
-        calculateCardPrice(sanId);
-    }
-
-    function calculateCardPrice(sanId) {
-        const durationInput = document.getElementById(`card-walkin-duration-\${sanId}`);
-        const rateInput = document.getElementById(`card-rate-\${sanId}`);
-        const totalSpan = document.getElementById(`card-subtotal-val-\${sanId}`);
-        if (!durationInput || !rateInput || !totalSpan) return;
-        
-        const openRadio = document.querySelector(`#collapse-walkin-\${sanId} input[name="playMode"][value="OPEN"]`);
-        const isOpen = openRadio && openRadio.checked;
-        if (isOpen) {
-            totalSpan.textContent = "Thực tế";
-            const overrideContainer = document.getElementById(`card-override-container-\${sanId}`);
-            if (overrideContainer) overrideContainer.classList.add('hidden');
-            return;
-        }
-
-        const duration = parseInt(durationInput.value) || 0;
-        const rate = parseFloat(rateInput.value) || 0;
-        const total = (duration / 60.0) * rate;
-        
-        totalSpan.textContent = formatCurrency(total);
-        
-        const base = parseFloat(rateInput.getAttribute('data-base')) || 0;
-        const overrideContainer = document.getElementById(`card-override-container-\${sanId}`);
-        const reasonText = document.getElementById(`card-override-reason-\${sanId}`);
-        if (overrideContainer && reasonText) {
-            if (rate !== base) {
-                overrideContainer.classList.remove('hidden');
-                reasonText.setAttribute('required', 'required');
-            } else {
-                overrideContainer.classList.add('hidden');
-                reasonText.removeAttribute('required');
-            }
-        }
-    }
-
-    function renderCardPrebookedBookings(sanId) {
-        const prebookedSection = document.getElementById(`card-prebooked-section-\${sanId}`);
-        const prebookedList = document.getElementById(`card-prebooked-list-\${sanId}`);
-        if (!prebookedSection || !prebookedList) return;
-
-        const courtBookings = localDanhSachLich.filter(b => b.sanId === sanId && (b.trangThai === 'Đã xác nhận' || b.trangThai === 'Chờ xác nhận'));
-        if (courtBookings.length === 0) {
-            prebookedSection.classList.add('hidden');
-            prebookedList.innerHTML = '';
-        } else {
-            prebookedSection.classList.remove('hidden');
-            prebookedList.innerHTML = '';
-            courtBookings.forEach(b => {
-                const statusBadgeClass = b.trangThaiThanhToan === 'Đã thanh toán' ? 'badge-green' : 'badge-amber';
-                prebookedList.insertAdjacentHTML('beforeend', `
-                    <div class="p-1.5 \${themeBgLight} border \${themeBorder} rounded flex flex-col gap-0.5 text-[9px] mb-1">
-                        <div class="flex justify-between items-center font-bold">
-                            <span class="text-zinc-800 truncate max-w-[80px]">\${b.tenKhachHang}</span>
-                            <span class="text-[7px] px-1 py-0.5 rounded font-mono \${statusBadgeClass}">\${b.trangThaiThanhToan}</span>
-                        </div>
-                        <div class="text-[8px] text-zinc-500 font-mono flex justify-between items-center">
-                            <span>\${b.gioBatDau} - \${b.gioKetThuc}</span>
-                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
-                                <input type="hidden" name="action" value="checkInPreBooked">
-                                <input type="hidden" name="datSanId" value="\${b.datSanId}">
-                                <input type="hidden" name="daThuTienMat" value="false">
-                                <button type="submit" class="\${themeBg} \${themeBgHover} text-white font-extrabold text-[8px] px-1 py-0.5 rounded transition-all active:scale-95">
-                                    Mở
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                `);
-            });
-        }
-    }
-
     // --- Side Drawer Functions ---
     let activeDrawerSanId = null;
 
@@ -2742,21 +2431,40 @@
 
     function onCardClick(event, cardEl) {
         if (event.target.closest('button') || event.target.closest('form')) return;
-        const trangThai = cardEl.getAttribute('data-trangthai');
         const sanId = parseInt(cardEl.getAttribute('data-sanid'));
-        if (trangThai === 'Sẵn sàng') {
-            toggleCardCollapse(event, sanId);
-        } else {
-            openCourtDetailDrawer(sanId);
-        }
+        openCourtDetailDrawer(sanId);
     }
+
+    // Returns the earliest upcoming (still-pending/confirmed) booking for a court that starts at/after `afterDate`
+    function getNextBookingForSan(sanId, afterDate) {
+        const candidates = localDanhSachLich.filter(b => b.sanId === sanId && (b.trangThai === 'Đã xác nhận' || b.trangThai === 'Chờ xác nhận'));
+        let best = null, bestDate = null;
+        candidates.forEach(b => {
+            const d = parseTimeToDate(b.gioBatDau);
+            if (!d || d < afterDate) return;
+            if (!bestDate || d < bestDate) {
+                bestDate = d;
+                best = b;
+            }
+        });
+        return best ? { booking: best, startDate: bestDate } : null;
+    }
+
+    function formatHm(d) {
+        return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+
+    let drawerTriggerEl = null;
+    let isDrawerSubmitting = false;
 
     function openCourtDetailDrawer(sanId) {
         activeDrawerSanId = sanId;
-        
+        isDrawerSubmitting = false;
+        drawerTriggerEl = document.activeElement;
+
         const cardEl = document.querySelector('.card[data-sanid="' + sanId + '"]');
         if (!cardEl) return;
-        
+
         const tenSan = cardEl.getAttribute('data-tensan');
         const tenLoaiSan = cardEl.getAttribute('data-loaisan');
         const trangThai = cardEl.getAttribute('data-trangthai');
@@ -2767,11 +2475,11 @@
         const gioKetThucLenDen = cardEl.getAttribute('data-giokethuclenden') || '';
         const datSanIdActive = cardEl.getAttribute('data-datsanidactive');
         const gioBatDauActive = cardEl.getAttribute('data-giobatdauactive');
-        
+
         // Update Drawer elements
         document.getElementById('drawer-court-name').textContent = tenSan;
         document.getElementById('drawer-court-type').textContent = tenLoaiSan;
-        document.getElementById('drawer-court-id').textContent = sanId;
+        document.getElementById('drawer-current-time').textContent = formatHm(new Date());
         document.getElementById('drawer-court-coso').textContent = 'CS' + '${sessionScope.user.coSoId}';
         document.getElementById('drawer-price-nolite').textContent = formatCurrency(giaKhongDen);
         document.getElementById('drawer-price-lite').textContent = formatCurrency(giaCoDen);
@@ -2814,8 +2522,23 @@
             if (fixedRadio) {
                 fixedRadio.checked = true;
             }
+            const customHoursInput = document.getElementById('drawer-custom-hours');
+            if (customHoursInput) customHoursInput.value = '';
+            const customWrap = document.getElementById('drawer-custom-hours-wrap');
+            if (customWrap) customWrap.classList.add('hidden');
             setDrawerPlayMode('FIXED');
             setDrawerDuration(120);
+
+            // Info: next upcoming booking today, if any
+            const nextInfo = getNextBookingForSan(sanId, new Date());
+            const nextInfoBox = document.getElementById('drawer-next-booking-info');
+            const nextInfoText = document.getElementById('drawer-next-booking-text');
+            if (nextInfo) {
+                nextInfoBox.classList.remove('hidden');
+                nextInfoText.textContent = `Lịch tiếp theo bắt đầu lúc \${nextInfo.booking.gioBatDau}.`;
+            } else {
+                nextInfoBox.classList.add('hidden');
+            }
 
             // Filter bookings for this court today
             const courtBookings = localDanhSachLich.filter(b => b.sanId === sanId && (b.trangThai === 'Đã xác nhận' || b.trangThai === 'Chờ xác nhận'));
@@ -2890,12 +2613,7 @@
             rateTypeSpan.textContent = `Áp dụng: \${isLite ? 'Giá có đèn' : 'Giá không đèn'}`;
             
             calculateDrawerPrice();
-            
-            // Auto focus duration
-            setTimeout(() => {
-                document.getElementById('drawer-walkin-duration').focus();
-            }, 100);
-            
+
         } else if (trangThai === 'Đang sử dụng') {
             document.getElementById('drawer-action-active').classList.remove('hidden');
             document.getElementById('drawer-active-id').textContent = datSanIdActive || '-';
@@ -2961,15 +2679,20 @@
             document.getElementById('drawer-action-disabled').classList.remove('hidden');
         }
         
-        // Open drawer
+        // Open modal (centered)
         const drawer = document.getElementById('courtDetailDrawer');
         const overlay = document.getElementById('drawerOverlay');
+        const panel = document.getElementById('courtDetailDrawerPanel');
         drawer.classList.remove('hidden');
         overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
         setTimeout(() => {
-            drawer.classList.remove('translate-x-full');
             overlay.classList.remove('opacity-0');
+            panel.classList.remove('scale-95', 'opacity-0');
         }, 10);
+        setTimeout(() => {
+            panel.focus();
+        }, 60);
     }
 
     function setDrawerPlayMode(mode) {
@@ -2978,116 +2701,162 @@
         const fixedPanel = document.getElementById('drawer-fixed-duration-panel');
         const openNote = document.getElementById('drawer-open-duration-note');
         const durationInput = document.getElementById('drawer-walkin-duration');
-        const customHoursInput = document.getElementById('drawer-custom-hours');
-        
+
         if (mode === 'FIXED') {
             if (lblFixed) lblFixed.className = `border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 cursor-pointer text-xs font-bold ${themeTextMedium} transition-all text-center`;
             if (lblOpen) lblOpen.className = "border-2 border-zinc-150 rounded-xl p-3 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all text-center";
             if (fixedPanel) fixedPanel.classList.remove('hidden');
             if (openNote) openNote.classList.add('hidden');
-            
+
             // Revert duration input to the active button's value
             let activeFixedBtn = document.querySelector(`.drawer-duration-btn.\${themeBorderStrong}`);
             if (activeFixedBtn) {
                 const dur = parseInt(activeFixedBtn.getAttribute('data-duration-btn')) || 120;
                 if (durationInput) durationInput.value = dur;
-            } else {
-                if (durationInput) durationInput.value = 120;
+            } else if (durationInput) {
+                durationInput.value = 120;
             }
-            if (customHoursInput) customHoursInput.value = '';
         } else {
             if (lblFixed) lblFixed.className = "border-2 border-zinc-150 rounded-xl p-3 cursor-pointer text-xs font-bold text-zinc-700 hover:border-zinc-300 transition-all text-center";
             if (lblOpen) lblOpen.className = `border-2 ${themeBorderStrong} ${themeBgLight} rounded-xl p-3 cursor-pointer text-xs font-bold ${themeTextMedium} transition-all text-center`;
             if (fixedPanel) fixedPanel.classList.add('hidden');
             if (openNote) openNote.classList.remove('hidden');
-            
-            // For open mode, we set duration input to 120 minutes by default (which represents the initial conflict checking window, 2 hours)
+
+            // For open mode, duration input is unused for billing but kept at a sane default
             if (durationInput) durationInput.value = 120;
+
+            const customWrap = document.getElementById('drawer-custom-hours-wrap');
+            if (customWrap) customWrap.classList.add('hidden');
         }
         calculateDrawerPrice();
     }
- 
+
     function setDrawerDuration(mins) {
         const durationInput = document.getElementById('drawer-walkin-duration');
         if (durationInput) {
             durationInput.value = mins;
         }
-        
-        // Highlight active button
+
+        // Highlight active preset button
         const buttons = document.querySelectorAll('.drawer-duration-btn');
         buttons.forEach(btn => {
             const btnDur = parseInt(btn.getAttribute('data-duration-btn'));
             if (btnDur === mins) {
-                btn.className = `drawer-duration-btn py-2 px-1 rounded-lg border \${themeBorderStrong} \${themeBgLight} text-[10px] font-bold \${themeTextMedium}`;
+                btn.className = `drawer-duration-btn py-2.5 px-1 rounded-lg border \${themeBorderStrong} \${themeBgLight} text-xs font-bold \${themeTextMedium}`;
             } else {
-                btn.className = "drawer-duration-btn py-2 px-1 rounded-lg border border-zinc-200 text-[10px] font-bold text-zinc-700 hover:bg-zinc-50";
+                btn.className = "drawer-duration-btn py-2.5 px-1 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50";
             }
         });
-        
-        // Clear custom input
+
+        // Reset "Khác" button and hide the custom input
+        const customBtn = document.getElementById('drawer-duration-custom-btn');
+        if (customBtn) customBtn.className = "py-2.5 px-1 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50";
+        const customWrap = document.getElementById('drawer-custom-hours-wrap');
+        if (customWrap) customWrap.classList.add('hidden');
         const customHoursInput = document.getElementById('drawer-custom-hours');
-        if (customHoursInput) {
-            customHoursInput.value = '';
-        }
-        
+        if (customHoursInput) customHoursInput.value = '';
+
         calculateDrawerPrice();
     }
- 
+
+    function showDrawerCustomDuration() {
+        const customWrap = document.getElementById('drawer-custom-hours-wrap');
+        if (customWrap) customWrap.classList.remove('hidden');
+
+        document.querySelectorAll('.drawer-duration-btn').forEach(btn => {
+            btn.className = "drawer-duration-btn py-2.5 px-1 rounded-lg border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50";
+        });
+        const customBtn = document.getElementById('drawer-duration-custom-btn');
+        if (customBtn) customBtn.className = `py-2.5 px-1 rounded-lg border ${themeBorderStrong} ${themeBgLight} text-xs font-bold ${themeTextMedium}`;
+
+        const durationInput = document.getElementById('drawer-walkin-duration');
+        const customHoursInput = document.getElementById('drawer-custom-hours');
+        if (customHoursInput) {
+            if (!customHoursInput.value) {
+                const currentMins = parseInt(durationInput ? durationInput.value : 0) || 120;
+                customHoursInput.value = currentMins / 60;
+            }
+            setTimeout(() => customHoursInput.focus(), 50);
+        }
+    }
+
     function setDrawerCustomDuration() {
         const customHoursInput = document.getElementById('drawer-custom-hours');
         const durationInput = document.getElementById('drawer-walkin-duration');
         if (!customHoursInput || !durationInput) return;
-        
+
         const hours = parseFloat(customHoursInput.value);
         if (!isNaN(hours) && hours > 0) {
-            const mins = Math.round(hours * 60);
-            durationInput.value = mins;
-            
-            // De-select all fixed buttons
-            const buttons = document.querySelectorAll('.drawer-duration-btn');
-            buttons.forEach(btn => {
-                btn.className = "drawer-duration-btn py-2 px-1 rounded-lg border border-zinc-200 text-[10px] font-bold text-zinc-700 hover:bg-zinc-50";
-            });
+            durationInput.value = Math.round(hours * 60);
         }
         calculateDrawerPrice();
     }
- 
+
+    let drawerOverlapBlocked = false;
+
     function calculateDrawerPrice() {
         const durationSelect = document.getElementById('drawer-walkin-duration');
         const rateInput = document.getElementById('drawer-walkin-rate');
         const totalSpan = document.getElementById('drawer-walkin-total');
+        const startSpan = document.getElementById('drawer-walkin-start-time');
+        const endSpan = document.getElementById('drawer-walkin-end-time');
+        const overlapBox = document.getElementById('drawer-walkin-overlap-warning');
+        const overlapText = document.getElementById('drawer-walkin-overlap-text');
+        const submitBtn = document.getElementById('drawer-walkin-submit-btn');
+        const submitLabel = document.getElementById('drawer-walkin-submit-label');
         if (!durationSelect || !rateInput || !totalSpan) return;
-        
+
         const openRadio = document.querySelector('#courtDetailDrawer input[name="playMode"][value="OPEN"]');
         const isOpen = openRadio && openRadio.checked;
+
+        const now = new Date();
+        if (startSpan) startSpan.textContent = formatHm(now);
+
+        drawerOverlapBlocked = false;
+        if (overlapBox) overlapBox.classList.add('hidden');
+
         if (isOpen) {
-            totalSpan.textContent = "Tính theo thời gian thực tế";
-            const overrideContainer = document.getElementById('drawer-walkin-override-container');
-            if (overrideContainer) overrideContainer.classList.add('hidden');
+            totalSpan.textContent = "Tính theo thời gian sử dụng thực tế";
+            if (endSpan) endSpan.textContent = "Chưa xác định";
+            if (submitLabel) submitLabel.textContent = 'Mở sân linh hoạt';
+            if (submitBtn) submitBtn.disabled = false;
             return;
         }
- 
+
+        if (submitLabel) submitLabel.textContent = 'Mở sân ngay';
+
         const duration = parseInt(durationSelect.value) || 0;
         const rate = parseFloat(rateInput.value) || 0;
         const total = (duration / 60.0) * rate;
-        
+
         totalSpan.textContent = formatCurrency(total);
-        
-        const base = parseFloat(rateInput.getAttribute('data-base')) || 0;
-        const overrideContainer = document.getElementById('drawer-walkin-override-container');
-        const reasonText = document.getElementById('drawer-walkin-override-reason');
-        if (overrideContainer && reasonText) {
-            if (rate !== base) {
-                overrideContainer.classList.remove('hidden');
-                reasonText.setAttribute('required', 'required');
-            } else {
-                overrideContainer.classList.add('hidden');
-                reasonText.removeAttribute('required');
+
+        const endDate = new Date(now.getTime() + duration * 60000);
+        if (endSpan) {
+            let endText = formatHm(endDate);
+            if (endDate.toDateString() !== now.toDateString()) {
+                endText += ' hôm sau';
+            }
+            endSpan.textContent = endText;
+        }
+
+        // Block submit if the chosen fixed duration overlaps the next booking today
+        if (activeDrawerSanId !== null) {
+            const next = getNextBookingForSan(activeDrawerSanId, now);
+            if (next && endDate > next.startDate) {
+                drawerOverlapBlocked = true;
+                if (overlapBox) overlapBox.classList.remove('hidden');
+                if (overlapText) overlapText.textContent = `Thời lượng đã chọn trùng với lịch đặt lúc \${next.booking.gioBatDau}. Vui lòng chọn thời lượng ngắn hơn.`;
             }
         }
+
+        if (submitBtn) submitBtn.disabled = drawerOverlapBlocked;
     }
 
-    function closeCourtDetailDrawer() {
+    function closeCourtDetailDrawer(force) {
+        // Don't allow closing mid-submit unless explicitly forced (e.g. after a successful AJAX-less POST navigates away anyway)
+        if (isDrawerSubmitting && force !== true) return;
+
         if (drawerTimerInterval) {
             clearInterval(drawerTimerInterval);
             drawerTimerInterval = null;
@@ -3095,14 +2864,66 @@
         activeDrawerSanId = null;
         const drawer = document.getElementById('courtDetailDrawer');
         const overlay = document.getElementById('drawerOverlay');
-        
-        drawer.classList.add('translate-x-full');
+        const panel = document.getElementById('courtDetailDrawerPanel');
+
+        panel.classList.add('scale-95', 'opacity-0');
         overlay.classList.add('opacity-0');
         setTimeout(() => {
             drawer.classList.add('hidden');
             overlay.classList.add('hidden');
-        }, 300);
+            document.body.style.overflow = '';
+        }, 200);
+
+        if (drawerTriggerEl && typeof drawerTriggerEl.focus === 'function') {
+            drawerTriggerEl.focus();
+        }
+        drawerTriggerEl = null;
     }
+
+    // Escape-to-close + focus trap while the court detail modal is open
+    document.addEventListener('keydown', (e) => {
+        const drawer = document.getElementById('courtDetailDrawer');
+        if (!drawer || drawer.classList.contains('hidden')) return;
+
+        if (e.key === 'Escape') {
+            closeCourtDetailDrawer();
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            const panel = document.getElementById('courtDetailDrawerPanel');
+            const focusables = panel.querySelectorAll('button:not([disabled]):not(.hidden), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled])');
+            const visible = Array.from(focusables).filter(el => el.offsetParent !== null);
+            if (!visible.length) return;
+            const first = visible[0];
+            const last = visible[visible.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    });
+
+    // Prevent double-submit on the walk-in "Mở sân ngay" form
+    document.addEventListener('DOMContentLoaded', () => {
+        const walkinForm = document.getElementById('drawer-walkin-form');
+        if (walkinForm) {
+            walkinForm.addEventListener('submit', (e) => {
+                if (drawerOverlapBlocked) {
+                    e.preventDefault();
+                    return;
+                }
+                isDrawerSubmitting = true;
+                const btn = document.getElementById('drawer-walkin-submit-btn');
+                const label = document.getElementById('drawer-walkin-submit-label');
+                if (btn) btn.disabled = true;
+                if (label) label.textContent = 'Đang mở sân...';
+            });
+        }
+    });
 
     // --- Split Bill ---
     let currentBillMode = 'MAIN';

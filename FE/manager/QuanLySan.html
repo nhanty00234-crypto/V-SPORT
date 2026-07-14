@@ -609,20 +609,22 @@ body { font-family: 'Inter', sans-serif; }
           <input type="text" id="courtName" placeholder="Tên hiển thị" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
         </div>
       </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-zinc-700">Loại sân * <span class="text-zinc-400 font-normal">· LoaiSan Table</span></label>
-        <select id="courtTypeSelect" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
-          <!-- Populated dynamically -->
-        </select>
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-zinc-700">Trạng thái *</label>
-        <select id="courtStatus" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
-          <option value="Sẵn sàng">Sẵn sàng</option>
-          <option value="Đang dùng">Đang dùng</option>
-          <option value="Bảo trì">Bảo trì</option>
-          <option value="Tạm đóng">Tạm đóng</option>
-        </select>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700">Loại sân * <span class="text-zinc-400 font-normal">· LoaiSan Table</span></label>
+          <select id="courtTypeSelect" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700">Trạng thái *</label>
+          <select id="courtStatus" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
+            <option value="Sẵn sàng">Sẵn sàng</option>
+            <option value="Đang dùng">Đang dùng</option>
+            <option value="Bảo trì">Bảo trì</option>
+            <option value="Tạm đóng">Tạm đóng</option>
+          </select>
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-zinc-700">Mô tả chi tiết</label>
@@ -663,26 +665,49 @@ body { font-family: 'Inter', sans-serif; }
         <label class="text-xs font-semibold text-zinc-700">Tên loại sân *</label>
         <input type="text" id="typeName" placeholder="VD: Sân bóng đá 7 người" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
       </div>
+      <!-- Checkbox: Sân không dùng đèn -->
+      <label id="noLightToggle" class="flex items-start gap-3 px-3 py-2.5 rounded-xl border border-zinc-200 cursor-pointer hover:bg-zinc-50 select-none transition-colors">
+        <input type="checkbox" id="typeNoLight" onchange="toggleNoLightMode()" class="mt-0.5 w-4 h-4 accent-zinc-800 shrink-0">
+        <div>
+          <span class="text-xs font-semibold text-zinc-700">Sân không dùng đèn</span>
+          <p class="text-[10px] text-zinc-400 mt-0.5 leading-relaxed">Tích vào nếu sân luôn dùng ánh sáng tự nhiên hoặc đã tính đèn vào giá — không phụ thu thêm buổi tối.</p>
+        </div>
+      </label>
+
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-zinc-700">Giá ngày (Không đèn) *</label>
+          <label class="text-xs font-semibold text-zinc-700">Giá ban ngày *</label>
           <div class="relative">
             <input type="text" id="typePriceNoLight" placeholder="150,000" class="h-10 w-full pl-3 pr-10 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-450">đ</span>
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-400">đ</span>
           </div>
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-zinc-700">Giá tối (Có đèn phụ thu) *</label>
+        <div id="priceWithLightWrap" class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-zinc-700">Giá có bật đèn *</label>
           <div class="relative">
             <input type="text" id="typePriceWithLight" placeholder="200,000" class="h-10 w-full pl-3 pr-10 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-450">đ</span>
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-400">đ</span>
           </div>
         </div>
       </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-zinc-700">Giờ bắt đầu lên đèn *</label>
-        <input type="time" id="typeLightStart" value="17:30" class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
-        <p class="text-[10px] text-zinc-450 mt-1">💡 Đối với loại sân trong nhà như Cầu lông, vui lòng chọn <span class="font-semibold">06:00</span> để đèn bật 100% full ca (Không phụ thu thêm hoặc đã tính thẳng vào giá sân).</p>
+
+      <!-- Giờ lên đèn (ẩn khi chọn không dùng đèn) -->
+      <div id="lightTimeSection" class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-700">Giờ bắt đầu bật đèn *</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex gap-2 items-center">
+            <select id="typeLightStartH" class="flex-1 h-10 px-2 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"></select>
+            <span class="text-xs text-zinc-400 font-medium">h</span>
+            <select id="typeLightStartM" class="w-20 h-10 px-2 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
+              <option value="00">00</option>
+              <option value="30">30</option>
+            </select>
+            <span class="text-xs text-zinc-400 font-medium">m</span>
+          </div>
+          <div class="flex items-end pb-2">
+            <p class="text-[10px] text-zinc-400 leading-relaxed">💡 Sân trong nhà full-time: chọn <span class="font-semibold text-zinc-600">06h 00m</span></p>
+          </div>
+        </div>
       </div>
     </div>
     <div class="px-6 py-4 border-t border-zinc-100 flex justify-end gap-2 bg-zinc-50/50">
@@ -1169,13 +1194,67 @@ body { font-family: 'Inter', sans-serif; }
   // CRUD ACTIONS FOR COURT TYPES (LoaiSan)
   // -------------------------------------------------------------
   
+  // Build hour options 00-23 for select
+  function buildHourOptions(selectId, selectedH) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = Array.from({length: 24}, (_, i) => {
+      const v = String(i).padStart(2, '0');
+      return `<option value="${v}"${v === selectedH ? ' selected' : ''}>${v}h</option>`;
+    }).join('');
+  }
+
+  function setLightStartSelects(timeStr) {
+    const [h, m] = (timeStr || '17:30').split(':');
+    buildHourOptions('typeLightStartH', h);
+    const mSel = document.getElementById('typeLightStartM');
+    if (mSel) mSel.value = (m === '30') ? '30' : '00';
+  }
+
+  function getLightStartValue() {
+    const h = document.getElementById('typeLightStartH').value;
+    const m = document.getElementById('typeLightStartM').value;
+    return `${h}:${m}`;
+  }
+
+  function toggleNoLightMode() {
+    const noLight = document.getElementById('typeNoLight').checked;
+    const lightSection = document.getElementById('lightTimeSection');
+    const priceWithWrap = document.getElementById('priceWithLightWrap');
+    const priceWithInput = document.getElementById('typePriceWithLight');
+    if (noLight) {
+      lightSection.classList.add('hidden');
+      priceWithWrap.classList.add('opacity-40', 'pointer-events-none');
+      priceWithInput.value = document.getElementById('typePriceNoLight').value;
+    } else {
+      lightSection.classList.remove('hidden');
+      priceWithWrap.classList.remove('opacity-40', 'pointer-events-none');
+    }
+  }
+
+  // Sync giá có đèn = giá ngày khi bật chế độ không đèn
+  document.addEventListener('DOMContentLoaded', function() {
+    const noLightPriceInput = document.getElementById('typePriceNoLight');
+    if (noLightPriceInput) {
+      noLightPriceInput.addEventListener('input', function() {
+        if (document.getElementById('typeNoLight').checked) {
+          document.getElementById('typePriceWithLight').value = this.value;
+        }
+      });
+    }
+    buildHourOptions('typeLightStartH', '17');
+  });
+
   function openCreateTypeModal() {
     document.getElementById('typeModalTitle').innerText = 'Thêm cấu hình loại sân mới';
     document.getElementById('typeEditId').value = '';
     document.getElementById('typeName').value = '';
     document.getElementById('typePriceNoLight').value = '';
     document.getElementById('typePriceWithLight').value = '';
-    document.getElementById('typeLightStart').value = '17:30';
+    document.getElementById('typeNoLight').checked = false;
+    document.getElementById('lightTimeSection').classList.remove('hidden');
+    document.getElementById('priceWithLightWrap').classList.remove('opacity-40', 'pointer-events-none');
+    setLightStartSelects('17:30');
     document.getElementById('saveTypeBtn').innerText = 'Thêm cấu hình';
     document.getElementById('typeModal').classList.remove('hidden');
   }
@@ -1184,14 +1263,18 @@ body { font-family: 'Inter', sans-serif; }
     const typeObj = mockLoaiSan.find(t => t.id === id);
     if (!typeObj) return;
 
+    const isNoLight = typeObj.noLight === true || typeObj.priceWithLight === typeObj.priceNoLight;
+
     document.getElementById('typeModalTitle').innerText = 'Chỉnh sửa loại sân & Bảng giá';
     document.getElementById('typeEditId').value = typeObj.id;
     document.getElementById('typeSportSelect').value = typeObj.sportId;
     document.getElementById('typeName').value = typeObj.name;
     document.getElementById('typePriceNoLight').value = typeObj.priceNoLight.toLocaleString('en-US');
     document.getElementById('typePriceWithLight').value = typeObj.priceWithLight.toLocaleString('en-US');
-    document.getElementById('typeLightStart').value = typeObj.lightStart;
+    document.getElementById('typeNoLight').checked = isNoLight;
+    setLightStartSelects(typeObj.lightStart || '17:30');
     document.getElementById('saveTypeBtn').innerText = 'Lưu cấu hình';
+    toggleNoLightMode();
     document.getElementById('typeModal').classList.remove('hidden');
   }
 
@@ -1203,11 +1286,12 @@ body { font-family: 'Inter', sans-serif; }
     const id = document.getElementById('typeEditId').value;
     const sportId = parseInt(document.getElementById('typeSportSelect').value);
     const name = document.getElementById('typeName').value.trim();
+    const noLight = document.getElementById('typeNoLight').checked;
     const priceNoLight = parseFormattedNumber(document.getElementById('typePriceNoLight').value);
-    const priceWithLight = parseFormattedNumber(document.getElementById('typePriceWithLight').value);
-    const lightStart = document.getElementById('typeLightStart').value;
+    const priceWithLight = noLight ? priceNoLight : parseFormattedNumber(document.getElementById('typePriceWithLight').value);
+    const lightStart = noLight ? '06:00' : getLightStartValue();
 
-    if (!name || !priceNoLight || !priceWithLight || !lightStart) {
+    if (!name || !priceNoLight || (!noLight && !priceWithLight)) {
       alert('Vui lòng điền đầy đủ thông tin loại sân!');
       return;
     }
@@ -1221,6 +1305,7 @@ body { font-family: 'Inter', sans-serif; }
         typeObj.priceNoLight = priceNoLight;
         typeObj.priceWithLight = priceWithLight;
         typeObj.lightStart = lightStart;
+        typeObj.noLight = noLight;
         showToast(`Cập nhật biểu phí loại sân ${name} thành công!`);
       }
     } else {
@@ -1231,7 +1316,8 @@ body { font-family: 'Inter', sans-serif; }
         name,
         priceNoLight,
         priceWithLight,
-        lightStart
+        lightStart,
+        noLight
       };
       mockLoaiSan.push(newType);
       showToast(`Đã thêm cấu hình loại sân ${name} thành công!`);

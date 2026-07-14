@@ -180,13 +180,9 @@ public class CheckInServlet extends HttpServlet {
                 if (ls != null) {
                     basePrice = ls.getGiaKhongDen();
                     java.time.LocalTime nowTime = java.time.LocalTime.now();
-                    java.time.LocalTime startLight = ls.getGioBatDauLenDen();
-                    java.time.LocalTime endLight = ls.getGioKetThucLenDen();
-                    if (startLight != null && endLight != null) {
-                        if ((nowTime.isAfter(startLight) || nowTime.equals(startLight))
-                                && (nowTime.isBefore(endLight) || nowTime.equals(endLight))) {
-                            basePrice = ls.getGiaCoDen();
-                        }
+                    if (org.example.service.manager.SanService.isLightingTime(
+                            nowTime, ls.getGioBatDauLenDen(), ls.getGioKetThucLenDen())) {
+                        basePrice = ls.getGiaCoDen();
                     }
                 }
 
