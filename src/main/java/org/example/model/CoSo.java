@@ -1,6 +1,7 @@
 package org.example.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
 
@@ -53,6 +54,12 @@ public class CoSo {
 
     @Column(name = "DeletedBy")
     private Integer deletedBy;
+
+    @Column(name = "ViDo")
+    private BigDecimal viDo;
+
+    @Column(name = "KinhDo")
+    private BigDecimal kinhDo;
 
     public CoSo() {
     }
@@ -167,6 +174,14 @@ public class CoSo {
     public void setAccountID_QuanLy(Integer accountID_QuanLy) {
         AccountID_QuanLy = accountID_QuanLy;
     }
+
+    public BigDecimal getViDo() { return viDo; }
+
+    public void setViDo(BigDecimal viDo) { this.viDo = viDo; }
+
+    public BigDecimal getKinhDo() { return kinhDo; }
+
+    public void setKinhDo(BigDecimal kinhDo) { this.kinhDo = kinhDo; }
 
     public boolean isDeleted() { return isDeleted != null && isDeleted; }
 

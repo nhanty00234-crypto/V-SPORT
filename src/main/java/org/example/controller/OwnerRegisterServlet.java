@@ -19,6 +19,8 @@ import jakarta.persistence.EntityTransaction;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.Random;
 
 /**
@@ -172,10 +174,35 @@ public class OwnerRegisterServlet extends HttpServlet {
         String closeTime   = req.getParameter("closeTime");
         String operatingDays = req.getParameter("operatingDays");
         String sportsData  = req.getParameter("sportsData"); // JSON array
+        String viDoRaw     = req.getParameter("viDo");
+        String kinhDoRaw   = req.getParameter("kinhDo");
 
         if (ownerName != null) ownerName = ownerName.trim();
         if (email != null) email = email.trim();
         if (phone != null) phone = phone.trim();
+
+        // Parse and validate viDo / kinhDo (optional — null allowed)
+        BigDecimal viDo = null;
+        BigDecimal kinhDo = null;
+        if (viDoRaw != null && !viDoRaw.trim().isEmpty()) {
+            try { viDo = new BigDecimal(viDoRaw.trim()); } catch (NumberFormatException ignored) {}
+        }
+        if (kinhDoRaw != null && !kinhDoRaw.trim().isEmpty()) {
+            try { kinhDo = new BigDecimal(kinhDoRaw.trim()); } catch (NumberFormatException ignored) {}
+        }
+        // If user supplied one but not the other, reject
+        if ((viDo == null) != (kinhDo == null)) {
+            out.print("{\"success\":false,\"message\":\"Vui lòng cung cấp đủ cả vĩ độ và kinh độ.\"}");
+            return;
+        }
+        if (viDo != null && (viDo.compareTo(BigDecimal.valueOf(-90)) < 0 || viDo.compareTo(BigDecimal.valueOf(90)) > 0)) {
+            out.print("{\"success\":false,\"message\":\"Vĩ độ phải nằm trong khoảng -90 đến 90.\"}");
+            return;
+        }
+        if (kinhDo != null && (kinhDo.compareTo(BigDecimal.valueOf(-180)) < 0 || kinhDo.compareTo(BigDecimal.valueOf(180)) > 0)) {
+            out.print("{\"success\":false,\"message\":\"Kinh độ phải nằm trong khoảng -180 đến 180.\"}");
+            return;
+        }
 
         // Basic validation
         if (ownerName == null || ownerName.isEmpty() ||
@@ -247,6 +274,8 @@ public class OwnerRegisterServlet extends HttpServlet {
             coSo.setMoTa(description);
             coSo.setLoaiHinhKinhDoanh(loaiHinh);
             coSo.setSoLuongSanDuKien(totalCourts);
+            coSo.setViDo(viDo);
+            coSo.setKinhDo(kinhDo);
 
             em.persist(coSo);
             em.flush(); // To retrieve generated CoSoID
