@@ -17,6 +17,7 @@ import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.model.AdminTrash;
 import org.example.model.CoSo;
 import org.example.model.TaiKhoan;
+import org.example.service.admin.FacilityTrashService;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +29,7 @@ public class AdminTrashServlet extends HttpServlet {
     private final AdminTrashDAO trashDAO = new AdminTrashDAOImpl();
     private final CoSoDAO coSoDAO = new CoSoDAOImpl();
     private final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAOImpl();
+    private final FacilityTrashService facilityTrashService = new FacilityTrashService();
 
     private TaiKhoan requireAdmin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
@@ -47,15 +49,25 @@ public class AdminTrashServlet extends HttpServlet {
         String entityType = req.getParameter("loai");
         String restoredFilter = req.getParameter("thuhoi");
         String scope = req.getParameter("scope");
+        if (scope == null || scope.isBlank()) {
+            scope = "tatca";
+        }
 
-        Integer deletedByFilter = "cuatoi".equals(scope) || scope == null ? admin.getAccountId() : null;
+        // Chỉ lọc theo DeletedBy khi Admin chọn "Của tôi"; mặc định "Tất cả"
+        // hiển thị toàn bộ để không ẩn mất dữ liệu có DeletedBy null/khác admin hiện tại.
+        Integer deletedByFilter = "cuatoi".equals(scope) ? admin.getAccountId() : null;
 
         List<AdminTrash> items = trashDAO.search(entityType, restoredFilter, deletedByFilter);
+        if (items == null) {
+            items = java.util.Collections.emptyList();
+        }
+        logger.info("Admin trash loaded: scope={}, type={}, status={}, count={}",
+                scope, entityType, restoredFilter, items.size());
 
         req.setAttribute("items", items);
         req.setAttribute("loai", entityType);
         req.setAttribute("thuhoi", restoredFilter);
-        req.setAttribute("scope", scope == null ? "cuatoi" : scope);
+        req.setAttribute("scope", scope);
         req.getRequestDispatcher("/admin/ThungRacAdmin.jsp").forward(req, resp);
     }
 
@@ -94,6 +106,17 @@ public class AdminTrashServlet extends HttpServlet {
             return;
         }
 
+        if ("CoSo".equals(item.getEntityType())) {
+            // Dùng service transaction duy nhất (CoSo + AdminTrash cùng commit/rollback).
+            FacilityTrashService.Result result = facilityTrashService.restoreFacility(trashId, admin.getAccountId());
+            if (result.success) {
+                session.setAttribute("message", result.message);
+            } else {
+                session.setAttribute("error", result.message);
+            }
+            return;
+        }
+
         boolean restoredOk = restoreSource(item, admin.getAccountId());
         if (!restoredOk) {
             session.setAttribute("error", "Không thể thu hồi vì dữ liệu gốc không còn tồn tại.");
@@ -108,16 +131,10 @@ public class AdminTrashServlet extends HttpServlet {
     }
 
     private boolean restoreSource(AdminTrash item, int actorId) {
+        // EntityType "CoSo" được xử lý riêng bởi FacilityTrashService.restoreFacility()
+        // (transaction JDBC duy nhất) trước khi gọi tới hàm này — xem handleRestore().
         try {
             switch (item.getEntityType()) {
-                case "CoSo": {
-                    CoSo coSo = coSoDAO.getCoSoById(item.getEntityId());
-                    if (coSo == null) return false;
-                    if (item.getOldStatus() != null) {
-                        coSo.setTrangThai(item.getOldStatus());
-                    }
-                    return coSoDAO.restore(item.getEntityId()) && coSoDAO.updateCoSo(coSo);
-                }
                 case "Account": {
                     TaiKhoan acc = taiKhoanDAO.getAccountById(item.getEntityId());
                     if (acc == null) return false;
@@ -126,6 +143,11 @@ public class AdminTrashServlet extends HttpServlet {
                 case "OwnerRequest": {
                     CoSo coSo = coSoDAO.getCoSoById(item.getEntityId());
                     if (coSo == null) return false;
+                    if (coSo.getAccountID_QuanLy() != null &&
+                            coSoDAO.hasActiveOrPendingCoSo(coSo.getAccountID_QuanLy(), coSo.getCoSoID())) {
+                        logger.warn("Không thể thu hồi OwnerRequest CoSoID={}: account đã có cơ sở khác đang hoạt động/chờ duyệt", coSo.getCoSoID());
+                        return false;
+                    }
                     coSo.setTrangThai(item.getOldStatus() != null ? item.getOldStatus() : "Chờ duyệt");
                     return coSoDAO.updateCoSo(coSo);
                 }

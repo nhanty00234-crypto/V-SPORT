@@ -80,7 +80,7 @@
   .tab-pill{
     display:inline-flex;align-items:center;gap:6px;
     padding:7px 16px;border-radius:99px;font-size:13px;font-weight:500;
-    border:none;cursor:pointer;transition:all .18s;
+    border:none;cursor:pointer;transition:all .18s;text-decoration:none;
   }
   .tab-pill.active{background:#2563eb;color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.3)}
   .tab-pill:not(.active){background:#fff;color:#64748b;border:1px solid #e2e8f0}

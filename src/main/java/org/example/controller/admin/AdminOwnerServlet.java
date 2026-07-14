@@ -14,6 +14,7 @@ import org.example.dao.impl.CoSoDAOImpl;
 import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.model.CoSo;
 import org.example.model.TaiKhoan;
+import org.example.service.admin.OwnerApprovalService;
 import org.example.util.DBUtil;
 import org.example.util.EmailUtil;
 
@@ -30,6 +31,7 @@ public class AdminOwnerServlet extends HttpServlet {
     private final CoSoDAOImpl coSoDAO = new CoSoDAOImpl();
     private final TaiKhoanDAOImpl taiKhoanDAO = new TaiKhoanDAOImpl();
     private final AdminTrashDAO adminTrashDAO = new AdminTrashDAOImpl();
+    private final OwnerApprovalService ownerApprovalService = new OwnerApprovalService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -65,49 +67,39 @@ public class AdminOwnerServlet extends HttpServlet {
         }
 
         switch (action) {
-            case "duyet":
-                if ("Chờ duyệt".equals(coSo.getTrangThai())) {
-                    coSo.setTrangThai("Đang hoạt động");
-                    coSoDAO.updateCoSo(coSo);
-                    syncCourts(coSoId, coSo.getLoaiHinhKinhDoanh(), coSo.getSoLuongSanDuKien());
-                    if (coSo.getAccountID_QuanLy() != null) {
-                        unlockAndNotify(coSo.getAccountID_QuanLy());
-                        coSoDAO.archiveRejectedForAccount(coSo.getAccountID_QuanLy(), coSoId, admin.getAccountId());
+            case "duyet": {
+                OwnerApprovalService.ApprovalResult result = ownerApprovalService.approve(coSoId, admin.getAccountId());
+                if (result.success) {
+                    syncCourts(coSoId, result.coSo.getLoaiHinhKinhDoanh(), result.coSo.getSoLuongSanDuKien());
+                    if (result.account != null) {
+                        sendApprovalEmail(result.account);
                     }
-                    req.getSession().setAttribute("message", "Đã duyệt cơ sở \"" + coSo.getTenCoSo() + "\" và kích hoạt tài khoản quản lý.");
+                    req.getSession().setAttribute("message",
+                            "Đã duyệt cơ sở \"" + result.coSo.getTenCoSo() + "\" và kích hoạt tài khoản quản lý.");
                 } else {
-                    req.getSession().setAttribute("error", "Cơ sở này không ở trạng thái chờ duyệt.");
+                    req.getSession().setAttribute("error", result.errorMessage);
                 }
                 break;
+            }
 
-            case "tu-choi":
-                if ("Chờ duyệt".equals(coSo.getTrangThai())) {
-                    String oldStatus = coSo.getTrangThai();
-                    coSo.setTrangThai("Từ chối");
-                    coSoDAO.updateCoSo(coSo);
-                    if (coSo.getAccountID_QuanLy() != null) {
-                        notifyRejection(coSo.getAccountID_QuanLy(), coSo.getTenCoSo());
-                    }
-                    adminTrashDAO.log("OwnerRequest", coSoId, coSo.getTenCoSo(), "CoSo", oldStatus,
+            case "tu-choi": {
+                String coSoName = coSo.getTenCoSo();
+                OwnerApprovalService.ApprovalResult result = ownerApprovalService.reject(coSoId);
+                if (result.success) {
+                    adminTrashDAO.log("OwnerRequest", coSoId, coSoName, "CoSo", "Chờ duyệt",
                             admin.getAccountId(), null);
-                    req.getSession().setAttribute("message", "Đã từ chối yêu cầu đăng ký cơ sở \"" + coSo.getTenCoSo() + "\".");
+                    if (result.account != null) {
+                        sendRejectionEmail(result.account, coSoName);
+                    }
+                    req.getSession().setAttribute("message", "Đã từ chối yêu cầu đăng ký cơ sở \"" + coSoName + "\".");
                     req.getSession().setAttribute("trashMessage", "Đã chuyển vào thùng rác.");
                     req.getSession().setAttribute("trashUrl", req.getContextPath() + "/admin/thung-rac");
                     req.getSession().setAttribute("trashCountdownSeconds", 10);
                 } else {
-                    req.getSession().setAttribute("error", "Chỉ có thể từ chối cơ sở đang chờ duyệt.");
+                    req.getSession().setAttribute("error", result.errorMessage);
                 }
                 break;
-
-            case "thu-hoi":
-                if ("Từ chối".equals(coSo.getTrangThai())) {
-                    coSo.setTrangThai("Chờ duyệt");
-                    coSoDAO.updateCoSo(coSo);
-                    req.getSession().setAttribute("message", "Đã thu hồi từ chối, cơ sở \"" + coSo.getTenCoSo() + "\" chuyển về chờ duyệt.");
-                } else {
-                    req.getSession().setAttribute("error", "Chỉ có thể thu hồi cơ sở đang ở trạng thái từ chối.");
-                }
-                break;
+            }
 
             case "khoa":
                 if (coSo.getAccountID_QuanLy() != null) {
@@ -139,7 +131,9 @@ public class AdminOwnerServlet extends HttpServlet {
     }
 
     private void loadPageData(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<CoSo> allBranches = coSoDAO.getAllCoSo();
+        // Dùng getAllCoSoIncludingPending() (không phải getAllCoSo()) vì trang này
+        // CẦN thấy CoSo "Chờ duyệt" để hiển thị tab tương ứng.
+        List<CoSo> allBranches = coSoDAO.getAllCoSoIncludingPending();
         List<TaiKhoan> allAccounts = taiKhoanDAO.getAllAccounts();
 
         // Map accountId -> TaiKhoan for quick lookup
@@ -150,7 +144,6 @@ public class AdminOwnerServlet extends HttpServlet {
 
         List<Map<String, Object>> pending  = new ArrayList<>();
         List<Map<String, Object>> approved = new ArrayList<>();
-        List<Map<String, Object>> rejected = new ArrayList<>();
 
         for (CoSo cs : allBranches) {
             // Only process branches that came from owner registration (have a linked manager)
@@ -165,25 +158,22 @@ public class AdminOwnerServlet extends HttpServlet {
             switch (cs.getTrangThai()) {
                 case "Chờ duyệt": pending.add(row); break;
                 case "Đang hoạt động": approved.add(row); break;
-                case "Từ chối": rejected.add(row); break;
+                // "Từ chối" không hiển thị ở trang Quản lý Owner nữa —
+                // chỉ xuất hiện tại /admin/thung-rac (xem AdminTrashServlet).
+                default: break;
             }
         }
 
         req.setAttribute("pending",  pending);
         req.setAttribute("approved", approved);
-        req.setAttribute("rejected", rejected);
         req.getRequestDispatcher("/admin/QuanLyOwner.jsp").forward(req, resp);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    private void unlockAndNotify(int accountId) {
-        TaiKhoan mgr = taiKhoanDAO.getAccountById(accountId);
-        if (mgr == null) return;
-        mgr.setIsLocked(false);
-        taiKhoanDAO.updateAccount(mgr);
-        final String email   = mgr.getEmail();
-        final String name    = mgr.getFullName();
+    private void sendApprovalEmail(TaiKhoan account) {
+        final String email = account.getEmail();
+        final String name  = account.getFullName();
         new Thread(() -> {
             try {
                 EmailUtil.sendEmail(email,
@@ -250,11 +240,9 @@ public class AdminOwnerServlet extends HttpServlet {
         }
     }
 
-    private void notifyRejection(int accountId, String coSoName) {
-        TaiKhoan mgr = taiKhoanDAO.getAccountById(accountId);
-        if (mgr == null) return;
-        final String email = mgr.getEmail();
-        final String name = mgr.getFullName();
+    private void sendRejectionEmail(TaiKhoan account, String coSoName) {
+        final String email = account.getEmail();
+        final String name = account.getFullName();
         new Thread(() -> {
             try {
                 EmailUtil.sendEmail(email,

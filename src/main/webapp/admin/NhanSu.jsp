@@ -52,11 +52,12 @@ body { font-family: 'Inter', sans-serif; }
         <span class="material-symbols-outlined text-[16px]">people</span>Nhân sự
         <span class="text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium" id="staffCountDisplay">0</span>
       </button>
-      <button id="tabThungRac" onclick="switchTab('thungrac')" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-all">
-        <span class="material-symbols-outlined text-[16px]">delete</span>Thùng rác
-        <span id="trashCountBadge" class="hidden text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">0</span>
-      </button>
     </div>
+
+    <a href="${pageContext.request.contextPath}/admin/thung-rac?loai=Account"
+       class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 transition-all">
+      <span class="material-symbols-outlined text-[16px]">delete</span>Thùng rác
+    </a>
     
     <div class="relative w-full sm:max-w-xs">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
@@ -92,14 +93,7 @@ body { font-family: 'Inter', sans-serif; }
     <div id="staffGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </div>
 
-  <!-- Grid thùng rác (ẩn mặc định) -->
-  <div id="sectionThungRac" class="hidden w-full flex flex-col gap-4">
-    <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-medium flex items-center gap-2">
-      <span class="material-symbols-outlined text-[16px]">info</span>
-      Các tài khoản trong thùng rác đã bị vô hiệu hóa. Bạn có thể khôi phục lại.
-    </div>
-    <div id="trashGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-  </div>
+
 </main>
 
 <!-- Modal xác nhận chuyển vào thùng rác -->
@@ -541,106 +535,17 @@ function restoreStaff(id) {
   document.body.appendChild(form); form.submit();
 }
 
-// ---- Render thùng rác ----
-function renderTrash() {
-  const trashGrid = document.getElementById('trashGrid');
-  if (!trashGrid) return;
-
-  const searchValue = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value.toLowerCase().trim() : '';
-  const filtered = deletedList.filter(s => {
-    return s.name.toLowerCase().includes(searchValue) || 
-           s.username.toLowerCase().includes(searchValue) || 
-           (s.email && s.email.toLowerCase().includes(searchValue)) || 
-           s.VaiTro.toLowerCase().includes(searchValue);
-  });
-
-  if (filtered.length === 0) {
-    trashGrid.innerHTML = `
-      <div class="col-span-full card py-16 text-center text-zinc-400">
-        <span class="material-symbols-outlined text-4xl mb-2 text-zinc-300">group_off</span>
-        <p class="text-xs font-medium">Thùng rác trống hoặc không tìm thấy kết quả</p>
-      </div>
-    `;
-    const existing = document.getElementById('sectionThungRac').querySelector('#trashPagination');
-    if (existing) existing.remove();
-    return;
-  }
-
-  const totalPages = Math.ceil(filtered.length / nhanSuPageSize);
-  if (trashCurrentPage > totalPages && totalPages > 0) trashCurrentPage = totalPages;
-  if (trashCurrentPage < 1) trashCurrentPage = 1;
-
-  const pageList = filtered.slice((trashCurrentPage - 1) * nhanSuPageSize, trashCurrentPage * nhanSuPageSize);
-
-  trashGrid.innerHTML = pageList.map(s => {
-    let avatarUrl = `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=94a3b8&color=fff&size=128&bold=true`;
-    return `
-      <div class="card p-5 border border-slate-200 bg-white rounded-2xl shadow-sm flex flex-col justify-between">
-        <div>
-          <!-- Card Header: Avatar, Name, Status -->
-          <div class="flex items-start justify-between gap-2.5 mb-4">
-            <div class="flex items-center gap-3">
-              <img src="\${avatarUrl}" alt="\${s.name}" class="w-12 h-12 rounded-full border border-slate-100 shadow-sm shrink-0 opacity-60">
-              <div>
-                <p class="font-extrabold text-slate-500 text-sm leading-tight">\${s.name}</p>
-                <p class="text-[11px] text-slate-400 font-semibold mt-0.5">\${s.VaiTro}</p>
-              </div>
-            </div>
-            <span class="badge bg-slate-100 border border-slate-250 text-slate-600">Đã xóa</span>
-          </div>
-
-          <!-- Contact Container -->
-          <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-1.5 text-xs text-slate-500 font-medium mb-4">
-            <div class="flex items-center gap-2 truncate">
-              <span class="material-symbols-outlined text-[15px] text-slate-400 shrink-0">mail</span>
-              <span class="truncate" title="\${s.email}">\${s.email}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Row -->
-        <div class="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 w-full justify-between">
-          <button onclick="restoreStaff('\${s.id}')" title="Khôi phục tài khoản" class="flex-1 h-8 rounded-lg bg-green-600 text-white hover:bg-green-700 text-[11px] font-bold shadow-sm transition-all flex items-center justify-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">restore</span>Khôi phục
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  const thungRacCard = document.getElementById('sectionThungRac');
-  if (thungRacCard) {
-    if (!thungRacCard.id) thungRacCard.id = 'trashCardContainer';
-    renderPaginationControls('sectionThungRac', 'trashPagination', filtered.length, trashCurrentPage, totalPages, (p) => {
-      trashCurrentPage = p;
-      renderTrash();
-    });
-  }
-}
-
 // ---- Chuyển tab ----
+// Chỉ còn tab "Nhân sự" (thùng rác riêng đã bị loại bỏ, dùng /admin/thung-rac chung).
 function switchTab(tab) {
   const nhansuSection = document.getElementById('sectionNhanSu');
-  const trashSection = document.getElementById('sectionThungRac');
   const tabNhanSu = document.getElementById('tabNhanSu');
-  const tabThungRac = document.getElementById('tabThungRac');
   const addBtn = document.getElementById('addStaffBtn');
 
-  if (tab === 'nhansu') {
-    nhansuSection.classList.remove('hidden');
-    trashSection.classList.add('hidden');
-    tabNhanSu.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all';
-    tabNhanSu.querySelector('#staffCountDisplay').className = 'text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium';
-    tabThungRac.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-all';
-    addBtn.classList.remove('hidden');
-  } else {
-    nhansuSection.classList.add('hidden');
-    trashSection.classList.remove('hidden');
-    tabThungRac.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all';
-    tabNhanSu.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-all';
-    tabNhanSu.querySelector('#staffCountDisplay').className = 'text-xs bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded font-medium';
-    addBtn.classList.add('hidden');
-  }
+  nhansuSection.classList.remove('hidden');
+  tabNhanSu.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all';
+  tabNhanSu.querySelector('#staffCountDisplay').className = 'text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium';
+  addBtn.classList.remove('hidden');
 }
 
 
@@ -955,20 +860,12 @@ async function submitOtpVerification() {
 // Scripts run at end of <body>, DOM is already ready — call directly
 (function initNhanSu() {
     renderStaff();
-    renderTrash();
-    const badge = document.getElementById('trashCountBadge');
-    if (deletedList.length > 0) {
-      badge.innerText = deletedList.length;
-      badge.classList.remove('hidden');
-    }
 
     const searchInput = document.getElementById('adminSearchInput');
     if (searchInput) {
         searchInput.addEventListener('input', () => {
             staffCurrentPage = 1;
-            trashCurrentPage = 1;
             renderStaff();
-            renderTrash();
         });
     }
 
@@ -1030,7 +927,6 @@ async function submitOtpVerification() {
 window.addEventListener('pageshow', function(e) {
     if (e.persisted) {
         renderStaff();
-        renderTrash();
     }
 });
 </script>

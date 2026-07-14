@@ -19,9 +19,25 @@ public class CoSoDAOImpl implements CoSoDAO {
 
     @Override
     public List<CoSo> getAllCoSo() {
+        // Loại trừ cơ sở đang "Chờ duyệt"/"Từ chối" vì đây là yêu cầu Owner
+        // chưa được Admin duyệt, không phải cơ sở đang vận hành thật sự.
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false OR c.isDeleted IS NULL", CoSo.class).getResultList();
+            return em.createQuery(
+                    "SELECT c FROM CoSo c WHERE (c.isDeleted = false OR c.isDeleted IS NULL) " +
+                    "AND c.TrangThai NOT IN ('Chờ duyệt', 'Từ chối')", CoSo.class)
+                .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<CoSo> getAllCoSoIncludingPending() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false OR c.isDeleted IS NULL", CoSo.class)
+                .getResultList();
         } finally {
             em.close();
         }
@@ -368,6 +384,23 @@ public class CoSoDAOImpl implements CoSoDAO {
             if (trans.isActive()) trans.rollback();
             logger.error("Lỗi archive rejected CoSo for accountId={}: {}", accountId, e.getMessage(), e);
             return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean hasActiveOrPendingCoSo(int accountId, int excludeCoSoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            Long count = em.createQuery(
+                    "SELECT COUNT(c) FROM CoSo c WHERE c.AccountID_QuanLy = :accId AND c.CoSoID <> :excludeId " +
+                    "AND (c.isDeleted = false OR c.isDeleted IS NULL) " +
+                    "AND c.TrangThai IN ('Chờ duyệt', 'Đang hoạt động')", Long.class)
+                .setParameter("accId", accountId)
+                .setParameter("excludeId", excludeCoSoId)
+                .getSingleResult();
+            return count != null && count > 0;
         } finally {
             em.close();
         }

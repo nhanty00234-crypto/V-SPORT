@@ -60,7 +60,7 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             return;
         }
 
-        List<TaiKhoan> accounts = TaiKhoanDAO.getAllAccounts();
+        List<TaiKhoan> accounts = TaiKhoanDAO.getStaffDirectoryAccounts();
         List<TaiKhoan> deletedAccounts = TaiKhoanDAO.getDeletedAccounts();
         List<CoSo> branches = coSoDAO.getAllCoSo();
         List<VaiTro> roles = VaiTroDAO.getAllRoles();

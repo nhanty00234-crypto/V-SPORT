@@ -29,7 +29,6 @@
     }
     .owner-card.card-pending::before { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
     .owner-card.card-approved::before { background:linear-gradient(90deg,#10b981,#34d399); }
-    .owner-card.card-rejected::before { background:linear-gradient(90deg,#ef4444,#f87171); }
 
     .owner-card:hover { box-shadow:0 10px 30px -10px rgba(0,0,0,.08); transform:translateY(-2px); }
     .owner-card:hover::before { opacity:1; }
@@ -113,7 +112,7 @@
   </section>
 
   <!-- Count cards -->
-  <section class="reveal d1 grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <section class="reveal d1 grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 flex items-center gap-4 hover:shadow-sm transition-all">
       <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
         <i class="ti ti-clock-hour-4 text-2xl"></i>
@@ -130,15 +129,6 @@
       <div>
         <p class="text-2xl font-black text-zinc-900">${approved.size()}</p>
         <p class="text-xs text-zinc-400 font-semibold tracking-wide uppercase">Đang hoạt động</p>
-      </div>
-    </div>
-    <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 flex items-center gap-4 hover:shadow-sm transition-all">
-      <div class="w-12 h-12 rounded-xl bg-red-50 text-red-500 border border-red-100 flex items-center justify-center shrink-0">
-        <i class="ti ti-circle-x text-2xl"></i>
-      </div>
-      <div>
-        <p class="text-2xl font-black text-zinc-900">${rejected.size()}</p>
-        <p class="text-xs text-zinc-400 font-semibold tracking-wide uppercase">Từ chối</p>
       </div>
     </div>
   </section>
@@ -159,13 +149,10 @@
         <span class="ml-1 bg-emerald-100 text-emerald-700 rounded-md px-2 py-0.5 text-[10px] font-bold">${approved.size()}</span>
       </c:if>
     </button>
-    <button class="tab-pill" id="tabRejected" onclick="switchTab('rejected', this)">
-      <i class="ti ti-circle-x text-sm"></i>
-      Từ chối
-      <c:if test="${rejected.size() > 0}">
-        <span class="ml-1 bg-red-100 text-red-600 rounded-md px-2 py-0.5 text-[10px] font-bold">${rejected.size()}</span>
-      </c:if>
-    </button>
+    <a href="${pageContext.request.contextPath}/admin/thung-rac?loai=OwnerRequest"
+       class="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 transition-all">
+      <i class="ti ti-trash text-sm"></i>Yêu cầu đã từ chối (thùng rác)
+    </a>
   </section>
 
   <!-- ══ TAB: Chờ duyệt ══ -->
@@ -347,78 +334,6 @@
     </c:choose>
   </div>
 
-  <!-- ══ TAB: Từ chối ══ -->
-  <div id="tab-rejected" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 hidden">
-    <c:choose>
-      <c:when test="${empty rejected}">
-        <div class="col-span-full flex flex-col items-center justify-center py-20 text-zinc-400 bg-white border border-zinc-200 rounded-2xl shadow-xs">
-          <i class="ti ti-circle-x text-5xl mb-3 opacity-30"></i>
-          <p class="text-sm font-semibold">Không có đơn đăng ký nào bị từ chối</p>
-        </div>
-      </c:when>
-      <c:otherwise>
-        <c:forEach var="row" items="${rejected}" varStatus="st">
-          <c:set var="cs"  value="${row.coSo}"/>
-          <c:set var="mgr" value="${row.manager}"/>
-          <div class="owner-card card-rejected reveal d${st.index < 6 ? st.index : 5} p-5 flex flex-col gap-4">
-
-            <!-- Top row: Avatar + Facility details -->
-            <div class="flex items-start gap-4">
-              <div class="owner-avatar !bg-red-50 !color-red-500 !border-red-200">
-                <i class="ti ti-building-stadium text-2xl text-red-500"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <p class="font-bold text-zinc-900 text-base leading-tight truncate"><c:out value="${cs.tenCoSo}"/></p>
-                    <p class="text-[11px] text-red-500 font-semibold mt-1">
-                      <i class="ti ti-user-x mr-0.5"></i>Owner: <c:out value="${mgr.fullName}"/>
-                    </p>
-                  </div>
-                  <span class="badge badge-red shrink-0">Từ chối</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Divider -->
-            <div class="border-t border-zinc-100"></div>
-
-            <!-- Details -->
-            <div class="flex flex-col gap-2">
-              <div class="info-row">
-                <i class="ti ti-mail"></i>
-                <span class="truncate"><c:out value="${mgr.email}"/></span>
-              </div>
-              <div class="info-row">
-                <i class="ti ti-phone"></i>
-                <span><c:out value="${cs.soDienThoai}"/></span>
-              </div>
-              <div class="info-row">
-                <i class="ti ti-map-pin"></i>
-                <span class="line-clamp-2 leading-relaxed"><c:out value="${cs.diaChi}"/></span>
-              </div>
-              <c:if test="${not empty cs.loaiHinhKinhDoanh}">
-                <div class="info-row">
-                  <i class="ti ti-ball-football"></i>
-                  <span class="truncate"><c:out value="${cs.loaiHinhKinhDoanh}"/></span>
-                </div>
-              </c:if>
-            </div>
-
-            <!-- Action buttons -->
-            <div class="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100 mt-auto">
-              <a href="?action=thu-hoi&id=${cs.coSoID}"
-                 onclick="return confirm('Thu hồi từ chối và đưa cơ sở \'${cs.tenCoSo}\' về chờ duyệt?')"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 transition-all shadow-md shadow-amber-100">
-                <i class="ti ti-arrow-back-up text-sm"></i>Thu hồi
-              </a>
-            </div>
-
-          </div>
-        </c:forEach>
-      </c:otherwise>
-    </c:choose>
-  </div>
 
 </main>
 
@@ -435,7 +350,7 @@
 
   // Switch tabs
   function switchTab(name, btn) {
-    ['pending','approved','rejected'].forEach(function(t) {
+    ['pending','approved'].forEach(function(t) {
       document.getElementById('tab-' + t).classList.add('hidden');
     });
     document.getElementById('tab-' + name).classList.remove('hidden');
