@@ -22,8 +22,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Service layer cho quản lý nhân sự (Manager scope)
- * Business logic tập trung, dễ test và maintain
+ * Tên tiếng Việt: Dịch vụ quản lý nhân sự chi nhánh.
+ *
+ * Nhiệm vụ:
+ * - Quản lý hồ sơ nhân viên (Thêm, Sửa, Xóa).
+ * - Khóa (lock) và mở khóa (unlock) tài khoản nhân viên.
+ * - Lấy danh sách nhân viên theo cơ sở và danh sách nhân sự đã xóa mềm (thùng rác).
+ * - Quản lý ca làm việc định kỳ (Shift Patterns) cho từng nhân viên.
+ *
+ * Được gọi bởi:
+ * - NhanSuManagerServlet.java
+ * - DashboardServlet.java
+ * - ThungRacManagerServlet.java
+ * - StaffDashboardServlet.java
+ *
+ * Lưu ý:
+ * - Không tự ý nâng cấp quyền của nhân viên lên Admin hoặc Manager trong service này.
  */
 public class NhanSuService {
 
@@ -39,7 +53,7 @@ public class NhanSuService {
         this.caLamViecDAO = new CaLamViecDAOImpl();
     }
 
-    // Constructor for dependency injection (testing)
+    // Constructor phục vụ cho việc tiêm phụ thuộc (dependency injection) khi kiểm thử
     public NhanSuService(TaiKhoanDAO taiKhoanDAO, VaiTroDAO vaiTroDAO, CaLamViecDAO caLamViecDAO) {
         this.taiKhoanDAO = taiKhoanDAO;
         this.vaiTroDAO = vaiTroDAO;
@@ -64,7 +78,7 @@ public class NhanSuService {
         private String initial;
         private String avatarUrl;
 
-        // Constructors, getters, setters
+        // Các constructor, getter và setter
         public NhanSuDTO() {}
 
         public NhanSuDTO(int accountId, String username, String fullName, String email,
@@ -94,7 +108,7 @@ public class NhanSuService {
             return username.substring(0, 1).toUpperCase();
         }
 
-        // Getters
+        // Các hàm getter
         public int getAccountId() { return accountId; }
         public String getUsername() { return username; }
         public String getFullName() { return fullName; }
@@ -138,7 +152,7 @@ public class NhanSuService {
         private String gioiTinh;
         private String ngaySinh; // YYYY-MM-dd
 
-        // Getters and setters
+        // Các hàm getter và setter
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
         public String getPassword() { return password; }
@@ -185,7 +199,7 @@ public class NhanSuService {
         private String ngaySinh;
         private String password;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getEmail() { return email; }
@@ -217,7 +231,19 @@ public class NhanSuService {
     // ==================== READ OPERATIONS ====================
 
     /**
-     * Lấy danh sách nhân viên (không bao gồm Admin/Manager) của cơ sở
+     * Nghĩa tiếng Việt: Lấy danh sách nhân viên chi nhánh (getAvailableStaffForShift / getStaffListByBranch).
+     *
+     * Mục đích:
+     * - Trả về toàn bộ danh sách nhân viên (trừ Admin và Manager) đang làm việc tại một chi nhánh cụ thể, phục vụ việc xem danh sách nhân sự hoặc lựa chọn phân ca làm việc.
+     *
+     * Input:
+     * - coSoId: ID cơ sở của chi nhánh
+     *
+     * Output:
+     * - List<NhanSuDTO>: Danh sách nhân viên khả dụng dưới dạng DTO
+     *
+     * Rủi ro:
+     * - Thấp.
      */
     public List<NhanSuDTO> getStaffListByBranch(int coSoId) {
         List<TaiKhoan> accounts = taiKhoanDAO.getAccountsByCoSoAndRoleNotIn(
@@ -298,7 +324,7 @@ public class NhanSuService {
         if (request.getFullName() != null) request.setFullName(request.getFullName().trim());
         if (request.getPassword() != null) request.setPassword(request.getPassword().trim());
 
-        // Validate input
+        // Kiểm tra tính hợp lệ dữ liệu đầu vào
         Map<String, String> errors = ValidationUtils.validateStaffCreate(
             request.getUsername(),
             request.getEmail(),
@@ -307,12 +333,12 @@ public class NhanSuService {
             request.getRoleId()
         );
 
-        // Check username exists
+        // Kiểm tra tên đăng nhập đã tồn tại
         if (taiKhoanDAO.kiemtraUsername(request.getUsername())) {
             errors.put("username", "Tên đăng nhập đã tồn tại");
         }
 
-        // Check email exists
+        // Kiểm tra email đã tồn tại
         if (taiKhoanDAO.kiemtraEmail(request.getEmail())) {
             errors.put("email", "Email đã tồn tại trên hệ thống");
         }
@@ -321,7 +347,7 @@ public class NhanSuService {
             throw new IllegalArgumentException(errors.toString());
         }
 
-        // Validate password if provided, otherwise use default
+        // Kiểm tra mật khẩu nếu có, ngược lại dùng mật khẩu ngẫu nhiên
         String rawPassword = request.getPassword();
         if (rawPassword == null || rawPassword.trim().isEmpty()) {
             rawPassword = generateRandomPassword();
@@ -329,7 +355,7 @@ public class NhanSuService {
             ValidationUtils.validateStrongPassword(rawPassword);
         }
 
-        // Create account
+        // Tạo tài khoản mới
         TaiKhoan newAcc = new TaiKhoan();
         newAcc.setUsername(request.getUsername());
         newAcc.setFullName(request.getFullName());
@@ -344,28 +370,28 @@ public class NhanSuService {
         newAcc.setViTriSoTruong(request.getViTriSoTruong());
         newAcc.setGioiTinh(request.getGioiTinh());
 
-        // Parse ngaySinh if provided
+        // Chuyển đổi định dạng ngày sinh nếu có
         if (request.getNgaySinh() != null && !request.getNgaySinh().isEmpty()) {
             newAcc.setNgaySinh(ValidationUtils.parseDate(request.getNgaySinh(), "yyyy-MM-dd"));
         }
 
         newAcc.setIsLocked(false);
 
-        // Hash password
+        // Mã hóa mật khẩu
         String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(
             rawPassword,
             org.mindrot.jbcrypt.BCrypt.gensalt(12)
         );
         newAcc.setPassword(hashedPassword);
 
-        // Save - set default scores and notification flag
+        // Lưu tài khoản và thiết lập các thông số mặc định
         boolean success = taiKhoanDAO.addAccountByAdmin(newAcc);
         if (!success) {
             throw new IllegalArgumentException("Thêm nhân viên thất bại");
         }
         int newAccountId = newAcc.getAccountId();
 
-        // Generate OTP manually so we can send both OTP and password in one email
+        // Tạo mã OTP thủ công để gửi kèm mật khẩu qua email
         java.util.Random random = new java.util.Random();
         int otp = random.nextInt(900000) + 100000;
         String otpString = String.valueOf(otp);
@@ -385,17 +411,28 @@ public class NhanSuService {
             }
         }).start();
 
-        // Return newAccountId, caller should store OTP in session
+        // Trả về ID tài khoản mới, mã OTP nên được lưu vào session ở controller
         return newAccountId;
     }
 
     // ==================== UPDATE OPERATIONS ====================
 
     /**
-     * Cập nhật thông tin nhân viên
-     * Supports two modes:
-     * 1. Update lock status only (isLocked param != null)
-     * 2. Update full info (isLocked == null)
+     * Nghĩa tiếng Việt: Cập nhật thông tin / Khóa / Mở khóa nhân viên (updateStaff / lockNhanSu / unlockNhanSu).
+     *
+     * Mục đích:
+     * - Cập nhật toàn bộ thông tin nhân viên hoặc thực hiện chức năng khóa/mở khóa tài khoản nhân viên nhanh chóng dựa trên tham số isLocked.
+     *
+     * Input:
+     * - accountId: ID tài khoản nhân viên cần cập nhật
+     * - request: Thông tin cập nhật (StaffUpdateRequest)
+     * - managerCoSoId: ID cơ sở của quản lý
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Thấp. Ném ngoại lệ if-else nếu email trùng lặp, số điện thoại sai định dạng, hoặc cố tình thay đổi phân quyền chi nhánh bất hợp pháp.
      */
     public void updateStaff(int accountId, StaffUpdateRequest request, int managerCoSoId) {
         if (request == null) throw new IllegalArgumentException("Yêu cầu không được để trống");
@@ -403,14 +440,14 @@ public class NhanSuService {
         if (request.getEmail() != null) request.setEmail(request.getEmail().trim());
         if (request.getPhoneNumber() != null) request.setPhoneNumber(request.getPhoneNumber().trim());
 
-        // Get existing account
+        // Lấy tài khoản hiện tại
         TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
         BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
 
-        // Check branch access
+        // Kiểm tra quyền truy cập chi nhánh
         BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
 
-        // Check if trying to elevate to Admin/Manager
+        // Kiểm tra nếu cố gắng nâng quyền lên Admin/Manager
         if (request.getRoleId() != null) {
             if (request.getRoleId() == Constants.ROLE_ADMIN ||
                 request.getRoleId() == Constants.ROLE_MANAGER) {
@@ -418,15 +455,15 @@ public class NhanSuService {
             }
         }
 
-        // Lock-only update (quick toggle)
+        // Chỉ cập nhật trạng thái khóa (bật/tắt nhanh)
         if (request.getIsLocked() != null) {
             account.setIsLocked(request.getIsLocked());
             taiKhoanDAO.updateAccount(account);
             return;
         }
 
-        // Full update
-        // Validate email
+        // Cập nhật toàn bộ thông tin
+        // Kiểm tra tính hợp lệ của email
         if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(account.getEmail())) {
             if (taiKhoanDAO.kiemtraEmail(request.getEmail())) {
                 throw new IllegalArgumentException("Email đã tồn tại trên hệ thống!");
@@ -434,12 +471,12 @@ public class NhanSuService {
             ValidationUtils.validateEmail(request.getEmail());
         }
 
-        // Validate phone if provided
+        // Kiểm tra số điện thoại nếu có
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
             ValidationUtils.validateVietnamPhone(request.getPhoneNumber());
         }
 
-        // Update fields
+        // Cập nhật các trường thông tin
         if (request.getFullName() != null) {
             account.setFullName(request.getFullName());
         }
@@ -495,10 +532,10 @@ public class NhanSuService {
         TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
         BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
 
-        // Check branch access
+        // Kiểm tra quyền truy cập chi nhánh
         BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
 
-        // Cannot delete Admin/Manager
+        // Không thể xóa Admin/Manager
         if (!isStaff(account.getRoleId())) {
             throw new IllegalArgumentException("Không thể xóa tài khoản có quyền Quản trị hoặc Quản lý!");
         }
@@ -516,10 +553,10 @@ public class NhanSuService {
         TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
         BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
 
-        // Check branch access
+        // Kiểm tra quyền truy cập chi nhánh
         BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
 
-        // Cannot delete Admin/Manager
+        // Không thể xóa Admin/Manager
         if (!isStaff(account.getRoleId())) {
             throw new IllegalArgumentException("Không thể xóa tài khoản có quyền Quản trị hoặc Quản lý!");
         }
@@ -567,10 +604,10 @@ public class NhanSuService {
         TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
         BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
 
-        // Check branch access
+        // Kiểm tra quyền truy cập chi nhánh
         BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
 
-        // Cannot restore Admin/Manager
+        // Không thể khôi phục Admin/Manager
         if (!isStaff(account.getRoleId())) {
             throw new IllegalArgumentException("Không thể khôi phục tài khoản có quyền Quản trị hoặc Quản lý!");
         }

@@ -4,7 +4,24 @@ import vn.payos.PayOS;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.webhooks.WebhookData;
+import org.example.dto.payment.PayOSCheckoutSession;
 
+/**
+ * Tên tiếng Việt: Dịch vụ tích hợp thanh toán PayOS.
+ *
+ * Nhiệm vụ:
+ * - Khởi tạo kết nối với PayOS SDK sử dụng Client ID, API Key và Checksum Key từ biến môi trường.
+ * - Tạo đường dẫn thanh toán (checkoutUrl) hoặc tạo phiên thanh toán đầy đủ chứa QR Code.
+ * - Xác thực tính hợp lệ của Webhook gửi từ hệ thống PayOS.
+ *
+ * Được gọi bởi:
+ * - DatSanServlet.java
+ * - PayOSWebhookServlet.java
+ *
+ * Lưu ý:
+ * - Không được log thông tin bảo mật (checksum key, api key).
+ * - Không thay đổi logic xác thực chữ ký của cổng thanh toán.
+ */
 public class PayOSService {
 
     private static volatile PayOSService instance;
@@ -21,6 +38,21 @@ public class PayOSService {
         this.payOS = new PayOS(clientId, apiKey, checksumKey);
     }
 
+    /**
+     * Nghĩa tiếng Việt: Lấy thể hiện duy nhất (Singleton Instance).
+     *
+     * Mục đích:
+     * - Cung cấp một điểm truy cập duy nhất cho lớp PayOSService trong toàn bộ ứng dụng (Thread-safe Singleton).
+     *
+     * Input:
+     * - Không có
+     *
+     * Output:
+     * - Thể hiện duy nhất của PayOSService
+     *
+     * Rủi ro:
+     * - Thấp. Sử dụng cơ chế Double-Checked Locking đảm bảo an toàn đa luồng.
+     */
     public static PayOSService getInstance() {
         if (instance == null) {
             synchronized (PayOSService.class) {
@@ -33,14 +65,23 @@ public class PayOSService {
     }
 
     /**
-     * Tạo payment link PayOS và trả về checkoutUrl để redirect customer.
+     * Nghĩa tiếng Việt: Tạo đường dẫn thanh toán trực tuyến.
      *
-     * @param datSanId  ID booking (dùng làm orderCode)
-     * @param amount    Tổng tiền (VND, nguyên)
-     * @param description Mô tả ngắn tối đa 25 ký tự
-     * @param returnUrl URL trả về sau khi thanh toán thành công
-     * @param cancelUrl URL trả về nếu khách hủy thanh toán
-     * @return checkoutUrl PayOS để redirect
+     * Mục đích:
+     * - Tạo một đường link thanh toán PayOS đơn giản và lấy URL điều hướng người dùng.
+     *
+     * Input:
+     * - datSanId: ID của đơn đặt sân (sử dụng làm orderCode cho PayOS)
+     * - amount: Số tiền cần thanh toán (VND)
+     * - description: Nội dung chuyển khoản (tối đa 25 ký tự)
+     * - returnUrl: URL quay lại khi khách thanh toán thành công
+     * - cancelUrl: URL quay lại khi khách hủy thanh toán
+     *
+     * Output:
+     * - checkoutUrl: Chuỗi đường dẫn để redirect khách sang cổng PayOS
+     *
+     * Rủi ro:
+     * - Trung bình. Lỗi nếu mất kết nối mạng hoặc sai lệch khóa cấu hình API.
      */
     public String createCheckoutUrl(int datSanId, long amount, String description,
                                     String returnUrl, String cancelUrl) throws Exception {
@@ -55,6 +96,25 @@ public class PayOSService {
         return result.getCheckoutUrl();
     }
 
+    /**
+     * Nghĩa tiếng Việt: Tạo phiên giao dịch thanh toán đầy đủ.
+     *
+     * Mục đích:
+     * - Tạo liên kết thanh toán chi tiết kèm theo thông tin mã QR tĩnh, số tiền và hạn dùng của link QR đó.
+     *
+     * Input:
+     * - datSanId: ID của đơn đặt sân
+     * - amount: Số tiền cần thanh toán
+     * - description: Nội dung chuyển khoản
+     * - returnUrl: URL khi thành công
+     * - cancelUrl: URL khi hủy bỏ
+     *
+     * Output:
+     * - PayOSCheckoutSession: DTO chứa checkoutUrl, qrCode, expiredAt, amount
+     *
+     * Rủi ro:
+     * - Trung bình. Cần đảm bảo dữ liệu số tiền lớn hơn 0 và không vượt quá giới hạn giao dịch.
+     */
     public PayOSCheckoutSession createCheckoutSession(int datSanId, long amount, String description,
                                                        String returnUrl, String cancelUrl) throws Exception {
         CreatePaymentLinkRequest request = CreatePaymentLinkRequest.builder()
@@ -74,11 +134,19 @@ public class PayOSService {
     }
 
     /**
-     * Xác thực webhook PayOS bằng SDK (kiểm tra chữ ký HMAC nội bộ).
-     * Ném vn.payos.exception.PayOSException (unchecked) nếu chữ ký không hợp lệ.
+     * Nghĩa tiếng Việt: Xác thực phản hồi giao dịch tự động (Webhook).
      *
-     * @param rawBody raw JSON body của request webhook
-     * @return WebhookData đã được xác thực (orderCode, amount, code, ...)
+     * Mục đích:
+     * - Đọc và xác thực tính toàn vẹn của dữ liệu webhook gửi tự động từ PayOS bằng chữ ký HMAC.
+     *
+     * Input:
+     * - rawBody: Chuỗi JSON thô nhận được từ request body của webhook
+     *
+     * Output:
+     * - WebhookData: Dữ liệu giao dịch đã được giải mã và kiểm tra chữ ký thành công
+     *
+     * Rủi ro:
+     * - Cao. Sẽ ném PayOSException nếu dữ liệu bị giả mạo hoặc cấu hình sai CHECKSUM_KEY.
      */
     public WebhookData verifyWebhook(String rawBody) {
         return payOS.webhooks().verify(rawBody);

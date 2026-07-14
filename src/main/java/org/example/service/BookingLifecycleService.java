@@ -10,11 +10,19 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Dịch vụ xử lý vòng đời đơn đặt sân (reservation-hold lifecycle).
- * Hiện tại phụ trách auto-expire booking "Chờ thanh toán" đã quá HoldExpiresAt.
- * Được gọi lại tại các entry-point đọc dữ liệu đặt sân (lưới an toàn "on-read"),
- * theo đúng cách LichDatSanDAOImpl.updateExpiredBookingsAndFields() đã làm —
- * dự án chưa có scheduler/background thread nào.
+ * Tên tiếng Việt: Dịch vụ xử lý vòng đời đặt sân.
+ *
+ * Nhiệm vụ:
+ * - Quét lịch đặt sân quá hạn giữ chỗ thanh toán.
+ * - Chuyển trạng thái từ "Chờ thanh toán" sang "Quá hạn".
+ *
+ * Được gọi bởi:
+ * - CheckInDAO.java
+ * - LichDatSanDAOImpl.java
+ *
+ * Lưu ý:
+ * - Hiện tại lớp này còn sử dụng câu lệnh SQL trực tiếp và tự quản lý JDBC connection.
+ * - TODO(sau-đánh-giá): Tách SQL này xuống DAO để Service chỉ xử lý nghiệp vụ.
  */
 public class BookingLifecycleService {
 
@@ -24,10 +32,19 @@ public class BookingLifecycleService {
     }
 
     /**
-     * Quét và tự động chuyển các booking "Chờ thanh toán" đã quá HoldExpiresAt sang "Quá hạn".
-     * An toàn khi gọi nhiều lần: chỉ UPDATE các row đang thật sự "Chờ thanh toán" VÀ đã quá hạn,
-     * không đụng "Đã xác nhận"/"Đã hoàn thành"/"Đã hủy"/booking COD (HoldExpiresAt NULL).
-     * Dùng GETDATE() phía SQL Server làm nguồn thời gian duy nhất — không nhận giờ từ caller.
+     * Nghĩa tiếng Việt: Chạy quét các đơn giữ chỗ hết hạn.
+     *
+     * Mục đích:
+     * - Tự động chuyển các đơn đặt sân đang giữ chỗ "Chờ thanh toán" nhưng đã quá thời hạn thanh toán sang trạng thái "Quá hạn".
+     *
+     * Input:
+     * - Không có (Sử dụng thời gian hệ thống của SQL Server làm chuẩn)
+     *
+     * Output:
+     * - Không có (Cập nhật trực tiếp xuống Database)
+     *
+     * Rủi ro:
+     * - Thấp. Chỉ tác động tới những bản ghi thỏa mãn điều kiện quá hạn.
      */
     public static void runExpirySweep() {
         String sql = "UPDATE LichDatSan " +

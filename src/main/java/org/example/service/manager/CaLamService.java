@@ -34,7 +34,21 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Service layer cho quản lý ca làm việc (Manager scope)
+ * Tên tiếng Việt: Dịch vụ quản lý ca làm việc.
+ *
+ * Nhiệm vụ:
+ * - Quản lý việc lập lịch ca làm việc cho nhân sự (Tạo, Sửa, Hủy ca).
+ * - Nhân bản ca làm việc từ tuần trước sang tuần kế tiếp.
+ * - Công bố ca làm việc chính thức cho nhân viên.
+ * - Phân bổ lịch tự động dựa trên mức độ rảnh và vị trí của nhân sự.
+ * - Phê duyệt hoặc từ chối hoán đổi ca giữa các nhân viên.
+ *
+ * Được gọi bởi:
+ * - QuanLyCaLamManagerServlet.java
+ * - StaffCaLamServlet.java
+ *
+ * Lưu ý:
+ * - Đây là service quản lý nghiệp vụ phức tạp, có tích hợp cơ chế Transaction qua JDBC Connection.
  */
 public class CaLamService {
 
@@ -85,7 +99,7 @@ public class CaLamService {
         private String trangThai;
         private int gioNghi;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public int getCaLamViecId() { return caLamViecId; }
         public void setCaLamViecId(int caLamViecId) { this.caLamViecId = caLamViecId; }
         public int getAccountId() { return accountId; }
@@ -117,7 +131,7 @@ public class CaLamService {
      */
     public static class CaLamRequest {
         private int accountId;
-        private int coSoId; // Dynamic branch
+        private int coSoId; // Chi nhánh động
         private LocalDate ngayLam;
         private LocalTime gioBatDau;
         private LocalTime gioKetThuc;
@@ -127,15 +141,15 @@ public class CaLamService {
         private String trangThai;
         private int gioNghi;
         
-        // Recurring shifts support
-        private String repeatType = "none"; // none, daily, weekly
+        // Hỗ trợ ca làm việc định kỳ
+        private String repeatType = "none"; // không có, hàng ngày, hàng tuần
         private LocalDate repeatUntil;
         private boolean overrideConfirm;
         private boolean isCustomTime;
         private String customTimeReason;
         private String shiftTemplateId;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public int getAccountId() { return accountId; }
         public void setAccountId(int accountId) { this.accountId = accountId; }
         public int getCoSoId() { return coSoId; }
@@ -210,6 +224,24 @@ public class CaLamService {
         return createShift(request, managerCoSoId, managerCoSoId);
     }
 
+    /**
+     * Nghĩa tiếng Việt: Tạo ca làm việc mới.
+     *
+     * Mục đích:
+     * - Khởi tạo một hoặc chuỗi ca làm việc (nếu có chế độ lặp lại ca) cho nhân viên. 
+     *   Kiểm tra tính hợp lệ về mặt thời gian, trùng ca và lưu lịch sử thao tác (Audit Log).
+     *
+     * Input:
+     * - request: Thông tin ca làm cần tạo (CaLamRequest)
+     * - managerCoSoId: ID cơ sở của quản lý
+     * - actorId: ID tài khoản thực hiện thao tác
+     *
+     * Output:
+     * - List<String>: Danh sách cảnh báo/lỗi phát sinh trong quá trình tạo ca
+     *
+     * Rủi ro:
+     * - Cao. Có thể ném ConflictException nếu trùng lịch ca làm hoặc ValidationException nếu thông tin thời gian không hợp lệ.
+     */
     public List<String> createShift(CaLamRequest request, int managerCoSoId, int actorId) {
         // 3.1 Input validate
         if (request == null) {
@@ -225,7 +257,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Giờ bắt đầu và giờ kết thúc không được để trống.");
         }
 
-        // Validate repeat properties
+        // Kiểm tra tính hợp lệ của thuộc tính lặp
         String repeatType = request.getRepeatType();
         if (repeatType == null || repeatType.trim().isEmpty()) {
             repeatType = "none";
@@ -247,7 +279,7 @@ public class CaLamService {
             }
         }
 
-        // Check nhân viên
+        // Kiểm tra nhân viên
         TaiKhoan staff = taiKhoanDAO.getAccountById(request.getAccountId());
         if (staff == null) {
             throw new NotFoundException("Nhân viên không tồn tại.");
@@ -256,7 +288,7 @@ public class CaLamService {
         int targetCoSoId = request.getCoSoId() > 0 ? request.getCoSoId() : managerCoSoId;
         BranchSecurityUtils.checkBranchAccess(targetCoSoId, managerCoSoId);
 
-        // Collect all dates to generate shifts
+        // Thu thập tất cả các ngày để tạo ca làm việc
         List<LocalDate> datesToSchedule = new ArrayList<>();
         datesToSchedule.add(request.getNgayLam());
 
@@ -278,12 +310,12 @@ public class CaLamService {
             }
         }
 
-        // MAX_REPEAT_OCCURRENCES = 90
+        // Số lần lặp tối đa = 90
         if (datesToSchedule.size() > 90) {
             throw new ValidationException("Không thể tạo quá 90 ca làm việc lặp lại trong một lần!");
         }
 
-        // P1-2: No duplicate dates in batch
+        // P1-2: Không trùng lặp ngày trong loạt tạo
         java.util.Set<LocalDate> uniqueDates = new java.util.HashSet<>();
         for (LocalDate d : datesToSchedule) {
             if (!uniqueDates.add(d)) {
@@ -291,7 +323,7 @@ public class CaLamService {
             }
         }
 
-        // Validate all generated dates using validationEngine
+        // Kiểm tra tính hợp lệ của tất cả các ngày đã tạo bằng validationEngine
         boolean hasOverlap = false;
         boolean hasCompleted = false;
         boolean hasActive = false;
@@ -362,7 +394,7 @@ public class CaLamService {
             }
         }
 
-        // All-or-nothing batch insert using a shared JDBC transaction
+        // Thêm hàng loạt (tất cả hoặc không) bằng cách sử dụng một giao dịch JDBC chung
         try (Connection txConn = DBUtil.getConnection()) {
             txConn.setAutoCommit(false);
             try {
@@ -390,7 +422,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Lỗi kết nối CSDL khi tạo ca làm việc: " + e.getMessage(), e);
         }
 
-        // Post-commit notifications (outside transaction — non-critical)
+        // Thông báo sau khi commit (ngoài giao dịch — không quan trọng)
         for (CaLamViec ca : shiftsToCreate) {
             if (ca.isPublished()) {
                 org.example.model.ThongBao tb = new org.example.model.ThongBao();
@@ -458,6 +490,27 @@ public class CaLamService {
         return updateShift(caLamViecId, request, managerCoSoId, managerCoSoId, "Cập nhật ca làm");
     }
 
+    /**
+     * Nghĩa tiếng Việt: Cập nhật ca làm việc.
+     *
+     * Mục đích:
+     * - Sửa đổi thông tin ca làm việc (nhân viên, thời gian, trạng thái, ghi chú). 
+     *   Kiểm tra tính hợp lệ về mặt thời gian, trùng ca và các quy tắc đặc biệt đối với ca đã công bố.
+     *
+     * Input:
+     * - caLamViecId: ID ca làm việc cần sửa
+     * - request: Thông tin cập nhật (CaLamRequest)
+     * - managerCoSoId: ID cơ sở của quản lý
+     * - actorId: ID tài khoản thực hiện cập nhật
+     * - changeReason: Lý do thay đổi ca
+     *
+     * Output:
+     * - List<String>: Danh sách cảnh báo/lỗi
+     *
+     * Rủi ro:
+     * - Cao. Ném ConflictException nếu sửa ca đã kết thúc/hủy, ca sắp bắt đầu trong 2 giờ, 
+     *   hoặc ValidationException nếu thiếu lý do đổi ca đã công bố.
+     */
     public List<String> updateShift(int caLamViecId, CaLamRequest request, int managerCoSoId, int actorId, String changeReason) {
         CaLamViec existing = caLamViecDAO.getCaById(caLamViecId);
         BranchSecurityUtils.getEntityOrThrow(existing, "Ca làm việc");
@@ -474,14 +527,14 @@ public class CaLamService {
             throw new ConflictException("Không thể sửa ca làm việc đã bị hủy.");
         }
 
-        // 2-hour cutoff: block update if shift starts within 120 minutes
+        // Giới hạn 2 giờ: chặn cập nhật nếu ca làm việc bắt đầu trong vòng 120 phút
         LocalDateTime shiftStart = LocalDateTime.of(existing.getNgayLam(), existing.getGioBatDau());
         long minutesUntilStart = ChronoUnit.MINUTES.between(LocalDateTime.now(), shiftStart);
         if (minutesUntilStart > 0 && minutesUntilStart < 120) {
             throw new ConflictException("SHIFT_CUTOFF_VIOLATED: Ca làm việc sắp bắt đầu trong vòng 2 giờ. Không thể cập nhật.");
         }
 
-        // Require reason when updating a Published shift
+        // Yêu cầu lý do khi cập nhật ca làm việc đã công bố
         if (existing.isPublished() && (changeReason == null || changeReason.trim().isEmpty())) {
             throw new ValidationException("PUBLISHED_REASON_REQUIRED: Vui lòng nhập lý do thay đổi ca đã gửi cho nhân viên.");
         }
@@ -508,7 +561,7 @@ public class CaLamService {
         int targetCoSoId = request.getCoSoId() > 0 ? request.getCoSoId() : managerCoSoId;
         BranchSecurityUtils.checkBranchAccess(targetCoSoId, managerCoSoId);
 
-        // Run validation engine
+        // Chạy bộ máy kiểm tra tính hợp lệ (validation engine)
         CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
                 request.getAccountId(), request.getNgayLam(), request.getGioBatDau(), request.getGioKetThuc(), request.getGioNghi(), caLamViecId, targetCoSoId,
                 request.isCustomTime(), request.getCustomTimeReason()
@@ -541,7 +594,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Cập nhật ca làm việc thất bại");
         }
 
-        // Log audit log
+        // Ghi nhật ký audit log
         CaLamViecAudit audit = new CaLamViecAudit();
         audit.setCaLamViecId(existing.getCaLamViecId());
         audit.setThaoTac("UPDATE");
@@ -551,7 +604,7 @@ public class CaLamService {
         audit.setLyDo(changeReason != null && !changeReason.trim().isEmpty() ? changeReason : "Cập nhật ca làm bởi quản lý");
         auditDAO.insert(audit);
 
-        // Notify employee if published
+        // Thông báo cho nhân viên nếu ca làm việc đã được công bố
         if (existing.isPublished()) {
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(existing.getAccountId());
@@ -577,12 +630,32 @@ public class CaLamService {
         deleteShift(caLamViecId, managerCoSoId, managerCoSoId, "Xóa ca làm");
     }
 
+    /**
+     * Nghĩa tiếng Việt: Hủy/Xóa ca làm việc (cancelShift).
+     *
+     * Mục đích:
+     * - Hủy bỏ hoặc xóa một ca làm việc đã phân cho nhân viên. Thực hiện các ràng buộc thời gian 
+     *   và trạng thái của ca làm, ghi nhật ký hoạt động (Audit Log) và gửi thông báo nếu ca đã công bố.
+     *
+     * Input:
+     * - caLamViecId: ID ca làm việc cần xóa
+     * - managerCoSoId: ID cơ sở của quản lý
+     * - actorId: ID tài khoản thực hiện hành động
+     * - deleteReason: Lý do hủy/xóa ca làm
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Cao. Ném ConflictException nếu ca đã hoàn thành/hủy/đang diễn ra, 
+     *   hoặc ValidationException nếu hủy khẩn cấp ca đã công bố/xác nhận sát giờ (trong vòng 2 giờ) mà thiếu lý do.
+     */
     public void deleteShift(int caLamViecId, int managerCoSoId, int actorId, String deleteReason) {
         CaLamViec ca = caLamViecDAO.getCaById(caLamViecId);
         BranchSecurityUtils.getEntityOrThrow(ca, "Ca làm việc");
         BranchSecurityUtils.checkBranchAccess(ca.getCoSoId(), managerCoSoId);
 
-        // CheckedIn / CheckedOut -> ERROR cứng
+        // CheckedIn / CheckedOut -> Báo lỗi cứng
         if (Constants.isTerminalStatus(ca.getTrangThai())) {
             throw new ConflictException("Không sửa hoặc hủy ca đã completed.");
         }
@@ -593,7 +666,7 @@ public class CaLamService {
             throw new ConflictException("Ca làm việc đã bị hủy.");
         }
 
-        // 2-hour emergency check
+        // Kiểm tra khẩn cấp trong vòng 2 giờ
         LocalDateTime shiftStart2h = LocalDateTime.of(ca.getNgayLam(), ca.getGioBatDau());
         long minutesUntilStart2h = ChronoUnit.MINUTES.between(LocalDateTime.now(), shiftStart2h);
         boolean isEmergencyCancel = minutesUntilStart2h > 0 && minutesUntilStart2h < 120;
@@ -601,7 +674,7 @@ public class CaLamService {
             throw new ValidationException("EMERGENCY_CANCEL_REQUIRED: Ca sắp bắt đầu trong vòng 2 giờ. Vui lòng nhập lý do hủy khẩn cấp.");
         }
 
-        // reason null/blank khi ca đã Published/Confirmed -> throw
+        // Lý do null/trống khi ca đã Published/Confirmed -> ném ngoại lệ
         boolean isPublished = ca.isPublished();
         boolean isConfirmed = Constants.SHIFT_STATUS_CONFIRMED.equalsIgnoreCase(ca.getTrangThai());
         if (isPublished || isConfirmed) {
@@ -612,14 +685,14 @@ public class CaLamService {
 
         String oldValue = ca.toString();
 
-        // Soft Cancel: Update status thành Cancelled instead of hardDelete
+        // Hủy mềm: Cập nhật trạng thái thành Cancelled thay vì xóa cứng (hardDelete)
         ca.setTrangThai(Constants.SHIFT_STATUS_CANCELLED);
         boolean success = caLamViecDAO.updateCaLamViec(ca);
         if (!success) {
             throw new IllegalArgumentException("Hủy ca làm việc thất bại");
         }
 
-        // Log audit log
+        // Ghi nhật ký audit log
         CaLamViecAudit audit = new CaLamViecAudit();
         audit.setCaLamViecId(caLamViecId);
         audit.setThaoTac(isEmergencyCancel ? "EMERGENCY_CANCEL" : "CANCEL");
@@ -629,7 +702,7 @@ public class CaLamService {
         audit.setLyDo(deleteReason != null ? deleteReason : "Hủy ca làm bởi quản lý");
         auditDAO.insert(audit);
 
-        // Notify employee if published
+        // Thông báo cho nhân viên nếu ca làm việc đã công bố
         if (ca.isPublished()) {
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(ca.getAccountId());
@@ -762,7 +835,22 @@ public class CaLamService {
     private final org.example.dao.ThongBaoDAO thongBaoDAO = new org.example.dao.impl.ThongBaoDAOImpl();
 
     /**
-     * Nhân bản lịch làm việc của một tuần sang một tuần khác
+     * Nghĩa tiếng Việt: Nhân bản lịch làm việc của một tuần sang tuần khác.
+     *
+     * Mục đích:
+     * - Sao chép toàn bộ ca làm việc (nhân viên, ca kíp, thời gian) từ một tuần làm việc nguồn sang tuần làm việc đích.
+     *
+     * Input:
+     * - fromStart: Ngày bắt đầu (Thứ 2) của tuần nguồn
+     * - toStart: Ngày bắt đầu (Thứ 2) của tuần đích
+     * - coSoId: ID cơ sở của chi nhánh
+     * - actorId: ID tài khoản thực hiện nhân bản
+     *
+     * Output:
+     * - List<String>: Danh sách cảnh báo/lỗi nếu có ca làm bị trùng lặp hoặc vi phạm quy định ở tuần đích
+     *
+     * Rủi ro:
+     * - Trung bình. Lỗi nếu tuần đích đã kết thúc trong quá khứ hoặc không có ca làm việc nào ở tuần nguồn.
      */
     public List<String> cloneWeekShifts(LocalDate fromStart, LocalDate toStart, int coSoId, int actorId) {
         if (fromStart == null || toStart == null) {
@@ -801,7 +889,7 @@ public class CaLamService {
         }
 
         long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(fromStart, toStart);
-        // BUG-CLONE-03: skip ALL terminal statuses, not just CheckedOut
+        // BUG-CLONE-03: bỏ qua TẤT CẢ các trạng thái cuối, không chỉ CheckedOut
         java.util.Set<String> SKIP_STATUSES = java.util.Set.of(
                 "CheckedOut", "CheckedIn", "Cancelled", "Completed"
         );
@@ -810,14 +898,14 @@ public class CaLamService {
         for (CaLamViec src : sourceShifts) {
             if (src.getNgayLam() == null) continue;
 
-            // BUG-CLONE-03: skip terminal/in-progress statuses
+            // BUG-CLONE-03: bỏ qua các trạng thái cuối/đang tiến hành
             if (src.getTrangThai() != null && SKIP_STATUSES.contains(src.getTrangThai())) {
                 continue;
             }
 
             LocalDate targetDate = src.getNgayLam().plusDays(daysDiff);
 
-            // Run validation
+            // Chạy kiểm tra tính hợp lệ
             CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
                     src.getAccountId(), targetDate, src.getGioBatDau(), src.getGioKetThuc(), src.getGioNghi(), null, coSoId
             );
@@ -838,7 +926,7 @@ public class CaLamService {
                 target.setGioNghi(src.getGioNghi());
                 target.setTrangThai("Draft");
                 target.setPublished(false);
-                // BUG-CLONE-04: copy all business fields
+                // BUG-CLONE-04: sao chép tất cả các trường nghiệp vụ
                 target.setTenCa(src.getTenCa());
                 target.setViTri(src.getViTri());
                 target.setCustomTime(src.isCustomTime());
@@ -856,8 +944,8 @@ public class CaLamService {
                     (reports.isEmpty() ? "" : "Chi tiết: " + String.join("; ", reports)));
         }
 
-        // BUG-CLONE-01: wrap all inserts in one transaction
-        // BUG-CLONE-02: use addCaLamViecWithConnection to get generated ID for audit
+        // BUG-CLONE-01: bao bọc tất cả các lệnh chèn trong một giao dịch
+        // BUG-CLONE-02: sử dụng addCaLamViecWithConnection để lấy ID tự sinh cho việc ghi nhật ký audit
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try {
@@ -887,7 +975,22 @@ public class CaLamService {
     }
 
     /**
-     * Công bố lịch làm việc cho cả tuần
+     * Nghĩa tiếng Việt: Công bố lịch làm việc tuần.
+     *
+     * Mục đích:
+     * - Chuyển toàn bộ các ca làm việc ở trạng thái nháp (Draft) sang trạng thái đã công bố (Published) trong một tuần của chi nhánh. 
+     *   Cho phép nhân viên xem được lịch phân công của mình.
+     *
+     * Input:
+     * - startOfWeek: Ngày thứ Hai đầu tuần cần công bố
+     * - coSoId: ID chi nhánh
+     * - actorId: ID tài khoản quản lý thực hiện công bố
+     *
+     * Output:
+     * - List<String>: Danh sách cảnh báo/thông báo phát sinh
+     *
+     * Rủi ro:
+     * - Thấp. Ném ValidationException nếu tuần cần công bố đã trôi qua trong quá khứ.
      */
     public List<String> publishWeekShifts(LocalDate startOfWeek, int coSoId, int actorId) {
         if (startOfWeek == null) {
@@ -899,14 +1002,14 @@ public class CaLamService {
 
         LocalDate endOfWeek = startOfWeek.plusDays(6);
 
-        // BUG-PUB-04: block publishing past weeks
+        // BUG-PUB-04: chặn công bố lịch của các tuần đã qua
         if (endOfWeek.isBefore(LocalDate.now())) {
             throw new ValidationException("Không thể công bố lịch cho tuần đã kết thúc trong quá khứ.");
         }
 
         List<CaLamViec> shifts = caLamViecDAO.getShiftsByCoSoAndDateRange(coSoId, startOfWeek, endOfWeek);
 
-        // BUG-PUB-01: only check for Draft status, ignore Cancelled/CheckedIn/etc.
+        // BUG-PUB-01: chỉ kiểm tra trạng thái Draft, bỏ qua Cancelled/CheckedIn/v.v.
         boolean hasDraft = shifts.stream().anyMatch(ca ->
             "Draft".equalsIgnoreCase(ca.getTrangThai())
         );
@@ -914,7 +1017,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Không có ca làm việc nháp nào trong tuần để công bố.");
         }
 
-        // Keep only Draft shifts for audit (non-Draft shifts are untouched)
+        // Chỉ giữ lại các ca Draft cho nhật ký audit (các ca không phải Draft được giữ nguyên)
         List<CaLamViec> draftShifts = shifts.stream()
             .filter(ca -> "Draft".equalsIgnoreCase(ca.getTrangThai()))
             .toList();
@@ -936,17 +1039,17 @@ public class CaLamService {
             }
         }
 
-        // BUG-PUB-02: wrap publish + all audits in one transaction
+        // BUG-PUB-02: bao bọc hành động công bố + tất cả các nhật ký audit trong một giao dịch
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                // BUG-PUB-01 + PUB-03: use new method that only touches Draft, returns count
+                // BUG-PUB-01 + PUB-03: sử dụng phương thức mới chỉ tác động đến Draft, trả về số lượng
                 int publishedCount = caLamViecDAO.publishDraftShiftsWithConnection(startOfWeek, endOfWeek, coSoId, conn);
                 if (publishedCount == 0) {
                     throw new IllegalArgumentException("Công bố lịch tuần thất bại: không có ca nào được publish.");
                 }
 
-                // BUG-PUB-03: read actual old status per shift rather than hardcoding "Unpublished"
+                // BUG-PUB-03: đọc trạng thái cũ thực tế của từng ca thay vì mã hóa cứng "Unpublished"
                 for (CaLamViec s : draftShifts) {
                     String oldStatus = s.getTrangThai() != null ? s.getTrangThai() : "Draft";
                     CaLamViecAudit audit = new CaLamViecAudit();
@@ -969,7 +1072,7 @@ public class CaLamService {
             throw new IllegalStateException("Lỗi kết nối DB khi công bố lịch: " + e.getMessage(), e);
         }
 
-        // Notifications sent AFTER commit (non-critical, outside transaction)
+        // Thông báo được gửi SAU KHI commit (không quan trọng, nằm ngoài giao dịch)
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
         cal.set(java.util.Calendar.MINUTE, 0);
@@ -1060,14 +1163,14 @@ public class CaLamService {
             throw new IllegalArgumentException("Ca làm việc này không thuộc về bạn.");
         }
 
-        // BUG-SWAP-05: only allow swap for Published/Confirmed shifts
+        // BUG-SWAP-05: chỉ cho phép đổi ca cho các ca ở trạng thái Đã Công Bố hoặc Đã Xác Nhận
         String shiftStatus = shift.getTrangThai();
         if (shiftStatus == null ||
                 (!"Published".equalsIgnoreCase(shiftStatus) && !"Confirmed".equalsIgnoreCase(shiftStatus))) {
             throw new ValidationException("Chỉ có thể gửi yêu cầu đổi ca cho ca ở trạng thái Đã Công Bố hoặc Đã Xác Nhận.");
         }
 
-        // BUG-SWAP-06: block duplicate pending requests for the same shift
+        // BUG-SWAP-06: chặn yêu cầu đổi ca trùng lặp đối với cùng một ca
         if (swapRequestDAO.hasPendingForShift(sr.getCaLamViecIdGui())) {
             throw new ConflictException("Ca này đã có yêu cầu đổi ca đang chờ xử lý. Vui lòng đợi yêu cầu hiện tại được giải quyết.");
         }
@@ -1081,12 +1184,12 @@ public class CaLamService {
             throw new IllegalArgumentException("Chỉ có thể hoán đổi ca làm với đồng nghiệp cùng chi nhánh.");
         }
 
-        // BUG-SWAP-07: require same role (no LE_TAN swapping with BAO_VE)
+        // BUG-SWAP-07: yêu cầu cùng vai trò (lễ tân không được đổi ca với bảo vệ)
         if (guiAcc.getRoleId() != nhanAcc.getRoleId()) {
             throw new ValidationException("Chỉ có thể đổi ca với nhân viên cùng vị trí (vai trò).");
         }
 
-        // Validate receiver conflict for this shift
+        // Kiểm tra xung đột của người nhận đối với ca làm việc này
         CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
                 sr.getAccountIdNhan(), shift.getNgayLam(), shift.getGioBatDau(), shift.getGioKetThuc(), shift.getGioNghi(), null, shift.getCoSoId()
         );
@@ -1100,7 +1203,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Gửi yêu cầu đổi ca thất bại.");
         }
 
-        // Notify Receiver
+        // Thông báo cho người nhận
         org.example.model.ThongBao tb = new org.example.model.ThongBao();
         tb.setAccountId(sr.getAccountIdNhan());
         tb.setTieuDe("Yêu cầu hoán đổi ca làm");
@@ -1129,12 +1232,12 @@ public class CaLamService {
             sr.setTrangThai("ChoQuanLyDuyet");
             swapRequestDAO.update(sr);
 
-            // Notify Managers of this branch
+            // Thông báo cho các quản lý của chi nhánh này
             List<TaiKhoan> managers = taiKhoanDAO.findAll(); // Simple lookup
             TaiKhoan receiver = taiKhoanDAO.getAccountById(sr.getAccountIdNhan());
             
             for (TaiKhoan m : managers) {
-                // BUG-SWAP-03: null-guard m.getCoSoId() before equals() to prevent NPE
+                // BUG-SWAP-03: kiểm tra null cho m.getCoSoId() trước khi gọi equals() để tránh lỗi NPE
                 if (m.getRoleId() == Constants.ROLE_MANAGER &&
                         m.getCoSoId() != null && receiver != null &&
                         m.getCoSoId().equals(receiver.getCoSoId())) {
@@ -1154,7 +1257,7 @@ public class CaLamService {
             sr.setTrangThai("TuChoi");
             swapRequestDAO.update(sr);
 
-            // Notify Requester
+            // Thông báo cho người gửi yêu cầu
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(sr.getAccountIdGui());
             tb.setTieuDe("Yêu cầu đổi ca bị từ chối");
@@ -1168,6 +1271,24 @@ public class CaLamService {
         }
     }
 
+    /**
+     * Nghĩa tiếng Việt: Phê duyệt yêu cầu đổi ca.
+     *
+     * Mục đích:
+     * - Quản lý phê duyệt yêu cầu đổi ca làm việc của hai nhân viên. Thực hiện hoán đổi nhân viên trong 
+     *   hai ca làm việc đó, ghi nhật ký hoạt động (Audit Log) và gửi thông báo cho cả hai nhân viên.
+     *
+     * Input:
+     * - swapId: ID của yêu cầu đổi ca (CaLamViecSwapRequest)
+     * - managerId: ID của quản lý thực hiện phê duyệt
+     * - notes: Ghi chú của quản lý
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Cao. Ném ConflictException nếu phát sinh trùng lịch mới sau khi hoán đổi (ví dụ nhân viên bị xếp 2 ca đè giờ nhau).
+     */
     public void approveSwapRequest(int swapId, int managerId, String notes) {
         CaLamViecSwapRequest sr = swapRequestDAO.getById(swapId);
         if (sr == null || !"ChoQuanLyDuyet".equals(sr.getTrangThai())) {
@@ -1209,7 +1330,7 @@ public class CaLamService {
             );
         }
 
-        // BUG-SWAP-02: throw BEFORE any DB write when validation fails, so DB stays clean
+        // BUG-SWAP-02: ném ngoại lệ TRƯỚC KHI ghi DB khi kiểm tra thất bại để DB luôn sạch
         if (!valRes1.isValid() || (valRes2 != null && !valRes2.isValid())) {
             String autoRejectReason = "Hệ thống tự động từ chối do phát sinh xung đột lịch: ";
             if (!valRes1.isValid()) {
@@ -1221,11 +1342,11 @@ public class CaLamService {
             throw new ConflictException(autoRejectReason);
         }
 
-        // BUG-SWAP-01: wrap all swap DB ops in a single transaction
+        // BUG-SWAP-01: bao bọc tất cả các thao tác DB đổi ca trong một giao dịch duy nhất
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                // 1. Swap caGui to receiver
+                // 1. Hoán đổi caGui cho người nhận
                 caGui.setAccountId(sr.getAccountIdNhan());
                 caLamViecDAO.updateCaLamViecWithConnection(caGui, conn);
 
@@ -1238,7 +1359,7 @@ public class CaLamService {
                 audit1.setLyDo("Phê duyệt hoán đổi ca làm. Ghi chú: " + notes);
                 auditDAO.insertWithConnection(audit1, conn);
 
-                // 2. Swap caNhan to requester (if trade)
+                // 2. Hoán đổi caNhan cho người gửi (nếu là giao dịch đổi ca)
                 if (caNhan != null) {
                     caNhan.setAccountId(sr.getAccountIdGui());
                     caLamViecDAO.updateCaLamViecWithConnection(caNhan, conn);
@@ -1253,7 +1374,7 @@ public class CaLamService {
                     auditDAO.insertWithConnection(audit2, conn);
                 }
 
-                // 3. Update swap request to DaDuyet
+                // 3. Cập nhật yêu cầu đổi ca thành DaDuyet
                 sr.setTrangThai("DaDuyet");
                 sr.setNguoiDuyet(managerId);
                 sr.setNgayDuyet(LocalDateTime.now());
@@ -1271,7 +1392,7 @@ public class CaLamService {
             throw new IllegalStateException("Lỗi kết nối DB khi phê duyệt hoán đổi ca: " + e.getMessage(), e);
         }
 
-        // Notify both staff AFTER commit (non-critical)
+        // Thông báo cho cả hai nhân viên SAU KHI commit (không quan trọng)
         for (int accId : new int[]{sr.getAccountIdGui(), sr.getAccountIdNhan()}) {
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(accId);
@@ -1286,6 +1407,24 @@ public class CaLamService {
         }
     }
 
+    /**
+     * Nghĩa tiếng Việt: Từ chối yêu cầu đổi ca.
+     *
+     * Mục đích:
+     * - Quản lý từ chối yêu cầu đổi ca của nhân viên. Gắn cờ trạng thái yêu cầu thành 'TuChoi', 
+     *   ghi nhật ký hoạt động (Audit Log) và gửi thông báo báo lại cho cả hai nhân viên.
+     *
+     * Input:
+     * - swapId: ID của yêu cầu đổi ca làm
+     * - managerId: ID của quản lý thực hiện từ chối
+     * - notes: Ghi chú phản hồi lý do từ chối
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Thấp. Ném ngoại lệ nếu yêu cầu không hợp lệ hoặc không ở trạng thái chờ duyệt.
+     */
     public void rejectSwapRequest(int swapId, int managerId, String notes) {
         CaLamViecSwapRequest sr = swapRequestDAO.getById(swapId);
         if (sr == null || !"ChoQuanLyDuyet".equals(sr.getTrangThai())) {
@@ -1305,7 +1444,7 @@ public class CaLamService {
         sr.setGhiChuQuanLy(notes);
         swapRequestDAO.update(sr);
 
-        // BUG-SWAP-04: write audit log on rejection
+        // BUG-SWAP-04: ghi nhật ký audit log khi từ chối
         CaLamViecAudit rejectAudit = new CaLamViecAudit();
         rejectAudit.setCaLamViecId(sr.getCaLamViecIdGui());
         rejectAudit.setThaoTac("SWAP_REJECT");
@@ -1315,7 +1454,7 @@ public class CaLamService {
         rejectAudit.setLyDo("Quản lý từ chối yêu cầu đổi ca. Ghi chú: " + (notes != null ? notes : ""));
         auditDAO.insert(rejectAudit);
 
-        // Notify both staff
+        // Thông báo cho cả hai nhân viên
         for (int accId : new int[]{sr.getAccountIdGui(), sr.getAccountIdNhan()}) {
             org.example.model.ThongBao tb = new org.example.model.ThongBao();
             tb.setAccountId(accId);
@@ -1354,7 +1493,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Điểm danh ca làm thất bại.");
         }
 
-        // Log audit
+        // Ghi nhật ký audit log
         org.example.model.CaLamViecAudit audit = new org.example.model.CaLamViecAudit();
         audit.setCaLamViecId(ca.getCaLamViecId());
         audit.setThaoTac("CHECK_IN");
@@ -1386,7 +1525,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Kết thúc ca làm thất bại.");
         }
 
-        // Log audit
+        // Ghi nhật ký audit log
         org.example.model.CaLamViecAudit audit = new org.example.model.CaLamViecAudit();
         audit.setCaLamViecId(ca.getCaLamViecId());
         audit.setThaoTac("CHECK_OUT");
@@ -1401,7 +1540,23 @@ public class CaLamService {
      * Tự động ghép ca cho các ca làm việc trong khoảng thời gian dựa trên nguyện vọng rảnh/bận của nhân viên
      */
     /**
-     * Tự động ghép ca cho các ca làm việc trong khoảng thời gian dựa trên nguyện vọng rảnh/bận của nhân viên
+     * Nghĩa tiếng Việt: Tự động sắp xếp ca làm việc.
+     *
+     * Mục đích:
+     * - Chạy thuật toán tự động phân bổ nhân viên vào các ca làm việc còn trống trong khoảng thời gian chỉ định 
+     *   dựa trên vị trí công việc và lịch đăng ký rảnh/bận của nhân sự.
+     *
+     * Input:
+     * - startDate: Ngày bắt đầu sắp lịch
+     * - endDate: Ngày kết thúc sắp lịch
+     * - coSoId: ID cơ sở
+     * - actorId: ID tài khoản thực hiện yêu cầu sắp lịch tự động
+     *
+     * Output:
+     * - String: Báo cáo kết quả phân ca (số lượng ca phân công thành công/thất bại)
+     *
+     * Rủi ro:
+     * - Cao. Thuật toán có thể không tìm thấy nhân viên nào rảnh hoặc phù hợp trong khoảng thời gian đã chọn, ném ValidationException.
      */
     public String autoScheduleShifts(LocalDate startDate, LocalDate endDate, int coSoId, int actorId) {
         if (startDate == null || endDate == null) {
@@ -1446,14 +1601,14 @@ public class CaLamService {
         int unassignedCount = 0;
         List<String> autoErrors = new ArrayList<>();
 
-        // BUG-AUTO-02: track assigned hours in-session (in-memory, updated as we assign)
+        // BUG-AUTO-02: theo dõi số giờ được phân công trong phiên làm việc (trong bộ nhớ, cập nhật khi phân công)
         java.util.Map<Integer, Double> assignedHoursMap = new java.util.HashMap<>();
 
         // Duyệt qua từng ca làm việc để tìm nhân viên phù hợp
         for (CaLamViec shift : shifts) {
-            // BUG-AUTO-01: null status must be skipped (treated as non-Draft)
+            // BUG-AUTO-01: trạng thái null phải được bỏ qua (được coi là không phải Draft)
             if (shift.getTrangThai() == null) continue;
-            // Only auto-schedule Draft shifts
+            // Chỉ tự động sắp lịch cho các ca nháp (Draft)
             if (!"Draft".equals(shift.getTrangThai())) {
                 continue;
             }
@@ -1479,7 +1634,7 @@ public class CaLamService {
             }
 
             if (!candidateStaffs.isEmpty()) {
-                // BUG-AUTO-02: fairness using in-session tracking map, not just the DB snapshot
+                // BUG-AUTO-02: đảm bảo tính công bằng bằng bản đồ theo dõi trong phiên, không chỉ ảnh chụp DB
                 TaiKhoan bestStaff = null;
                 double minHours = Double.MAX_VALUE;
                 for (TaiKhoan staff : candidateStaffs) {
@@ -1495,14 +1650,14 @@ public class CaLamService {
                     shift.setAccountId(bestStaff.getAccountId());
                     boolean updated = caLamViecDAO.updateCaLamViec(shift);
                     if (!updated) {
-                        // BUG-AUTO-03: consistent error tracking instead of silently dropping
+                        // BUG-AUTO-03: theo dõi lỗi nhất quán thay vì âm thầm bỏ qua
                         autoErrors.add("Cập nhật ca ID=" + shift.getCaLamViecId() + " thất bại.");
                         unassignedCount++;
                         continue;
                     }
                     scheduledCount++;
 
-                    // Update in-session hours map
+                    // Cập nhật bản đồ số giờ trong phiên
                     long netMinutes = java.time.Duration.between(shift.getGioBatDau(), shift.getGioKetThuc()).toMinutes() - shift.getGioNghi();
                     assignedHoursMap.merge(bestStaff.getAccountId(), netMinutes / 60.0, Double::sum);
 
@@ -1522,7 +1677,7 @@ public class CaLamService {
             }
         }
 
-        // BUG-AUTO-03: consistent error handling — throw only when zero scheduled AND no partial success
+        // BUG-AUTO-03: xử lý lỗi nhất quán — chỉ ném ngoại lệ khi không có ca nào được lập lịch VÀ không có thành công một phần
         if (scheduledCount == 0 && autoErrors.isEmpty()) {
             throw new ValidationException("Không thể tự động sắp lịch: Không có nhân viên nào phù hợp hoặc rảnh trong khoảng thời gian đã chọn.");
         }

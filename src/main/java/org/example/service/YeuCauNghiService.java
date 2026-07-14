@@ -14,8 +14,20 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Service layer cho YeuCauNghi
- * Xử lý business logic liên quan đến yêu cầu nghỉ phép
+ * Tên tiếng Việt: Dịch vụ xử lý yêu cầu nghỉ phép.
+ *
+ * Nhiệm vụ:
+ * - Nhân viên gửi đơn nghỉ phép, kiểm tra hạn mức (tối đa 4 ngày/tháng).
+ * - Quản lý duyệt/từ chối đơn xin nghỉ phép.
+ * - Tự động xóa ca làm việc của nhân viên trong ngày nghỉ đã phê duyệt.
+ * - Gửi thông báo cho quản lý chi nhánh và nhân viên khi trạng thái đơn thay đổi.
+ *
+ * Được gọi bởi:
+ * - YeuCauNghiManagerServlet.java
+ * - YeuCauNghiStaffServlet.java
+ *
+ * Lưu ý:
+ * - Có sử dụng JPA EntityManager để truy vấn quản lý chi nhánh khi tạo đơn.
  */
 public class YeuCauNghiService {
     private final YeuCauNghiDAO yeuCauNghiDAO;
@@ -35,10 +47,23 @@ public class YeuCauNghiService {
     }
 
     /**
-     * Tạo yêu cầu nghỉ mới
+     * Nghĩa tiếng Việt: Tạo yêu cầu nghỉ phép mới.
+     *
+     * Mục đích:
+     * - Nhân viên gửi đơn xin nghỉ phép. Hệ thống thực hiện kiểm tra hạn mức nghỉ (tối đa 4 ngày/tháng), 
+     *   kiểm tra trùng lịch và ngày nghỉ trong quá khứ trước khi lưu đơn và gửi thông báo cho quản lý.
+     *
+     * Input:
+     * - yeuCauNghi: Thực thể chứa thông tin đơn xin nghỉ phép
+     *
+     * Output:
+     * - boolean: true nếu tạo thành công, false nếu thất bại
+     *
+     * Rủi ro:
+     * - Thấp. Có thể ném IllegalArgumentException nếu dữ liệu không hợp lệ hoặc vượt hạn mức.
      */
     public boolean createYeuCauNghi(YeuCauNghi yeuCauNghi) {
-        // Validation
+        // Kiểm tra tính hợp lệ
         if (yeuCauNghi.getAccountID() <= 0) {
             throw new IllegalArgumentException("AccountID không hợp lệ");
         }
@@ -72,7 +97,7 @@ public class YeuCauNghiService {
             throw new IllegalArgumentException("Không thể gửi yêu cầu nghỉ vì bạn đã có ca làm việc được phân vào ngày " + yeuCauNghi.getNgayNghi() + ". Vui lòng đổi ca hoặc xin quản lý hủy lịch làm trước.");
         }
 
-        // Kiểm tra hạn mức nghỉ phép (quota check): tối đa 4 ngày nghỉ/tháng
+        // Kiểm tra hạn mức nghỉ phép: tối đa 4 ngày nghỉ/tháng
         int targetMonth = yeuCauNghi.getNgayNghi().getMonthValue();
         int targetYear = yeuCauNghi.getNgayNghi().getYear();
         
@@ -170,7 +195,19 @@ public class YeuCauNghiService {
     }
 
     /**
-     * Lấy yêu cầu nghỉ sắp tới của một nhân viên
+     * Nghĩa tiếng Việt: Lấy các yêu cầu nghỉ phép sắp tới (getUpcomingLeaves).
+     *
+     * Mục đích:
+     * - Tìm kiếm toàn bộ danh sách đơn xin nghỉ phép trong tương lai của nhân viên dựa trên ID tài khoản.
+     *
+     * Input:
+     * - accountID: ID của tài khoản nhân viên
+     *
+     * Output:
+     * - List<YeuCauNghi>: Danh sách đơn nghỉ phép sắp tới
+     *
+     * Rủi ro:
+     * - Thấp. Ném IllegalArgumentException nếu accountID không hợp lệ.
      */
     public List<YeuCauNghi> getUpcomingYeuCauNghiByAccount(int accountID) {
         if (accountID <= 0) {
@@ -200,12 +237,22 @@ public class YeuCauNghiService {
     }
 
     /**
-     * Phê duyệt yêu cầu nghỉ
-     * - Cập nhật trạng thái thành "DaDuyet"
-     * - Ghi chú xử lý
-     * - Ghi log audit (đã có trigger)
-     * - Tự động xóa ca làm của nhân viên vào ngày nghỉ
-     * - Gửi thông báo cho nhân viên
+     * Nghĩa tiếng Việt: Phê duyệt yêu cầu nghỉ phép.
+     *
+     * Mục đích:
+     * - Chấp nhận đơn xin nghỉ phép của nhân viên. Hệ thống tự động chuyển trạng thái đơn sang 'DaDuyet', 
+     *   xóa toàn bộ lịch ca làm việc của nhân viên đó trong ngày được nghỉ và gửi thông báo phản hồi.
+     *
+     * Input:
+     * - yeuCauNghiID: ID của đơn xin nghỉ phép
+     * - quanLyID: ID tài khoản quản lý thực hiện duyệt
+     * - ghiChuQuanLy: Ghi chú giải trình của quản lý
+     *
+     * Output:
+     * - boolean: true nếu duyệt thành công, false nếu thất bại
+     *
+     * Rủi ro:
+     * - Trung bình. Lỗi nếu đơn không tồn tại, đã xử lý trước đó, hoặc nhân viên vẫn còn ca chưa đổi.
      */
     public boolean approveYeuCauNghi(int yeuCauNghiID, int quanLyID, String ghiChuQuanLy) {
         if (quanLyID <= 0) {
@@ -251,7 +298,21 @@ public class YeuCauNghiService {
     }
 
     /**
-     * Từ chối yêu cầu nghỉ
+     * Nghĩa tiếng Việt: Từ chối yêu cầu nghỉ phép.
+     *
+     * Mục đích:
+     * - Không đồng ý đơn xin nghỉ phép. Chuyển trạng thái đơn sang 'TuChoi', lưu lý do và gửi thông báo báo lại cho nhân viên.
+     *
+     * Input:
+     * - yeuCauNghiID: ID đơn xin nghỉ
+     * - quanLyID: ID quản lý xử lý
+     * - ghiChuQuanLy: Lý do từ chối
+     *
+     * Output:
+     * - boolean: true nếu thành công, false nếu thất bại
+     *
+     * Rủi ro:
+     * - Thấp. Ném IllegalArgumentException nếu ID không hợp lệ hoặc đơn đã được duyệt trước đó.
      */
     public boolean rejectYeuCauNghi(int yeuCauNghiID, int quanLyID, String ghiChuQuanLy) {
         if (quanLyID <= 0) {
@@ -288,7 +349,20 @@ public class YeuCauNghiService {
     }
 
     /**
-     * Hủy yêu cầu nghỉ (chỉ nhân viên tạo mới được hủy khi trạng thái là "ChoDuyet")
+     * Nghĩa tiếng Việt: Hủy yêu cầu nghỉ phép.
+     *
+     * Mục đích:
+     * - Cho phép chính nhân viên đã tạo đơn tự hủy yêu cầu xin nghỉ (chỉ khả dụng khi đơn đang ở trạng thái 'ChoDuyet').
+     *
+     * Input:
+     * - yeuCauNghiID: ID đơn xin nghỉ cần hủy
+     * - accountID: ID tài khoản nhân viên thực hiện hủy
+     *
+     * Output:
+     * - boolean: true nếu hủy thành công, false nếu thất bại
+     *
+     * Rủi ro:
+     * - Thấp. Ném ngoại lệ nếu người hủy không phải chủ đơn hoặc đơn đã được xử lý.
      */
     public boolean cancelYeuCauNghi(int yeuCauNghiID, int accountID) {
         YeuCauNghi ycn = yeuCauNghiDAO.findById(yeuCauNghiID);

@@ -699,7 +699,7 @@ public class DatSanServlet extends HttpServlet {
 
                         try {
                             long tPayOS0 = System.currentTimeMillis();
-                            org.example.service.PayOSCheckoutSession checkoutSession =
+                            org.example.dto.payment.PayOSCheckoutSession checkoutSession =
                                     org.example.service.PayOSService.getInstance()
                                             .createCheckoutSession(newDatSanId, amount, description, returnUrl, cancelUrl);
                             LOGGER.info(String.format("handleDatSan: PayOS createCheckoutSession=%dms",

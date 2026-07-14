@@ -7,11 +7,33 @@ import org.example.model.TaiKhoan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Tên tiếng Việt: Dịch vụ ghi nhật ký hoạt động hệ thống.
+ *
+ * Nhiệm vụ:
+ * - Ghi lại thông tin người thực hiện hành động (ID tài khoản, Tên hiển thị, Vai trò).
+ * - Ghi lại hành động gì (Thêm, Sửa, Xóa tạm, Duyệt, Từ chối).
+ * - Ghi lại thực thể nào bị ảnh hưởng (Tài khoản, Sân, Ca làm, Yêu cầu nghỉ phép).
+ *
+ * Được gọi bởi:
+ * - XacThucOTPServlet.java
+ * - CheckInServlet.java
+ * - YeuCauNghiManagerServlet.java
+ * - ThungRacManagerServlet.java
+ * - QuanLySanManagerServlet.java
+ * - QuanLyCaLamManagerServlet.java
+ * - NhanSuManagerServlet.java
+ * - KhoDichVuManagerServlet.java
+ * - QuanLySanServlet.java
+ *
+ * Lưu ý:
+ * - Không được làm hỏng luồng nghiệp vụ chính của người dùng nếu việc ghi log gặp sự cố.
+ */
 public class AuditLogService {
     private static final Logger logger = LoggerFactory.getLogger(AuditLogService.class);
     private static final AuditLogDAOImpl dao = new AuditLogDAOImpl();
 
-    // Action constants
+    // Các hằng số hành động
     public static final String ACTION_CREATE           = "CREATE";
     public static final String ACTION_UPDATE           = "UPDATE";
     public static final String ACTION_SOFT_DELETE      = "SOFT_DELETE";
@@ -21,7 +43,7 @@ public class AuditLogService {
     public static final String ACTION_APPROVE          = "APPROVE";
     public static final String ACTION_REJECT           = "REJECT";
 
-    // Entity type constants
+    // Các hằng số loại thực thể
     public static final String ENTITY_ACCOUNT    = "TaiKhoan";
     public static final String ENTITY_SAN        = "San";
     public static final String ENTITY_LOAI_SAN   = "LoaiSan";

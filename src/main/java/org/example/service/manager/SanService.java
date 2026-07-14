@@ -24,7 +24,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Service layer cho quản lý sân thi đấu (Manager scope)
+ * Tên tiếng Việt: Dịch vụ quản lý sân và loại sân.
+ *
+ * Nhiệm vụ:
+ * - Quản lý sân (Thêm mới, Cập nhật thông tin, Xóa).
+ * - Quản lý trạng thái hoạt động của sân (Khóa sân, Bảo trì, Khôi phục).
+ * - Quản lý cấu hình loại sân, khung giá và giờ lên đèn.
+ * - Kiểm tra lịch đặt sân đang hoạt động trước khi đổi trạng thái sân (tránh ảnh hưởng khách hàng).
+ *
+ * Được gọi bởi:
+ * - QuanLySanManagerServlet.java
+ *
+ * Lưu ý:
+ * - Hiện tại lớp này còn sử dụng câu lệnh SQL trực tiếp và tự quản lý JDBC connection.
+ * - TODO(sau-đánh-giá): Tách các đoạn check SQL này xuống DAO để Service chỉ xử lý nghiệp vụ.
  */
 public class SanService {
 
@@ -64,7 +77,7 @@ public class SanService {
         private LocalTime gioBatDauLenDen;
         private LocalTime gioKetThucLenDen;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public int getSanId() { return sanId; }
         public void setSanId(int sanId) { this.sanId = sanId; }
         public String getTenSan() { return tenSan; }
@@ -109,7 +122,7 @@ public class SanService {
         private LocalTime gioKetThucLenDen;
         private int coSoId;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public int getLoaiSanId() { return loaiSanId; }
         public void setLoaiSanId(int loaiSanId) { this.loaiSanId = loaiSanId; }
         public int getMonTheThaoId() { return monTheThaoId; }
@@ -140,7 +153,7 @@ public class SanService {
         private String moTa;
         private String hinhAnh;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public String getTenSan() { return tenSan; }
         public void setTenSan(String tenSan) { this.tenSan = tenSan; }
         public int getLoaiSanId() { return loaiSanId; }
@@ -163,7 +176,7 @@ public class SanService {
         private String moTa;
         private String hinhAnh;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public String getTenSan() { return tenSan; }
         public void setTenSan(String tenSan) { this.tenSan = tenSan; }
         public int getLoaiSanId() { return loaiSanId; }
@@ -187,7 +200,7 @@ public class SanService {
         private LocalTime gioBatDauLenDen;
         private LocalTime gioKetThucLenDen;
 
-        // Getters and setters
+        // Các hàm getter và setter
         public String getTenLoai() { return tenLoai; }
         public void setTenLoai(String tenLoai) { this.tenLoai = tenLoai; }
         public int getMonTheThaoId() { return monTheThaoId; }
@@ -259,7 +272,20 @@ public class SanService {
     // ==================== SAN OPERATIONS ====================
 
     /**
-     * Tạo sân mới
+     * Nghĩa tiếng Việt: Tạo sân thi đấu mới (createSan).
+     *
+     * Mục đích:
+     * - Khởi tạo một sân thi đấu mới trực thuộc cơ sở quản lý. Thực hiện kiểm tra trùng tên sân trước khi lưu vào database.
+     *
+     * Input:
+     * - request: Thông tin sân cần tạo (SanCreateRequest)
+     * - managerCoSoId: ID cơ sở của quản lý
+     *
+     * Output:
+     * - San: Đối tượng sân thi đấu đã được lưu thành công
+     *
+     * Rủi ro:
+     * - Thấp. Ném IllegalArgumentException nếu dữ liệu trống, không hợp lệ hoặc trùng tên sân trong cùng một chi nhánh.
      */
     public San createSan(SanCreateRequest request, int managerCoSoId) {
         validateSanRequest(request);
@@ -287,7 +313,22 @@ public class SanService {
     }
 
     /**
-     * Cập nhật sân
+     * Nghĩa tiếng Việt: Cập nhật thông tin sân thi đấu (updateSan).
+     *
+     * Mục đích:
+     * - Cập nhật tên, mô tả, hình ảnh và loại sân của một sân hiện có. 
+     *   Kiểm tra phân quyền quản lý chi nhánh và trùng lặp tên sân sau khi sửa.
+     *
+     * Input:
+     * - sanId: ID sân cần cập nhật
+     * - request: Thông tin cập nhật (SanUpdateRequest)
+     * - managerCoSoId: ID cơ sở của quản lý
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Thấp. Ném ngoại lệ if-else nếu tên sân mới bị trùng lặp hoặc không tìm thấy sân.
      */
     public void updateSan(int sanId, SanUpdateRequest request, int managerCoSoId) {
         San existing = sanDAO.getSanById(sanId);
@@ -316,14 +357,27 @@ public class SanService {
         }
 
         updateSanFromRequest(existing, request);
-        // Ensure coSoId không thay đổi
+        // Đảm bảo coSoId không thay đổi
         existing.setCoSoID(managerCoSoId);
 
         sanDAO.update(existing);
     }
 
     /**
-     * Kiểm tra xem sân có ca đặt sân hoạt động/chờ duyệt nào trong tương lai không
+     * Nghĩa tiếng Việt: Kiểm tra các ca đặt sân đang hoạt động (checkActiveBookings).
+     *
+     * Mục đích:
+     * - Ngăn cản quản lý thay đổi trạng thái sân nếu sân đó đang có các lịch đặt sân hoạt động trong tương lai hoặc đang diễn ra để tránh ảnh hưởng khách đặt.
+     *
+     * Input:
+     * - sanId: ID sân cần kiểm tra
+     * - newStatus: Trạng thái sân mới muốn cập nhật
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Cao. Ném IllegalArgumentException nếu phát hiện các đơn đặt sân đang hoạt động.
      */
     private void checkActiveBookingsForStatusChange(int sanId, String newStatus) {
         if ("Sẵn sàng".equals(newStatus)) {
@@ -399,7 +453,21 @@ public class SanService {
 
 
     /**
-     * Cập nhật trạng thái sân
+     * Nghĩa tiếng Việt: Cập nhật trạng thái sân / Khóa / Mở khóa sân (updateSanStatus / lockSan / unlockSan).
+     *
+     * Mục đích:
+     * - Chuyển đổi trạng thái của sân (ví dụ: khóa tạm thời bằng trạng thái "Tạm đóng", mở khóa bằng trạng thái "Sẵn sàng").
+     *
+     * Input:
+     * - sanId: ID sân thi đấu
+     * - newStatus: Trạng thái mới ("Sẵn sàng", "Tạm đóng", "Bảo trì", v.v.)
+     * - managerCoSoId: ID cơ sở của quản lý
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Cao. Sẽ ném IllegalArgumentException nếu trạng thái không hợp lệ hoặc vi phạm quy tắc checkActiveBookings.
      */
     public void updateSanStatus(int sanId, String newStatus, int managerCoSoId) {
         San san = sanDAO.getSanById(sanId);
@@ -438,7 +506,21 @@ public class SanService {
     }
 
     /**
-     * Cập nhật loại sân
+     * Nghĩa tiếng Việt: Cập nhật cấu hình loại sân (updateLoaiSan).
+     *
+     * Mục đích:
+     * - Sửa đổi thông tin cấu hình của loại sân (như giá tiền theo khung giờ, giờ lên đèn, v.v.).
+     *
+     * Input:
+     * - loaiSanId: ID loại sân cần cập nhật
+     * - request: Thông tin cập nhật (LoaiSanRequest)
+     * - managerCoSoId: ID cơ sở của quản lý
+     *
+     * Output:
+     * - Không có (void)
+     *
+     * Rủi ro:
+     * - Thấp. Ném ngoại lệ if-else nếu thông tin request không hợp lệ.
      */
     public void updateLoaiSan(int loaiSanId, LoaiSanRequest request, int managerCoSoId) {
         LoaiSan existing = loaiSanDAO.getLoaiSanById(loaiSanId);
@@ -448,7 +530,7 @@ public class SanService {
         validateLoaiSanRequest(request);
 
         updateLoaiSanFromRequest(existing, request);
-        existing.setCoSoID(managerCoSoId); // Lock to manager's branch
+        existing.setCoSoID(managerCoSoId); // Giới hạn ở chi nhánh của quản lý
 
         loaiSanDAO.update(existing);
     }
@@ -461,7 +543,7 @@ public class SanService {
         BranchSecurityUtils.getEntityOrThrow(ls, "Loại sân");
         BranchSecurityUtils.checkBranchAccess(ls.getCoSoID(), managerCoSoId);
 
-        // Check if any active courts use this type
+        // Kiểm tra xem có sân đang hoạt động nào sử dụng loại sân này hay không
         Long courtCount = sanDAO.countSansByLoaiSanId(loaiSanId);
         if (courtCount > 0) {
             throw new IllegalArgumentException(
