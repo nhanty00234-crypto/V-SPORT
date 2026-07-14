@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.manager;
 
 import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;

@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.admin;
 
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.VaiTroDAO;

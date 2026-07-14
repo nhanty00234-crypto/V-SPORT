@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.admin;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
