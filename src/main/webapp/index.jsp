@@ -1,17 +1,26 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%
-    org.example.model.TaiKhoan loggedInUser = (org.example.model.TaiKhoan) session.getAttribute("user");
-    if (loggedInUser != null) {
-        if (loggedInUser.getRoleId() == 1) {
-            response.sendRedirect(request.getContextPath() + "/admin/nhan-su");
-            return;
-        } else if (loggedInUser.getRoleId() == 2) {
-            response.sendRedirect(request.getContextPath() + "/manager/nhan-su");
-            return;
-        } else if (loggedInUser.getRoleId() == 4 || loggedInUser.getRoleId() == 5) {
-            response.sendRedirect(request.getContextPath() + "/staff/dashboard");
-            return;
-        }
+    Object roleIdObj = session.getAttribute("roleId");
+    Object fullNameObj = session.getAttribute("fullName");
+    Object emailObj    = session.getAttribute("email");
+
+    int roleId = -1;
+    if (roleIdObj instanceof Number) {
+        roleId = ((Number) roleIdObj).intValue();
+    } else if (roleIdObj instanceof String) {
+        try { roleId = Integer.parseInt((String) roleIdObj); } catch (NumberFormatException ignored) {}
+    }
+
+    String fullName    = fullNameObj != null ? fullNameObj.toString() : "";
+    String email       = emailObj    != null ? emailObj.toString()    : "";
+    boolean isLoggedIn = roleId != -1 || session.getAttribute("user") != null;
+    String displayName = !fullName.trim().isEmpty() ? fullName : (!email.trim().isEmpty() ? email : "Tài khoản");
+    String avatarChar  = !displayName.isEmpty() ? displayName.substring(0, 1).toUpperCase() : "T";
+
+    if (roleId != -1 && roleId != org.example.util.RoleRedirectUtil.ROLE_CUSTOMER) {
+        String homePath = org.example.util.RoleRedirectUtil.getHomePathByRoleId(roleId);
+        response.sendRedirect(request.getContextPath() + homePath);
+        return;
     }
     String ctx = request.getContextPath();
 %>
@@ -569,16 +578,16 @@
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
             </button>
-            <% if (loggedInUser != null) { %>
+            <% if (isLoggedIn) { %>
                 <!-- Dropdown for Logged-In User -->
                 <div id="user-profile-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-md overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-neutral-100">
                     <div class="px-4 py-2.5 bg-neutral-50 border-b border-neutral-100">
                         <p class="text-xs text-neutral-400">Tài khoản</p>
-                        <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName() : loggedInUser.getEmail() %></p>
+                        <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= displayName %></p>
                     </div>
                     <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Tài Khoản</a>
                     <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch Sử Đặt Sân</a>
-                    <a href="<%= ctx %>/dangnhap?action=logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng Xuất</a>
+                    <a href="<%= ctx %>/logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng Xuất</a>
                 </div>
             <% } %>
         </div>
@@ -1135,7 +1144,7 @@
 
 <script>
     window.handleUserClick = function(btn) {
-        const isLoggedIn = <%= loggedInUser != null ? "true" : "false" %>;
+        const isLoggedIn = <%= isLoggedIn ? "true" : "false" %>;
         if (isLoggedIn) {
             const userDropdown = document.getElementById('user-profile-dropdown');
             if (userDropdown) {
@@ -1172,13 +1181,13 @@
 
         <!-- User Profile Section -->
         <div class="side-drawer-section user-section">
-            <% if (loggedInUser != null) { %>
+            <% if (isLoggedIn) { %>
                 <div class="drawer-user-info">
                     <div class="avatar-circle">
-                        <%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName().substring(0, 1).toUpperCase() : loggedInUser.getEmail().substring(0, 1).toUpperCase() %>
+                        <%= avatarChar %>
                     </div>
                     <div class="user-details">
-                        <p class="user-name"><%= loggedInUser.getFullName() != null && !loggedInUser.getFullName().isEmpty() ? loggedInUser.getFullName() : loggedInUser.getEmail() %></p>
+                        <p class="user-name"><%= displayName %></p>
                         <p class="user-role">Thành viên</p>
                     </div>
                 </div>

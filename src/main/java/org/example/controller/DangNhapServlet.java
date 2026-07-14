@@ -9,22 +9,32 @@ import jakarta.servlet.http.HttpSession;
 import org.example.model.TaiKhoan;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
 @WebServlet("/dangnhap")
 public class DangNhapServlet extends HttpServlet {
 
+    private static final Logger LOGGER = LogManager.getLogger(DangNhapServlet.class);
     private TaiKhoanDAO TaiKhoanDAO = new TaiKhoanDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
+        // Phòng ngừa link logout sai trỏ về đây
+        if ("logout".equals(req.getParameter("action"))) {
+            resp.sendRedirect(req.getContextPath() + "/logout");
+            return;
+        }
 
-        if (session.getAttribute("user") != null) {
-            resp.sendRedirect(req.getContextPath() + "/index.jsp");
+        HttpSession session = req.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+            String redirectUrl = req.getContextPath()
+                    + org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
+            resp.sendRedirect(redirectUrl);
         } else {
-            // Một form duy nhất cho tất cả roles – chuyển về trang chủ với modal đăng nhập
             resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login");
         }
     }
@@ -51,27 +61,56 @@ public class DangNhapServlet extends HttpServlet {
             return;
         }
 
-        TaiKhoan taiKhoan = TaiKhoanDAO.dangNhapKhachHang(usernameOrEmail, password);
+        TaiKhoan taiKhoan = null;
+        String dbErrorMsg = null;
+        try {
+            taiKhoan = TaiKhoanDAO.dangNhapKhachHang(usernameOrEmail, password);
+        } catch (ExceptionInInitializerError e) {
+            LOGGER.error("Lỗi khởi tạo cấu hình kết nối database: ", e);
+            dbErrorMsg = getDatabaseErrorMessage(e);
+        } catch (LinkageError e) {
+            // Bắt thêm LinkageError để xử lý lỗi NoClassDefFoundError phát sinh từ lỗi ExceptionInInitializerError trước đó.
+            LOGGER.error("Lỗi liên kết lớp (có thể do lỗi khởi tạo CSDL trước đó): ", e);
+            dbErrorMsg = getDatabaseErrorMessage(e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Lỗi runtime database: ", e);
+            dbErrorMsg = getDatabaseErrorMessage(e);
+        } catch (Exception e) {
+            LOGGER.error("Lỗi kết nối database thông thường: ", e);
+            dbErrorMsg = getDatabaseErrorMessage(e);
+        }
+
+        if (dbErrorMsg != null) {
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + dbErrorMsg + "\"}");
+                return;
+            }
+            req.setAttribute("loi", dbErrorMsg);
+            req.setAttribute("username", usernameOrEmail);
+            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            return;
+        }
 
         if (taiKhoan != null) {
-            // Một cổng đăng nhập duy nhất cho tất cả roles (Admin, Quản lý, Khách hàng, ...)
-            // Không phân biệt loginType – mọi tài khoản hợp lệ đều được chấp nhận.
-
-            // Thiết lập phiên đăng nhập (Session) khi thông tin hợp lệ
-            HttpSession session = req.getSession();
-            session.setAttribute("user", taiKhoan);
-
-            // Xác định đường dẫn điều hướng sau đăng nhập dựa vào Role ID
-            String redirectUrl;
-            if (taiKhoan.getRoleId() == 1) { // Admin
-                redirectUrl = req.getContextPath() + "/admin/tong-quan";
-            } else if (taiKhoan.getRoleId() == 2) { // Manager (Quản lý)
-                redirectUrl = req.getContextPath() + "/manager/dashboard";
-            } else if (taiKhoan.getRoleId() == 4 || taiKhoan.getRoleId() == 5) { // Lễ tân & Bảo vệ (Staff)
-                redirectUrl = req.getContextPath() + "/staff/dashboard";
-            } else { // Khách hàng
-                redirectUrl = req.getContextPath() + "/index.jsp";
+            // Invalidate session cũ để tránh nhầm tài khoản khi đăng nhập liên tiếp
+            HttpSession oldSession = req.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
             }
+            HttpSession session = req.getSession(true);
+            session.setAttribute("user", taiKhoan);
+            session.setAttribute("roleId", taiKhoan.getRoleId());
+            session.setAttribute("accountId", taiKhoan.getAccountId());
+            session.setAttribute("fullName", taiKhoan.getFullName() != null ? taiKhoan.getFullName() : "");
+            session.setAttribute("email", taiKhoan.getEmail() != null ? taiKhoan.getEmail() : "");
+
+            String redirectUrl = req.getContextPath()
+                    + org.example.util.RoleRedirectUtil.getHomePathByRoleId(taiKhoan.getRoleId());
+
+            LOGGER.info("Login success: accountId={}, username={}, roleId={}, redirect={}",
+                    taiKhoan.getAccountId(), taiKhoan.getUsername(),
+                    taiKhoan.getRoleId(), redirectUrl);
 
             // Phản hồi kết quả đăng nhập thành công
             if (isAjax) {
@@ -85,14 +124,63 @@ public class DangNhapServlet extends HttpServlet {
         } else {
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"Tên đăng nhập hoặc mật khẩu không chính xác!\"}");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"Tên đăng nhập hoặc mật khẩu không đúng.\"}");
                 return;
             }
 
-            req.setAttribute("loi", "Tên đăng nhập hoặc mật khẩu không chính xác!");
+            req.setAttribute("loi", "Tên đăng nhập hoặc mật khẩu không đúng.");
             req.setAttribute("username", usernameOrEmail);
             req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
         }
+    }
+
+    private boolean isDatabaseConfigError(Throwable e) {
+        Throwable current = e;
+        while (current != null) {
+            String msg = current.getMessage();
+            if (msg != null) {
+                if (msg.contains("DB_URL") ||
+                    msg.contains("DB_USERNAME") ||
+                    msg.contains("DB_PASSWORD") ||
+                    msg.contains("Cấu hình bắt buộc bị thiếu") ||
+                    msg.contains("Error initializing HikariCP data source")) {
+                    return true;
+                }
+            }
+            if (current instanceof IllegalStateException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private boolean isDatabaseConnectionError(Throwable e) {
+        Throwable current = e;
+        while (current != null) {
+            String msg = current.getMessage();
+            if (msg != null) {
+                if (msg.contains("Connection refused") ||
+                    msg.contains("The TCP/IP connection") ||
+                    msg.contains("Login failed") ||
+                    msg.contains("HikariPool") ||
+                    msg.contains("SQLServerException")) {
+                    return true;
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private String getDatabaseErrorMessage(Throwable t) {
+        if (isDatabaseConfigError(t)) {
+            return "Hệ thống chưa được cấu hình kết nối database. Vui lòng kiểm tra DB_URL, DB_USERNAME, DB_PASSWORD.";
+        }
+        if (isDatabaseConnectionError(t)) {
+            return "Không thể kết nối database. Vui lòng kiểm tra SQL Server hoặc cấu hình kết nối.";
+        }
+        return "Lỗi kết nối cơ sở dữ liệu. Vui lòng liên hệ quản trị viên hoặc kiểm tra cấu hình hệ thống!";
     }
 }
 

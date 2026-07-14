@@ -21,7 +21,7 @@ public class CoSoDAOImpl implements CoSoDAO {
     public List<CoSo> getAllCoSo() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false", CoSo.class).getResultList();
+            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false OR c.isDeleted IS NULL", CoSo.class).getResultList();
         } finally {
             em.close();
         }

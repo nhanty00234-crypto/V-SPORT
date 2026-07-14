@@ -32,20 +32,9 @@ public class FilterKhach implements Filter {
                 String requestedWith = httpRequest.getHeader("X-Requested-With");
                 boolean isAjax = "XMLHttpRequest".equals(requestedWith);
                 org.example.model.TaiKhoan user = (org.example.model.TaiKhoan) session.getAttribute("user");
-                String redirectUrl;
-                if (user != null) {
-                    if (user.getRoleId() == 1) { // Admin
-                        redirectUrl = httpRequest.getContextPath() + "/admin/nhan-su";
-                    } else if (user.getRoleId() == 2) { // Manager
-                        redirectUrl = httpRequest.getContextPath() + "/manager/nhan-su";
-                    } else if (user.getRoleId() == 4 || user.getRoleId() == 5) { // Staff
-                        redirectUrl = httpRequest.getContextPath() + "/staff/dashboard";
-                    } else {
-                        redirectUrl = httpRequest.getContextPath() + "/index.jsp";
-                    }
-                } else {
-                    redirectUrl = httpRequest.getContextPath() + "/index.jsp";
-                }
+                Integer roleId = user != null ? user.getRoleId() : null;
+                String redirectUrl = httpRequest.getContextPath()
+                        + org.example.util.RoleRedirectUtil.getHomePathByRoleId(roleId);
 
                 if (isAjax) {
                     httpResponse.setContentType("application/json;charset=UTF-8");

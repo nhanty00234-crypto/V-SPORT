@@ -8,6 +8,55 @@ set "APP_NAME=Backend_java"
 set "PORT=8080"
 
 echo ============================================
+echo [0/5] Loading environment variables...
+echo ============================================
+if exist .env (
+    echo Loading variables from .env file...
+    for /f "usebackq tokens=1* delims==" %%i in (".env") do (
+        set "key=%%i"
+        set "val=%%j"
+        if defined key (
+            if not "!key:~0,1!"=="#" (
+                set "!key!=!val!"
+            )
+        )
+    )
+) else (
+    echo WARNING: .env file not found. Make sure environment variables are set.
+)
+
+echo Checking database configuration...
+set "DB_CONFIG_OK=1"
+
+if defined DB_URL (
+    echo   DB_URL: configured
+) else (
+    echo   DB_URL: missing
+    set "DB_CONFIG_OK=0"
+)
+
+if defined DB_USERNAME (
+    echo   DB_USERNAME: configured
+) else (
+    echo   DB_USERNAME: missing
+    set "DB_CONFIG_OK=0"
+)
+
+if defined DB_PASSWORD (
+    echo   DB_PASSWORD: configured
+) else (
+    echo   DB_PASSWORD: missing
+    set "DB_CONFIG_OK=0"
+)
+
+if "!DB_CONFIG_OK!"=="0" (
+    echo ERROR: Required database configuration is missing!
+    echo Please make sure DB_URL, DB_USERNAME, and DB_PASSWORD are set.
+    echo Refer to docs/setup/local-database-config.md for details.
+    exit /b 1
+)
+
+echo ============================================
 echo [1/5] Stopping old Tomcat...
 echo ============================================
 call "%CATALINA_HOME%\bin\catalina.bat" stop 10 -force >nul 2>&1
