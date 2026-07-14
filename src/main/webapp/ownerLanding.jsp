@@ -575,6 +575,11 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
           </div>
         </div>
 
+        <!-- Xóa bản nháp / Bắt đầu lại -->
+        <div class="flex justify-end -mt-4 mb-4">
+          <button type="button" onclick="confirmResetOwnerDraft()" class="text-white/35 hover:text-white/70 text-xs underline underline-offset-2 bg-transparent border-none cursor-pointer transition-colors">Xóa bản nháp / Bắt đầu lại</button>
+        </div>
+
         <!-- ====== STEP 1: Basic Info ====== -->
         <div id="formStep1" class="form-step">
           <h3 class="font-serif text-xl mb-6 font-medium">Thông tin cơ bản</h3>
@@ -619,6 +624,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         <div id="formStep2" class="form-step hidden">
           <h3 class="font-serif text-xl mb-2 font-medium">Xác thực Email</h3>
           <p class="text-white/80 text-sm mb-6">Chúng tôi đã gửi mã OTP đến <strong id="otpEmailDisplay" class="text-[#E08A4F]"></strong>. Vui lòng nhập mã bên dưới.</p>
+          <p id="otpValidityHint" class="hidden text-white/50 text-xs -mt-4 mb-4"></p>
           <div class="flex justify-center gap-2 mb-6" id="otpInputs">
             <input type="text" maxlength="1" class="otp-box w-12 h-12 text-center text-xl font-bold border-2 border-white/20 rounded-xl bg-black/25 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all" data-index="0" />
             <input type="text" maxlength="1" class="otp-box w-12 h-12 text-center text-xl font-bold border-2 border-white/20 rounded-xl bg-black/25 text-white focus:outline-none focus:ring-2 focus:ring-[#C9612F]/40 focus:border-[#C9612F] transition-all" data-index="1" />
@@ -637,7 +643,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
                 <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
               </button>
               <button type="button" onclick="resendOtp()" id="btnResendOtp" class="text-[#E08A4F] hover:text-[#E08A4F]/80 text-sm transition-colors disabled:opacity-40 bg-transparent border-none cursor-pointer" disabled>
-                Gửi lại mã (<span id="resendCountdown">60</span>s)
+                Gửi lại mã<span id="resendCountdownWrap"> (<span id="resendCountdown">60</span>s)</span>
               </button>
             </div>
           </div>
@@ -1005,6 +1011,12 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
     let selectedSports = []; // [{name, icon}]
     let emailVerified = false;
 
+    // Cờ do backend đặt khi JSP được forward lại kèm dữ liệu form (vd: lỗi validate).
+    // Khi true, bản nháp trong sessionStorage KHÔNG được ghi đè lên dữ liệu backend trả về.
+    if (typeof window.ownerServerFormHasData === 'undefined') {
+        window.ownerServerFormHasData = false;
+    }
+
     const POPULAR_SPORTS = [
         { name: 'Bóng đá', icon: 'sports_soccer' },
         { name: 'Bóng rổ', icon: 'sports_basketball' },
@@ -1149,6 +1161,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
             setLocationCoords(result.lat, result.lng);
             closeGeoModal();
             fetchAddressFromCoords(result.lat, result.lng);
+            saveOwnerDraft();
         } else {
             alert("Không đọc được tọa độ. Vui lòng nhập dạng 10.7626, 106.6601 hoặc dán link Google Maps có chứa tọa độ.");
         }
@@ -1190,6 +1203,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
                 setLocationCoords(lat, lng, accuracy);
                 closeGeoModal();
                 fetchAddressFromCoords(lat, lng);
+                saveOwnerDraft();
             },
             function(err) {
                 btn.disabled = false;
@@ -1241,7 +1255,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
             });
     }
 
-    function goToStep1() { hideError(); showStep(1); }
+    function goToStep1() { hideError(); showStep(1); saveOwnerDraft(); }
 
     function goToStep2() {
         hideError();
@@ -1283,8 +1297,10 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
                 otpAttempts = 0;
                 resendCount = 0;
                 document.getElementById('otpAttemptCount').textContent = '0';
+                document.getElementById('otpValidityHint').classList.add('hidden');
                 showStep(2);
                 startResendCountdown();
+                saveOwnerDraft();
                 // Focus first OTP box
                 document.querySelector('.otp-box[data-index="0"]').focus();
             } else {
@@ -1339,6 +1355,9 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         if (otp.length < 6) { otpError.textContent = 'Vui lòng nhập đủ 6 chữ số.'; otpError.classList.remove('hidden'); return; }
 
         const email = document.getElementById('regEmail').value.trim();
+        const btn = document.getElementById('btnVerifyOtp');
+        if (btn.disabled) return; // chống double-click / double-submit
+        btn.disabled = true;
         fetch('${pageContext.request.contextPath}/owner/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1346,9 +1365,11 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         })
         .then(r => r.json())
         .then(data => {
+            btn.disabled = false;
             if (data.success) {
                 emailVerified = true;
                 showStep(3);
+                saveOwnerDraft();
             } else {
                 otpAttempts++;
                 document.getElementById('otpAttemptCount').textContent = otpAttempts;
@@ -1367,6 +1388,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
             }
         })
         .catch(() => {
+            btn.disabled = false;
             otpError.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
             otpError.classList.remove('hidden');
         });
@@ -1375,19 +1397,27 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
     // ==========================================
     // RESEND OTP
     // ==========================================
-    function startResendCountdown() {
-        let seconds = 60;
+    function startResendCountdown(startSeconds) {
+        let seconds = typeof startSeconds === 'number' ? startSeconds : 60;
         const btn = document.getElementById('btnResendOtp');
         const countdown = document.getElementById('resendCountdown');
-        btn.disabled = true;
+        const wrap = document.getElementById('resendCountdownWrap');
         clearInterval(resendTimer);
+        if (seconds <= 0) {
+            btn.disabled = false;
+            if (wrap) wrap.classList.add('hidden');
+            return;
+        }
+        countdown.textContent = seconds;
+        if (wrap) wrap.classList.remove('hidden');
+        btn.disabled = true;
         resendTimer = setInterval(() => {
             seconds--;
             countdown.textContent = seconds;
             if (seconds <= 0) {
                 clearInterval(resendTimer);
                 btn.disabled = false;
-                btn.textContent = 'Gửi lại mã';
+                if (wrap) wrap.classList.add('hidden');
             }
         }, 1000);
     }
@@ -1410,6 +1440,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
     function goToStep2Back() {
         hideError();
         showStep(2);
+        saveOwnerDraft();
     }
 
     // ==========================================
@@ -1460,6 +1491,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         });
         closeSportsPopup();
         renderCourtQuantities();
+        saveOwnerDraft();
     };
 
     // ==========================================
@@ -1502,6 +1534,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         let val = parseInt(input.value) || 1;
         val = Math.max(1, val + delta);
         input.value = val;
+        saveOwnerDraft();
     };
 
     // ==========================================
@@ -1559,6 +1592,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
             if (data.success) {
                 document.getElementById('successAlert').classList.remove('hidden');
                 document.getElementById('formStep3').innerHTML = '<div class="text-center py-12"><span class="material-symbols-outlined text-green-500 text-6xl mb-4">check_circle</span><h3 class="font-serif text-2xl text-white mb-2">Đăng ký thành công!</h3><p class="text-white/70">Chúng tôi sẽ sớm liên hệ với bạn qua email hoặc số điện thoại đã cung cấp.</p></div>';
+                clearOwnerDraft();
             } else {
                 showError(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
             }
@@ -1583,6 +1617,7 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         document.getElementById('successAlert').classList.remove('hidden');
         const regSection = document.getElementById('begin');
         if (regSection) regSection.scrollIntoView({behavior:'smooth'});
+        clearOwnerDraft();
     }
 
     function syncOwnerTime(which) {
@@ -1616,6 +1651,287 @@ document.addEventListener('DOMContentLoaded',function(){var M=window.__MIMG;docu
         buildTimeSelects('openTime',  6, 0);
         buildTimeSelects('closeTime', 22, 0);
     })();
+
+    // ==========================================
+    // BẢN NHÁP ĐĂNG KÝ (sessionStorage) — chống mất dữ liệu khi reload
+    // ==========================================
+    const OWNER_DRAFT_KEY = 'vsport_owner_registration_draft';
+    const OWNER_DRAFT_TTL_MS = 2 * 60 * 60 * 1000; // 2 giờ
+    const OWNER_DRAFT_VERSION = 1;
+
+    // Debounce đơn giản: trì hoãn thực thi để không ghi sessionStorage liên tục
+    function debounce(fn, wait) {
+        let timer = null;
+        return function() {
+            const args = arguments;
+            const ctx = this;
+            clearTimeout(timer);
+            timer = setTimeout(function() { fn.apply(ctx, args); }, wait);
+        };
+    }
+
+    function ownerDraftGetVal(id) {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    }
+
+    // Thu thập dữ liệu KHÔNG nhạy cảm từ form hiện tại (không đọc OTP/password)
+    function collectOwnerDraft() {
+        const courtQuantities = {};
+        document.querySelectorAll('.court-qty').forEach(function(input) {
+            courtQuantities[input.dataset.sport] = input.value;
+        });
+
+        const operatingDays = [];
+        document.querySelectorAll('#operatingDays input[type="checkbox"]:checked').forEach(function(cb) {
+            operatingDays.push(cb.value);
+        });
+
+        return {
+            version: OWNER_DRAFT_VERSION,
+            savedAt: Date.now(),
+            currentStep: currentStep,
+            fields: {
+                tenCoSo: ownerDraftGetVal('ownerName'),
+                email: ownerDraftGetVal('regEmail'),
+                soDienThoai: ownerDraftGetVal('regPhone'),
+                diaChi: ownerDraftGetVal('regAddress'),
+                viDo: ownerDraftGetVal('viDo'),
+                kinhDo: ownerDraftGetVal('kinhDo')
+            },
+            step3: {
+                selectedSports: selectedSports,
+                courtQuantities: courtQuantities,
+                openTimeH: ownerDraftGetVal('openTimeH'),
+                openTimeM: ownerDraftGetVal('openTimeM'),
+                closeTimeH: ownerDraftGetVal('closeTimeH'),
+                closeTimeM: ownerDraftGetVal('closeTimeM'),
+                operatingDays: operatingDays,
+                description: ownerDraftGetVal('regDescription')
+            }
+        };
+    }
+
+    function saveOwnerDraft() {
+        try {
+            const draft = collectOwnerDraft();
+            sessionStorage.setItem(OWNER_DRAFT_KEY, JSON.stringify(draft));
+        } catch (e) {
+            // sessionStorage có thể bị trình duyệt chặn (chế độ ẩn danh nghiêm ngặt...) — bỏ qua an toàn
+        }
+    }
+    const debouncedSaveOwnerDraft = debounce(saveOwnerDraft, 400);
+
+    function isDraftExpired(draft) {
+        if (!draft || !draft.savedAt) return true;
+        return (Date.now() - draft.savedAt) > OWNER_DRAFT_TTL_MS;
+    }
+
+    function clearOwnerDraft() {
+        try { sessionStorage.removeItem(OWNER_DRAFT_KEY); } catch (e) { /* bỏ qua */ }
+    }
+
+    function loadOwnerDraft() {
+        let raw;
+        try {
+            raw = sessionStorage.getItem(OWNER_DRAFT_KEY);
+        } catch (e) {
+            return null;
+        }
+        if (!raw) return null;
+
+        let draft;
+        try {
+            draft = JSON.parse(raw);
+        } catch (e) {
+            clearOwnerDraft(); // JSON hỏng — xóa key để không lặp lại lỗi ở lần sau
+            return null;
+        }
+
+        if (!draft || draft.version !== OWNER_DRAFT_VERSION || isDraftExpired(draft)) {
+            clearOwnerDraft();
+            return null;
+        }
+
+        // Nếu chỉ có 1 trong 2 giá trị tọa độ thì bỏ luôn cặp tọa độ lỗi, không restore
+        if (draft.fields) {
+            const hasVi = !!draft.fields.viDo;
+            const hasKinh = !!draft.fields.kinhDo;
+            if (hasVi !== hasKinh) {
+                draft.fields.viDo = '';
+                draft.fields.kinhDo = '';
+            }
+        }
+
+        return draft;
+    }
+
+    // Điều hướng bước dùng khi khôi phục / reset — không kèm side-effect gửi OTP hay submit
+    function goToRegistrationStep(step) {
+        showStep(step);
+    }
+
+    // Đổ dữ liệu draft vào các input thật trên form (không đụng tới bước hiện tại / OTP)
+    function restoreOwnerDraftFieldsToDom(draft) {
+        const f = draft.fields || {};
+        if (f.tenCoSo) document.getElementById('ownerName').value = f.tenCoSo;
+        if (f.email) document.getElementById('regEmail').value = f.email;
+        if (f.soDienThoai) document.getElementById('regPhone').value = f.soDienThoai;
+        if (f.diaChi) document.getElementById('regAddress').value = f.diaChi;
+
+        if (f.viDo && f.kinhDo) {
+            document.getElementById('viDo').value = f.viDo;
+            document.getElementById('kinhDo').value = f.kinhDo;
+            setLocationCoords(f.viDo, f.kinhDo); // chỉ hiển thị lại preview, không gọi GPS/Nominatim
+        }
+
+        const s3 = draft.step3 || {};
+        if (Array.isArray(s3.selectedSports) && s3.selectedSports.length) {
+            selectedSports = s3.selectedSports;
+            renderCourtQuantities();
+            if (s3.courtQuantities) {
+                document.querySelectorAll('.court-qty').forEach(function(input) {
+                    const qty = s3.courtQuantities[input.dataset.sport];
+                    if (qty) input.value = qty;
+                });
+            }
+        }
+
+        if (Array.isArray(s3.operatingDays) && s3.operatingDays.length) {
+            document.querySelectorAll('#operatingDays input[type="checkbox"]').forEach(function(cb) {
+                cb.checked = s3.operatingDays.indexOf(cb.value) !== -1;
+            });
+        }
+
+        if (s3.openTimeH) { document.getElementById('openTimeH').value = s3.openTimeH; syncOwnerTime('open'); }
+        if (s3.openTimeM) { document.getElementById('openTimeM').value = s3.openTimeM; syncOwnerTime('open'); }
+        if (s3.closeTimeH) { document.getElementById('closeTimeH').value = s3.closeTimeH; syncOwnerTime('close'); }
+        if (s3.closeTimeM) { document.getElementById('closeTimeM').value = s3.closeTimeM; syncOwnerTime('close'); }
+
+        if (s3.description) document.getElementById('regDescription').value = s3.description;
+    }
+
+    // Gọi server để biết trạng thái OTP/xác thực THẬT (không bao giờ tin sessionStorage cho việc này)
+    function fetchOwnerOtpStatus() {
+        return fetch('${pageContext.request.contextPath}/owner/otp-status')
+            .then(function(r) { return r.json(); })
+            .catch(function() { return { emailVerified: false, otpActive: false, secondsRemaining: 0, otpEmail: null }; });
+    }
+
+    function showOtpValidityHint(secondsRemaining) {
+        const el = document.getElementById('otpValidityHint');
+        if (!el) return;
+        const mins = Math.max(1, Math.ceil(secondsRemaining / 60));
+        el.textContent = 'Mã xác thực còn hiệu lực khoảng ' + mins + ' phút.';
+        el.classList.remove('hidden');
+    }
+
+    // Suy ra cooldown còn lại của nút "Gửi lại mã" (60s) từ thời gian OTP đã tồn tại (tối đa 5 phút)
+    function applyResendCooldownFromOtpValidity(secondsRemainingOtpValidity) {
+        const elapsedSinceSent = Math.max(0, 300 - (secondsRemainingOtpValidity || 0));
+        const cooldownLeft = Math.max(0, 60 - elapsedSinceSent);
+        startResendCountdown(cooldownLeft);
+    }
+
+    // Đối chiếu bước muốn khôi phục với trạng thái OTP thật trên server (CASE A/B/C)
+    async function reconcileOtpState(candidateStep, emailForDisplay) {
+        if (!candidateStep || candidateStep <= 1) {
+            goToRegistrationStep(1);
+            return;
+        }
+
+        const status = await fetchOwnerOtpStatus();
+
+        if (status.emailVerified) {
+            // CASE C — server xác nhận email đã verify, không bắt xác minh lại
+            emailVerified = true;
+            if (emailForDisplay) document.getElementById('otpEmailDisplay').textContent = emailForDisplay;
+            goToRegistrationStep(3);
+            return;
+        }
+
+        if (status.otpActive) {
+            // CASE A — OTP server vẫn còn hiệu lực, không tự gửi lại
+            document.getElementById('otpEmailDisplay').textContent = status.otpEmail || emailForDisplay || '';
+            goToRegistrationStep(2);
+            applyResendCooldownFromOtpValidity(status.secondsRemaining);
+            showOtpValidityHint(status.secondsRemaining);
+            return;
+        }
+
+        // CASE B — OTP hết hạn hoặc không còn phiên hợp lệ
+        emailVerified = false;
+        showError('Phiên xác thực đã hết hạn. Vui lòng gửi lại OTP.');
+        goToRegistrationStep(1);
+    }
+
+    async function initOwnerRegistrationDraft() {
+        if (window.ownerServerFormHasData) return; // ưu tiên dữ liệu backend, không ghi đè bằng draft cũ
+        const draft = loadOwnerDraft();
+        if (!draft) return;
+
+        restoreOwnerDraftFieldsToDom(draft);
+        await reconcileOtpState(draft.currentStep, draft.fields && draft.fields.email);
+    }
+
+    // Tự động lưu draft khi người dùng nhập/chọn (không gắn cho OTP box / file input)
+    const OWNER_DRAFT_WATCHED_SELECTOR = '#ownerName, #regEmail, #regPhone, #regAddress, #regDescription, ' +
+        '#openTimeH, #openTimeM, #closeTimeH, #closeTimeM, #operatingDays input[type="checkbox"], .court-qty';
+
+    ['input', 'change', 'focusout'].forEach(function(evt) {
+        document.addEventListener(evt, function(e) {
+            if (e.target && e.target.matches && e.target.matches(OWNER_DRAFT_WATCHED_SELECTOR)) {
+                debouncedSaveOwnerDraft();
+            }
+        });
+    });
+
+    // Nút "Xóa bản nháp / Bắt đầu lại"
+    window.confirmResetOwnerDraft = function() {
+        const ok = window.confirm('Bạn có chắc muốn xóa toàn bộ thông tin đã nhập và bắt đầu lại không?');
+        if (!ok) return;
+        clearOwnerDraft();
+        resetOwnerFormToInitialState();
+    };
+
+    function resetOwnerFormToInitialState() {
+        document.getElementById('ownerName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPhone').value = '';
+        document.getElementById('regAddress').value = '';
+        document.getElementById('viDo').value = '';
+        document.getElementById('kinhDo').value = '';
+        document.getElementById('coordPreview').classList.add('hidden');
+        document.getElementById('coordPreviewText').textContent = '';
+        document.getElementById('coordMapsLink').classList.add('hidden');
+        document.getElementById('regDescription').value = '';
+
+        selectedSports = [];
+        renderCourtQuantities();
+        document.querySelectorAll('#operatingDays input[type="checkbox"]').forEach(function(cb) { cb.checked = true; });
+
+        emailVerified = false;
+        otpAttempts = 0;
+        resendCount = 0;
+        clearInterval(resendTimer);
+        document.querySelectorAll('.otp-box').forEach(function(b) { b.value = ''; });
+        document.getElementById('otpValidityHint').classList.add('hidden');
+
+        hideError();
+        goToRegistrationStep(1);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initOwnerRegistrationDraft();
+    });
+
+    // Khôi phục từ bfcache (nút back/forward trình duyệt): chỉ đồng bộ lại trạng thái OTP,
+    // KHÔNG gửi lại OTP, KHÔNG submit lại — dữ liệu form đã được bfcache giữ nguyên.
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted && currentStep > 1) {
+            reconcileOtpState(currentStep, ownerDraftGetVal('regEmail'));
+        }
+    });
 </script>
 
 <!-- Custom Geolocation Modal -->

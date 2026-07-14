@@ -54,11 +54,7 @@ body { font-family: 'Inter', sans-serif; }
       </button>
     </div>
 
-    <a href="${pageContext.request.contextPath}/admin/thung-rac?loai=Account"
-       class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 transition-all">
-      <span class="material-symbols-outlined text-[16px]">delete</span>Thùng rác
-    </a>
-    
+
     <div class="relative w-full sm:max-w-xs">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
       <input type="search" id="adminSearchInput" autocomplete="off" placeholder="Tìm theo tên, email, sđt..." 

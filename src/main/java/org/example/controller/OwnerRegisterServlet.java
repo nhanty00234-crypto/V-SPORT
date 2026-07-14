@@ -26,18 +26,66 @@ import java.util.Random;
 /**
  * Handles the multi-step owner registration flow:
  *   GET  /owner/register    -> shows landing page
+ *   GET  /owner/otp-status  -> reports whether the session still has a valid OTP / verified email (AJAX, returns JSON)
  *   POST /owner/send-otp    -> sends OTP to the given email (AJAX, returns JSON)
  *   POST /owner/verify-otp  -> verifies the OTP (AJAX, returns JSON)
  *   POST /owner/register    -> final registration submission (AJAX, returns JSON)
  */
-@WebServlet(urlPatterns = {"/owner/register", "/owner/send-otp", "/owner/verify-otp"})
+@WebServlet(urlPatterns = {"/owner/register", "/owner/send-otp", "/owner/verify-otp", "/owner/otp-status"})
 public class OwnerRegisterServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(OwnerRegisterServlet.class);
     private final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/ownerLanding.jsp").forward(req, resp);
+        if ("/owner/otp-status".equals(req.getServletPath())) {
+            handleOtpStatus(req, resp);
+        } else {
+            req.getRequestDispatcher("/ownerLanding.jsp").forward(req, resp);
+        }
+    }
+
+    // ────────────────────────────────────────
+    // OTP STATUS (dùng để khôi phục đúng bước sau khi reload trang, không lộ mã OTP)
+    // ────────────────────────────────────────
+    private void handleOtpStatus(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = resp.getWriter();
+        HttpSession session = req.getSession(false);
+
+        boolean emailVerified = false;
+        boolean otpActive = false;
+        String otpEmail = null;
+        long secondsRemaining = 0;
+
+        if (session != null) {
+            Boolean verifiedAttr = (Boolean) session.getAttribute("ownerEmailVerified");
+            emailVerified = verifiedAttr != null && verifiedAttr;
+
+            String savedOtp = (String) session.getAttribute("ownerOtp");
+            Long otpTime = (Long) session.getAttribute("ownerOtpTime");
+            otpEmail = (String) session.getAttribute("ownerOtpEmail");
+
+            if (savedOtp != null && otpTime != null) {
+                long remainingMs = (5 * 60 * 1000) - (System.currentTimeMillis() - otpTime);
+                if (remainingMs > 0) {
+                    otpActive = true;
+                    secondsRemaining = remainingMs / 1000;
+                }
+            }
+        }
+
+        StringBuilder json = new StringBuilder();
+        json.append("{\"emailVerified\":").append(emailVerified)
+                .append(",\"otpActive\":").append(otpActive)
+                .append(",\"secondsRemaining\":").append(secondsRemaining)
+                .append(",\"otpEmail\":").append(otpEmail != null ? "\"" + escapeJson(otpEmail) + "\"" : "null")
+                .append("}");
+        out.print(json.toString());
+    }
+
+    private String escapeJson(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     @Override

@@ -191,7 +191,7 @@
     </a>
 
     <a href="${pageContext.request.contextPath}/admin/thung-rac"
-       class="nav-link ${uri.contains('/admin/thung-rac') ? 'active' : ''}">
+       class="nav-link ${uri.contains('/admin/thung-rac') || uri.contains('/ThungRacAdmin') ? 'active' : ''}">
       <i class="ti ti-trash"></i>
       Thùng rác
     </a>
