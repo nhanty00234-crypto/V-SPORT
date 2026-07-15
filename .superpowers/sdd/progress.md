@@ -13,8 +13,12 @@ Branch: feature/pagination-phase1-foundation (base commit: 277b5e0)
   the classes they add/touch, not rely on a fully-green `mvn test`.
 
 ## Tasks
-- [ ] Task 1: PaginationRequest
+- [x] Task 1: PaginationRequest (commits 08fa46d..fc04a02, review clean)
 - [ ] Task 2: PageResult<T>
 - [ ] Task 3: PaginationUtils
 - [ ] Task 4: Shared JSP pagination tag file
 - [ ] Task 5: Full Phase 1 verification
+
+## Minor findings deferred to final review
+- Task 1: PaginationRequest.getOffset() computes (page-1) in int before cast to long (residual overflow edge, unreachable via package-private of()). Minor.
+- Task 1: PaginationRequestTest.java has minor blank-line style drift from SecretMaskUtilTest.java convention. Minor.
