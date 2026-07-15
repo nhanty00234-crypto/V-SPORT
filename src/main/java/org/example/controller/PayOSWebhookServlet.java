@@ -6,16 +6,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.dao.LichDatSanDAO;
 import org.example.dao.PayOSPaymentAttemptDAO;
-import org.example.dao.impl.LichDatSanDAOImpl;
 import org.example.dao.impl.PayOSPaymentAttemptDAOImpl;
 import org.example.dto.payment.PayOSCredentials;
 import org.example.dto.payment.PayOSFinalizeResult;
-import org.example.model.Lichdatsan;
 import org.example.service.PayOSConfigurationService;
 import org.example.service.PayOSService;
 import org.example.service.payos.PayOSClientFactory;
+import org.example.service.payos.PayOSLegacyBookingFinalizationService;
 import org.example.service.payos.PayOSPaymentFinalizationService;
 import org.example.util.DBUtil;
 import vn.payos.PayOS;
@@ -49,10 +47,11 @@ public class PayOSWebhookServlet extends HttpServlet {
     private static final String PAYOS_SUCCESS_CODE = "00";
     private static final Gson gson = new Gson();
 
-    private final LichDatSanDAO lichDatSanDAO = new LichDatSanDAOImpl();
     private final PayOSPaymentAttemptDAO attemptDAO = new PayOSPaymentAttemptDAOImpl();
     private final PayOSConfigurationService payOSConfigurationService = new PayOSConfigurationService();
     private final PayOSPaymentFinalizationService finalizationService = new PayOSPaymentFinalizationService();
+    private final PayOSLegacyBookingFinalizationService legacyFinalizationService =
+            new PayOSLegacyBookingFinalizationService();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -171,54 +170,6 @@ public class PayOSWebhookServlet extends HttpServlet {
                 "PayOS webhook nhan: orderCode=%d amount=%d code=%s -> DatSanID=%d",
                 orderCode, amount, code, datSanId));
 
-        Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
-        if (lich == null) {
-            LOGGER.warning(String.format(
-                    "PayOS webhook: khong tim thay booking DatSanID=%d (orderCode=%d), bo qua",
-                    datSanId, orderCode));
-            respondOk(resp, "Booking not found, ignored");
-            return;
-        }
-
-        String currentStatus = lich.getTrangThai();
-        LOGGER.info(String.format("PayOS webhook: DatSanID=%d trang thai hien tai=%s", datSanId, currentStatus));
-
-        if ("Đã xác nhận".equals(currentStatus)) {
-            LOGGER.info(String.format(
-                    "PayOS webhook: DatSanID=%d da 'Da xac nhan' truoc do, bo qua (idempotent)", datSanId));
-            respondOk(resp, "Already confirmed");
-            return;
-        }
-
-        if ("Đã hủy".equals(currentStatus)) {
-            LOGGER.warning(String.format(
-                    "PayOS webhook: DatSanID=%d da bi huy truoc do, khong doi lai thanh 'Da xac nhan'", datSanId));
-            respondOk(resp, "Already cancelled, ignored");
-            return;
-        }
-
-        if (!"Chờ thanh toán".equals(currentStatus)) {
-            LOGGER.warning(String.format(
-                    "PayOS webhook: DatSanID=%d dang o trang thai khong mong doi '%s', bo qua",
-                    datSanId, currentStatus));
-            respondOk(resp, "Unexpected status, ignored");
-            return;
-        }
-
-        BigDecimal expectedAmount = lich.getTongTienDuKien();
-        if (expectedAmount == null || BigDecimal.valueOf(amount).compareTo(expectedAmount) != 0) {
-            // Số tiền không khớp: KHÔNG update DB để tránh xác nhận sai tiền.
-            // Trả 200 OK (thay vì 400) vì amount trong webhook là cố định - PayOS retry
-            // lại sẽ luôn mismatch giống hệt, retry không giúp giải quyết vấn đề. Booking
-            // vẫn giữ nguyên "Chờ thanh toán" (an toàn), cảnh báo được ghi log để vận hành
-            // theo dõi thủ công thay vì dựa vào cơ chế retry của webhook.
-            LOGGER.warning(String.format(
-                    "PayOS webhook: DatSanID=%d SO TIEN KHONG KHOP (webhook=%d, DB=%s), khong xac nhan",
-                    datSanId, amount, expectedAmount));
-            respondOk(resp, "Amount mismatch, ignored");
-            return;
-        }
-
         if (!PAYOS_SUCCESS_CODE.equals(code)) {
             LOGGER.warning(String.format(
                     "PayOS webhook: DatSanID=%d webhook code='%s' khong phai thanh cong, khong xac nhan",
@@ -227,33 +178,25 @@ public class PayOSWebhookServlet extends HttpServlet {
             return;
         }
 
-        boolean updated = confirmBookingPaid(datSanId);
-        if (updated) {
-            LOGGER.info(String.format(
-                    "PayOS webhook: DatSanID=%d da duoc xac nhan 'Da xac nhan' thanh cong", datSanId));
-            respondOk(resp, "Confirmed");
-        } else {
-            // Trạng thái đã đổi giữa lúc đọc và lúc update (race condition) - an toàn,
-            // không throw lỗi để tránh PayOS retry vô ích.
-            LOGGER.warning(String.format(
-                    "PayOS webhook: DatSanID=%d update that bai (trang thai da doi truoc do)", datSanId));
-            respondOk(resp, "Update skipped");
-        }
-    }
+        // Toàn bộ việc xác minh trạng thái/số tiền + tạo-hoặc-lấy MAIN invoice + ghi nhận thanh
+        // toán chạy TRONG MỘT transaction có khóa (PayOSLegacyBookingFinalizationService) - idempotent
+        // với webhook retry, và xử lý đúng race "Quá hạn nhưng thanh toán đến đồng thời".
+        PayOSLegacyBookingFinalizationService.Result result =
+                legacyFinalizationService.confirmPaid(datSanId, BigDecimal.valueOf(amount), data.getReference());
 
-    private boolean confirmBookingPaid(int datSanId) {
-        String sql = "UPDATE LichDatSan " +
-                "SET TrangThai = N'Đã xác nhận', " +
-                "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [PayOS webhook xác nhận thanh toán thành công]') " +
-                "WHERE DatSanID = ? AND TrangThai = N'Chờ thanh toán'";
-        try (java.sql.Connection conn = DBUtil.getConnection();
-                java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, datSanId);
-            int rows = ps.executeUpdate();
-            return rows > 0;
-        } catch (java.sql.SQLException e) {
-            LOGGER.log(Level.SEVERE, "PayOS webhook: loi SQL khi update DatSanID=" + datSanId, e);
-            return false;
+        switch (result.code()) {
+            case CONFIRMED, ALREADY_CONFIRMED -> {
+                LOGGER.info(String.format(
+                        "PayOS webhook: DatSanID=%d da duoc xac nhan (hoaDonId=%s, %s)",
+                        datSanId, result.hoaDonId(), result.code()));
+                respondOk(resp, result.code() == PayOSLegacyBookingFinalizationService.ResultCode.ALREADY_CONFIRMED
+                        ? "Already confirmed" : "Confirmed");
+            }
+            case NOT_FOUND -> respondOk(resp, "Booking not found, ignored");
+            case CANCELLED -> respondOk(resp, "Already cancelled, ignored");
+            case AMOUNT_MISMATCH -> respondOk(resp, "Amount mismatch, ignored");
+            case UNEXPECTED_STATUS -> respondOk(resp, "Unexpected status, ignored");
+            case DATABASE_ERROR -> respondOk(resp, "Update skipped");
         }
     }
 

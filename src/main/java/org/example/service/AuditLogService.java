@@ -99,6 +99,31 @@ public class AuditLogService {
         }
     }
 
+    /**
+     * Ghi audit log cho hành động không có actor đăng nhập (webhook PayOS, scheduler nền) -
+     * ActorAccountID=NULL, actorName mô tả nguồn gốc (vd "PAYOS_WEBHOOK", "SCHEDULER").
+     * Không ném exception ra ngoài - lỗi log không được phá luồng nghiệp vụ chính.
+     */
+    public static void logSystem(String actorName, Integer coSoId, String action, String entityType,
+                                  String entityId, String entityName, String details) {
+        try {
+            AuditLog entry = new AuditLog();
+            entry.setActorAccountId(null);
+            entry.setActorName(actorName);
+            entry.setActorRole(0);
+            entry.setCoSoId(coSoId);
+            entry.setAction(action);
+            entry.setEntityType(entityType);
+            entry.setEntityId(entityId);
+            entry.setEntityName(entityName);
+            entry.setDetails(details);
+            entry.setIpAddress(null);
+            dao.save(entry);
+        } catch (Exception e) {
+            logger.error("Không thể ghi AuditLog (system): {}", e.getMessage(), e);
+        }
+    }
+
     private static String getClientIp(HttpServletRequest req) {
         String ip = req.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty()) ip = req.getRemoteAddr();

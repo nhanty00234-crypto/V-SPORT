@@ -221,7 +221,7 @@ public class CheckInServlet extends HttpServlet {
                 try {
                     // Gá» i DAO xá»­ lÃ½ nghiá»‡p vá»¥ check-in khÃ¡ch Ä‘áº·t trÆ°á»›c
                     // LuÃ´n kiá»ƒm tra tiá» n cá» c/thanh toÃ¡n (forcePaymentCheck = true)
-                    checkInDAO.checkInKhachDatTruoc(datSanId, user.getAccountId(), true, daThuTienMat);
+                    checkInDAO.checkInKhachDatTruoc(datSanId, user.getAccountId(), user.getCoSoId(), true, daThuTienMat);
                 } finally {
                     session.removeAttribute(lockKey);
                 }
@@ -306,7 +306,13 @@ public class CheckInServlet extends HttpServlet {
                     throw new CheckInException("Thiáº¿u ID Ä‘Æ¡n Ä‘áº·t sÃ¢n Ä‘á»ƒ há»§y.");
                 }
                 int datSanId = Integer.parseInt(datSanIdStr);
-                checkInDAO.huyLichKhachBung(datSanId, user.getAccountId());
+                checkInDAO.huyLichKhachBung(datSanId, user.getAccountId(), user.getCoSoId());
+                org.example.service.AuditLogService.log(req, user,
+                    "NO_SHOW",
+                    "LichDatSan",
+                    String.valueOf(datSanId),
+                    "Don dat san #" + datSanId,
+                    "Da danh dau khach khong den (no-show)");
                 successMsg = "Ä Ã£ há»§y thÃ nh cÃ´ng Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + " (KhÃ¡ch bÃ¹ng)!";
             } else if ("payInvoice".equals(action)) {
                 String hoaDonIdStr = req.getParameter("hoaDonId");
@@ -351,6 +357,9 @@ public class CheckInServlet extends HttpServlet {
             } else {
                 throw new CheckInException("HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡.");
             }
+        } catch (SecurityException e) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            errorMsg = e.getMessage();
         } catch (PaymentRequiredException e) {
             // TrÆ°á» ng há»£p lá»—i yÃªu cáº§u thanh toÃ¡n/cá» c:
             // Ä Ã¡nh dáº¥u Ä‘á»ƒ hiá»ƒn thá»‹ há»™p thoáº¡i xÃ¡c nháº­n thu tiá» n máº·t cho Lá»… tÃ¢n
@@ -426,6 +435,9 @@ public class CheckInServlet extends HttpServlet {
                     : "Đã hoàn thành thanh toán hóa đơn cho đơn đặt sân #" + datSanId + "!");
             json.addProperty("hoaDonId", hoaDonId);
             json.addProperty("printUrl", printUrl);
+            json.addProperty("tongThanhToan", result.tongThanhToan());
+            json.addProperty("depositAmount", result.depositAmount());
+            json.addProperty("remainingAmount", result.remainingAmount());
             logger.info("PAYMENT_PRINT_URL_CREATED datSanId={}, hoaDonId={}", datSanId, hoaDonId);
             writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
             logger.info("PAYMENT_RESPONSE_SENT datSanId={}, hoaDonId={}", datSanId, hoaDonId);
@@ -475,6 +487,8 @@ public class CheckInServlet extends HttpServlet {
             payload.put("phiGuiXe", result.phiGuiXe());
             payload.put("giamGia", result.giamGia());
             payload.put("tongThanhToan", result.tongThanhToan());
+            payload.put("depositAmount", result.depositAmount());
+            payload.put("remainingAmount", result.remainingAmount());
             payload.put("segments", result.segments());
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setCharacterEncoding("UTF-8");

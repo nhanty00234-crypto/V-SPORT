@@ -2,6 +2,7 @@ package org.example.service.checkout;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.service.payment.PaymentCalculator;
 import org.example.service.pricing.*;
 import org.example.util.DBUtil;
 
@@ -11,7 +12,18 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 
-/** Transaction boundary duy nhất cho chốt giờ và thanh toán MAIN invoice. */
+/** Transaction boundary duy nhất cho chốt giờ và thanh toán MAIN invoice.
+ *
+ * Ba khái niệm tách biệt, không được gộp lẫn (xem finalizeLocked/pay/confirmBankTransfer):
+ *   - Finalize: chốt ActualEndAt + tính tiền sân theo segment (CourtPricingService).
+ *   - Settle: đánh dấu HoaDon.TrangThaiThanhToan = Đã thanh toán.
+ *   - Complete/release: LichDatSan -> Đã hoàn thành, San -> Sẵn sàng.
+ * Một hóa đơn có thể đã Settle (thu tiền mặt lúc check-in) trước khi Finalize (ca vẫn đang
+ * chơi) - finalizeLocked() phải luôn chạy phần chốt giờ bất kể đã thanh toán hay chưa, chỉ
+ * bỏ qua việc ghi đè số tiền trên hóa đơn nếu đã thanh toán. pay()/confirmBankTransfer() luôn
+ * gọi completeBookingAndReleaseCourtIfNeeded() sau khi cả hai điều kiện (finalize + settle) đã
+ * đúng, kể cả khi bước settle đã xảy ra từ trước (không return sớm bỏ qua bước hoàn thành).
+ */
 public class CheckoutService {
     private static final Logger logger = LogManager.getLogger(CheckoutService.class);
     private static final Set<String> PAYMENT_METHODS = Set.of("Tiền mặt", "Chuyển khoản", "Ví điện tử", "Thẻ", "QR");
@@ -32,20 +44,19 @@ public class CheckoutService {
             c.setAutoCommit(false);
             try {
                 CheckoutResult result = finalizeLocked(c, datSanId, coSoId, LocalDateTime.now());
-                if (result.alreadyPaid()) { c.commit(); return result; }
-                try (PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM HoaDon WITH (UPDLOCK, ROWLOCK) WHERE DatSanID=? AND LoaiHoaDon=N'SPLIT' AND TrangThaiThanhToan<>N'Đã thanh toán'")) {
-                    ps.setInt(1, datSanId); try (ResultSet rs = ps.executeQuery()) { rs.next(); if (rs.getInt(1) > 0) throw new IllegalStateException("Còn hóa đơn SPLIT chưa thanh toán."); }
+                assertNoUnpaidSplitBills(c, datSanId);
+                if (!result.alreadyPaid()) {
+                    try (PreparedStatement ps = c.prepareStatement("UPDATE HoaDon SET TrangThaiThanhToan=N'Đã thanh toán', PhuongThucThanhToan=?, AccountID_NhanVien=?, NgayLap=GETDATE() WHERE HoaDonID=? AND TrangThaiThanhToan<>N'Đã thanh toán'")) {
+                        ps.setNString(1, method); ps.setInt(2, staffId); ps.setInt(3, result.hoaDonId());
+                        if (ps.executeUpdate() != 1) throw new IllegalStateException("Hóa đơn đã được xử lý bởi giao dịch khác.");
+                    }
+                    result = new CheckoutResult(result.datSanId(), result.hoaDonId(), result.actualEndAt(),
+                            result.tongTienSan(), result.tongTienDichVu(), result.phiGuiXe(), result.giamGia(),
+                            result.tongThanhToan(), result.depositAmount(), BigDecimal.ZERO, result.segments(), true);
                 }
-                try (PreparedStatement ps = c.prepareStatement("UPDATE HoaDon SET TrangThaiThanhToan=N'Đã thanh toán', PhuongThucThanhToan=?, AccountID_NhanVien=?, NgayLap=GETDATE() WHERE HoaDonID=? AND TrangThaiThanhToan<>N'Đã thanh toán'")) {
-                    ps.setNString(1, method); ps.setInt(2, staffId); ps.setInt(3, result.hoaDonId());
-                    if (ps.executeUpdate() != 1) throw new IllegalStateException("Hóa đơn đã được xử lý bởi giao dịch khác.");
-                }
-                try (PreparedStatement ps = c.prepareStatement("UPDATE LichDatSan SET TrangThai=N'Đã hoàn thành' WHERE DatSanID=? AND TrangThai=N'Đang sử dụng'")) {
-                    ps.setInt(1, datSanId); if (ps.executeUpdate() != 1) throw new IllegalStateException("Không thể hoàn thành ca chơi.");
-                }
-                try (PreparedStatement ps = c.prepareStatement("UPDATE San SET TrangThai=N'Sẵn sàng' WHERE SanID=(SELECT SanID FROM LichDatSan WHERE DatSanID=?) AND TrangThai=N'Đang sử dụng'")) {
-                    ps.setInt(1, datSanId); if (ps.executeUpdate() != 1) throw new IllegalStateException("Không thể giải phóng sân.");
-                }
+                // Dù invoice đã Settle từ trước (vd thu tiền mặt lúc check-in) hay vừa Settle ở trên,
+                // luôn đảm bảo Complete/release chạy - không return sớm chỉ vì alreadyPaid.
+                completeBookingAndReleaseCourtIfNeeded(c, datSanId);
                 c.commit();
                 logger.info("Thanh toán checkout thành công datSanId={}, hoaDonId={}", datSanId, result.hoaDonId());
                 return result;
@@ -75,25 +86,23 @@ public class CheckoutService {
                 CheckoutResult result = finalizeLocked(c, datSanId, coSoId, LocalDateTime.now());
                 if (result.alreadyPaid()) throw new IllegalStateException("Hóa đơn đã được thanh toán trước đó.");
 
-                String status; String reference; BigDecimal paidAmount;
+                String status; String reference;
                 try (PreparedStatement ps = c.prepareStatement(
-                        "SELECT h.TrangThaiThanhToan, h.PaymentReference, ISNULL(l.DepositAmount,0) AS DepositAmount " +
-                        "FROM HoaDon h WITH (UPDLOCK, ROWLOCK) JOIN LichDatSan l ON l.DatSanID=h.DatSanID WHERE h.HoaDonID=?")) {
+                        "SELECT TrangThaiThanhToan, PaymentReference FROM HoaDon WITH (UPDLOCK, ROWLOCK) WHERE HoaDonID=?")) {
                     ps.setInt(1, result.hoaDonId());
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) throw new IllegalStateException("Không tìm thấy hóa đơn.");
                         status = rs.getNString("TrangThaiThanhToan");
                         reference = rs.getString("PaymentReference");
-                        paidAmount = nz(rs.getBigDecimal("DepositAmount"));
                     }
                 }
                 if ("Đã thanh toán".equals(status)) throw new IllegalStateException("Hóa đơn đã được thanh toán trước đó.");
 
-                BigDecimal remaining = result.tongThanhToan().subtract(paidAmount).max(BigDecimal.ZERO).setScale(0, RoundingMode.HALF_UP);
+                BigDecimal remaining = result.remainingAmount();
 
                 if ("Chờ xác nhận chuyển khoản".equals(status) && reference != null && !reference.isBlank()) {
                     c.commit();
-                    return new BankTransferInit(datSanId, result.hoaDonId(), remaining, paidAmount, reference);
+                    return new BankTransferInit(datSanId, result.hoaDonId(), remaining, result.depositAmount(), reference);
                 }
 
                 String newReference = "VSPORT HD" + result.hoaDonId();
@@ -106,7 +115,7 @@ public class CheckoutService {
                 }
                 c.commit();
                 logger.info("Khởi tạo chuyển khoản datSanId={}, hoaDonId={}, amount={}", datSanId, result.hoaDonId(), remaining);
-                return new BankTransferInit(datSanId, result.hoaDonId(), remaining, paidAmount, newReference);
+                return new BankTransferInit(datSanId, result.hoaDonId(), remaining, result.depositAmount(), newReference);
             } catch (Exception e) { c.rollback(); logger.error("Rollback initBankTransfer datSanId={}: {}", datSanId, e.getMessage()); throw e; }
             finally { c.setAutoCommit(true); }
         }
@@ -114,8 +123,9 @@ public class CheckoutService {
 
     /**
      * Xác nhận đã nhận tiền chuyển khoản (thao tác thủ công của nhân viên). Idempotent: nếu hóa đơn
-     * đã "Đã thanh toán" (double-click, hai nhân viên xác nhận cùng lúc), không xử lý lại. Chặn nếu
-     * paymentReference gửi lên không khớp giá trị đã lưu (chống submit lệch dữ liệu/hóa đơn cũ).
+     * đã "Đã thanh toán" (double-click, hai nhân viên xác nhận cùng lúc), không xử lý lại tiền nhưng
+     * vẫn đảm bảo booking/sân đã Complete/release (không return sớm bỏ dở). Chặn nếu paymentReference
+     * gửi lên không khớp giá trị đã lưu, và chặn nếu còn hóa đơn SPLIT chưa thanh toán.
      */
     public BankTransferConfirm confirmBankTransfer(int datSanId, int coSoId, int staffId,
                                                      String paymentReference, String transactionCode) throws Exception {
@@ -136,9 +146,14 @@ public class CheckoutService {
                         storedRef = rs.getString("PaymentReference");
                     }
                 }
-                if ("Đã thanh toán".equals(status)) { c.commit(); return new BankTransferConfirm(datSanId, hoaDonId, true); }
+                if ("Đã thanh toán".equals(status)) {
+                    completeBookingAndReleaseCourtIfNeeded(c, datSanId);
+                    c.commit();
+                    return new BankTransferConfirm(datSanId, hoaDonId, true);
+                }
                 if (!"Chờ xác nhận chuyển khoản".equals(status)) throw new IllegalStateException("Hóa đơn chưa ở trạng thái chờ xác nhận chuyển khoản.");
                 if (storedRef == null || !storedRef.equals(paymentReference)) throw new IllegalArgumentException("Nội dung chuyển khoản không khớp, vui lòng tải lại hóa đơn.");
+                assertNoUnpaidSplitBills(c, datSanId);
 
                 try (PreparedStatement up = c.prepareStatement(
                         "UPDATE HoaDon SET TrangThaiThanhToan=N'Đã thanh toán', PhuongThucThanhToan=N'Chuyển khoản', " +
@@ -153,12 +168,7 @@ public class CheckoutService {
                     up.setInt(2, staffId); up.setInt(3, datSanId);
                     up.executeUpdate();
                 }
-                try (PreparedStatement up = c.prepareStatement("UPDATE LichDatSan SET TrangThai=N'Đã hoàn thành' WHERE DatSanID=? AND TrangThai=N'Đang sử dụng'")) {
-                    up.setInt(1, datSanId); if (up.executeUpdate() != 1) throw new IllegalStateException("Không thể hoàn thành ca chơi.");
-                }
-                try (PreparedStatement up = c.prepareStatement("UPDATE San SET TrangThai=N'Sẵn sàng' WHERE SanID=(SELECT SanID FROM LichDatSan WHERE DatSanID=?) AND TrangThai=N'Đang sử dụng'")) {
-                    up.setInt(1, datSanId); if (up.executeUpdate() != 1) throw new IllegalStateException("Không thể giải phóng sân.");
-                }
+                completeBookingAndReleaseCourtIfNeeded(c, datSanId);
                 c.commit();
                 logger.info("Xác nhận chuyển khoản thành công datSanId={}, hoaDonId={}", datSanId, hoaDonId);
                 return new BankTransferConfirm(datSanId, hoaDonId, false);
@@ -195,10 +205,34 @@ public class CheckoutService {
         }
     }
 
+    /** Chặn Complete/release khi còn hóa đơn SPLIT chưa thanh toán (loại trừ SPLIT đã hủy hợp lệ). */
+    private void assertNoUnpaidSplitBills(Connection c, int datSanId) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT COUNT(*) FROM HoaDon WITH (UPDLOCK, ROWLOCK) WHERE DatSanID=? AND LoaiHoaDon=N'SPLIT' " +
+                "AND TrangThaiThanhToan NOT IN (N'Đã thanh toán', N'Đã hủy')")) {
+            ps.setInt(1, datSanId);
+            try (ResultSet rs = ps.executeQuery()) { rs.next(); if (rs.getInt(1) > 0) throw new IllegalStateException("Còn hóa đơn SPLIT chưa thanh toán."); }
+        }
+    }
+
+    /** Idempotent: 0 dòng bị ảnh hưởng nghĩa là đã Complete/release từ trước, KHÔNG phải lỗi. */
+    private void completeBookingAndReleaseCourtIfNeeded(Connection c, int datSanId) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(
+                "UPDATE LichDatSan SET TrangThai=N'Đã hoàn thành' WHERE DatSanID=? AND TrangThai=N'Đang sử dụng'")) {
+            ps.setInt(1, datSanId);
+            ps.executeUpdate();
+        }
+        try (PreparedStatement ps = c.prepareStatement(
+                "UPDATE San SET TrangThai=N'Sẵn sàng' WHERE SanID=(SELECT SanID FROM LichDatSan WHERE DatSanID=?) AND TrangThai=N'Đang sử dụng'")) {
+            ps.setInt(1, datSanId);
+            ps.executeUpdate();
+        }
+    }
+
     private CheckoutResult finalizeLocked(Connection c, int datSanId, int coSoId, LocalDateTime now) throws Exception {
-        String sql = "SELECT l.DatSanID,l.NgayDat,l.GioBatDau,l.GioKetThuc,l.TimeMode,l.ActualStartAt,l.ActualEndAt,l.actual_start_time,l.TrangThai," +
+        String sql = "SELECT l.DatSanID,l.NgayDat,l.GioBatDau,l.GioKetThuc,l.TimeMode,l.ActualStartAt,l.ActualEndAt,l.actual_start_time,l.TrangThai,l.DepositAmount," +
                 "s.CoSoID,ls.GiaKhongDen,ls.GiaCoDen,ls.GioBatDauLenDen,ls.GioKetThucLenDen," +
-                "h.HoaDonID,h.TrangThaiThanhToan,h.TongTienDichVu,h.PhiGuiXe,h.GiamGia " +
+                "h.HoaDonID,h.TrangThaiThanhToan,h.TongTienSan,h.TongTienDichVu,h.PhiGuiXe,h.GiamGia,h.TongThanhToan " +
                 "FROM LichDatSan l WITH (UPDLOCK,ROWLOCK) JOIN San s ON s.SanID=l.SanID JOIN LoaiSan ls ON ls.LoaiSanID=s.LoaiSanID " +
                 "JOIN HoaDon h WITH (UPDLOCK,ROWLOCK) ON h.DatSanID=l.DatSanID AND h.LoaiHoaDon=N'MAIN' WHERE l.DatSanID=?";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
@@ -208,10 +242,23 @@ public class CheckoutService {
                 if (rs.getInt("CoSoID") != coSoId) throw new SecurityException("Ca chơi không thuộc cơ sở của bạn.");
                 int invoiceId = rs.getInt("HoaDonID");
                 boolean paid = "Đã thanh toán".equals(rs.getNString("TrangThaiThanhToan"));
+                BigDecimal deposit = nz(rs.getBigDecimal("DepositAmount"));
                 LocalDateTime finalizedEnd = timestamp(rs, "ActualEndAt");
-                if (paid || finalizedEnd != null) return loadResult(c, datSanId, invoiceId, finalizedEnd, paid);
-                if (!"Đang sử dụng".equals(rs.getNString("TrangThai"))) throw new IllegalStateException("Ca chơi không ở trạng thái Đang sử dụng.");
+                String trangThai = rs.getNString("TrangThai");
 
+                // Đã chốt giờ trước đó (idempotent, double-click/hai nhân viên checkout đồng thời) -
+                // trả lại đúng kết quả đã lưu, không tính lại, không đụng tiền lần hai.
+                if (finalizedEnd != null) return loadResult(c, datSanId, invoiceId, finalizedEnd, paid, deposit);
+
+                // Chưa chốt giờ và ca không còn "Đang sử dụng": nếu đã Complete/paid từ một luồng cũ
+                // không ghi ActualEndAt (dữ liệu lịch sử), trả nguyên trạng thay vì lỗi; ngược lại báo lỗi rõ.
+                if (!"Đang sử dụng".equals(trangThai)) {
+                    if (paid || "Đã hoàn thành".equals(trangThai)) return loadResult(c, datSanId, invoiceId, null, paid, deposit);
+                    throw new IllegalStateException("Ca chơi không ở trạng thái Đang sử dụng.");
+                }
+
+                // Finalize: chốt ActualEndAt + tính tiền sân - PHẢI chạy dù hóa đơn đã Settle (paid=true)
+                // hay chưa, vì Finalize (chốt giờ chơi thực tế) và Settle (đã thu tiền) là hai việc khác nhau.
                 LocalDate date = rs.getDate("NgayDat").toLocalDate();
                 LocalDateTime start = timestamp(rs, "ActualStartAt");
                 if (start == null) { Time legacy = rs.getTime("actual_start_time"); start = LocalDateTime.of(date, legacy != null ? legacy.toLocalTime() : rs.getTime("GioBatDau").toLocalTime()); }
@@ -235,8 +282,18 @@ public class CheckoutService {
                     int order=1; for (CourtPriceSegment s : segments) { ins.setInt(1,invoiceId);ins.setInt(2,datSanId);ins.setInt(3,order++);ins.setTimestamp(4,Timestamp.valueOf(s.segmentStart()));ins.setTimestamp(5,Timestamp.valueOf(s.segmentEnd()));ins.setLong(6,s.durationMinutes());ins.setNString(7,s.rateType().name());ins.setBigDecimal(8,s.hourlyRate());ins.setBigDecimal(9,s.amount());ins.addBatch(); } ins.executeBatch();
                 }
                 try (PreparedStatement up = c.prepareStatement("UPDATE LichDatSan SET ActualEndAt=?,actual_end_time=?,PricingFinalizedAt=GETDATE(),TongTienDuKien=? WHERE DatSanID=? AND ActualEndAt IS NULL")) { up.setTimestamp(1,Timestamp.valueOf(now));up.setTime(2,Time.valueOf(now.toLocalTime()));up.setBigDecimal(3,court);up.setInt(4,datSanId);if(up.executeUpdate()!=1)throw new IllegalStateException("Ca chơi đã được chốt đồng thời."); }
-                try (PreparedStatement up = c.prepareStatement("UPDATE HoaDon SET TongTienSan=?,TongThanhToan=? WHERE HoaDonID=? AND TrangThaiThanhToan<>N'Đã thanh toán'")) { up.setBigDecimal(1,court);up.setBigDecimal(2,total);up.setInt(3,invoiceId);if(up.executeUpdate()!=1)throw new IllegalStateException("Hóa đơn đã thanh toán."); }
-                return new CheckoutResult(datSanId,invoiceId,now,court,service,parking,discount,total,segments,false);
+
+                // Settle đã xảy ra trước đó (vd thu tiền mặt lúc check-in): KHÔNG được ghi đè số tiền
+                // hóa đơn đã thanh toán - trả lại đúng số tiền đã lưu, không phải số vừa tính lại.
+                if (paid) {
+                    BigDecimal storedCourt = nz(rs.getBigDecimal("TongTienSan"));
+                    BigDecimal storedTotal = nz(rs.getBigDecimal("TongThanhToan"));
+                    return new CheckoutResult(datSanId, invoiceId, now, storedCourt, service, parking, discount, storedTotal,
+                            deposit, PaymentCalculator.remainingAmount(storedTotal, deposit), segments, true);
+                }
+                try (PreparedStatement up = c.prepareStatement("UPDATE HoaDon SET TongTienSan=?,TongThanhToan=? WHERE HoaDonID=? AND TrangThaiThanhToan<>N'Đã thanh toán'")) { up.setBigDecimal(1,court);up.setBigDecimal(2,total);up.setInt(3,invoiceId);up.executeUpdate(); }
+                return new CheckoutResult(datSanId, invoiceId, now, court, service, parking, discount, total,
+                        deposit, PaymentCalculator.remainingAmount(total, deposit), segments, false);
             }
         }
     }
@@ -245,10 +302,26 @@ public class CheckoutService {
         Time a=rs.getTime("GioBatDauLenDen"), b=rs.getTime("GioKetThucLenDen");
         return pricing.calculate(start,end,a==null?null:a.toLocalTime(),b==null?null:b.toLocalTime(),rs.getBigDecimal("GiaKhongDen"),rs.getBigDecimal("GiaCoDen"));
     }
-    private CheckoutResult loadResult(Connection c,int datSanId,int invoiceId,LocalDateTime end,boolean paid)throws SQLException{
-        List<CourtPriceSegment> ss=new ArrayList<>();try(PreparedStatement p=c.prepareStatement("SELECT * FROM CourtChargeSegment WHERE HoaDonID=? ORDER BY SegmentOrder")){p.setInt(1,invoiceId);try(ResultSet r=p.executeQuery()){while(r.next())ss.add(new CourtPriceSegment(r.getTimestamp("StartAt").toLocalDateTime(),r.getTimestamp("EndAt").toLocalDateTime(),r.getLong("DurationMinutes"),CourtRateType.valueOf(r.getNString("RateType")),r.getBigDecimal("HourlyRate"),r.getBigDecimal("Amount")));}}
-        try(PreparedStatement p=c.prepareStatement("SELECT TongTienSan,TongTienDichVu,PhiGuiXe,GiamGia,TongThanhToan FROM HoaDon WHERE HoaDonID=?")){p.setInt(1,invoiceId);try(ResultSet r=p.executeQuery()){r.next();return new CheckoutResult(datSanId,invoiceId,end,nz(r.getBigDecimal(1)),nz(r.getBigDecimal(2)),nz(r.getBigDecimal(3)),nz(r.getBigDecimal(4)),nz(r.getBigDecimal(5)),ss,paid);}}
+
+    private CheckoutResult loadResult(Connection c, int datSanId, int invoiceId, LocalDateTime end, boolean paid, BigDecimal deposit) throws SQLException {
+        List<CourtPriceSegment> ss=new ArrayList<>();
+        try(PreparedStatement p=c.prepareStatement("SELECT * FROM CourtChargeSegment WHERE HoaDonID=? ORDER BY SegmentOrder")){
+            p.setInt(1, invoiceId);
+            try(ResultSet r=p.executeQuery()){
+                while(r.next()) ss.add(new CourtPriceSegment(r.getTimestamp("StartAt").toLocalDateTime(),r.getTimestamp("EndAt").toLocalDateTime(),r.getLong("DurationMinutes"),CourtRateType.valueOf(r.getNString("RateType")),r.getBigDecimal("HourlyRate"),r.getBigDecimal("Amount")));
+            }
+        }
+        try(PreparedStatement p=c.prepareStatement("SELECT TongTienSan,TongTienDichVu,PhiGuiXe,GiamGia,TongThanhToan FROM HoaDon WHERE HoaDonID=?")){
+            p.setInt(1, invoiceId);
+            try(ResultSet r=p.executeQuery()){
+                r.next();
+                BigDecimal total = nz(r.getBigDecimal(5));
+                return new CheckoutResult(datSanId, invoiceId, end, nz(r.getBigDecimal(1)), nz(r.getBigDecimal(2)), nz(r.getBigDecimal(3)), nz(r.getBigDecimal(4)),
+                        total, nz(deposit), PaymentCalculator.remainingAmount(total, deposit), ss, paid);
+            }
+        }
     }
+
     private static LocalDateTime timestamp(ResultSet rs,String name)throws SQLException{Timestamp t=rs.getTimestamp(name);return t==null?null:t.toLocalDateTime();}
     private static BigDecimal nz(BigDecimal n){return n==null?BigDecimal.ZERO:n;}
 }

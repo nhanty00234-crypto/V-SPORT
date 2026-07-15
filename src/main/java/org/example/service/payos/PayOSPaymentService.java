@@ -17,10 +17,7 @@ import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 /**
  * Tạo hoặc tái sử dụng payment link PayOS cho MAIN invoice của một ca chơi, dùng credentials
@@ -49,9 +46,7 @@ public class PayOSPaymentService {
                     return PayOSCreatePaymentResult.fail(409, "PAYMENT_ALREADY_PAID", "Hóa đơn đã được thanh toán trước đó.");
                 }
 
-                BigDecimal paidAmount = readDepositAmount(c, datSanId);
-                BigDecimal remaining = checkout.tongThanhToan().subtract(paidAmount).max(BigDecimal.ZERO)
-                        .setScale(0, RoundingMode.HALF_UP);
+                BigDecimal remaining = checkout.remainingAmount();
                 if (remaining.signum() <= 0) {
                     c.rollback();
                     return PayOSCreatePaymentResult.fail(409, "PAYMENT_ALREADY_PAID", "Hóa đơn không còn số tiền cần thanh toán.");
@@ -120,15 +115,6 @@ public class PayOSPaymentService {
         } catch (Exception connEx) {
             logger.error("PAYOS_CREATE_FAILED (kết nối DB) datSanId={}", datSanId, connEx);
             return PayOSCreatePaymentResult.fail(500, "DATABASE_ERROR", "Không thể kết nối cơ sở dữ liệu.");
-        }
-    }
-
-    private BigDecimal readDepositAmount(Connection c, int datSanId) throws Exception {
-        try (PreparedStatement ps = c.prepareStatement("SELECT ISNULL(DepositAmount,0) FROM LichDatSan WHERE DatSanID = ?")) {
-            ps.setInt(1, datSanId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getBigDecimal(1) : BigDecimal.ZERO;
-            }
         }
     }
 
