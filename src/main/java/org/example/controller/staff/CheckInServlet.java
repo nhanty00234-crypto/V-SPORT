@@ -140,6 +140,10 @@ public class CheckInServlet extends HttpServlet {
             handleStopOpenSession(req, resp, user);
             return;
         }
+        if ("addServices".equals(action)) {
+            handleAddServices(req, resp, user);
+            return;
+        }
 
         String successMsg = null;
         String errorMsg = null;
@@ -252,45 +256,6 @@ public class CheckInServlet extends HttpServlet {
                 int datSanId = Integer.parseInt(datSanIdStr);
                 checkInDAO.huyLichKhachBung(datSanId, user.getAccountId());
                 successMsg = "Ä Ã£ há»§y thÃ nh cÃ´ng Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + " (KhÃ¡ch bÃ¹ng)!";
-            } else if ("addServices".equals(action)) {
-                String datSanIdStr = req.getParameter("datSanId");
-                if (datSanIdStr == null || datSanIdStr.isEmpty()) {
-                    throw new CheckInException("Thiếu ID đơn đặt sân.");
-                }
-                int datSanId = Integer.parseInt(datSanIdStr);
-
-                String[] spIdsStr = req.getParameterValues("productId");
-                String[] qtysStr = req.getParameterValues("quantity");
-
-                int[] productIds = new int[0];
-                int[] quantities = new int[0];
-
-                if (spIdsStr != null && qtysStr != null) {
-                    int count = spIdsStr.length;
-                    productIds = new int[count];
-                    quantities = new int[count];
-                    for (int i = 0; i < count; i++) {
-                        productIds[i] = Integer.parseInt(spIdsStr[i]);
-                        quantities[i] = Integer.parseInt(qtysStr[i]);
-                    }
-                }
-
-                String billMode = req.getParameter("billMode");
-                if ("SPLIT".equals(billMode)) {
-                    boolean payNow = "true".equals(req.getParameter("payNow"));
-                    String paymentMethod = req.getParameter("phuongThucThanhToan");
-                    if (payNow && (paymentMethod == null || paymentMethod.trim().isEmpty())) {
-                        paymentMethod = "Tiền mặt";
-                    }
-                    int splitId = checkInDAO.addServicesSplitBill(datSanId, productIds, quantities,
-                            payNow, paymentMethod, user.getAccountId(), user.getCoSoId());
-                    successMsg = "Đã tạo hóa đơn tách dịch vụ #" + splitId
-                            + (payNow ? " và thanh toán thành công!" : ". Hóa đơn đang chờ thanh toán.");
-                } else {
-                    LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
-                    lichDAO.updateDichVuDatSan(datSanId, productIds, quantities);
-                    successMsg = "Đã cập nhật dịch vụ thành công cho đơn đặt sân #" + datSanId + "!";
-                }
             } else if ("payInvoice".equals(action)) {
                 String hoaDonIdStr = req.getParameter("hoaDonId");
                 String paymentMethod = req.getParameter("phuongThucThanhToan");
@@ -483,6 +448,72 @@ public class CheckInServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Xử lý thêm/cập nhật dịch vụ cho một ca chơi (action=addServices), luôn trả JSON.
+     * Chỉ ghi nhận dịch vụ - không thanh toán, không hoàn thành booking, không đổi trạng thái sân.
+     */
+    private void handleAddServices(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String datSanIdStr = req.getParameter("datSanId");
+        try {
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân."));
+                return;
+            }
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+
+            String[] spIdsStr = req.getParameterValues("productId");
+            String[] qtysStr = req.getParameterValues("quantity");
+            int[] productIds = new int[0];
+            int[] quantities = new int[0];
+            if (spIdsStr != null && qtysStr != null) {
+                int count = spIdsStr.length;
+                productIds = new int[count];
+                quantities = new int[count];
+                for (int i = 0; i < count; i++) {
+                    productIds[i] = Integer.parseInt(spIdsStr[i]);
+                    quantities[i] = Integer.parseInt(qtysStr[i]);
+                }
+            }
+
+            String billMode = req.getParameter("billMode");
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            json.addProperty("success", true);
+            json.addProperty("billMode", billMode);
+            json.addProperty("datSanId", datSanId);
+
+            if ("SPLIT".equals(billMode)) {
+                boolean payNow = "true".equals(req.getParameter("payNow"));
+                String paymentMethod = req.getParameter("phuongThucThanhToan");
+                if (payNow && (paymentMethod == null || paymentMethod.trim().isEmpty())) {
+                    paymentMethod = "Tiền mặt";
+                }
+                int splitId = checkInDAO.addServicesSplitBill(datSanId, productIds, quantities,
+                        payNow, paymentMethod, user.getAccountId(), user.getCoSoId());
+                json.addProperty("splitId", splitId);
+                json.addProperty("message", "Đã tạo hóa đơn tách dịch vụ #" + splitId
+                        + (payNow ? " và thanh toán thành công!" : ". Hóa đơn đang chờ thanh toán."));
+            } else {
+                LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
+                lichDAO.updateDichVuDatSan(datSanId, productIds, quantities);
+                json.addProperty("message", "Đã lưu dịch vụ.");
+            }
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (CheckInException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("VALIDATION_ERROR", e.getMessage()));
+        } catch (Exception e) {
+            logger.warn("ADD_SERVICES_FAILED datSanId={}, reason={}", datSanIdStr, e.getMessage());
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("VALIDATION_ERROR",
+                            e.getMessage() != null ? e.getMessage() : "Không thể lưu dịch vụ. Vui lòng thử lại."));
+        }
+    }
+
     private boolean isAjax(HttpServletRequest req, String action) {
         String accept = req.getHeader("Accept");
         return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"))
@@ -545,11 +576,13 @@ public class CheckInServlet extends HttpServlet {
             double tongTienSan = lich.getTongTienDuKien() != null ? lich.getTongTienDuKien().doubleValue() : 0.0;
             double tongTienDichVu = 0.0;
             double tongThanhToan = tongTienSan;
+            double giamGia = 0.0;
+            double phiGuiXe = 0.0;
             String trangThaiThanhToan = "Chưa thanh toán";
 
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
                 boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
-                String invoiceSql = "SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?" +
+                String invoiceSql = "SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan, GiamGia, PhiGuiXe FROM HoaDon WHERE DatSanID = ?" +
                         (hasLoaiHoaDon ? " AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)" : "");
                 try (java.sql.PreparedStatement ps = conn.prepareStatement(invoiceSql)) {
                 ps.setInt(1, datSanId);
@@ -560,13 +593,15 @@ public class CheckInServlet extends HttpServlet {
                         tongTienDichVu = rs.getDouble("TongTienDichVu");
                         tongThanhToan = rs.getDouble("TongThanhToan");
                         trangThaiThanhToan = rs.getString("TrangThaiThanhToan");
+                        giamGia = rs.getDouble("GiamGia");
+                        phiGuiXe = rs.getDouble("PhiGuiXe");
                     }
                 }
                 }
             } catch (java.sql.SQLException sqlEx) {
                 // Fallback: LoaiHoaDon column may not exist yet
                 try (java.sql.Connection conn2 = org.example.util.DBUtil.getConnection();
-                     java.sql.PreparedStatement ps2 = conn2.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ?")) {
+                     java.sql.PreparedStatement ps2 = conn2.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan, GiamGia, PhiGuiXe FROM HoaDon WHERE DatSanID = ?")) {
                     ps2.setInt(1, datSanId);
                     try (java.sql.ResultSet rs2 = ps2.executeQuery()) {
                         if (rs2.next()) {
@@ -575,6 +610,8 @@ public class CheckInServlet extends HttpServlet {
                             tongTienDichVu = rs2.getDouble("TongTienDichVu");
                             tongThanhToan = rs2.getDouble("TongThanhToan");
                             trangThaiThanhToan = rs2.getString("TrangThaiThanhToan");
+                            giamGia = rs2.getDouble("GiamGia");
+                            phiGuiXe = rs2.getDouble("PhiGuiXe");
                         }
                     }
                 }
@@ -710,6 +747,10 @@ public class CheckInServlet extends HttpServlet {
             data.put("earlyCheckoutDiscount", lich.getEarlyCheckoutDiscount() != null ? lich.getEarlyCheckoutDiscount().doubleValue() : 0.0);
             data.put("earlyCheckoutReason", lich.getEarlyCheckoutReason() != null ? lich.getEarlyCheckoutReason() : "");
             data.put("proposedEarlyDiscount", proposedEarlyDiscount);
+            data.put("giamGia", giamGia);
+            data.put("phiGuiXe", phiGuiXe);
+            data.put("bookingTrangThai", lich.getTrangThai());
+            data.put("actualEndAt", lich.getActualEndAt() != null ? lich.getActualEndAt().toString() : null);
             resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
             e.printStackTrace();
