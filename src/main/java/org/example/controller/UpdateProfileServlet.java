@@ -16,12 +16,10 @@ import org.example.model.TaiKhoan;
 import org.example.util.EmailUtil;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
+import org.example.util.CloudinaryUtil;
 
 @WebServlet({"/admin/update-profile", "/manager/update-profile", "/staff/update-profile", "/account/update-profile"})
 @MultipartConfig(
@@ -69,13 +67,13 @@ public class UpdateProfileServlet extends HttpServlet {
                     return;
                 }
 
-                String avatarUrl = saveAvatarFile(req, avatarPart, account.getAccountId());
+                String avatarUrl = CloudinaryUtil.uploadImage(avatarPart, "avatars");
                 account.setAvatarUrl(avatarUrl);
 
                 boolean success = taiKhoanDAO.updateAccount(account);
                 if (success) {
                     session.setAttribute("user", account);
-                    resp.getWriter().write("{\"success\":true,\"message\":\"Cập nhật ảnh đại diện thành công.\",\"avatarUrl\":\"" + json(req.getContextPath() + avatarUrl) + "\"}");
+                    resp.getWriter().write("{\"success\":true,\"message\":\"Cập nhật ảnh đại diện thành công.\",\"avatarUrl\":\"" + json(avatarUrl) + "\"}");
                 } else {
                     resp.getWriter().write("{\"success\":false,\"message\":\"Không thể lưu ảnh đại diện vào cơ sở dữ liệu.\"}");
                 }
@@ -292,39 +290,9 @@ public class UpdateProfileServlet extends HttpServlet {
                 + "\"avatarUrl\":\"" + json(account.getAvatarUrl()) + "\"}";
     }
 
-    private String saveAvatarFile(HttpServletRequest req, Part avatarPart, int accountId) throws IOException {
-        String submittedFileName = Paths.get(avatarPart.getSubmittedFileName()).getFileName().toString();
-        String extension = getSafeImageExtension(submittedFileName, avatarPart.getContentType());
-        String fileName = "acc-" + accountId + "-" + UUID.randomUUID() + extension;
+    // Phương thức saveAvatarFile đã được thay thế bằng CloudinaryUtil.uploadImage()
 
-        String uploadPath = getServletContext().getRealPath("/uploads/avatars");
-        if (uploadPath == null) {
-            uploadPath = new File(System.getProperty("user.home"), "v-sport/uploads/avatars").getAbsolutePath();
-        }
 
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
-            throw new IOException("Không thể tạo thư mục lưu ảnh đại diện.");
-        }
-
-        File avatarFile = new File(uploadDir, fileName);
-        avatarPart.write(avatarFile.getAbsolutePath());
-        return "/uploads/avatars/" + fileName;
-    }
-
-    private String getSafeImageExtension(String fileName, String contentType) {
-        String lowerName = fileName == null ? "" : fileName.toLowerCase();
-        if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) return ".jpg";
-        if (lowerName.endsWith(".png")) return ".png";
-        if (lowerName.endsWith(".webp")) return ".webp";
-        if (lowerName.endsWith(".gif")) return ".gif";
-
-        if ("image/jpeg".equals(contentType)) return ".jpg";
-        if ("image/png".equals(contentType)) return ".png";
-        if ("image/webp".equals(contentType)) return ".webp";
-        if ("image/gif".equals(contentType)) return ".gif";
-        throw new IllegalArgumentException("Định dạng ảnh không hợp lệ.");
-    }
 
     private String json(String value) {
         if (value == null) return "";

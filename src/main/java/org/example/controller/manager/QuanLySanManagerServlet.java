@@ -20,13 +20,11 @@ import org.apache.logging.log4j.Logger;
 import org.example.service.AuditLogService;
 
 import java.io.IOException;
-import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+import org.example.util.CloudinaryUtil;
 
 /**
  * Servlet quản lý sân thi đấu dành cho Manager
@@ -284,39 +282,10 @@ public class QuanLySanManagerServlet extends HttpServlet {
     }
 
     private String saveCourtImageFile(HttpServletRequest req, Part imagePart) throws IOException {
-        String submittedFileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
-        String extension = getSafeImageExtension(submittedFileName, imagePart.getContentType());
-        String fileName = "court-" + UUID.randomUUID() + extension;
-
-        String uploadPath = getServletContext().getRealPath("/uploads/courts");
-        if (uploadPath == null) {
-            uploadPath = new File(System.getProperty("user.home"), "v-sport/uploads/courts").getAbsolutePath();
-        }
-
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
-            throw new IOException("Không thể tạo thư mục lưu ảnh sân.");
-        }
-
-        File courtImageFile = new File(uploadDir, fileName);
-        imagePart.write(courtImageFile.getAbsolutePath());
-        return "/uploads/courts/" + fileName;
+        return CloudinaryUtil.uploadImage(imagePart, "courts");
     }
 
-    private String getSafeImageExtension(String fileName, String contentType) {
-        String lowerName = fileName == null ? "" : fileName.toLowerCase();
-        if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) return ".jpg";
-        if (lowerName.endsWith(".png")) return ".png";
-        if (lowerName.endsWith(".webp")) return ".webp";
-        if (lowerName.endsWith(".gif")) return ".gif";
 
-        if ("image/jpeg".equals(contentType)) return ".jpg";
-        if ("image/png".equals(contentType)) return ".png";
-        if ("image/webp".equals(contentType)) return ".webp";
-        if ("image/gif".equals(contentType)) return ".gif";
-
-        throw new IllegalArgumentException("Định dạng ảnh sân không hợp lệ.");
-    }
 
     private String getFormField(HttpServletRequest req, String fieldName) {
         String value = req.getParameter(fieldName);

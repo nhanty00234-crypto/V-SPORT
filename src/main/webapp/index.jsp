@@ -729,7 +729,7 @@
 <section class="max-w-[95%] xl:max-w-[92%] mx-auto px-margin-mobile md:px-margin-desktop py-16">
 <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
 <div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="A tennis racket lying on a green grass court with several yellow tennis balls nearby. Bright sunlight." src="https://lh3.googleusercontent.com/aida/AP1WRLvWebT7ZNHs6ZdkCWKS9U-MazznW5ERpv32DFU3jHF_YyUANkNUkRCIcgok_P8A0t0nO9-aswBrwjCbFcneyFuSl1BpKMFkUxH-_z-9oYPFqF13Vtc3_88AM7Kt6Cx-zH0beU9IPzqLhLVBkyeQNzslJ8noEmjOpVsOycOG_sp3fg96phuIWrq3clPldYv_69RBQ1PLSkb5Lnm6qp-TKWHWyTsdLedtuEd_QZMp5LWIJ4jVWdVJHGAgwA"/>
+<img class="w-full h-full object-cover img-ken-burns" alt="A tennis racket lying on a green grass court with several yellow tennis balls nearby. Bright sunlight." src="<%= ctx %>/resources/racket.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
 <div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
 <h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">RACKETS</h3>
@@ -740,7 +740,7 @@
 </div>
 </div>
 <div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-100 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="A male tennis player running to hit a backhand on a blue hard court. Wearing dark apparel." src="https://lh3.googleusercontent.com/aida/AP1WRLtdxurZ6J7ydy2eP7rqXeqTMhJ1n-EjW8nfWwJkvbGMUi5RQHxU55fmhZVw5i_VnfFg8blm35yCB5KohihuvF_CdHZW5qOmOYHvVhoGdDUSi3M0PuEq3Q2oJHI5tCUSjHY9y798KfWcib0vQwLzjCLMro59hkSvU2rCVsyg9PM9E11U5zoXG8JCUsbT33Ujq-gW11BASrUAf_TJqvj-OzvnYHeWkP79IEyqK_kPfKayIOBOGTGyt6zS_w"/>
+<img class="w-full h-full object-cover img-ken-burns" alt="A male tennis player running to hit a backhand on a blue hard court. Wearing dark apparel." src="<%= ctx %>/resources/apparel.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
 <div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
 <h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">APPAREL</h3>
@@ -751,7 +751,7 @@
 </div>
 </div>
 <div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-200 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="A female tennis player running on a clay court. View from above." src="https://lh3.googleusercontent.com/aida/AP1WRLsCif0ca5AJK-rv5YXnylO3sQExKc8APL8Q_C-ogNla22Bshc-uTcpSSeHIgnWOgWZWpEhIFxgjTYz748HOgQorLtAgjdyItKzpv1vdCnwUgC7vzVSG2R2wi9OLkEA4S9kTO-jyLOyRATtqAAjqNm_HSHb2b8qb1RZM4-pUOa-06s-ap4FkDdDbfOJnZ1lyflidEJS1VNGvoFAuVjyBsdkOok8NS9rmubEbCeiM9ey564vFFprktPmLRP0"/>
+<img class="w-full h-full object-cover img-ken-burns" alt="A female tennis player running on a clay court. View from above." src="<%= ctx %>/resources/shoes.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
 <div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
 <h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">SHOES</h3>
@@ -762,7 +762,7 @@
 </div>
 </div>
 <div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-300 card-glow-sweep">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A yellow tennis ball caught in the black netting of a tennis net. Close up shot." src="https://lh3.googleusercontent.com/aida/AP1WRLsxuq5CEbyLge_0n5xxq6dFz5gcZD_mhi9pDI-6CcMIFHUD_58vqcZsqY8x6lJnQq16-vNHvWyz02q_V1ChrVcajhVFbmWa9Hd2SG6YGQFPgtNlGT6CF5jZIek0mqmH9eYugfV6tA6ZQzyeNl3MTBlS6Hlvhqc3LiNjWO32PTDYBxLWnjkzL8yBf7PQb49cRlPG79pe2I-gIVupqXKgaalQsGKy3sc-AbmA7wGSAbylJ9IaNEkr6Dd1LQ"/>
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A yellow tennis ball caught in the black netting of a tennis net. Close up shot." src="<%= ctx %>/resources/accessories.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
 <div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
 <h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">ACCESSORIES</h3>
