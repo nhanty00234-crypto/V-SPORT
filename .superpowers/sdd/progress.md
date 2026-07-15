@@ -24,3 +24,18 @@ Branch: feature/pagination-phase1-foundation (base commit: 277b5e0)
 - Task 1: PaginationRequestTest.java has minor blank-line style drift from SecretMaskUtilTest.java convention. Minor.
 - Task 3: PaginationUtils.normalizePageSize's Math.min(allowed, MAX_PAGE_SIZE) branch is dead code (ALLOWED_PAGE_SIZES tops out at 50 < 100). Minor, brief-authoring artifact.
 - Task 3: 4-arg PaginationUtils.of(page,pageSize,sortBy,sortDir) overload has no direct caller/test yet. Minor, may be used by later phases.
+
+## Environment limitation discovered before Task 4
+This sandboxed Linux dev environment cannot run a full live-server browser
+verification: `start_server.bat` is Windows-only (hardcoded `C:\`/`D:\` paths,
+`catalina.bat`), and even after sourcing `.env` and pointing at a local
+Apache Tomcat 10.1.55 install found at `/home/nhan/Downloads/apache-tomcat-10.1.55`,
+the SQL Server connection reaches the host but fails TLS certificate validation
+(`PKIX path building failed` — this sandbox's JVM truststore doesn't trust the
+DB server's cert chain the way the user's Windows/IntelliJ machine does).
+Modifying JDBC TLS trust settings to work around this is out of scope (security-
+relevant, environment-specific, not part of the pagination task).
+Consequence: Task 4's JSP tag-file "Manual verification" step (live browser
+smoke test) cannot be performed from this environment. It is replaced with a
+careful static/manual code review of the tag file's JSTL syntax instead. The
+user must do the real browser smoke test on their own machine before merging.
