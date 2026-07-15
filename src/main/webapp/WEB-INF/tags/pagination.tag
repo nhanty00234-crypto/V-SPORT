@@ -19,7 +19,7 @@
       <form method="get" action="${pageContext.request.contextPath}${baseUrl}" class="flex items-center gap-2">
         <c:forEach var="entry" items="${extraParams}">
           <c:if test="${not empty entry.value}">
-            <input type="hidden" name="${entry.key}" value="${entry.value}" />
+            <input type="hidden" name="<c:out value="${entry.key}"/>" value="<c:out value="${entry.value}"/>" />
           </c:if>
         </c:forEach>
         <input type="hidden" name="page" value="1" />
