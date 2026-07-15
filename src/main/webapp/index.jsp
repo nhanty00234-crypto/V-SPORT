@@ -785,7 +785,7 @@
 <!-- Court 1 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="Three yellow tennis balls clustered together on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLuVO6G7WE20o_ncujLDMWXKsYywrZ32bf609snGygLJBbWhr4a9K9wO0f7FDBw8-M63rpMYroxplAvmv8juM3Ex6gpfaRYOIpm5sL8WwKE65VOyO-9FmiJ3naA7Dh4smzfl4RslJ7TSDj6qvTmIZnuQaL2k2w7sYSMtWs08BuonvLoBTcWQTU4YNiRqS-X1zygtVkoq2oMQn2CVdchuv7Ci1Iu2Kd1O6rdLJBpI5x4McvEBXnT_KywCTA"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="Three yellow tennis balls clustered together on a white background." src="<%= ctx %>/resources/football.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN BÓNG ĐÁ 5 NGƯỜI</h3>
@@ -798,7 +798,7 @@
 <!-- Court 2 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A single Aeropro tennis racket standing upright on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLttf6-GiVcmloQ8hiZr_nxjiGoONtewcPhpBIu7MAeSbMui8ctDhKX6lFKETpk3KiKui7-0F2ngdheZts6hjynUngH_GNmMnnww6Ad40_Log14q7bnbxwpgVRRjh7XAVKZHzzclIbktzix5DEn9jY0-J2hLatFUo5ZNjc-QhO-NQn-giN4q47sK9c7gDhpaq7mdvXdclcpY-JRItpORAJHWywKemmLgK9nXds4G2Wo3YKvVfMjCdRv7i-Q"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A single Aeropro tennis racket standing upright on a white background." src="<%= ctx %>/resources/sancaulong.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN CẦU LÔNG</h3>
@@ -811,7 +811,7 @@
 <!-- Court 3 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A plain light pink cotton baseball cap shown from a three-quarter angle on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLvYq1xffxGjwYXdEyPHE4NTLz2W5wT_XyOu-Q7vQpswHYOPFX-eVvWXRC29Zw_xBf6sYsBtR-ldPDWL0y56VjJveZd_M0eni2grcqiatszzAsWTq5YsAIWTGa71Wl2oeTITUqpvYiZDKkIYD6xEcVFcd3gH3jI4H6k38X8GP10NI0V_c3-x3ERkzwobl1YTFVXmnUuw7nHQOXcHQ9F2BbXggiToCFBoS-_ve-j5LQbUJ9p-AUYR9p8gRWE"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A plain light pink cotton baseball cap shown from a three-quarter angle on a white background." src="<%= ctx %>/resources/tennis.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN TENNIS</h3>
@@ -824,7 +824,7 @@
 <!-- Court 4 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d delay-300" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A green leather duffel-style sport bag with white handles and piping on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLu6YoJlJoTRxpeddFZnf6O2IChPVk-2giSUTbtmkzQeSdvqJPuMZAv7Y9q8hVuyxlJurKOU7VKY_qIja4VC6N4L_KEKoYewa4ErfTU1rG9if4NUgUm-MR5ZiKcRBRfid_IXBeaiglZlu6vHtStfUADSItkFYn5WLhLQfqU6Iw1Xs-o2LD3Ak5s0HCzUSzfSRRvbEYteUA_HhnoiG-U4b-zzNCI7tItUdrRr1j-fGH-GUBvf9GyORgzCMdQ"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A green leather duffel-style sport bag with white handles and piping on a white background." src="<%= ctx %>/resources/pickleball.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN PICKLEBALL</h3>
@@ -837,7 +837,7 @@
 <!-- Court 5 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A white pleated tennis skirt displayed flat on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLuyKP6xoMTKdDVOEZO8AFfv5cX_zsh6alzIzPSLn4VqQ6FLIGiFbTRGn3Gb8yeewN6qJ1yCDnmYpxLB0wz_k3WCkcf63DGaVdnSOVnrLomL9eVOjRikOXwgAoMwePOs2G0-8OrqqLwwjLKd-lydWVjIMdFP62zD3J6kX4-T_wpBRQdiFAffd5jv5RLbyE0vQ7VF-ZAOVMK4gShx_DeyXN98zHRKkaYcaIOJHEt8W-sjMdVeIflnMD60iY0"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A white pleated tennis skirt displayed flat on a white background." src="<%= ctx %>/resources/bongda7nguoi.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN BÓNG ĐÁ 7 NGƯỜI</h3>
@@ -850,7 +850,7 @@
 <!-- Court 6 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A dark grey nylon tennis racket cover case on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLsNaqsm4nBpLxEpBx1XgEtMereVCNuHyiL8V7v9PvUVpQm1zaEFNTI9BRrrZKoDfzhA1vlptEkK-UOBCw0DdUAMg0WhYBwahfgl-p-5D3eAVxUMsP9KFwqpoYPdaVKweX-Uij1veYO9uGN_QbZ9XhcapNPuxR22IZUIINAiW3tMvhOXzuJkE3dvocxZ_VSt_1uzo0MIqvltNQI0AIXGtQD0huu4mT_Z0lBzT4DrbOOSpU2sFSVIK7oI2eQ"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A dark grey nylon tennis racket cover case on a white background." src="<%= ctx %>/resources/fustal.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN FUTSAL</h3>
@@ -863,7 +863,7 @@
 <!-- Court 7 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A sleek black tennis racket standing upright on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLv-CNo131QzCgX083he__RfyatqoTtPF9_oi68e13kF0u8i13eHMoWtjfE0Kq_pFfzkk2mHjhq2eLXjkXt8Tqtz8YJzkDyZ7Oqah_Y2Z2SeZPRxSjAuVCcRyy8H1CcwzXwWfYPO9XI21-_eW5V2meGn_GJ8bK5XmweYE-JaSnd7CWDnSxdRgBOFtWRu6PQp_5mpQOmdjID0bQkMxcjuJLnFXJ5i0A_a9EP10T2Q"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A sleek black tennis racket standing upright on a white background." src="<%= ctx %>/resources/tenniscaocap.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN TENNIS CAO CẤP</h3>
@@ -876,7 +876,7 @@
 <!-- Court 8 -->
 <div class="group cursor-pointer scroll-reveal reveal-3d delay-300" onclick="location.href='<%= ctx %>/customer/dat-san'">
 <div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A pair of white running sport sneakers with black accents on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLvhDmgRuPiNkvTvnJ3evCmAB1SxJ_PrOtNtg4Gfn6pSfojai4MbY195QszHNVgbiL6EMCVtq4KRxFK_JlMqSzrDlkRfci4hY5hKIsUFs6Q-NwmUZAun6d9obxlPYw-xKVQSyf-Iq7CSt9vV3yXDPNx4lNy7-X5t-o_CGCUHJDytYelY9HguPPIzn7Y8Ymm-Dp19nUDHoc7e1ngVmESY7CLTr50fcZxMyjRbt3u3LLeQwtf6TBWEAv3lvg"/>
+<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A pair of white running sport sneakers with black accents on a white background." src="<%= ctx %>/resources/caulongcaocap.jpg"/>
 </div>
 <div class="text-center">
 <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN CẦU LÔNG CAO CẤP</h3>
