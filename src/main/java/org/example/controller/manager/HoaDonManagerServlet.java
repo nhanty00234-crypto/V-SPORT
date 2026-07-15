@@ -45,11 +45,15 @@ public class HoaDonManagerServlet extends HttpServlet {
         String filterFrom    = req.getParameter("filterFrom");
         String filterTo      = req.getParameter("filterTo");
         String filterSearch  = req.getParameter("filterSearch");
-        String pageStr       = req.getParameter("page");
-        int page = 1;
-        try { if (pageStr != null) page = Math.max(1, Integer.parseInt(pageStr)); } catch (NumberFormatException ignored) {}
-        int pageSize = 20;
-        int offset   = (page - 1) * pageSize;
+
+        org.example.util.PaginationRequest pagination = org.example.util.PaginationUtils.fromRequest(req);
+        java.util.Map<String, String> sortWhitelist = java.util.Map.of(
+                "createdAt", "hd.NgayLap",
+                "total", "hd.TongThanhToan",
+                "status", "hd.TrangThaiThanhToan"
+        );
+        String sortColumn = org.example.util.PaginationUtils.resolveSortColumn(sortWhitelist, pagination.getSortBy(), "hd.NgayLap");
+        String orderClause = "ORDER BY " + sortColumn + " " + pagination.getSortDirection() + ", hd.HoaDonID DESC ";
 
         List<Map<String, Object>> invoices = new ArrayList<>();
         int totalCount = 0;
@@ -128,6 +132,9 @@ public class HoaDonManagerServlet extends HttpServlet {
                 }
             }
 
+            int totalPagesForClamp = totalCount == 0 ? 0 : (int) Math.ceil((double) totalCount / pagination.getPageSize());
+            pagination = pagination.withPage(org.example.util.PaginationUtils.clampPage(pagination.getPage(), totalPagesForClamp));
+
             // Data
             String sqlList =
                 "SELECT hd.HoaDonID, hd.DatSanID, hd.NgayLap, hd.TongTienSan, hd.TongTienDichVu, " +
@@ -138,11 +145,11 @@ public class HoaDonManagerServlet extends HttpServlet {
                 "s.TenSan, lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, " +
                 "acc.FullName AS TenKhachHang, nv.FullName AS TenNhanVien " +
                 baseQuery +
-                "ORDER BY hd.NgayLap DESC " +
+                orderClause +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             List<Object> listParams = new ArrayList<>(params);
-            listParams.add(offset);
-            listParams.add(pageSize);
+            listParams.add(pagination.getOffset());
+            listParams.add(pagination.getPageSize());
             try (PreparedStatement ps = conn.prepareStatement(sqlList)) {
                 for (int i = 0; i < listParams.size(); i++) {
                     ps.setObject(i + 1, listParams.get(i));
@@ -178,17 +185,24 @@ public class HoaDonManagerServlet extends HttpServlet {
             req.setAttribute("errorMsg", "Lỗi tải danh sách hóa đơn: " + e.getMessage());
         }
 
-        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+        org.example.util.PageResult<Map<String, Object>> invoicePage =
+                org.example.util.PageResult.of(invoices, pagination.getPage(), pagination.getPageSize(), totalCount);
+
         List<Map<String, Object>> serviceProducts = loadServiceProducts(user.getCoSoId());
         List<Map<String, Object>> payableBookings = loadPayableBookings(user.getCoSoId());
 
+        Map<String, String> paginationExtraParams = new LinkedHashMap<>();
+        if (filterStatus != null) paginationExtraParams.put("filterStatus", filterStatus);
+        if (filterLoai != null) paginationExtraParams.put("filterLoai", filterLoai);
+        if (filterFrom != null) paginationExtraParams.put("filterFrom", filterFrom);
+        if (filterTo != null) paginationExtraParams.put("filterTo", filterTo);
+        if (filterSearch != null) paginationExtraParams.put("filterSearch", filterSearch);
+
         req.setAttribute("serviceProducts", serviceProducts);
         req.setAttribute("payableBookings", payableBookings);
-        req.setAttribute("invoices",     invoices);
+        req.setAttribute("invoicePage",  invoicePage);
+        req.setAttribute("paginationExtraParams", paginationExtraParams);
         req.setAttribute("stats",        stats);
-        req.setAttribute("totalCount",   totalCount);
-        req.setAttribute("totalPages",   totalPages);
-        req.setAttribute("currentPage",  page);
         req.setAttribute("filterStatus", filterStatus);
         req.setAttribute("filterLoai",   filterLoai);
         req.setAttribute("filterFrom",   filterFrom);

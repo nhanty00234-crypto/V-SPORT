@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="v" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -165,7 +166,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50">
-          <c:forEach var="hd" items="${invoices}">
+          <c:forEach var="hd" items="${invoicePage.items}">
             <tr class="tbl-row">
               <td class="px-4 py-3 font-bold text-purple-700">#${hd.hoaDonId}</td>
               <td class="px-4 py-3">
@@ -220,7 +221,7 @@
               </td>
             </tr>
           </c:forEach>
-          <c:if test="${empty invoices}">
+          <c:if test="${empty invoicePage.items}">
             <tr>
               <td colspan="9" class="px-4 py-12 text-center text-zinc-400">
                 <span class="material-symbols-outlined text-[36px] block mb-2">receipt_long</span>
@@ -233,25 +234,7 @@
     </div>
 
     <%-- Pagination --%>
-    <c:if test="${totalPages > 1}">
-      <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-        <p class="text-xs text-zinc-400">Trang ${currentPage} / ${totalPages} · ${totalCount} kết quả</p>
-        <div class="flex gap-1">
-          <c:if test="${currentPage > 1}">
-            <a href="?page=${currentPage-1}&filterStatus=${filterStatus}&filterLoai=${filterLoai}&filterFrom=${filterFrom}&filterTo=${filterTo}&filterSearch=${filterSearch}"
-               class="px-3 py-1.5 rounded-lg text-xs border border-slate-200 text-zinc-600 hover:bg-purple-50 hover:text-purple-700 transition-all">‹</a>
-          </c:if>
-          <c:forEach begin="1" end="${totalPages}" var="p">
-            <a href="?page=${p}&filterStatus=${filterStatus}&filterLoai=${filterLoai}&filterFrom=${filterFrom}&filterTo=${filterTo}&filterSearch=${filterSearch}"
-               class="px-3 py-1.5 rounded-lg text-xs border transition-all ${p == currentPage ? 'bg-purple-600 text-white border-purple-600' : 'border-slate-200 text-zinc-600 hover:bg-purple-50 hover:text-purple-700'}">${p}</a>
-          </c:forEach>
-          <c:if test="${currentPage < totalPages}">
-            <a href="?page=${currentPage+1}&filterStatus=${filterStatus}&filterLoai=${filterLoai}&filterFrom=${filterFrom}&filterTo=${filterTo}&filterSearch=${filterSearch}"
-               class="px-3 py-1.5 rounded-lg text-xs border border-slate-200 text-zinc-600 hover:bg-purple-50 hover:text-purple-700 transition-all">›</a>
-          </c:if>
-        </div>
-      </div>
-    </c:if>
+    <v:pagination pageResult="${invoicePage}" baseUrl="/manager/hoa-don" extraParams="${paginationExtraParams}" ariaLabel="Phân trang hóa đơn" />
   </section>
 
 </main>
