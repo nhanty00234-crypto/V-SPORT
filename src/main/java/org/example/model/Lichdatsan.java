@@ -68,6 +68,15 @@ public class Lichdatsan {
     @Column(name = "actual_start_time")
     private LocalTime actualStartTime;
 
+    @Column(name = "ActualStartAt")
+    private LocalDateTime actualStartAt;
+
+    @Column(name = "ActualEndAt")
+    private LocalDateTime actualEndAt;
+
+    @Column(name = "PricingFinalizedAt")
+    private LocalDateTime pricingFinalizedAt;
+
     @Column(name = "EarlyCheckoutReason", length = 255)
     private String earlyCheckoutReason;
 
@@ -279,6 +288,13 @@ public class Lichdatsan {
     public void setActualStartTime(LocalTime actualStartTime) {
         this.actualStartTime = actualStartTime;
     }
+
+    public LocalDateTime getActualStartAt() { return actualStartAt; }
+    public void setActualStartAt(LocalDateTime actualStartAt) { this.actualStartAt = actualStartAt; }
+    public LocalDateTime getActualEndAt() { return actualEndAt; }
+    public void setActualEndAt(LocalDateTime actualEndAt) { this.actualEndAt = actualEndAt; }
+    public LocalDateTime getPricingFinalizedAt() { return pricingFinalizedAt; }
+    public void setPricingFinalizedAt(LocalDateTime pricingFinalizedAt) { this.pricingFinalizedAt = pricingFinalizedAt; }
 
     public String getEarlyCheckoutReason() {
         return earlyCheckoutReason;

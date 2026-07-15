@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @WebFilter("/*")
 public class FilterMaHoa implements Filter {
@@ -14,8 +15,8 @@ public class FilterMaHoa implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         HttpServletRequest httpReq = (HttpServletRequest) request;
         HttpServletResponse httpResp = (HttpServletResponse) response;
@@ -35,7 +36,6 @@ public class FilterMaHoa implements Filter {
             httpResp.setDateHeader("Expires", 0);
         }
 
-        response.setContentType("text/html; charset=UTF-8");
         chain.doFilter(request, response);
     }
 

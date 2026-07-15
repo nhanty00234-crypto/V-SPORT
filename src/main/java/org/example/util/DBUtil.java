@@ -64,7 +64,7 @@ public class DBUtil {
             return dataSource.getConnection();
         } catch (SQLException e) {
             logger.error("DBUtil: Failed to get database connection", e);
-            return null;
+            throw new IllegalStateException("Không thể kết nối cơ sở dữ liệu.", e);
         }
     }
 

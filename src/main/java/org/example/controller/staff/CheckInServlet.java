@@ -16,6 +16,10 @@ import org.example.dao.impl.SanDAOImpl;
 import org.example.model.Lichdatsan;
 import org.example.model.San;
 import org.example.model.TaiKhoan;
+import org.example.service.checkout.CheckoutResult;
+import org.example.service.checkout.CheckoutService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.List;
 
 import java.io.IOException;
@@ -27,7 +31,10 @@ import java.io.IOException;
 @WebServlet("/staff/checkin")
 public class CheckInServlet extends HttpServlet {
 
+    private static final Logger logger = LogManager.getLogger(CheckInServlet.class);
+
     private final CheckInDAO checkInDAO = new CheckInDAO();
+    private final CheckoutService checkoutService = new CheckoutService();
 
     private boolean columnExists(java.sql.Connection conn, String tableName, String columnName) throws java.sql.SQLException {
         String sql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(?) AND name = ?";
@@ -96,19 +103,41 @@ public class CheckInServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        String action = req.getParameter("action");
         // 1. PhÃ¢n quyá»n (Authorization)
-        HttpSession session = req.getSession();
-        TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+        HttpSession session = req.getSession(false);
+        TaiKhoan user = session == null ? null : (TaiKhoan) session.getAttribute("user");
+
+        logger.info("CheckIn POST uri={}, contentType={}, contentLength={}, action={}, datSanId={}, roleId={}, coSoId={}, ajax={}",
+                req.getRequestURI(), req.getContentType(), req.getContentLengthLong(), action, req.getParameter("datSanId"),
+                user == null ? null : user.getRoleId(), user == null ? null : user.getCoSoId(),
+                req.getHeader("X-Requested-With"));
 
         if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 4)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p chá»©c nÄƒng nÃ y!");
+            if (isAjax(req, action)) {
+                writeJsonResponse(resp, HttpServletResponse.SC_UNAUTHORIZED,
+                        errorJson("UNAUTHORIZED", "Phiên đăng nhập đã hết hạn."));
+            } else {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            }
             return;
         }
 
-        String action = req.getParameter("action");
+        if (action == null || action.isBlank()) {
+            if (isAjax(req, action)) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_ACTION", "Thiếu action."));
+                return;
+            }
+        }
 
         if ("processPayment".equals(action)) {
             handleProcessPayment(req, resp, user);
+            return;
+        }
+        if ("stopOpenSession".equals(action)) {
+            handleStopOpenSession(req, resp, user);
             return;
         }
 
@@ -214,15 +243,6 @@ public class CheckInServlet extends HttpServlet {
                     session.removeAttribute(lockKey);
                 }
                 successMsg = "Đã mở sân thành công cho khách vãng lai!";
-            } else if ("stopOpenSession".equals(action)) {
-                String datSanIdStr = req.getParameter("datSanId");
-                if (datSanIdStr == null || datSanIdStr.isEmpty()) {
-                    throw new CheckInException("Thiếu ID đơn đặt sân để dừng.");
-                }
-                int datSanId = Integer.parseInt(datSanIdStr);
-                checkInDAO.stopOpenSession(datSanId, user.getAccountId());
-                successMsg = "Đã dừng chơi và chốt thời gian cho ca #" + datSanId + "!";
-                req.setAttribute("autoOpenInvoiceDatSanId", datSanId);
             } else if ("cancelNoShow".equals(action)) {
                 // Há»§y Ä‘Æ¡n Ä‘áº·t sÃ¢n do khÃ¡ch bÃ¹ng
                 String datSanIdStr = req.getParameter("datSanId");
@@ -353,69 +373,141 @@ public class CheckInServlet extends HttpServlet {
      */
     private void handleProcessPayment(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
             throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
-        com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+        logger.info("PAYMENT_REQUEST_RECEIVED datSanId={}", req.getParameter("datSanId"));
         try {
             String datSanIdStr = req.getParameter("datSanId");
             String paymentMethod = req.getParameter("phuongThucThanhToan");
-            if (datSanIdStr == null || datSanIdStr.isEmpty()) {
-                throw new CheckInException("Thiếu ID đơn đặt sân để thanh toán.");
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân để thanh toán."));
+                return;
             }
-            if (paymentMethod == null || paymentMethod.isEmpty()) {
-                paymentMethod = "Tiền mặt";
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+            if (datSanId <= 0) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+                return;
             }
-            int datSanId = Integer.parseInt(datSanIdStr);
+            if (!"Tiền mặt".equals(paymentMethod) && !"Chuyển khoản".equals(paymentMethod)) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("INVALID_PAYMENT_METHOD", "Phương thức thanh toán không hợp lệ."));
+                return;
+            }
+            logger.info("PAYMENT_VALIDATED datSanId={}, roleId={}, coSoId={}", datSanId, user.getRoleId(), user.getCoSoId());
+            logger.info("PAYMENT_TRANSACTION_STARTED datSanId={}", datSanId);
 
-            // Chặn checkout nếu còn split bill chưa thanh toán
-            if (checkInDAO.hasUnpaidSplitBills(datSanId)) {
-                throw new CheckInException("Vui lòng thanh toán toàn bộ hóa đơn tách dịch vụ trước khi kết thúc ca chơi.");
-            }
-
-            LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
-            org.example.dao.HoaDonDAO hoaDonDAO = new org.example.dao.impl.HoaDonDAOImpl();
-
-            boolean alreadyPaid = false;
-            try {
-                lichDAO.thanhToanHoaDonDatSan(datSanId, user.getAccountId(), paymentMethod);
-            } catch (Exception payEx) {
-                if (payEx.getMessage() != null && payEx.getMessage().contains("đã được thanh toán trước đó")) {
-                    // Không thanh toán lần hai, không trừ kho lại - chỉ trả về hóa đơn hiện có để in lại.
-                    alreadyPaid = true;
-                } else {
-                    throw payEx;
-                }
-            }
-
-            Integer hoaDonId = hoaDonDAO.getMainHoaDonIdByDatSanId(datSanId);
-            if (hoaDonId == null) {
-                throw new CheckInException("Không tìm thấy hóa đơn để in sau khi thanh toán.");
-            }
+            CheckoutResult result = checkoutService.pay(datSanId, user.getCoSoId(), user.getAccountId(), paymentMethod);
+            int hoaDonId = result.hoaDonId();
+            logger.info("PAYMENT_TRANSACTION_COMMITTED datSanId={}, hoaDonId={}", datSanId, hoaDonId);
 
             String printUrl = req.getContextPath() + "/staff/hoa-don/in?id=" + hoaDonId;
 
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
             json.addProperty("success", true);
-            json.addProperty("message", alreadyPaid
+            json.addProperty("message", result.alreadyPaid()
                     ? "Hóa đơn đã được thanh toán trước đó."
                     : "Đã hoàn thành thanh toán hóa đơn cho đơn đặt sân #" + datSanId + "!");
             json.addProperty("hoaDonId", hoaDonId);
             json.addProperty("printUrl", printUrl);
-            resp.getWriter().write(json.toString());
+            logger.info("PAYMENT_PRINT_URL_CREATED datSanId={}, hoaDonId={}", datSanId, hoaDonId);
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+            logger.info("PAYMENT_RESPONSE_SENT datSanId={}, hoaDonId={}", datSanId, hoaDonId);
         } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            json.addProperty("success", false);
-            json.addProperty("message", "Lỗi định dạng dữ liệu đầu vào.");
-            resp.getWriter().write(json.toString());
-        } catch (CheckInException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            json.addProperty("success", false);
-            json.addProperty("message", e.getMessage());
-            resp.getWriter().write(json.toString());
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (SecurityException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                    errorJson("FORBIDDEN", "Bạn không có quyền thanh toán hóa đơn này."));
+        } catch (IllegalArgumentException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("VALIDATION_ERROR", e.getMessage()));
+        } catch (IllegalStateException e) {
+            logger.warn("PAYMENT_FAILED datSanId={}, reason={}", req.getParameter("datSanId"), e.getMessage());
+            String code = e.getMessage() != null && e.getMessage().contains("SPLIT") ? "UNPAID_SPLIT_INVOICE" : "PAYMENT_CONFLICT";
+            writeJsonResponse(resp, HttpServletResponse.SC_CONFLICT, errorJson(code, e.getMessage()));
         } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            json.addProperty("success", false);
-            json.addProperty("message", "Lỗi hệ thống bất ngờ: " + e.getMessage());
-            resp.getWriter().write(json.toString());
+            logger.error("PAYMENT_FAILED datSanId={}", req.getParameter("datSanId"), e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("DATABASE_ERROR", "Không thể hoàn tất thanh toán. Dữ liệu đã được hoàn tác."));
         }
+    }
+
+    /**
+     * Xử lý dừng ca chơi Không cố định (action=stopOpenSession): chốt ActualEndAt, tính tiền sân
+     * theo CourtPricingService rồi trả JSON cho frontend mở modal Dịch vụ & Thanh toán.
+     * Luôn trả JSON (kể cả khi lỗi) vì action này giờ chỉ được gọi qua fetch/AJAX.
+     */
+    private void handleStopOpenSession(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String datSanIdStr = req.getParameter("datSanId");
+        try {
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân để dừng."));
+                return;
+            }
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+            CheckoutResult result = checkoutService.finalizeSession(datSanId, user.getCoSoId());
+            java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("success", true);
+            payload.put("datSanId", result.datSanId());
+            payload.put("hoaDonId", result.hoaDonId());
+            payload.put("actualEndAt", result.actualEndAt());
+            payload.put("tongTienSan", result.tongTienSan());
+            payload.put("tongTienDichVu", result.tongTienDichVu());
+            payload.put("phiGuiXe", result.phiGuiXe());
+            payload.put("giamGia", result.giamGia());
+            payload.put("tongThanhToan", result.tongThanhToan());
+            payload.put("segments", result.segments());
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setCharacterEncoding("UTF-8");
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().write(gson.toJson(payload));
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (SecurityException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                    errorJson("FORBIDDEN", "Ca chơi không thuộc cơ sở của bạn."));
+        } catch (IllegalArgumentException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("VALIDATION_ERROR", e.getMessage()));
+        } catch (IllegalStateException e) {
+            logger.warn("STOP_SESSION_FAILED datSanId={}, reason={}", datSanIdStr, e.getMessage());
+            writeJsonResponse(resp, HttpServletResponse.SC_CONFLICT,
+                    errorJson("PAYMENT_CONFLICT", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("STOP_SESSION_FAILED datSanId={}", datSanIdStr, e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("INTERNAL_ERROR", "Không thể chốt giờ. Vui lòng thử lại."));
+        }
+    }
+
+    private boolean isAjax(HttpServletRequest req, String action) {
+        String accept = req.getHeader("Accept");
+        return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"))
+                || (accept != null && accept.contains("application/json"))
+                || "processPayment".equals(action);
+    }
+
+    private com.google.gson.JsonObject errorJson(String code, String message) {
+        com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+        json.addProperty("success", false);
+        json.addProperty("code", code);
+        json.addProperty("message", message == null || message.isBlank() ? "Yêu cầu không thể xử lý." : message);
+        return json;
+    }
+
+    private void writeJsonResponse(HttpServletResponse response, int status, com.google.gson.JsonObject body)
+            throws IOException {
+        if (!response.isCommitted()) {
+            response.resetBuffer();
+        }
+        response.setStatus(status);
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(body.toString());
+        response.getWriter().flush();
     }
 
     private void handleGetInvoiceDetails(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)

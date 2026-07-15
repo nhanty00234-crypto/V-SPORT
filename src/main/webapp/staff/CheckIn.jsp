@@ -211,6 +211,52 @@
         .cart-item:hover {
             background: rgba(248, 250, 252, 0.5);
         }
+
+        /* ── Payment success view (chung style với hóa đơn in - staff/HoaDonPrint.jsp) ── */
+        .success-processing-overlay {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(1px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; z-index: 10;
+        }
+        .success-banner-icon {
+            width: 44px; height: 44px; border-radius: 999px;
+            background: #ecfdf5; color: #059669;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .success-banner-enter { animation: fadeUp .3s ease both; }
+        }
+
+        .receipt {
+            width: 400px; max-width: 100%; margin: 0 auto; background: #ffffff; color: #1f2937;
+            font-size: 12.5px; line-height: 1.55; padding: 18px 20px; box-sizing: border-box; word-break: break-word;
+        }
+        .receipt-row { display: flex; justify-content: space-between; gap: 10px; }
+        .receipt-row + .receipt-row { margin-top: 4px; }
+        .receipt-money { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .receipt hr { border: none; border-top: 1px solid #e5e7eb; margin: 10px 0; }
+        .receipt .center { text-align: center; }
+        .receipt .bold { font-weight: 700; }
+        .receipt .muted { color: #6b7280; }
+        .receipt .small { font-size: 11px; color: #6b7280; }
+        .receipt .mono { font-variant-numeric: tabular-nums; }
+        .receipt .total-row { font-size: 15px; font-weight: 800; }
+        .receipt table.dv-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        .receipt table.dv-table th { text-align: left; font-size: 11px; font-weight: 700; color: #6b7280; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+        .receipt table.dv-table th.qty, .receipt table.dv-table th.money { text-align: right; }
+        .receipt table.dv-table td { padding: 5px 0; vertical-align: top; }
+        .receipt table.dv-table td.qty, .receipt table.dv-table td.money { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .segment-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px; margin-top: 8px; }
+        .segment-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+        .segment-tag.light { background: #fef3c7; color: #92400e; }
+        .segment-tag.no-light { background: #f4f4f5; color: #52525b; }
+        .min-charge-note { font-size: 11px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 6px 9px; margin-top: 6px; }
+
+        @media print {
+            body.printing-invoice > *:not(#staff-print-root) { visibility: hidden !important; }
+            #staff-print-root { visibility: visible !important; position: fixed !important; inset: 0; background: #fff; z-index: 9999; }
+            #staff-print-root .receipt { width: 80mm; max-width: 80mm; margin: 0; }
+        }
     </style>
 </head>
 <body class="text-zinc-900 min-h-screen">
@@ -1425,7 +1471,7 @@
 </script>
 
 <!-- STAFF INVOICE & SERVICE MODAL -->
-<div id="staffInvoiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-2 sm:p-4">
+<div id="staffInvoiceModal" role="dialog" aria-modal="true" aria-labelledby="staffInvoiceModalTitle" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-2 sm:p-4">
     <div class="bg-white w-full max-w-[1400px] rounded-lg sm:rounded-xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative flex flex-col" style="max-height: 96vh;">
 
         <!-- Header -->
@@ -1435,8 +1481,8 @@
                     <span class="material-symbols-outlined">receipt_long</span>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-[#0b1c30]">Thanh toán &amp; Quản lý Dịch vụ</h1>
-                    <p class="text-xs text-[#5d5d67]">Chọn dịch vụ · Xác nhận thanh toán · In hóa đơn</p>
+                    <h1 id="staffInvoiceModalTitle" class="text-xl font-bold text-[#0b1c30]">Thanh toán &amp; Quản lý Dịch vụ</h1>
+                    <p id="staffInvoiceModalSubtitle" class="text-xs text-[#5d5d67]">Chọn dịch vụ · Xác nhận thanh toán · In hóa đơn</p>
                 </div>
             </div>
             <button onclick="closeStaffInvoiceModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#dce9ff] transition-colors text-[#5d5d67]">
@@ -1672,20 +1718,91 @@
                 </section>
             </div><!-- End of staff-invoice-content -->
 
+            <!-- Payment success state -->
+            <div id="staff-payment-success" class="hidden flex-1 min-h-0 bg-[#f8f9ff] overflow-y-auto relative">
+                <div class="p-4 lg:p-6 success-banner-enter">
+                    <!-- Success banner -->
+                    <div class="max-w-5xl mx-auto mb-5 flex items-start gap-3 flex-wrap">
+                        <div class="success-banner-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined">check</span>
+                        </div>
+                        <div class="flex-1 min-w-[220px]">
+                            <h2 id="staff-success-heading" tabindex="-1" class="text-lg font-bold text-[#0b1c30] outline-none">Thanh toán thành công</h2>
+                            <p id="staff-success-description" class="text-sm text-[#5d5d67] mt-0.5">Hóa đơn đã được ghi nhận. Sân đã chuyển về trạng thái sẵn sàng.</p>
+                        </div>
+                        <span id="staff-success-code" class="badge badge-green text-sm px-3 py-1.5 shrink-0"></span>
+                    </div>
+
+                    <!-- Loading invoice detail -->
+                    <div id="staff-success-body-loading" class="max-w-5xl mx-auto flex flex-col items-center justify-center text-zinc-500 py-10">
+                        <span class="material-symbols-outlined animate-spin text-[28px] ${themeIcon} mb-2">sync</span>
+                        <p class="text-sm font-medium">Đang chuẩn bị hóa đơn...</p>
+                    </div>
+
+                    <!-- Preview failed -->
+                    <div id="staff-success-preview-error" class="hidden max-w-5xl mx-auto p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-xs flex items-center justify-between gap-3 flex-wrap">
+                        <span>Không thể tải bản xem trước hóa đơn.</span>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <button type="button" onclick="retryLoadSuccessInvoice()" class="font-bold underline">Thử lại</button>
+                            <a id="staff-success-fallback-link" href="#" target="_blank" class="font-bold underline">Mở hóa đơn</a>
+                        </div>
+                    </div>
+
+                    <!-- Two-column success body -->
+                    <div id="staff-success-body" class="hidden max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                        <!-- Left: payment info -->
+                        <div class="bg-white rounded-xl border border-[#ccc3d8] p-5">
+                            <h3 class="text-xs text-[#5d5d67] uppercase font-semibold mb-3">Thông tin thanh toán</h3>
+                            <div class="space-y-2.5 text-sm" id="staff-success-info-list"></div>
+                            <div class="mt-4 pt-4 border-t border-[#ccc3d8] space-y-2 text-sm" id="staff-success-summary-list"></div>
+                        </div>
+
+                        <!-- Right: invoice preview -->
+                        <div class="bg-white rounded-xl border border-[#ccc3d8] overflow-hidden">
+                            <div class="px-5 pt-4 pb-3 flex items-center gap-2 border-b border-[#ccc3d8]">
+                                <span class="material-symbols-outlined text-[#5d5d67] text-[18px]">receipt_long</span>
+                                <h3 class="text-xs text-[#5d5d67] uppercase font-semibold">Xem trước hóa đơn</h3>
+                            </div>
+                            <div class="p-4 lg:p-5 flex justify-center">
+                                <div id="staff-print-root" class="receipt" style="border:1px solid #e5e7eb;border-radius:12px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- End of staff-payment-success -->
+
         </div><!-- End of flex body -->
 
         <!-- Footer -->
         <footer class="bg-[#f8f9ff] border-t border-[#ccc3d8] flex flex-wrap justify-between items-center gap-2 px-4 lg:px-8 py-3 lg:py-4 shrink-0">
-            <button type="button" onclick="closeStaffInvoiceModal()" class="bg-[#e3e1ed] text-[#64636d] rounded-lg px-5 py-2 text-sm font-semibold hover:brightness-95 transition-all active:scale-95">
-                Đóng
-            </button>
-            <div class="flex flex-wrap gap-2">
-                <button form="staff-save-services-form" type="submit" class="bg-white border ${themeBorderStrong} ${themeTextMedium} rounded-lg px-6 py-2.5 text-sm font-semibold ${isManager ? 'hover:bg-purple-50' : 'hover:bg-orange-50'} transition-all active:scale-95">
-                    Lưu dịch vụ
+            <!-- EDITING / PROCESSING actions -->
+            <div id="staff-footer-editing" class="contents">
+                <button type="button" onclick="closeStaffInvoiceModal()" class="bg-[#e3e1ed] text-[#64636d] rounded-lg px-5 py-2 text-sm font-semibold hover:brightness-95 transition-all active:scale-95">
+                    Đóng
                 </button>
-                <button form="staff-payment-form" type="submit" id="staff-payment-submit-btn" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
+                <div class="flex flex-wrap gap-2">
+                    <button form="staff-save-services-form" type="submit" class="bg-white border ${themeBorderStrong} ${themeTextMedium} rounded-lg px-6 py-2.5 text-sm font-semibold ${isManager ? 'hover:bg-purple-50' : 'hover:bg-orange-50'} transition-all active:scale-95">
+                        Lưu dịch vụ
+                    </button>
+                    <button form="staff-payment-form" type="submit" id="staff-payment-submit-btn" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span class="material-symbols-outlined text-sm">print</span>
+                        <span id="staff-payment-submit-label">Thanh toán &amp; In hóa đơn</span>
+                    </button>
+                </div>
+            </div>
+            <!-- SUCCESS actions -->
+            <div id="staff-footer-success" class="hidden contents">
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="closeStaffInvoiceModal()" class="bg-[#e3e1ed] text-[#64636d] rounded-lg px-5 py-2 text-sm font-semibold hover:brightness-95 transition-all active:scale-95">
+                        Đóng
+                    </button>
+                    <button type="button" onclick="openStaffSuccessManagementUrl()" class="bg-white border ${themeBorderStrong} ${themeTextMedium} rounded-lg px-5 py-2 text-sm font-semibold ${isManager ? 'hover:bg-purple-50' : 'hover:bg-orange-50'} transition-all active:scale-95">
+                        Quản lý hóa đơn
+                    </button>
+                </div>
+                <button type="button" id="staff-success-print-btn" onclick="printSuccessInvoice()" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95">
                     <span class="material-symbols-outlined text-sm">print</span>
-                    <span id="staff-payment-submit-label">Thanh toán &amp; In hóa đơn</span>
+                    In hóa đơn
                 </button>
             </div>
         </footer>
@@ -1924,6 +2041,41 @@
     let currentStaffCatalogCat = "all";
     let currentStaffCatalogSearch = "";
 
+    // ── Payment modal state machine: EDITING -> PROCESSING -> SUCCESS ──
+    const PaymentModalState = { EDITING: 'EDITING', PROCESSING: 'PROCESSING', SUCCESS: 'SUCCESS' };
+    let currentPaymentModalState = PaymentModalState.EDITING;
+    let staffInvoiceModalTriggerEl = null;
+    let staffSuccessHoaDonId = null;
+    let staffSuccessPrintUrl = '';
+    let staffSuccessManagementUrl = '';
+
+    function setPaymentModalState(state) {
+        currentPaymentModalState = state;
+        const content = document.getElementById('staff-invoice-content');
+        const success = document.getElementById('staff-payment-success');
+        const footerEditing = document.getElementById('staff-footer-editing');
+        const footerSuccess = document.getElementById('staff-footer-success');
+        const btn = document.getElementById('staff-payment-submit-btn');
+        const label = document.getElementById('staff-payment-submit-label');
+        const subtitle = document.getElementById('staffInvoiceModalSubtitle');
+
+        if (state === PaymentModalState.SUCCESS) {
+            content.classList.add('hidden');
+            success.classList.remove('hidden');
+            footerEditing.classList.add('hidden');
+            footerSuccess.classList.remove('hidden');
+            if (subtitle) subtitle.textContent = 'Thanh toán thành công · Xem trước & in hóa đơn';
+        } else {
+            success.classList.add('hidden');
+            footerSuccess.classList.add('hidden');
+            footerEditing.classList.remove('hidden');
+            content.classList.remove('hidden');
+            if (subtitle) subtitle.textContent = 'Chọn dịch vụ · Xác nhận thanh toán · In hóa đơn';
+            if (btn) btn.disabled = (state === PaymentModalState.PROCESSING);
+            if (label) label.textContent = (state === PaymentModalState.PROCESSING) ? 'Đang thanh toán...' : 'Thanh toán & In hóa đơn';
+        }
+    }
+
     function filterStaffCatalog(cat, button) {
         document.querySelectorAll(".pos-tab").forEach(btn => btn.classList.remove("active"));
         button.classList.add("active");
@@ -2035,16 +2187,19 @@
         currentStaffDatSanId = datSanId;
         document.getElementById("staff-save-datsan-id").value = datSanId;
         document.getElementById("staff-pay-datsan-id").value = datSanId;
-        
+
+        staffInvoiceModalTriggerEl = document.activeElement;
+        setPaymentModalState(PaymentModalState.EDITING);
+
         const modal = document.getElementById("staffInvoiceModal");
         const loading = document.getElementById("staff-invoice-loading");
         const content = document.getElementById("staff-invoice-content");
-        
+
         modal.classList.remove("hidden");
         modal.classList.add("flex");
         loading.classList.remove("hidden");
         content.classList.add("hidden");
-        
+
         setTimeout(() => {
             modal.classList.remove("opacity-0");
             modal.querySelector(".bg-white").classList.remove("scale-95");
@@ -2407,84 +2562,429 @@
         return confirm("Xác nhận khách đã thanh toán đơn này? Sân bóng sẽ được giải phóng về trạng thái Sẵn sàng.");
     }
 
-    // Chặn submit form truyền thống, thay bằng fetch POST rồi điều hướng sang trang xem trước/in hóa đơn
-    // sau khi backend xác nhận transaction đã commit thành công.
-    function handleStaffPaymentSubmit(event) {
+    // Chặn submit form truyền thống, thay bằng fetch POST. Sau khi backend xác nhận transaction
+    // đã commit thành công, modal chuyển sang PAYMENT_SUCCESS và hiển thị hóa đơn thật ngay tại chỗ -
+    // không điều hướng sang /staff/hoa-don/in (route đó vẫn được giữ cho in lại / Quản lý hóa đơn / fallback).
+    async function handleStaffPaymentSubmit(event) {
         event.preventDefault();
+        event.stopPropagation();
 
         if (isStaffPaymentSubmitting) return false;
         if (!confirmPaymentSubmit()) return false;
 
-        const form = document.getElementById('staff-payment-form');
         const btn = document.getElementById('staff-payment-submit-btn');
-        const label = document.getElementById('staff-payment-submit-label');
         const errorBox = document.getElementById('staff-payment-error');
 
-        // Chuyển FormData sang URLSearchParams để gửi application/x-www-form-urlencoded.
-        // FormData gửi multipart/form-data mà CheckInServlet không có @MultipartConfig nên
-        // req.getParameter() sẽ trả null cho tất cả tham số, khiến handleProcessPayment không được gọi.
-        const params = new URLSearchParams(new FormData(form));
-
-        // Validate datSanId trước khi gửi — không để backend trả generic 400
-        const datSanId = params.get('datSanId');
-        if (!datSanId || isNaN(parseInt(datSanId, 10))) {
+        const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
+        const datSanId = Number(datSanIdText);
+        const paymentMethod = document.getElementById('staff-pay-method-input')?.value || '';
+        if (!Number.isInteger(datSanId) || datSanId <= 0) {
             if (errorBox) {
                 errorBox.textContent = 'Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.';
                 errorBox.classList.remove('hidden');
             }
-            isStaffPaymentSubmitting = false;
-            if (btn) btn.disabled = false;
-            if (label) label.textContent = 'Thanh toán & In hóa đơn';
+            return false;
+        }
+        if (!['Tiền mặt', 'Chuyển khoản'].includes(paymentMethod)) {
+            if (errorBox) {
+                errorBox.textContent = 'Phương thức thanh toán không hợp lệ.';
+                errorBox.classList.remove('hidden');
+            }
             return false;
         }
 
+        const params = new URLSearchParams();
+        params.set('action', 'processPayment');
+        params.set('datSanId', String(datSanId));
+        params.set('phuongThucThanhToan', paymentMethod);
+        const paymentUrl = '${pageContext.request.contextPath}/staff/checkin';
+
         isStaffPaymentSubmitting = true;
-        if (btn) btn.disabled = true;
-        if (label) label.textContent = 'Đang thanh toán...';
+        setPaymentModalState(PaymentModalState.PROCESSING);
         if (errorBox) errorBox.classList.add('hidden');
 
-        fetch(form.action, {
-            method: 'POST',
-            body: params
-        })
-            .then(res => {
-                const contentType = res.headers.get('content-type') || '';
-                if (contentType.includes('application/json')) {
-                    return res.json().then(data => ({ status: res.status, data }));
-                }
-                return res.text().then(text => ({
-                    status: res.status,
-                    data: { success: false, message: text || ('Máy chủ trả về lỗi HTTP ' + res.status + '.') }
-                }));
-            })
-            .then(({ status, data }) => {
-                if (data.success && data.printUrl) {
-                    // Thanh toán đã commit (hoặc đã thanh toán từ trước) - điều hướng sang trang in, không submit lại.
-                    window.location.assign(data.printUrl);
-                    return;
-                }
-                throw new Error(data.message || ('Thanh toán thất bại (HTTP ' + status + ').'));
-            })
-            .catch(err => {
-                isStaffPaymentSubmitting = false;
-                if (btn) btn.disabled = false;
-                if (label) label.textContent = 'Thanh toán & In hóa đơn';
-                if (errorBox) {
-                    errorBox.textContent = err.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
-                    errorBox.classList.remove('hidden');
-                }
+        try {
+            const response = await fetch(paymentUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
             });
+            const contentType = response.headers.get('content-type') || '';
+            const rawText = await response.text();
+            if (!contentType.includes('application/json')) {
+                console.error('Non-JSON payment response:', {status: response.status, contentType, body: rawText});
+                throw new Error(`Máy chủ trả về HTTP \${response.status} nhưng không có JSON. Vui lòng kiểm tra Network và log Tomcat.`);
+            }
+            let data;
+            try { data = JSON.parse(rawText); }
+            catch (parseError) { throw new Error(`Máy chủ trả về JSON không hợp lệ (HTTP \${response.status}).`); }
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || (`Thanh toán thất bại (HTTP \${response.status}).`));
+            }
+            if (!data.hoaDonId) throw new Error('Thanh toán thành công nhưng máy chủ không trả mã hóa đơn.');
+            isStaffPaymentSubmitting = false;
+            await showPaymentSuccessInvoice({ hoaDonId: data.hoaDonId, printUrl: data.printUrl });
+        } catch (err) {
+            isStaffPaymentSubmitting = false;
+            setPaymentModalState(PaymentModalState.EDITING);
+            if (errorBox) {
+                errorBox.textContent = err.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
+                errorBox.classList.remove('hidden');
+            }
+        }
 
         return false;
     }
 
+    // ── PAYMENT_SUCCESS: hiển thị hóa đơn thật ngay trong modal, không rời trang Check-in ──
+
+    async function showPaymentSuccessInvoice({ hoaDonId, printUrl }) {
+        staffSuccessHoaDonId = hoaDonId;
+        staffSuccessPrintUrl = printUrl || ('${pageContext.request.contextPath}/staff/hoa-don/in?id=' + hoaDonId);
+        staffSuccessManagementUrl = '';
+
+        setPaymentModalState(PaymentModalState.SUCCESS);
+
+        const codeEl = document.getElementById('staff-success-code');
+        const descEl = document.getElementById('staff-success-description');
+        if (codeEl) codeEl.textContent = '#' + hoaDonId;
+        if (descEl) descEl.textContent = 'Hóa đơn #' + hoaDonId + ' đã được ghi nhận. Sân đã chuyển về trạng thái sẵn sàng.';
+
+        const heading = document.getElementById('staff-success-heading');
+        if (heading) heading.focus();
+
+        await loadSuccessInvoiceDetail();
+
+        // Cập nhật card sân / bộ đếm dashboard ở nền, không chặn việc xem/in hóa đơn.
+        pollUpdates();
+    }
+
+    async function loadSuccessInvoiceDetail() {
+        const loadingEl = document.getElementById('staff-success-body-loading');
+        const bodyEl = document.getElementById('staff-success-body');
+        const errorEl = document.getElementById('staff-success-preview-error');
+        loadingEl.classList.remove('hidden');
+        bodyEl.classList.add('hidden');
+        errorEl.classList.add('hidden');
+
+        try {
+            const response = await fetch('${pageContext.request.contextPath}/staff/hoa-don/detail?id=' + staffSuccessHoaDonId, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            });
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error('Máy chủ trả về phản hồi không phải JSON.');
+            }
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Không thể tải chi tiết hóa đơn.');
+            }
+
+            renderStaffSuccessInfo(data.invoice);
+            renderStaffSuccessReceipt(data.invoice);
+            staffSuccessManagementUrl = data.invoice.invoiceManagementUrl || '';
+
+            loadingEl.classList.add('hidden');
+            bodyEl.classList.remove('hidden');
+        } catch (err) {
+            console.error('Không thể tải bản xem trước hóa đơn:', err);
+            loadingEl.classList.add('hidden');
+            errorEl.classList.remove('hidden');
+            const link = document.getElementById('staff-success-fallback-link');
+            if (link) link.href = staffSuccessPrintUrl;
+        }
+    }
+
+    function retryLoadSuccessInvoice() {
+        loadSuccessInvoiceDetail();
+    }
+
+    function openStaffSuccessManagementUrl() {
+        window.location.assign(staffSuccessManagementUrl || '${pageContext.request.contextPath}/staff/checkin');
+    }
+
+    function addStaffInfoRow(container, label, value) {
+        const row = document.createElement('div');
+        row.className = 'flex justify-between gap-3';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'text-[#5d5d67]';
+        labelEl.textContent = label;
+        const valueEl = document.createElement('span');
+        valueEl.className = 'font-semibold text-[#0b1c30] text-right';
+        valueEl.textContent = value;
+        row.appendChild(labelEl);
+        row.appendChild(valueEl);
+        container.appendChild(row);
+    }
+
+    function renderStaffSuccessInfo(invoice) {
+        const infoList = document.getElementById('staff-success-info-list');
+        const summaryList = document.getElementById('staff-success-summary-list');
+        infoList.textContent = '';
+        summaryList.textContent = '';
+
+        addStaffInfoRow(infoList, 'Mã hóa đơn:', invoice.invoiceCode);
+        addStaffInfoRow(infoList, 'Sân:', invoice.courtName);
+        addStaffInfoRow(infoList, 'Loại sân:', invoice.courtTypeName);
+        addStaffInfoRow(infoList, 'Khách hàng:', invoice.customerName);
+        addStaffInfoRow(infoList, 'Chế độ chơi:', invoice.playModeLabel);
+        addStaffInfoRow(infoList, 'Bắt đầu:', invoice.actualStartLabel);
+        addStaffInfoRow(infoList, 'Kết thúc:', invoice.actualEndLabel);
+        addStaffInfoRow(infoList, 'Thời gian thực tế:', invoice.actualDurationLabel);
+        addStaffInfoRow(infoList, 'Thời lượng tính phí:', invoice.chargedDurationLabel);
+        addStaffInfoRow(infoList, 'Phương thức thanh toán:', invoice.paymentMethod || '-');
+        addStaffInfoRow(infoList, 'Nhân viên thu ngân:', invoice.cashierName);
+        addStaffInfoRow(infoList, 'Trạng thái:', invoice.paymentStatus);
+        if (invoice.minimumChargeApplied) {
+            const note = document.createElement('div');
+            note.className = 'text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mt-1';
+            note.textContent = 'Áp dụng thời lượng tính phí tối thiểu ' + invoice.chargedDurationLabel + '.';
+            infoList.appendChild(note);
+        }
+
+        addStaffInfoRow(summaryList, 'Tiền sân:', formatCurrency(invoice.courtAmount));
+        addStaffInfoRow(summaryList, 'Tiền dịch vụ:', formatCurrency(invoice.serviceAmount));
+        if (invoice.discountAmount > 0) addStaffInfoRow(summaryList, 'Giảm giá:', '-' + formatCurrency(invoice.discountAmount));
+        if (invoice.parkingFee > 0) addStaffInfoRow(summaryList, 'Phí gửi xe:', formatCurrency(invoice.parkingFee));
+
+        const totalRow = document.createElement('div');
+        totalRow.className = 'flex justify-between items-center pt-2 mt-1 border-t border-[#ccc3d8]';
+        const totalLabel = document.createElement('span');
+        totalLabel.className = 'text-xs text-[#5d5d67] uppercase font-medium';
+        totalLabel.textContent = 'Tổng thanh toán';
+        const totalValue = document.createElement('span');
+        totalValue.className = 'text-lg font-bold ' + (isManager ? 'text-purple-700' : 'text-orange-700');
+        totalValue.textContent = formatCurrency(invoice.totalAmount);
+        totalRow.appendChild(totalLabel);
+        totalRow.appendChild(totalValue);
+        summaryList.appendChild(totalRow);
+    }
+
+    // Render bill xem trước bằng DOM an toàn (textContent/createElement) - không dùng innerHTML với
+    // dữ liệu từ server. Dùng chung class CSS ".receipt"/".receipt-row"/... với staff/HoaDonPrint.jsp
+    // để bản xem trước trong modal và trang in thật sự giống nhau.
+    function renderStaffSuccessReceipt(invoice) {
+        const root = document.getElementById('staff-print-root');
+        root.textContent = '';
+
+        function el(tag, className, text) {
+            const e = document.createElement(tag);
+            if (className) e.className = className;
+            if (text !== undefined && text !== null) e.textContent = text;
+            return e;
+        }
+        function row(label, value, opts) {
+            opts = opts || {};
+            const r = el('div', 'receipt-row' + (opts.rowClass ? ' ' + opts.rowClass : ''));
+            r.appendChild(el('span', opts.labelClass || 'muted', label));
+            r.appendChild(el('span', 'receipt-money' + (opts.valueClass ? ' ' + opts.valueClass : ''), value));
+            return r;
+        }
+
+        root.appendChild(el('div', 'center bold', 'V-SPORT'));
+        root.appendChild(el('div', 'center bold', invoice.facilityName || ''));
+        if (invoice.facilityAddress) root.appendChild(el('div', 'center small', invoice.facilityAddress));
+        if (invoice.facilityPhone) root.appendChild(el('div', 'center small', 'ĐT: ' + invoice.facilityPhone));
+        const titleEl = el('div', 'center bold ' + (isManager ? 'text-purple-700' : 'text-orange-700'),
+            invoice.invoiceType === 'SPLIT' ? 'HÓA ĐƠN DỊCH VỤ (TÁCH)' : 'HÓA ĐƠN THANH TOÁN');
+        titleEl.style.marginTop = '8px';
+        root.appendChild(titleEl);
+        root.appendChild(el('hr'));
+
+        root.appendChild(row('Mã hóa đơn:', invoice.invoiceCode, { valueClass: 'bold mono' }));
+        root.appendChild(row('Ngày lập:', invoice.paidAtLabel || '-'));
+        root.appendChild(row('Thu ngân:', invoice.cashierName || '-'));
+        root.appendChild(row('PT thanh toán:', invoice.paymentMethod || '-'));
+        root.appendChild(row('Trạng thái:', invoice.paymentStatus || '-', { valueClass: 'bold' }));
+        root.appendChild(el('hr'));
+
+        root.appendChild(row('Sân:', invoice.courtName || '-'));
+        root.appendChild(row('Loại sân:', invoice.courtTypeName || '-'));
+        root.appendChild(row('Khách:', invoice.customerName || '-'));
+        root.appendChild(row('Chế độ:', invoice.playModeLabel || '-'));
+        root.appendChild(row('Bắt đầu:', invoice.actualStartLabel || '-'));
+        root.appendChild(row('Kết thúc:', invoice.actualEndLabel || '-'));
+        root.appendChild(row('Thời gian thực tế:', invoice.actualDurationLabel || '-'));
+        root.appendChild(row('Thời lượng tính phí:', invoice.chargedDurationLabel || '-', { valueClass: 'bold' }));
+        if (invoice.minimumChargeApplied) {
+            root.appendChild(el('div', 'min-charge-note', 'Áp dụng thời lượng tính phí tối thiểu ' + invoice.chargedDurationLabel + '.'));
+        }
+
+        if (invoice.invoiceType !== 'SPLIT') {
+            (invoice.courtSegments || []).forEach(function (seg) {
+                const card = el('div', 'segment-card');
+                const head = el('div', 'receipt-row');
+                const tag = el('span', 'segment-tag ' + (seg.rateType === 'WITH_LIGHT' ? 'light' : 'no-light'));
+                const icon = el('span', 'material-symbols-outlined', seg.rateType === 'WITH_LIGHT' ? 'bolt' : 'bedtime');
+                icon.style.fontSize = '12px';
+                tag.appendChild(icon);
+                tag.appendChild(document.createTextNode(' ' + (seg.rateLabel || '')));
+                head.appendChild(tag);
+                head.appendChild(el('span', 'small', seg.durationMinutes + ' phút'));
+                card.appendChild(head);
+
+                const timeRow = el('div', 'receipt-row small');
+                timeRow.style.marginTop = '4px';
+                const startTime = seg.startAt ? seg.startAt.substring(11, 16) : '';
+                const endTime = seg.endAt ? seg.endAt.substring(11, 16) : '';
+                timeRow.appendChild(el('span', null, startTime + ' - ' + endTime));
+                timeRow.appendChild(el('span', null, formatCurrency(seg.hourlyRate) + '/giờ'));
+                card.appendChild(timeRow);
+
+                const amountRow = el('div', 'receipt-row bold');
+                amountRow.style.marginTop = '4px';
+                amountRow.appendChild(el('span', null, 'Thành tiền đoạn'));
+                amountRow.appendChild(el('span', null, formatCurrency(seg.amount)));
+                card.appendChild(amountRow);
+
+                root.appendChild(card);
+            });
+            const courtRow = row('Thành tiền sân:', formatCurrency(invoice.courtAmount), { valueClass: 'bold' });
+            courtRow.style.marginTop = '10px';
+            root.appendChild(courtRow);
+        }
+        root.appendChild(el('hr'));
+
+        root.appendChild(el('div', 'bold small', 'DỊCH VỤ ĐI KÈM'));
+        const services = invoice.services || [];
+        if (services.length > 0) {
+            const table = el('table', 'dv-table');
+            const thead = el('thead');
+            const headRow = el('tr');
+            headRow.appendChild(el('th', null, 'Tên dịch vụ'));
+            headRow.appendChild(el('th', 'qty', 'SL'));
+            headRow.appendChild(el('th', 'money', 'Đơn giá'));
+            headRow.appendChild(el('th', 'money', 'T.Tiền'));
+            thead.appendChild(headRow);
+            table.appendChild(thead);
+            const tbody = el('tbody');
+            services.forEach(function (dv) {
+                const tr = el('tr');
+                tr.appendChild(el('td', null, dv.name));
+                tr.appendChild(el('td', 'qty', String(dv.quantity)));
+                tr.appendChild(el('td', 'money', formatCurrency(dv.unitPrice).replace(' đ', '')));
+                tr.appendChild(el('td', 'money', formatCurrency(dv.amount).replace(' đ', '')));
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            root.appendChild(table);
+        } else {
+            root.appendChild(el('div', 'small', 'Không có dịch vụ.'));
+        }
+        root.appendChild(el('hr'));
+
+        if (invoice.invoiceType !== 'SPLIT') {
+            root.appendChild(row('Tiền sân:', formatCurrency(invoice.courtAmount)));
+        }
+        root.appendChild(row('Tiền dịch vụ:', formatCurrency(invoice.serviceAmount)));
+        if (invoice.discountAmount > 0) root.appendChild(row('Giảm giá:', '-' + formatCurrency(invoice.discountAmount)));
+        if (invoice.parkingFee > 0) root.appendChild(row('Phí gửi xe:', formatCurrency(invoice.parkingFee)));
+        root.appendChild(el('hr'));
+
+        root.appendChild(row('TỔNG THANH TOÁN:', formatCurrency(invoice.totalAmount), {
+            rowClass: 'total-row', labelClass: '', valueClass: isManager ? 'text-purple-700' : 'text-orange-700'
+        }));
+        root.appendChild(el('hr'));
+        root.appendChild(el('div', 'center small', 'Cảm ơn quý khách đã sử dụng dịch vụ V-SPORT.'));
+    }
+
+    function printSuccessInvoice() {
+        const root = document.getElementById('staff-print-root');
+        if (!root) { window.print(); return; }
+
+        // Modal wrapper dùng class "transform" (Tailwind) nên tạo containing block riêng cho
+        // position:fixed - nếu in tại chỗ, receipt sẽ bị neo/cắt theo khung modal thay vì toàn trang.
+        // Chuyển receipt ra thành con trực tiếp của <body> khi in, rồi trả lại đúng vị trí sau đó.
+        const originalParent = root.parentNode;
+        const originalNextSibling = root.nextSibling;
+        let restored = false;
+
+        function restore() {
+            if (restored) return;
+            restored = true;
+            document.body.classList.remove('printing-invoice');
+            if (originalNextSibling && originalNextSibling.parentNode === originalParent) {
+                originalParent.insertBefore(root, originalNextSibling);
+            } else {
+                originalParent.appendChild(root);
+            }
+        }
+
+        document.body.appendChild(root);
+        document.body.classList.add('printing-invoice');
+
+        window.addEventListener('afterprint', restore, { once: true });
+        window.print();
+        // Fallback nếu trình duyệt không phát afterprint (một số trường hợp hiếm).
+        setTimeout(restore, 3000);
+    }
+
+    // Mọi nút Dừng sân (kể cả card render động) đều đi qua AJAX, không reload dashboard.
+    document.addEventListener('submit', async function (event) {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || form.querySelector('input[name="action"]')?.value !== 'stopOpenSession') return;
+        event.preventDefault();
+        event.stopPropagation();
+        const button = form.querySelector('button[type="submit"]');
+        if (button?.disabled) return;
+        const oldText = button ? button.textContent : '';
+        if (button) { button.disabled = true; button.textContent = 'Đang chốt giờ...'; }
+        try {
+            // Không dùng form.action: form có input name="action" nên form.action bị DOM
+            // clobbering (named-property access che khuất IDL attribute), trả về chính
+            // HTMLInputElement thay vì URL -> fetch gửi "[object HTMLInputElement]".
+            const stopSessionUrl = '${pageContext.request.contextPath}/staff/checkin';
+            const response = await fetch(stopSessionUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+                body: new URLSearchParams(new FormData(form))
+            });
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const text = (await response.text()).slice(0, 300);
+                throw new Error(`HTTP \${response.status}: \${text || 'Phản hồi không phải JSON'}`);
+            }
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || data.error || `HTTP \${response.status}`);
+            const datSanId = data.datSanId || new FormData(form).get('datSanId');
+            openStaffInvoiceModal(datSanId);
+        } catch (error) {
+            const box = document.getElementById('staff-payment-error');
+            if (box) { box.textContent = error.message; box.classList.remove('hidden'); }
+            if (button) { button.disabled = false; button.textContent = oldText; }
+        }
+    });
+
     function closeStaffInvoiceModal() {
+        // Không cho đóng modal khi đang gửi/chờ transaction thanh toán commit.
+        if (currentPaymentModalState === PaymentModalState.PROCESSING) return;
+
+        const wasSuccess = currentPaymentModalState === PaymentModalState.SUCCESS;
         const modal = document.getElementById("staffInvoiceModal");
+        const errorBox = document.getElementById('staff-payment-error');
+        if (errorBox) errorBox.classList.add('hidden');
+
         modal.classList.add("opacity-0");
         modal.querySelector(".bg-white").classList.add("scale-95");
         setTimeout(() => {
             modal.classList.add("hidden");
             modal.classList.remove("flex");
+            setPaymentModalState(PaymentModalState.EDITING);
+
+            if (staffInvoiceModalTriggerEl && typeof staffInvoiceModalTriggerEl.focus === 'function') {
+                staffInvoiceModalTriggerEl.focus();
+            }
+            staffInvoiceModalTriggerEl = null;
+
+            // Sân vừa thanh toán xong cần cập nhật ngay về Sẵn sàng trên dashboard phía sau modal.
+            if (wasSuccess) pollUpdates();
         }, 300);
     }
 
@@ -2979,6 +3479,16 @@
                 first.focus();
             }
         }
+    });
+
+    // Escape-to-close cho modal Thanh toán & Quản lý Dịch vụ - chặn đóng khi đang PROCESSING
+    // (đang chờ transaction thanh toán commit), cho phép đóng ở EDITING và SUCCESS.
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const modal = document.getElementById('staffInvoiceModal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (currentPaymentModalState === PaymentModalState.PROCESSING) return;
+        closeStaffInvoiceModal();
     });
 
     // Prevent double-submit on the walk-in "Mở sân ngay" form
