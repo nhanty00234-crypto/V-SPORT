@@ -1,4 +1,10 @@
 <%@ tag description="Shared server-side pagination footer (item-range text, page-size select, compact numbered pager)" pageEncoding="UTF-8" %>
+<%-- Contract: this tag has no dedicated sortBy/sortDir handling. It only ever
+     forwards "page", "pageSize", and whatever key-value pairs the caller puts
+     into the extraParams map onto every generated link/form. Callers whose
+     list supports sorting MUST include the current sortBy/sortDir values in
+     the extraParams map passed to this tag, or the sort selection will be
+     silently reset to the default on any page click or page-size change. --%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <%@ attribute name="pageResult" required="true" type="org.example.util.PageResult" %>
