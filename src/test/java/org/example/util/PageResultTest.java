@@ -55,4 +55,12 @@ class PageResultTest {
         PageResult<String> result = PageResult.of(new java.util.ArrayList<>(List.of("a")), 1, 20, 1L);
         assertThrows(UnsupportedOperationException.class, () -> result.getItems().add("b"));
     }
+
+    @Test
+    void of_pageBeyondTotalPages_clampsToLastPage() {
+        PageResult<String> result = PageResult.of(List.of("a", "b", "c"), 999, 20, 43L);
+        assertEquals(3, result.getPage());
+        assertEquals(43L, result.getToItem());
+        assertFalse(result.isHasNext());
+    }
 }

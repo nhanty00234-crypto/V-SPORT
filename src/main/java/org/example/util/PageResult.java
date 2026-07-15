@@ -35,16 +35,17 @@ public final class PageResult<T> {
 
     public static <T> PageResult<T> of(List<T> items, int page, int pageSize, long totalItems) {
         int totalPages = totalItems == 0 ? 0 : (int) Math.ceil((double) totalItems / (double) pageSize);
-        long fromItem = totalItems == 0 ? 0L : (long) (page - 1) * (long) pageSize + 1L;
-        long toItem = totalItems == 0 ? 0L : Math.min((long) page * (long) pageSize, totalItems);
-        boolean hasNext = page < totalPages;
+        int clampedPage = PaginationUtils.clampPage(page, totalPages);
+        long fromItem = totalItems == 0 ? 0L : (long) (clampedPage - 1) * (long) pageSize + 1L;
+        long toItem = totalItems == 0 ? 0L : Math.min((long) clampedPage * (long) pageSize, totalItems);
+        boolean hasNext = clampedPage < totalPages;
         return new PageResult<>(
                 Collections.unmodifiableList(items),
-                page,
+                clampedPage,
                 pageSize,
                 totalItems,
                 totalPages,
-                page > 1,
+                clampedPage > 1,
                 hasNext,
                 fromItem,
                 toItem
