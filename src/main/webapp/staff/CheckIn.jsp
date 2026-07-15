@@ -1662,11 +1662,12 @@
                         <input type="hidden" name="phuongThucThanhToan" id="staff-save-paymethod" value="Tiền mặt">
                         <div id="staff-save-hidden-inputs" class="hidden"></div>
                     </form>
-                    <form id="staff-payment-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return confirmPaymentSubmit()">
+                    <form id="staff-payment-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return handleStaffPaymentSubmit(event)">
                         <input type="hidden" name="action" value="processPayment">
                         <input type="hidden" name="datSanId" id="staff-pay-datsan-id">
                         <input type="hidden" name="phuongThucThanhToan" id="staff-pay-method-input" value="Tiền mặt">
                     </form>
+                    <div id="staff-payment-error" class="hidden p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold"></div>
 
                 </section>
             </div><!-- End of staff-invoice-content -->
@@ -1682,9 +1683,9 @@
                 <button form="staff-save-services-form" type="submit" class="bg-white border ${themeBorderStrong} ${themeTextMedium} rounded-lg px-6 py-2.5 text-sm font-semibold ${isManager ? 'hover:bg-purple-50' : 'hover:bg-orange-50'} transition-all active:scale-95">
                     Lưu dịch vụ
                 </button>
-                <button form="staff-payment-form" type="submit" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95">
+                <button form="staff-payment-form" type="submit" id="staff-payment-submit-btn" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
                     <span class="material-symbols-outlined text-sm">print</span>
-                    Thanh toán &amp; In hóa đơn
+                    <span id="staff-payment-submit-label">Thanh toán &amp; In hóa đơn</span>
                 </button>
             </div>
         </footer>
@@ -2392,8 +2393,10 @@
         }
     }
 
+    let isStaffPaymentSubmitting = false;
+
+    // Trả về true nếu người dùng xác nhận muốn tiếp tục thanh toán (dialog xác nhận thuần phía client).
     function confirmPaymentSubmit() {
-        // Kiểm tra split bills chưa thanh toán (cảnh báo phía client, server sẽ chặn cứng)
         const splitSection = document.getElementById('split-bills-section');
         if (splitSection && !splitSection.classList.contains('hidden')) {
             const unpaidBtns = splitSection.querySelectorAll('button[onclick^="paySplitBill"]');
@@ -2402,6 +2405,77 @@
             }
         }
         return confirm("Xác nhận khách đã thanh toán đơn này? Sân bóng sẽ được giải phóng về trạng thái Sẵn sàng.");
+    }
+
+    // Chặn submit form truyền thống, thay bằng fetch POST rồi điều hướng sang trang xem trước/in hóa đơn
+    // sau khi backend xác nhận transaction đã commit thành công.
+    function handleStaffPaymentSubmit(event) {
+        event.preventDefault();
+
+        if (isStaffPaymentSubmitting) return false;
+        if (!confirmPaymentSubmit()) return false;
+
+        const form = document.getElementById('staff-payment-form');
+        const btn = document.getElementById('staff-payment-submit-btn');
+        const label = document.getElementById('staff-payment-submit-label');
+        const errorBox = document.getElementById('staff-payment-error');
+
+        // Chuyển FormData sang URLSearchParams để gửi application/x-www-form-urlencoded.
+        // FormData gửi multipart/form-data mà CheckInServlet không có @MultipartConfig nên
+        // req.getParameter() sẽ trả null cho tất cả tham số, khiến handleProcessPayment không được gọi.
+        const params = new URLSearchParams(new FormData(form));
+
+        // Validate datSanId trước khi gửi — không để backend trả generic 400
+        const datSanId = params.get('datSanId');
+        if (!datSanId || isNaN(parseInt(datSanId, 10))) {
+            if (errorBox) {
+                errorBox.textContent = 'Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.';
+                errorBox.classList.remove('hidden');
+            }
+            isStaffPaymentSubmitting = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Thanh toán & In hóa đơn';
+            return false;
+        }
+
+        isStaffPaymentSubmitting = true;
+        if (btn) btn.disabled = true;
+        if (label) label.textContent = 'Đang thanh toán...';
+        if (errorBox) errorBox.classList.add('hidden');
+
+        fetch(form.action, {
+            method: 'POST',
+            body: params
+        })
+            .then(res => {
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    return res.json().then(data => ({ status: res.status, data }));
+                }
+                return res.text().then(text => ({
+                    status: res.status,
+                    data: { success: false, message: text || ('Máy chủ trả về lỗi HTTP ' + res.status + '.') }
+                }));
+            })
+            .then(({ status, data }) => {
+                if (data.success && data.printUrl) {
+                    // Thanh toán đã commit (hoặc đã thanh toán từ trước) - điều hướng sang trang in, không submit lại.
+                    window.location.assign(data.printUrl);
+                    return;
+                }
+                throw new Error(data.message || ('Thanh toán thất bại (HTTP ' + status + ').'));
+            })
+            .catch(err => {
+                isStaffPaymentSubmitting = false;
+                if (btn) btn.disabled = false;
+                if (label) label.textContent = 'Thanh toán & In hóa đơn';
+                if (errorBox) {
+                    errorBox.textContent = err.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
+                    errorBox.classList.remove('hidden');
+                }
+            });
+
+        return false;
     }
 
     function closeStaffInvoiceModal() {

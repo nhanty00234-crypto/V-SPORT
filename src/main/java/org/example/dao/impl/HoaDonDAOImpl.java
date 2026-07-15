@@ -211,6 +211,43 @@ public class HoaDonDAOImpl implements HoaDonDAO {
     }
 
     @Override
+    public Integer getMainHoaDonIdByDatSanId(int datSanId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            List<Integer> ids = em.createQuery(
+                            "SELECT h.hoaDonId FROM HoaDon h WHERE h.datSanId = :datSanId " +
+                                    "AND (h.loaiHoaDon = 'MAIN' OR h.loaiHoaDon IS NULL) ORDER BY h.hoaDonId DESC",
+                            Integer.class)
+                    .setParameter("datSanId", datSanId)
+                    .setMaxResults(1)
+                    .getResultList();
+            return ids.isEmpty() ? null : ids.get(0);
+        } catch (Exception e) {
+            logger.error("Lỗi khi tra HoaDonID chính theo DatSanID {}: {}", datSanId, e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Integer> getSplitHoaDonIdsByParent(int parentHoaDonId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT h.hoaDonId FROM HoaDon h WHERE h.parentHoaDonId = :parentId AND h.loaiHoaDon = 'SPLIT' ORDER BY h.hoaDonId",
+                            Integer.class)
+                    .setParameter("parentId", parentHoaDonId)
+                    .getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi khi tra danh sách hóa đơn tách theo ParentHoaDonID {}: {}", parentHoaDonId, e.getMessage(), e);
+            return List.of();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public BigDecimal getTotalDoanhThuByCoSo(int coSoId) {
         EntityManager em = JPAUtil.getEntityManager();
         try {

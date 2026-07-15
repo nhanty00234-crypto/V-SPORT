@@ -106,6 +106,12 @@ public class CheckInServlet extends HttpServlet {
         }
 
         String action = req.getParameter("action");
+
+        if ("processPayment".equals(action)) {
+            handleProcessPayment(req, resp, user);
+            return;
+        }
+
         String successMsg = null;
         String errorMsg = null;
 
@@ -277,25 +283,6 @@ public class CheckInServlet extends HttpServlet {
                 int hoaDonId = Integer.parseInt(hoaDonIdStr);
                 checkInDAO.payInvoice(hoaDonId, user.getAccountId(), paymentMethod, user.getCoSoId());
                 successMsg = "Đã thanh toán hóa đơn #" + hoaDonId + " thành công!";
-            } else if ("processPayment".equals(action)) {
-                String datSanIdStr = req.getParameter("datSanId");
-                String paymentMethod = req.getParameter("phuongThucThanhToan");
-                if (datSanIdStr == null || datSanIdStr.isEmpty()) {
-                    throw new CheckInException("Thiếu ID đơn đặt sân để thanh toán.");
-                }
-                if (paymentMethod == null || paymentMethod.isEmpty()) {
-                    paymentMethod = "Tiền mặt";
-                }
-                int datSanId = Integer.parseInt(datSanIdStr);
-
-                // Chặn checkout nếu còn split bill chưa thanh toán
-                if (checkInDAO.hasUnpaidSplitBills(datSanId)) {
-                    throw new CheckInException("Vui lòng thanh toán toàn bộ hóa đơn tách dịch vụ trước khi kết thúc ca chơi.");
-                }
-
-                LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
-                lichDAO.thanhToanHoaDonDatSan(datSanId, user.getAccountId(), paymentMethod);
-                successMsg = "Đã hoàn thành thanh toán hóa đơn cho đơn đặt sân #" + datSanId + "!";
             } else if ("applyEarlyCheckoutAdjustment".equals(action)) {
                 if (user.getRoleId() != 1 && user.getRoleId() != 2) {
                     throw new CheckInException("Chỉ quản lý hoặc admin mới được thực hiện giảm trừ trả sân sớm.");
@@ -356,6 +343,79 @@ public class CheckInServlet extends HttpServlet {
 
         // Forward láº¡i trang JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
+    }
+
+    /**
+     * Xử lý thanh toán hóa đơn (action=processPayment) và trả JSON {success, message, hoaDonId, printUrl}
+     * để frontend điều hướng sang trang xem trước/in hóa đơn sau khi transaction đã commit thành công.
+     * Idempotent: nếu hóa đơn đã ở trạng thái "Đã thanh toán" (double-click, reload), không xử lý tiền
+     * lần hai mà chỉ trả về HoaDonID hiện có để in lại.
+     */
+    private void handleProcessPayment(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+        try {
+            String datSanIdStr = req.getParameter("datSanId");
+            String paymentMethod = req.getParameter("phuongThucThanhToan");
+            if (datSanIdStr == null || datSanIdStr.isEmpty()) {
+                throw new CheckInException("Thiếu ID đơn đặt sân để thanh toán.");
+            }
+            if (paymentMethod == null || paymentMethod.isEmpty()) {
+                paymentMethod = "Tiền mặt";
+            }
+            int datSanId = Integer.parseInt(datSanIdStr);
+
+            // Chặn checkout nếu còn split bill chưa thanh toán
+            if (checkInDAO.hasUnpaidSplitBills(datSanId)) {
+                throw new CheckInException("Vui lòng thanh toán toàn bộ hóa đơn tách dịch vụ trước khi kết thúc ca chơi.");
+            }
+
+            LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
+            org.example.dao.HoaDonDAO hoaDonDAO = new org.example.dao.impl.HoaDonDAOImpl();
+
+            boolean alreadyPaid = false;
+            try {
+                lichDAO.thanhToanHoaDonDatSan(datSanId, user.getAccountId(), paymentMethod);
+            } catch (Exception payEx) {
+                if (payEx.getMessage() != null && payEx.getMessage().contains("đã được thanh toán trước đó")) {
+                    // Không thanh toán lần hai, không trừ kho lại - chỉ trả về hóa đơn hiện có để in lại.
+                    alreadyPaid = true;
+                } else {
+                    throw payEx;
+                }
+            }
+
+            Integer hoaDonId = hoaDonDAO.getMainHoaDonIdByDatSanId(datSanId);
+            if (hoaDonId == null) {
+                throw new CheckInException("Không tìm thấy hóa đơn để in sau khi thanh toán.");
+            }
+
+            String printUrl = req.getContextPath() + "/staff/hoa-don/in?id=" + hoaDonId;
+
+            json.addProperty("success", true);
+            json.addProperty("message", alreadyPaid
+                    ? "Hóa đơn đã được thanh toán trước đó."
+                    : "Đã hoàn thành thanh toán hóa đơn cho đơn đặt sân #" + datSanId + "!");
+            json.addProperty("hoaDonId", hoaDonId);
+            json.addProperty("printUrl", printUrl);
+            resp.getWriter().write(json.toString());
+        } catch (NumberFormatException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            json.addProperty("success", false);
+            json.addProperty("message", "Lỗi định dạng dữ liệu đầu vào.");
+            resp.getWriter().write(json.toString());
+        } catch (CheckInException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            json.addProperty("success", false);
+            json.addProperty("message", e.getMessage());
+            resp.getWriter().write(json.toString());
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            json.addProperty("success", false);
+            json.addProperty("message", "Lỗi hệ thống bất ngờ: " + e.getMessage());
+            resp.getWriter().write(json.toString());
+        }
     }
 
     private void handleGetInvoiceDetails(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)

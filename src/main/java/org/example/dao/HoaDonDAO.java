@@ -24,4 +24,16 @@ public interface HoaDonDAO {
     long countOrdersTodayByCoSo(int coSoId);
     List<HoaDon> getRecentInvoicesByCoSo(int coSoId, int limit);
     BigDecimal getTotalDoanhThuByCoSo(int coSoId);
+
+    /**
+     * Tra HoaDonID của hóa đơn MAIN (không phải bill tách dịch vụ) theo DatSanID.
+     * Trả về null nếu chưa có hóa đơn nào được khởi tạo cho đơn đặt sân này.
+     */
+    Integer getMainHoaDonIdByDatSanId(int datSanId);
+
+    /**
+     * Danh sách HoaDonID của các hóa đơn tách dịch vụ (LoaiHoaDon = 'SPLIT') có ParentHoaDonID
+     * trỏ về hóa đơn chính này. Dùng để hiển thị liên kết "hóa đơn tách" trên bill in.
+     */
+    List<Integer> getSplitHoaDonIdsByParent(int parentHoaDonId);
 }

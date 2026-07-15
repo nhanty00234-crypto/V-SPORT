@@ -212,6 +212,10 @@
                           class="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600 transition-all" title="Xem chi tiết">
                     <span class="material-symbols-outlined text-[16px]">visibility</span>
                   </button>
+                  <a href="${pageContext.request.contextPath}/staff/hoa-don/in?id=${hd.hoaDonId}" target="_blank"
+                     class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-600 transition-all" title="In lại hóa đơn">
+                    <span class="material-symbols-outlined text-[16px]">print</span>
+                  </a>
                 </div>
               </td>
             </tr>
