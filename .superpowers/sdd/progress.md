@@ -17,7 +17,7 @@ Branch: feature/pagination-phase1-foundation (base commit: 277b5e0)
 - [x] Task 2: PageResult<T> (commits a5f7e43..28424a9, review clean)
 - [x] Task 3: PaginationUtils (commit 7e68bbf, review clean)
 - [x] Task 4: Shared JSP pagination tag file (commits a4f2ab1..6c86a87, review clean after XSS fix)
-- [ ] Task 5: Full Phase 1 verification
+- [x] Task 5: Full Phase 1 verification (mvn test clean for the 3 targeted classes, mvn package succeeds, WAR contains all 4 new classes/tag file, zero pre-existing files modified)
 
 ## Minor findings deferred to final review
 - Task 1: PaginationRequest.getOffset() computes (page-1) in int before cast to long (residual overflow edge, unreachable via package-private of()). Minor.
