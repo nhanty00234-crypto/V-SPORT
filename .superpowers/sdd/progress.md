@@ -16,7 +16,7 @@ Branch: feature/pagination-phase1-foundation (base commit: 277b5e0)
 - [x] Task 1: PaginationRequest (commits 08fa46d..fc04a02, review clean)
 - [x] Task 2: PageResult<T> (commits a5f7e43..28424a9, review clean)
 - [x] Task 3: PaginationUtils (commit 7e68bbf, review clean)
-- [ ] Task 4: Shared JSP pagination tag file
+- [x] Task 4: Shared JSP pagination tag file (commits a4f2ab1..6c86a87, review clean after XSS fix)
 - [ ] Task 5: Full Phase 1 verification
 
 ## Minor findings deferred to final review
@@ -39,3 +39,17 @@ Consequence: Task 4's JSP tag-file "Manual verification" step (live browser
 smoke test) cannot be performed from this environment. It is replaced with a
 careful static/manual code review of the tag file's JSTL syntax instead. The
 user must do the real browser smoke test on their own machine before merging.
+
+## Update: live JSP verification IS possible in this sandbox after all
+Task 4's re-review subagent successfully stood up an embedded Tomcat
+(tomcat-embed-jasper 10.1.54, pulled from the project's own ~/.m2 cache)
+against a scratch copy of pagination.tag + PageResult on the classpath, and
+issued real HTTP requests to confirm both JSP compilation and correct
+escaped rendering. This does NOT require the app's SQL Server DB (which is
+what's actually blocked by TLS in this sandbox) — it only requires
+tomcat-embed-jasper + jstl jars, both already present as transitive/direct
+Maven dependencies. Future Phase 2/3 JSP verification steps that don't need
+live DB data (e.g. syntax/rendering checks of JSTL logic in isolation) can
+reuse this embedded-Jasper technique instead of being skipped outright.
+Full end-to-end app verification (real data, real DB queries, real login)
+still requires the user's own Windows/IntelliJ machine.
