@@ -15,10 +15,12 @@ Branch: feature/pagination-phase1-foundation (base commit: 277b5e0)
 ## Tasks
 - [x] Task 1: PaginationRequest (commits 08fa46d..fc04a02, review clean)
 - [x] Task 2: PageResult<T> (commits a5f7e43..28424a9, review clean)
-- [ ] Task 3: PaginationUtils
+- [x] Task 3: PaginationUtils (commit 7e68bbf, review clean)
 - [ ] Task 4: Shared JSP pagination tag file
 - [ ] Task 5: Full Phase 1 verification
 
 ## Minor findings deferred to final review
 - Task 1: PaginationRequest.getOffset() computes (page-1) in int before cast to long (residual overflow edge, unreachable via package-private of()). Minor.
 - Task 1: PaginationRequestTest.java has minor blank-line style drift from SecretMaskUtilTest.java convention. Minor.
+- Task 3: PaginationUtils.normalizePageSize's Math.min(allowed, MAX_PAGE_SIZE) branch is dead code (ALLOWED_PAGE_SIZES tops out at 50 < 100). Minor, brief-authoring artifact.
+- Task 3: 4-arg PaginationUtils.of(page,pageSize,sortBy,sortDir) overload has no direct caller/test yet. Minor, may be used by later phases.
