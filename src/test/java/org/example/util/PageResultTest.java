@@ -37,7 +37,7 @@ class PageResultTest {
 
     @Test
     void of_firstPage_hasPreviousFalse() {
-        PageResult<String> result = PageResult.of(List.of("a"), 1, 20, 5L);
+        PageResult<String> result = PageResult.of(List.of("a"), 1, 20, 25L);
         assertFalse(result.isHasPrevious());
         assertTrue(result.isHasNext());
     }

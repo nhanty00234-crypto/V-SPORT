@@ -37,7 +37,7 @@ public final class PageResult<T> {
         int totalPages = totalItems == 0 ? 0 : (int) Math.ceil((double) totalItems / (double) pageSize);
         long fromItem = totalItems == 0 ? 0L : (long) (page - 1) * (long) pageSize + 1L;
         long toItem = totalItems == 0 ? 0L : Math.min((long) page * (long) pageSize, totalItems);
-        boolean hasNext = totalItems > (long) (page - 1) * (long) pageSize + (long) items.size();
+        boolean hasNext = page < totalPages;
         return new PageResult<>(
                 Collections.unmodifiableList(items),
                 page,
