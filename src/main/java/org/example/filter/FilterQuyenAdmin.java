@@ -24,10 +24,11 @@ public class FilterQuyenAdmin implements Filter {
         HttpSession session = httpRequest.getSession(false);
 
         boolean loggedIn = (session != null && session.getAttribute("user") != null);
+        String path = httpRequest.getServletPath();
+        boolean isJsonApiRoute = path.contains("/chi-nhanh/payos");
 
         if (loggedIn) {
             TaiKhoan user = (TaiKhoan) session.getAttribute("user");
-            String path = httpRequest.getServletPath();
             if (path.contains("/quan-ly-san") || path.contains("/QuanLySan.jsp")) {
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Quản trị viên không có quyền quản lý sân (Chức năng này dành riêng cho Quản lý cơ sở).");
                 return;
@@ -35,12 +36,23 @@ public class FilterQuyenAdmin implements Filter {
             // Chỉ Role 1 (Admin) mới được vào vùng này
             if (user.getRoleId() == 1) {
                 chain.doFilter(request, response);
+            } else if (isJsonApiRoute) {
+                writeForbiddenJson(httpResponse);
             } else {
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền Admin để truy cập chức năng này.");
             }
+        } else if (isJsonApiRoute) {
+            writeForbiddenJson(httpResponse);
         } else {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/dangnhap?admin=true");
         }
+    }
+
+    private void writeForbiddenJson(HttpServletResponse resp) throws IOException {
+        resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        resp.setContentType("application/json;charset=UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().write("{\"success\":false,\"message\":\"Bạn không có quyền thực hiện thao tác này.\"}");
     }
 
     @Override

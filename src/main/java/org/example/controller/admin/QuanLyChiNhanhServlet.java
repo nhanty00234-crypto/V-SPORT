@@ -10,8 +10,11 @@ import org.apache.logging.log4j.Logger;
 import org.example.service.AuditLogService;
 import org.example.dao.AdminTrashDAO;
 import org.example.dao.CoSoDAO;
+import org.example.dao.PayOSConfigDAO;
 import org.example.dao.impl.AdminTrashDAOImpl;
 import org.example.dao.impl.CoSoDAOImpl;
+import org.example.dao.impl.PayOSConfigDAOImpl;
+import org.example.dto.payment.PayOSConfigState;
 import org.example.model.CoSo;
 import org.example.model.TaiKhoan;
 import org.example.service.admin.FacilityTrashService;
@@ -38,6 +41,7 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(QuanLyChiNhanhServlet.class);
     private CoSoDAO chiNhanhDAO = new CoSoDAOImpl();
+    private final PayOSConfigDAO payOSConfigDAO = new PayOSConfigDAOImpl();
     private final AdminTrashDAO adminTrashDAO = new AdminTrashDAOImpl();
     private final OwnerApprovalService ownerApprovalService = new OwnerApprovalService();
     private final FacilityTrashService facilityTrashService = new FacilityTrashService();
@@ -96,7 +100,9 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             }
 
             List<CoSo> dsChiNhanh = chiNhanhDAO.getAllCoSo();
+            Map<Integer, PayOSConfigState> payosStatusMap = payOSConfigDAO.findStatusForAllCoSo();
             req.setAttribute("dsChiNhanh", dsChiNhanh);
+            req.setAttribute("payosStatusMap", payosStatusMap);
             req.getRequestDispatcher("/admin/QuanLyChiNhanh.jsp").forward(req, resp);
         } else if (path.equals("/admin/chi-nhanh/sua")) {
             int id = Integer.parseInt(req.getParameter("id"));

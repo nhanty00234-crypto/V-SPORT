@@ -6,7 +6,11 @@
 <head>
     <title>Quản lý Mở Sân / Check-in | V-SPORT</title>
     <jsp:include page="/staff/common/staff_head.jsp" />
-    
+    <!-- Render QR PayOS thật (chuỗi payload EMV từ PayOS) thành ảnh QR ngay trên trình duyệt - asset
+         tự host trong project (davidshimjs/qrcodejs, MIT), không gửi dữ liệu giao dịch ra dịch vụ
+         ảnh QR bên thứ ba nào, không phụ thuộc CDN ngoài khi chạy local/offline. -->
+    <script src="${pageContext.request.contextPath}/assets/js/qrcode.min.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         .card { 
@@ -233,6 +237,27 @@
         .segment-tag.light { background: #fef3c7; color: #92400e; }
         .segment-tag.no-light { background: #f4f4f5; color: #52525b; }
         .min-charge-note { font-size: 11px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 6px 9px; margin-top: 6px; }
+
+        /* QR PayOS: khung cố định để không nhảy layout giữa loading/hiển thị/lỗi; hỗ trợ cả 3 kiểu
+           render mà thư viện QR có thể tạo ra tùy trình duyệt (canvas phổ biến nhất, table dự phòng). */
+        .payos-qr-container {
+            width: 232px;
+            min-height: 232px;
+            display: grid;
+            place-items: center;
+            background: #fff;
+            border: 1px solid #e4e4e7;
+            border-radius: 10px;
+        }
+        .payos-qr-container canvas,
+        .payos-qr-container img,
+        .payos-qr-container svg,
+        .payos-qr-container table {
+            display: block;
+            width: 220px;
+            height: 220px;
+            max-width: 100%;
+        }
 
         @media print {
             body.printing-invoice > *:not(#staff-print-root) { visibility: hidden !important; }
@@ -1584,11 +1609,17 @@
                             <button type="button" id="lbl-pay-cash" class="seg-btn active" role="radio" aria-checked="true" onclick="changeStaffPayMethod('Tiền mặt')">
                                 <span class="material-symbols-outlined text-[16px]">payments</span> Tiền mặt
                             </button>
-                            <button type="button" id="lbl-pay-transfer" class="seg-btn" role="radio" aria-checked="false" onclick="changeStaffPayMethod('Chuyển khoản')">
-                                <span class="material-symbols-outlined text-[16px]">qr_code_2</span> Chuyển khoản
+                            <button type="button" id="lbl-pay-transfer" class="seg-btn" role="radio" aria-checked="false" onclick="changeStaffPayMethod('PayOS')">
+                                <span class="material-symbols-outlined text-[16px]">qr_code_2</span> PayOS
                             </button>
                         </div>
-                        <p class="text-[11px] text-[#5d5d67] mt-1.5">Chuyển khoản được ghi nhận thủ công bởi nhân viên, hệ thống chưa tự động xác minh ngân hàng.</p>
+                        <p class="text-[11px] text-[#5d5d67] mt-1.5">Quét mã QR hoặc mở trang thanh toán PayOS. Hệ thống tự động xác nhận khi khách thanh toán xong.</p>
+                    </div>
+
+                    <!-- Cơ sở chưa cấu hình tài khoản ngân hàng -->
+                    <div id="bank-not-configured-banner" class="hidden shrink-0 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-2">
+                        <p>Cơ sở chưa cấu hình thông tin chuyển khoản.</p>
+                        <button type="button" onclick="document.getElementById('bank-not-configured-banner').classList.add('hidden'); changeStaffPayMethod(PaymentMethod.CASH);" class="font-bold underline">Chọn tiền mặt</button>
                     </div>
 
                     <!-- Cảnh báo trả sân sớm - luôn hiển thị vì cần thao tác, không ẩn trong disclosure -->
@@ -1714,6 +1745,96 @@
                 </div>
             </div><!-- End of staff-payment-success -->
 
+            <!-- Bank transfer awaiting state -->
+            <div id="staff-bank-transfer-panel" class="hidden flex-1 min-h-0 bg-[#f8f9ff] overflow-y-auto">
+                <div class="p-4 lg:p-6 max-w-3xl mx-auto">
+                    <div class="bg-white rounded-xl border ${themeBorderStrong} overflow-hidden">
+                        <div class="px-5 pt-4 pb-3 border-b ${themeBorder}">
+                            <h3 class="text-sm font-bold text-[#0b1c30]">Chuyển khoản</h3>
+                            <p class="text-xs text-[#5d5d67] mt-0.5">Quét mã hoặc nhập thông tin bên dưới</p>
+                        </div>
+                        <div class="p-5 flex flex-col lg:flex-row gap-5">
+                            <div class="lg:w-2/5 shrink-0" id="bank-transfer-customer-info"></div>
+                            <div class="lg:flex-1 min-w-0">
+                                <div class="${themeBgLight} rounded-lg p-4 flex flex-col items-center gap-2">
+                                    <img id="bank-transfer-qr" src="" alt="QR chuyển khoản" class="w-40 h-40 object-contain bg-white rounded-lg border ${themeBorder}"
+                                         onerror="this.style.display='none'; document.getElementById('bank-transfer-qr-error').classList.remove('hidden');">
+                                    <p id="bank-transfer-qr-error" class="hidden text-[11px] text-amber-700 text-center">Không tải được QR. Dùng thông tin bên dưới để chuyển khoản thủ công.</p>
+                                </div>
+                                <div class="mt-3 space-y-1.5 text-sm">
+                                    <div class="flex justify-between items-center gap-2">
+                                        <span class="text-[#5d5d67]">Ngân hàng</span>
+                                        <span class="font-semibold text-[#0b1c30]" id="bank-transfer-bank-name">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2">
+                                        <span class="text-[#5d5d67]">Chủ tài khoản</span>
+                                        <span class="font-semibold text-[#0b1c30]" id="bank-transfer-account-name">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2">
+                                        <span class="text-[#5d5d67]">Số tài khoản</span>
+                                        <span class="flex items-center gap-2">
+                                            <span class="font-semibold text-[#0b1c30]" id="bank-transfer-account-number">-</span>
+                                            <button type="button" aria-label="Sao chép số tài khoản" onclick="copyBankTransferField('bank-transfer-account-number', this)" class="text-[11px] font-semibold ${themeTextMedium} underline">Copy</button>
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2 pt-2 mt-1 border-t ${themeBorder}">
+                                        <span class="text-[#5d5d67]">Số tiền</span>
+                                        <span class="flex items-center gap-2">
+                                            <span class="font-bold text-base ${themeTextMedium}" id="bank-transfer-amount">0 đ</span>
+                                            <button type="button" aria-label="Sao chép số tiền" onclick="copyBankTransferField('bank-transfer-amount', this)" class="text-[11px] font-semibold ${themeTextMedium} underline">Copy</button>
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2">
+                                        <span class="text-[#5d5d67]">Nội dung</span>
+                                        <span class="flex items-center gap-2">
+                                            <span class="font-semibold text-[#0b1c30]" id="bank-transfer-content">-</span>
+                                            <button type="button" aria-label="Sao chép nội dung chuyển khoản" onclick="copyBankTransferField('bank-transfer-content', this)" class="text-[11px] font-semibold ${themeTextMedium} underline">Copy</button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0" aria-hidden="true"></span>
+                                    <span class="text-xs font-semibold text-amber-800">Chờ khách chuyển khoản</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- End of staff-bank-transfer-panel -->
+
+            <!-- PayOS awaiting state -->
+            <div id="staff-payos-panel" class="hidden flex-1 min-h-0 bg-[#f8f9ff] overflow-y-auto">
+                <div class="p-4 lg:p-6 max-w-md mx-auto">
+                    <div class="bg-white rounded-xl border ${themeBorderStrong} overflow-hidden">
+                        <div class="px-5 pt-4 pb-3 border-b ${themeBorder}">
+                            <h3 class="text-sm font-bold text-[#0b1c30]">Thanh toán PayOS</h3>
+                            <p class="text-xs text-[#5d5d67] mt-0.5">Quét mã QR hoặc mở trang thanh toán</p>
+                        </div>
+                        <div class="p-5 flex flex-col items-center gap-3">
+                            <div id="staff-payos-qr-container" class="payos-qr-container"></div>
+                            <div id="staff-payos-qr-fallback" class="hidden flex flex-col items-center gap-1.5 text-center">
+                                <p class="text-[11px] text-amber-700">Không thể hiển thị mã QR trên thiết bị này.<br>Bạn vẫn có thể mở trang thanh toán PayOS.</p>
+                                <button type="button" onclick="retryRenderPayOSQr()" class="text-[11px] font-semibold ${themeTextMedium} underline">Thử tải lại mã QR</button>
+                            </div>
+                            <div class="w-full space-y-1.5 text-sm">
+                                <div class="flex justify-between items-center gap-2 pb-2 border-b ${themeBorder}">
+                                    <span class="text-[#5d5d67]">Số tiền</span>
+                                    <span class="font-bold text-base ${themeTextMedium}" id="staff-payos-amount">0 đ</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="text-[#5d5d67]">Nội dung</span>
+                                    <span class="font-semibold text-[#0b1c30]" id="staff-payos-description">-</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="text-[#5d5d67]">Trạng thái</span>
+                                    <span class="font-semibold text-amber-700" id="staff-payos-status-label">Chờ thanh toán</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- End of staff-payos-panel -->
+
         </div><!-- End of flex body -->
 
         <!-- Footer -->
@@ -1726,6 +1847,26 @@
                 <button type="button" id="staff-payment-submit-btn" onclick="handlePrimaryPaymentAction()" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
                     <span class="material-symbols-outlined text-sm" id="staff-payment-submit-icon">save</span>
                     <span id="staff-payment-submit-label">Lưu dịch vụ</span>
+                </button>
+            </div>
+            <!-- AWAITING_TRANSFER / VERIFYING_TRANSFER actions -->
+            <div id="staff-footer-awaiting-transfer" class="hidden contents">
+                <button type="button" onclick="handleChangePaymentMethodFromAwaiting()" class="bg-[#e3e1ed] text-[#64636d] rounded-lg px-5 py-2 text-sm font-semibold hover:brightness-95 transition-all active:scale-95">
+                    Đổi phương thức
+                </button>
+                <button type="button" id="staff-bank-transfer-confirm-btn" onclick="openBankTransferConfirmDialog()" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
+                    <span class="material-symbols-outlined text-sm">verified</span>
+                    <span id="staff-bank-transfer-confirm-label">Xác nhận đã nhận tiền</span>
+                </button>
+            </div>
+            <!-- AWAITING_PAYOS / VERIFYING_PAYOS actions -->
+            <div id="staff-footer-awaiting-payos" class="hidden contents">
+                <button type="button" onclick="handleChangePaymentMethodFromAwaitingPayOS()" class="bg-[#e3e1ed] text-[#64636d] rounded-lg px-5 py-2 text-sm font-semibold hover:brightness-95 transition-all active:scale-95">
+                    Đổi phương thức
+                </button>
+                <button type="button" onclick="openPayOSCheckoutUrl()" class="${themeBg} ${themeBgHover} text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">open_in_new</span>
+                    Mở trang PayOS
                 </button>
             </div>
             <!-- SUCCESS actions -->
@@ -1979,46 +2120,91 @@
     let currentStaffCatalogCat = "all";
     let currentStaffCatalogSearch = "";
 
-    // ── Payment modal state machine: EDITING -> PROCESSING -> SUCCESS ──
-    const PaymentModalState = { EDITING: 'EDITING', PROCESSING: 'PROCESSING', SUCCESS: 'SUCCESS' };
+    // ── Payment modal state machine: EDITING -> PROCESSING -> [AWAITING_TRANSFER -> VERIFYING_TRANSFER | CREATING_PAYOS -> AWAITING_PAYOS -> VERIFYING_PAYOS ->] SUCCESS ──
+    const PaymentModalState = {
+        EDITING: 'EDITING', PROCESSING: 'PROCESSING',
+        AWAITING_TRANSFER: 'AWAITING_TRANSFER', VERIFYING_TRANSFER: 'VERIFYING_TRANSFER',
+        CREATING_PAYOS: 'CREATING_PAYOS', AWAITING_PAYOS: 'AWAITING_PAYOS', VERIFYING_PAYOS: 'VERIFYING_PAYOS',
+        SUCCESS: 'SUCCESS'
+    };
+    const PaymentMethod = { CASH: 'Tiền mặt', BANK_TRANSFER: 'Chuyển khoản', PAYOS: 'PayOS' };
     let currentPaymentModalState = PaymentModalState.EDITING;
     let staffInvoiceModalTriggerEl = null;
     let staffSuccessHoaDonId = null;
     let staffSuccessPrintUrl = '';
     let staffSuccessManagementUrl = '';
+    let currentInvoiceDetailData = null;
+    let currentBankTransferPayment = null;
+    let currentPayOSPayment = null;
+    let payosPollTimer = null;
 
     function setPaymentModalState(state) {
         currentPaymentModalState = state;
         const content = document.getElementById('staff-invoice-content');
         const success = document.getElementById('staff-payment-success');
+        const bankPanel = document.getElementById('staff-bank-transfer-panel');
+        const payosPanel = document.getElementById('staff-payos-panel');
         const footerEditing = document.getElementById('staff-footer-editing');
         const footerSuccess = document.getElementById('staff-footer-success');
+        const footerAwaiting = document.getElementById('staff-footer-awaiting-transfer');
+        const footerPayos = document.getElementById('staff-footer-awaiting-payos');
         const btn = document.getElementById('staff-payment-submit-btn');
         const icon = document.getElementById('staff-payment-submit-icon');
         const label = document.getElementById('staff-payment-submit-label');
         const subtitle = document.getElementById('staffInvoiceModalSubtitle');
+        const confirmBtn = document.getElementById('staff-bank-transfer-confirm-btn');
+        const confirmLabel = document.getElementById('staff-bank-transfer-confirm-label');
         const isCheckout = typeof currentActionMode !== 'undefined' && currentActionMode === PaymentActionMode.CHECKOUT;
+        const isBankTransferMethod = document.getElementById('staff-pay-method-input')?.value === PaymentMethod.BANK_TRANSFER;
+        const isPayOSMethod = document.getElementById('staff-pay-method-input')?.value === PaymentMethod.PAYOS;
+
+        content.classList.add('hidden');
+        success.classList.add('hidden');
+        if (bankPanel) bankPanel.classList.add('hidden');
+        if (payosPanel) payosPanel.classList.add('hidden');
+        footerEditing.classList.add('hidden');
+        footerSuccess.classList.add('hidden');
+        if (footerAwaiting) footerAwaiting.classList.add('hidden');
+        if (footerPayos) footerPayos.classList.add('hidden');
 
         if (state === PaymentModalState.SUCCESS) {
-            content.classList.add('hidden');
             success.classList.remove('hidden');
-            footerEditing.classList.add('hidden');
             footerSuccess.classList.remove('hidden');
             if (subtitle) subtitle.textContent = 'Thanh toán thành công · Xem trước & in hóa đơn';
-        } else {
-            success.classList.add('hidden');
-            footerSuccess.classList.add('hidden');
-            footerEditing.classList.remove('hidden');
-            content.classList.remove('hidden');
-            if (subtitle) subtitle.textContent = 'Thêm dịch vụ hoặc hoàn tất thanh toán';
-            if (btn) btn.disabled = (state === PaymentModalState.PROCESSING);
-            if (icon) icon.textContent = isCheckout ? 'payments' : 'save';
-            if (label) {
-                if (state === PaymentModalState.PROCESSING) {
-                    label.textContent = isCheckout ? 'Đang thanh toán...' : 'Đang lưu...';
-                } else {
-                    label.textContent = isCheckout ? 'Thanh toán' : 'Lưu dịch vụ';
-                }
+            return;
+        }
+
+        if (state === PaymentModalState.AWAITING_TRANSFER || state === PaymentModalState.VERIFYING_TRANSFER) {
+            if (bankPanel) bankPanel.classList.remove('hidden');
+            if (footerAwaiting) footerAwaiting.classList.remove('hidden');
+            if (subtitle) subtitle.textContent = 'Chờ khách chuyển khoản';
+            if (confirmBtn) confirmBtn.disabled = (state === PaymentModalState.VERIFYING_TRANSFER);
+            if (confirmLabel) confirmLabel.textContent = state === PaymentModalState.VERIFYING_TRANSFER ? 'Đang xác nhận...' : 'Xác nhận đã nhận tiền';
+            return;
+        }
+
+        if (state === PaymentModalState.AWAITING_PAYOS || state === PaymentModalState.VERIFYING_PAYOS) {
+            if (payosPanel) payosPanel.classList.remove('hidden');
+            if (footerPayos) footerPayos.classList.remove('hidden');
+            if (subtitle) subtitle.textContent = 'Chờ thanh toán PayOS';
+            const statusLabel = document.getElementById('staff-payos-status-label');
+            if (statusLabel) statusLabel.textContent = state === PaymentModalState.VERIFYING_PAYOS ? 'Đang xác nhận...' : 'Chờ thanh toán';
+            return;
+        }
+
+        // EDITING / PROCESSING / CREATING_PAYOS
+        content.classList.remove('hidden');
+        footerEditing.classList.remove('hidden');
+        if (subtitle) subtitle.textContent = 'Thêm dịch vụ hoặc hoàn tất thanh toán';
+        if (btn) btn.disabled = (state === PaymentModalState.PROCESSING || state === PaymentModalState.CREATING_PAYOS);
+        if (icon) icon.textContent = isCheckout ? ((isBankTransferMethod || isPayOSMethod) ? 'qr_code_2' : 'payments') : 'save';
+        if (label) {
+            if (state === PaymentModalState.PROCESSING || state === PaymentModalState.CREATING_PAYOS) {
+                label.textContent = isCheckout ? (isPayOSMethod ? 'Đang tạo mã...' : isBankTransferMethod ? 'Đang khởi tạo...' : 'Đang thanh toán...') : 'Đang lưu...';
+            } else if (isCheckout) {
+                label.textContent = isPayOSMethod ? 'Tạo mã thanh toán' : isBankTransferMethod ? 'Tiếp tục chuyển khoản' : 'Thanh toán';
+            } else {
+                label.textContent = 'Lưu dịch vụ';
             }
         }
     }
@@ -2134,6 +2320,11 @@
         currentStaffDatSanId = datSanId;
         document.getElementById("staff-save-datsan-id").value = datSanId;
         document.getElementById("staff-pay-datsan-id").value = datSanId;
+        currentBankTransferPayment = null;
+        currentPayOSPayment = null;
+        stopPayOSPolling();
+        currentInvoiceDetailData = null;
+        document.getElementById('bank-not-configured-banner')?.classList.add('hidden');
 
         staffInvoiceModalTriggerEl = document.activeElement;
         setPaymentModalState(PaymentModalState.EDITING);
@@ -2160,8 +2351,33 @@
                 if (searchInput) searchInput.focus();
             })
             .catch(err => {
-                alert('Lỗi khi tải chi tiết hóa đơn: ' + err.message);
-                closeStaffInvoiceModal();
+                loading.classList.add("hidden");
+                // Hiển thị inline error state — không dùng alert(), không đóng modal
+                let errorContainer = document.getElementById('staff-invoice-load-error');
+                if (!errorContainer) {
+                    errorContainer = document.createElement('div');
+                    errorContainer.id = 'staff-invoice-load-error';
+                    errorContainer.className = 'flex flex-col items-center justify-center gap-4 py-12 px-6 text-center';
+                    modal.querySelector('.bg-white').appendChild(errorContainer);
+                }
+                errorContainer.innerHTML = `
+                    <span class="material-symbols-outlined text-red-400 text-5xl">error_outline</span>
+                    <div>
+                        <p class="font-bold text-zinc-800 text-sm">Không thể tải thông tin thanh toán</p>
+                        <p class="text-xs text-zinc-500 mt-1">Dữ liệu ca chơi chưa được tải. Vui lòng thử lại.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" onclick="document.getElementById('staff-invoice-load-error').remove();openStaffInvoiceModal(${datSanId})"
+                            class="px-4 py-2 rounded-lg bg-violet-600 text-white text-xs font-bold hover:bg-violet-700 transition-colors">
+                            Thử lại
+                        </button>
+                        <button type="button" onclick="closeStaffInvoiceModal()"
+                            class="px-4 py-2 rounded-lg border border-zinc-200 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">
+                            Đóng
+                        </button>
+                    </div>
+                `;
+                errorContainer.classList.remove('hidden');
             });
     }
 
@@ -2174,12 +2390,14 @@
             const text = await res.text();
             try {
                 const errData = JSON.parse(text);
-                throw new Error(errData.error || 'Lỗi server: ' + res.status);
+                // Nhận cả format cũ {error:...} và mới {success:false, message:...}
+                const msg = errData.message || errData.error || ('Lỗi server: ' + res.status);
+                throw new Error(msg);
             } catch (parseErr) {
                 if (parseErr.message && !parseErr.message.startsWith('Lỗi server')) {
-                    throw new Error('Lỗi server (' + res.status + '). Vui lòng tải lại trang.');
+                    throw parseErr;
                 }
-                throw parseErr;
+                throw new Error('Lỗi server (' + res.status + '). Vui lòng tải lại trang.');
             }
         }
         const data = await res.json();
@@ -2294,7 +2512,16 @@
         }
 
         renderStaffOrderedTable();
+        currentInvoiceDetailData = data;
         setPaymentModalState(currentPaymentModalState); // refresh nhãn nút chính theo actionMode hiện tại
+
+        // Mở lại modal cho hóa đơn đang chờ chuyển khoản (đóng rồi mở lại): tái dựng panel AWAITING_TRANSFER
+        // thay vì EDITING - initBankTransfer ở backend là idempotent, tái dùng nguyên reference/amount cũ.
+        if (opts.isInitialLoad && data.trangThaiThanhToan === 'Chờ xác nhận chuyển khoản') {
+            setActionMode(PaymentActionMode.CHECKOUT);
+            changeStaffPayMethod(PaymentMethod.BANK_TRANSFER);
+            handleInitBankTransfer();
+        }
         return data;
     }
 
@@ -2385,11 +2612,18 @@
         toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
     }
 
-    // Một handler duy nhất cho nút hành động chính - hành vi rẽ theo actionMode.
+    // Một handler duy nhất cho nút hành động chính - hành vi rẽ theo actionMode + phương thức thanh toán.
     function handlePrimaryPaymentAction() {
         if (currentPaymentModalState !== PaymentModalState.EDITING) return;
         if (currentActionMode === PaymentActionMode.ADD_SERVICES) {
             handleSaveServicesAction();
+            return;
+        }
+        const method = document.getElementById('staff-pay-method-input')?.value || '';
+        if (method === PaymentMethod.PAYOS) {
+            handleCreatePayOSPayment();
+        } else if (method === PaymentMethod.BANK_TRANSFER) {
+            handleInitBankTransfer();
         } else {
             handleStaffPaymentSubmit();
         }
@@ -2587,12 +2821,14 @@
         const lblTransfer = document.getElementById("lbl-pay-transfer");
 
         if (lblCash && lblTransfer) {
-            const isCash = method === 'Tiền mặt';
+            const isCash = method === PaymentMethod.CASH;
             lblCash.classList.toggle("active", isCash);
             lblCash.setAttribute('aria-checked', String(isCash));
             lblTransfer.classList.toggle("active", !isCash);
             lblTransfer.setAttribute('aria-checked', String(!isCash));
         }
+        document.getElementById('bank-not-configured-banner')?.classList.add('hidden');
+        if (currentPaymentModalState === PaymentModalState.EDITING) setPaymentModalState(PaymentModalState.EDITING);
     }
 
     let isStaffPaymentSubmitting = false;
@@ -2671,6 +2907,457 @@
         }
     }
 
+    // ── Chuyển khoản: EDITING -> (initBankTransfer) -> AWAITING_TRANSFER -> (confirmBankTransfer) -> SUCCESS ──
+
+    // Chọn "Chuyển khoản" rồi bấm nút chính chỉ khởi tạo yêu cầu chuyển khoản (chốt tiền sân, chuyển
+    // hóa đơn sang chờ xác nhận) - KHÔNG đánh dấu đã thanh toán, KHÔNG giải phóng sân, KHÔNG đóng modal.
+    async function handleInitBankTransfer() {
+        if (isStaffPaymentSubmitting || currentPaymentModalState !== PaymentModalState.EDITING) return;
+
+        const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
+        const datSanId = Number(datSanIdText);
+        if (!Number.isInteger(datSanId) || datSanId <= 0) {
+            showStaffPaymentError('Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.');
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.set('action', 'initBankTransfer');
+        params.set('datSanId', String(datSanId));
+
+        isStaffPaymentSubmitting = true;
+        setPaymentModalState(PaymentModalState.PROCESSING);
+        document.getElementById('staff-payment-error')?.classList.add('hidden');
+
+        try {
+            const response = await fetch('${pageContext.request.contextPath}/staff/checkin', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            const rawText = await response.text();
+            let data;
+            try { data = JSON.parse(rawText); }
+            catch (parseError) { throw new Error(`Máy chủ trả về JSON không hợp lệ (HTTP \${response.status}).`); }
+
+            isStaffPaymentSubmitting = false;
+
+            if (!response.ok || !data.success) {
+                if (data.code === 'BANK_NOT_CONFIGURED') {
+                    document.getElementById('bank-not-configured-banner')?.classList.remove('hidden');
+                    setPaymentModalState(PaymentModalState.EDITING);
+                    return;
+                }
+                throw new Error(data.message || 'Không thể khởi tạo yêu cầu chuyển khoản.');
+            }
+
+            currentBankTransferPayment = data.payment;
+            renderBankTransferPanel(data.payment);
+            setPaymentModalState(PaymentModalState.AWAITING_TRANSFER);
+        } catch (err) {
+            isStaffPaymentSubmitting = false;
+            setPaymentModalState(PaymentModalState.EDITING);
+            showStaffPaymentError(err.message || 'Đã có lỗi xảy ra, vui lòng thử lại.');
+        }
+    }
+
+    function renderBankTransferPanel(payment) {
+        const qr = document.getElementById('bank-transfer-qr');
+        const qrError = document.getElementById('bank-transfer-qr-error');
+        if (qr) {
+            qr.style.display = '';
+            qrError?.classList.add('hidden');
+            qr.src = payment.qrImageUrl || '';
+        }
+        const bankNameEl = document.getElementById('bank-transfer-bank-name');
+        if (bankNameEl) bankNameEl.textContent = payment.bankName || '-';
+        const accNameEl = document.getElementById('bank-transfer-account-name');
+        if (accNameEl) accNameEl.textContent = payment.accountName || '-';
+        const accNoEl = document.getElementById('bank-transfer-account-number');
+        if (accNoEl) { accNoEl.textContent = payment.accountNumber || '-'; accNoEl.dataset.raw = payment.accountNumber || ''; }
+        const amtEl = document.getElementById('bank-transfer-amount');
+        if (amtEl) { amtEl.textContent = formatCurrency(payment.amount); amtEl.dataset.raw = String(Math.round(payment.amount || 0)); }
+        const contentEl = document.getElementById('bank-transfer-content');
+        if (contentEl) { contentEl.textContent = payment.transferContent || '-'; contentEl.dataset.raw = payment.transferContent || ''; }
+        renderBankTransferCustomerInfo(payment, currentInvoiceDetailData || {});
+    }
+
+    function renderBankTransferCustomerInfo(payment, invoiceData) {
+        const el = document.getElementById('bank-transfer-customer-info');
+        if (!el) return;
+        el.textContent = '';
+
+        function row(label, value, strong) {
+            const r = document.createElement('div');
+            r.className = 'flex justify-between items-baseline gap-3 py-1.5';
+            const l = document.createElement('span');
+            l.className = 'text-[#5d5d67] text-xs';
+            l.textContent = label;
+            const v = document.createElement('span');
+            v.className = strong ? ('text-sm font-bold text-right ' + themeTextMedium) : 'text-sm font-semibold text-[#0b1c30] text-right';
+            v.textContent = value;
+            r.appendChild(l);
+            r.appendChild(v);
+            return r;
+        }
+
+        if (payment.bookingSource === 'PREBOOKED') {
+            const badge = document.createElement('span');
+            badge.className = 'inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md ' + (isManager ? 'bg-purple-50 text-purple-700' : 'bg-orange-50 text-orange-700');
+            badge.textContent = 'Đặt trước · Trả sau';
+            el.appendChild(badge);
+            const wrap = document.createElement('div');
+            wrap.className = 'mt-2 divide-y divide-[#EAEAEA]';
+            wrap.appendChild(row('Mã đặt sân', '#' + (payment.bookingCode || '-')));
+            wrap.appendChild(row('Khách hàng', payment.customerName || '-'));
+            if (payment.customerPhone) wrap.appendChild(row('Số điện thoại', payment.customerPhone));
+            wrap.appendChild(row('Tổng hóa đơn', formatCurrency(invoiceData.tongThanhToan)));
+            wrap.appendChild(row('Đã cọc', formatCurrency(payment.paidAmount || 0)));
+            wrap.appendChild(row('Còn phải chuyển', formatCurrency(payment.amount), true));
+            el.appendChild(wrap);
+        } else {
+            const wrap = document.createElement('div');
+            wrap.className = 'divide-y divide-[#EAEAEA]';
+            wrap.appendChild(row('Khách hàng', 'Khách vãng lai'));
+            wrap.appendChild(row('Tổng hóa đơn', formatCurrency(invoiceData.tongThanhToan)));
+            wrap.appendChild(row('Đã thanh toán', formatCurrency(payment.paidAmount || 0)));
+            wrap.appendChild(row('Cần chuyển', formatCurrency(payment.amount), true));
+            el.appendChild(wrap);
+        }
+    }
+
+    // Copy nhỏ, không dùng alert - đổi nhãn nút tạm thời sang "Đã sao chép".
+    function copyBankTransferField(elId, btnEl) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const text = el.dataset.raw || el.textContent || '';
+        if (!navigator.clipboard) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const original = btnEl.textContent;
+            btnEl.textContent = 'Đã sao chép';
+            btnEl.disabled = true;
+            clearTimeout(btnEl._copyResetTimer);
+            btnEl._copyResetTimer = setTimeout(() => { btnEl.textContent = original; btnEl.disabled = false; }, 1500);
+        }).catch(() => { showStaffToast('Không thể sao chép, vui lòng chọn thủ công.'); });
+    }
+
+    // ── PayOS: EDITING -> (createPayOSPayment) -> AWAITING_PAYOS -> (polling) -> SUCCESS ──
+
+    async function handleCreatePayOSPayment() {
+        if (isStaffPaymentSubmitting || currentPaymentModalState !== PaymentModalState.EDITING) return;
+
+        const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
+        const datSanId = Number(datSanIdText);
+        if (!Number.isInteger(datSanId) || datSanId <= 0) {
+            showStaffPaymentError('Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.');
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.set('action', 'createPayOSPayment');
+        params.set('datSanId', String(datSanId));
+
+        isStaffPaymentSubmitting = true;
+        setPaymentModalState(PaymentModalState.CREATING_PAYOS);
+        document.getElementById('staff-payment-error')?.classList.add('hidden');
+
+        try {
+            const response = await fetch('${pageContext.request.contextPath}/staff/checkin', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            const rawText = await response.text();
+            let data;
+            try { data = JSON.parse(rawText); }
+            catch (parseError) { throw new Error(`Máy chủ trả về JSON không hợp lệ (HTTP \${response.status}).`); }
+
+            isStaffPaymentSubmitting = false;
+
+            if (!response.ok || !data.success) {
+                if (data.code === 'PAYOS_NOT_CONFIGURED') {
+                    showStaffPaymentError('Cơ sở chưa cấu hình đầy đủ PayOS. Vui lòng chọn Tiền mặt hoặc liên hệ Admin.');
+                    setPaymentModalState(PaymentModalState.EDITING);
+                    return;
+                }
+                throw new Error(data.message || 'Không thể tạo mã thanh toán PayOS.');
+            }
+
+            currentPayOSPayment = data.payment;
+            renderPayOSPanel(data.payment);
+            setPaymentModalState(PaymentModalState.AWAITING_PAYOS);
+            startPayOSPolling();
+        } catch (err) {
+            isStaffPaymentSubmitting = false;
+            setPaymentModalState(PaymentModalState.EDITING);
+            showStaffPaymentError(err.message || 'Đã có lỗi xảy ra, vui lòng thử lại.');
+        }
+    }
+
+    function renderPayOSPanel(payment) {
+        const amtEl = document.getElementById('staff-payos-amount');
+        if (amtEl) amtEl.textContent = formatCurrency(payment.amount);
+        const descEl = document.getElementById('staff-payos-description');
+        if (descEl) descEl.textContent = payment.description || '-';
+        renderPayOSQrCode(payment.qrCode);
+    }
+
+    // PayOS trả qrCode dưới dạng chuỗi payload EMV (không phải URL ảnh) trong đa số trường hợp,
+    // nhưng hỗ trợ luôn URL/data URL để không vỡ nếu SDK/response thay đổi kiểu dữ liệu sau này.
+    function detectPayOSQrType(qrCode) {
+        if (!qrCode || !String(qrCode).trim()) return 'EMPTY';
+        const value = String(qrCode).trim();
+        if (value.startsWith('data:image/') || value.startsWith('http://') || value.startsWith('https://')) {
+            return 'IMAGE_SOURCE';
+        }
+        if (value.startsWith('000201') || /^[0-9A-Za-z]+$/.test(value)) {
+            return 'EMV_TEXT';
+        }
+        return 'UNKNOWN';
+    }
+
+    // Render QR PayOS thật vào #staff-payos-qr-container. Luôn xóa nội dung cũ trước khi render để
+    // không chồng nhiều QR khi gọi lại (reopen modal / thử tải lại). Không dùng innerHTML với dữ liệu
+    // server - chỉ tạo phần tử qua DOM API hoặc để thư viện QR tự vẽ vào container.
+    function renderPayOSQrCode(qrCode) {
+        const container = document.getElementById('staff-payos-qr-container');
+        const fallback = document.getElementById('staff-payos-qr-fallback');
+        if (!container) return;
+
+        container.replaceChildren();
+        fallback?.classList.add('hidden');
+
+        const type = detectPayOSQrType(qrCode);
+
+        if (type === 'IMAGE_SOURCE') {
+            const img = document.createElement('img');
+            img.alt = 'Mã QR thanh toán PayOS';
+            img.decoding = 'async';
+            img.onerror = () => { container.replaceChildren(); fallback?.classList.remove('hidden'); };
+            img.src = String(qrCode).trim();
+            container.appendChild(img);
+            return;
+        }
+
+        if (type === 'EMV_TEXT') {
+            if (typeof window.QRCode !== 'function') {
+                fallback?.classList.remove('hidden');
+                return;
+            }
+            try {
+                new window.QRCode(container, {
+                    text: String(qrCode).trim(),
+                    width: 220,
+                    height: 220,
+                    correctLevel: window.QRCode.CorrectLevel.M
+                });
+            } catch (err) {
+                container.replaceChildren();
+                fallback?.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // EMPTY hoặc UNKNOWN - không đoán, chỉ hiển thị fallback gọn kèm nút mở trang PayOS.
+        fallback?.classList.remove('hidden');
+    }
+
+    // "Thử tải lại mã QR" - chỉ render lại từ dữ liệu attempt đang có, KHÔNG gọi backend tạo payment mới.
+    function retryRenderPayOSQr() {
+        if (!currentPayOSPayment) return;
+        renderPayOSQrCode(currentPayOSPayment.qrCode);
+    }
+
+    function openPayOSCheckoutUrl() {
+        if (!currentPayOSPayment || !currentPayOSPayment.checkoutUrl) return;
+        window.open(currentPayOSPayment.checkoutUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    // "Đổi phương thức" trong lúc chờ PayOS: KHÔNG hủy payment link ở backend (khách vẫn có thể
+    // trả qua link/QR cũ) - chỉ dừng polling và quay UI về EDITING + Tiền mặt. Nếu bấm lại PayOS,
+    // backend tự tái sử dụng đúng attempt PENDING này (mục VII).
+    function handleChangePaymentMethodFromAwaitingPayOS() {
+        if (currentPaymentModalState !== PaymentModalState.AWAITING_PAYOS) return;
+        stopPayOSPolling();
+        currentPayOSPayment = null;
+        setPaymentModalState(PaymentModalState.EDITING);
+        changeStaffPayMethod(PaymentMethod.CASH);
+    }
+
+    function startPayOSPolling() {
+        stopPayOSPolling();
+        payosPollTimer = setInterval(pollPayOSStatus, 4000);
+    }
+
+    function stopPayOSPolling() {
+        if (payosPollTimer) { clearInterval(payosPollTimer); payosPollTimer = null; }
+    }
+
+    async function pollPayOSStatus() {
+        if (!currentPayOSPayment || currentPaymentModalState !== PaymentModalState.AWAITING_PAYOS) {
+            stopPayOSPolling();
+            return;
+        }
+        try {
+            const res = await fetch('${pageContext.request.contextPath}/staff/checkin?action=getPayOSPaymentStatus&orderCode=' + currentPayOSPayment.orderCode, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (!data.success) return; // lỗi tạm thời - thử lại ở lần poll kế tiếp, không dừng polling
+
+            if (data.status === 'PAID') {
+                stopPayOSPolling();
+                setPaymentModalState(PaymentModalState.VERIFYING_PAYOS);
+                await showPaymentSuccessInvoice({ hoaDonId: data.hoaDonId, printUrl: data.printUrl });
+            } else if (data.status === 'CANCELLED' || data.status === 'EXPIRED') {
+                stopPayOSPolling();
+                currentPayOSPayment = null;
+                setPaymentModalState(PaymentModalState.EDITING);
+                showStaffPaymentError(data.status === 'CANCELLED'
+                        ? 'Giao dịch PayOS đã bị hủy. Vui lòng tạo mã mới hoặc chọn phương thức khác.'
+                        : 'Mã thanh toán PayOS đã hết hạn. Vui lòng tạo mã mới.');
+            }
+            // PENDING: không làm gì, chờ lần poll kế tiếp
+        } catch (err) {
+            // Lỗi mạng tạm thời khi polling - im lặng thử lại lần sau, không làm gián đoạn nhân viên.
+        }
+    }
+
+    // "Đổi phương thức" khi đang chờ chuyển khoản: đưa hóa đơn về Chưa thanh toán, quay lại EDITING + Tiền mặt.
+    // Không tạo/xóa invoice, không đổi amount, không đụng sân - best-effort (UI luôn reset về EDITING).
+    async function handleChangePaymentMethodFromAwaiting() {
+        if (currentPaymentModalState !== PaymentModalState.AWAITING_TRANSFER) return;
+        const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
+        const datSanId = Number(datSanIdText);
+        try {
+            if (Number.isInteger(datSanId) && datSanId > 0) {
+                const params = new URLSearchParams();
+                params.set('action', 'cancelBankTransfer');
+                params.set('datSanId', String(datSanId));
+                await fetch('${pageContext.request.contextPath}/staff/checkin', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: params.toString()
+                });
+            }
+        } catch (err) {
+            console.error('Không thể đổi phương thức thanh toán:', err);
+        } finally {
+            currentBankTransferPayment = null;
+            setPaymentModalState(PaymentModalState.EDITING);
+            changeStaffPayMethod(PaymentMethod.CASH);
+        }
+    }
+
+    // ── Dialog xác nhận "Xác nhận đã nhận tiền" (modal-trong-modal, không dùng confirm() mặc định) ──
+
+    function openBankTransferConfirmDialog() {
+        if (currentPaymentModalState !== PaymentModalState.AWAITING_TRANSFER || !currentBankTransferPayment) return;
+
+        const summary = document.getElementById('bank-transfer-confirm-summary');
+        summary.textContent = '';
+        function row(label, value) {
+            const r = document.createElement('div');
+            r.className = 'flex justify-between gap-3';
+            const l = document.createElement('span'); l.className = 'text-zinc-500'; l.textContent = label;
+            const v = document.createElement('span'); v.className = 'font-bold text-zinc-900 text-right'; v.textContent = value;
+            r.appendChild(l); r.appendChild(v);
+            return r;
+        }
+        const p = currentBankTransferPayment;
+        summary.appendChild(row('Hóa đơn', '#' + p.hoaDonId));
+        summary.appendChild(row('Khách hàng', p.bookingSource === 'PREBOOKED' ? (p.customerName || '-') : 'Khách vãng lai'));
+        summary.appendChild(row('Nội dung', p.transferContent));
+        summary.appendChild(row('Số tiền', formatCurrency(p.amount)));
+
+        const codeInput = document.getElementById('bank-transfer-transaction-code');
+        if (codeInput) codeInput.value = '';
+        document.getElementById('bank-transfer-confirm-error')?.classList.add('hidden');
+        const submitBtn = document.getElementById('bank-transfer-confirm-submit-btn');
+        if (submitBtn) submitBtn.disabled = false;
+
+        const modal = document.getElementById('bankTransferConfirmModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.querySelector('.bg-white').classList.remove('scale-95');
+        }, 10);
+    }
+
+    function closeBankTransferConfirmDialog() {
+        const modal = document.getElementById('bankTransferConfirmModal');
+        modal.classList.add('opacity-0');
+        modal.querySelector('.bg-white').classList.add('scale-95');
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+    }
+
+    let isBankTransferConfirming = false;
+
+    async function submitBankTransferConfirm() {
+        if (isBankTransferConfirming || !currentBankTransferPayment) return;
+        const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
+        const datSanId = Number(datSanIdText);
+        const transactionCode = document.getElementById('bank-transfer-transaction-code')?.value?.trim() || '';
+        const errorBox = document.getElementById('bank-transfer-confirm-error');
+        errorBox?.classList.add('hidden');
+
+        isBankTransferConfirming = true;
+        const submitBtn = document.getElementById('bank-transfer-confirm-submit-btn');
+        if (submitBtn) submitBtn.disabled = true;
+        setPaymentModalState(PaymentModalState.VERIFYING_TRANSFER);
+
+        try {
+            const params = new URLSearchParams();
+            params.set('action', 'confirmBankTransfer');
+            params.set('datSanId', String(datSanId));
+            params.set('paymentReference', currentBankTransferPayment.transferContent);
+            if (transactionCode) params.set('transactionCode', transactionCode);
+
+            const response = await fetch('${pageContext.request.contextPath}/staff/checkin', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            const rawText = await response.text();
+            let data;
+            try { data = JSON.parse(rawText); }
+            catch (parseError) { throw new Error(`Máy chủ trả về JSON không hợp lệ (HTTP \${response.status}).`); }
+            if (!response.ok || !data.success) throw new Error(data.message || 'Xác nhận chuyển khoản không thành công.');
+            if (!data.hoaDonId) throw new Error('Xác nhận thành công nhưng máy chủ không trả mã hóa đơn.');
+
+            isBankTransferConfirming = false;
+            closeBankTransferConfirmDialog();
+            await showPaymentSuccessInvoice({ hoaDonId: data.hoaDonId, printUrl: data.printUrl });
+        } catch (err) {
+            isBankTransferConfirming = false;
+            if (submitBtn) submitBtn.disabled = false;
+            setPaymentModalState(PaymentModalState.AWAITING_TRANSFER);
+            if (errorBox) { errorBox.textContent = err.message || 'Đã có lỗi xảy ra, vui lòng thử lại.'; errorBox.classList.remove('hidden'); }
+        }
+    }
+
     // ── PAYMENT_SUCCESS: hiển thị hóa đơn thật ngay trong modal, không rời trang Check-in ──
 
     async function showPaymentSuccessInvoice({ hoaDonId, printUrl }) {
@@ -2683,7 +3370,13 @@
         const codeEl = document.getElementById('staff-success-code');
         const descEl = document.getElementById('staff-success-description');
         if (codeEl) codeEl.textContent = '#' + hoaDonId;
-        if (descEl) descEl.textContent = 'Hóa đơn #' + hoaDonId + ' đã được ghi nhận. Sân đã chuyển về trạng thái sẵn sàng.';
+        if (descEl) {
+            const bookingSource = currentInvoiceDetailData ? currentInvoiceDetailData.bookingSource : null;
+            const bookingCode = currentInvoiceDetailData ? currentInvoiceDetailData.bookingCode : null;
+            descEl.textContent = (bookingSource === 'PREBOOKED')
+                ? ('Đã thu đủ số tiền còn lại của đặt sân #' + (bookingCode || hoaDonId) + '.')
+                : 'Hóa đơn đã được thanh toán và sân đã chuyển về trạng thái sẵn sàng.';
+        }
 
         const heading = document.getElementById('staff-success-heading');
         if (heading) heading.focus();
@@ -2769,6 +3462,11 @@
         addStaffInfoRow(infoList, 'Thời gian thực tế:', invoice.actualDurationLabel);
         addStaffInfoRow(infoList, 'Thời lượng tính phí:', invoice.chargedDurationLabel);
         addStaffInfoRow(infoList, 'Phương thức thanh toán:', invoice.paymentMethod || '-');
+        if (invoice.paymentMethod === 'Chuyển khoản') {
+            if (invoice.transactionCode) addStaffInfoRow(infoList, 'Mã giao dịch:', invoice.transactionCode);
+            if (invoice.confirmedByName) addStaffInfoRow(infoList, 'NV xác nhận:', invoice.confirmedByName);
+            if (invoice.confirmedAtLabel) addStaffInfoRow(infoList, 'TG xác nhận:', invoice.confirmedAtLabel);
+        }
         addStaffInfoRow(infoList, 'Nhân viên thu ngân:', invoice.cashierName);
         addStaffInfoRow(infoList, 'Trạng thái:', invoice.paymentStatus);
         if (invoice.minimumChargeApplied) {
@@ -2831,6 +3529,11 @@
         root.appendChild(row('Ngày lập:', invoice.paidAtLabel || '-'));
         root.appendChild(row('Thu ngân:', invoice.cashierName || '-'));
         root.appendChild(row('PT thanh toán:', invoice.paymentMethod || '-'));
+        if (invoice.paymentMethod === 'Chuyển khoản') {
+            if (invoice.transactionCode) root.appendChild(row('Mã giao dịch:', invoice.transactionCode, { valueClass: 'mono' }));
+            if (invoice.confirmedByName) root.appendChild(row('NV xác nhận:', invoice.confirmedByName));
+            if (invoice.confirmedAtLabel) root.appendChild(row('TG xác nhận:', invoice.confirmedAtLabel));
+        }
         root.appendChild(row('Trạng thái:', invoice.paymentStatus || '-', { valueClass: 'bold' }));
         root.appendChild(el('hr'));
 
@@ -2994,8 +3697,12 @@
 
     function closeStaffInvoiceModal() {
         // Không cho đóng modal khi đang gửi/chờ transaction thanh toán commit.
-        if (currentPaymentModalState === PaymentModalState.PROCESSING) return;
+        if (currentPaymentModalState === PaymentModalState.PROCESSING
+            || currentPaymentModalState === PaymentModalState.VERIFYING_TRANSFER
+            || currentPaymentModalState === PaymentModalState.CREATING_PAYOS
+            || currentPaymentModalState === PaymentModalState.VERIFYING_PAYOS) return;
 
+        stopPayOSPolling();
         const wasSuccess = currentPaymentModalState === PaymentModalState.SUCCESS;
         const modal = document.getElementById("staffInvoiceModal");
         const errorBox = document.getElementById('staff-payment-error');
@@ -3517,8 +4224,18 @@
         if (e.key !== 'Escape') return;
         const modal = document.getElementById('staffInvoiceModal');
         if (!modal || modal.classList.contains('hidden')) return;
-        if (currentPaymentModalState === PaymentModalState.PROCESSING) return;
+        if (currentPaymentModalState === PaymentModalState.PROCESSING
+            || currentPaymentModalState === PaymentModalState.CREATING_PAYOS
+            || currentPaymentModalState === PaymentModalState.VERIFYING_PAYOS) return;
         closeStaffInvoiceModal();
+    });
+
+    // Dừng polling PayOS khi rời trang hoặc chuyển tab ẩn - tránh gọi API PayOS không cần thiết
+    // khi nhân viên không còn nhìn màn hình; tiếp tục polling khi quay lại tab nếu vẫn đang chờ.
+    window.addEventListener('beforeunload', () => { stopPayOSPolling(); });
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopPayOSPolling();
+        else if (currentPaymentModalState === PaymentModalState.AWAITING_PAYOS) startPayOSPolling();
     });
 
     // Prevent double-submit on the walk-in "Mở sân ngay" form
@@ -3703,7 +4420,7 @@
 
     // Initialize subtotal and event listener for product stock check
     document.addEventListener("DOMContentLoaded", () => {
-        updateWalkinSubtotal();
+        calculateDrawerPrice();
         
         const prodSelect = document.getElementById("staff-product-select");
         const addBtn = document.getElementById("staff-add-service-btn");
@@ -3786,6 +4503,31 @@
     </div>
 </div>
 </c:if>
+
+<!-- Bank Transfer Confirm Dialog (xác nhận đã nhận tiền - modal-trong-modal, không dùng confirm() mặc định) -->
+<div id="bankTransferConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+    <div class="bg-white w-full max-w-[420px] rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative flex flex-col p-6">
+        <div class="flex justify-between items-center pb-3 border-b border-zinc-150 mb-4">
+            <h3 class="text-base font-extrabold text-zinc-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-600">verified</span>
+                Xác nhận đã nhận tiền
+            </h3>
+            <button onclick="closeBankTransferConfirmDialog()" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-400">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="space-y-2 text-sm mb-4 pb-4 border-b border-zinc-150" id="bank-transfer-confirm-summary"></div>
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-zinc-550 mb-1">Mã giao dịch ngân hàng (tùy chọn)</label>
+            <input type="text" id="bank-transfer-transaction-code" maxlength="100" class="w-full text-xs p-3 border border-zinc-200 rounded-xl focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" placeholder="VD: FT24...">
+        </div>
+        <div id="bank-transfer-confirm-error" role="alert" class="hidden mb-3 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold"></div>
+        <div class="flex gap-3">
+            <button type="button" onclick="closeBankTransferConfirmDialog()" class="flex-1 bg-zinc-100 text-zinc-650 font-bold text-xs py-3 rounded-xl transition-colors hover:bg-zinc-200">Hủy</button>
+            <button type="button" id="bank-transfer-confirm-submit-btn" onclick="submitBankTransferConfirm()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold text-xs py-3 rounded-xl shadow transition-all active:scale-95 disabled:opacity-60">Xác nhận đã nhận đủ</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

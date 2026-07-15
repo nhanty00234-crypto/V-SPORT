@@ -49,6 +49,7 @@ public class AuditLogService {
     public static final String ENTITY_LOAI_SAN   = "LoaiSan";
     public static final String ENTITY_SAN_PHAM   = "SanPham";
     public static final String ENTITY_CO_SO      = "CoSo";
+    public static final String ENTITY_PAYOS_CONFIG = "PayOSConfig";
     public static final String ENTITY_CA_LAM     = "CaLamViec";
     public static final String ENTITY_YEU_CAU_NGHI = "YeuCauNghi";
 

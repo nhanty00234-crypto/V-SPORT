@@ -123,6 +123,16 @@ public class InvoiceViewService {
 
         String isManagerPath = requestingUser.getRoleId() == 2 ? "/manager/hoa-don" : "/staff/checkin";
 
+        String confirmedByName = null;
+        String confirmedAtLabel = null;
+        if (lich.getConfirmedBy() != null) {
+            TaiKhoan confirmedByAccount = taiKhoanDAO.getAccountById(lich.getConfirmedBy());
+            confirmedByName = confirmedByAccount != null ? confirmedByAccount.getFullName() : null;
+        }
+        if (lich.getConfirmedAt() != null) {
+            confirmedAtLabel = lich.getConfirmedAt().format(HM) + " " + lich.getConfirmedAt().toLocalDate().format(DMY);
+        }
+
         return new InvoiceView(
                 hoaDonId,
                 hoaDon.getLoaiHoaDon(),
@@ -146,7 +156,8 @@ public class InvoiceViewService {
                 hoaDon.getTongThanhToan(),
                 splitHoaDonIds,
                 contextPath + isManagerPath,
-                contextPath + "/staff/hoa-don/in?id=" + hoaDonId
+                contextPath + "/staff/hoa-don/in?id=" + hoaDonId,
+                lich.getTransactionCode(), confirmedByName, confirmedAtLabel
         );
     }
 

@@ -18,6 +18,25 @@ import org.example.model.San;
 import org.example.model.TaiKhoan;
 import org.example.service.checkout.CheckoutResult;
 import org.example.service.checkout.CheckoutService;
+import org.example.service.checkout.BankTransferInit;
+import org.example.service.checkout.BankTransferConfirm;
+import org.example.dao.CoSoNganHangDAO;
+import org.example.dao.impl.CoSoNganHangDAOImpl;
+import org.example.model.CoSoNganHang;
+import org.example.dao.LichDatSanDichVuDAO;
+import org.example.dao.impl.LichDatSanDichVuDAOImpl;
+import org.example.model.LichDatSanDichVu;
+import org.example.service.payos.PayOSPaymentService;
+import org.example.service.payos.PayOSPaymentFinalizationService;
+import org.example.service.payos.PayOSClientFactory;
+import org.example.dao.PayOSPaymentAttemptDAO;
+import org.example.dao.impl.PayOSPaymentAttemptDAOImpl;
+import org.example.dto.payment.PayOSCreatePaymentResult;
+import org.example.dto.payment.PayOSCredentials;
+import org.example.dto.payment.PayOSPaymentAttemptStatus;
+import org.example.service.PayOSConfigurationService;
+import vn.payos.PayOS;
+import vn.payos.model.v2.paymentRequests.PaymentLink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.List;
@@ -35,6 +54,10 @@ public class CheckInServlet extends HttpServlet {
 
     private final CheckInDAO checkInDAO = new CheckInDAO();
     private final CheckoutService checkoutService = new CheckoutService();
+    private final PayOSPaymentService payOSPaymentService = new PayOSPaymentService();
+    private final PayOSPaymentFinalizationService payOSFinalizationService = new PayOSPaymentFinalizationService();
+    private final PayOSPaymentAttemptDAO payOSPaymentAttemptDAO = new PayOSPaymentAttemptDAOImpl();
+    private final PayOSConfigurationService payOSConfigurationService = new PayOSConfigurationService();
 
     private boolean columnExists(java.sql.Connection conn, String tableName, String columnName) throws java.sql.SQLException {
         String sql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(?) AND name = ?";
@@ -58,6 +81,15 @@ public class CheckInServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // returnUrl/cancelUrl của PayOS: khách có thể mở trên CHÍNH ĐIỆN THOẠI của họ (quét QR),
+        // không có session V-SPORT nào cả - phải public, chỉ hiển thị trang tĩnh, không đọc/ghi DB,
+        // không dùng để xác nhận thanh toán (xem mục XIV của yêu cầu).
+        String earlyAction = req.getParameter("action");
+        if ("payosReturn".equals(earlyAction) || "payosCancel".equals(earlyAction)) {
+            handlePayOSLanding(resp);
+            return;
+        }
+
         // 1. PhÃ¢n quyá» n (Authorization): Kiá»ƒm tra Role qua Session
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
@@ -78,6 +110,10 @@ public class CheckInServlet extends HttpServlet {
         String action = req.getParameter("action");
         if ("getInvoiceDetails".equals(action)) {
             handleGetInvoiceDetails(req, resp, user);
+            return;
+        }
+        if ("getPayOSPaymentStatus".equals(action)) {
+            handleGetPayOSPaymentStatus(req, resp, user);
             return;
         }
 
@@ -142,6 +178,22 @@ public class CheckInServlet extends HttpServlet {
         }
         if ("addServices".equals(action)) {
             handleAddServices(req, resp, user);
+            return;
+        }
+        if ("initBankTransfer".equals(action)) {
+            handleInitBankTransfer(req, resp, user);
+            return;
+        }
+        if ("confirmBankTransfer".equals(action)) {
+            handleConfirmBankTransfer(req, resp, user);
+            return;
+        }
+        if ("cancelBankTransfer".equals(action)) {
+            handleCancelBankTransfer(req, resp, user);
+            return;
+        }
+        if ("createPayOSPayment".equals(action)) {
+            handleCreatePayOSPayment(req, resp, user);
             return;
         }
 
@@ -514,6 +566,349 @@ public class CheckInServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Khởi tạo/tái sử dụng yêu cầu chuyển khoản (action=initBankTransfer): chốt tiền sân, chuyển hóa
+     * đơn sang chờ xác nhận chuyển khoản, trả về QR + thông tin ngân hàng của cơ sở. KHÔNG đánh dấu
+     * đã thanh toán, KHÔNG giải phóng sân. Luôn kiểm tra cấu hình ngân hàng TRƯỚC khi đổi trạng thái
+     * hóa đơn để tránh kẹt hóa đơn ở trạng thái chờ khi cơ sở chưa cấu hình.
+     */
+    private void handleInitBankTransfer(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String datSanIdStr = req.getParameter("datSanId");
+        try {
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân."));
+                return;
+            }
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+
+            CoSoNganHangDAO bankDao = new CoSoNganHangDAOImpl();
+            CoSoNganHang bank = bankDao.findByCoSoId(user.getCoSoId());
+            if (bank == null) {
+                writeJsonResponse(resp, HttpServletResponse.SC_CONFLICT,
+                        errorJson("BANK_NOT_CONFIGURED", "Cơ sở chưa cấu hình thông tin chuyển khoản."));
+                return;
+            }
+
+            BankTransferInit init = checkoutService.initBankTransfer(datSanId, user.getCoSoId());
+
+            LichDatSanDAO lichDatSanDAO = new LichDatSanDAOImpl();
+            Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
+            boolean isPrebooked = lich != null && "Web".equals(lich.getNguonDatSan());
+            String customerName = null;
+            String customerPhone = null;
+            if (isPrebooked && lich.getAccountId() != null) {
+                org.example.dao.TaiKhoanDAO taiKhoanDAO = new org.example.dao.impl.TaiKhoanDAOImpl();
+                TaiKhoan khachHang = taiKhoanDAO.getAccountById(lich.getAccountId());
+                if (khachHang != null) {
+                    customerName = khachHang.getFullName();
+                    customerPhone = khachHang.getPhoneNumber();
+                }
+            }
+
+            String qrImageUrl = "https://img.vietqr.io/image/" + bank.getBankShortCode() + "-" + bank.getAccountNumber()
+                    + "-compact2.png?amount=" + init.amount().toBigInteger()
+                    + "&addInfo=" + java.net.URLEncoder.encode(init.paymentReference(), java.nio.charset.StandardCharsets.UTF_8)
+                    + "&accountName=" + java.net.URLEncoder.encode(bank.getAccountName(), java.nio.charset.StandardCharsets.UTF_8);
+
+            com.google.gson.JsonObject payment = new com.google.gson.JsonObject();
+            payment.addProperty("hoaDonId", init.hoaDonId());
+            payment.addProperty("bookingSource", isPrebooked ? "PREBOOKED" : "WALK_IN");
+            payment.addProperty("paymentStatus", "AWAITING_TRANSFER_CONFIRMATION");
+            payment.addProperty("bankName", bank.getBankName());
+            payment.addProperty("accountName", bank.getAccountName());
+            payment.addProperty("accountNumber", bank.getAccountNumber());
+            payment.addProperty("amount", init.amount());
+            payment.addProperty("paidAmount", init.paidAmount());
+            payment.addProperty("transferContent", init.paymentReference());
+            payment.addProperty("qrImageUrl", qrImageUrl);
+            payment.addProperty("bookingCode", isPrebooked ? ("DS" + datSanId) : null);
+            payment.addProperty("customerName", customerName);
+            payment.addProperty("customerPhone", customerPhone);
+
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            json.addProperty("success", true);
+            json.add("payment", payment);
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (SecurityException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                    errorJson("FORBIDDEN", "Ca chơi không thuộc cơ sở của bạn."));
+        } catch (IllegalStateException e) {
+            logger.warn("INIT_BANK_TRANSFER_FAILED datSanId={}, reason={}", datSanIdStr, e.getMessage());
+            writeJsonResponse(resp, HttpServletResponse.SC_CONFLICT, errorJson("PAYMENT_CONFLICT", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("INIT_BANK_TRANSFER_FAILED datSanId={}", datSanIdStr, e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("INTERNAL_ERROR", "Không thể khởi tạo yêu cầu chuyển khoản."));
+        }
+    }
+
+    /**
+     * Xác nhận thủ công đã nhận tiền chuyển khoản (action=confirmBankTransfer). Idempotent nếu hóa
+     * đơn đã "Đã thanh toán". Trả JSON cùng shape với processPayment để frontend tái dùng nguyên luồng
+     * hiển thị hóa đơn thành công (showPaymentSuccessInvoice).
+     */
+    private void handleConfirmBankTransfer(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String datSanIdStr = req.getParameter("datSanId");
+        try {
+            String paymentReference = req.getParameter("paymentReference");
+            String transactionCode = sanitizeTransactionCode(req.getParameter("transactionCode"));
+
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân."));
+                return;
+            }
+            if (paymentReference == null || paymentReference.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_PAYMENT_REFERENCE", "Thiếu nội dung chuyển khoản, vui lòng tải lại."));
+                return;
+            }
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+
+            BankTransferConfirm confirm = checkoutService.confirmBankTransfer(
+                    datSanId, user.getCoSoId(), user.getAccountId(), paymentReference.trim(), transactionCode);
+
+            String printUrl = req.getContextPath() + "/staff/hoa-don/in?id=" + confirm.hoaDonId();
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            json.addProperty("success", true);
+            json.addProperty("message", confirm.alreadyPaid()
+                    ? "Hóa đơn đã được thanh toán trước đó."
+                    : "Đã xác nhận chuyển khoản cho đơn đặt sân #" + datSanId + "!");
+            json.addProperty("hoaDonId", confirm.hoaDonId());
+            json.addProperty("printUrl", printUrl);
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (SecurityException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                    errorJson("FORBIDDEN", "Bạn không có quyền xác nhận hóa đơn này."));
+        } catch (IllegalArgumentException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST, errorJson("VALIDATION_ERROR", e.getMessage()));
+        } catch (IllegalStateException e) {
+            logger.warn("CONFIRM_BANK_TRANSFER_FAILED datSanId={}, reason={}", datSanIdStr, e.getMessage());
+            writeJsonResponse(resp, HttpServletResponse.SC_CONFLICT, errorJson("PAYMENT_CONFLICT", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("CONFIRM_BANK_TRANSFER_FAILED datSanId={}", datSanIdStr, e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("DATABASE_ERROR", "Không thể xác nhận chuyển khoản. Dữ liệu đã được hoàn tác."));
+        }
+    }
+
+    /**
+     * "Đổi phương thức" khi đang chờ chuyển khoản (action=cancelBankTransfer): đưa hóa đơn về Chưa
+     * thanh toán để nhân viên chọn lại Tiền mặt. Không tạo/xóa invoice, không đổi amount, không đụng sân.
+     */
+    private void handleCancelBankTransfer(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String datSanIdStr = req.getParameter("datSanId");
+        try {
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân."));
+                return;
+            }
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+            checkoutService.cancelAwaitingTransfer(datSanId, user.getCoSoId());
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            json.addProperty("success", true);
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (SecurityException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                    errorJson("FORBIDDEN", "Ca chơi không thuộc cơ sở của bạn."));
+        } catch (Exception e) {
+            logger.error("CANCEL_BANK_TRANSFER_FAILED datSanId={}", datSanIdStr, e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("INTERNAL_ERROR", "Không thể đổi phương thức thanh toán."));
+        }
+    }
+
+    /**
+     * Tạo/tái sử dụng payment link PayOS (action=createPayOSPayment). KHÔNG đánh dấu đã thanh
+     * toán - chỉ trả QR/checkoutUrl để hiển thị. Frontend chỉ gửi datSanId; amount/CoSoID/
+     * credentials đều lấy từ database phía backend.
+     */
+    private void handleCreatePayOSPayment(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String datSanIdStr = req.getParameter("datSanId");
+        try {
+            if (datSanIdStr == null || datSanIdStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_DAT_SAN_ID", "Thiếu ID đơn đặt sân."));
+                return;
+            }
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+            String publicBaseUrl = resolvePublicBaseUrl(req);
+
+            PayOSCreatePaymentResult result = payOSPaymentService.createOrReusePayment(datSanId, user.getCoSoId(), publicBaseUrl);
+            if (!result.isSuccess()) {
+                writeJsonResponse(resp, result.getHttpStatus(), errorJson(result.getCode(), result.getMessage()));
+                return;
+            }
+
+            com.google.gson.JsonObject payment = new com.google.gson.JsonObject();
+            payment.addProperty("hoaDonId", result.getPayment().getHoaDonId());
+            payment.addProperty("orderCode", result.getPayment().getOrderCode());
+            payment.addProperty("paymentLinkId", result.getPayment().getPaymentLinkId());
+            payment.addProperty("checkoutUrl", result.getPayment().getCheckoutUrl());
+            payment.addProperty("qrCode", result.getPayment().getQrCode());
+            payment.addProperty("amount", result.getPayment().getAmount());
+            payment.addProperty("description", result.getPayment().getDescription());
+            payment.addProperty("status", result.getPayment().getStatus().name());
+
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            json.addProperty("success", true);
+            json.add("payment", payment);
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (Exception e) {
+            logger.error("CREATE_PAYOS_PAYMENT_FAILED datSanId={}", datSanIdStr, e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("INTERNAL_ERROR", "Không thể tạo mã thanh toán PayOS."));
+        }
+    }
+
+    /**
+     * Polling (action=getPayOSPaymentStatus, gọi mỗi 4s từ frontend). Nếu local đã PAID, trả
+     * ngay không gọi PayOS. Nếu chưa, tự gọi API PayOS lấy trạng thái bằng đúng credentials của
+     * CoSo sở hữu attempt, rồi finalize idempotent qua PayOSPaymentFinalizationService nếu PAID.
+     */
+    private void handleGetPayOSPaymentStatus(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
+            throws IOException {
+        String orderCodeStr = req.getParameter("orderCode");
+        try {
+            if (orderCodeStr == null || orderCodeStr.isBlank()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        errorJson("MISSING_ORDER_CODE", "Thiếu orderCode."));
+                return;
+            }
+            long orderCode = Long.parseLong(orderCodeStr.trim());
+
+            PayOSPaymentAttemptDAO.Row attempt;
+            try (java.sql.Connection c = org.example.util.DBUtil.getConnection()) {
+                attempt = payOSPaymentAttemptDAO.findByOrderCode(c, orderCode);
+            }
+            if (attempt == null) {
+                writeJsonResponse(resp, HttpServletResponse.SC_NOT_FOUND,
+                        errorJson("PAYOS_PAYMENT_NOT_FOUND", "Không tìm thấy giao dịch PayOS."));
+                return;
+            }
+            if (attempt.coSoId != user.getCoSoId()) {
+                writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                        errorJson("FORBIDDEN", "Giao dịch không thuộc cơ sở của bạn."));
+                return;
+            }
+
+            if (attempt.status == PayOSPaymentAttemptStatus.PAID) {
+                writeJsonResponse(resp, HttpServletResponse.SC_OK, payosStatusJson("PAID", attempt.hoaDonId, req));
+                return;
+            }
+
+            PayOSCredentials credentials = payOSConfigurationService.getCredentialsForPayment(attempt.coSoId);
+            if (credentials == null) {
+                writeJsonResponse(resp, HttpServletResponse.SC_OK, payosStatusJson("PENDING", null, req));
+                return;
+            }
+
+            PayOS client = PayOSClientFactory.create(credentials);
+            PaymentLink link;
+            try {
+                link = client.paymentRequests().get(orderCode);
+            } finally {
+                client.close();
+            }
+
+            String status = link.getStatus() != null ? link.getStatus().name() : "PENDING";
+            if ("PAID".equals(status)) {
+                long paidAmount = link.getAmountPaid() != null ? link.getAmountPaid() : (link.getAmount() != null ? link.getAmount() : 0L);
+                String reference = (link.getTransactions() != null && !link.getTransactions().isEmpty())
+                        ? link.getTransactions().get(0).getReference() : null;
+                org.example.dto.payment.PayOSFinalizeResult result = payOSFinalizationService.finalizePaidPayment(
+                        orderCode, paidAmount, attempt.paymentLinkId, reference, "PAYOS_POLLING");
+                if (result.isSuccess()) {
+                    writeJsonResponse(resp, HttpServletResponse.SC_OK, payosStatusJson("PAID", result.getHoaDonId(), req));
+                    return;
+                }
+                writeJsonResponse(resp, HttpServletResponse.SC_OK, payosStatusJson("PENDING", null, req));
+                return;
+            }
+            if ("CANCELLED".equals(status) || "EXPIRED".equals(status)) {
+                try (java.sql.Connection c = org.example.util.DBUtil.getConnection()) {
+                    payOSPaymentAttemptDAO.markCancelledOrExpired(c, orderCode,
+                            "CANCELLED".equals(status) ? PayOSPaymentAttemptStatus.CANCELLED : PayOSPaymentAttemptStatus.EXPIRED);
+                } catch (Exception ignored) {}
+                writeJsonResponse(resp, HttpServletResponse.SC_OK, payosStatusJson(status, null, req));
+                return;
+            }
+            try (java.sql.Connection c = org.example.util.DBUtil.getConnection()) {
+                payOSPaymentAttemptDAO.touchLastChecked(c, orderCode);
+            } catch (Exception ignored) {}
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, payosStatusJson("PENDING", null, req));
+        } catch (NumberFormatException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    errorJson("INVALID_ORDER_CODE", "orderCode không hợp lệ."));
+        } catch (Exception e) {
+            logger.error("GET_PAYOS_STATUS_FAILED orderCode={}", orderCodeStr, e);
+            writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    errorJson("PAYOS_STATUS_CHECK_FAILED", "Không thể kiểm tra trạng thái thanh toán."));
+        }
+    }
+
+    private com.google.gson.JsonObject payosStatusJson(String status, Integer hoaDonId, HttpServletRequest req) {
+        com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+        json.addProperty("success", true);
+        json.addProperty("status", status);
+        if (hoaDonId != null) {
+            json.addProperty("hoaDonId", hoaDonId);
+            json.addProperty("printUrl", req.getContextPath() + "/staff/hoa-don/in?id=" + hoaDonId);
+        }
+        return json;
+    }
+
+    /** returnUrl/cancelUrl của PayOS trỏ về đây - CHỈ hiển thị trang tĩnh, KHÔNG đọc query param để đổi DB. */
+    private void handlePayOSLanding(HttpServletResponse resp) throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().write(
+                "<!DOCTYPE html><html lang=\"vi\"><head><meta charset=\"UTF-8\">" +
+                "<title>V-SPORT</title></head><body style=\"font-family:sans-serif;text-align:center;padding:60px 20px;\">" +
+                "<h2>Bạn có thể đóng tab này</h2>" +
+                "<p>Vui lòng quay lại màn hình Check-in để xem trạng thái thanh toán mới nhất.</p>" +
+                "</body></html>");
+    }
+
+    private String resolvePublicBaseUrl(HttpServletRequest req) {
+        String configured = System.getenv("PUBLIC_BASE_URL");
+        if (configured != null && !configured.isBlank()) {
+            return configured.trim().replaceAll("/$", "");
+        }
+        String scheme = req.getScheme();
+        String serverName = req.getServerName();
+        int port = req.getServerPort();
+        boolean defaultPort = (scheme.equals("http") && port == 80) || (scheme.equals("https") && port == 443);
+        return scheme + "://" + serverName + (defaultPort ? "" : ":" + port) + req.getContextPath();
+    }
+
+    /** Trim, cắt độ dài tối đa 100 ký tự, loại ký tự điều khiển. Trả null nếu rỗng sau khi làm sạch. */
+    private String sanitizeTransactionCode(String raw) {
+        if (raw == null) return null;
+        String trimmed = raw.trim();
+        if (trimmed.isEmpty()) return null;
+        if (trimmed.length() > 100) trimmed = trimmed.substring(0, 100);
+        trimmed = trimmed.replaceAll("\\p{Cntrl}", "");
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     private boolean isAjax(HttpServletRequest req, String action) {
         String accept = req.getHeader("Accept");
         return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"))
@@ -751,14 +1146,60 @@ public class CheckInServlet extends HttpServlet {
             data.put("phiGuiXe", phiGuiXe);
             data.put("bookingTrangThai", lich.getTrangThai());
             data.put("actualEndAt", lich.getActualEndAt() != null ? lich.getActualEndAt().toString() : null);
+
+            // Thông tin phục vụ panel chuyển khoản (mục IV/XV): WALK_IN vs PREBOOKED dùng chung 1 component,
+            // chỉ khác dữ liệu hiển thị. Suy bookingSource từ NguonDatSan - codebase chưa có cột PaymentPlan riêng.
+            boolean isPrebooked = "Web".equals(lich.getNguonDatSan());
+            data.put("bookingSource", isPrebooked ? "PREBOOKED" : "WALK_IN");
+            data.put("bookingCode", isPrebooked ? ("DS" + datSanId) : null);
+            data.put("depositAmount", lich.getDepositAmount() != null ? lich.getDepositAmount().doubleValue() : 0.0);
+            if (isPrebooked && lich.getAccountId() != null) {
+                org.example.dao.TaiKhoanDAO taiKhoanDAO = new org.example.dao.impl.TaiKhoanDAOImpl();
+                TaiKhoan khachHang = taiKhoanDAO.getAccountById(lich.getAccountId());
+                data.put("customerName", khachHang != null ? khachHang.getFullName() : null);
+                data.put("customerPhone", khachHang != null ? khachHang.getPhoneNumber() : null);
+            } else {
+                // WALK_IN: không có thông tin khách hàng
+                data.put("customerName", null);
+                data.put("customerPhone", null);
+            }
+            double prebookedServiceAmount = 0.0;
+            List<java.util.Map<String, Object>> prebookedServices = new java.util.ArrayList<>();
+            try {
+                LichDatSanDichVuDAO lichDatSanDichVuDAO = new LichDatSanDichVuDAOImpl();
+                List<LichDatSanDichVu> preOrders = lichDatSanDichVuDAO.findByDatSanId(datSanId);
+                for (LichDatSanDichVu dv : preOrders) {
+                    java.util.Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("tenSanPham", dv.getTenSanPham());
+                    m.put("quantity", dv.getQuantity());
+                    m.put("unitPrice", dv.getUnitPrice());
+                    m.put("totalPrice", dv.getTotalPrice());
+                    prebookedServices.add(m);
+                    if (dv.getTotalPrice() != null) prebookedServiceAmount += dv.getTotalPrice().doubleValue();
+                }
+            } catch (Exception preOrderEx) {
+                // Bảng LichDatSan_DichVu có thể chưa tồn tại; bỏ qua và tiếp tục tải modal
+                logger.warn("getInvoiceDetails: không thể tải prebookedServices datSanId={}, lý do: {}", datSanId, preOrderEx.getMessage());
+            }
+            data.put("prebookedServices", prebookedServices);
+            data.put("prebookedServiceAmount", prebookedServiceAmount);
+
             resp.getWriter().write(gson.toJson(data));
         } catch (Exception e) {
-            e.printStackTrace();
-            resp.setContentType("application/json;charset=UTF-8");
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            java.util.Map<String, String> err = new java.util.HashMap<>();
-            err.put("error", e.getMessage() != null ? e.getMessage() : "Lỗi hệ thống");
-            resp.getWriter().write(gson.toJson(err));
+            logger.error("getInvoiceDetails FAILED datSanId={}, roleId={}, coSoId={}, exception={}",
+                    req.getParameter("datSanId"),
+                    user != null ? user.getRoleId() : null,
+                    user != null ? user.getCoSoId() : null,
+                    e.getMessage(), e);
+            if (!resp.isCommitted()) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                com.google.gson.JsonObject errJson = new com.google.gson.JsonObject();
+                errJson.addProperty("success", false);
+                errJson.addProperty("code", "INVOICE_DETAIL_LOAD_FAILED");
+                errJson.addProperty("message", "Không thể tải thông tin thanh toán.");
+                resp.getWriter().write(errJson.toString());
+            }
         }
     }
 

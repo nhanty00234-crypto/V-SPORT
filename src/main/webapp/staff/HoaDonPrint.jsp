@@ -148,6 +148,15 @@
             <div class="receipt-row"><span class="muted">Ngày lập:</span><span class="receipt-money">${invoice.paidAtLabel}</span></div>
             <div class="receipt-row"><span class="muted">Thu ngân:</span><span class="receipt-money">${invoice.cashierName}</span></div>
             <div class="receipt-row"><span class="muted">PT thanh toán:</span><span class="receipt-money">${not empty invoice.paymentMethod ? invoice.paymentMethod : '-'}</span></div>
+            <c:if test="${not empty invoice.transactionCode}">
+                <div class="receipt-row"><span class="muted">Mã giao dịch:</span><span class="receipt-money mono">${invoice.transactionCode}</span></div>
+            </c:if>
+            <c:if test="${not empty invoice.confirmedByName}">
+                <div class="receipt-row"><span class="muted">NV xác nhận:</span><span class="receipt-money">${invoice.confirmedByName}</span></div>
+            </c:if>
+            <c:if test="${not empty invoice.confirmedAtLabel}">
+                <div class="receipt-row"><span class="muted">TG xác nhận:</span><span class="receipt-money">${invoice.confirmedAtLabel}</span></div>
+            </c:if>
             <div class="receipt-row">
                 <span class="muted">Trạng thái:</span>
                 <span class="receipt-money bold" style="${invoice.paid ? 'color:#15803d' : 'color:#b45309'}">${invoice.paymentStatus}</span>

@@ -62,6 +62,10 @@ public class InvoiceView {
     private final String invoiceManagementUrl;
     private final String printUrl;
 
+    private final String transactionCode;
+    private final String confirmedByName;
+    private final String confirmedAtLabel;
+
     public InvoiceView(int hoaDonId, String invoiceType, Integer parentHoaDonId, String paymentStatus,
                         String paymentMethod, Date paidAt, String facilityName, String facilityAddress,
                         String facilityPhone, String courtName, String courtTypeName, String customerName,
@@ -71,7 +75,8 @@ public class InvoiceView {
                         String actualDurationLabel, String chargedDurationLabel,
                         List<InvoiceCourtSegmentView> courtSegments, List<InvoiceServiceItemView> services,
                         double courtAmount, double serviceAmount, double parkingFee, double discountAmount,
-                        double totalAmount, List<Integer> splitHoaDonIds, String invoiceManagementUrl, String printUrl) {
+                        double totalAmount, List<Integer> splitHoaDonIds, String invoiceManagementUrl, String printUrl,
+                        String transactionCode, String confirmedByName, String confirmedAtLabel) {
         this.hoaDonId = hoaDonId;
         this.invoiceCode = "#" + hoaDonId;
         this.invoiceType = invoiceType;
@@ -112,6 +117,9 @@ public class InvoiceView {
         this.splitHoaDonIds = List.copyOf(splitHoaDonIds);
         this.invoiceManagementUrl = invoiceManagementUrl;
         this.printUrl = printUrl;
+        this.transactionCode = transactionCode;
+        this.confirmedByName = confirmedByName;
+        this.confirmedAtLabel = confirmedAtLabel;
     }
 
     public int getHoaDonId() { return hoaDonId; }
@@ -162,4 +170,8 @@ public class InvoiceView {
     public List<Integer> getSplitHoaDonIds() { return splitHoaDonIds; }
     public String getInvoiceManagementUrl() { return invoiceManagementUrl; }
     public String getPrintUrl() { return printUrl; }
+
+    public String getTransactionCode() { return transactionCode; }
+    public String getConfirmedByName() { return confirmedByName; }
+    public String getConfirmedAtLabel() { return confirmedAtLabel; }
 }

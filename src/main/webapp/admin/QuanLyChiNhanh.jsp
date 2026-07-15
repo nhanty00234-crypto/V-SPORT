@@ -16,6 +16,7 @@ body { font-family: 'Inter', sans-serif; }
   .badge-green  { background:#dcfce7;color:#15803d; }
   .badge-red    { background:#fee2e2;color:#b91c1c; }
   .badge-amber  { background:#fef3c7;color:#b45309; }
+  .badge-gray   { background:#f4f4f5;color:#52525b; }
 
   /* Card */
   .cs-card {
@@ -200,6 +201,29 @@ body { font-family: 'Inter', sans-serif; }
               <span>${cn.gioMoCua} – ${cn.gioDongCua}</span>
             </div>
           </c:if>
+        </div>
+
+        <!-- PayOS status row -->
+        <div class="flex items-center justify-between pt-1">
+          <div class="flex items-center gap-1.5 text-xs">
+            <i class="ti ti-credit-card text-sm text-zinc-400"></i>
+            <span class="text-zinc-500">PayOS:</span>
+            <c:choose>
+              <c:when test="${payosStatusMap[cn.coSoID] == 'CONFIGURED'}">
+                <span id="payosBadge${cn.coSoID}" class="badge badge-green">Đã cấu hình</span>
+              </c:when>
+              <c:when test="${payosStatusMap[cn.coSoID] == 'PARTIAL'}">
+                <span id="payosBadge${cn.coSoID}" class="badge badge-amber">Thiếu thông tin</span>
+              </c:when>
+              <c:otherwise>
+                <span id="payosBadge${cn.coSoID}" class="badge badge-gray">Chưa cấu hình</span>
+              </c:otherwise>
+            </c:choose>
+          </div>
+          <button type="button" onclick="openPayOSModal(${cn.coSoID}, '${cn.tenCoSo}')"
+                  class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-zinc-600 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition-all">
+            <i class="ti ti-settings text-xs"></i>Cấu hình
+          </button>
         </div>
 
         <!-- Action buttons -->
@@ -887,6 +911,141 @@ body { font-family: 'Inter', sans-serif; }
     }
     return true;
   }
+
+  // ═══════════ PAYOS CONFIG MODAL ═══════════
+  let payosCurrentCoSoId = null;
+  let payosSaving = false;
+
+  function openPayOSModal(coSoId, coSoName) {
+    payosCurrentCoSoId = coSoId;
+    document.getElementById('payosModalSubtitle').textContent = coSoName + ' · Cơ sở #' + coSoId;
+    document.getElementById('payosForm').classList.add('hidden');
+    document.getElementById('payosLoading').classList.remove('hidden');
+    document.getElementById('payosFormError').classList.add('hidden');
+    ['payosClientId', 'payosApiKey', 'payosChecksumKey'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.type = 'password';
+    });
+    document.getElementById('modalPayOS').classList.remove('hidden');
+
+    fetch('${pageContext.request.contextPath}/admin/chi-nhanh/payos?coSoId=' + coSoId)
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('payosLoading').classList.add('hidden');
+        document.getElementById('payosForm').classList.remove('hidden');
+        if (!data.success) {
+          showPayOSFormError(data.message || 'Không thể tải cấu hình PayOS.');
+          return;
+        }
+        const cfg = data.configuration;
+        setPayOSFieldHint('payosClientIdHint', cfg.clientIdConfigured, cfg.clientIdMasked);
+        setPayOSFieldHint('payosApiKeyHint', cfg.apiKeyConfigured, cfg.apiKeyMasked);
+        setPayOSFieldHint('payosChecksumKeyHint', cfg.checksumKeyConfigured, cfg.checksumKeyMasked);
+        document.getElementById('payosClientId').placeholder = cfg.clientIdConfigured ? 'Đã cấu hình — để trống nếu không thay đổi' : 'Nhập Client ID';
+        document.getElementById('payosApiKey').placeholder = cfg.apiKeyConfigured ? 'Đã cấu hình — để trống nếu không thay đổi' : 'Nhập API Key';
+        document.getElementById('payosChecksumKey').placeholder = cfg.checksumKeyConfigured ? 'Đã cấu hình — để trống nếu không thay đổi' : 'Nhập Checksum Key';
+      })
+      .catch(() => {
+        document.getElementById('payosLoading').classList.add('hidden');
+        document.getElementById('payosForm').classList.remove('hidden');
+        showPayOSFormError('Lỗi kết nối. Vui lòng thử lại.');
+      });
+  }
+
+  function setPayOSFieldHint(hintId, configured, masked) {
+    document.getElementById(hintId).textContent = configured ? ('Hiện tại: ' + masked) : 'Chưa cấu hình';
+  }
+
+  function togglePayOSVisibility(inputId) {
+    const el = document.getElementById(inputId);
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+
+  function showPayOSFormError(msg) {
+    const el = document.getElementById('payosFormError');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function closePayOSModal() {
+    if (payosSaving) return;
+    document.getElementById('modalPayOS').classList.add('hidden');
+    payosCurrentCoSoId = null;
+  }
+
+  function setPayOSFormDisabled(disabled) {
+    document.getElementById('payosCancelBtn').disabled = disabled;
+    document.getElementById('payosCloseBtn').disabled = disabled;
+    document.querySelectorAll('.payos-input').forEach(i => i.disabled = disabled);
+  }
+
+  function submitPayOSConfig(event) {
+    event.preventDefault();
+    if (payosSaving) return false;
+    payosSaving = true;
+
+    document.getElementById('payosFormError').classList.add('hidden');
+    const btn = document.getElementById('payosSaveBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span> Đang lưu...';
+    setPayOSFormDisabled(true);
+
+    const body = new URLSearchParams();
+    body.set('coSoId', payosCurrentCoSoId);
+    body.set('clientId', document.getElementById('payosClientId').value);
+    body.set('apiKey', document.getElementById('payosApiKey').value);
+    body.set('checksumKey', document.getElementById('payosChecksumKey').value);
+
+    fetch('${pageContext.request.contextPath}/admin/chi-nhanh/payos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    })
+      .then(r => r.json())
+      .then(data => {
+        payosSaving = false;
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        setPayOSFormDisabled(false);
+
+        if (!data.success) {
+          showPayOSFormError(data.message || 'Không thể lưu cấu hình PayOS.');
+          return;
+        }
+        updatePayOSBadge(payosCurrentCoSoId, data.configuration.status);
+        showPayOSToast(data.message || 'Đã cập nhật cấu hình PayOS.');
+        closePayOSModal();
+      })
+      .catch(() => {
+        payosSaving = false;
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        setPayOSFormDisabled(false);
+        showPayOSFormError('Lỗi kết nối. Vui lòng thử lại.');
+      });
+
+    return false;
+  }
+
+  function updatePayOSBadge(coSoId, status) {
+    const badge = document.getElementById('payosBadge' + coSoId);
+    if (!badge) return;
+    const cls = status === 'CONFIGURED' ? 'badge-green' : status === 'PARTIAL' ? 'badge-amber' : 'badge-gray';
+    const label = status === 'CONFIGURED' ? 'Đã cấu hình' : status === 'PARTIAL' ? 'Thiếu thông tin' : 'Chưa cấu hình';
+    badge.className = 'badge ' + cls;
+    badge.textContent = label;
+  }
+
+  let payosToastTimer = null;
+  function showPayOSToast(msg) {
+    const toast = document.getElementById('payosToast');
+    document.getElementById('payosToastMsg').textContent = msg;
+    toast.classList.remove('hidden');
+    clearTimeout(payosToastTimer);
+    payosToastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
+  }
 </script>
 
 <!-- ═══ Modal Sửa Cơ Sở ═══ -->
@@ -1029,6 +1188,85 @@ body { font-family: 'Inter', sans-serif; }
     </div>
 
   </div>
+</div>
+
+<!-- ═══ Modal Cấu hình PayOS ═══ -->
+<div id="modalPayOS" class="hidden fixed inset-0 z-[95] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePayOSModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px] flex flex-col">
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100 shrink-0">
+      <div>
+        <h3 class="text-base font-bold text-zinc-900">Cấu hình PayOS</h3>
+        <p class="text-xs text-zinc-500 mt-0.5" id="payosModalSubtitle"></p>
+      </div>
+      <button type="button" id="payosCloseBtn" onclick="closePayOSModal()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400">
+        <i class="ti ti-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- LOADING state -->
+    <div id="payosLoading" class="p-6 flex flex-col gap-3">
+      <div class="h-10 rounded-xl bg-zinc-100 animate-pulse"></div>
+      <div class="h-10 rounded-xl bg-zinc-100 animate-pulse"></div>
+      <div class="h-10 rounded-xl bg-zinc-100 animate-pulse"></div>
+    </div>
+
+    <!-- EDITING / SAVING / ERROR states -->
+    <form id="payosForm" class="hidden p-6 flex flex-col gap-4" onsubmit="return submitPayOSConfig(event)">
+      <div id="payosFormError" class="hidden px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium"></div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-700">Client ID</label>
+        <div class="relative">
+          <input type="password" id="payosClientId" autocomplete="new-password"
+                 class="payos-input h-10 w-full pl-3 pr-10 rounded-xl border border-zinc-200 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          <button type="button" onclick="togglePayOSVisibility('payosClientId')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+            <i class="ti ti-eye text-base"></i>
+          </button>
+        </div>
+        <p class="text-[11px] text-zinc-400" id="payosClientIdHint"></p>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-700">API Key</label>
+        <div class="relative">
+          <input type="password" id="payosApiKey" autocomplete="new-password"
+                 class="payos-input h-10 w-full pl-3 pr-10 rounded-xl border border-zinc-200 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          <button type="button" onclick="togglePayOSVisibility('payosApiKey')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+            <i class="ti ti-eye text-base"></i>
+          </button>
+        </div>
+        <p class="text-[11px] text-zinc-400" id="payosApiKeyHint"></p>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-zinc-700">Checksum Key</label>
+        <div class="relative">
+          <input type="password" id="payosChecksumKey" autocomplete="new-password"
+                 class="payos-input h-10 w-full pl-3 pr-10 rounded-xl border border-zinc-200 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          <button type="button" onclick="togglePayOSVisibility('payosChecksumKey')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+            <i class="ti ti-eye text-base"></i>
+          </button>
+        </div>
+        <p class="text-[11px] text-zinc-400" id="payosChecksumKeyHint"></p>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2 border-t border-zinc-50">
+        <button type="button" onclick="closePayOSModal()" id="payosCancelBtn" class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
+        <button type="submit" id="payosSaveBtn" class="h-10 px-6 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/10 flex items-center gap-2">
+          <i class="ti ti-device-floppy text-sm"></i>Lưu cấu hình
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="payosToast" class="hidden fixed bottom-6 right-6 z-[110] px-4 py-3 rounded-xl bg-zinc-900 text-white text-sm font-semibold shadow-xl flex items-center gap-2">
+  <i class="ti ti-circle-check text-emerald-400"></i>
+  <span id="payosToastMsg"></span>
 </div>
 
 <!-- Custom Geolocation Modal -->

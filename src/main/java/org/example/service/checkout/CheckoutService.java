@@ -54,6 +54,147 @@ public class CheckoutService {
         }
     }
 
+    /**
+     * Khóa + chốt tiền sân (idempotent) cho một transaction do CALLER quản lý - dùng bởi
+     * PayOSPaymentService để tạo/tái sử dụng payment link trong CÙNG transaction với việc
+     * kiểm tra/khóa PayOSPaymentAttempt, tránh race giữa hai bước.
+     */
+    public CheckoutResult finalizeLockedForPayment(Connection c, int datSanId, int coSoId) throws Exception {
+        return finalizeLocked(c, datSanId, coSoId, LocalDateTime.now());
+    }
+
+    /**
+     * Chốt tiền sân (idempotent, dùng chung finalizeLocked) rồi chuyển hóa đơn sang trạng thái
+     * chờ xác nhận chuyển khoản. KHÔNG đánh dấu đã thanh toán, KHÔNG giải phóng sân. Nếu hóa đơn
+     * đang chờ chuyển khoản sẵn (mở lại modal), tái sử dụng nguyên PaymentReference/amount hiện có.
+     */
+    public BankTransferInit initBankTransfer(int datSanId, int coSoId) throws Exception {
+        try (Connection c = DBUtil.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                CheckoutResult result = finalizeLocked(c, datSanId, coSoId, LocalDateTime.now());
+                if (result.alreadyPaid()) throw new IllegalStateException("Hóa đơn đã được thanh toán trước đó.");
+
+                String status; String reference; BigDecimal paidAmount;
+                try (PreparedStatement ps = c.prepareStatement(
+                        "SELECT h.TrangThaiThanhToan, h.PaymentReference, ISNULL(l.DepositAmount,0) AS DepositAmount " +
+                        "FROM HoaDon h WITH (UPDLOCK, ROWLOCK) JOIN LichDatSan l ON l.DatSanID=h.DatSanID WHERE h.HoaDonID=?")) {
+                    ps.setInt(1, result.hoaDonId());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) throw new IllegalStateException("Không tìm thấy hóa đơn.");
+                        status = rs.getNString("TrangThaiThanhToan");
+                        reference = rs.getString("PaymentReference");
+                        paidAmount = nz(rs.getBigDecimal("DepositAmount"));
+                    }
+                }
+                if ("Đã thanh toán".equals(status)) throw new IllegalStateException("Hóa đơn đã được thanh toán trước đó.");
+
+                BigDecimal remaining = result.tongThanhToan().subtract(paidAmount).max(BigDecimal.ZERO).setScale(0, RoundingMode.HALF_UP);
+
+                if ("Chờ xác nhận chuyển khoản".equals(status) && reference != null && !reference.isBlank()) {
+                    c.commit();
+                    return new BankTransferInit(datSanId, result.hoaDonId(), remaining, paidAmount, reference);
+                }
+
+                String newReference = "VSPORT HD" + result.hoaDonId();
+                try (PreparedStatement up = c.prepareStatement(
+                        "UPDATE HoaDon SET TrangThaiThanhToan=N'Chờ xác nhận chuyển khoản', PaymentReference=? " +
+                        "WHERE HoaDonID=? AND TrangThaiThanhToan<>N'Đã thanh toán'")) {
+                    up.setString(1, newReference);
+                    up.setInt(2, result.hoaDonId());
+                    if (up.executeUpdate() != 1) throw new IllegalStateException("Hóa đơn đã được xử lý bởi giao dịch khác.");
+                }
+                c.commit();
+                logger.info("Khởi tạo chuyển khoản datSanId={}, hoaDonId={}, amount={}", datSanId, result.hoaDonId(), remaining);
+                return new BankTransferInit(datSanId, result.hoaDonId(), remaining, paidAmount, newReference);
+            } catch (Exception e) { c.rollback(); logger.error("Rollback initBankTransfer datSanId={}: {}", datSanId, e.getMessage()); throw e; }
+            finally { c.setAutoCommit(true); }
+        }
+    }
+
+    /**
+     * Xác nhận đã nhận tiền chuyển khoản (thao tác thủ công của nhân viên). Idempotent: nếu hóa đơn
+     * đã "Đã thanh toán" (double-click, hai nhân viên xác nhận cùng lúc), không xử lý lại. Chặn nếu
+     * paymentReference gửi lên không khớp giá trị đã lưu (chống submit lệch dữ liệu/hóa đơn cũ).
+     */
+    public BankTransferConfirm confirmBankTransfer(int datSanId, int coSoId, int staffId,
+                                                     String paymentReference, String transactionCode) throws Exception {
+        try (Connection c = DBUtil.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                String sql = "SELECT h.HoaDonID,h.TrangThaiThanhToan,h.PaymentReference,s.CoSoID " +
+                        "FROM LichDatSan l WITH (UPDLOCK,ROWLOCK) JOIN San s ON s.SanID=l.SanID " +
+                        "JOIN HoaDon h WITH (UPDLOCK,ROWLOCK) ON h.DatSanID=l.DatSanID AND h.LoaiHoaDon=N'MAIN' WHERE l.DatSanID=?";
+                int hoaDonId; String status; String storedRef;
+                try (PreparedStatement ps = c.prepareStatement(sql)) {
+                    ps.setInt(1, datSanId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) throw new IllegalArgumentException("Không tìm thấy ca chơi hoặc MAIN invoice.");
+                        if (rs.getInt("CoSoID") != coSoId) throw new SecurityException("Ca chơi không thuộc cơ sở của bạn.");
+                        hoaDonId = rs.getInt("HoaDonID");
+                        status = rs.getNString("TrangThaiThanhToan");
+                        storedRef = rs.getString("PaymentReference");
+                    }
+                }
+                if ("Đã thanh toán".equals(status)) { c.commit(); return new BankTransferConfirm(datSanId, hoaDonId, true); }
+                if (!"Chờ xác nhận chuyển khoản".equals(status)) throw new IllegalStateException("Hóa đơn chưa ở trạng thái chờ xác nhận chuyển khoản.");
+                if (storedRef == null || !storedRef.equals(paymentReference)) throw new IllegalArgumentException("Nội dung chuyển khoản không khớp, vui lòng tải lại hóa đơn.");
+
+                try (PreparedStatement up = c.prepareStatement(
+                        "UPDATE HoaDon SET TrangThaiThanhToan=N'Đã thanh toán', PhuongThucThanhToan=N'Chuyển khoản', " +
+                        "AccountID_NhanVien=?, NgayLap=GETDATE() WHERE HoaDonID=? AND TrangThaiThanhToan=N'Chờ xác nhận chuyển khoản'")) {
+                    up.setInt(1, staffId); up.setInt(2, hoaDonId);
+                    if (up.executeUpdate() != 1) throw new IllegalStateException("Hóa đơn đã được xử lý bởi giao dịch khác.");
+                }
+                try (PreparedStatement up = c.prepareStatement(
+                        "UPDATE LichDatSan SET PaymentMethodConfirmed=N'Chuyển khoản', TransactionCode=?, ConfirmedAt=GETDATE(), " +
+                        "ConfirmedBy=?, ConfirmSource=N'STAFF_MANUAL' WHERE DatSanID=?")) {
+                    up.setString(1, (transactionCode == null || transactionCode.isBlank()) ? null : transactionCode.trim());
+                    up.setInt(2, staffId); up.setInt(3, datSanId);
+                    up.executeUpdate();
+                }
+                try (PreparedStatement up = c.prepareStatement("UPDATE LichDatSan SET TrangThai=N'Đã hoàn thành' WHERE DatSanID=? AND TrangThai=N'Đang sử dụng'")) {
+                    up.setInt(1, datSanId); if (up.executeUpdate() != 1) throw new IllegalStateException("Không thể hoàn thành ca chơi.");
+                }
+                try (PreparedStatement up = c.prepareStatement("UPDATE San SET TrangThai=N'Sẵn sàng' WHERE SanID=(SELECT SanID FROM LichDatSan WHERE DatSanID=?) AND TrangThai=N'Đang sử dụng'")) {
+                    up.setInt(1, datSanId); if (up.executeUpdate() != 1) throw new IllegalStateException("Không thể giải phóng sân.");
+                }
+                c.commit();
+                logger.info("Xác nhận chuyển khoản thành công datSanId={}, hoaDonId={}", datSanId, hoaDonId);
+                return new BankTransferConfirm(datSanId, hoaDonId, false);
+            } catch (Exception e) { c.rollback(); logger.error("Rollback confirmBankTransfer datSanId={}: {}", datSanId, e.getMessage()); throw e; }
+            finally { c.setAutoCommit(true); }
+        }
+    }
+
+    /**
+     * "Đổi phương thức" khi đang chờ chuyển khoản: đưa hóa đơn về Chưa thanh toán để nhân viên chọn
+     * lại Tiền mặt. Không đụng amount/PaymentReference (giữ lại để tái dùng nếu chọn lại Chuyển khoản),
+     * không đụng booking/sân. Không có tác dụng nếu hóa đơn không còn ở trạng thái chờ chuyển khoản.
+     */
+    public void cancelAwaitingTransfer(int datSanId, int coSoId) throws Exception {
+        try (Connection c = DBUtil.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                try (PreparedStatement check = c.prepareStatement(
+                        "SELECT s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID=l.SanID WHERE l.DatSanID=?")) {
+                    check.setInt(1, datSanId);
+                    try (ResultSet rs = check.executeQuery()) {
+                        if (!rs.next()) throw new IllegalArgumentException("Không tìm thấy ca chơi.");
+                        if (rs.getInt("CoSoID") != coSoId) throw new SecurityException("Ca chơi không thuộc cơ sở của bạn.");
+                    }
+                }
+                try (PreparedStatement up = c.prepareStatement(
+                        "UPDATE HoaDon SET TrangThaiThanhToan=N'Chưa thanh toán' WHERE DatSanID=? AND TrangThaiThanhToan=N'Chờ xác nhận chuyển khoản'")) {
+                    up.setInt(1, datSanId);
+                    up.executeUpdate();
+                }
+                c.commit();
+            } catch (Exception e) { c.rollback(); throw e; }
+            finally { c.setAutoCommit(true); }
+        }
+    }
+
     private CheckoutResult finalizeLocked(Connection c, int datSanId, int coSoId, LocalDateTime now) throws Exception {
         String sql = "SELECT l.DatSanID,l.NgayDat,l.GioBatDau,l.GioKetThuc,l.TimeMode,l.ActualStartAt,l.ActualEndAt,l.actual_start_time,l.TrangThai," +
                 "s.CoSoID,ls.GiaKhongDen,ls.GiaCoDen,ls.GioBatDauLenDen,ls.GioKetThucLenDen," +

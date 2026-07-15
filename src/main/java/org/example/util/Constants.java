@@ -47,6 +47,7 @@ public final class Constants {
     // ========== PAYMENT METHODS ==========
     public static final String PT_TIEN_MAT = "Tiền mặt";
     public static final String PT_CHUYEN_KHOAN = "Chuyển khoản";
+    public static final String PT_PAYOS = "PayOS";
     public static final String PT_VI_DIEN_TU = "Ví điện tử";
     public static final String PT_THE = "Thẻ";
 
