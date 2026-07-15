@@ -53,3 +53,31 @@ live DB data (e.g. syntax/rendering checks of JSTL logic in isolation) can
 reuse this embedded-Jasper technique instead of being skipped outright.
 Full end-to-end app verification (real data, real DB queries, real login)
 still requires the user's own Windows/IntelliJ machine.
+
+## Final whole-branch review
+First pass (opus): 2 Important findings — PageResult.of() didn't defensively
+clamp out-of-range page; pagination.tag silently drops sortBy/sortDir on
+navigation (extraParams contract undocumented). Both fixed (commits cefc112,
+3e310a3) + Phase 2 plan amended (bc3a4f3) to require sortBy/sortDir in every
+sortable module's paginationExtraParams map. Re-verification pass (opus):
+Ready to merge: YES.
+
+Remaining Minor findings logged for awareness, not blocking (all either
+inherited from the plan's own example code or genuinely low-risk):
+- PaginationUtils: dead Math.min(allowed, MAX_PAGE_SIZE) branch; unused
+  4-arg PaginationUtils.of overload; resolveSortColumn NPEs on null whitelist
+  (no guard) — low risk, callers always pass a real Map literal.
+- PageResult: getOffset-style (page-1) int-before-cast pattern in
+  PaginationRequest, unreachable in the intended call path.
+- PaginationRequest vs PaginationUtils: two same-signature `of()` overloads
+  with different normalization semantics — package-private visibility
+  mostly hides this but worth a rename (ofRaw/ofNormalized) if it ever
+  causes confusion.
+- pagination.tag: ariaLabel/baseUrl written as raw ${...} in HTML attribute
+  context (developer-controlled today, not user input — would need <c:out>
+  if a module ever wires user data into ariaLabel); ellipsis "…" has no
+  aria-hidden; Trước/Sau links lack aria-label (only numbered pages have one);
+  page-size <select> has no <noscript>/fallback for JS-disabled users;
+  cosmetic quote-style inconsistency vs AuditLog.jsp's <c:out> idiom.
+
+## PHASE 1 COMPLETE — branch ready to merge
