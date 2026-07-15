@@ -19,7 +19,7 @@ public final class PaginationRequest {
         this.sortDirection = sortDirection;
     }
 
-    public static PaginationRequest of(int page, int pageSize, String sortBy, String sortDirection) {
+    static PaginationRequest of(int page, int pageSize, String sortBy, String sortDirection) {
         return new PaginationRequest(page, pageSize, sortBy, sortDirection);
     }
 
