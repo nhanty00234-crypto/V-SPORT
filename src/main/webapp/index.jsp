@@ -21,6 +21,8 @@
     boolean isLoggedIn = roleId != -1 || session.getAttribute("user") != null;
     String displayName = !fullName.trim().isEmpty() ? fullName : (!email.trim().isEmpty() ? email : "Tài khoản");
     String avatarChar  = !displayName.isEmpty() ? displayName.substring(0, 1).toUpperCase() : "T";
+    String displayNameSafe = displayName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+    String avatarCharSafe  = avatarChar.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
 
     if (roleId != -1 && roleId != org.example.util.RoleRedirectUtil.ROLE_CUSTOMER) {
         String homePath = org.example.util.RoleRedirectUtil.getHomePathByRoleId(roleId);
@@ -589,7 +591,7 @@
         
         <!-- User Icon -->
         <div class="relative group">
-            <button id="header-user-btn" onclick="handleUserClick(this)" class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
+            <button id="header-user-btn" onclick="handleUserClick(this)" aria-haspopup="true" aria-expanded="false" aria-label="Tài khoản" class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
                 <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
@@ -600,11 +602,11 @@
                 <div id="user-profile-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-md overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-neutral-100">
                     <div class="px-4 py-2.5 bg-neutral-50 border-b border-neutral-100">
                         <p class="text-xs text-neutral-400">Tài khoản</p>
-                        <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= displayName %></p>
+                        <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= displayNameSafe %></p>
                     </div>
-                    <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Tài Khoản</a>
-                    <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch Sử Đặt Sân</a>
-                    <a href="<%= ctx %>/logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng Xuất</a>
+                    <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Tài khoản</a>
+                    <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch sử đặt sân</a>
+                    <a href="<%= ctx %>/logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng xuất</a>
                 </div>
             <% } %>
         </div>
@@ -1214,18 +1216,35 @@
             if (userDropdown) {
                 userDropdown.classList.toggle('opacity-0');
                 userDropdown.classList.toggle('invisible');
+                const isOpen = !userDropdown.classList.contains('invisible');
+                btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             }
         } else {
             openAuthModal('login', btn);
         }
     };
-    
+
     // Close dropdown on outside click
     document.addEventListener('click', (e) => {
         const userDropdown = document.getElementById('user-profile-dropdown');
         const userBtn = document.getElementById('header-user-btn');
         if (userDropdown && userBtn && !userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
             userDropdown.classList.add('opacity-0', 'invisible');
+            userBtn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Close dropdown on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const userDropdown = document.getElementById('user-profile-dropdown');
+            const userBtn = document.getElementById('header-user-btn');
+            if (userDropdown) {
+                userDropdown.classList.add('opacity-0', 'invisible');
+            }
+            if (userBtn) {
+                userBtn.setAttribute('aria-expanded', 'false');
+            }
         }
     });
 </script>
@@ -1248,10 +1267,10 @@
             <% if (isLoggedIn) { %>
                 <div class="drawer-user-info">
                     <div class="avatar-circle">
-                        <%= avatarChar %>
+                        <%= avatarCharSafe %>
                     </div>
                     <div class="user-details">
-                        <p class="user-name"><%= displayName %></p>
+                        <p class="user-name"><%= displayNameSafe %></p>
                         <p class="user-role">Thành viên</p>
                     </div>
                 </div>

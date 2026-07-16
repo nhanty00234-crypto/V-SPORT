@@ -740,7 +740,7 @@
         
         <!-- User Icon -->
         <div class="menu-grid-container" style="position: relative;">
-            <button id="header-user-btn" class="header-icon-btn" onclick="handleUserClick(this)">
+            <button id="header-user-btn" class="header-icon-btn" onclick="handleUserClick(this)" aria-haspopup="true" aria-expanded="false" aria-label="Tài khoản">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
@@ -753,17 +753,17 @@
                         <p class="name">
                             <c:choose>
                                 <c:when test="${not empty user.fullName}">
-                                    ${user.fullName}
+                                    ${fn:escapeXml(user.fullName)}
                                 </c:when>
                                 <c:otherwise>
-                                    ${user.username}
+                                    ${fn:escapeXml(user.username)}
                                 </c:otherwise>
                             </c:choose>
                         </p>
                     </div>
-                    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-grid-item">Tài Khoản</a>
-                    <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="menu-grid-item">Lịch Sử Đặt Sân</a>
-                    <a href="${pageContext.request.contextPath}/logout" class="menu-grid-item logout">Đăng Xuất</a>
+                    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-grid-item">Tài khoản</a>
+                    <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="menu-grid-item">Lịch sử đặt sân</a>
+                    <a href="${pageContext.request.contextPath}/logout" class="menu-grid-item logout">Đăng xuất</a>
                 </div>
             </c:if>
         </div>
@@ -818,6 +818,7 @@
             if (isLoggedIn) {
                 if (userDropdown) {
                     userDropdown.classList.toggle('show');
+                    if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', userDropdown.classList.contains('show') ? 'true' : 'false');
                 }
             } else {
                 openAuthModal('login', btn);
@@ -828,12 +829,14 @@
             document.addEventListener('click', (e) => {
                 if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
                     userDropdown.classList.remove('show');
+                    userMenuBtn.setAttribute('aria-expanded', 'false');
                 }
             });
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     userDropdown.classList.remove('show');
+                    userMenuBtn.setAttribute('aria-expanded', 'false');
                 }
             });
         }
