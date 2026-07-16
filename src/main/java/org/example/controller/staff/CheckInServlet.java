@@ -340,13 +340,14 @@ public class CheckInServlet extends HttpServlet {
                     throw new CheckInException("Thiáº¿u ID Ä‘Æ¡n Ä‘áº·t sÃ¢n Ä‘á»ƒ há»§y.");
                 }
                 int datSanId = Integer.parseInt(datSanIdStr);
-                checkInDAO.huyLichKhachBung(datSanId, user.getAccountId(), user.getCoSoId());
+                checkInDAO.huyLichKhachBung(datSanId, user.getAccountId(), user.getCoSoId(),
+                        org.example.service.AuditLogService.getClientIp(req));
                 org.example.service.AuditLogService.log(req, user,
-                    "NO_SHOW",
-                    "LichDatSan",
+                    org.example.service.AuditLogService.ACTION_NO_SHOW,
+                    org.example.service.AuditLogService.ENTITY_DAT_SAN,
                     String.valueOf(datSanId),
-                    "Don dat san #" + datSanId,
-                    "Da danh dau khach khong den (no-show)");
+                    "Đơn đặt sân #" + datSanId,
+                    "Đã đánh dấu khách không đến (No Show) - đã trừ điểm uy tín");
                 successMsg = "Ä Ã£ há»§y thÃ nh cÃ´ng Ä‘Æ¡n Ä‘áº·t sÃ¢n #" + datSanId + " (KhÃ¡ch bÃ¹ng)!";
             } else if ("payInvoice".equals(action)) {
                 String hoaDonIdStr = req.getParameter("hoaDonId");

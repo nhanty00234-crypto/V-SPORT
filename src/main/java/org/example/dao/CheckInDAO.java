@@ -545,7 +545,7 @@ public class CheckInDAO {
      * toán/cọc - chỉ tự hủy khi hóa đơn thực sự chưa thu tiền gì (an toàn, không mất dấu vết cần
      * hoàn tiền/giữ cọc thủ công).
      */
-    public void huyLichKhachBung(int datSanId, int staffAccountId, int requiredCoSoId) throws CheckInException {
+    public void huyLichKhachBung(int datSanId, int staffAccountId, int requiredCoSoId, String ipAddress) throws CheckInException {
         Connection conn = null;
         PreparedStatement psSelect = null;
         PreparedStatement psUpdateBooking = null;
@@ -559,7 +559,7 @@ public class CheckInDAO {
             conn.setAutoCommit(false); // Quản lý Transaction thủ công
 
             // 1. Khóa đơn đặt lịch + join San để xác minh cơ sở
-            String sqlSelect = "SELECT l.TrangThai, l.GhiChu, l.NgayDat, l.GioBatDau, s.CoSoID " +
+            String sqlSelect = "SELECT l.TrangThai, l.GhiChu, l.NgayDat, l.GioBatDau, l.AccountID, s.CoSoID " +
                     "FROM LichDatSan l WITH (UPDLOCK, ROWLOCK) JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
@@ -575,6 +575,8 @@ public class CheckInDAO {
             }
 
             String trangThaiBooking = rs.getString("TrangThai");
+            int customerAccountId = rs.getInt("AccountID");
+            boolean hasCustomerAccount = !rs.wasNull();
             String ghiChu = rs.getString("GhiChu");
             java.time.LocalDate ngayDat = rs.getDate("NgayDat").toLocalDate();
             java.time.LocalTime gioBatDau = rs.getTime("GioBatDau").toLocalTime();
@@ -597,6 +599,14 @@ public class CheckInDAO {
             psUpdateBooking.setInt(3, datSanId);
             if (psUpdateBooking.executeUpdate() != 1) {
                 throw new CheckInException("Trạng thái đơn đặt sân vừa thay đổi bởi một thao tác khác. Vui lòng tải lại.");
+            }
+
+            // 2b. Trừ điểm uy tín NO_SHOW - chỉ chạy khi booking thực sự vừa được đánh dấu ở bước trên
+            // (nếu executeUpdate() != 1 đã throw ở trên, nên tới đây chắc chắn là lần đánh dấu đầu tiên).
+            if (hasCustomerAccount) {
+                org.example.service.reputation.CustomerReputationService.applyDelta(conn, customerAccountId, datSanId,
+                        org.example.util.Constants.REPUTATION_ACTION_NO_SHOW, org.example.util.Constants.NO_SHOW_PENALTY,
+                        "Khách không đến (No Show)", staffAccountId, ipAddress);
             }
 
             // 3. Hóa đơn MAIN: chỉ tự hủy nếu THỰC SỰ chưa thu tiền gì - nếu đã thanh toán/cọc,
@@ -625,6 +635,12 @@ public class CheckInDAO {
                             " [Khách bùng - đã thu tiền, cần xử lý hoàn tiền/giữ cọc thủ công]").trim());
                     psUpdateInvoice.setInt(2, hoaDonId);
                     psUpdateInvoice.executeUpdate();
+
+                    try (PreparedStatement psFlagBooking = conn.prepareStatement(
+                            "UPDATE LichDatSan SET RequiresRefundReview = 1 WHERE DatSanID = ?")) {
+                        psFlagBooking.setInt(1, datSanId);
+                        psFlagBooking.executeUpdate();
+                    }
                 }
             }
 
