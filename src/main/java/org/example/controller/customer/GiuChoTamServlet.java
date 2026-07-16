@@ -39,6 +39,22 @@ public class GiuChoTamServlet extends HttpServlet {
             return;
         }
 
+        if ("release".equals(req.getParameter("action"))) {
+            // Giải phóng hold ngay khi khách đóng modal đặt sân mà không hoàn tất - không chờ
+            // SOFT_HOLD_TIMEOUT_MINUTES tự hết hạn, tránh chặn oan slot cho khách khác.
+            try {
+                int sanId = Integer.parseInt(req.getParameter("sanId"));
+                LocalDate ngayDat = LocalDate.parse(req.getParameter("ngayDat"));
+                softHoldDAO.deleteHoldsByAccountAndSan(user.getAccountId(), sanId, ngayDat);
+                result.put("success", true);
+            } catch (Exception e) {
+                result.put("success", false);
+                result.put("message", "Dữ liệu không hợp lệ.");
+            }
+            resp.getWriter().write(new com.google.gson.Gson().toJson(result));
+            return;
+        }
+
         try {
             int sanId = Integer.parseInt(req.getParameter("sanId"));
             LocalDate ngayDat = LocalDate.parse(req.getParameter("ngayDat"));
@@ -61,6 +77,7 @@ public class GiuChoTamServlet extends HttpServlet {
                 result.put("holdSeconds", org.example.util.Constants.SOFT_HOLD_TIMEOUT_MINUTES * 60);
             } else {
                 result.put("message", hold.errorMessage);
+                result.put("code", hold.errorCode != null ? hold.errorCode : "SLOT_UNAVAILABLE");
             }
         } catch (Exception e) {
             result.put("success", false);

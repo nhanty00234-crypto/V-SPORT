@@ -36,6 +36,25 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     }
 
     /**
+     * Đếm số lượt đặt sân "đang hoạt động" (chưa hủy) của một khách trong một ngày, dùng để
+     * áp giới hạn tối đa 3 lượt/ngày. Nguồn sự thật duy nhất - dùng chung bởi DatSanServlet
+     * (bước submit booking chính thức) và SoftHoldDAOImpl.createHold() (bước giữ chỗ tạm), để
+     * một khách đã đạt giới hạn không thể tạo SoftHold chặn slot của người khác dù chưa đặt được.
+     * Nhận Connection từ caller để dùng chung transaction khi caller đã mở sẵn.
+     */
+    public static int countActiveBookingsForAccountAndDate(Connection conn, int accountId, java.time.LocalDate ngayDat)
+            throws SQLException {
+        String sql = "SELECT COUNT(*) FROM LichDatSan WHERE AccountID = ? AND NgayDat = ? AND TrangThai <> N'Đã hủy'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setDate(2, Date.valueOf(ngayDat));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    /**
      * Sweep AN TOÀN, gọi được cả từ scheduler (BookingExpiryScheduler) lẫn lazy từ các hàm đọc
      * danh sách bên dưới. KHÔNG BAO GIỜ được tự hoàn thành một booking "Đang sử dụng" - việc đó
      * chỉ được phép qua transaction checkout chính thức (CheckoutService). Chỉ xử lý:

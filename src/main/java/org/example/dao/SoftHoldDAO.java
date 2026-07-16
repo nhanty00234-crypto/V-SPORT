@@ -9,10 +9,17 @@ public interface SoftHoldDAO {
     class HoldResult {
         public final boolean success;
         public final String errorMessage;
+        public final String errorCode;
         public final LocalDateTime expiresAt;
+
         public HoldResult(boolean success, String errorMessage, LocalDateTime expiresAt) {
+            this(success, errorMessage, null, expiresAt);
+        }
+
+        public HoldResult(boolean success, String errorMessage, String errorCode, LocalDateTime expiresAt) {
             this.success = success;
             this.errorMessage = errorMessage;
+            this.errorCode = errorCode;
             this.expiresAt = expiresAt;
         }
     }

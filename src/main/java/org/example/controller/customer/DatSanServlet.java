@@ -64,6 +64,8 @@ public class DatSanServlet extends HttpServlet {
                     (src, typeOfSrc, context) -> new com.google.gson.JsonPrimitive(src.toString()))
             .create();
 
+    private final org.example.dao.SoftHoldDAO softHoldDAO = new org.example.dao.impl.SoftHoldDAOImpl();
+
     /** Số lần thử lại tối đa khi xảy ra deadlock (SQL Error 1205) */
     private static final int MAX_DEADLOCK_RETRIES = 3;
 
@@ -399,19 +401,21 @@ public class DatSanServlet extends HttpServlet {
                         }
                     }
 
+                    // ── 3a-1. Giải phóng SoftHold của chính tài khoản này cho đúng slot đang submit ──
+                    // Từ đây trở đi việc chặn slot đã do UPDLOCK trên San + re-check overlap bên dưới
+                    // đảm nhiệm; SoftHold tạm (bước "Chọn ngày & giờ") không còn cần thiết nữa dù kết
+                    // quả submit là thành công hay thất bại. Dùng connection riêng (tự commit), không
+                    // nằm trong transaction này, để lệnh release không bị rollback theo nếu bước nào
+                    // đó bên dưới thất bại.
+                    softHoldDAO.deleteHoldsByAccountAndSan(user.getAccountId(), sanId, ngayDat);
+
                     // ── 3a-2. Kiểm tra giới hạn số booking/ngày per customer (tối đa 3 bookings) ──
-                    String limitSql = "SELECT COUNT(*) FROM LichDatSan WHERE AccountID = ? AND NgayDat = ? AND TrangThai <> N'Đã hủy'";
-                    try (java.sql.PreparedStatement limitPs = conn.prepareStatement(limitSql)) {
-                        limitPs.setInt(1, user.getAccountId());
-                        limitPs.setDate(2, java.sql.Date.valueOf(ngayDat));
-                        try (java.sql.ResultSet rsLimit = limitPs.executeQuery()) {
-                            if (rsLimit.next() && rsLimit.getInt(1) >= 3) {
-                                conn.rollback();
-                                session.setAttribute("error", "Bạn đã đạt giới hạn đặt sân tối đa trong ngày hôm nay (tối đa 3 lượt đặt/ngày).");
-                                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                                return;
-                            }
-                        }
+                    if (org.example.dao.impl.LichDatSanDAOImpl.countActiveBookingsForAccountAndDate(
+                            conn, user.getAccountId(), ngayDat) >= 3) {
+                        conn.rollback();
+                        session.setAttribute("error", "Bạn đã đạt giới hạn đặt sân tối đa trong ngày hôm nay (tối đa 3 lượt đặt/ngày).");
+                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+                        return;
                     }
 
                     // ── 3b. Kiểm tra trạng thái sân ──

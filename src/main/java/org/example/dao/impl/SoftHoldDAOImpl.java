@@ -52,6 +52,17 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
                     }
                 }
 
+                // Chặn giữ chỗ ngay từ bước này nếu khách đã đạt giới hạn 3 lượt/ngày - trước đây
+                // bước này không kiểm tra, nên một tài khoản đã hết lượt vẫn tạo được SoftHold chặn
+                // slot của người khác cho tới khi hold tự hết hạn (SOFT_HOLD_TIMEOUT_MINUTES), dù
+                // chính request đặt sân thật (DatSanServlet) chắc chắn sẽ bị từ chối sau đó.
+                if (org.example.dao.impl.LichDatSanDAOImpl.countActiveBookingsForAccountAndDate(conn, accountId, ngayDat) >= 3) {
+                    conn.rollback();
+                    return new HoldResult(false,
+                            "Bạn đã đạt giới hạn đặt sân tối đa trong ngày hôm nay (tối đa 3 lượt đặt/ngày).",
+                            "BOOKING_LIMIT_REACHED", null);
+                }
+
                 String checkSql = "SELECT COUNT(*) FROM SoftHold " +
                         "WHERE SanID = ? AND NgayDat = ? AND AccountID <> ? " +
                         "AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " +
@@ -67,16 +78,23 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
                         if (rs.next() && rs.getInt(1) > 0) {
                             conn.rollback();
                             return new HoldResult(false,
-                                "Đã có người đang giữ khung giờ này, vui lòng chọn khung giờ khác.", null);
+                                "Đã có người đang giữ khung giờ này, vui lòng chọn khung giờ khác.",
+                                "SLOT_ALREADY_RESERVED", null);
                         }
                     }
                 }
 
+                // Overlap chuẩn - PHẢI khớp đúng whitelist trạng thái với DatSanServlet (nguồn sự
+                // thật duy nhất): Đã xác nhận/Đang sử dụng/Chờ xác nhận luôn chặn; Chờ thanh toán chỉ
+                // chặn khi còn hạn giữ chỗ thật (HoldExpiresAt > GETDATE(), không phải DATEDIFF(CreatedTime)
+                // - hold có thể được gia hạn/khác PENDING_PAYMENT_TIMEOUT_MINUTES). Đã hoàn thành/Quá
+                // hạn/Đã hủy/Không đến KHÔNG được chặn.
                 String checkBookingSql = "SELECT COUNT(*) FROM LichDatSan " +
                         "WHERE SanID = ? AND NgayDat = ? " +
-                        "AND (TrangThai IN (N'Đã xác nhận', N'Đang sử dụng', N'Đã hoàn thành') " +
-                        "     OR (TrangThai = N'Chờ thanh toán' AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " +
-                        org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
+                        "AND (TrangThai IN (N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
+                        "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
+                        "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') " +
+                        "     OR (TrangThai = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND HoldExpiresAt > GETDATE())) " +
                         "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
                 try (PreparedStatement bkPs = conn.prepareStatement(checkBookingSql)) {
                     bkPs.setInt(1, sanId);
@@ -87,7 +105,8 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
                         if (rs.next() && rs.getInt(1) > 0) {
                             conn.rollback();
                             return new HoldResult(false,
-                                "Khung giờ này đã có người đặt. Vui lòng chọn khung giờ khác.", null);
+                                "Khung giờ này đã có người đặt. Vui lòng chọn khung giờ khác.",
+                                "SLOT_ALREADY_RESERVED", null);
                         }
                     }
                 }

@@ -407,7 +407,28 @@ public class CheckInServlet extends HttpServlet {
             errorMsg = "Lá»—i há»‡ thá»‘ng báº¥t ngá»: " + e.getMessage();
         }
 
-        // Thiáº¿t láº­p thÃ´ng Ä‘iá»‡p thÃ´ng bÃ¡o
+        // Thiết lập thông điệp thông báo
+        if (isAjax(req, action)) {
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            if (errorMsg != null) {
+                json.addProperty("success", false);
+                json.addProperty("message", errorMsg);
+                if (req.getAttribute("paymentRequired") != null) {
+                    json.addProperty("paymentRequired", true);
+                    json.addProperty("datSanIdPending", String.valueOf(req.getAttribute("datSanIdPending")));
+                }
+                writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST, json);
+            } else {
+                json.addProperty("success", true);
+                json.addProperty("message", successMsg);
+                if (req.getAttribute("autoOpenInvoiceDatSanId") != null) {
+                    json.addProperty("autoOpenInvoiceDatSanId", (Integer) req.getAttribute("autoOpenInvoiceDatSanId"));
+                }
+                writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
+            }
+            return;
+        }
+
         if (successMsg != null) {
             req.setAttribute("successMsg", successMsg);
         }
@@ -415,11 +436,11 @@ public class CheckInServlet extends HttpServlet {
             req.setAttribute("errorMsg", errorMsg);
         }
 
-        // Táº£i láº¡i dá»¯ liá»‡u lÃªn trang dashboard
+        // Tải lại dữ liệu lên trang dashboard
         req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
         req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
 
-        // Forward láº¡i trang JSP
+        // Forward lại trang JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
     }
 

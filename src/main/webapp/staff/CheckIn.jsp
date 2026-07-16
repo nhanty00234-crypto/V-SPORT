@@ -2983,17 +2983,40 @@
     // không điều hướng sang /staff/hoa-don/in (route đó vẫn được giữ cho in lại / Quản lý hóa đơn / fallback).
     async function handleStaffPaymentSubmit() {
         if (isStaffPaymentSubmitting || currentPaymentModalState !== PaymentModalState.EDITING) return;
-        if (!confirmPaymentSubmit()) return;
+
+        // Lock flag immediately
+        isStaffPaymentSubmitting = true;
+
+        // Show loading state and disable button immediately
+        const btn = document.getElementById('staff-payment-submit-btn');
+        const label = document.getElementById('staff-payment-submit-label');
+        if (btn) btn.disabled = true;
+        if (label) label.textContent = 'Đang thanh toán...';
+
+        // Now run the confirm dialog
+        if (!confirmPaymentSubmit()) {
+            // If cancelled, reset flag and restore state
+            isStaffPaymentSubmitting = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Thanh toán';
+            return;
+        }
 
         const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
         const datSanId = Number(datSanIdText);
         const paymentMethod = document.getElementById('staff-pay-method-input')?.value || '';
         if (!Number.isInteger(datSanId) || datSanId <= 0) {
             showStaffPaymentError('Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.');
+            isStaffPaymentSubmitting = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Thanh toán';
             return;
         }
         if (!['Tiền mặt', 'Chuyển khoản'].includes(paymentMethod)) {
             showStaffPaymentError('Vui lòng chọn phương thức thanh toán.');
+            isStaffPaymentSubmitting = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Thanh toán';
             return;
         }
 
@@ -3003,7 +3026,6 @@
         params.set('phuongThucThanhToan', paymentMethod);
         const paymentUrl = '${pageContext.request.contextPath}/staff/checkin';
 
-        isStaffPaymentSubmitting = true;
         setPaymentModalState(PaymentModalState.PROCESSING);
         document.getElementById('staff-payment-error')?.classList.add('hidden');
 
@@ -3047,10 +3069,19 @@
     async function handleInitBankTransfer() {
         if (isStaffPaymentSubmitting || currentPaymentModalState !== PaymentModalState.EDITING) return;
 
+        isStaffPaymentSubmitting = true;
+        const btn = document.getElementById('staff-payment-submit-btn');
+        const label = document.getElementById('staff-payment-submit-label');
+        if (btn) btn.disabled = true;
+        if (label) label.textContent = 'Đang khởi tạo...';
+
         const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
         const datSanId = Number(datSanIdText);
         if (!Number.isInteger(datSanId) || datSanId <= 0) {
             showStaffPaymentError('Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.');
+            isStaffPaymentSubmitting = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Tiếp tục chuyển khoản';
             return;
         }
 
@@ -3058,7 +3089,6 @@
         params.set('action', 'initBankTransfer');
         params.set('datSanId', String(datSanId));
 
-        isStaffPaymentSubmitting = true;
         setPaymentModalState(PaymentModalState.PROCESSING);
         document.getElementById('staff-payment-error')?.classList.add('hidden');
 
@@ -3184,10 +3214,19 @@
     async function handleCreatePayOSPayment() {
         if (isStaffPaymentSubmitting || currentPaymentModalState !== PaymentModalState.EDITING) return;
 
+        isStaffPaymentSubmitting = true;
+        const btn = document.getElementById('staff-payment-submit-btn');
+        const label = document.getElementById('staff-payment-submit-label');
+        if (btn) btn.disabled = true;
+        if (label) label.textContent = 'Đang tạo mã...';
+
         const datSanIdText = document.getElementById('staff-pay-datsan-id')?.value?.trim() || '';
         const datSanId = Number(datSanIdText);
         if (!Number.isInteger(datSanId) || datSanId <= 0) {
             showStaffPaymentError('Không xác định được phiên chơi cần thanh toán. Vui lòng đóng và mở lại cửa sổ thanh toán.');
+            isStaffPaymentSubmitting = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Tạo mã thanh toán';
             return;
         }
 
@@ -3195,7 +3234,6 @@
         params.set('action', 'createPayOSPayment');
         params.set('datSanId', String(datSanId));
 
-        isStaffPaymentSubmitting = true;
         setPaymentModalState(PaymentModalState.CREATING_PAYOS);
         document.getElementById('staff-payment-error')?.classList.add('hidden');
 
@@ -3825,6 +3863,88 @@
             const box = document.getElementById('staff-payment-error');
             if (box) { box.textContent = error.message; box.classList.remove('hidden'); }
             if (button) { button.disabled = false; button.textContent = oldText; }
+        }
+    });
+
+    // AJAX handling for Mở sân/Check-in and Bùng kèo
+    document.addEventListener('submit', async function (event) {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        
+        const actionInput = form.querySelector('input[name="action"]');
+        const action = actionInput ? actionInput.value : null;
+        if (action !== 'checkInPreBooked' && action !== 'cancelNoShow') return;
+        
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const button = form.querySelector('button[type="submit"]');
+        if (button?.disabled) return;
+        
+        const oldButtonHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="material-symbols-outlined text-[14.5px] animate-spin">sync</span>';
+        
+        try {
+            const url = '${pageContext.request.contextPath}/staff/checkin';
+            const formData = new FormData(form);
+            const response = await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams(formData)
+            });
+            
+            const contentType = response.headers.get('content-type') || '';
+            let data;
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                throw new Error('Phản hồi từ hệ thống không hợp lệ.');
+            }
+            
+            if (!response.ok || !data.success) {
+                if (data.paymentRequired) {
+                    if (confirm(data.message + '\n\nBạn có xác nhận đã thu đủ tiền mặt của khách tại quầy không?')) {
+                        let cashInput = form.querySelector('input[name="daThuTienMat"]');
+                        if (!cashInput) {
+                            cashInput = document.createElement('input');
+                            cashInput.type = 'hidden';
+                            cashInput.name = 'daThuTienMat';
+                            form.appendChild(cashInput);
+                        }
+                        cashInput.value = 'true';
+                        button.disabled = false;
+                        button.innerHTML = oldButtonHtml;
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
+                            form.dispatchEvent(submitEvent);
+                            if (!submitEvent.defaultPrevented) {
+                                form.submit();
+                            }
+                        }
+                        return;
+                    }
+                } else {
+                    showStaffToast(data.message || 'Thao tác thất bại.');
+                }
+                button.disabled = false;
+                button.innerHTML = oldButtonHtml;
+                return;
+            }
+            
+            showStaffToast(data.message || 'Thao tác thành công.');
+            await pollUpdates(); // Cập nhật danh sách, counter và card sân tức thì
+            
+        } catch (error) {
+            showStaffToast(error.message || 'Đã xảy ra lỗi kết nối.');
+            button.disabled = false;
+            button.innerHTML = oldButtonHtml;
         }
     });
 
@@ -4478,17 +4598,29 @@
     async function handleSaveServicesAction() {
         if (isStaffSavingServices || currentPaymentModalState !== PaymentModalState.EDITING) return;
 
+        isStaffSavingServices = true;
+        const btn = document.getElementById('staff-payment-submit-btn');
+        const label = document.getElementById('staff-payment-submit-label');
+        if (btn) btn.disabled = true;
+        if (label) label.textContent = 'Đang lưu...';
+
         const errorBox = document.getElementById('staff-payment-error');
         if (errorBox) errorBox.classList.add('hidden');
 
         if (staffOrdered.length === 0) {
             showStaffPaymentError('Vui lòng chọn ít nhất một dịch vụ.');
+            isStaffSavingServices = false;
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = 'Lưu dịch vụ';
             return;
         }
 
         let billMode = currentBillMode;
         if (billMode === 'MAIN' && currentMainBillPaid) {
             if (!confirm('Hóa đơn sân đã được thanh toán. Bạn có muốn tạo hóa đơn tách thay thế không?')) {
+                isStaffSavingServices = false;
+                if (btn) btn.disabled = false;
+                if (label) label.textContent = 'Lưu dịch vụ';
                 return;
             }
             billMode = 'SPLIT';
@@ -4512,7 +4644,6 @@
             params.append('quantity', String(item.SoLuong));
         });
 
-        isStaffSavingServices = true;
         setPaymentModalState(PaymentModalState.PROCESSING);
 
         try {

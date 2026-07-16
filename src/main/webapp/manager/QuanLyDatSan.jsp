@@ -245,6 +245,20 @@
                         <span class="w-1.5 h-1.5 rounded-full bg-purple-700 live-dot"></span>Đang chơi
                       </span>
                     </c:when>
+                    <c:when test="${item.trangThai eq 'Chờ thanh toán'}">
+                      <span class="badge badge-amber flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600 live-dot"></span>Đang giữ chỗ
+                      </span>
+                      <c:if test="${not empty item.holdExpiresAt}">
+                        <p class="text-[9px] text-amber-600 font-semibold mt-0.5">Hết hạn giữ chỗ: ${item.holdExpiresAt.toString().substring(11,16)}</p>
+                      </c:if>
+                    </c:when>
+                    <c:when test="${item.trangThai eq 'Quá hạn'}">
+                      <span class="badge badge-gray">Hết hạn giữ chỗ</span>
+                    </c:when>
+                    <c:when test="${item.trangThai eq 'Không đến'}">
+                      <span class="badge badge-gray">Khách không đến</span>
+                    </c:when>
                     <c:otherwise>
                       <span class="badge badge-gray">${item.trangThai}</span>
                     </c:otherwise>

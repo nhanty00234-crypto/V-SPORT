@@ -1653,6 +1653,7 @@
         }
 
         function closeBookingModal() {
+            releaseSoftHold();
             const overlay = document.getElementById("bookingModalOverlay");
             overlay.classList.add("opacity-0");
             document.querySelectorAll("#bookingFormPanel, #checkoutPanel").forEach(p => p.classList.add("scale-95"));
@@ -1709,6 +1710,11 @@
         }
 
         let lastHoldKey = null;
+        // Sân/ngày đang thực sự được giữ chỗ ở server (khác lastHoldKey ở chỗ chỉ set khi hold
+        // THÀNH CÔNG) - dùng để release đúng hold khi người dùng đóng modal mà không hoàn tất đặt sân.
+        let activeHoldCourtId = null;
+        let activeHoldDate = null;
+
         function requestSoftHold(courtId, dateVal, startVal, endVal) {
             const holdKey = `\${courtId}|\${dateVal}|\${startVal}|\${endVal}`;
             if (holdKey === lastHoldKey) return;
@@ -1726,8 +1732,30 @@
                     warningBox.classList.remove("hidden");
                     if (btnNext) btnNext.disabled = true;
                     lastHoldKey = null;
+                } else {
+                    activeHoldCourtId = courtId;
+                    activeHoldDate = dateVal;
                 }
             }).catch(() => {});
+        }
+
+        // Giải phóng SoftHold hiện tại ngay khi người dùng đóng modal mà không hoàn tất đặt sân -
+        // không chờ hold tự hết hạn (SOFT_HOLD_TIMEOUT_MINUTES), tránh chặn oan slot cho khách khác.
+        function releaseSoftHold() {
+            if (!activeHoldCourtId || !activeHoldDate) return;
+            const payload = new URLSearchParams({ action: "release", sanId: activeHoldCourtId, ngayDat: activeHoldDate }).toString();
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon("<c:url value='/customer/giu-cho-tam'/>",
+                    new Blob([payload], { type: "application/x-www-form-urlencoded" }));
+            } else {
+                fetch("<c:url value='/customer/giu-cho-tam'/>", {
+                    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: payload, keepalive: true
+                }).catch(() => {});
+            }
+            activeHoldCourtId = null;
+            activeHoldDate = null;
+            lastHoldKey = null;
         }
 
         function checkScheduleAndPrice() {
