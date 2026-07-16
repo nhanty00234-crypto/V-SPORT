@@ -187,12 +187,11 @@
                                             <td class="p-4 text-center">
                                                 <div class="flex items-center justify-center gap-1.5">
                                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
-                                                        <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt sân này?');" class="inline-block">
-                                                                <input type="hidden" name="id" value="${lich.datSanId}">
-                                                                <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
-                                                                    Hủy
-                                                                </button>
-                                                            </form>
+                                                        <button type="button"
+                                                                onclick="openCancelBookingModal(${lich.datSanId}, '${lich.ngayDat}', '${lich.gioBatDau}')"
+                                                                class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
+                                                            Hủy
+                                                        </button>
                                                     </c:if>
                                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
                                                         <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-all active:scale-95 text-[10px]">
@@ -408,6 +407,39 @@
         </div>
     </div>
 
+    <!-- CANCEL BOOKING MODAL -->
+    <div id="cancelBookingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md scale-95 transition-transform duration-300">
+            <div class="bg-red-600 rounded-t-2xl px-6 py-4 flex items-center justify-between">
+                <h3 class="text-white font-bold text-sm">Xác nhận hủy đặt sân</h3>
+                <button onclick="closeCancelBookingModal()" class="text-white/80 hover:text-white transition-colors p-1">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+            <form id="cancelBookingForm" action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post">
+                <input type="hidden" name="id" id="cancelBookingDatSanId" value="">
+                <div class="p-6 space-y-4">
+                    <p class="text-sm text-slate-600">Bạn có chắc chắn muốn hủy yêu cầu đặt sân này không?</p>
+                    <div id="cancelBookingLateWarning" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-[12px] text-amber-800 font-semibold leading-snug">
+                        Bạn vẫn có thể hủy, nhưng đây là hủy sát giờ và sẽ ảnh hưởng điểm uy tín của bạn.
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Lý do hủy (không bắt buộc)</label>
+                        <textarea name="reason" rows="2" maxlength="255" placeholder="Ví dụ: bận việc đột xuất..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"></textarea>
+                    </div>
+                </div>
+                <div class="px-6 pb-6 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeCancelBookingModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm">
+                        Đóng
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors text-sm">
+                        Xác nhận hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let customerProducts = [];
         let customerOrdered = [];
@@ -513,6 +545,39 @@
             modal.classList.add("opacity-0");
             modal.querySelector(".bg-white").classList.add("scale-95");
             setTimeout(() => {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }, 300);
+        }
+
+        function openCancelBookingModal(datSanId, ngayDatStr, gioBatDauStr) {
+            document.getElementById("cancelBookingDatSanId").value = datSanId;
+
+            // Cảnh báo hủy sát giờ chỉ là gợi ý hiển thị phía client — quyết định EARLY/LATE
+            // chính thức và việc trừ điểm luôn do server (BookingCancellationService) quyết định.
+            var warningEl = document.getElementById("cancelBookingLateWarning");
+            try {
+                var bookingStart = new Date(ngayDatStr + "T" + gioBatDauStr);
+                var hoursUntilStart = (bookingStart.getTime() - Date.now()) / (1000 * 60 * 60);
+                warningEl.classList.toggle("hidden", hoursUntilStart > 6);
+            } catch (e) {
+                warningEl.classList.add("hidden");
+            }
+
+            var modal = document.getElementById("cancelBookingModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            requestAnimationFrame(function () {
+                modal.classList.remove("opacity-0");
+                modal.querySelector(".bg-white").classList.remove("scale-95");
+            });
+        }
+
+        function closeCancelBookingModal() {
+            var modal = document.getElementById("cancelBookingModal");
+            modal.classList.add("opacity-0");
+            modal.querySelector(".bg-white").classList.add("scale-95");
+            setTimeout(function () {
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
             }, 300);
