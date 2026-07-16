@@ -144,14 +144,8 @@ public class CheckInServlet extends HttpServlet {
             return;
         }
 
-        // 2. Láº¥y dá»¯ liá»‡u hiá»ƒn thá»‹ lÃªn Dashboard
-        req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
-        req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
-        // Source of truth cho mọi đồng hồ đếm ngược trên trang - frontend tính offset so với
-        // Date.now() của client thay vì tin tưởng đồng hồ thiết bị (xem CheckIn.jsp).
-        req.setAttribute("serverNow", java.time.LocalDateTime.now());
-        req.setAttribute("upcomingBookingWarningMinutes", org.example.service.checkin.CheckInWindow.MAX_EARLY_MINUTES);
-        req.setAttribute("endingSoonMinutes", org.example.util.Constants.ENDING_SOON_MINUTES);
+        // 2. Lấy dữ liệu hiển thị lên Dashboard
+        setupDashboardAttributes(req, user);
 
         // 3. Forward tá»›i giao diá»‡n JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
@@ -445,8 +439,7 @@ public class CheckInServlet extends HttpServlet {
         }
 
         // Tải lại dữ liệu lên trang dashboard
-        req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
-        req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
+        setupDashboardAttributes(req, user);
 
         // Forward lại trang JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);
@@ -1383,5 +1376,13 @@ public class CheckInServlet extends HttpServlet {
             logger.error("Error extending session", e);
             writeJsonResponse(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorJson("SYSTEM_ERROR", e.getMessage()));
         }
+    }
+
+    private void setupDashboardAttributes(HttpServletRequest req, TaiKhoan user) {
+        req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
+        req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
+        req.setAttribute("serverNow", java.time.LocalDateTime.now());
+        req.setAttribute("upcomingBookingWarningMinutes", org.example.service.checkin.CheckInWindow.MAX_EARLY_MINUTES);
+        req.setAttribute("endingSoonMinutes", org.example.util.Constants.ENDING_SOON_MINUTES);
     }
 }

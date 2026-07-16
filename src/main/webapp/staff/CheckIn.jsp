@@ -660,13 +660,24 @@
     // Server là source of truth cho thời gian - mọi đồng hồ đếm ngược trên trang tính theo
     // offset này thay vì tin đồng hồ thiết bị. Được resync mỗi lần poll dữ liệu (30s) và khi
     // tab quay lại foreground, nên không lệch nhiều theo thời gian.
-    let serverTimeOffsetMs = new Date("${serverNow}").getTime() - Date.now();
+    let serverTimeOffsetMs = 0;
+    try {
+        const sNowStr = "${serverNow}";
+        if (sNowStr) {
+            const parsedTime = new Date(sNowStr).getTime();
+            if (!isNaN(parsedTime)) {
+                serverTimeOffsetMs = parsedTime - Date.now();
+            }
+        }
+    } catch (e) {
+        console.error("Lỗi đồng bộ thời gian máy chủ:", e);
+    }
     function getServerNow() { return new Date(Date.now() + serverTimeOffsetMs); }
 
-    const UPCOMING_BOOKING_WARNING_MINUTES = ${upcomingBookingWarningMinutes};
-    const ENDING_SOON_MINUTES = ${endingSoonMinutes};
+    const UPCOMING_BOOKING_WARNING_MINUTES = ${not empty upcomingBookingWarningMinutes ? upcomingBookingWarningMinutes : 15};
+    const ENDING_SOON_MINUTES = ${not empty endingSoonMinutes ? endingSoonMinutes : 15};
 
-    const isManager = ${isManager};
+    const isManager = ${isManager ? 'true' : 'false'};
     const themeBg = '${themeBg}';
     const themeBgHover = '${themeBgHover}';
     const themeText = '${themeText}';
