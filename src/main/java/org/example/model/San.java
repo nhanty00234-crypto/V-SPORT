@@ -56,6 +56,32 @@ public class San {
     private String gioKetThucActive;
     @Transient
     private String ghiChuActive;
+    // Ca đang chơi (nếu có) - thời điểm ISO đầy đủ để frontend không phải tự ghép ngày+giờ,
+    // và thông tin khách để hiển thị ngay trên card (không phải kéo xuống danh sách bên dưới mới biết).
+    @Transient
+    private LocalDateTime scheduledEndActive;
+    @Transient
+    private LocalDateTime actualStartActive;
+    @Transient
+    private String nguonDatSanActive;
+    @Transient
+    private String tenKhachHangActive;
+    @Transient
+    private String soDienThoaiActive;
+    // Booking "Đã xác nhận" gần nhất sắp tới (chưa check-in) trong ngưỡng cảnh báo - lý do
+    // chính xác vì sao card không được coi là AVAILABLE dù San.TrangThai = 'Sẵn sàng'.
+    @Transient
+    private Integer nextDatSanId;
+    @Transient
+    private String nextTenKhachHang;
+    @Transient
+    private String nextSoDienThoai;
+    @Transient
+    private String nextNguonDatSan;
+    @Transient
+    private LocalDateTime nextGioBatDau;
+    @Transient
+    private LocalDateTime nextGioKetThuc;
 
 
     public San(int sanID, String tenSan, int loaiSanID, int coSoID, String trangThai, String moTa, String hinhAnh) {
@@ -165,6 +191,41 @@ public class San {
 
     public String getGhiChuActive() { return ghiChuActive; }
     public void setGhiChuActive(String ghiChuActive) { this.ghiChuActive = ghiChuActive; }
+
+    public LocalDateTime getScheduledEndActive() { return scheduledEndActive; }
+    public void setScheduledEndActive(LocalDateTime scheduledEndActive) { this.scheduledEndActive = scheduledEndActive; }
+
+    public LocalDateTime getActualStartActive() { return actualStartActive; }
+    public void setActualStartActive(LocalDateTime actualStartActive) { this.actualStartActive = actualStartActive; }
+
+    public String getNguonDatSanActive() { return nguonDatSanActive; }
+    public void setNguonDatSanActive(String nguonDatSanActive) { this.nguonDatSanActive = nguonDatSanActive; }
+
+    public String getTenKhachHangActive() { return tenKhachHangActive; }
+    public void setTenKhachHangActive(String tenKhachHangActive) { this.tenKhachHangActive = tenKhachHangActive; }
+
+    public String getSoDienThoaiActive() { return soDienThoaiActive; }
+    public void setSoDienThoaiActive(String soDienThoaiActive) { this.soDienThoaiActive = soDienThoaiActive; }
+
+    public Integer getNextDatSanId() { return nextDatSanId; }
+    public void setNextDatSanId(Integer nextDatSanId) { this.nextDatSanId = nextDatSanId; }
+
+    public String getNextTenKhachHang() { return nextTenKhachHang; }
+    public void setNextTenKhachHang(String nextTenKhachHang) { this.nextTenKhachHang = nextTenKhachHang; }
+
+    public String getNextSoDienThoai() { return nextSoDienThoai; }
+    public void setNextSoDienThoai(String nextSoDienThoai) { this.nextSoDienThoai = nextSoDienThoai; }
+
+    public String getNextNguonDatSan() { return nextNguonDatSan; }
+    public void setNextNguonDatSan(String nextNguonDatSan) { this.nextNguonDatSan = nextNguonDatSan; }
+
+    public LocalDateTime getNextGioBatDau() { return nextGioBatDau; }
+    public void setNextGioBatDau(LocalDateTime nextGioBatDau) { this.nextGioBatDau = nextGioBatDau; }
+
+    public LocalDateTime getNextGioKetThuc() { return nextGioKetThuc; }
+    public void setNextGioKetThuc(LocalDateTime nextGioKetThuc) { this.nextGioKetThuc = nextGioKetThuc; }
+
+    public boolean isHasUpcomingBooking() { return nextDatSanId != null; }
 
 
     @Override

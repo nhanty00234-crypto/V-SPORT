@@ -670,12 +670,46 @@ public class CheckInDAO {
         org.example.dao.impl.LichDatSanDAOImpl.updateExpiredBookingsAndFields();
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<San> list = new ArrayList<>();
+        // Ngưỡng "sắp có lịch đặt" dùng chung với cửa sổ check-in hợp lệ (CheckInWindow.MAX_EARLY_MINUTES) -
+        // một sân không được coi là AVAILABLE nếu có booking "Đã xác nhận" sắp bắt đầu trong ngưỡng này.
+        int upcomingWindowMinutes = org.example.service.checkin.CheckInWindow.MAX_EARLY_MINUTES;
         String sql = "SELECT s.SanID, s.TenSan, s.LoaiSanID, s.CoSoID, s.TrangThai, s.MoTa, s.HinhAnh, " +
                      "ls.TenLoai AS TenLoaiSan, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen, " +
                      "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS DatSanIDActive, " +
                      "(SELECT TOP 1 CONVERT(VARCHAR(5), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive, " +
                      "(SELECT TOP 1 CONVERT(VARCHAR(5), lds.GioKetThuc, 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioKetThucActive, " +
-                     "(SELECT TOP 1 lds.GhiChu FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GhiChuActive " +
+                     "(SELECT TOP 1 lds.GhiChu FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GhiChuActive, " +
+                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioKetThuc AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS ScheduledEndActive, " +
+                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(COALESCE(lds.actual_start_time, lds.GioBatDau) AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS ActualStartActive, " +
+                     "(SELECT TOP 1 lds.NguonDatSan FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS NguonDatSanActive, " +
+                     "(SELECT TOP 1 acc.FullName FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS TenKhachHangActive, " +
+                     "(SELECT TOP 1 acc.PhoneNumber FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS SoDienThoaiActive, " +
+                     "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
+                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.GioBatDau ASC) AS NextDatSanId, " +
+                     "(SELECT TOP 1 COALESCE(acc.FullName, N'Khách vãng lai') FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
+                     "   WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' AND lds.NgayDat = CAST(GETDATE() AS DATE) " +
+                     "   AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.GioBatDau ASC) AS NextTenKhachHang, " +
+                     "(SELECT TOP 1 acc.PhoneNumber FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
+                     "   WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' AND lds.NgayDat = CAST(GETDATE() AS DATE) " +
+                     "   AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.GioBatDau ASC) AS NextSoDienThoai, " +
+                     "(SELECT TOP 1 lds.NguonDatSan FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
+                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.GioBatDau ASC) AS NextNguonDatSan, " +
+                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
+                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.GioBatDau ASC) AS NextGioBatDau, " +
+                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioKetThuc AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
+                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.GioBatDau ASC) AS NextGioKetThuc " +
                      "FROM San s " +
                      "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
                      "WHERE s.CoSoID = ? AND s.IsDeleted = 0 " +
@@ -702,6 +736,17 @@ public class CheckInDAO {
                     s.setGioBatDauActive(rs.getString("GioBatDauActive"));
                     s.setGioKetThucActive(rs.getString("GioKetThucActive"));
                     s.setGhiChuActive(rs.getString("GhiChuActive"));
+                    s.setScheduledEndActive(rs.getTimestamp("ScheduledEndActive") != null ? rs.getTimestamp("ScheduledEndActive").toLocalDateTime() : null);
+                    s.setActualStartActive(rs.getTimestamp("ActualStartActive") != null ? rs.getTimestamp("ActualStartActive").toLocalDateTime() : null);
+                    s.setNguonDatSanActive(rs.getString("NguonDatSanActive"));
+                    s.setTenKhachHangActive(rs.getString("TenKhachHangActive"));
+                    s.setSoDienThoaiActive(rs.getString("SoDienThoaiActive"));
+                    s.setNextDatSanId(rs.getObject("NextDatSanId") != null ? rs.getInt("NextDatSanId") : null);
+                    s.setNextTenKhachHang(rs.getString("NextTenKhachHang"));
+                    s.setNextSoDienThoai(rs.getString("NextSoDienThoai"));
+                    s.setNextNguonDatSan(rs.getString("NextNguonDatSan"));
+                    s.setNextGioBatDau(rs.getTimestamp("NextGioBatDau") != null ? rs.getTimestamp("NextGioBatDau").toLocalDateTime() : null);
+                    s.setNextGioKetThuc(rs.getTimestamp("NextGioKetThuc") != null ? rs.getTimestamp("NextGioKetThuc").toLocalDateTime() : null);
                     list.add(s);
                 }
             }

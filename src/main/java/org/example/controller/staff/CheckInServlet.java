@@ -138,7 +138,8 @@ public class CheckInServlet extends HttpServlet {
             java.util.Map<String, Object> data = new java.util.HashMap<>();
             data.put("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
             data.put("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
-            
+            data.put("serverNow", java.time.LocalDateTime.now());
+
             resp.getWriter().write(gson.toJson(data));
             return;
         }
@@ -146,6 +147,11 @@ public class CheckInServlet extends HttpServlet {
         // 2. Láº¥y dá»¯ liá»‡u hiá»ƒn thá»‹ lÃªn Dashboard
         req.setAttribute("danhSachSan", checkInDAO.getDanhSachSan(user.getCoSoId()));
         req.setAttribute("danhSachLich", checkInDAO.getDanhSachLichCheckInHomNay(user.getCoSoId()));
+        // Source of truth cho mọi đồng hồ đếm ngược trên trang - frontend tính offset so với
+        // Date.now() của client thay vì tin tưởng đồng hồ thiết bị (xem CheckIn.jsp).
+        req.setAttribute("serverNow", java.time.LocalDateTime.now());
+        req.setAttribute("upcomingBookingWarningMinutes", org.example.service.checkin.CheckInWindow.MAX_EARLY_MINUTES);
+        req.setAttribute("endingSoonMinutes", org.example.util.Constants.ENDING_SOON_MINUTES);
 
         // 3. Forward tá»›i giao diá»‡n JSP
         req.getRequestDispatcher("/staff/CheckIn.jsp").forward(req, resp);

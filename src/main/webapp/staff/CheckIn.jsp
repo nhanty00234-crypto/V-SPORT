@@ -439,6 +439,7 @@
                 <c:forEach var="san" items="${danhSachSan}">
                     <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300
                          ${san.trangThai == 'Đang sử dụng' ? (isManager ? 'border-purple-300 shadow-md' : 'border-orange-300 shadow-md') : ''}
+                         ${san.trangThai == 'Sẵn sàng' && san.hasUpcomingBooking ? 'border-amber-300 bg-amber-50/30 shadow-md' : ''}
                          ${san.trangThai == 'Bảo trì' ? 'border-amber-200 bg-amber-50/20' : ''}
                          ${san.trangThai == 'Tạm đóng' ? 'border-red-200 bg-red-50/20' : ''}"
                          data-sanid="${san.sanID}"
@@ -454,6 +455,7 @@
                          data-giobatdauactive="${san.gioBatDauActive}"
                          data-giokethucactive="${san.gioKetThucActive}"
                          data-ghichuactive="${san.ghiChuActive}"
+                         data-nextdatsanid="${san.nextDatSanId}"
                          onclick="onCardClick(event, this)">
                         
                         <div class="w-full flex flex-col items-center">
@@ -487,6 +489,40 @@
                                     <button type="button" onclick="openStaffInvoiceModal(${san.datSanIdActive})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
                                         Dịch vụ & Thanh toán
                                     </button>
+                                </c:when>
+                                <c:when test="${san.trangThai == 'Sẵn sàng' && san.hasUpcomingBooking}">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">event_upcoming</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
+                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Sắp có lịch đặt</span>
+
+                                    <div class="w-full mt-2 text-left text-[10px] text-zinc-600 space-y-0.5">
+                                        <p class="font-bold text-zinc-800 truncate flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">person</span>${san.nextTenKhachHang}
+                                        </p>
+                                        <p class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                            ${san.nextGioBatDau.toString().substring(11,16)} – ${san.nextGioKetThuc.toString().substring(11,16)}
+                                            <span class="badge badge-gray text-[8px] uppercase ml-1">${san.nextNguonDatSan}</span>
+                                        </p>
+                                    </div>
+                                    <p class="text-[10px] mt-1.5 flex items-center justify-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px] text-amber-600">hourglass_top</span>
+                                        <span class="upcoming-timer font-bold text-amber-700" data-next-start="${san.nextGioBatDau}">Đang tính...</span>
+                                    </p>
+
+                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="w-full mt-2">
+                                        <input type="hidden" name="action" value="checkInPreBooked">
+                                        <input type="hidden" name="datSanId" value="${san.nextDatSanId}">
+                                        <input type="hidden" name="daThuTienMat" value="false">
+                                        <button type="submit" onclick="event.stopPropagation();" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
+                                            <span class="material-symbols-outlined text-[14px]">how_to_reg</span>
+                                            Check-in khách
+                                        </button>
+                                    </form>
                                 </c:when>
                                 <c:when test="${san.trangThai == 'Sẵn sàng'}">
                                     <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
@@ -620,6 +656,16 @@
 
 <script>
     let drawerTimerInterval = null;
+
+    // Server là source of truth cho thời gian - mọi đồng hồ đếm ngược trên trang tính theo
+    // offset này thay vì tin đồng hồ thiết bị. Được resync mỗi lần poll dữ liệu (30s) và khi
+    // tab quay lại foreground, nên không lệch nhiều theo thời gian.
+    let serverTimeOffsetMs = new Date("${serverNow}").getTime() - Date.now();
+    function getServerNow() { return new Date(Date.now() + serverTimeOffsetMs); }
+
+    const UPCOMING_BOOKING_WARNING_MINUTES = ${upcomingBookingWarningMinutes};
+    const ENDING_SOON_MINUTES = ${endingSoonMinutes};
+
     const isManager = ${isManager};
     const themeBg = '${themeBg}';
     const themeBgHover = '${themeBgHover}';
@@ -934,7 +980,7 @@
             } else if (b.trangThai === 'Đã xác nhận' || b.trangThai === 'Chờ xác nhận') {
                 countWaiting++;
                 
-                let checkinBtnText = "Mở sân";
+                let checkinBtnText = b.trangThai === 'Đã xác nhận' ? "Check-in khách" : "Mở sân";
                 let checkinAction = "checkInPreBooked";
                 
                 waitingContainer.insertAdjacentHTML('beforeend', `
@@ -1132,8 +1178,8 @@
     // Update all card timers in the court grid
     function updateAllCardTimers() {
         const timers = document.querySelectorAll('.card-timer');
-        const now = new Date();
-        
+        const now = getServerNow();
+
         timers.forEach(timer => {
             const startStr = timer.getAttribute('data-start');
             const endStr = timer.getAttribute('data-end');
@@ -1158,21 +1204,46 @@
                         timer.textContent = "Chờ bắt đầu";
                         timer.className = "card-timer font-bold text-zinc-500";
                     } else if (now >= endDate) {
-                        timer.textContent = "Hết giờ chơi";
+                        const overtimeMs = now - endDate;
+                        timer.textContent = "QUÁ GIỜ · Quá " + formatDuration(overtimeMs);
                         timer.className = "card-timer font-black text-rose-600 animate-bounce";
                     } else {
                         const remainingMs = endDate - now;
-                        timer.textContent = "Còn lại: " + formatDuration(remainingMs);
-                        
-                        // Change style dynamically based on remaining time
                         const remainingMins = remainingMs / 60000;
-                        if (remainingMins <= 15) {
+                        if (remainingMins <= ENDING_SOON_MINUTES) {
+                            timer.textContent = "Sắp hết giờ · Còn " + formatDuration(remainingMs);
                             timer.className = "card-timer font-black text-rose-600 animate-pulse";
                         } else {
+                            timer.textContent = "Còn lại: " + formatDuration(remainingMs);
                             timer.className = "card-timer font-bold " + themeText;
                         }
                     }
                 }
+            }
+        });
+
+        // Đồng hồ đếm ngược tới giờ bắt đầu cho các sân đang UPCOMING_BOOKING (đã xác nhận,
+        // chưa check-in, sắp tới trong ngưỡng cảnh báo) - dùng chung 1 global timer, không tạo
+        // interval riêng cho mỗi card.
+        document.querySelectorAll('.upcoming-timer').forEach(timer => {
+            const startIso = timer.getAttribute('data-next-start');
+            if (!startIso) return;
+            const startDate = new Date(startIso);
+            if (isNaN(startDate.getTime())) return;
+
+            const remainingMs = startDate - now;
+            if (remainingMs <= 0) {
+                // Đã tới/qua giờ hẹn mà vẫn chưa check-in - vẫn hiển thị mốc 00:00:00, không âm.
+                timer.textContent = "Bắt đầu sau 00:00:00";
+                timer.className = "upcoming-timer font-black text-rose-600 animate-pulse";
+                return;
+            }
+            const remainingMins = remainingMs / 60000;
+            timer.textContent = "Bắt đầu sau " + formatDuration(remainingMs);
+            if (remainingMins <= ENDING_SOON_MINUTES) {
+                timer.className = "upcoming-timer font-black text-rose-600 animate-pulse";
+            } else {
+                timer.className = "upcoming-timer font-bold text-amber-700";
             }
         });
     }
@@ -1189,7 +1260,7 @@
         const totalPriceEl = document.getElementById('drawer-active-total-price');
         
         function update() {
-            const now = new Date();
+            const now = getServerNow();
             if (isOpenMode) {
                 // Count-up mode
                 if (startDate) {
@@ -1273,7 +1344,12 @@
             const response = await fetch('${pageContext.request.contextPath}/staff/checkin?ajax=true');
             if (!response.ok) return;
             const data = await response.json();
-            
+
+            // Resync server-time offset mỗi lần poll để tránh lệch dần nếu tab đứng yên lâu.
+            if (data.serverNow) {
+                serverTimeOffsetMs = new Date(data.serverNow).getTime() - Date.now();
+            }
+
             if (data.danhSachLich) {
                 localDanhSachLich = data.danhSachLich;
             }
@@ -1357,6 +1433,56 @@
                                     <button type="button" onclick="openStaffInvoiceModal(\${san.datSanIdActive})" class="w-full mt-3 \${themeBg} \${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
                                         Dịch vụ & Thanh toán
                                     </button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (san.trangThai === 'Sẵn sàng' && san.nextDatSanId != null) {
+                        htmlGrid += `
+                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300 border-amber-300 bg-amber-50/30 shadow-md"
+                                 data-sanid="\${san.sanID}"
+                                 data-tensan="\${san.tenSan}"
+                                 data-loaisan="\${tenLoaiSan}"
+                                 data-trangthai="\${san.trangThai}"
+                                 data-mota="\${san.moTa || ''}"
+                                 data-giakhongden="\${san.giaKhongDen}"
+                                 data-giacoden="\${san.giaCoDen}"
+                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
+                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
+                                 data-nextdatsanid="\${san.nextDatSanId}"
+                                 onclick="onCardClick(event, this)">
+                                <div class="w-full flex flex-col items-center">
+                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
+                                        <span class="material-symbols-outlined text-[24px]">event_upcoming</span>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
+                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
+                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Sắp có lịch đặt</span>
+
+                                    <div class="w-full mt-2 text-left text-[10px] text-zinc-600 space-y-0.5">
+                                        <p class="font-bold text-zinc-800 truncate flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">person</span>\${san.nextTenKhachHang || ''}
+                                        </p>
+                                        <p class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                            \${(san.nextGioBatDau || '').substring(11,16)} – \${(san.nextGioKetThuc || '').substring(11,16)}
+                                            <span class="badge badge-gray text-[8px] uppercase ml-1">\${san.nextNguonDatSan || ''}</span>
+                                        </p>
+                                    </div>
+                                    <p class="text-[10px] mt-1.5 flex items-center justify-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px] text-amber-600">hourglass_top</span>
+                                        <span class="upcoming-timer font-bold text-amber-700" data-next-start="\${san.nextGioBatDau || ''}">Đang tính...</span>
+                                    </p>
+
+                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="w-full mt-2">
+                                        <input type="hidden" name="action" value="checkInPreBooked">
+                                        <input type="hidden" name="datSanId" value="\${san.nextDatSanId}">
+                                        <input type="hidden" name="daThuTienMat" value="false">
+                                        <button type="submit" onclick="event.stopPropagation();" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
+                                            <span class="material-symbols-outlined text-[14px]">how_to_reg</span>
+                                            Check-in khách
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         `;
@@ -1475,6 +1601,13 @@
 
     // Chạy cập nhật ngay khi tải trang và thiết lập chu kỳ 30 giây
     setInterval(pollUpdates, 30000);
+
+    // Resync ngay khi tab quay lại foreground - tránh đồng hồ đếm ngược lệch nếu máy vào sleep/đổi tab lâu.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            pollUpdates();
+        }
+    });
 </script>
 
 <!-- STAFF INVOICE & SERVICE MODAL -->

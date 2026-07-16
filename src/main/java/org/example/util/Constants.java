@@ -36,6 +36,10 @@ public final class Constants {
     public static final int NO_SHOW_GRACE_MINUTES = 15;
     public static final int COD_APPROVAL_EXPIRE_HOURS = 2;
     public static final boolean NO_SHOW_AUTO_MODE = false;
+    // Ngưỡng hiển thị "sắp hết giờ" trên card sân Check-in (staff/CheckIn.jsp) khi ca đang
+    // chơi còn dưới mốc này. Ngưỡng "sắp có lịch đặt" dùng chung CheckInWindow.MAX_EARLY_MINUTES
+    // (cùng cửa sổ với thời điểm được phép check-in) thay vì khai báo thêm hằng số trùng ý nghĩa.
+    public static final int ENDING_SOON_MINUTES = 10;
 
     // ========== INVOICE (HoaDon) STATUS ==========
     public static final String TRANG_THAI_HOA_DON_CHUA_TT = "Chưa thanh toán";
