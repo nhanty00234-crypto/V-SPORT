@@ -260,12 +260,18 @@ body { font-family: 'Inter', sans-serif; }
     <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
       <i class="ti ti-trash text-red-500 text-3xl"></i>
     </div>
-    <h3 class="text-base font-bold text-zinc-900 mb-1">Chuyển cơ sở vào thùng rác?</h3>
-    <p class="text-sm text-zinc-500 mb-6" id="deleteMsg">Bạn chắc chắn muốn chuyển mục này vào thùng rác? Bạn có thể thu hồi lại trong trang Thùng rác.</p>
+    <h3 class="text-base font-bold text-zinc-900 mb-1">Ngừng hoạt động cơ sở?</h3>
+    <p class="text-sm text-zinc-500 mb-6 text-left" id="deleteMsg">Khi xác nhận:
+      <ul class="list-disc pl-5 mt-1.5 space-y-1">
+        <li>Quản lý, nhân viên và bảo vệ của cơ sở sẽ không thể đăng nhập.</li>
+        <li>Phiên đăng nhập hiện tại của họ sẽ bị vô hiệu ở lần thao tác tiếp theo.</li>
+        <li>Dữ liệu sân, lịch đặt và hóa đơn vẫn được giữ nguyên để khôi phục sau này.</li>
+      </ul>
+    </p>
     <div class="flex gap-3">
       <button onclick="closeDelete()" class="flex-1 h-10 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
       <a id="deleteBtn" href="#" class="flex-1 h-10 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-red-200">
-        <i class="ti ti-trash text-sm"></i>Chuyển vào thùng rác
+        <i class="ti ti-trash text-sm"></i>Ngừng hoạt động
       </a>
     </div>
   </div>

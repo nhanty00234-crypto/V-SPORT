@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import org.example.model.TaiKhoan;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
+import org.example.service.FacilityAccessService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,6 +20,7 @@ public class DangNhapServlet extends HttpServlet {
 
     private static final Logger LOGGER = LogManager.getLogger(DangNhapServlet.class);
     private TaiKhoanDAO TaiKhoanDAO = new TaiKhoanDAOImpl();
+    private final FacilityAccessService facilityAccessService = new FacilityAccessService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -34,6 +36,10 @@ public class DangNhapServlet extends HttpServlet {
             String redirectUrl = req.getContextPath()
                     + org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
             resp.sendRedirect(redirectUrl);
+        } else if ("true".equals(req.getParameter("facilityInactive"))) {
+            // ActiveFacilityFilter vừa invalidate session vì cơ sở của tài khoản đã ngừng hoạt động.
+            req.setAttribute("loi", "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
         } else {
             resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login");
         }
@@ -87,6 +93,23 @@ public class DangNhapServlet extends HttpServlet {
                 return;
             }
             req.setAttribute("loi", dbErrorMsg);
+            req.setAttribute("username", usernameOrEmail);
+            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            return;
+        }
+
+        if (taiKhoan != null && taiKhoan.getCoSoId() != null
+                && !facilityAccessService.isFacilityActive(taiKhoan.getCoSoId())) {
+            LOGGER.warn("Login blocked - facility inactive: accountId={}, username={}, roleId={}, coSoId={}",
+                    taiKhoan.getAccountId(), taiKhoan.getUsername(), taiKhoan.getRoleId(), taiKhoan.getCoSoId());
+            String facilityInactiveMsg = "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.";
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\": false, \"code\": \"FACILITY_INACTIVE\", \"loi\": \""
+                        + facilityInactiveMsg + "\"}");
+                return;
+            }
+            req.setAttribute("loi", facilityInactiveMsg);
             req.setAttribute("username", usernameOrEmail);
             req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
             return;

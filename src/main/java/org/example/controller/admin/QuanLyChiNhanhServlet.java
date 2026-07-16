@@ -204,6 +204,13 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                 session.setAttribute("trashMessage", "Đã chuyển vào thùng rác.");
                 session.setAttribute("trashUrl", req.getContextPath() + "/admin/thung-rac");
                 session.setAttribute("trashCountdownSeconds", 10);
+                TaiKhoan admin = (TaiKhoan) session.getAttribute("user");
+                if (admin != null) {
+                    AuditLogService.log(req, admin, null,
+                            AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_CO_SO,
+                            String.valueOf(id), "CoSoID=" + id,
+                            "Admin ngừng hoạt động cơ sở. Tài khoản thuộc cơ sở này sẽ không thể đăng nhập/thao tác cho đến khi được khôi phục.");
+                }
             } else {
                 session.setAttribute("error", result.message);
             }

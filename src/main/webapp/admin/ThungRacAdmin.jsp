@@ -188,7 +188,7 @@
                 <td class="py-4 pr-5 text-right">
                   <c:if test="${!it.restored}">
                     <button type="button"
-                            onclick="openRestoreModal(${it.trashId}, '${fn:escapeXml(it.displayName)}')"
+                            onclick="openRestoreModal(${it.trashId}, '${fn:escapeXml(it.displayName)}', '${it.entityType}')"
                             class="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors ml-auto">
                       <span class="material-symbols-outlined text-[14px]">settings_backup_restore</span>Thu hồi
                     </button>
@@ -209,7 +209,7 @@
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeRestoreModal()"></div>
   <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
     <span class="material-symbols-outlined text-3xl text-green-600 mb-3 block">settings_backup_restore</span>
-    <h3 class="text-base font-bold text-slate-900 mb-1">Thu hồi mục này?</h3>
+    <h3 class="text-base font-bold text-slate-900 mb-1" id="restoreModalTitle">Thu hồi mục này?</h3>
     <p class="text-sm text-slate-500 mb-5" id="restoreModalText"></p>
     <div class="flex justify-end gap-2">
       <button type="button" onclick="closeRestoreModal()"
@@ -228,9 +228,17 @@
 </form>
 
 <script>
-  function openRestoreModal(trashId, displayName) {
+  function openRestoreModal(trashId, displayName, entityType) {
     document.getElementById('restoreTrashId').value = trashId;
-    document.getElementById('restoreModalText').textContent = 'Đưa "' + displayName + '" trở lại trạng thái trước khi xóa.';
+    var title = document.getElementById('restoreModalTitle');
+    var text = document.getElementById('restoreModalText');
+    if (entityType === 'CoSo') {
+      title.textContent = 'Khôi phục cơ sở?';
+      text.textContent = 'Khôi phục "' + displayName + '". Các tài khoản hợp lệ (chưa bị khóa riêng) và dữ liệu vận hành của cơ sở này sẽ có thể truy cập trở lại.';
+    } else {
+      title.textContent = 'Thu hồi mục này?';
+      text.textContent = 'Đưa "' + displayName + '" trở lại trạng thái trước khi xóa.';
+    }
     document.getElementById('restoreModal').classList.remove('hidden');
   }
   function closeRestoreModal() {

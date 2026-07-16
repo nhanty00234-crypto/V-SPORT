@@ -17,6 +17,7 @@ import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.model.AdminTrash;
 import org.example.model.CoSo;
 import org.example.model.TaiKhoan;
+import org.example.service.AuditLogService;
 import org.example.service.admin.FacilityTrashService;
 
 import java.io.IOException;
@@ -111,6 +112,10 @@ public class AdminTrashServlet extends HttpServlet {
             FacilityTrashService.Result result = facilityTrashService.restoreFacility(trashId, admin.getAccountId());
             if (result.success) {
                 session.setAttribute("message", result.message);
+                AuditLogService.log(req, admin, null,
+                        AuditLogService.ACTION_RESTORE, AuditLogService.ENTITY_CO_SO,
+                        String.valueOf(item.getEntityId()), "CoSoID=" + item.getEntityId(),
+                        "Admin khôi phục cơ sở từ thùng rác. Tài khoản hợp lệ (chưa bị khóa riêng) của cơ sở này có thể đăng nhập/thao tác trở lại.");
             } else {
                 session.setAttribute("error", result.message);
             }

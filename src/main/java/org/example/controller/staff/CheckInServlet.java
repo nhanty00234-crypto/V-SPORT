@@ -58,6 +58,7 @@ public class CheckInServlet extends HttpServlet {
     private final PayOSPaymentFinalizationService payOSFinalizationService = new PayOSPaymentFinalizationService();
     private final PayOSPaymentAttemptDAO payOSPaymentAttemptDAO = new PayOSPaymentAttemptDAOImpl();
     private final PayOSConfigurationService payOSConfigurationService = new PayOSConfigurationService();
+    private final org.example.service.FacilityAccessService facilityAccessService = new org.example.service.FacilityAccessService();
 
     private boolean columnExists(java.sql.Connection conn, String tableName, String columnName) throws java.sql.SQLException {
         String sql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(?) AND name = ?";
@@ -103,6 +104,19 @@ public class CheckInServlet extends HttpServlet {
                 resp.getWriter().write("{\"error\":\"Phiên đăng nhập hết hạn hoặc bạn không có quyền truy cập.\"}");
             } else {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            }
+            return;
+        }
+
+        // Phòng thủ nhiều lớp: ActiveFacilityFilter đã chặn ở /staff/* nhưng kiểm tra lại
+        // ở đây vì đây là điểm xử lý tiền (thanh toán, PayOS) - không phụ thuộc hoàn toàn filter.
+        if (!facilityAccessService.isFacilityActive(user.getCoSoId())) {
+            String action = req.getParameter("action");
+            if (action != null || "true".equals(req.getParameter("ajax"))) {
+                writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                        errorJson("FACILITY_INACTIVE", "Cơ sở đã ngừng hoạt động."));
+            } else {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cơ sở đã ngừng hoạt động.");
             }
             return;
         }
@@ -156,6 +170,18 @@ public class CheckInServlet extends HttpServlet {
                         errorJson("UNAUTHORIZED", "Phiên đăng nhập đã hết hạn."));
             } else {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập chức năng này!");
+            }
+            return;
+        }
+
+        // Phòng thủ nhiều lớp: ActiveFacilityFilter đã chặn ở /staff/* nhưng kiểm tra lại
+        // ở đây vì đây là điểm xử lý tiền (thanh toán, PayOS) - không phụ thuộc hoàn toàn filter.
+        if (!facilityAccessService.isFacilityActive(user.getCoSoId())) {
+            if (isAjax(req, action)) {
+                writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                        errorJson("FACILITY_INACTIVE", "Cơ sở đã ngừng hoạt động."));
+            } else {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cơ sở đã ngừng hoạt động.");
             }
             return;
         }

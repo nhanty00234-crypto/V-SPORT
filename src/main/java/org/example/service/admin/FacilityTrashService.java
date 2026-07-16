@@ -61,6 +61,34 @@ public class FacilityTrashService {
                     }
                 }
 
+                int sanDangSuDung = 0;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM San WHERE CoSoID = ? AND TrangThai = N'Đang sử dụng'")) {
+                    ps.setInt(1, coSoId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) sanDangSuDung = rs.getInt(1);
+                    }
+                }
+
+                int paymentPending = 0;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM PayOSPaymentAttempt WHERE CoSoID = ? AND Status = N'PENDING'")) {
+                    ps.setInt(1, coSoId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) paymentPending = rs.getInt(1);
+                    }
+                }
+
+                if (sanDangSuDung > 0 || paymentPending > 0) {
+                    conn.rollback();
+                    StringBuilder msg = new StringBuilder("Không thể ngừng hoạt động cơ sở vì đang có ");
+                    if (sanDangSuDung > 0) msg.append(sanDangSuDung).append(" sân sử dụng");
+                    if (sanDangSuDung > 0 && paymentPending > 0) msg.append(" và ");
+                    if (paymentPending > 0) msg.append(paymentPending).append(" giao dịch chờ thanh toán");
+                    msg.append(". Vui lòng xử lý xong trước khi ngừng hoạt động.");
+                    return Result.fail(msg.toString());
+                }
+
                 int updated;
                 try (PreparedStatement ps = conn.prepareStatement(
                         "UPDATE CoSo SET IsDeleted = 1, DeletedAt = SYSUTCDATETIME(), DeletedBy = ? " +
