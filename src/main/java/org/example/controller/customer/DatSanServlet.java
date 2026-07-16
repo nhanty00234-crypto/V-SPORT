@@ -83,6 +83,8 @@ public class DatSanServlet extends HttpServlet {
     private final LoaiSanDAO loaiSanDAO = new LoaiSanDAOImpl();
     private final org.example.dao.CoSoDAO coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
     private final org.example.dao.LichDatSanDichVuDAO lichDatSanDichVuDAO = new org.example.dao.impl.LichDatSanDichVuDAOImpl();
+    private final org.example.service.booking.BookingCancellationService bookingCancellationService =
+            new org.example.service.booking.BookingCancellationService();
 
     // =========================================================================
     // PHẦN 1: XỬ LÝ GET - Hiển thị trang
@@ -814,64 +816,20 @@ public class DatSanServlet extends HttpServlet {
                 req.getServletPath(), req.getPathInfo(), user.getAccountId(), req.getParameter("id")));
         try {
             int id = Integer.parseInt(req.getParameter("id"));
-            Lichdatsan lich = lichDatSanDAO.getLichById(id);
+            String reason = req.getParameter("reason");
 
-            if (lich == null) {
-                session.setAttribute("error", "Không tìm thấy đơn đặt sân.");
-            } else if (lich.getAccountId() != user.getAccountId()) {
-                // Bảo vệ IDOR: Không cho người dùng hủy đơn của người khác
-                session.setAttribute("error", "Bạn không có quyền hủy đơn này.");
-                LOGGER.warning(String.format("IDOR attempt: AccountID=%d cố hủy đơn ID=%d của AccountID=%d",
-                        user.getAccountId(), id, lich.getAccountId()));
-            } else if ("Đã xác nhận".equals(lich.getTrangThai())
-                    && ("PayOS".equals(lich.getPaymentMethodConfirmed())
-                        || (lich.getGhiChu() != null && lich.getGhiChu().contains(org.example.util.Constants.PAYOS_PAID_GHI_CHU_MARKER)))) {
-                // Đơn đã được PayOS webhook xác nhận thanh toán: chưa có refund tự động,
-                // không cho khách tự hủy để tránh mất tiền mà không hoàn lại được.
-                session.setAttribute("error",
-                        "Đơn này đã thanh toán PayOS. Vui lòng liên hệ sân để được hỗ trợ hủy/hoàn tiền.");
-                LOGGER.warning(String.format(
-                        "[huy-dat-san] CHAN: AccountID=%d co huy don da thanh toan PayOS, DatSanID=%d",
-                        user.getAccountId(), id));
-            } else if ("Chờ xác nhận".equals(lich.getTrangThai())) {
-                LocalDateTime startDateTime = LocalDateTime.of(lich.getNgayDat(), lich.getGioBatDau());
-                if (LocalDateTime.now().plusHours(6).isAfter(startDateTime)) {
-                    session.setAttribute("error", "Không thể hủy lịch đặt sân này vì còn dưới 6 tiếng trước giờ chơi.");
-                } else {
-                    lichDatSanDAO.updateTrangThai(id, "Đã hủy");
-                    session.setAttribute("message", "Đã hủy yêu cầu đặt sân #" + id + " thành công.");
-                }
-            } else if ("Chờ thanh toán".equals(lich.getTrangThai())) {
-                // Hủy đơn chờ thanh toán: dùng SQL với điều kiện AccountID + TrangThai để đảm bảo an toàn
-                try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
-                    String sql = "UPDATE LichDatSan " +
-                            "SET TrangThai = N'Đã hủy', " +
-                            "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Khách tự hủy đơn chờ thanh toán]') " +
-                            "WHERE DatSanID = ? AND AccountID = ? AND TrangThai = N'Chờ thanh toán'";
-                    try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-                        ps.setInt(1, id);
-                        ps.setInt(2, user.getAccountId());
-                        int rows = ps.executeUpdate();
-                        if (rows > 0) {
-                            session.setAttribute("message", "Đã hủy đơn thanh toán PayOS thành công.");
-                            LOGGER.info(String.format("[huy-dat-san] THANH CONG: AccountID=%d, DatSanID=%d, rowsUpdated=%d",
-                                    user.getAccountId(), id, rows));
-                        } else {
-                            session.setAttribute("error", "Không thể hủy đơn này. Đơn có thể đã được xử lý, đã hủy hoặc không thuộc về bạn.");
-                            LOGGER.info(String.format("[huy-dat-san] THAT BAI (rows=0): AccountID=%d, DatSanID=%d, trangThaiHienTai=%s",
-                                    user.getAccountId(), id, lich.getTrangThai()));
-                        }
-                    }
-                } catch (java.sql.SQLException e) {
-                    LOGGER.log(Level.WARNING, "Lỗi SQL khi hủy đơn chờ thanh toán ID=" + id, e);
-                    session.setAttribute("error", "Hệ thống gặp lỗi khi hủy đơn. Vui lòng thử lại.");
-                }
+            org.example.service.booking.BookingCancellationService.CancelResult result =
+                    bookingCancellationService.cancelByCustomer(id, user.getAccountId(), reason, req, user);
+
+            if (result.success) {
+                session.setAttribute("message", result.message);
+                LOGGER.info(String.format("[huy-dat-san] THANH CONG: AccountID=%d, DatSanID=%d, lateCancel=%s",
+                        user.getAccountId(), id, result.lateCancel));
             } else {
-                session.setAttribute("error",
-                        "Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận' hoặc 'Chờ thanh toán'. " +
-                                "Đơn của bạn hiện đang ở trạng thái '" + lich.getTrangThai() + "'.");
+                session.setAttribute("error", result.message);
+                LOGGER.info(String.format("[huy-dat-san] THAT BAI: AccountID=%d, DatSanID=%d, message=%s",
+                        user.getAccountId(), id, result.message));
             }
-
         } catch (NumberFormatException e) {
             session.setAttribute("error", "Yêu cầu không hợp lệ.");
         }
