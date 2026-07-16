@@ -874,11 +874,19 @@
             </c:when>
             <c:otherwise>
               <c:forEach items="${categories}" var="cat">
-                <div class="flex items-center gap-3 px-3 py-2.5 bg-white rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/30 transition-colors shadow-2xs">
+                <div class="flex items-center gap-3 px-3 py-2 bg-white rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/30 transition-colors shadow-2xs">
                   <div class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-[16px]">label</span>
                   </div>
-                  <span class="text-sm font-bold text-slate-800 flex-1">${cat.tenDanhMuc}</span>
+                  <span class="text-sm font-bold text-slate-800 flex-1 truncate">${cat.tenDanhMuc}</span>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button type="button" onclick="editCategory(${cat.danhMucID}, '${cat.tenDanhMuc}')" title="Sửa nhóm" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors">
+                      <span class="material-symbols-outlined text-[15px]">edit</span>
+                    </button>
+                    <button type="button" onclick="deleteCategory(${cat.danhMucID}, '${cat.tenDanhMuc}')" title="Xóa nhóm" class="w-7 h-7 rounded hover:bg-rose-50 text-rose-500 flex items-center justify-center transition-colors">
+                      <span class="material-symbols-outlined text-[15px]">delete</span>
+                    </button>
+                  </div>
                 </div>
               </c:forEach>
             </c:otherwise>
@@ -1296,6 +1304,39 @@
       const b = document.createElement('input'); b.type='hidden'; b.name='id'; b.value=id; form.appendChild(b);
       document.body.appendChild(form);
       setTimeout(() => form.submit(), 1200);
+    });
+  }
+
+  function editCategory(id, currentName) {
+    const newName = prompt("Nhập tên mới cho nhóm dịch vụ '" + currentName + "':", currentName);
+    if (newName === null) return;
+    const trimmed = newName.trim();
+    if (trimmed === "") {
+      showToast("Tên nhóm dịch vụ không được để trống!", "error");
+      return;
+    }
+    if (trimmed.toLowerCase() === currentName.toLowerCase()) {
+      return;
+    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '${pageContext.request.contextPath}/manager/kho-dich-vu';
+    const a = document.createElement('input'); a.type='hidden'; a.name='action'; a.value='update-category'; form.appendChild(a);
+    const b = document.createElement('input'); b.type='hidden'; b.name='danhMucID'; b.value=id; form.appendChild(b);
+    const c = document.createElement('input'); c.type='hidden'; c.name='tenDanhMuc'; c.value=trimmed; form.appendChild(c);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function deleteCategory(id, name) {
+    showCustomConfirm("Bạn có chắc chắn muốn xóa nhóm dịch vụ '" + name + "'? Thao tác này không thể khôi phục.", () => {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '${pageContext.request.contextPath}/manager/kho-dich-vu';
+      const a = document.createElement('input'); a.type='hidden'; a.name='action'; a.value='delete-category'; form.appendChild(a);
+      const b = document.createElement('input'); b.type='hidden'; b.name='danhMucID'; b.value=id; form.appendChild(b);
+      document.body.appendChild(form);
+      form.submit();
     });
   }
 

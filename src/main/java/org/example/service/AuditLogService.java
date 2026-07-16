@@ -37,6 +37,7 @@ public class AuditLogService {
     public static final String ACTION_CREATE           = "CREATE";
     public static final String ACTION_UPDATE           = "UPDATE";
     public static final String ACTION_SOFT_DELETE      = "SOFT_DELETE";
+    public static final String ACTION_DELETE           = "DELETE";
     public static final String ACTION_RESTORE          = "RESTORE";
     public static final String ACTION_ADD_STAFF        = "ADD_STAFF";
     public static final String ACTION_APPROVE          = "APPROVE";
