@@ -1045,7 +1045,7 @@
                                     \${checkinBtnText}
                                 </button>
                             </form>
-                            <button type="button" onclick="openNoShowModal(\${b.datSanId}, '\${b.tenKhachHang}', \${b.reputationScore != null ? b.reputationScore : 'null'})"
+                            <button type="button" onclick="openNoShowModal(\${b.datSanId}, \${JSON.stringify(b.tenKhachHang)}, \${b.reputationScore != null ? b.reputationScore : 'null'})"
                                     class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[10.5px] px-2.5 py-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
                                 <span class="material-symbols-outlined text-[15px]">cancel</span>
                             </button>
