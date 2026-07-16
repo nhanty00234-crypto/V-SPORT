@@ -1770,6 +1770,50 @@
                         </c:if>
                     </div>
 
+                    <!-- Gia hạn thời gian chơi -->
+                    <div id="staff-extension-panel" class="bg-white rounded-xl border border-[#ccc3d8] p-3.5 shrink-0 hidden">
+                        <h4 class="text-[11px] text-[#5d5d67] uppercase font-semibold tracking-wide mb-2 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px] ${isManager ? 'text-purple-600' : 'text-orange-600'}">more_time</span>
+                            Gia hạn thời gian chơi
+                        </h4>
+                        <div class="space-y-2.5">
+                            <!-- Nút nhanh -->
+                            <div class="flex gap-2">
+                                <button type="button" onclick="previewExtensionByMinutes(15)" class="flex-1 py-1.5 rounded-lg border border-zinc-200 hover:border-violet-600 hover:bg-violet-50 text-xs font-bold text-zinc-700 hover:text-violet-700 transition-all select-none">
+                                    +15 Phút
+                                </button>
+                                <button type="button" onclick="previewExtensionByMinutes(30)" class="flex-1 py-1.5 rounded-lg border border-zinc-200 hover:border-violet-600 hover:bg-violet-50 text-xs font-bold text-zinc-700 hover:text-violet-700 transition-all select-none">
+                                    +30 Phút
+                                </button>
+                                <button type="button" onclick="previewExtensionByMinutes(60)" class="flex-1 py-1.5 rounded-lg border border-zinc-200 hover:border-violet-600 hover:bg-violet-50 text-xs font-bold text-zinc-700 hover:text-violet-700 transition-all select-none">
+                                    +60 Phút
+                                </button>
+                            </div>
+                            <!-- Chọn giờ cụ thể -->
+                            <div class="flex items-center gap-2">
+                                <label for="extension-new-time" class="text-xs text-[#5d5d67] font-medium whitespace-nowrap">Đến giờ:</label>
+                                <input type="time" id="extension-new-time" class="flex-1 text-xs border border-zinc-200 rounded-lg p-1 focus:outline-none focus:border-violet-600" onchange="previewExtensionByTime(this.value)">
+                            </div>
+                            <!-- Phí phát sinh preview -->
+                            <div id="extension-preview-result" class="hidden text-[11px] p-2 rounded-lg bg-zinc-50 border border-zinc-200 space-y-1">
+                                <div class="flex justify-between">
+                                    <span class="text-zinc-650">Giờ kết thúc mới:</span>
+                                    <span class="font-bold text-zinc-800" id="extension-preview-new-end">--:--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-zinc-650">Phí phát sinh:</span>
+                                    <span class="font-bold text-red-650" id="extension-preview-fee">0 đ</span>
+                                </div>
+                                <div class="text-zinc-550 italic mt-0.5 text-[10px] leading-tight" id="extension-preview-note"></div>
+                            </div>
+                            <!-- Nút Xác nhận -->
+                            <button type="button" id="extension-confirm-btn" onclick="confirmExtension()" disabled class="w-full bg-zinc-300 text-white font-extrabold text-[10.5px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1 select-none cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[14px]">done</span>
+                                Xác nhận gia hạn
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Tổng kết -->
                     <div class="bg-white rounded-xl border border-[#ccc3d8] p-3.5 shrink-0">
                         <div id="summary-row-court" class="hidden flex justify-between items-baseline text-sm mb-1.5 gap-2">
@@ -2592,6 +2636,8 @@
         if (discountEl) { discountEl.textContent = formatCurrency(data.giamGia || 0); discountEl.setAttribute('data-val', data.giamGia || 0); }
         const parkingEl = document.getElementById("staff-summary-parking");
         if (parkingEl) { parkingEl.textContent = formatCurrency(data.phiGuiXe || 0); parkingEl.setAttribute('data-val', data.phiGuiXe || 0); }
+
+        renderExtensionPanel(data);
 
         if (opts.isInitialLoad) {
             // Reset search/category chỉ khi mở modal lần đầu - không reset giữa lúc đang thao tác.
@@ -4715,6 +4761,157 @@
             });
         }
     });
+
+    let currentExtensionMinutes = null;
+    let currentExtensionNewTime = null;
+    let currentExtensionPreviewData = null;
+
+    function renderExtensionPanel(data) {
+        const panel = document.getElementById("staff-extension-panel");
+        if (!panel) return;
+        const confirmBtn = document.getElementById("extension-confirm-btn");
+        const previewResult = document.getElementById("extension-preview-result");
+        
+        currentExtensionMinutes = null;
+        currentExtensionNewTime = null;
+        currentExtensionPreviewData = null;
+        const timeInput = document.getElementById("extension-new-time");
+        if (timeInput) timeInput.value = "";
+        if (previewResult) previewResult.classList.add("hidden");
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.className = "w-full bg-zinc-300 text-white font-extrabold text-[10.5px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1 select-none cursor-not-allowed";
+        }
+
+        if (data.bookingTrangThai === "Đang sử dụng" && data.timeMode !== "OPEN_ENDED") {
+            panel.classList.remove("hidden");
+        } else {
+            panel.classList.add("hidden");
+        }
+    }
+
+    function previewExtensionByMinutes(mins) {
+        currentExtensionMinutes = mins;
+        currentExtensionNewTime = null;
+        const timeInput = document.getElementById("extension-new-time");
+        if (timeInput) timeInput.value = "";
+        runExtensionPreview({ extendMinutes: mins });
+    }
+
+    function previewExtensionByTime(timeStr) {
+        if (!timeStr) return;
+        currentExtensionMinutes = null;
+        currentExtensionNewTime = timeStr;
+        runExtensionPreview({ newEndTime: timeStr });
+    }
+
+    function runExtensionPreview(params) {
+        const confirmBtn = document.getElementById("extension-confirm-btn");
+        const previewResult = document.getElementById("extension-preview-result");
+        const newEndEl = document.getElementById("extension-preview-new-end");
+        const feeEl = document.getElementById("extension-preview-fee");
+        const noteEl = document.getElementById("extension-preview-note");
+
+        params.datSanId = currentStaffDatSanId;
+
+        const urlParams = new URLSearchParams(params).toString();
+        fetch('${pageContext.request.contextPath}/staff/checkin?action=previewSessionExtension&' + urlParams, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(preview => {
+            currentExtensionPreviewData = preview;
+            if (previewResult) previewResult.classList.remove("hidden");
+            if (preview.canExtend) {
+                if (newEndEl) newEndEl.textContent = preview.newGioKetThuc ? preview.newGioKetThuc.substring(0, 5) : "--:--";
+                if (feeEl) {
+                    feeEl.textContent = formatCurrency(preview.additionalAmount || 0);
+                    feeEl.className = "font-bold text-red-655";
+                }
+                if (noteEl) {
+                    noteEl.textContent = preview.maxExtendableMinutes > 0 ? ("Khung giờ khả dụng tiếp theo tối đa: " + preview.maxExtendableMinutes + " phút.") : "";
+                    noteEl.className = "text-zinc-550 italic mt-0.5 text-[10px] leading-tight";
+                }
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.className = "w-full bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10.5px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1 select-none";
+                }
+            } else {
+                if (newEndEl) newEndEl.textContent = "--:--";
+                if (feeEl) {
+                    feeEl.textContent = "Không khả dụng";
+                    feeEl.className = "font-bold text-red-500";
+                }
+                if (noteEl) {
+                    noteEl.textContent = preview.message || "Không thể gia hạn chơi.";
+                    noteEl.className = "text-red-500 font-bold mt-0.5 text-[10px] leading-tight";
+                }
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.className = "w-full bg-zinc-300 text-white font-extrabold text-[10.5px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1 select-none cursor-not-allowed";
+                }
+            }
+        })
+        .catch(err => {
+            console.error("Preview extension failed", err);
+            if (newEndEl) newEndEl.textContent = "--:--";
+            if (feeEl) {
+                feeEl.textContent = "Lỗi";
+                feeEl.className = "font-bold text-red-500";
+            }
+            if (noteEl) {
+                noteEl.textContent = "Lỗi kết nối hoặc hệ thống khi tải xem trước.";
+                noteEl.className = "text-red-500 font-bold mt-0.5 text-[10px] leading-tight";
+            }
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.className = "w-full bg-zinc-300 text-white font-extrabold text-[10.5px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1 select-none cursor-not-allowed";
+            }
+        });
+    }
+
+    function confirmExtension() {
+        if (!currentExtensionPreviewData || !currentExtensionPreviewData.canExtend) return;
+        
+        const confirmBtn = document.getElementById("extension-confirm-btn");
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = "Đang xử lý...";
+        }
+
+        const params = {
+            datSanId: currentStaffDatSanId
+        };
+        if (currentExtensionMinutes) params.extendMinutes = currentExtensionMinutes;
+        if (currentExtensionNewTime) params.newEndTime = currentExtensionNewTime;
+
+        const urlParams = new URLSearchParams(params).toString();
+        fetch('${pageContext.request.contextPath}/staff/checkin?action=extendSession&' + urlParams, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                showStaffToast(result.message);
+                fetchAndRenderInvoiceDetails(currentStaffDatSanId);
+                pollUpdates();
+            } else {
+                showStaffToast("Gia hạn thất bại: " + result.message);
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">done</span> Xác nhận gia hạn';
+                }
+            }
+        })
+        .catch(err => {
+            console.error("Confirm extension failed", err);
+            showStaffToast("Lỗi kết nối khi gửi yêu cầu gia hạn.");
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">done</span> Xác nhận gia hạn';
+            }
+        });
+    }
 </script>
 
 <c:if test="${not empty autoOpenInvoiceDatSanId}">
