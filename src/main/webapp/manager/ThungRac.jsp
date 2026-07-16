@@ -24,7 +24,7 @@
   <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
       <h2 class="text-2xl font-black tracking-tight text-purple-950">Quản lý mục đã xóa</h2>
-      <p class="text-xs text-purple-500 mt-1">Nơi khôi phục hoặc xóa vĩnh viễn các thông tin đã bị xóa mềm.</p>
+      <p class="text-xs text-purple-500 mt-1">Nơi xem và khôi phục các thông tin đã bị xóa mềm.</p>
     </div>
   </section>
 
@@ -101,9 +101,6 @@
                       <button onclick="performAction('restore', 'san', ${s.sanID})" class="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors">
                         <span class="material-symbols-outlined text-[14px]">settings_backup_restore</span>Khôi phục
                       </button>
-                      <button onclick="performAction('delete', 'san', ${s.sanID})" class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">delete_forever</span>Xóa vĩnh viễn
-                      </button>
                     </td>
                   </tr>
                 </c:forEach>
@@ -148,9 +145,6 @@
                     <td class="py-4 text-right pr-4 flex items-center justify-end gap-2">
                       <button onclick="performAction('restore', 'loaisan', ${ls.loaiSanID})" class="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors">
                         <span class="material-symbols-outlined text-[14px]">settings_backup_restore</span>Khôi phục
-                      </button>
-                      <button onclick="performAction('delete', 'loaisan', ${ls.loaiSanID})" class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">delete_forever</span>Xóa vĩnh viễn
                       </button>
                     </td>
                   </tr>
@@ -197,9 +191,6 @@
                       <button onclick="performAction('restore', 'sanpham', ${sp.sanPhamID})" class="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors">
                         <span class="material-symbols-outlined text-[14px]">settings_backup_restore</span>Khôi phục
                       </button>
-                      <button onclick="performAction('delete', 'sanpham', ${sp.sanPhamID})" class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">delete_forever</span>Xóa vĩnh viễn
-                      </button>
                     </td>
                   </tr>
                 </c:forEach>
@@ -243,9 +234,6 @@
                       <button onclick="performAction('restore', 'nhansu', ${st.accountId})" class="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors">
                         <span class="material-symbols-outlined text-[14px]">settings_backup_restore</span>Khôi phục
                       </button>
-                      <button onclick="performAction('delete', 'nhansu', ${st.accountId})" class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">delete_forever</span>Xóa vĩnh viễn
-                      </button>
                     </td>
                   </tr>
                 </c:forEach>
@@ -284,15 +272,6 @@
   }
 
   function performAction(action, type, id) {
-      if (action === 'delete') {
-          let msg = 'Bạn có chắc chắn muốn xóa vĩnh viễn mục này? Hành động này sẽ xóa dữ liệu hoàn toàn khỏi hệ thống và không thể khôi phục.';
-          if (type === 'nhansu') {
-              msg = 'Cảnh báo về tài khoản này: Tài khoản nhân viên có thể đang liên kết với ca làm việc, yêu cầu nghỉ,... Việc xóa vĩnh viễn sẽ xóa sạch hoặc gỡ bỏ các liên kết này khỏi database. Bạn vẫn muốn tiếp tục xóa?';
-          }
-          if (!confirm(msg)) {
-              return;
-          }
-      }
       document.getElementById('formAction').value = action;
       document.getElementById('formType').value = type;
       document.getElementById('formId').value = id;

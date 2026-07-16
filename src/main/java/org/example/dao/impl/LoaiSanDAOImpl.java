@@ -98,30 +98,6 @@ public class LoaiSanDAOImpl implements LoaiSanDAO {
     }
 
     @Override
-    public boolean hardDelete(int id) {
-        EntityManager em = JPAUtil.getEntityManager();
-        EntityTransaction trans = em.getTransaction();
-        try {
-            trans.begin();
-            LoaiSan ls = em.find(LoaiSan.class, id);
-            if (ls != null) {
-                em.createNativeQuery("UPDATE San SET LoaiSanID = NULL WHERE LoaiSanID = ?").setParameter(1, id).executeUpdate();
-                em.remove(ls);
-                trans.commit();
-                return true;
-            }
-            trans.rollback();
-            return false;
-        } catch (Exception e) {
-            logger.error("Lỗi xóa LoaiSan ID {}: {}", id, e.getMessage(), e);
-            if (trans.isActive()) trans.rollback();
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
     public boolean softDelete(int id, int actorId) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction trans = em.getTransaction();

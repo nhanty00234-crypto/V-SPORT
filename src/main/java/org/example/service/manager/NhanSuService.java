@@ -547,26 +547,6 @@ public class NhanSuService {
     }
 
     /**
-     * Xóa vĩnh viễn nhân viên khỏi cơ sở dữ liệu (Hard Delete)
-     */
-    public void permanentlyDeleteStaff(int accountId, int managerCoSoId) {
-        TaiKhoan account = taiKhoanDAO.getAccountById(accountId);
-        BranchSecurityUtils.getEntityOrThrow(account, "Nhân viên");
-
-        // Kiểm tra quyền truy cập chi nhánh
-        BranchSecurityUtils.checkBranchAccess(account.getCoSoId(), managerCoSoId);
-
-        // Không thể xóa Admin/Manager
-        if (!isStaff(account.getRoleId())) {
-            throw new IllegalArgumentException("Không thể xóa tài khoản có quyền Quản trị hoặc Quản lý!");
-        }
-
-        if (!taiKhoanDAO.permanentDeleteAccount(accountId)) {
-            throw new RuntimeException("Lỗi xóa vĩnh viễn nhân viên trong cơ sở dữ liệu");
-        }
-    }
-
-    /**
      * Lấy danh sách nhân viên đã bị xóa mềm của cơ sở
      */
     public List<NhanSuDTO> getDeletedStaffListByBranch(int coSoId) {

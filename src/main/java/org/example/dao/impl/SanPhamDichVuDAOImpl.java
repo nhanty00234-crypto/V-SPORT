@@ -104,32 +104,6 @@ public class SanPhamDichVuDAOImpl implements SanPhamDichVuDAO {
     }
 
     @Override
-    public boolean hardDelete(int id) {
-        EntityManager em = getEntityManager();
-        EntityTransaction trans = em.getTransaction();
-        try {
-            trans.begin();
-            SanPham_DichVu sp = em.find(SanPham_DichVu.class, id);
-            if (sp != null) {
-                em.createNativeQuery("UPDATE ChiTietHoaDon SET SanPhamID = NULL WHERE SanPhamID = ?").setParameter(1, id).executeUpdate();
-                em.remove(sp);
-                trans.commit();
-                return true;
-            }
-            trans.rollback();
-            return false;
-        } catch (Exception e) {
-            if (trans.isActive()) {
-                trans.rollback();
-            }
-            e.printStackTrace();
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
     public boolean softDelete(int id, int actorId) {
         EntityManager em = getEntityManager();
         EntityTransaction trans = em.getTransaction();

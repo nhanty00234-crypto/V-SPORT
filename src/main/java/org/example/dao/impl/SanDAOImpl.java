@@ -160,31 +160,6 @@ public class SanDAOImpl implements SanDAO {
     }
 
     @Override
-    public boolean hardDelete(int id) {
-        EntityManager em = JPAUtil.getEntityManager();
-        EntityTransaction trans = em.getTransaction();
-        try {
-            trans.begin();
-            San s = em.find(San.class, id);
-            if (s != null) {
-                em.createNativeQuery("DELETE FROM SoftHold WHERE SanID = ?").setParameter(1, id).executeUpdate();
-                em.createNativeQuery("UPDATE LichDatSan SET SanID = NULL WHERE SanID = ?").setParameter(1, id).executeUpdate();
-                em.remove(s);
-                trans.commit();
-                return true;
-            }
-            trans.rollback();
-            return false;
-        } catch (Exception e) {
-            logger.error("Lỗi xóa San ID {}: {}", id, e.getMessage(), e);
-            if (trans.isActive()) trans.rollback();
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
     public List<San> findDeletedByCoSo(int coSoId) {
         EntityManager em = JPAUtil.getEntityManager();
         try {

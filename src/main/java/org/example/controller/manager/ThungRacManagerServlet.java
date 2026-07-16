@@ -115,43 +115,10 @@ public class ThungRacManagerServlet extends HttpServlet {
                     session.setAttribute("errorMsg", "Khôi phục thất bại.");
                 }
             } 
-            else if ("delete".equals(action)) { // Xóa vĩnh viễn
-                boolean success = false;
-                switch (type) {
-                    case "san":
-                        San san = sanDAO.getSanById(id);
-                        if (san != null && san.getCoSoID() == coSoId) {
-                            success = sanDAO.hardDelete(id);
-                        }
-                        break;
-                    case "loaisan":
-                        LoaiSan ls = loaiSanDAO.getLoaiSanById(id);
-                        if (ls != null && ls.getCoSoID() == coSoId) {
-                            success = loaiSanDAO.hardDelete(id);
-                        }
-                        break;
-                    case "sanpham":
-                        SanPham_DichVu sp = sanPhamDAO.findById(id);
-                        if (sp != null && sp.getCoSoID() == coSoId) {
-                            success = sanPhamDAO.hardDelete(id);
-                        }
-                        break;
-                    case "nhansu":
-                        nhanSuService.permanentlyDeleteStaff(id, coSoId);
-                        success = true;
-                        break;
-                }
-                if (success) {
-                    session.setAttribute("successMsg", "Đã xóa vĩnh viễn dữ liệu thành công.");
-                    AuditLogService.log(req, user,
-                        AuditLogService.ACTION_PERMANENT_DELETE, type.equals("nhansu") ? AuditLogService.ENTITY_ACCOUNT
-                            : type.equals("san") ? AuditLogService.ENTITY_SAN
-                            : type.equals("loaisan") ? AuditLogService.ENTITY_LOAI_SAN : AuditLogService.ENTITY_SAN_PHAM,
-                        String.valueOf(id), "ID=" + id,
-                        "Manager xóa vĩnh viễn từ thùng rác: loại=" + type);
-                } else {
-                    session.setAttribute("errorMsg", "Không thể xóa vĩnh viễn dữ liệu.");
-                }
+            else if ("delete".equals(action) || "hardDelete".equals(action) || "permanentDelete".equals(action)) {
+                // Hệ thống chỉ hỗ trợ soft delete/khôi phục. Từ chối an toàn các request cũ
+                // (cache trình duyệt, request trực tiếp) đòi xóa vĩnh viễn - không thực hiện xóa gì cả.
+                session.setAttribute("errorMsg", "Hệ thống không hỗ trợ xóa vĩnh viễn.");
             }
         } catch (Exception e) {
             session.setAttribute("errorMsg", "Lỗi: " + e.getMessage());

@@ -20,7 +20,6 @@ public interface LoaiSanDAO {
 
     boolean softDelete(int id, int actorId);
     boolean restore(int id);
-    boolean hardDelete(int id);
     List<LoaiSan> findDeletedByCoSo(int coSoId);
     List<LoaiSan> findDeletedOlderThan(int days);
 }

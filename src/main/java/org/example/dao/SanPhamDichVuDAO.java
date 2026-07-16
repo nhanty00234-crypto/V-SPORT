@@ -14,7 +14,6 @@ public interface SanPhamDichVuDAO {
 
     boolean softDelete(int id, int actorId);
     boolean restore(int id);
-    boolean hardDelete(int id);
     List<SanPham_DichVu> findDeletedByCoSo(int coSoId);
     List<SanPham_DichVu> findDeletedOlderThan(int days);
 }

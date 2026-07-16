@@ -258,10 +258,11 @@ public class NhanSuManagerServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
             }
             else if ("permanentDelete".equals(action)) {
-                int accountId = Integer.parseInt(req.getParameter("id"));
-                nhanSuService.permanentlyDeleteStaff(accountId, managerCoSoId);
-                session.setAttribute("message", "Xóa vĩnh viễn nhân viên thành công!");
-                resp.setStatus(HttpServletResponse.SC_OK);
+                // Hệ thống chỉ hỗ trợ soft delete/khôi phục. Từ chối an toàn request cũ đòi xóa
+                // vĩnh viễn - không thực hiện xóa gì cả.
+                resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\":false,\"code\":\"PERMANENT_DELETE_DISABLED\",\"message\":\"Hệ thống không hỗ trợ xóa vĩnh viễn.\"}");
             }
             else if ("addShift".equals(action)) {
                 int accountId = Integer.parseInt(req.getParameter("accountId"));
