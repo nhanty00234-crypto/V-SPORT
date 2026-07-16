@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -739,11 +739,16 @@ async function loadLeaveRequests() {
             renderLeaveTable();
         } else {
             console.error('Failed to load leave requests');
-            // Fallback: maybe endpoint returns HTML, we'd need to parse
+            let errorText = 'Lỗi máy chủ khi tải yêu cầu nghỉ';
+            try {
+                const errData = await response.json();
+                if (errData && errData.error) errorText = errData.error;
+            } catch (e) {}
+            showNotification('error', errorText);
         }
     } catch (error) {
         console.error('Error loading leave requests:', error);
-        alert('Lỗi tải dữ liệu yêu cầu nghỉ');
+        showNotification('error', 'Lỗi tải dữ liệu yêu cầu nghỉ.');
     }
 }
 
