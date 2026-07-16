@@ -786,7 +786,8 @@ public class CheckInDAO {
             String sql = "SELECT lds.DatSanID, s.SanID, s.TenSan, acc.FullName AS TenKhachHang, acc.PhoneNumber AS SoDienThoai, " +
                          "ls.TenLoai AS TenLoaiSan, " +
                          "lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.TongTienDuKien, " +
-                         "lds.TrangThai, lds.GhiChu, hd.TrangThaiThanhToan, lds.NguonDatSan " +
+                         "lds.TrangThai, lds.GhiChu, hd.TrangThaiThanhToan, lds.NguonDatSan, " +
+                         "acc.DiemUyTin, acc.LateCancelCount, acc.NoShowCount " +
                          "FROM LichDatSan lds " +
                          "INNER JOIN San s ON lds.SanID = s.SanID " +
                          "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
@@ -817,6 +818,13 @@ public class CheckInDAO {
                     dto.setTrangThaiThanhToan(paymentStatus != null ? paymentStatus : PAYMENT_STATUS_UNPAID);
                     String nguonDat = rs.getString("NguonDatSan");
                     dto.setNguonDatSan(nguonDat != null ? nguonDat : "Walk-in");
+                    int diemUyTin = rs.getInt("DiemUyTin");
+                    if (!rs.wasNull()) {
+                        dto.setReputationScore(diemUyTin);
+                        dto.setReputationLabel(org.example.service.reputation.ReputationLabel.of(diemUyTin));
+                        dto.setLateCancelCount(rs.getInt("LateCancelCount"));
+                        dto.setNoShowCount(rs.getInt("NoShowCount"));
+                    }
                     list.add(dto);
                 }
             }
@@ -887,6 +895,23 @@ public class CheckInDAO {
 
         public String getNguonDatSan() { return nguonDatSan; }
         public void setNguonDatSan(String nguonDatSan) { this.nguonDatSan = nguonDatSan; }
+
+        private Integer reputationScore;
+        private String reputationLabel;
+        private Integer lateCancelCount;
+        private Integer noShowCount;
+
+        public Integer getReputationScore() { return reputationScore; }
+        public void setReputationScore(Integer reputationScore) { this.reputationScore = reputationScore; }
+
+        public String getReputationLabel() { return reputationLabel; }
+        public void setReputationLabel(String reputationLabel) { this.reputationLabel = reputationLabel; }
+
+        public Integer getLateCancelCount() { return lateCancelCount; }
+        public void setLateCancelCount(Integer lateCancelCount) { this.lateCancelCount = lateCancelCount; }
+
+        public Integer getNoShowCount() { return noShowCount; }
+        public void setNoShowCount(Integer noShowCount) { this.noShowCount = noShowCount; }
     }
 
     /**
