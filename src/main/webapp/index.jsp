@@ -1,4 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page import="org.example.dao.impl.CoSoDAOImpl" %>
+<%@ page import="org.example.dao.impl.LoaiSanDAOImpl" %>
+<%@ page import="org.example.model.CoSo" %>
+<%@ page import="org.example.model.MonTheThao" %>
+<%@ page import="java.util.List" %>
 <%
     Object roleIdObj = session.getAttribute("roleId");
     Object fullNameObj = session.getAttribute("fullName");
@@ -23,13 +28,25 @@
         return;
     }
     String ctx = request.getContextPath();
+
+    CoSoDAOImpl coSoDAO = new CoSoDAOImpl();
+    LoaiSanDAOImpl loaiSanDAO = new LoaiSanDAOImpl();
+    List<CoSo> dsCoSo = null;
+    List<MonTheThao> dsMon = null;
+    try {
+        dsCoSo = coSoDAO.getAllCoSo();
+        dsMon = loaiSanDAO.getAllMonTheThao();
+    } catch (Exception e) {
+        dsCoSo = new java.util.ArrayList<>();
+        dsMon = new java.util.ArrayList<>();
+    }
 %>
 <!DOCTYPE html>
 <html class="light" lang="vi">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>V-SPORT – Hệ Thống Đặt Sân Thể Thao</title>
+<title>V-SPORT - Hệ Thống Đặt Sân Thể Thao</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=DM+Sans:wght@400;500;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -618,20 +635,93 @@
 </nav>
 
 <!-- Hero Section -->
-<section class="grid grid-cols-1 md:grid-cols-3 w-full h-[55vh] md:h-[65vh] overflow-hidden">
-<div class="hidden md:block w-full h-full bg-surface-container group overflow-hidden hero-drop hero-drop-1">
-<img class="w-full h-full object-cover object-center img-ken-burns" alt="Sân thể thao đa năng V-SPORT" src="<%= ctx %>/resources/hero_left.png"/>
-</div>
-<div class="w-full h-full bg-primary-container flex flex-col justify-center items-center text-center p-6 hero-drop hero-drop-2">
-<span class="font-label-lg text-label-lg text-on-surface uppercase mb-3 tracking-widest text-xs md:text-sm">HỆ THỐNG ĐẶT SÂN HÀNG ĐẦU</span>
-<h1 class="font-display-lg text-display-lg text-on-surface uppercase mb-6 max-w-xs md:max-w-sm mx-auto text-2xl md:text-3xl lg:text-4xl leading-tight shimmer-text">ĐẶT SÂN THỂ THAO NHANH CHÓNG, TIN CẬY VÀ TIỆN LỢI</h1>
-<a class="inline-block bg-on-surface text-surface font-label-lg text-label-lg uppercase py-3 px-6 tracking-widest hover:opacity-90 transition-opacity text-sm hover:scale-105 active:scale-95 transition-transform btn-pulse-glow" href="<%= ctx %>/customer/dat-san">ĐẶT SÂN NGAY</a>
-</div>
-<div class="hidden md:block w-full h-full bg-surface-container group overflow-hidden hero-drop hero-drop-3">
-<img class="w-full h-full object-cover object-center img-ken-burns" alt="Sân bóng đá cỏ nhân tạo V-SPORT" src="<%= ctx %>/resources/hero_right.png"/>
-</div>
+<section class="relative w-full h-[65vh] md:h-[75vh] flex items-center justify-center overflow-hidden bg-neutral-900 select-none">
+    <!-- Background Image -->
+    <div class="absolute inset-0 z-0">
+        <img class="w-full h-full object-cover object-center img-ken-burns opacity-55" alt="Cơ sở thể thao hiện đại V-SPORT" src="<%= ctx %>/assets/images/home/hero-sports-facility.webp"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-900/60 to-transparent"></div>
+    </div>
+    
+    <!-- Hero Content -->
+    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
+        <span class="font-label-lg text-label-lg text-[#afd639] uppercase mb-3 tracking-widest text-xs md:text-sm animate-fade-in font-bold">HỆ THỐNG ĐẶT SÂN THỂ THAO HÀNG ĐẦU</span>
+        <h1 class="font-display-lg text-display-lg text-white uppercase mb-4 text-3xl md:text-5xl lg:text-6xl leading-tight shimmer-text font-extrabold tracking-wide">Tìm kiếm và đặt sân thể thao nhanh chóng</h1>
+        <p class="text-neutral-300 font-medium text-sm md:text-base lg:text-lg max-w-2xl mb-8 leading-relaxed font-body-md">
+            Trải nghiệm tìm kiếm thông minh, thanh toán an toàn PayOS và quản lý lịch đặt tiện lợi.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a class="inline-block bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg btn-pulse-glow" href="<%= ctx %>/customer/dat-san">Đặt sân ngay</a>
+            <a class="inline-block bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform backdrop-blur-md" href="<%= ctx %>/customer/dat-san">Khám phá sân</a>
+        </div>
+    </div>
 </section>
 
+<!-- Quick Booking Bar -->
+<section class="max-w-[95%] xl:max-w-[92%] mx-auto px-margin-mobile md:px-margin-desktop relative z-20">
+    <div class="flex justify-center -mt-10 md:-mt-16">
+        <form action="<%= ctx %>/customer/dat-san" method="GET" class="w-full max-w-5xl bg-white border border-neutral-200/80 shadow-2xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-4 gap-6 select-none relative rounded-none">
+            <!-- Chọn Môn Thể Thao -->
+            <div class="flex flex-col">
+                <label for="sportId" class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">Chọn Môn Thể Thao</label>
+                <div class="relative">
+                    <select id="sportId" name="sportId" class="w-full bg-neutral-50 border border-neutral-200 rounded-none py-3 px-4 text-neutral-800 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-neutral-400 appearance-none cursor-pointer">
+                        <option value="">Tất cả môn thể thao</option>
+                        <% if (dsMon != null) {
+                            for (MonTheThao m : dsMon) { %>
+                                <option value="<%= m.getMonTheThaoID() %>"><%= m.getTenMon() %></option>
+                            <% }
+                        } %>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-neutral-400">
+                        <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chọn Cơ Sở -->
+            <div class="flex flex-col">
+                <label for="branchId" class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">Chọn Cơ Sở</label>
+                <div class="relative">
+                    <select id="branchId" name="branchId" class="w-full bg-neutral-50 border border-neutral-200 rounded-none py-3 px-4 text-neutral-800 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-neutral-400 appearance-none cursor-pointer">
+                        <option value="">Tất cả cơ sở</option>
+                        <% if (dsCoSo != null) {
+                            for (CoSo c : dsCoSo) { %>
+                                <option value="<%= c.getCoSoID() %>"><%= c.getTenCoSo() %></option>
+                            <% }
+                        } %>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-neutral-400">
+                        <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chọn Ngày -->
+            <div class="flex flex-col">
+                <label for="date" class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">Chọn Ngày</label>
+                <input type="date" id="date" name="date" class="w-full bg-neutral-50 border border-neutral-200 rounded-none py-2.5 px-4 text-neutral-800 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-neutral-400 cursor-pointer"/>
+            </div>
+            
+            <!-- Nút Tìm Kiếm -->
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-bold uppercase py-3.5 px-6 rounded-none tracking-wider transition-colors shadow-md hover:shadow-lg active:scale-[0.98] transition-all text-sm">
+                    TÌM SÂN NGAY
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const homeDateInput = document.getElementById('date');
+        if (homeDateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            homeDateInput.min = today;
+            homeDateInput.value = today;
+        }
+    });
+</script>
 
 <!-- Trust Bar -->
 <div class="bg-court-blue text-on-primary py-4 overflow-hidden whitespace-nowrap border-b border-surface">
@@ -725,171 +815,171 @@
     </div>
 </div>
 
-<!-- Categories Grid -->
+<!-- Sport Categories Grid -->
 <section class="max-w-[95%] xl:max-w-[92%] mx-auto px-margin-mobile md:px-margin-desktop py-16">
-<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="A tennis racket lying on a green grass court with several yellow tennis balls nearby. Bright sunlight." src="https://lh3.googleusercontent.com/aida/AP1WRLvWebT7ZNHs6ZdkCWKS9U-MazznW5ERpv32DFU3jHF_YyUANkNUkRCIcgok_P8A0t0nO9-aswBrwjCbFcneyFuSl1BpKMFkUxH-_z-9oYPFqF13Vtc3_88AM7Kt6Cx-zH0beU9IPzqLhLVBkyeQNzslJ8noEmjOpVsOycOG_sp3fg96phuIWrq3clPldYv_69RBQ1PLSkb5Lnm6qp-TKWHWyTsdLedtuEd_QZMp5LWIJ4jVWdVJHGAgwA"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
-<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
-<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">RACKETS</h3>
-<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
-    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
-</span>
-</div>
-</div>
-</div>
-<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-100 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="A male tennis player running to hit a backhand on a blue hard court. Wearing dark apparel." src="https://lh3.googleusercontent.com/aida/AP1WRLtdxurZ6J7ydy2eP7rqXeqTMhJ1n-EjW8nfWwJkvbGMUi5RQHxU55fmhZVw5i_VnfFg8blm35yCB5KohihuvF_CdHZW5qOmOYHvVhoGdDUSi3M0PuEq3Q2oJHI5tCUSjHY9y798KfWcib0vQwLzjCLMro59hkSvU2rCVsyg9PM9E11U5zoXG8JCUsbT33Ujq-gW11BASrUAf_TJqvj-OzvnYHeWkP79IEyqK_kPfKayIOBOGTGyt6zS_w"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
-<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
-<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">APPAREL</h3>
-<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
-    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
-</span>
-</div>
-</div>
-</div>
-<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-200 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="A female tennis player running on a clay court. View from above." src="https://lh3.googleusercontent.com/aida/AP1WRLsCif0ca5AJK-rv5YXnylO3sQExKc8APL8Q_C-ogNla22Bshc-uTcpSSeHIgnWOgWZWpEhIFxgjTYz748HOgQorLtAgjdyItKzpv1vdCnwUgC7vzVSG2R2wi9OLkEA4S9kTO-jyLOyRATtqAAjqNm_HSHb2b8qb1RZM4-pUOa-06s-ap4FkDdDbfOJnZ1lyflidEJS1VNGvoFAuVjyBsdkOok8NS9rmubEbCeiM9ey564vFFprktPmLRP0"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
-<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
-<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">SHOES</h3>
-<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
-    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
-</span>
-</div>
-</div>
-</div>
-<div class="group relative overflow-hidden aspect-[1.15] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-300 card-glow-sweep">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="A yellow tennis ball caught in the black netting of a tennis net. Close up shot." src="https://lh3.googleusercontent.com/aida/AP1WRLsxuq5CEbyLge_0n5xxq6dFz5gcZD_mhi9pDI-6CcMIFHUD_58vqcZsqY8x6lJnQq16-vNHvWyz02q_V1ChrVcajhVFbmWa9Hd2SG6YGQFPgtNlGT6CF5jZIek0mqmH9eYugfV6tA6ZQzyeNl3MTBlS6Hlvhqc3LiNjWO32PTDYBxLWnjkzL8yBf7PQb49cRlPG79pe2I-gIVupqXKgaalQsGKy3sc-AbmA7wGSAbylJ9IaNEkr6Dd1LQ"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-8">
-<div class="flex flex-col transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300 ease-out">
-<h3 class="font-bold text-3xl md:text-4xl tracking-widest text-white uppercase font-headline-md">ACCESSORIES</h3>
-<span class="text-sm md:text-base tracking-widest font-bold text-white mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 uppercase">
-    SHOP NOW <span class="text-lg font-normal">&rarr;</span>
-</span>
-</div>
-</div>
-</div>
-</div>
+    <div class="scroll-reveal mb-12 text-center">
+        <span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-2">DANH MỤC THỂ THAO</span>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface uppercase font-bold">KHÁM PHÁ CÁC BỘ MÔN</h2>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <!-- Item 1: Bóng đá -->
+        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=1'">
+            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân bóng đá cỏ nhân tạo" src="<%= ctx %>/assets/images/home/sport-football.webp"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                <div class="flex flex-col w-full text-center">
+                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Bóng đá</h3>
+                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
+                </div>
+            </div>
+        </div>
+        <!-- Item 2: Cầu lông -->
+        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-100 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=2'">
+            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân cầu lông trong nhà" src="<%= ctx %>/assets/images/home/sport-badminton.webp"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                <div class="flex flex-col w-full text-center">
+                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Cầu lông</h3>
+                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
+                </div>
+            </div>
+        </div>
+        <!-- Item 3: Pickleball -->
+        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-200 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=3'">
+            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân pickleball ngoài trời" src="<%= ctx %>/assets/images/home/sport-pickleball.webp"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                <div class="flex flex-col w-full text-center">
+                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Pickleball</h3>
+                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
+                </div>
+            </div>
+        </div>
+        <!-- Item 4: Tennis -->
+        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-300 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=4'">
+            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân tennis ngoài trời" src="<%= ctx %>/assets/images/home/sport-tennis.webp"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                <div class="flex flex-col w-full text-center">
+                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Tennis</h3>
+                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
+                </div>
+            </div>
+        </div>
+        <!-- Item 5: Bóng bàn -->
+        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-100 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=5'">
+            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân bóng bàn trong nhà" src="<%= ctx %>/assets/images/home/sport-tabletennis.webp"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                <div class="flex flex-col w-full text-center">
+                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Bóng bàn</h3>
+                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
+                </div>
+            </div>
+        </div>
+        <!-- Item 6: Gym / Fitness -->
+        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-200 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=6'">
+            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Phòng tập gym cao cấp" src="<%= ctx %>/assets/images/home/sport-gym.webp"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                <div class="flex flex-col w-full text-center">
+                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Gym / Fitness</h3>
+                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
-<!-- Popular Products -->
+<!-- Popular Courts -->
 <section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center">
-<div class="scroll-reveal">
-<span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-2">KHO SÂN CỦA CHÚNG TÔI</span>
-<h2 class="font-headline-lg text-headline-lg text-on-surface uppercase mb-16">SÂN PHỔ BIẾN</h2>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-x-gutter gap-y-16 text-left">
-<!-- Court 1 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="Three yellow tennis balls clustered together on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLuVO6G7WE20o_ncujLDMWXKsYywrZ32bf609snGygLJBbWhr4a9K9wO0f7FDBw8-M63rpMYroxplAvmv8juM3Ex6gpfaRYOIpm5sL8WwKE65VOyO-9FmiJ3naA7Dh4smzfl4RslJ7TSDj6qvTmIZnuQaL2k2w7sYSMtWs08BuonvLoBTcWQTU4YNiRqS-X1zygtVkoq2oMQn2CVdchuv7Ci1Iu2Kd1O6rdLJBpI5x4McvEBXnT_KywCTA"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN BÓNG ĐÁ 5 NGƯỜI</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 150.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-</div>
-</div>
-</div>
-<!-- Court 2 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A single Aeropro tennis racket standing upright on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLttf6-GiVcmloQ8hiZr_nxjiGoONtewcPhpBIu7MAeSbMui8ctDhKX6lFKETpk3KiKui7-0F2ngdheZts6hjynUngH_GNmMnnww6Ad40_Log14q7bnbxwpgVRRjh7XAVKZHzzclIbktzix5DEn9jY0-J2hLatFUo5ZNjc-QhO-NQn-giN4q47sK9c7gDhpaq7mdvXdclcpY-JRItpORAJHWywKemmLgK9nXds4G2Wo3YKvVfMjCdRv7i-Q"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN CẦU LÔNG</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 80.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span class="text-surface-variant">★</span>
-</div>
-</div>
-</div>
-<!-- Court 3 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A plain light pink cotton baseball cap shown from a three-quarter angle on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLvYq1xffxGjwYXdEyPHE4NTLz2W5wT_XyOu-Q7vQpswHYOPFX-eVvWXRC29Zw_xBf6sYsBtR-ldPDWL0y56VjJveZd_M0eni2grcqiatszzAsWTq5YsAIWTGa71Wl2oeTITUqpvYiZDKkIYD6xEcVFcd3gH3jI4H6k38X8GP10NI0V_c3-x3ERkzwobl1YTFVXmnUuw7nHQOXcHQ9F2BbXggiToCFBoS-_ve-j5LQbUJ9p-AUYR9p8gRWE"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN TENNIS</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 120.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-</div>
-</div>
-</div>
-<!-- Court 4 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d delay-300" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A green leather duffel-style sport bag with white handles and piping on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLu6YoJlJoTRxpeddFZnf6O2IChPVk-2giSUTbtmkzQeSdvqJPuMZAv7Y9q8hVuyxlJurKOU7VKY_qIja4VC6N4L_KEKoYewa4ErfTU1rG9if4NUgUm-MR5ZiKcRBRfid_IXBeaiglZlu6vHtStfUADSItkFYn5WLhLQfqU6Iw1Xs-o2LD3Ak5s0HCzUSzfSRRvbEYteUA_HhnoiG-U4b-zzNCI7tItUdrRr1j-fGH-GUBvf9GyORgzCMdQ"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN PICKLEBALL</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 100.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-</div>
-</div>
-</div>
-<!-- Court 5 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A white pleated tennis skirt displayed flat on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLuyKP6xoMTKdDVOEZO8AFfv5cX_zsh6alzIzPSLn4VqQ6FLIGiFbTRGn3Gb8yeewN6qJ1yCDnmYpxLB0wz_k3WCkcf63DGaVdnSOVnrLomL9eVOjRikOXwgAoMwePOs2G0-8OrqqLwwjLKd-lydWVjIMdFP62zD3J6kX4-T_wpBRQdiFAffd5jv5RLbyE0vQ7VF-ZAOVMK4gShx_DeyXN98zHRKkaYcaIOJHEt8W-sjMdVeIflnMD60iY0"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN BÓNG ĐÁ 7 NGƯỜI</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 250.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-</div>
-</div>
-</div>
-<!-- Court 6 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A dark grey nylon tennis racket cover case on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLsNaqsm4nBpLxEpBx1XgEtMereVCNuHyiL8V7v9PvUVpQm1zaEFNTI9BRrrZKoDfzhA1vlptEkK-UOBCw0DdUAMg0WhYBwahfgl-p-5D3eAVxUMsP9KFwqpoYPdaVKweX-Uij1veYO9uGN_QbZ9XhcapNPuxR22IZUIINAiW3tMvhOXzuJkE3dvocxZ_VSt_1uzo0MIqvltNQI0AIXGtQD0huu4mT_Z0lBzT4DrbOOSpU2sFSVIK7oI2eQ"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN FUTSAL</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 200.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span class="text-surface-variant">★</span>
-</div>
-</div>
-</div>
-<!-- Court 7 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A sleek black tennis racket standing upright on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLv-CNo131QzCgX083he__RfyatqoTtPF9_oi68e13kF0u8i13eHMoWtjfE0Kq_pFfzkk2mHjhq2eLXjkXt8Tqtz8YJzkDyZ7Oqah_Y2Z2SeZPRxSjAuVCcRyy8H1CcwzXwWfYPO9XI21-_eW5V2meGn_GJ8bK5XmweYE-JaSnd7CWDnSxdRgBOFtWRu6PQp_5mpQOmdjID0bQkMxcjuJLnFXJ5i0A_a9EP10T2Q"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN TENNIS CAO CẤP</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 180.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-</div>
-</div>
-</div>
-<!-- Court 8 -->
-<div class="group cursor-pointer scroll-reveal reveal-3d delay-300" onclick="location.href='<%= ctx %>/customer/dat-san'">
-<div class="bg-surface-container-low aspect-square mb-6 relative hover-outline transition-shadow card-glow-sweep">
-<img class="w-full h-full object-contain p-8 mix-blend-multiply img-ken-burns" alt="A pair of white running sport sneakers with black accents on a white background." src="https://lh3.googleusercontent.com/aida/AP1WRLvhDmgRuPiNkvTvnJ3evCmAB1SxJ_PrOtNtg4Gfn6pSfojai4MbY195QszHNVgbiL6EMCVtq4KRxFK_JlMqSzrDlkRfci4hY5hKIsUFs6Q-NwmUZAun6d9obxlPYw-xKVQSyf-Iq7CSt9vV3yXDPNx4lNy7-X5t-o_CGCUHJDytYelY9HguPPIzn7Y8Ymm-Dp19nUDHoc7e1ngVmESY7CLTr50fcZxMyjRbt3u3LLeQwtf6TBWEAv3lvg"/>
-</div>
-<div class="text-center">
-<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2">SÂN CẦU LÔNG CAO CẤP</h3>
-<p class="font-label-lg text-label-lg text-on-surface-variant mb-3">từ 110.000₫/h</p>
-<div class="flex justify-center text-primary-container text-sm">
-<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-</div>
-</div>
-</div>
-</div>
-<div class="mt-16 scroll-reveal">
-<a class="inline-block bg-primary-container text-on-surface font-label-lg text-label-lg uppercase py-4 px-8 tracking-widest hover:opacity-90 transition-opacity btn-pulse-glow" href="<%= ctx %>/customer/dat-san">XEM TẤT CẢ SÂN</a>
-</div>
+    <div class="scroll-reveal">
+        <span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-2">DANH MỤC SÂN ĐẶT HÀNG ĐẦU</span>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface uppercase mb-16 font-bold">CÁC KHU VỰC SÂN PHỔ BIẾN</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+        <!-- Court 1 -->
+        <div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=1'">
+            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
+                <img class="w-full h-full object-cover img-ken-burns" alt="Sân bóng đá cỏ nhân tạo 5 người" src="<%= ctx %>/assets/images/home/sport-football.webp"/>
+            </div>
+            <div>
+                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">BÓNG ĐÁ</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN BÓNG ĐÁ 5 NGƯỜI TIÊU CHUẨN</h3>
+                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 150.000đ/giờ</p>
+                <div class="flex text-primary-container text-sm gap-0.5">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+        <!-- Court 2 -->
+        <div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=2'">
+            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
+                <img class="w-full h-full object-cover img-ken-burns" alt="Sân cầu lông trong nhà" src="<%= ctx %>/assets/images/home/sport-badminton.webp"/>
+            </div>
+            <div>
+                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">CẦU LÔNG</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN CẦU LÔNG THẢM PVC CHUYÊN NGHIỆP</h3>
+                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 80.000đ/giờ</p>
+                <div class="flex text-primary-container text-sm gap-0.5">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+        <!-- Court 3 -->
+        <div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=4'">
+            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
+                <img class="w-full h-full object-cover img-ken-burns" alt="Sân tennis ngoài trời" src="<%= ctx %>/assets/images/home/sport-tennis.webp"/>
+            </div>
+            <div>
+                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">TENNIS</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN TENNIS ĐẤT CỨNG CHUẨN QUỐC TẾ</h3>
+                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 120.000đ/giờ</p>
+                <div class="flex text-primary-container text-sm gap-0.5">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+        <!-- Court 4 -->
+        <div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=3'">
+            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
+                <img class="w-full h-full object-cover img-ken-burns" alt="Sân pickleball hiện đại" src="<%= ctx %>/assets/images/home/sport-pickleball.webp"/>
+            </div>
+            <div>
+                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">PICKLEBALL</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN PICKLEBALL TRONG NHÀ CAO CẤP</h3>
+                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 100.000đ/giờ</p>
+                <div class="flex text-primary-container text-sm gap-0.5">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+        <!-- Court 5 -->
+        <div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=5'">
+            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
+                <img class="w-full h-full object-cover img-ken-burns" alt="Sân bóng bàn trong nhà" src="<%= ctx %>/assets/images/home/sport-tabletennis.webp"/>
+            </div>
+            <div>
+                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">BÓNG BÀN</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN BÓNG BÀN ĐA NĂNG</h3>
+                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 50.000đ/giờ</p>
+                <div class="flex text-primary-container text-sm gap-0.5">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+        <!-- Court 6 -->
+        <div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=6'">
+            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
+                <img class="w-full h-full object-cover img-ken-burns" alt="Phòng gym fitness hiện đại" src="<%= ctx %>/assets/images/home/sport-gym.webp"/>
+            </div>
+            <div>
+                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">GYM / FITNESS</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">PHÒNG GYM VA FITNESS CAO CẤP</h3>
+                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 60.000đ/giờ</p>
+                <div class="flex text-primary-container text-sm gap-0.5">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-16 scroll-reveal">
+        <a class="inline-block bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-4 px-8 tracking-widest transition-transform hover:scale-105 active:scale-95 btn-pulse-glow" href="<%= ctx %>/customer/dat-san">XEM TẤT CẢ SÂN</a>
+    </div>
 </section>
 
 <!-- Testimonials -->
@@ -951,50 +1041,24 @@
     </div>
 </section>
 
-<!-- Make Your Game -->
-<section class="py-16 md:py-24 text-center overflow-hidden">
-    <div class="max-w-container-max mx-auto px-margin-mobile scroll-reveal">
-        <h2 class="font-['Barlow_Condensed'] text-[9.5vw] font-bold uppercase leading-none text-neutral-900 tracking-tight flex items-center justify-center flex-wrap select-none">
-            MAKE YOUR
-            <span class="inline-block w-[7.8vw] h-[7.8vw] mx-[1.5vw] relative align-middle" style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));">
-                <img src="<%= ctx %>/resources/tennis_ball.png" alt="Tennis Ball" class="w-full h-full object-contain animate-float" />
-            </span>
-            GAME
-        </h2>
+<!-- Booking CTA Banner -->
+<section class="relative w-full py-24 md:py-32 flex items-center justify-center overflow-hidden bg-neutral-900 select-none scroll-reveal">
+    <!-- Background Image -->
+    <div class="absolute inset-0 z-0">
+        <img class="w-full h-full object-cover object-center img-ken-burns opacity-45" alt="Trải nghiệm thể thao V-SPORT" src="<%= ctx %>/assets/images/home/booking-cta.webp"/>
+        <div class="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-transparent"></div>
     </div>
-</section>
-
-<!-- Programs -->
-<section class="relative bg-gradient-to-br from-[#4a5424] via-[#232a12] to-[#0a0a09] text-white py-20 md:py-24 px-margin-mobile md:px-margin-desktop overflow-hidden">
-<div class="relative max-w-[960px] mx-auto text-center">
-<div class="scroll-reveal">
-<span class="font-label-lg text-label-lg uppercase tracking-widest block mb-3 text-white/85">CHƯƠNG TRÌNH CỦA CHÚNG TÔI</span>
-<h2 class="font-headline-lg text-headline-lg uppercase mb-14 text-white">TÌM CHƯƠNG TRÌNH PHÙ HỢP</h2>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter text-left">
-<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden scroll-reveal reveal-3d card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="Bóng đá 5 người" src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?auto=format&fit=crop&w=500&q=80"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
-<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Bóng Đá 5 Người</span>
-</a>
-<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden scroll-reveal reveal-3d delay-100 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="Cầu lông" src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=500&q=80"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
-<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Cầu Lông</span>
-</a>
-<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden scroll-reveal reveal-3d delay-200 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="Tennis thiếu nhi" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=500&q=80"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
-<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Tennis Thiếu Nhi</span>
-</a>
-<a href="<%= ctx %>/customer/dat-san" class="group relative block aspect-[10/14] overflow-hidden scroll-reveal reveal-3d delay-300 card-glow-sweep">
-<img class="w-full h-full object-cover img-ken-burns" alt="Nhóm riêng tư" src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=500&q=80"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"></div>
-<span class="absolute bottom-4 left-4 right-4 font-headline-sm text-[18px] font-bold uppercase text-white leading-tight">Nhóm Riêng Tư</span>
-</a>
-</div>
-<a href="<%= ctx %>/customer/dat-san" class="inline-block bg-primary-container text-on-surface font-label-lg text-label-lg uppercase py-4 px-10 tracking-widest hover:opacity-90 transition-opacity mt-14 scroll-reveal delay-150 btn-pulse-glow">THAM GIA NGAY</a>
-</div>
+    
+    <!-- Content -->
+    <div class="relative z-10 text-left px-margin-mobile md:px-margin-desktop max-w-[95%] xl:max-w-[92%] w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div>
+            <h2 class="font-headline-lg text-headline-lg text-white uppercase mb-4 font-extrabold leading-tight">Bạn Đã Sẵn Sàng Trải Nghiệm Sân Chơi?</h2>
+            <p class="text-neutral-300 font-medium text-sm md:text-base max-w-lg mb-8 leading-relaxed font-body-md">
+                Hệ thống đặt sân V-SPORT giúp bạn giữ chỗ chỉ trong 1 phút. Nhanh chóng, tiện lợi, đảm bảo giữ sân.
+            </p>
+            <a class="inline-block bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-4 px-10 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg btn-pulse-glow" href="<%= ctx %>/customer/dat-san">ĐẶT LỊCH NGAY</a>
+        </div>
+    </div>
 </section>
 
 <!-- News -->
@@ -1108,7 +1172,7 @@
 <div>
 <h4 class="font-headline-sm text-headline-sm text-primary-fixed uppercase mb-6">VĂN PHÒNG</h4>
 <address class="font-body-md text-body-md text-secondary-fixed-dim not-italic space-y-2">
-<p>Việt Nam —</p>
+<p>Việt Nam</p>
 <p>123 Nguyễn Trãi, Quận 1,</p>
 <p>TP. Hồ Chí Minh</p>
 <a class="block text-white hover:text-primary-fixed transition-colors mt-4" href="mailto:support@vsport.vn">support@vsport.vn</a>
