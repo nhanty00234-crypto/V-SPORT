@@ -580,6 +580,7 @@ body { font-family: 'Inter', sans-serif; }
     if (!email) return showAdminError('Vui lòng nhập email liên hệ.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAdminError('Email không hợp lệ.');
     if (!phone) return showAdminError('Vui lòng nhập số điện thoại.');
+    if (!/^(0|\+84)[35789][0-9]{8}$/.test(phone)) return showAdminError('Số điện thoại không hợp lệ.');
     if (!addr)  return showAdminError('Vui lòng nhập địa chỉ.');
 
     const btn = document.getElementById('btnSendOtp');
@@ -589,7 +590,7 @@ body { font-family: 'Inter', sans-serif; }
     fetch('${pageContext.request.contextPath}/owner/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'email=' + encodeURIComponent(email)
+      body: 'email=' + encodeURIComponent(email) + '&phone=' + encodeURIComponent(phone)
     })
     .then(r => r.json())
     .then(data => {
@@ -709,10 +710,11 @@ body { font-family: 'Inter', sans-serif; }
       return;
     }
     const email = document.getElementById('adminEmail').value.trim();
+    const phone = document.getElementById('adminPhone').value.trim();
     fetch('${pageContext.request.contextPath}/owner/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'email=' + encodeURIComponent(email)
+      body: 'email=' + encodeURIComponent(email) + '&phone=' + encodeURIComponent(phone)
     }).then(r => r.json()).then(data => {
       if (data.success) {
         document.querySelectorAll('.adm-otp').forEach(b => b.value = '');
