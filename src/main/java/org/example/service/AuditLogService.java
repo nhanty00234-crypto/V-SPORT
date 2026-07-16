@@ -49,6 +49,7 @@ public class AuditLogService {
     public static final String ENTITY_LOAI_SAN   = "LoaiSan";
     public static final String ENTITY_SAN_PHAM   = "SanPham";
     public static final String ENTITY_CO_SO      = "CoSo";
+    public static final String ENTITY_PAYOS_CONFIG = "PayOSConfig";
     public static final String ENTITY_CA_LAM     = "CaLamViec";
     public static final String ENTITY_YEU_CAU_NGHI = "YeuCauNghi";
 
@@ -95,6 +96,31 @@ public class AuditLogService {
             dao.save(entry);
         } catch (Exception e) {
             logger.error("Không thể ghi AuditLog: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Ghi audit log cho hành động không có actor đăng nhập (webhook PayOS, scheduler nền) -
+     * ActorAccountID=NULL, actorName mô tả nguồn gốc (vd "PAYOS_WEBHOOK", "SCHEDULER").
+     * Không ném exception ra ngoài - lỗi log không được phá luồng nghiệp vụ chính.
+     */
+    public static void logSystem(String actorName, Integer coSoId, String action, String entityType,
+                                  String entityId, String entityName, String details) {
+        try {
+            AuditLog entry = new AuditLog();
+            entry.setActorAccountId(null);
+            entry.setActorName(actorName);
+            entry.setActorRole(0);
+            entry.setCoSoId(coSoId);
+            entry.setAction(action);
+            entry.setEntityType(entityType);
+            entry.setEntityId(entityId);
+            entry.setEntityName(entityName);
+            entry.setDetails(details);
+            entry.setIpAddress(null);
+            dao.save(entry);
+        } catch (Exception e) {
+            logger.error("Không thể ghi AuditLog (system): {}", e.getMessage(), e);
         }
     }
 

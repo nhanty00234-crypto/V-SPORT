@@ -255,16 +255,25 @@
         </span>
       </div>
 
-      <!-- Loại sân -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Loại sân &amp; Bảng giá *</label>
-        <select name="loaiSanID" id="courtTypeSelect"
-                onchange="onCourtTypeChange(); clearFieldError('courtTypeSelect')"
-                class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors">
-        </select>
-        <span id="err-courtTypeSelect" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
-          <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtTypeSelect-msg"></span>
-        </span>
+      <!-- Loại sân + Trạng thái cùng hàng -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-purple-900">Loại sân &amp; Bảng giá *</label>
+          <select name="loaiSanID" id="courtTypeSelect"
+                  onchange="onCourtTypeChange(); clearFieldError('courtTypeSelect')"
+                  class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors">
+          </select>
+          <span id="err-courtTypeSelect" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtTypeSelect-msg"></span>
+          </span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-purple-900">Trạng thái sân *</label>
+          <select name="trangThai" id="courtStatus" onchange="updateCardPreview()"
+                  class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+            <!-- Populated by JS depending on create/edit mode -->
+          </select>
+        </div>
       </div>
 
       <!-- Preview cấu hình loại sân -->
@@ -295,30 +304,6 @@
             <span id="previewLightHours" class="text-sm font-semibold text-purple-900">—</span>
           </div>
         </div>
-      </div>
-
-      <!-- Số lượng sân (chỉ khi tạo mới) -->
-      <div id="courtQtyWrap" class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Số lượng sân cần tạo</label>
-        <div class="flex items-center gap-3">
-          <input type="number" name="soLuong" id="courtQty" value="1" min="1" max="10"
-                 oninput="clearFieldError('courtQty'); updateBulkNamePreview()"
-                 class="h-10 w-20 px-3 rounded-xl border border-purple-200 text-sm text-center font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
-          <p class="text-xs text-zinc-500">sân (tối đa 10)</p>
-        </div>
-        <span id="err-courtQty" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
-          <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtQty-msg"></span>
-        </span>
-        <p id="bulkNamePreview" class="hidden text-xs text-sky-700 bg-sky-50 border border-sky-100 rounded-xl px-3 py-2 leading-relaxed"></p>
-      </div>
-
-      <!-- Trạng thái sân -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Trạng thái sân *</label>
-        <select name="trangThai" id="courtStatus" onchange="updateCardPreview()"
-                class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
-          <!-- Populated by JS depending on create/edit mode -->
-        </select>
       </div>
 
       <!-- Mô tả -->
@@ -420,38 +405,57 @@
         <input type="text" name="tenLoai" id="typeName" required placeholder="VD: Sân cỏ nhân tạo 5 người" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
       </div>
 
+      <!-- Hidden input gửi lên backend -->
+      <input type="hidden" name="khongDungDen" id="typeKhongDungDenHidden" value="false">
+
+      <!-- Checkbox: Sân không dùng đèn -->
+      <label class="flex items-start gap-3 px-3 py-2.5 rounded-xl border border-purple-200 cursor-pointer hover:bg-purple-50/60 select-none transition-colors">
+        <input type="checkbox" id="typeNoLight" onchange="toggleTypeNoLight()" class="mt-0.5 w-4 h-4 accent-purple-600 shrink-0">
+        <div>
+          <span class="text-xs font-semibold text-purple-900">Sân không dùng đèn</span>
+          <p class="text-[10px] text-purple-500 mt-0.5 leading-relaxed">Tích vào nếu sân dùng ánh sáng tự nhiên hoặc đã tính đèn vào giá — không phụ thu thêm buổi tối.</p>
+        </div>
+      </label>
+
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-purple-900">Giá ngày (Không đèn) *</label>
+          <label class="text-xs font-semibold text-purple-900">Giá ban ngày *</label>
           <div class="relative">
-            <input type="text" name="giaKhongDen" id="typePriceNoLight" required placeholder="150,000" class="h-10 w-full pl-3 pr-10 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+            <input type="text" name="giaKhongDen" id="typePriceNoLight" required placeholder="150,000"
+                   class="h-10 w-full pl-3 pr-10 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-purple-400">đ</span>
           </div>
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-purple-900">Giá tối (Có bật đèn) *</label>
+        <div id="priceWithLightWrap" class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-purple-900">Giá có bật đèn *</label>
           <div class="relative">
-            <input type="text" name="giaCoDen" id="typePriceWithLight" required placeholder="200,000" class="h-10 w-full pl-3 pr-10 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+            <input type="text" name="giaCoDen" id="typePriceWithLight" placeholder="200,000" class="h-10 w-full pl-3 pr-10 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-purple-400">đ</span>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-purple-900">Giờ bắt đầu bật đèn *</label>
-          <input type="time" name="gioBatDauLenDen" id="typeLightStart" required value="17:30" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+      <!-- Giờ lên đèn — ẩn khi chọn "không dùng đèn" -->
+      <div id="lightTimeSection">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-purple-900">Giờ bắt đầu bật đèn *</label>
+            <input type="time" name="gioBatDauLenDen" id="typeLightStart" value="17:30" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-purple-900">Giờ kết thúc bật đèn *</label>
+            <input type="time" name="gioKetThucLenDen" id="typeLightEnd" value="22:00" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          </div>
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-purple-900">Giờ kết thúc bật đèn *</label>
-          <input type="time" name="gioKetThucLenDen" id="typeLightEnd" required value="22:00" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+        <div class="mt-2 flex flex-col gap-1">
+          <p class="text-[10px] text-purple-500">💡 Có thể cấu hình qua ngày, ví dụ <span class="font-bold">17:00</span> đến <span class="font-bold">05:00</span> sáng hôm sau.</p>
+          <p class="text-[10px] text-purple-500">💡 Nếu giờ bắt đầu bằng giờ kết thúc, giá có đèn được áp dụng toàn thời gian (phù hợp sân trong nhà như Cầu lông).</p>
         </div>
       </div>
-      <p class="text-[10px] text-purple-500 mt-1">💡 Mẹo: Đối với loại sân trong nhà như Cầu lông, chọn <span class="font-bold">06:00</span> đến <span class="font-bold">22:00</span> để tính giá phụ thu full ca.</p>
 
       <div class="flex justify-end gap-2 pt-3 border-t border-purple-50">
         <button type="button" onclick="closeTypeModal()" class="h-10 px-4 rounded-xl border border-purple-200 text-sm font-semibold text-purple-700 hover:bg-purple-50">Hủy</button>
-        <button type="submit" id="saveTypeBtn" class="h-10 px-5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 shadow shadow-purple-200">Lưu bảng giá</button>
+        <button type="button" onclick="submitTypeForm()" id="saveTypeBtn" class="h-10 px-5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 shadow shadow-purple-200">Lưu bảng giá</button>
       </div>
     </form>
   </div>
@@ -570,7 +574,13 @@
       let value = e.target.value.replace(/,/g, '').replace(/[^0-9]/g, '');
       if (value === '') { e.target.value = ''; return; }
       let num = parseInt(value, 10);
-      e.target.value = num.toLocaleString('en-US');
+      const cursorBefore = e.target.selectionStart;
+      const lenBefore = e.target.value.length;
+      const formatted = num.toLocaleString('en-US');
+      e.target.value = formatted;
+      const lenAfter = formatted.length;
+      const newCursor = Math.max(0, cursorBefore + (lenAfter - lenBefore));
+      e.target.setSelectionRange(newCursor, newCursor);
     });
   }
 
@@ -652,23 +662,9 @@
     return type.name + ' - Sân ' + (countSameType + 1);
   }
 
-  // Preview danh sách tên khi tạo nhiều sân
   let courtNameEdited = false;
   function updateBulkNamePreview() {
-    const el = document.getElementById('bulkNamePreview');
-    const qty = parseInt(document.getElementById('courtQty').value) || 1;
-    const baseName = document.getElementById('courtName').value.trim();
-    if (qty <= 1 || !baseName || document.getElementById('courtAction').value !== 'add') {
-      el.classList.add('hidden');
-      return;
-    }
-    const shown = Math.min(qty, 3);
-    let names = [];
-    for (let i = 1; i <= shown; i++) names.push('<b>' + escapeHtml(baseName) + ' ' + i + '</b>');
-    let text = 'Sẽ tạo ' + qty + ' sân: ' + names.join(', ');
-    if (qty > shown) text += ' ... đến <b>' + escapeHtml(baseName) + ' ' + qty + '</b>';
-    el.innerHTML = text;
-    el.classList.remove('hidden');
+    // no-op: field đã xóa
   }
 
   function escapeHtml(s) {
@@ -813,19 +809,10 @@
     const typeVal = document.getElementById('courtTypeSelect').value;
     const isAdd = document.getElementById('courtAction').value === 'add';
 
-    clearFieldError('courtName'); clearFieldError('courtTypeSelect'); clearFieldError('courtQty');
+    clearFieldError('courtName'); clearFieldError('courtTypeSelect');
 
     if (!name) { showFieldError('courtName', 'Tên sân không được để trống'); valid = false; }
     if (!typeVal) { showFieldError('courtTypeSelect', 'Vui lòng chọn loại sân'); valid = false; }
-
-    if (isAdd) {
-      const qtyRaw = document.getElementById('courtQty').value.trim();
-      const qty = Number(qtyRaw);
-      if (!qtyRaw || !Number.isInteger(qty) || qty < 1 || qty > 10) {
-        showFieldError('courtQty', 'Số lượng phải là số nguyên từ 1 đến 10');
-        valid = false;
-      }
-    }
 
     if (!valid) return;
 
@@ -1080,14 +1067,11 @@
     document.getElementById('existingCourtImage').value = '';
     document.getElementById('courtImageFile').value = '';
     courtNameEdited = false;
-    document.getElementById('bulkNamePreview').classList.add('hidden');
-    clearFieldError('courtName'); clearFieldError('courtTypeSelect'); clearFieldError('courtQty');
+    clearFieldError('courtName'); clearFieldError('courtTypeSelect');
     document.getElementById('courtModalTitle').textContent = 'Thêm sân thi đấu mới';
     document.getElementById('courtModalSubtitle').textContent = 'Tạo sân thi đấu mới cho chi nhánh';
     document.getElementById('courtAction').value = 'add';
     document.getElementById('courtEditId').value = '';
-    document.getElementById('courtQtyWrap').classList.remove('hidden');
-    document.getElementById('courtQty').value = 1;
     document.getElementById('courtImagePreviewWrap').classList.add('hidden');
     updateImagePreview();
 
@@ -1113,8 +1097,7 @@
     const c = mockSan.find(x => x.id === id);
     if (!c) return;
 
-    courtNameEdited = true; // không gợi ý đè tên khi chỉnh sửa
-    document.getElementById('bulkNamePreview').classList.add('hidden');
+    courtNameEdited = true;
     clearFieldError('courtName'); clearFieldError('courtTypeSelect');
     document.getElementById('courtModalTitle').textContent = 'Chỉnh sửa sân thi đấu';
     document.getElementById('courtModalSubtitle').textContent = 'Cập nhật thông tin sân #' + c.id;
@@ -1124,8 +1107,6 @@
     document.getElementById('courtName').value = c.name;
     document.getElementById('courtDesc').value = c.desc || '';
     document.getElementById('existingCourtImage').value = c.image || '';
-    document.getElementById('courtQtyWrap').classList.add('hidden');
-
     setStatusOptions(true, c.status);
     populateCourtTypeDropdown(c.typeId);
     updateImagePreview();
@@ -1178,11 +1159,54 @@
 
 
   // TYPE MODAL ACTIONS
+  function toggleTypeNoLight() {
+    const noLight = document.getElementById('typeNoLight').checked;
+    const lightSection = document.getElementById('lightTimeSection');
+    const priceWithWrap = document.getElementById('priceWithLightWrap');
+    const priceWithInput = document.getElementById('typePriceWithLight');
+    document.getElementById('typeKhongDungDenHidden').value = noLight ? 'true' : 'false';
+    if (noLight) {
+      lightSection.classList.add('hidden');
+      priceWithWrap.classList.add('opacity-40', 'pointer-events-none');
+      priceWithInput.value = '';
+      priceWithInput.removeAttribute('required');
+    } else {
+      lightSection.classList.remove('hidden');
+      priceWithWrap.classList.remove('opacity-40', 'pointer-events-none');
+      priceWithInput.setAttribute('required', '');
+    }
+  }
+
+  function submitTypeForm() {
+    const noLight = document.getElementById('typeNoLight').checked;
+    const name = document.getElementById('typeName').value.trim();
+    const priceNoLight = document.getElementById('typePriceNoLight').value.trim();
+    if (!name) { alert('Vui lòng nhập tên loại sân.'); return; }
+    if (!priceNoLight) { alert('Vui lòng nhập giá ban ngày.'); return; }
+    if (!noLight) {
+      const priceWithLight = document.getElementById('typePriceWithLight').value.trim();
+      const lightStart = document.getElementById('typeLightStart').value;
+      const lightEnd = document.getElementById('typeLightEnd').value;
+      if (!priceWithLight || !lightStart || !lightEnd) {
+        alert('Vui lòng nhập đầy đủ giá và thời gian áp dụng giá có đèn.');
+        return;
+      }
+    }
+    document.getElementById('typeForm').submit();
+  }
+
   function openCreateTypeModal() {
     document.getElementById('typeForm').reset();
     document.getElementById('typeModalTitle').textContent = 'Thêm loại cấu hình sân mới';
     document.getElementById('typeAction').value = 'addType';
     document.getElementById('typeEditId').value = '';
+    document.getElementById('typeNoLight').checked = false;
+    document.getElementById('typeKhongDungDenHidden').value = 'false';
+    document.getElementById('lightTimeSection').classList.remove('hidden');
+    document.getElementById('priceWithLightWrap').classList.remove('opacity-40', 'pointer-events-none');
+    document.getElementById('typePriceWithLight').setAttribute('required', '');
+    document.getElementById('typeLightStart').value = '17:30';
+    document.getElementById('typeLightEnd').value = '22:00';
     document.getElementById('typeModal').classList.remove('hidden');
   }
 
@@ -1195,20 +1219,25 @@
     document.getElementById('typeEditId').value = t.id;
     document.getElementById('typeSportSelect').value = t.sportId;
     document.getElementById('typeName').value = t.name;
-    
-    // Format values with commas for currency inputs
-    document.getElementById('typePriceNoLight').value = t.priceNoLight.toLocaleString('en-US');
-    document.getElementById('typePriceWithLight').value = t.priceWithLight.toLocaleString('en-US');
-    
-    // Set time format
-    let timeStr = t.lightStart;
-    if (timeStr && timeStr.length > 5) timeStr = timeStr.substring(0, 5); // HH:mm:ss -> HH:mm
-    document.getElementById('typeLightStart').value = timeStr;
 
-    let endTimeStr = t.lightEnd;
-    if (endTimeStr && endTimeStr.length > 5) endTimeStr = endTimeStr.substring(0, 5);
-    document.getElementById('typeLightEnd').value = endTimeStr || '22:00';
+    document.getElementById('typePriceNoLight').value = t.priceNoLight ? t.priceNoLight.toLocaleString('en-US') : '';
 
+    // Detect không dùng đèn: giaCoDen null/0 hoặc không có giờ đèn
+    const isNoLight = !t.priceWithLight || t.priceWithLight === 0 || (!t.lightStart && !t.lightEnd);
+    document.getElementById('typeNoLight').checked = isNoLight;
+    document.getElementById('typeKhongDungDenHidden').value = isNoLight ? 'true' : 'false';
+
+    if (!isNoLight) {
+      document.getElementById('typePriceWithLight').value = t.priceWithLight ? t.priceWithLight.toLocaleString('en-US') : '';
+      let timeStr = t.lightStart || '';
+      if (timeStr.length > 5) timeStr = timeStr.substring(0, 5);
+      document.getElementById('typeLightStart').value = timeStr;
+      let endTimeStr = t.lightEnd || '';
+      if (endTimeStr.length > 5) endTimeStr = endTimeStr.substring(0, 5);
+      document.getElementById('typeLightEnd').value = endTimeStr || '22:00';
+    }
+
+    toggleTypeNoLight();
     document.getElementById('typeModal').classList.remove('hidden');
   }
 
@@ -1236,28 +1265,10 @@
   }
 
 
-  // Form submit preprocessing to remove commas from currency values and validate fields
-  document.getElementById('typeForm').addEventListener('submit', function(e) {
+  // Tiền xử lý submit typeForm: bỏ dấu phẩy khỏi giá trước khi gửi
+  document.getElementById('typeForm').addEventListener('submit', function() {
     const priceNoLight = document.getElementById('typePriceNoLight');
     const priceWithLight = document.getElementById('typePriceWithLight');
-    
-    const priceNoLightVal = parseFloat(priceNoLight.value.replace(/,/g, ''));
-    const priceWithLightVal = parseFloat(priceWithLight.value.replace(/,/g, ''));
-    
-    if (priceWithLightVal < priceNoLightVal) {
-      alert('Lỗi: Giá tối (có bật đèn) không được thấp hơn giá ngày (không đèn)!');
-      e.preventDefault();
-      return false;
-    }
-    
-    const lightStart = document.getElementById('typeLightStart').value;
-    const lightEnd = document.getElementById('typeLightEnd').value;
-    if (lightStart && lightEnd && lightStart >= lightEnd) {
-      alert('Lỗi: Giờ bắt đầu bật đèn phải trước giờ kết thúc bật đèn!');
-      e.preventDefault();
-      return false;
-    }
-    
     priceNoLight.value = priceNoLight.value.replace(/,/g, '');
     priceWithLight.value = priceWithLight.value.replace(/,/g, '');
   });
@@ -1302,27 +1313,10 @@
   }
 
   // Preprocessing for priceConfigForm submit to strip commas and validate fields
-  document.getElementById('priceConfigForm').addEventListener('submit', function(e) {
+  // Tiền xử lý submit priceConfigForm: bỏ dấu phẩy, cho phép khung giờ qua ngày
+  document.getElementById('priceConfigForm').addEventListener('submit', function() {
     const priceNoLight = document.getElementById('priceConfigPriceNoLight');
     const priceWithLight = document.getElementById('priceConfigPriceWithLight');
-    
-    const priceNoLightVal = parseFloat(priceNoLight.value.replace(/,/g, ''));
-    const priceWithLightVal = parseFloat(priceWithLight.value.replace(/,/g, ''));
-    
-    if (priceWithLightVal < priceNoLightVal) {
-      alert('Lỗi: Giá tối (có bật đèn) không được thấp hơn giá ngày (không đèn)!');
-      e.preventDefault();
-      return false;
-    }
-    
-    const lightStart = document.getElementById('priceConfigLightStart').value;
-    const lightEnd = document.getElementById('priceConfigLightEnd').value;
-    if (lightStart && lightEnd && lightStart >= lightEnd) {
-      alert('Lỗi: Giờ bắt đầu bật đèn phải trước giờ kết thúc bật đèn!');
-      e.preventDefault();
-      return false;
-    }
-    
     priceNoLight.value = priceNoLight.value.replace(/,/g, '');
     priceWithLight.value = priceWithLight.value.replace(/,/g, '');
   });

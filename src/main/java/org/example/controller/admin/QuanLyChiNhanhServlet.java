@@ -8,14 +8,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.service.AuditLogService;
+import org.example.dao.AdminTrashDAO;
 import org.example.dao.CoSoDAO;
+import org.example.dao.PayOSConfigDAO;
+import org.example.dao.impl.AdminTrashDAOImpl;
 import org.example.dao.impl.CoSoDAOImpl;
-import org.example.dao.TaiKhoanDAO;
-import org.example.dao.impl.TaiKhoanDAOImpl;
+import org.example.dao.impl.PayOSConfigDAOImpl;
+import org.example.dto.payment.PayOSConfigState;
 import org.example.model.CoSo;
 import org.example.model.TaiKhoan;
+import org.example.service.admin.FacilityTrashService;
+import org.example.service.admin.OwnerApprovalService;
 import org.example.util.DBUtil;
 import org.example.util.EmailUtil;
+import org.example.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,6 +41,10 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(QuanLyChiNhanhServlet.class);
     private CoSoDAO chiNhanhDAO = new CoSoDAOImpl();
+    private final PayOSConfigDAO payOSConfigDAO = new PayOSConfigDAOImpl();
+    private final AdminTrashDAO adminTrashDAO = new AdminTrashDAOImpl();
+    private final OwnerApprovalService ownerApprovalService = new OwnerApprovalService();
+    private final FacilityTrashService facilityTrashService = new FacilityTrashService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -43,35 +54,18 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             String action = req.getParameter("action");
             if ("duyet".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                CoSo chiNhanh = chiNhanhDAO.getCoSoById(id);
-                if (chiNhanh != null && "Chờ duyệt".equals(chiNhanh.getTrangThai())) {
-                    chiNhanh.setTrangThai("Đang hoạt động");
-                    chiNhanhDAO.updateCoSo(chiNhanh);
-                    
-                    // Sync courts for branch on approval
-                    String loaiHinh = chiNhanh.getLoaiHinhKinhDoanh();
-                    int total = chiNhanh.getSoLuongSanDuKien();
-                    Map<String, Integer> sportCounts = new HashMap<>();
-                    if (loaiHinh != null && !loaiHinh.trim().isEmpty() && total > 0) {
-                        String[] sports = loaiHinh.split(",");
-                        for (int i = 0; i < sports.length; i++) {
-                            sports[i] = sports[i].trim();
-                        }
-                        int base = total / sports.length;
-                        int remainder = total % sports.length;
-                        for (int i = 0; i < sports.length; i++) {
-                            int count = base + (i < remainder ? 1 : 0);
-                            sportCounts.put(sports[i], count);
-                        }
-                    }
+                TaiKhoan admin = (TaiKhoan) req.getSession().getAttribute("user");
+                OwnerApprovalService.ApprovalResult result = ownerApprovalService.approve(id, admin.getAccountId());
+                if (result.success) {
+                    Map<String, Integer> sportCounts = buildSportCounts(
+                            result.coSo.getLoaiHinhKinhDoanh(), result.coSo.getSoLuongSanDuKien());
                     syncCourtsForBranch(id, sportCounts);
-
-                    if (chiNhanh.getAccountID_QuanLy() != null) {
-                        unlockManagerAccount(chiNhanh.getAccountID_QuanLy());
+                    if (result.account != null) {
+                        sendApprovalEmail(result.account);
                     }
                     req.getSession().setAttribute("message", "Duyệt cơ sở thành công và tài khoản quản lý đã được kích hoạt!");
                 } else {
-                    req.getSession().setAttribute("error", "Không thể phê duyệt cơ sở này hoặc cơ sở đã được duyệt trước đó.");
+                    req.getSession().setAttribute("error", result.errorMessage);
                 }
                 String from = req.getParameter("from");
                 if ("nhan-su".equals(from)) {
@@ -82,13 +76,19 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                 return;
             } else if ("khong-duyet".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                CoSo chiNhanh = chiNhanhDAO.getCoSoById(id);
-                if (chiNhanh != null && "Chờ duyệt".equals(chiNhanh.getTrangThai())) {
-                    chiNhanh.setTrangThai("Từ chối");
-                    chiNhanhDAO.updateCoSo(chiNhanh);
+                TaiKhoan admin = (TaiKhoan) req.getSession().getAttribute("user");
+                CoSo chiNhanhBeforeReject = chiNhanhDAO.getCoSoById(id);
+                String coSoName = chiNhanhBeforeReject != null ? chiNhanhBeforeReject.getTenCoSo() : null;
+                OwnerApprovalService.ApprovalResult result = ownerApprovalService.reject(id);
+                if (result.success) {
+                    adminTrashDAO.log("OwnerRequest", id, coSoName, "CoSo", "Chờ duyệt",
+                            admin.getAccountId(), null);
                     req.getSession().setAttribute("message", "Đã từ chối duyệt cơ sở.");
+                    req.getSession().setAttribute("trashMessage", "Đã chuyển vào thùng rác.");
+                    req.getSession().setAttribute("trashUrl", req.getContextPath() + "/admin/thung-rac");
+                    req.getSession().setAttribute("trashCountdownSeconds", 10);
                 } else {
-                    req.getSession().setAttribute("error", "Thao tác từ chối không hợp lệ.");
+                    req.getSession().setAttribute("error", result.errorMessage);
                 }
                 String from = req.getParameter("from");
                 if ("nhan-su".equals(from)) {
@@ -100,7 +100,9 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             }
 
             List<CoSo> dsChiNhanh = chiNhanhDAO.getAllCoSo();
+            Map<Integer, PayOSConfigState> payosStatusMap = payOSConfigDAO.findStatusForAllCoSo();
             req.setAttribute("dsChiNhanh", dsChiNhanh);
+            req.setAttribute("payosStatusMap", payosStatusMap);
             req.getRequestDispatcher("/admin/QuanLyChiNhanh.jsp").forward(req, resp);
         } else if (path.equals("/admin/chi-nhanh/sua")) {
             int id = Integer.parseInt(req.getParameter("id"));
@@ -187,10 +189,23 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             req.getRequestDispatcher("/admin/SuaChiNhanh.jsp").forward(req, resp);
         } else if (path.equals("/admin/chi-nhanh/xoa")) {
             int id = Integer.parseInt(req.getParameter("id"));
-            if (chiNhanhDAO.deleteCoSo(id)) {
-                req.getSession().setAttribute("message", "Xóa cơ sở và toàn bộ tài khoản nhân sự liên quan thành công!");
+            HttpSession session = req.getSession();
+            Integer adminId = SessionUtil.getCurrentAccountId(session);
+
+            if (adminId == null) {
+                logger.error("Không xác định được AccountID của Admin trong session.");
+                session.setAttribute("error", "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+                resp.sendRedirect(req.getContextPath() + "/admin/chi-nhanh");
+                return;
+            }
+
+            FacilityTrashService.Result result = facilityTrashService.softDeleteFacility(id, adminId);
+            if (result.success) {
+                session.setAttribute("trashMessage", "Đã chuyển vào thùng rác.");
+                session.setAttribute("trashUrl", req.getContextPath() + "/admin/thung-rac");
+                session.setAttribute("trashCountdownSeconds", 10);
             } else {
-                req.getSession().setAttribute("error", "Lỗi khi xóa cơ sở!");
+                session.setAttribute("error", result.message);
             }
             resp.sendRedirect(req.getContextPath() + "/admin/chi-nhanh");
         }
@@ -403,32 +418,39 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
         }
     }
 
-    private void unlockManagerAccount(int accountId) {
-        TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAOImpl();
-        TaiKhoan managerAcc = taiKhoanDAO.getAccountById(accountId);
-        if (managerAcc != null && managerAcc.getRoleId() == 2) {
-            managerAcc.setIsLocked(false);
-            taiKhoanDAO.updateAccount(managerAcc);
-
-            // Send notification email
-            new Thread(() -> {
-                try {
-                    EmailUtil.sendEmail(
-                        managerAcc.getEmail(),
-                        "Tài khoản đối tác V-SPORT đã được phê duyệt",
-                        "Chào " + managerAcc.getFullName() + ",\n\n" +
-                        "Cơ sở thể thao của bạn đã được quản trị viên phê duyệt thành công.\n" +
-                        "Bạn hiện có thể đăng nhập vào hệ thống quản lý V-SPORT bằng tài khoản sau:\n" +
-                        "- Tên đăng nhập (Email): " + managerAcc.getEmail() + "\n" +
-                        "- Mật khẩu mặc định: 123456\n\n" +
-                        "Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu tiên để bảo mật tài khoản.\n\n" +
-                        "Trân trọng,\nBan quản trị V-SPORT"
-                    );
-                } catch (Exception e) {
-                    TaiKhoan account = null;
-                    logger.error("Lỗi gửi email phê duyệt đến {}", account.getEmail(), e);
-                }
-            }).start();
+    private Map<String, Integer> buildSportCounts(String loaiHinh, int total) {
+        Map<String, Integer> sportCounts = new HashMap<>();
+        if (loaiHinh != null && !loaiHinh.trim().isEmpty() && total > 0) {
+            String[] sports = loaiHinh.split(",");
+            for (int i = 0; i < sports.length; i++) {
+                sports[i] = sports[i].trim();
+            }
+            int base = total / sports.length;
+            int remainder = total % sports.length;
+            for (int i = 0; i < sports.length; i++) {
+                sportCounts.put(sports[i], base + (i < remainder ? 1 : 0));
+            }
         }
+        return sportCounts;
+    }
+
+    private void sendApprovalEmail(TaiKhoan account) {
+        new Thread(() -> {
+            try {
+                EmailUtil.sendEmail(
+                    account.getEmail(),
+                    "Tài khoản đối tác V-SPORT đã được phê duyệt",
+                    "Chào " + account.getFullName() + ",\n\n" +
+                    "Cơ sở thể thao của bạn đã được quản trị viên phê duyệt thành công.\n" +
+                    "Bạn hiện có thể đăng nhập vào hệ thống quản lý V-SPORT bằng tài khoản sau:\n" +
+                    "- Tên đăng nhập (Email): " + account.getEmail() + "\n" +
+                    "- Mật khẩu mặc định: 123456\n\n" +
+                    "Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu tiên để bảo mật tài khoản.\n\n" +
+                    "Trân trọng,\nBan quản trị V-SPORT"
+                );
+            } catch (Exception e) {
+                logger.error("Lỗi gửi email phê duyệt đến {}", account.getEmail(), e);
+            }
+        }).start();
     }
 }

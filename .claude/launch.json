@@ -22,7 +22,7 @@
     {
       "name": "vsport-tomcat-preview",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["/tmp/claude-1000/-home-nhan-Downloads-V-SPORT/7ef0981e-9f2b-4be9-b29b-ef61d064146c/scratchpad/run-tomcat-preview.sh"],
+      "runtimeArgs": ["/tmp/claude-1000/-home-nhan-Downloads-V-SPORT/c7e056d3-9ea5-4c50-862e-481ac3b562e8/scratchpad/run-tomcat-preview.sh"],
       "port": 8090
     }
   ]

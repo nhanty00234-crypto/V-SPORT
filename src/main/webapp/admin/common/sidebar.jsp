@@ -80,7 +80,7 @@
   .tab-pill{
     display:inline-flex;align-items:center;gap:6px;
     padding:7px 16px;border-radius:99px;font-size:13px;font-weight:500;
-    border:none;cursor:pointer;transition:all .18s;
+    border:none;cursor:pointer;transition:all .18s;text-decoration:none;
   }
   .tab-pill.active{background:#2563eb;color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.3)}
   .tab-pill:not(.active){background:#fff;color:#64748b;border:1px solid #e2e8f0}
@@ -189,6 +189,12 @@
       <i class="ti ti-history"></i>
       Nhật Ký Thao Tác
     </a>
+
+    <a href="${pageContext.request.contextPath}/admin/thung-rac"
+       class="nav-link ${uri.contains('/admin/thung-rac') || uri.contains('/ThungRacAdmin') ? 'active' : ''}">
+      <i class="ti ti-trash"></i>
+      Thùng rác
+    </a>
   </nav>
 
   <!-- Logout -->
@@ -274,13 +280,28 @@
     els.forEach(function (el) { io.observe(el); });
   }
 
+  /* ── Xác nhận trước khi chuyển vào thùng rác (soft-delete) ── */
+  function initSoftDeleteConfirm() {
+    document.addEventListener('click', function (event) {
+      var trigger = event.target.closest('.js-admin-soft-delete');
+      if (!trigger) return;
+      var msg = trigger.getAttribute('data-delete-message') ||
+                'Bạn chắc chắn muốn chuyển mục này vào thùng rác? Bạn có thể thu hồi lại trong trang Thùng rác.';
+      if (!confirm(msg)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { initPageMotion(); initSidebar(); initReveal(); init24hTime(); });
+    document.addEventListener('DOMContentLoaded', function () { initPageMotion(); initSidebar(); initReveal(); init24hTime(); initSoftDeleteConfirm(); });
   } else {
     initPageMotion();
     initSidebar();
     initReveal();
     init24hTime();
+    initSoftDeleteConfirm();
   }
 
   /* ── Force 24h time inputs across all admin pages ── */

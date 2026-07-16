@@ -35,25 +35,30 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         return datSanColumnExpression + " = ?";
     }
 
+    /**
+     * Sweep AN TOÀN, gọi được cả từ scheduler (BookingExpiryScheduler) lẫn lazy từ các hàm đọc
+     * danh sách bên dưới. KHÔNG BAO GIỜ được tự hoàn thành một booking "Đang sử dụng" - việc đó
+     * chỉ được phép qua transaction checkout chính thức (CheckoutService). Chỉ xử lý:
+     *   1. Giải phóng San "mồ côi" (không có LichDatSan "Đang sử dụng" nào tham chiếu tới) -
+     *      tự chữa lành trạng thái sân sau sự cố (crash giữa transaction, dữ liệu cũ...), không
+     *      đụng tới bất kỳ ca đang chơi nào vì điều kiện NOT IN loại trừ mọi San có ca đang chơi.
+     *   2. Tự hủy "Chờ xác nhận" quá hạn duyệt (COD_APPROVAL_EXPIRE_HOURS).
+     */
     public static void updateExpiredBookingsAndFields() {
-        String sqlUpdateLich = "UPDATE LichDatSan SET TrangThai = N'Đã hoàn thành' " +
-                               "WHERE TrangThai = N'Đang sử dụng' " +
-                               "AND DATEADD(second, DATEDIFF(second, '00:00:00', GioKetThuc), DATEADD(day, CASE WHEN GioKetThuc < GioBatDau THEN 1 ELSE 0 END, CAST(NgayDat AS datetime))) < DATEADD(hour, 7, GETUTCDATE())";
         String sqlUpdateSan = "UPDATE San SET TrangThai = N'Sẵn sàng' " +
                              "WHERE TrangThai = N'Đang sử dụng' " +
                              "AND SanID NOT IN (SELECT DISTINCT SanID FROM LichDatSan WHERE TrangThai = N'Đang sử dụng')";
         String sqlExpirePending = "UPDATE LichDatSan " +
                                   "SET TrangThai = N'Đã hủy', " +
-                                  "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Tự động hủy: Hết hạn chờ xác nhận (2 giờ)]') " +
+                                  "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Tự động hủy: Hết hạn chờ xác nhận (" +
+                                  org.example.util.Constants.COD_APPROVAL_EXPIRE_HOURS + " giờ)]') " +
                                   "WHERE TrangThai = N'Chờ xác nhận' " +
-                                  "AND DATEDIFF(hour, CreatedTime, GETDATE()) >= 2";
-        
+                                  "AND DATEDIFF(hour, CreatedTime, GETDATE()) >= " + org.example.util.Constants.COD_APPROVAL_EXPIRE_HOURS;
+
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement psLich = conn.prepareStatement(sqlUpdateLich);
-                 PreparedStatement psSan = conn.prepareStatement(sqlUpdateSan);
+            try (PreparedStatement psSan = conn.prepareStatement(sqlUpdateSan);
                  PreparedStatement psExpire = conn.prepareStatement(sqlExpirePending)) {
-                psLich.executeUpdate();
                 psSan.executeUpdate();
                 psExpire.executeUpdate();
                 conn.commit();
@@ -975,211 +980,4 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         }
     }
 
-    @Override
-    public boolean thanhToanHoaDonDatSan(int datSanId, int staffAccountId, String phuongThucThanhToan) throws Exception {
-        Connection conn = null;
-        PreparedStatement psSelect = null;
-        PreparedStatement psUpdateBooking = null;
-        PreparedStatement psUpdateSan = null;
-        PreparedStatement psUpdateInvoice = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            // 1. Lấy thông tin đơn đặt và kiểm tra
-            String sqlSelect = "SELECT SanID, TrangThai FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?";
-            psSelect = conn.prepareStatement(sqlSelect);
-            psSelect.setInt(1, datSanId);
-            rs = psSelect.executeQuery();
-
-            if (!rs.next()) {
-                throw new Exception("Không tìm thấy thông tin đơn đặt sân.");
-            }
-
-            int sanId = rs.getInt("SanID");
-            String trangThai = rs.getString("TrangThai");
-
-            if (!"Đang sử dụng".equals(trangThai)) {
-                throw new Exception("Chỉ có thể thanh toán hóa đơn cho các ca chơi đang ở trạng thái 'Đang sử dụng'.");
-            }
-
-            // 2. Kiểm tra hóa đơn đã thanh toán chưa
-            String sqlCheckInvoice = "SELECT TrangThaiThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-            try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckInvoice)) {
-                psCheck.setInt(1, datSanId);
-                try (ResultSet rsCheck = psCheck.executeQuery()) {
-                    if (rsCheck.next()) {
-                        String invoiceStatus = rsCheck.getString("TrangThaiThanhToan");
-                        if ("Đã thanh toán".equals(invoiceStatus)) {
-                            throw new Exception("Hóa đơn này đã được thanh toán trước đó.");
-                        }
-                    }
-                }
-            }
-
-            // 3. Kiểm tra phương thức thanh toán
-            if (phuongThucThanhToan == null || phuongThucThanhToan.trim().isEmpty()) {
-                throw new IllegalArgumentException("Phương thức thanh toán không được để trống.");
-            }
-            String paymentMethodTrim = phuongThucThanhToan.trim();
-            if (!"Tiền mặt".equals(paymentMethodTrim) && !"Chuyển khoản".equals(paymentMethodTrim) && !"Thẻ".equals(paymentMethodTrim) && !"Ví điện tử".equals(paymentMethodTrim)) {
-                throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ.");
-            }
-
-            // 4. Tính toán phụ thu quá giờ (Late Checkout) hoặc tính tiền chơi thực tế cho OPEN_ENDED
-            String sqlSelectDetails = "SELECT lds.GioKetThuc, lds.NgayDat, lds.ApDungGiaCoDen, ls.GiaCoDen, ls.GiaKhongDen, lds.GhiChu, lds.TimeMode, lds.actual_start_time " +
-                                      "FROM LichDatSan lds " +
-                                      "INNER JOIN San s ON lds.SanID = s.SanID " +
-                                      "INNER JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
-                                      "WHERE lds.DatSanID = ?";
-            Time gioKetThuc = null;
-            Date ngayDat = null;
-            boolean apDungGiaCoDen = false;
-            double giaCoDen = 0.0;
-            double giaKhongDen = 0.0;
-            String existingGhiChu = "";
-            String timeMode = "";
-            Time actualStartTime = null;
-            try (PreparedStatement psDet = conn.prepareStatement(sqlSelectDetails)) {
-                psDet.setInt(1, datSanId);
-                try (ResultSet rsDet = psDet.executeQuery()) {
-                    if (rsDet.next()) {
-                        gioKetThuc = rsDet.getTime("GioKetThuc");
-                        ngayDat = rsDet.getDate("NgayDat");
-                        apDungGiaCoDen = rsDet.getBoolean("ApDungGiaCoDen");
-                        giaCoDen = rsDet.getDouble("GiaCoDen");
-                        giaKhongDen = rsDet.getDouble("GiaKhongDen");
-                        existingGhiChu = rsDet.getString("GhiChu");
-                        timeMode = rsDet.getString("TimeMode");
-                        actualStartTime = rsDet.getTime("actual_start_time");
-                    }
-                }
-            }
-
-            double hourlyRate = apDungGiaCoDen ? giaCoDen : giaKhongDen;
-            double phuThuTre = 0.0;
-            long minutesOver = 0;
-
-            if ("OPEN_ENDED".equals(timeMode)) {
-                LocalTime localStart = (actualStartTime != null ? actualStartTime.toLocalTime() : (gioKetThuc != null ? gioKetThuc.toLocalTime() : LocalTime.now()));
-                LocalTime localEnd = LocalTime.now();
-                long actualDurationMins = Duration.between(localStart, localEnd).toMinutes();
-                if (actualDurationMins < 0) {
-                    actualDurationMins += 24 * 60;
-                }
-                if (actualDurationMins < 15) {
-                    actualDurationMins = 15; // Minimum 15 minutes charge
-                }
-                double finalCourtPrice = (actualDurationMins / 60.0) * hourlyRate;
-                BigDecimal finalCourtPriceBD = BigDecimal.valueOf(finalCourtPrice);
-
-                // Update LichDatSan set GioKetThuc = localEnd, actual_end_time = localEnd, TongTienDuKien = finalCourtPrice
-                String sqlUpdateLichOpen = "UPDATE LichDatSan SET GioKetThuc = ?, actual_end_time = ?, TongTienDuKien = ? WHERE DatSanID = ?";
-                try (PreparedStatement psUpLich = conn.prepareStatement(sqlUpdateLichOpen)) {
-                    psUpLich.setTime(1, Time.valueOf(localEnd));
-                    psUpLich.setTime(2, Time.valueOf(localEnd));
-                    psUpLich.setBigDecimal(3, finalCourtPriceBD);
-                    psUpLich.setInt(4, datSanId);
-                    psUpLich.executeUpdate();
-                }
-
-                // Update HoaDon set TongTienSan = finalCourtPrice, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe
-                String sqlUpdateInvoiceOpen = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-                try (PreparedStatement psUpInv = conn.prepareStatement(sqlUpdateInvoiceOpen)) {
-                    psUpInv.setBigDecimal(1, finalCourtPriceBD);
-                    psUpInv.setBigDecimal(2, finalCourtPriceBD);
-                    psUpInv.setInt(3, datSanId);
-                    psUpInv.executeUpdate();
-                }
-            } else {
-                // FIXED_DURATION or FIXED_BOOKING or NULL (fallback)
-                java.time.LocalDateTime actualCheckOut = java.time.LocalDateTime.now();
-                java.time.LocalTime actualCheckOutTime = actualCheckOut.toLocalTime();
-
-                // Update actual_end_time in LichDatSan
-                String sqlUpdateActualEnd = "UPDATE LichDatSan SET actual_end_time = ? WHERE DatSanID = ?";
-                try (PreparedStatement psUpEnd = conn.prepareStatement(sqlUpdateActualEnd)) {
-                    psUpEnd.setTime(1, Time.valueOf(actualCheckOutTime));
-                    psUpEnd.setInt(2, datSanId);
-                    psUpEnd.executeUpdate();
-                }
-
-                if (ngayDat != null && gioKetThuc != null) {
-                    java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(ngayDat.toLocalDate(), gioKetThuc.toLocalTime());
-                    if (actualCheckOut.isAfter(plannedEnd)) {
-                        minutesOver = java.time.Duration.between(plannedEnd, actualCheckOut).toMinutes();
-                        if (minutesOver > 10) { // Grace period: 10 minutes
-                            long overMinutes = minutesOver - 10;
-                            phuThuTre = overMinutes * (hourlyRate / 60.0);
-                        }
-                    }
-                }
-
-                if (phuThuTre > 0.0) {
-                    // Cập nhật phụ thu vào HoaDon
-                    String sqlUpdateInvoiceSurcharge = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-                    try (PreparedStatement psUpSurch = conn.prepareStatement(sqlUpdateInvoiceSurcharge)) {
-                        psUpSurch.setDouble(1, phuThuTre);
-                        psUpSurch.setDouble(2, phuThuTre);
-                        psUpSurch.setInt(3, datSanId);
-                        psUpSurch.executeUpdate();
-                    }
-                    // Cập nhật phụ thu vào LichDatSan
-                    String updatedGhiChu = (existingGhiChu != null ? existingGhiChu : "") + " [Phụ thu quá giờ: " + minutesOver + " phút (" + String.format("%.0f", phuThuTre) + "đ)]";
-                    String sqlUpdateLichSurcharge = "UPDATE LichDatSan SET TongTienDuKien = TongTienDuKien + ?, GhiChu = ? WHERE DatSanID = ?";
-                    try (PreparedStatement psUpLich = conn.prepareStatement(sqlUpdateLichSurcharge)) {
-                        psUpLich.setDouble(1, phuThuTre);
-                        psUpLich.setString(2, updatedGhiChu);
-                        psUpLich.setInt(3, datSanId);
-                        psUpLich.executeUpdate();
-                    }
-                }
-            }
-
-            // 5. Cập nhật hóa đơn sang Đã thanh toán
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-            psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
-            psUpdateInvoice.setString(1, paymentMethodTrim);
-            psUpdateInvoice.setInt(2, staffAccountId);
-            psUpdateInvoice.setInt(3, datSanId);
-            int affectedInv = psUpdateInvoice.executeUpdate();
-            if (affectedInv == 0) {
-                throw new Exception("Thanh toán hóa đơn thất bại (Hóa đơn không tồn tại).");
-            }
-
-            // 6. Cập nhật đơn đặt sang Đã hoàn thành
-            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = N'Đã hoàn thành' WHERE DatSanID = ?";
-            psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
-            psUpdateBooking.setInt(1, datSanId);
-            int affectedBooking = psUpdateBooking.executeUpdate();
-            if (affectedBooking == 0) {
-                throw new Exception("Cập nhật trạng thái đơn đặt sân thất bại.");
-            }
-
-            // 7. Giải phóng sân bóng
-            String sqlUpdateSan = "UPDATE San SET TrangThai = N'Sẵn sàng' WHERE SanID = ?";
-            psUpdateSan = conn.prepareStatement(sqlUpdateSan);
-            psUpdateSan.setInt(1, sanId);
-            psUpdateSan.executeUpdate();
-
-            conn.commit();
-            return true;
-        } catch (Exception e) {
-            if (conn != null) conn.rollback();
-            logger.error("Lỗi khi thanh toán hóa đơn đơn đặt sân ID {}: {}", datSanId, e.getMessage(), e);
-            throw e;
-        } finally {
-            if (rs != null) rs.close();
-            if (psSelect != null) psSelect.close();
-            if (psUpdateBooking != null) psUpdateBooking.close();
-            if (psUpdateSan != null) psUpdateSan.close();
-            if (psUpdateInvoice != null) psUpdateInvoice.close();
-            if (conn != null) {
-                conn.setAutoCommit(true);
-                conn.close();
-            }
-        }
-    }
 }

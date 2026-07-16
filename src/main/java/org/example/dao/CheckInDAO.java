@@ -91,7 +91,7 @@ public class CheckInDAO {
      * @param daThuTienMat Lễ tân xác nhận đã thu tiền mặt tại quầy (dành cho đơn chưa thanh toán)
      * @throws CheckInException nếu có lỗi nghiệp vụ xảy ra
      */
-    public void checkInKhachDatTruoc(int datSanId, int staffAccountId, boolean forcePaymentCheck, boolean daThuTienMat) throws CheckInException {
+    public void checkInKhachDatTruoc(int datSanId, int staffAccountId, int requiredCoSoId, boolean forcePaymentCheck, boolean daThuTienMat) throws CheckInException {
         Connection conn = null;
         PreparedStatement psSelectBooking = null;
         PreparedStatement psSelectField = null;
@@ -99,6 +99,7 @@ public class CheckInDAO {
         PreparedStatement psUpdateBooking = null;
         PreparedStatement psUpdateField = null;
         PreparedStatement psUpdateInvoice = null;
+        PreparedStatement psInsertInvoice = null;
         ResultSet rsBooking = null;
         ResultSet rsField = null;
         ResultSet rsPayment = null;
@@ -108,8 +109,9 @@ public class CheckInDAO {
             // BẮT BUỘC: Tắt auto-commit để quản lý Transaction thủ công
             conn.setAutoCommit(false);
 
-            // 1. Lấy thông tin đơn đặt lịch
-            String sqlSelectBooking = "SELECT SanID, NgayDat, GioBatDau, GioKetThuc, TrangThai, TongTienDuKien, GhiChu FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?";
+            // 1. Lấy thông tin đơn đặt lịch + join San để xác minh cơ sở
+            String sqlSelectBooking = "SELECT l.SanID, l.NgayDat, l.GioBatDau, l.GioKetThuc, l.TrangThai, l.TongTienDuKien, l.GhiChu, l.AccountID, s.CoSoID " +
+                    "FROM LichDatSan l WITH (UPDLOCK, ROWLOCK) JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
             psSelectBooking = conn.prepareStatement(sqlSelectBooking);
             psSelectBooking.setInt(1, datSanId);
             rsBooking = psSelectBooking.executeQuery();
@@ -118,7 +120,13 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy thông tin đơn đặt sân có ID: " + datSanId);
             }
 
+            int bookingCoSoId = rsBooking.getInt("CoSoID");
+            if (bookingCoSoId != requiredCoSoId) {
+                throw new SecurityException("Đơn đặt sân không thuộc cơ sở của bạn.");
+            }
+
             int sanId = rsBooking.getInt("SanID");
+            int khachHangAccountId = rsBooking.getInt("AccountID");
             Date ngayDat = rsBooking.getDate("NgayDat");
             Time gioBatDau = rsBooking.getTime("GioBatDau");
             Time gioKetThuc = rsBooking.getTime("GioKetThuc");
@@ -129,21 +137,31 @@ public class CheckInDAO {
             LocalDate localNgayDat = ngayDat.toLocalDate();
             LocalTime localGioBatDau = gioBatDau.toLocalTime();
             LocalTime localGioKetThuc = gioKetThuc.toLocalTime();
-            
-            LocalDate today = LocalDate.now();
-            LocalTime now = LocalTime.now();
+
+            java.time.LocalDateTime nowDateTime = java.time.LocalDateTime.now();
+            LocalDate today = nowDateTime.toLocalDate();
+            LocalTime now = nowDateTime.toLocalTime();
 
             // Kiểm tra ngày đặt có trùng ngày hôm nay không
             if (!localNgayDat.equals(today)) {
                 throw new CheckInException("Không thể check-in cho đơn đặt sân của ngày khác (Ngày đặt: " + localNgayDat + ")");
             }
 
-            // Kiểm tra trạng thái đơn đặt sân
+            // Kiểm tra trạng thái đơn đặt sân - CHỈ cho phép "Đã xác nhận", KHÔNG cho "Chờ xác nhận"
+            // (đơn chưa được quản lý duyệt không được vào sân).
             if (BOOKING_STATUS_IN_USE.equals(trangThaiBooking)) {
                 throw new CheckInException("Đơn đặt sân này đã được check-in và đang sử dụng.");
             }
-            if (!BOOKING_STATUS_CONFIRMED.equals(trangThaiBooking) && !"Chờ xác nhận".equals(trangThaiBooking)) {
-                throw new CheckInException("Đơn đặt sân có trạng thái không hợp lệ để check-in: " + trangThaiBooking);
+            if (!BOOKING_STATUS_CONFIRMED.equals(trangThaiBooking)) {
+                throw new CheckInException("Chỉ được check-in đơn đã ở trạng thái 'Đã xác nhận' (hiện tại: " + trangThaiBooking + ").");
+            }
+
+            // Cửa sổ thời gian check-in hợp lệ: tối đa 30 phút trước giờ bắt đầu, trễ tối đa theo
+            // policy no-show (NO_SHOW_GRACE_MINUTES) - quá mốc đó nên xử lý bằng no-show.
+            org.example.service.checkin.CheckInWindow.Result window =
+                    org.example.service.checkin.CheckInWindow.check(localNgayDat, localGioBatDau, nowDateTime);
+            if (!window.allowed()) {
+                throw new CheckInException(window.message());
             }
 
             // 2. Kiểm tra trạng thái thanh toán (Payment Lock)
@@ -155,7 +173,7 @@ public class CheckInDAO {
             int hoaDonId = -1;
             String trangThaiThanhToan = PAYMENT_STATUS_UNPAID;
             BigDecimal tongThanhToan = BigDecimal.ZERO;
-            
+
             if (rsPayment.next()) {
                 hoaDonId = rsPayment.getInt("HoaDonID");
                 trangThaiThanhToan = rsPayment.getString("TrangThaiThanhToan");
@@ -166,6 +184,30 @@ public class CheckInDAO {
             if (forcePaymentCheck && (trangThaiThanhToan == null || PAYMENT_STATUS_UNPAID.equals(trangThaiThanhToan) || "Chưa cọc".equals(trangThaiThanhToan))) {
                 if (!daThuTienMat) {
                     throw new PaymentRequiredException("Đơn đặt sân này yêu cầu thanh toán/cọc nhưng chưa hoàn tất. Lễ tân phải thu tiền mặt trước khi mở sân.");
+                } else if (hoaDonId == -1) {
+                    // Dữ liệu cũ chưa có MAIN invoice - tạo transactionally bằng dữ liệu server.
+                    // KHÔNG được tiếp tục với sentinel -1 (UPDATE ... WHERE HoaDonID = -1 trước đây
+                    // no-op nhưng vẫn báo "đã thanh toán" dù hóa đơn không hề tồn tại).
+                    BigDecimal amount = tongTienDuKien != null ? tongTienDuKien : BigDecimal.ZERO;
+                    boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                    String sqlInsertInvoice = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                            "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, PhuongThucThanhToan, TrangThaiThanhToan" +
+                            (hasLoaiHoaDon ? ", LoaiHoaDon" : "") + ") VALUES (?, ?, ?, GETDATE(), ?, 0, 0, 0, ?, N'Tiền mặt', ?" +
+                            (hasLoaiHoaDon ? ", N'MAIN'" : "") + ")";
+                    psInsertInvoice = conn.prepareStatement(sqlInsertInvoice, Statement.RETURN_GENERATED_KEYS);
+                    psInsertInvoice.setInt(1, datSanId);
+                    psInsertInvoice.setInt(2, khachHangAccountId);
+                    psInsertInvoice.setInt(3, staffAccountId);
+                    psInsertInvoice.setBigDecimal(4, amount);
+                    psInsertInvoice.setBigDecimal(5, amount);
+                    psInsertInvoice.setString(6, PAYMENT_STATUS_PAID);
+                    psInsertInvoice.executeUpdate();
+                    try (ResultSet genKeys = psInsertInvoice.getGeneratedKeys()) {
+                        if (genKeys.next()) hoaDonId = genKeys.getInt(1);
+                    }
+                    tongThanhToan = amount;
+                    trangThaiThanhToan = PAYMENT_STATUS_PAID;
+                    logger.info("Đã tạo MAIN invoice mới ID " + hoaDonId + " cho đơn đặt sân #" + datSanId + " (thu tiền mặt tại check-in, dữ liệu cũ chưa có hóa đơn).");
                 } else {
                     // Nếu lễ tân tích chọn đã thu tiền mặt, cập nhật trạng thái hóa đơn ngay lập tức
                     String sqlUpdateInvoiceStatus = "UPDATE HoaDon SET TrangThaiThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE HoaDonID = ?";
@@ -225,8 +267,9 @@ public class CheckInDAO {
                 durationMinutes += 24 * 60;
             }
 
-            // 5. Thực hiện cập nhật trạng thái đơn đặt sân
-            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, actual_start_time = ?, TongTienDuKien = TongTienDuKien + ?, GhiChu = ?, TimeMode = ?, ReservedDurationMinutes = ? WHERE DatSanID = ?";
+            // 5. Thực hiện cập nhật trạng thái đơn đặt sân - giữ điều kiện WHERE TrangThai nguồn để
+            // affected-row check phát hiện race (đơn vừa bị đổi trạng thái bởi request khác).
+            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, actual_start_time = ?, TongTienDuKien = TongTienDuKien + ?, GhiChu = ?, TimeMode = ?, ReservedDurationMinutes = ? WHERE DatSanID = ? AND TrangThai = N'Đã xác nhận'";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
             psUpdateBooking.setString(1, BOOKING_STATUS_IN_USE);
             psUpdateBooking.setTime(2, Time.valueOf(now));
@@ -235,7 +278,9 @@ public class CheckInDAO {
             psUpdateBooking.setString(5, "FIXED_BOOKING");
             psUpdateBooking.setInt(6, (int) durationMinutes);
             psUpdateBooking.setInt(7, datSanId);
-            psUpdateBooking.executeUpdate();
+            if (psUpdateBooking.executeUpdate() != 1) {
+                throw new ConcurrencyConflictException("Trạng thái đơn đặt sân vừa thay đổi bởi một thao tác khác. Vui lòng tải lại.");
+            }
 
             // Cập nhật lại số tiền trên hóa đơn (nếu có phụ thu đến sớm)
             if (phuThu.compareTo(BigDecimal.ZERO) > 0 && hoaDonId != -1) {
@@ -276,7 +321,9 @@ public class CheckInDAO {
                     logger.error("Failed to rollback transaction", ex);
                 }
             }
-            if (e instanceof CheckInException) {
+            if (e instanceof SecurityException) {
+                throw (SecurityException) e;
+            } else if (e instanceof CheckInException) {
                 throw (CheckInException) e;
             } else {
                 throw new CheckInException("Lỗi hệ thống trong quá trình check-in: " + e.getMessage());
@@ -288,6 +335,7 @@ public class CheckInDAO {
             closeResource(rsPayment);
             closeResource(psSelectBooking);
             closeResource(psSelectField);
+            closeResource(psInsertInvoice);
             closeResource(psCheckPayment);
             closeResource(psUpdateBooking);
             closeResource(psUpdateField);
@@ -486,20 +534,33 @@ public class CheckInDAO {
      * @param staffAccountId ID nhân viên thực hiện hủy đơn
      * @throws CheckInException nếu có lỗi nghiệp vụ xảy ra
      */
-    public void huyLichKhachBung(int datSanId, int staffAccountId) throws CheckInException {
+    /**
+     * Đánh dấu "khách bùng" (no-show) cho một đơn đặt trước. requiredCoSoId phải khớp cơ sở của
+     * sân - khác cơ sở ném SecurityException (servlet trả 403), chống IDOR. Điều kiện đủ để
+     * no-show do org.example.service.checkin.NoShowEligibility quyết định (trạng thái Đã xác nhận,
+     * đúng ngày hôm nay, đã qua thời gian ân hạn NO_SHOW_GRACE_MINUTES). Dùng trạng thái riêng
+     * "Không đến" (KHÔNG dùng lại "Đã hủy") và ghi NoShowAt. Không giải phóng sân - một booking
+     * "Đã xác nhận" (chưa check-in) không hề chiếm sân, nên không có gì để giải phóng, và không
+     * bao giờ được đụng vào San của một ca khác đang chơi. Không tự hủy hóa đơn nếu đã thanh
+     * toán/cọc - chỉ tự hủy khi hóa đơn thực sự chưa thu tiền gì (an toàn, không mất dấu vết cần
+     * hoàn tiền/giữ cọc thủ công).
+     */
+    public void huyLichKhachBung(int datSanId, int staffAccountId, int requiredCoSoId) throws CheckInException {
         Connection conn = null;
         PreparedStatement psSelect = null;
         PreparedStatement psUpdateBooking = null;
-        PreparedStatement psUpdateField = null;
+        PreparedStatement psSelectInvoice = null;
         PreparedStatement psUpdateInvoice = null;
         ResultSet rs = null;
+        ResultSet rsInvoice = null;
 
         try {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false); // Quản lý Transaction thủ công
 
-            // 1. Lấy thông tin đơn đặt lịch
-            String sqlSelect = "SELECT SanID, TrangThai, GhiChu FROM LichDatSan WHERE DatSanID = ?";
+            // 1. Khóa đơn đặt lịch + join San để xác minh cơ sở
+            String sqlSelect = "SELECT l.TrangThai, l.GhiChu, l.NgayDat, l.GioBatDau, s.CoSoID " +
+                    "FROM LichDatSan l WITH (UPDLOCK, ROWLOCK) JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
             rs = psSelect.executeQuery();
@@ -508,60 +569,88 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy thông tin đơn đặt sân có ID: " + datSanId);
             }
 
-            int sanId = rs.getInt("SanID");
-            String trangThaiBooking = rs.getString("TrangThai");
-            String ghiChu = rs.getString("GhiChu");
-
-            if ("Đã hủy".equals(trangThaiBooking)) {
-                throw new CheckInException("Đơn đặt sân này đã ở trạng thái Hủy.");
+            int bookingCoSoId = rs.getInt("CoSoID");
+            if (bookingCoSoId != requiredCoSoId) {
+                throw new SecurityException("Đơn đặt sân không thuộc cơ sở của bạn.");
             }
 
-            String logGhiChu = (ghiChu != null ? ghiChu.trim() : "") + " [Lễ tân hủy lịch do khách không đến]";
+            String trangThaiBooking = rs.getString("TrangThai");
+            String ghiChu = rs.getString("GhiChu");
+            java.time.LocalDate ngayDat = rs.getDate("NgayDat").toLocalDate();
+            java.time.LocalTime gioBatDau = rs.getTime("GioBatDau").toLocalTime();
 
-            // 2. Cập nhật đơn đặt sân thành 'Đã hủy'
-            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, GhiChu = ? WHERE DatSanID = ?";
+            org.example.service.checkin.NoShowEligibility.Result eligibility =
+                    org.example.service.checkin.NoShowEligibility.check(trangThaiBooking, ngayDat, gioBatDau, java.time.LocalDateTime.now());
+            if (!eligibility.eligible()) {
+                throw new CheckInException(eligibility.message());
+            }
+
+            String logGhiChu = (ghiChu != null ? ghiChu.trim() : "") + " [Lễ tân đánh dấu khách không đến]";
+
+            // 2. Cập nhật đơn đặt sân thành 'Không đến' - điều kiện WHERE giữ nguyên trạng thái nguồn
+            // để chống race (đơn có thể vừa được check-in/hủy bởi request khác giữa lúc SELECT và UPDATE).
+            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, NoShowAt = GETDATE(), GhiChu = ? " +
+                    "WHERE DatSanID = ? AND TrangThai = N'Đã xác nhận'";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
-            psUpdateBooking.setString(1, "Đã hủy");
+            psUpdateBooking.setString(1, org.example.util.Constants.TRANG_THAI_DAT_SAN_KHONG_DEN);
             psUpdateBooking.setString(2, logGhiChu.trim());
             psUpdateBooking.setInt(3, datSanId);
-            psUpdateBooking.executeUpdate();
+            if (psUpdateBooking.executeUpdate() != 1) {
+                throw new CheckInException("Trạng thái đơn đặt sân vừa thay đổi bởi một thao tác khác. Vui lòng tải lại.");
+            }
 
-            // 3. Cập nhật hóa đơn MAIN liên quan thành 'Đã hủy'; không đụng nhầm split bill dịch vụ.
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã hủy', AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-            psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
-            psUpdateInvoice.setInt(1, staffAccountId);
-            psUpdateInvoice.setInt(2, datSanId);
-            psUpdateInvoice.executeUpdate();
-
-            // 4. Giải phóng sân (Nếu sân đang ghi nhận bận do đơn này)
-            // Chỉ giải phóng nếu sân đang ở trạng thái 'Đang sử dụng'
-            String sqlUpdateField = "UPDATE San SET TrangThai = ? WHERE SanID = ? AND TrangThai = ?";
-            psUpdateField = conn.prepareStatement(sqlUpdateField);
-            psUpdateField.setString(1, FIELD_STATUS_AVAILABLE);
-            psUpdateField.setInt(2, sanId);
-            psUpdateField.setString(3, FIELD_STATUS_OCCUPIED);
-            psUpdateField.executeUpdate();
+            // 3. Hóa đơn MAIN: chỉ tự hủy nếu THỰC SỰ chưa thu tiền gì - nếu đã thanh toán/cọc,
+            // không được tự đổi trạng thái, chỉ ghi chú để xử lý hoàn tiền/giữ cọc thủ công.
+            String sqlSelectInvoice = "SELECT HoaDonID, TrangThaiThanhToan, GhiChu FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            psSelectInvoice = conn.prepareStatement(sqlSelectInvoice);
+            psSelectInvoice.setInt(1, datSanId);
+            rsInvoice = psSelectInvoice.executeQuery();
+            if (rsInvoice.next()) {
+                int hoaDonId = rsInvoice.getInt("HoaDonID");
+                String invoiceStatus = rsInvoice.getString("TrangThaiThanhToan");
+                String invoiceGhiChu = rsInvoice.getString("GhiChu");
+                boolean unpaid = invoiceStatus == null
+                        || PAYMENT_STATUS_UNPAID.equals(invoiceStatus)
+                        || "Chưa cọc".equals(invoiceStatus);
+                if (unpaid) {
+                    String sqlCancelInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã hủy', AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE HoaDonID = ?";
+                    psUpdateInvoice = conn.prepareStatement(sqlCancelInvoice);
+                    psUpdateInvoice.setInt(1, staffAccountId);
+                    psUpdateInvoice.setInt(2, hoaDonId);
+                    psUpdateInvoice.executeUpdate();
+                } else {
+                    String sqlFlagInvoice = "UPDATE HoaDon SET GhiChu = ? WHERE HoaDonID = ?";
+                    psUpdateInvoice = conn.prepareStatement(sqlFlagInvoice);
+                    psUpdateInvoice.setString(1, ((invoiceGhiChu != null ? invoiceGhiChu.trim() : "") +
+                            " [Khách bùng - đã thu tiền, cần xử lý hoàn tiền/giữ cọc thủ công]").trim());
+                    psUpdateInvoice.setInt(2, hoaDonId);
+                    psUpdateInvoice.executeUpdate();
+                }
+            }
 
             conn.commit();
-            logger.info("Đã hủy thành công đơn đặt sân ID " + datSanId + " do khách bùng.");
+            logger.info("Đã đánh dấu khách bùng cho đơn đặt sân ID " + datSanId);
         } catch (Exception e) {
             if (conn != null) {
                 try {
                     conn.rollback();
                 } catch (SQLException ex) {
-                    logger.error("Failed to rollback cancellation transaction", ex);
+                    logger.error("Failed to rollback no-show transaction", ex);
                 }
             }
-            if (e instanceof CheckInException) {
+            if (e instanceof SecurityException) {
+                throw (SecurityException) e;
+            } else if (e instanceof CheckInException) {
                 throw (CheckInException) e;
             } else {
-                throw new CheckInException("Lỗi hệ thống khi hủy ca đặt sân: " + e.getMessage());
+                throw new CheckInException("Lỗi hệ thống khi đánh dấu khách bùng: " + e.getMessage());
             }
         } finally {
+            closeResource(rsInvoice);
             closeResource(rs);
             closeResource(psSelect);
             closeResource(psUpdateBooking);
-            closeResource(psUpdateField);
+            closeResource(psSelectInvoice);
             closeResource(psUpdateInvoice);
             if (conn != null) {
                 try {
@@ -988,134 +1077,6 @@ public class CheckInDAO {
             logger.error("Lỗi hasUnpaidSplitBills datSanId={}: {}", datSanId, e.getMessage(), e);
         }
         return false;
-    }
-
-    /**
-     * Dừng phiên chơi của sân "Không cố định" và tính tiền sân thực tế.
-     */
-    public void stopOpenSession(int datSanId, int staffAccountId) throws CheckInException {
-        Connection conn = null;
-        PreparedStatement psSelect = null;
-        PreparedStatement psUpdateBooking = null;
-        PreparedStatement psUpdateInvoice = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            // 1. Lấy thông tin ca chơi và kiểm tra trạng thái
-            String sqlSelect = "SELECT lds.SanID, lds.GioBatDau, lds.GioKetThuc, lds.actual_start_time, lds.TrangThai, lds.GhiChu, hd.TongTienSan " +
-                               "FROM LichDatSan lds " +
-                               "LEFT JOIN HoaDon hd ON " + mainInvoiceJoinCondition(conn) + " " +
-                               "WHERE lds.DatSanID = ?";
-            psSelect = conn.prepareStatement(sqlSelect);
-            psSelect.setInt(1, datSanId);
-            rs = psSelect.executeQuery();
-
-            if (!rs.next()) {
-                throw new CheckInException("Không tìm thấy ca chơi có ID: " + datSanId);
-            }
-
-            String trangThai = rs.getString("TrangThai");
-            if (!"Đang sử dụng".equals(trangThai)) {
-                throw new CheckInException("Ca chơi này không ở trạng thái 'Đang sử dụng'.");
-            }
-
-            Time gioBatDau = rs.getTime("GioBatDau");
-            Time actualStartTime = rs.getTime("actual_start_time");
-            Time startTime = actualStartTime != null ? actualStartTime : gioBatDau;
-            Time gioKetThucPlanned = rs.getTime("GioKetThuc");
-            String ghiChu = rs.getString("GhiChu");
-            BigDecimal tongTienSanOriginal = rs.getBigDecimal("TongTienSan");
-
-            LocalTime localStart = startTime.toLocalTime();
-            LocalTime localEndPlanned = gioKetThucPlanned.toLocalTime();
-            LocalTime localNow = LocalTime.now();
-
-            // Tính thời gian đã chơi thực tế
-            long durationMins = Duration.between(localStart, localNow).toMinutes();
-            if (durationMins < 0) {
-                // Hỗ trợ ca chơi qua đêm (hiếm nhưng có thể xảy ra)
-                durationMins += 24 * 60;
-            }
-            if (durationMins < 1) {
-                durationMins = 1; // Tối thiểu 1 phút
-            }
-
-            // Tính đơn giá gốc bằng cách chia TongTienSanOriginal cho thời lượng dự kiến
-            long plannedMins = 0;
-            if (ghiChu != null && ghiChu.contains("[duration: ")) {
-                try {
-                    int startIndex = ghiChu.indexOf("[duration: ") + 11;
-                    int endIndex = ghiChu.indexOf("]", startIndex);
-                    plannedMins = Long.parseLong(ghiChu.substring(startIndex, endIndex));
-                } catch (Exception ignored) {}
-            }
-            if (plannedMins <= 0) {
-                plannedMins = Duration.between(localStart, localEndPlanned).toMinutes();
-                if (plannedMins < 0) {
-                    plannedMins += 24 * 60;
-                }
-            }
-            if (plannedMins <= 0) {
-                plannedMins = 60; // Tránh chia cho 0
-            }
-            double hourlyRate = tongTienSanOriginal.doubleValue() / (plannedMins / 60.0);
-
-            // Tính toán số tiền thực tế
-            double finalCourtPrice = (durationMins / 60.0) * hourlyRate;
-            BigDecimal finalCourtPriceBD = BigDecimal.valueOf(finalCourtPrice);
-
-            // 2. Cập nhật GioKetThuc và TongTienDuKien trong LichDatSan
-            String newGhiChu = (ghiChu != null ? ghiChu : "") + " [Đã chốt giờ thực tế: " + durationMins + " phút]";
-            String sqlUpdateBooking = "UPDATE LichDatSan SET GioKetThuc = ?, TongTienDuKien = ?, GhiChu = ? WHERE DatSanID = ?";
-            psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
-            psUpdateBooking.setTime(1, Time.valueOf(localNow));
-            psUpdateBooking.setBigDecimal(2, finalCourtPriceBD);
-            psUpdateBooking.setString(3, newGhiChu);
-            psUpdateBooking.setInt(4, datSanId);
-            psUpdateBooking.executeUpdate();
-
-            // 3. Cập nhật tổng tiền trong HoaDon
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ? + TongTienDichVu - GiamGia + PhiGuiXe, AccountID_NhanVien = ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
-            psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
-            psUpdateInvoice.setBigDecimal(1, finalCourtPriceBD);
-            psUpdateInvoice.setBigDecimal(2, finalCourtPriceBD);
-            psUpdateInvoice.setInt(3, staffAccountId);
-            psUpdateInvoice.setInt(4, datSanId);
-            psUpdateInvoice.executeUpdate();
-
-            conn.commit();
-            logger.info("Đã chốt giờ chơi thực tế thành công cho ca #" + datSanId + " (Đã chơi " + durationMins + " phút, Số tiền: " + finalCourtPriceBD + ")");
-
-        } catch (Exception e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    logger.error("Failed to rollback stopOpenSession transaction", ex);
-                }
-            }
-            if (e instanceof CheckInException) {
-                throw (CheckInException) e;
-            } else {
-                throw new CheckInException("Lỗi hệ thống khi dừng ca chơi: " + e.getMessage());
-            }
-        } finally {
-            closeResource(rs);
-            closeResource(psSelect);
-            closeResource(psUpdateBooking);
-            closeResource(psUpdateInvoice);
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    logger.error("Failed to close connection", e);
-                }
-            }
-        }
     }
 
     public void applyEarlyCheckoutAdjustment(int datSanId, double discountAmount, String reason, int staffAccountId, int coSoId) throws CheckInException {

@@ -199,6 +199,8 @@ public class SanService {
         private BigDecimal giaCoDen;
         private LocalTime gioBatDauLenDen;
         private LocalTime gioKetThucLenDen;
+        /** true = sân không dùng đèn: giaCoDen, gioBatDau, gioKetThuc đều null */
+        private boolean khongDungDen;
 
         // Các hàm getter và setter
         public String getTenLoai() { return tenLoai; }
@@ -213,6 +215,8 @@ public class SanService {
         public void setGioBatDauLenDen(LocalTime gioBatDauLenDen) { this.gioBatDauLenDen = gioBatDauLenDen; }
         public LocalTime getGioKetThucLenDen() { return gioKetThucLenDen; }
         public void setGioKetThucLenDen(LocalTime gioKetThucLenDen) { this.gioKetThucLenDen = gioKetThucLenDen; }
+        public boolean isKhongDungDen() { return khongDungDen; }
+        public void setKhongDungDen(boolean khongDungDen) { this.khongDungDen = khongDungDen; }
     }
 
     // ==================== READ OPERATIONS ====================
@@ -613,30 +617,43 @@ public class SanService {
         }
 
         ValidationUtils.validatePositiveNumber(req.getGiaKhongDen(), "giaKhongDen");
-        ValidationUtils.validatePositiveNumber(req.getGiaCoDen(), "giaCoDen");
 
-        if (req.getGiaCoDen() != null && req.getGiaKhongDen() != null) {
-            if (req.getGiaCoDen().compareTo(req.getGiaKhongDen()) < 0) {
-                errors.put("giaCoDen", "Giá tối (có bật đèn) không được thấp hơn giá ngày (không đèn)");
+        if (!req.isKhongDungDen()) {
+            // Có sử dụng đèn: bắt buộc giá và giờ đèn
+            if (req.getGiaCoDen() == null || req.getGiaCoDen().compareTo(BigDecimal.ZERO) <= 0) {
+                errors.put("giaCoDen", "Vui lòng nhập đầy đủ giá và thời gian áp dụng giá có đèn.");
             }
-        }
-
-        if (req.getGioBatDauLenDen() == null) {
-            errors.put("gioBatDauLenDen", "Giờ bắt đầu lên đèn không được để trống");
-        }
-        if (req.getGioKetThucLenDen() == null) {
-            errors.put("gioKetThucLenDen", "Giờ kết thúc lên đèn không được để trống");
-        }
-
-        if (req.getGioBatDauLenDen() != null && req.getGioKetThucLenDen() != null) {
-            if (!req.getGioBatDauLenDen().isBefore(req.getGioKetThucLenDen())) {
-                errors.put("gioBatDauLenDen", "Giờ bắt đầu lên đèn phải trước giờ kết thúc");
+            if (req.getGioBatDauLenDen() == null) {
+                errors.put("gioBatDauLenDen", "Vui lòng nhập đầy đủ giá và thời gian áp dụng giá có đèn.");
             }
+            if (req.getGioKetThucLenDen() == null) {
+                errors.put("gioKetThucLenDen", "Vui lòng nhập đầy đủ giá và thời gian áp dụng giá có đèn.");
+            }
+            // Không chặn start >= end — start > end có nghĩa là qua ngày, start == end là toàn thời gian
         }
+        // Nếu khongDungDen: không bắt buộc giaCoDen, gioBatDau, gioKetThuc
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(errors.toString());
         }
+    }
+
+    /**
+     * Kiểm tra một thời điểm có thuộc khung giờ đèn không.
+     * - start == end: đèn toàn thời gian (luôn trả true)
+     * - start < end: khung cùng ngày [start, end)
+     * - start > end: khung qua nửa đêm [start, 24h) ∪ [0h, end)
+     * - start hoặc end null / sân không dùng đèn: trả false
+     */
+    public static boolean isLightingTime(LocalTime time, LocalTime start, LocalTime end) {
+        if (start == null || end == null) return false;
+        if (start.equals(end)) return true;          // toàn thời gian
+        if (start.isBefore(end)) {
+            // Cùng ngày: [start, end)
+            return !time.isBefore(start) && time.isBefore(end);
+        }
+        // Qua nửa đêm: [start, 24h) ∪ [0h, end)
+        return !time.isBefore(start) || time.isBefore(end);
     }
 
     // ==================== MAPPER HELPERS ====================
@@ -663,8 +680,15 @@ public class SanService {
         ls.setTenLoai(req.getTenLoai());
         ls.setMonTheThaoID(req.getMonTheThaoId());
         ls.setGiaKhongDen(req.getGiaKhongDen() != null ? req.getGiaKhongDen().doubleValue() : 0.0);
-        ls.setGiaCoDen(req.getGiaCoDen() != null ? req.getGiaCoDen().doubleValue() : 0.0);
-        ls.setGioBatDauLenDen(req.getGioBatDauLenDen());
-        ls.setGioKetThucLenDen(req.getGioKetThucLenDen());
+        if (req.isKhongDungDen()) {
+            // Sân không dùng đèn: clear toàn bộ dữ liệu đèn cũ
+            ls.setGiaCoDen(0.0);
+            ls.setGioBatDauLenDen(null);
+            ls.setGioKetThucLenDen(null);
+        } else {
+            ls.setGiaCoDen(req.getGiaCoDen() != null ? req.getGiaCoDen().doubleValue() : 0.0);
+            ls.setGioBatDauLenDen(req.getGioBatDauLenDen());
+            ls.setGioKetThucLenDen(req.getGioKetThucLenDen());
+        }
     }
 }

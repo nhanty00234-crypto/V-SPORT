@@ -23,6 +23,12 @@ public interface TaiKhoanDAO {
 
     // Admin CRUD
     List<TaiKhoan> getAllAccounts();
+
+    /**
+     * Danh sách tài khoản dùng cho trang Nhân sự Admin: loại Owner (RoleID=2)
+     * chưa có cơ sở nào được duyệt (chỉ có CoSo "Chờ duyệt" hoặc "Từ chối").
+     */
+    List<TaiKhoan> getStaffDirectoryAccounts();
     List<TaiKhoan> getDeletedAccounts();
     TaiKhoan getAccountById(int id);
     boolean updateAccount(TaiKhoan TaiKhoan);

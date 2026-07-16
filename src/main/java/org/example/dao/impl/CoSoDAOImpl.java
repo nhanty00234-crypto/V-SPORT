@@ -19,9 +19,25 @@ public class CoSoDAOImpl implements CoSoDAO {
 
     @Override
     public List<CoSo> getAllCoSo() {
+        // Loại trừ cơ sở đang "Chờ duyệt"/"Từ chối" vì đây là yêu cầu Owner
+        // chưa được Admin duyệt, không phải cơ sở đang vận hành thật sự.
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false OR c.isDeleted IS NULL", CoSo.class).getResultList();
+            return em.createQuery(
+                    "SELECT c FROM CoSo c WHERE (c.isDeleted = false OR c.isDeleted IS NULL) " +
+                    "AND c.TrangThai NOT IN ('Chờ duyệt', 'Từ chối')", CoSo.class)
+                .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<CoSo> getAllCoSoIncludingPending() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT c FROM CoSo c WHERE c.isDeleted = false OR c.isDeleted IS NULL", CoSo.class)
+                .getResultList();
         } finally {
             em.close();
         }
@@ -104,7 +120,7 @@ public class CoSoDAOImpl implements CoSoDAO {
             trans.begin();
             int updated = em.createQuery(
                     "UPDATE CoSo c SET c.isDeleted = true, c.deletedAt = :now, c.deletedBy = :actor " +
-                    "WHERE c.CoSoID = :id AND c.isDeleted = false")
+                    "WHERE c.CoSoID = :id AND (c.isDeleted = false OR c.isDeleted IS NULL)")
                 .setParameter("now", java.time.LocalDateTime.now())
                 .setParameter("actor", actorId)
                 .setParameter("id", coSoId)
@@ -342,6 +358,49 @@ public class CoSoDAOImpl implements CoSoDAO {
                 trans.rollback();
             logger.error("Lỗi khi xóa cơ sở ID {}: {}", id, e.getMessage(), e);
             return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean archiveRejectedForAccount(int accountId, int excludeCoSoId, int actorId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            em.createQuery(
+                    "UPDATE CoSo c SET c.isDeleted = true, c.deletedAt = :now, c.deletedBy = :actor " +
+                    "WHERE c.AccountID_QuanLy = :accId AND c.TrangThai = 'Từ chối' AND c.CoSoID <> :excludeId " +
+                    "AND (c.isDeleted = false OR c.isDeleted IS NULL)")
+                .setParameter("now", java.time.LocalDateTime.now())
+                .setParameter("actor", actorId)
+                .setParameter("accId", accountId)
+                .setParameter("excludeId", excludeCoSoId)
+                .executeUpdate();
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            if (trans.isActive()) trans.rollback();
+            logger.error("Lỗi archive rejected CoSo for accountId={}: {}", accountId, e.getMessage(), e);
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean hasActiveOrPendingCoSo(int accountId, int excludeCoSoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            Long count = em.createQuery(
+                    "SELECT COUNT(c) FROM CoSo c WHERE c.AccountID_QuanLy = :accId AND c.CoSoID <> :excludeId " +
+                    "AND (c.isDeleted = false OR c.isDeleted IS NULL) " +
+                    "AND c.TrangThai IN ('Chờ duyệt', 'Đang hoạt động')", Long.class)
+                .setParameter("accId", accountId)
+                .setParameter("excludeId", excludeCoSoId)
+                .getSingleResult();
+            return count != null && count > 0;
         } finally {
             em.close();
         }

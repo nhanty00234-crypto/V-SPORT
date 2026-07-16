@@ -253,20 +253,32 @@ public class QuanLySanManagerServlet extends HttpServlet {
     private void populateLoaiSanRequest(HttpServletRequest req, SanService.LoaiSanRequest loaiReq) {
         loaiReq.setTenLoai(getFormField(req, "tenLoai"));
         loaiReq.setMonTheThaoId(Integer.parseInt(getFormField(req, "monTheThaoID")));
-        loaiReq.setGiaKhongDen(new BigDecimal(getFormField(req, "giaKhongDen")));
-        loaiReq.setGiaCoDen(new BigDecimal(getFormField(req, "giaCoDen")));
 
-        String timeStr = getFormField(req, "gioBatDauLenDen");
-        if (timeStr != null && !timeStr.isEmpty()) {
-            if (timeStr.length() == 5) timeStr += ":00";
-            loaiReq.setGioBatDauLenDen(LocalTime.parse(timeStr));
-        }
+        String giaKhongDenStr = getFormField(req, "giaKhongDen");
+        loaiReq.setGiaKhongDen(new BigDecimal(giaKhongDenStr != null ? giaKhongDenStr.replace(",", "") : "0"));
 
-        String endTimeStr = getFormField(req, "gioKetThucLenDen");
-        if (endTimeStr != null && !endTimeStr.isEmpty()) {
-            if (endTimeStr.length() == 5) endTimeStr += ":00";
-            loaiReq.setGioKetThucLenDen(LocalTime.parse(endTimeStr));
+        boolean khongDungDen = "true".equals(req.getParameter("khongDungDen"));
+        loaiReq.setKhongDungDen(khongDungDen);
+
+        if (!khongDungDen) {
+            String giaCoDenStr = getFormField(req, "giaCoDen");
+            if (giaCoDenStr != null && !giaCoDenStr.isBlank()) {
+                loaiReq.setGiaCoDen(new BigDecimal(giaCoDenStr.replace(",", "")));
+            }
+
+            String timeStr = getFormField(req, "gioBatDauLenDen");
+            if (timeStr != null && !timeStr.isEmpty()) {
+                if (timeStr.length() == 5) timeStr += ":00";
+                loaiReq.setGioBatDauLenDen(LocalTime.parse(timeStr));
+            }
+
+            String endTimeStr = getFormField(req, "gioKetThucLenDen");
+            if (endTimeStr != null && !endTimeStr.isEmpty()) {
+                if (endTimeStr.length() == 5) endTimeStr += ":00";
+                loaiReq.setGioKetThucLenDen(LocalTime.parse(endTimeStr));
+            }
         }
+        // khongDungDen=true: giaCoDen, gioBatDau, gioKetThuc giữ null → service sẽ clear trong DB
     }
 
     private String resolveCourtImage(HttpServletRequest req, String existingImage) throws IOException, ServletException {

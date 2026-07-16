@@ -60,7 +60,7 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
             return;
         }
 
-        List<TaiKhoan> accounts = TaiKhoanDAO.getAllAccounts();
+        List<TaiKhoan> accounts = TaiKhoanDAO.getStaffDirectoryAccounts();
         List<TaiKhoan> deletedAccounts = TaiKhoanDAO.getDeletedAccounts();
         List<CoSo> branches = coSoDAO.getAllCoSo();
         List<VaiTro> roles = VaiTroDAO.getAllRoles();
@@ -363,15 +363,20 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
         } else if ("softDelete".equals(action)) {
             int id = Integer.parseInt(req.getParameter("id"));
             TaiKhoan accToDelete = TaiKhoanDAO.getAccountById(id);
+            TaiKhoan actingAdmin = (TaiKhoan) req.getSession().getAttribute("user");
             if (accToDelete != null && accToDelete.getRoleId() != 1) {
-                boolean deleted = TaiKhoanDAO.softDeleteAccount(id);
+                boolean deleted = TaiKhoanDAO.softDeleteAccount(id, actingAdmin.getAccountId());
                 if (deleted) {
-                    req.getSession().setAttribute("message", "Đã chuyển tài khoản vào thùng rác.");
-                    AuditLogService.log(req, (TaiKhoan) req.getSession().getAttribute("user"),
+                    String displayName = accToDelete.getFullName() != null ? accToDelete.getFullName() : accToDelete.getUsername();
+                    new org.example.dao.impl.AdminTrashDAOImpl().log("Account", id, displayName, "Accounts",
+                            null, actingAdmin.getAccountId(), null);
+                    AuditLogService.log(req, actingAdmin,
                         AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_ACCOUNT,
-                        String.valueOf(id),
-                        accToDelete.getFullName() != null ? accToDelete.getFullName() : accToDelete.getUsername(),
+                        String.valueOf(id), displayName,
                         "Admin chuyển tài khoản vào thùng rác");
+                    req.getSession().setAttribute("trashMessage", "Đã chuyển vào thùng rác.");
+                    req.getSession().setAttribute("trashUrl", req.getContextPath() + "/admin/thung-rac");
+                    req.getSession().setAttribute("trashCountdownSeconds", 10);
                 } else {
                     req.getSession().setAttribute("error", "Không thể chuyển tài khoản vào thùng rác.");
                 }
@@ -393,25 +398,6 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                     "Admin khôi phục tài khoản");
             } else {
                 req.getSession().setAttribute("error", "Không thể khôi phục tài khoản.");
-            }
-            resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
-            return;
-        } else if ("permanentDelete".equals(action)) {
-            try {
-                int id = Integer.parseInt(req.getParameter("id"));
-                boolean deleted = TaiKhoanDAO.permanentDeleteAccount(id);
-                if (deleted) {
-                    req.getSession().setAttribute("message", "Đã xóa vĩnh viễn tài khoản thành công.");
-                    AuditLogService.log(req, (TaiKhoan) req.getSession().getAttribute("user"),
-                        AuditLogService.ACTION_PERMANENT_DELETE, AuditLogService.ENTITY_ACCOUNT,
-                        String.valueOf(id), String.valueOf(id),
-                        "Admin xóa vĩnh viễn tài khoản ID=" + id);
-                } else {
-                    req.getSession().setAttribute("error", "Không thể xóa vĩnh viễn tài khoản. Tài khoản có thể đang liên kết với dữ liệu khác.");
-                }
-            } catch (Exception e) {
-                logger.error("Lỗi xóa vĩnh viễn tài khoản: {}", e.getMessage(), e);
-                req.getSession().setAttribute("error", "Lỗi khi xóa vĩnh viễn: " + e.getMessage());
             }
             resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
             return;

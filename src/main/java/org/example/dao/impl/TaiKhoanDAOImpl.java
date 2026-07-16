@@ -54,6 +54,28 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     }
 
     @Override
+    public List<TaiKhoan> getStaffDirectoryAccounts() {
+        // Owner (RoleID=2) chỉ hiển thị trong Nhân sự nếu có ít nhất một CoSo
+        // đã được duyệt (TrangThai khác "Chờ duyệt"/"Từ chối"); các role khác giữ nguyên.
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT a FROM TaiKhoan a WHERE (a.isDeleted = false OR a.isDeleted IS NULL) " +
+                    "AND (a.roleId <> 2 OR EXISTS (" +
+                    "  SELECT c FROM CoSo c WHERE c.AccountID_QuanLy = a.accountId " +
+                    "  AND c.TrangThai NOT IN ('Chờ duyệt', 'Từ chối') " +
+                    "  AND (c.isDeleted = false OR c.isDeleted IS NULL)" +
+                    "))", TaiKhoan.class)
+                .getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi lấy danh sách tài khoản Nhân sự: {}", e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public List<TaiKhoan> getDeletedAccounts() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
