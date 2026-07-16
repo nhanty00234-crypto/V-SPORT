@@ -768,6 +768,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities) throws Exception {
+        return updateDichVuDatSan(datSanId, productIds, quantities, null);
+    }
+
+    @Override
+    public boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities, Integer requiredCoSoId) throws Exception {
         if (productIds == null || quantities == null || productIds.length != quantities.length) {
             throw new Exception("Dữ liệu đầu vào không hợp lệ (mảng sản phẩm và số lượng không khớp).");
         }
@@ -804,6 +809,10 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
             String trangThaiBooking = rsBooking.getString("TrangThai");
             int coSoId = rsBooking.getInt("CoSoID");
+
+            if (requiredCoSoId != null && coSoId != requiredCoSoId) {
+                throw new SecurityException("Đơn đặt sân không thuộc cơ sở của bạn.");
+            }
 
             if (!"Đang sử dụng".equals(trangThaiBooking)) {
                 throw new Exception("Chỉ được phép thêm/cập nhật dịch vụ khi đơn đặt sân ở trạng thái 'Đang sử dụng'.");

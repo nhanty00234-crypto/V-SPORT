@@ -17,6 +17,8 @@ public interface LichDatSanDAO {
     boolean duyetLichDatSan(int datSanId, int approvedByAccountId, int coSoId, boolean confirmPriceChange) throws Exception;
     boolean tuChoiLichDatSan(int datSanId, String ghiChu, int coSoId) throws Exception;
     boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities) throws Exception;
+    /** Như trên, nhưng bắt buộc DatSanID phải thuộc requiredCoSoId (dùng cho Manager/Staff thao tác qua Check-in). */
+    boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities, Integer requiredCoSoId) throws Exception;
     /** Xóa mềm lịch đặt sân theo ID */
     boolean softDelete(int id, int actorId);
     /** Khôi phục lịch đặt sân đã bị xóa mềm */

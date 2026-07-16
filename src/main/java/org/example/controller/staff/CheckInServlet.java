@@ -562,13 +562,16 @@ public class CheckInServlet extends HttpServlet {
                         + (payNow ? " và thanh toán thành công!" : ". Hóa đơn đang chờ thanh toán."));
             } else {
                 LichDatSanDAO lichDAO = new LichDatSanDAOImpl();
-                lichDAO.updateDichVuDatSan(datSanId, productIds, quantities);
+                lichDAO.updateDichVuDatSan(datSanId, productIds, quantities, user.getCoSoId());
                 json.addProperty("message", "Đã lưu dịch vụ.");
             }
             writeJsonResponse(resp, HttpServletResponse.SC_OK, json);
         } catch (NumberFormatException e) {
             writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
                     errorJson("INVALID_DAT_SAN_ID", "ID đơn đặt sân không hợp lệ."));
+        } catch (SecurityException e) {
+            writeJsonResponse(resp, HttpServletResponse.SC_FORBIDDEN,
+                    errorJson("FORBIDDEN", e.getMessage()));
         } catch (CheckInException e) {
             writeJsonResponse(resp, HttpServletResponse.SC_BAD_REQUEST,
                     errorJson("VALIDATION_ERROR", e.getMessage()));
