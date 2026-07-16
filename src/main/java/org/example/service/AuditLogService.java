@@ -42,6 +42,9 @@ public class AuditLogService {
     public static final String ACTION_ADD_STAFF        = "ADD_STAFF";
     public static final String ACTION_APPROVE          = "APPROVE";
     public static final String ACTION_REJECT           = "REJECT";
+    public static final String ACTION_CANCEL             = "CANCEL";
+    public static final String ACTION_NO_SHOW             = "NO_SHOW";
+    public static final String ACTION_REPUTATION_ADJUST   = "REPUTATION_ADJUST";
 
     // Các hằng số loại thực thể
     public static final String ENTITY_ACCOUNT    = "TaiKhoan";
@@ -52,6 +55,8 @@ public class AuditLogService {
     public static final String ENTITY_PAYOS_CONFIG = "PayOSConfig";
     public static final String ENTITY_CA_LAM     = "CaLamViec";
     public static final String ENTITY_YEU_CAU_NGHI = "YeuCauNghi";
+    public static final String ENTITY_DAT_SAN    = "LichDatSan";
+    public static final String ENTITY_REPUTATION = "CustomerReputation";
 
     /**
      * Ghi một bản ghi audit log. Không ném exception ra ngoài — lỗi log không được phá request chính.
@@ -124,7 +129,7 @@ public class AuditLogService {
         }
     }
 
-    private static String getClientIp(HttpServletRequest req) {
+    public static String getClientIp(HttpServletRequest req) {
         String ip = req.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty()) ip = req.getRemoteAddr();
         // X-Forwarded-For có thể chứa nhiều IP, lấy IP đầu tiên
