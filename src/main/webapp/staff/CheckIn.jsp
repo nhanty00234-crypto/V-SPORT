@@ -1045,13 +1045,10 @@
                                     \${checkinBtnText}
                                 </button>
                             </form>
-                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch đặt này do khách bùng không?');">
-                                <input type="hidden" name="action" value="cancelNoShow">
-                                <input type="hidden" name="datSanId" value="\${b.datSanId}">
-                                <button type="submit" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[10.5px] px-2.5 py-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
-                                    <span class="material-symbols-outlined text-[15px]">cancel</span>
-                                </button>
-                            </form>
+                            <button type="button" onclick="openNoShowModal(\${b.datSanId}, '\${b.tenKhachHang}', \${b.reputationScore != null ? b.reputationScore : 'null'})"
+                                    class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[10.5px] px-2.5 py-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
+                                <span class="material-symbols-outlined text-[15px]">cancel</span>
+                            </button>
                         </div>
                     </div>
                 `);
@@ -1620,6 +1617,36 @@
         }
     });
 </script>
+
+<div id="noShowModal" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm scale-95 transition-transform duration-300">
+        <div class="bg-rose-600 rounded-t-2xl px-5 py-4 flex items-center justify-between">
+            <h3 class="text-white font-bold text-sm">Xác nhận đánh dấu Không đến</h3>
+            <button onclick="closeNoShowModal()" class="text-white/80 hover:text-white transition-colors p-1">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="p-5 space-y-3">
+            <p class="text-sm text-zinc-700">Khách hàng <strong id="noShowCustomerName">-</strong> sẽ được đánh dấu <strong>Không đến (No Show)</strong> cho đơn <strong id="noShowDatSanLabel">-</strong>.</p>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[12px] text-amber-800 font-semibold leading-snug">
+                Thao tác này sẽ trừ điểm uy tín của khách và không thể hoàn tác. Vui lòng kiểm tra kỹ trước khi xác nhận.
+            </div>
+            <p id="noShowCurrentReputation" class="text-[11px] text-zinc-500 hidden"></p>
+        </div>
+        <div class="px-5 pb-5 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeNoShowModal()" class="px-4 py-2 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm">
+                Hủy thao tác
+            </button>
+            <form id="noShowForm" action="${pageContext.request.contextPath}/staff/checkin" method="post">
+                <input type="hidden" name="action" value="cancelNoShow">
+                <input type="hidden" name="datSanId" id="noShowDatSanId" value="">
+                <button type="submit" class="px-4 py-2 rounded-xl font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors text-sm">
+                    Xác nhận Không đến
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- STAFF INVOICE & SERVICE MODAL -->
 <div id="staffInvoiceModal" role="dialog" aria-modal="true" aria-labelledby="staffInvoiceModalTitle" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-2 sm:p-4">
@@ -4032,6 +4059,38 @@
 
             // Sân vừa thanh toán xong cần cập nhật ngay về Sẵn sàng trên dashboard phía sau modal.
             if (wasSuccess) pollUpdates();
+        }, 300);
+    }
+
+    function openNoShowModal(datSanId, tenKhachHang, reputationScore) {
+        document.getElementById("noShowDatSanId").value = datSanId;
+        document.getElementById("noShowCustomerName").textContent = tenKhachHang || "Khách vãng lai";
+        document.getElementById("noShowDatSanLabel").textContent = "#" + datSanId;
+
+        var repEl = document.getElementById("noShowCurrentReputation");
+        if (reputationScore !== null && reputationScore !== undefined) {
+            repEl.textContent = "Điểm uy tín hiện tại: " + reputationScore + "/100";
+            repEl.classList.remove("hidden");
+        } else {
+            repEl.classList.add("hidden");
+        }
+
+        var modal = document.getElementById("noShowModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        requestAnimationFrame(function () {
+            modal.classList.remove("opacity-0");
+            modal.querySelector(".bg-white").classList.remove("scale-95");
+        });
+    }
+
+    function closeNoShowModal() {
+        var modal = document.getElementById("noShowModal");
+        modal.classList.add("opacity-0");
+        modal.querySelector(".bg-white").classList.add("scale-95");
+        setTimeout(function () {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
         }, 300);
     }
 
