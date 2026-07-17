@@ -572,11 +572,10 @@
     <!-- Navigation Links -->
     <div class="hidden md:flex gap-2 items-center">
         <a class="nav-link active" href="<%= ctx %>/index.jsp">Trang chủ</a>
-        <a class="nav-link" href="#">Giới thiệu</a>
-        <a class="nav-link" href="#">Sự kiện</a>
-        <a class="nav-link" href="#">Tin tức</a>
         <a class="nav-link" href="<%= ctx %>/customer/dat-san">Đặt sân</a>
-        <a class="nav-link" href="#">Liên hệ</a>
+        <a class="nav-link" href="<%= ctx %>/customer/ghep-keo">Ghép kèo</a>
+        <a class="nav-link" href="<%= ctx %>/customer/lich-su-dat-san">Lịch của tôi</a>
+        <a class="nav-link" href="<%= ctx %>/customer/tai-khoan">Tài khoản</a>
     </div>
     
     <!-- Action Icons -->
@@ -605,7 +604,8 @@
                         <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= displayNameSafe %></p>
                     </div>
                     <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Tài khoản</a>
-                    <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch sử đặt sân</a>
+                    <a href="<%= ctx %>/customer/lich-su-dat-san" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch của tôi</a>
+                    <a href="<%= ctx %>/customer/ghep-keo" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Ghép kèo</a>
                     <a href="<%= ctx %>/logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng xuất</a>
                 </div>
             <% } %>
@@ -652,8 +652,15 @@
             Trải nghiệm tìm kiếm thông minh, thanh toán an toàn PayOS và quản lý lịch đặt tiện lợi.
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
-            <a class="inline-block bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg btn-pulse-glow" href="<%= ctx %>/customer/dat-san">Đặt sân ngay</a>
-            <a class="inline-block bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform backdrop-blur-md" href="<%= ctx %>/customer/dat-san">Khám phá sân</a>
+            <a class="inline-flex items-center justify-center gap-2 bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg btn-pulse-glow" href="<%= ctx %>/customer/dat-san">
+                <span class="material-symbols-outlined text-[18px]">calendar_add_on</span> Đặt sân ngay
+            </a>
+            <a class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform backdrop-blur-md" href="<%= ctx %>/customer/ghep-keo?tab=tim-doi-thu">
+                <span class="material-symbols-outlined text-[18px]">person_search</span> Tìm đối thủ
+            </a>
+            <a class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform backdrop-blur-md" href="<%= ctx %>/customer/ghep-keo?tab=tao-keo">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span> Tạo kèo
+            </a>
         </div>
     </div>
 </section>

@@ -9,14 +9,18 @@ import jakarta.servlet.http.HttpSession;
 import org.example.dao.LichDatSanDAO;
 import org.example.dao.LoaiSanDAO;
 import org.example.dao.SanDAO;
+import org.example.dao.CustomerReputationHistoryDAO;
 import org.example.dao.impl.LichDatSanDAOImpl;
 import org.example.dao.impl.LoaiSanDAOImpl;
 import org.example.dao.impl.SanDAOImpl;
+import org.example.dao.impl.CustomerReputationHistoryDAOImpl;
 import org.example.model.LoaiSan;
 import org.example.model.MonTheThao;
 import org.example.model.Lichdatsan;
 import org.example.model.TaiKhoan;
 import org.example.model.San;
+import org.example.model.CustomerReputationHistory;
+import org.example.util.Constants;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -24,7 +28,9 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,6 +89,7 @@ public class DatSanServlet extends HttpServlet {
     private final LoaiSanDAO loaiSanDAO = new LoaiSanDAOImpl();
     private final org.example.dao.CoSoDAO coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
     private final org.example.dao.LichDatSanDichVuDAO lichDatSanDichVuDAO = new org.example.dao.impl.LichDatSanDichVuDAOImpl();
+    private final CustomerReputationHistoryDAO reputationHistoryDAO = new CustomerReputationHistoryDAOImpl();
     private final org.example.service.booking.BookingCancellationService bookingCancellationService =
             new org.example.service.booking.BookingCancellationService();
 
@@ -191,9 +198,26 @@ public class DatSanServlet extends HttpServlet {
         List<San> dsSan = sanDAO.getAllSan();
         List<org.example.model.CoSo> dsCoSo = coSoDAO.getAllCoSo();
 
+        // Với mỗi booking đã hủy/không đến, tìm bản ghi lịch sử uy tín liên quan gần nhất
+        // (LATE_CANCEL/NO_SHOW/EARLY_CANCEL) để hiển thị rõ tác động uy tín cho khách hàng.
+        Map<Integer, CustomerReputationHistory> reputationByDatSanId = new HashMap<>();
+        for (CustomerReputationHistory h : reputationHistoryDAO.getByAccountId(user.getAccountId())) {
+            if (h.getDatSanId() == null) {
+                continue;
+            }
+            if (!Constants.REPUTATION_ACTION_LATE_CANCEL.equals(h.getActionType())
+                    && !Constants.REPUTATION_ACTION_NO_SHOW.equals(h.getActionType())
+                    && !Constants.REPUTATION_ACTION_EARLY_CANCEL.equals(h.getActionType())) {
+                continue;
+            }
+            // getByAccountId() trả về mới nhất trước; giữ bản ghi đầu tiên gặp cho mỗi DatSanID.
+            reputationByDatSanId.putIfAbsent(h.getDatSanId(), h);
+        }
+
         req.setAttribute("dsLich", dsLich);
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
+        req.setAttribute("reputationByDatSanId", reputationByDatSanId);
         req.getRequestDispatcher("/customer/LichSuDatSan.jsp").forward(req, resp);
     }
 

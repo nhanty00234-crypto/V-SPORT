@@ -24,6 +24,12 @@
             border-radius: 24px;
             box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
         }
+        .history-mobile-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 18px;
+            padding: 16px;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -94,11 +100,23 @@
                                 <span class="text-lg font-black text-slate-700 mt-1 block">${user.diemUyTin != null ? user.diemUyTin : 100}</span>
                             </div>
                         </div>
-                        
-                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-emerald-600/10 active:scale-95 duration-200">
+
+                        <a href="${pageContext.request.contextPath}/customer/tai-khoan#uyTinCuaToi" class="w-full mt-4 text-emerald-600 text-[11px] font-bold text-center hover:underline">
+                            Xem chi tiết điểm uy tín &rarr;
+                        </a>
+
+                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-emerald-600/10 active:scale-95 duration-200">
                             <span class="material-symbols-outlined text-[16px]">add_circle</span>
                             Đặt sân mới ngay
                         </a>
+                    </div>
+
+                    <!-- Reputation impact legend -->
+                    <div class="premium-card p-5">
+                        <h4 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wide mb-3">Uy tín & hủy lịch</h4>
+                        <p class="text-xs text-slate-600 flex items-start gap-2 mb-2"><span class="material-symbols-outlined text-emerald-600 text-[15px] mt-0.5">check_circle</span> Hủy sớm (trước 6 tiếng) không bị trừ điểm.</p>
+                        <p class="text-xs text-slate-600 flex items-start gap-2 mb-2"><span class="material-symbols-outlined text-amber-500 text-[15px] mt-0.5">warning</span> Hủy sát giờ có thể ảnh hưởng điểm uy tín.</p>
+                        <p class="text-xs text-slate-600 flex items-start gap-2"><span class="material-symbols-outlined text-rose-500 text-[15px] mt-0.5">error</span> Không đến sân trừ điểm nhiều hơn hủy sát giờ.</p>
                     </div>
                 </div>
 
@@ -125,6 +143,7 @@
                                         <th class="p-4 text-center">Thời gian thi đấu</th>
                                         <th class="p-4 text-right">Chi phí</th>
                                         <th class="p-4 text-center">Trạng thái</th>
+                                        <th class="p-4 text-center">Tác động uy tín</th>
                                         <th class="p-4 text-center">Thao tác</th>
                                     </tr>
                                 </thead>
@@ -179,13 +198,47 @@
                                                     <c:when test="${lich.trangThai == 'Đã hủy'}">
                                                         <span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã hủy</span>
                                                     </c:when>
+                                                    <c:when test="${lich.trangThai == 'Không đến'}">
+                                                        <span class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Không đến</span>
+                                                    </c:when>
+                                                    <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
+                                                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Hoàn thành</span>
+                                                    </c:when>
                                                     <c:otherwise>
                                                         <span class="bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">${lich.trangThai}</span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td class="p-4 text-center">
-                                                <div class="flex items-center justify-center gap-1.5">
+                                                <c:set var="repHist" value="${reputationByDatSanId[lich.datSanId]}" />
+                                                <c:choose>
+                                                    <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
+                                                        <span class="text-emerald-600 text-[10px] font-bold inline-flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[13px]">add_circle</span> +Điểm uy tín
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${not empty repHist && repHist.actionType == 'LATE_CANCEL'}">
+                                                        <span class="text-amber-600 text-[10px] font-bold inline-flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[13px]">warning</span> Hủy sát giờ (${repHist.scoreDelta} điểm)
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${not empty repHist && repHist.actionType == 'NO_SHOW'}">
+                                                        <span class="text-rose-600 text-[10px] font-bold inline-flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[13px]">error</span> Không đến (${repHist.scoreDelta} điểm)
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${lich.trangThai == 'Đã hủy'}">
+                                                        <span class="text-slate-400 text-[10px] font-bold inline-flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[13px]">check_circle</span> Hủy sớm, không trừ điểm
+                                                        </span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="text-slate-300 text-[10px]">&mdash;</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td class="p-4 text-center">
+                                                <div class="flex items-center justify-center gap-1.5 flex-wrap">
                                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
                                                         <button type="button"
                                                                 onclick="openCancelBookingModal(${lich.datSanId}, '${lich.ngayDat}', '${lich.gioBatDau}')"
@@ -198,11 +251,13 @@
                                                             Dịch vụ
                                                         </button>
                                                     </c:if>
-                                                    <c:if test="${lich.trangThai == 'Đã hủy'}">
-                                                        <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
+                                                    <c:if test="${lich.trangThai == 'Đã xác nhận'}">
+                                                        <button type="button" onclick="openUrgentOpponentModal()" class="px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 font-bold hover:bg-amber-100 transition-all active:scale-95 text-[10px] inline-flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[13px]">bolt</span> Tìm đối thủ gấp
+                                                        </button>
                                                     </c:if>
-                                                    <c:if test="${lich.trangThai == 'Đã hoàn thành'}">
-                                                        <span class="text-green-600 text-[10px] font-bold">Hoàn thành</span>
+                                                    <c:if test="${lich.trangThai == 'Đã hủy' || lich.trangThai == 'Không đến'}">
+                                                        <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
                                                     </c:if>
                                                 </div>
                                             </td>
@@ -210,7 +265,7 @@
                                     </c:forEach>
                                     <c:if test="${empty dsLich}">
                                         <tr>
-                                            <td colspan="5" class="p-16 text-center">
+                                            <td colspan="6" class="p-16 text-center">
                                                 <span class="material-symbols-outlined text-[40px] text-slate-200 block mb-4">event_busy</span>
                                                 <p class="text-slate-400 text-[11px] font-extrabold uppercase tracking-widest">Chưa có dữ liệu lịch sử đặt sân</p>
                                             </td>
@@ -583,5 +638,7 @@
             }, 300);
         }
     </script>
+
+    <jsp:include page="/customer/common/urgent-opponent-modal.jsp" />
 </body>
 </html>
