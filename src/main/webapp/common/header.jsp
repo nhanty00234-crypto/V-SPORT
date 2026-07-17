@@ -722,11 +722,10 @@
     </a>
     <ul class="nav-links">
         <li><a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">Trang chủ</a></li>
-        <li><a href="#" id="nav-pages">Giới thiệu</a></li>
-        <li><a href="#" id="nav-events">Sự kiện</a></li>
-        <li><a href="#" id="nav-blog">Tin tức</a></li>
         <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">Đặt sân</a></li>
-        <li><a href="#" id="nav-contact">Liên hệ</a></li>
+        <li><a href="${pageContext.request.contextPath}/customer/ghep-keo" id="nav-ghepkeo">Ghép kèo</a></li>
+        <li><a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" id="nav-history">Lịch của tôi</a></li>
+        <li><a href="${pageContext.request.contextPath}/customer/tai-khoan" id="nav-account">Tài khoản</a></li>
     </ul>
     
     <div class="header-icons">
@@ -762,7 +761,8 @@
                         </p>
                     </div>
                     <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-grid-item">Tài khoản</a>
-                    <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="menu-grid-item">Lịch sử đặt sân</a>
+                    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="menu-grid-item">Lịch của tôi</a>
+                    <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="menu-grid-item">Ghép kèo</a>
                     <a href="${pageContext.request.contextPath}/logout" class="menu-grid-item logout">Đăng xuất</a>
                 </div>
             </c:if>
@@ -801,10 +801,10 @@
 <!-- Mobile Navigation Drawer -->
 <div id="mobileNav" class="mobile-nav">
     <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-nav-link" id="mnav-home"><i class="fa-solid fa-house" style="width:20px;margin-right:10px;color:var(--primary)"></i>Trang Chủ</a>
-    <a href="${pageContext.request.contextPath}/customer/dat-san" class="mobile-nav-link" id="mnav-booking"><i class="fa-solid fa-magnifying-glass" style="width:20px;margin-right:10px;color:var(--primary)"></i>Tìm Sân</a>
-    <a href="#" class="mobile-nav-link"><i class="fa-solid fa-trophy" style="width:20px;margin-right:10px;color:var(--primary)"></i>Giải Đấu</a>
-    <a href="#" class="mobile-nav-link"><i class="fa-solid fa-users" style="width:20px;margin-right:10px;color:var(--primary)"></i>Cộng Đồng</a>
-    <a href="${pageContext.request.contextPath}/index.jsp#pricing" class="mobile-nav-link" id="mnav-pricing"><i class="fa-solid fa-tag" style="width:20px;margin-right:10px;color:var(--primary)"></i>Bảng Giá</a>
+    <a href="${pageContext.request.contextPath}/customer/dat-san" class="mobile-nav-link" id="mnav-booking"><i class="fa-solid fa-magnifying-glass" style="width:20px;margin-right:10px;color:var(--primary)"></i>Đặt sân</a>
+    <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="mobile-nav-link" id="mnav-ghepkeo"><i class="fa-solid fa-people-group" style="width:20px;margin-right:10px;color:var(--primary)"></i>Ghép kèo</a>
+    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="mobile-nav-link" id="mnav-history"><i class="fa-solid fa-calendar-check" style="width:20px;margin-right:10px;color:var(--primary)"></i>Lịch của tôi</a>
+    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="mobile-nav-link" id="mnav-account"><i class="fa-solid fa-user" style="width:20px;margin-right:10px;color:var(--primary)"></i>Tài khoản</a>
 </div>
 
 <script>
@@ -868,22 +868,25 @@
         // Auto active link based on URL
         const currentPath = window.location.pathname;
 
-        const navHome    = document.getElementById('nav-home');
-        const navBooking = document.getElementById('nav-booking');
-
-        if (currentPath.includes('dat-san') || currentPath.includes('ChiTietSan') || currentPath.includes('LichSuDatSan')) {
-            if (navBooking) navBooking.classList.add('active');
-        } else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) {
-            if (navHome) navHome.classList.add('active');
+        function pickActiveId(prefixes) {
+            if (currentPath.includes('/customer/ghep-keo')) return prefixes.ghepkeo;
+            if (currentPath.includes('/customer/lich-su-dat-san')) return prefixes.history;
+            if (currentPath.includes('/customer/tai-khoan')) return prefixes.account;
+            if (currentPath.includes('dat-san') || currentPath.includes('ChiTietSan')) return prefixes.booking;
+            if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) return prefixes.home;
+            return null;
         }
 
-        // Mobile nav active
-        const mnavHome    = document.getElementById('mnav-home');
-        const mnavBooking = document.getElementById('mnav-booking');
-        if (currentPath.includes('dat-san')) {
-            if (mnavBooking) mnavBooking.classList.add('active');
-        } else if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) {
-            if (mnavHome) mnavHome.classList.add('active');
+        const desktopActiveId = pickActiveId({ ghepkeo: 'nav-ghepkeo', history: 'nav-history', account: 'nav-account', booking: 'nav-booking', home: 'nav-home' });
+        if (desktopActiveId) {
+            const el = document.getElementById(desktopActiveId);
+            if (el) el.classList.add('active');
+        }
+
+        const mobileActiveId = pickActiveId({ ghepkeo: 'mnav-ghepkeo', history: 'mnav-history', account: 'mnav-account', booking: 'mnav-booking', home: 'mnav-home' });
+        if (mobileActiveId) {
+            const el = document.getElementById(mobileActiveId);
+            if (el) el.classList.add('active');
         }
     })();
 </script>
@@ -932,7 +935,8 @@
                     </div>
                     <div class="drawer-user-actions">
                         <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="btn-drawer-action"><i class="fa-regular fa-user"></i> Chỉnh sửa Profile</a>
-                        <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="btn-drawer-action"><i class="fa-regular fa-calendar-check"></i> Lịch sử đặt sân</a>
+                        <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="btn-drawer-action"><i class="fa-regular fa-calendar-check"></i> Lịch của tôi</a>
+                        <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn-drawer-action"><i class="fa-solid fa-people-group"></i> Ghép kèo</a>
                     </div>
                 </c:when>
                 <c:otherwise>
@@ -949,6 +953,7 @@
             <h4 class="section-title">TIỆN ÍCH HỆ THỐNG</h4>
             <a href="${pageContext.request.contextPath}/index.jsp" class="drawer-link"><i class="fa-solid fa-house"></i> Trang Chủ</a>
             <a href="${pageContext.request.contextPath}/customer/dat-san" class="drawer-link"><i class="fa-solid fa-calendar-days"></i> Tìm Sân Đặt Lịch</a>
+            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="drawer-link"><i class="fa-solid fa-people-group"></i> Ghép Kèo</a>
             <a href="${pageContext.request.contextPath}/index.jsp#pricing" class="drawer-link"><i class="fa-solid fa-tags"></i> Bảng Giá Dịch Vụ</a>
         </div>
 

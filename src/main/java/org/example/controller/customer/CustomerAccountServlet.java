@@ -123,6 +123,10 @@ public class CustomerAccountServlet extends HttpServlet {
             }
         }
 
+        // Booking sắp diễn ra, đã xác nhận và chưa hủy/hoàn thành/không đến -> đủ điều kiện "Tìm đối thủ gấp".
+        boolean nearestBookingUrgentEligible = nearestBooking != null
+                && "Đã xác nhận".equals(nearestBooking.getTrangThai());
+
         req.setAttribute("account", account);
         req.setAttribute("totalBookings", dsLich.size());
         req.setAttribute("upcomingCount", upcomingCount);
@@ -132,6 +136,7 @@ public class CustomerAccountServlet extends HttpServlet {
         req.setAttribute("nearestSan", nearestSan);
         req.setAttribute("nearestCoSo", nearestCoSo);
         req.setAttribute("nearestLoaiSan", nearestLoaiSan);
+        req.setAttribute("nearestBookingUrgentEligible", nearestBookingUrgentEligible);
 
         req.getRequestDispatcher("/customer/TaiKhoan.jsp").forward(req, resp);
     }

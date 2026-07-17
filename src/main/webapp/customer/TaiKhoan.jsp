@@ -2,6 +2,12 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="repScoreNav" value="${account.diemUyTin}" />
+<c:choose>
+    <c:when test="${repScoreNav >= 80}"><c:set var="repLabelNav" value="Uy tín tốt" /><c:set var="repDotNav" value="#10b981" /></c:when>
+    <c:when test="${repScoreNav >= 50}"><c:set var="repLabelNav" value="Cần theo dõi" /><c:set var="repDotNav" value="#d99a1b" /></c:when>
+    <c:otherwise><c:set var="repLabelNav" value="Cần cải thiện" /><c:set var="repDotNav" value="#e15a5a" /></c:otherwise>
+</c:choose>
 <!DOCTYPE html>
 <html lang="vi" class="scroll-smooth">
 <head>
@@ -45,6 +51,16 @@
         }
         .btn-secondary:hover { background:#f8fafc; }
         #accToast { transition: opacity .25s ease, transform .25s ease; }
+        .quick-nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            font-size: 13px; font-weight: 700; color: #475569;
+            transition: background-color .15s ease, color .15s ease;
+        }
+        .quick-nav-item:hover { background: #f8fafc; color: #0f172a; }
+        .quick-nav-item.active { background: #ecfdf5; color: #047857; }
+        .quick-nav-item .material-symbols-outlined { font-size: 18px; color: #94a3b8; }
+        .quick-nav-item.active .material-symbols-outlined { color: #059669; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -116,53 +132,48 @@
                         <p class="text-[11px] text-slate-400 mt-3">Tham gia từ <fmt:formatDate value="${account.createdAt}" pattern="dd/MM/yyyy"/></p>
                     </c:if>
 
-                    <button type="button" onclick="enterEditMode(true)" class="btn-secondary w-full mt-5">
+                    <a href="#uyTinCuaToi" class="w-full mt-4 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold" style="background-color: ${repDotNav}1A; color: ${repDotNav};">
+                        <span class="w-1.5 h-1.5 rounded-full inline-block" style="background-color: ${repDotNav};"></span>
+                        Uy tín ${repScoreNav}/100 &middot; ${repLabelNav}
+                    </a>
+
+                    <button type="button" onclick="enterEditMode(true)" class="btn-secondary w-full mt-4">
                         <span class="material-symbols-outlined text-[16px]">edit</span>
                         Chỉnh sửa hồ sơ
                     </button>
                 </div>
 
-                <!-- Security -->
-                <div class="acc-card p-6">
-                    <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined text-emerald-600 text-[18px]">shield</span>
-                        Bảo mật
-                    </h3>
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-slate-400 text-[20px] mt-0.5">password</span>
-                        <div class="flex-1">
-                            <p class="text-sm font-bold text-slate-800">Mật khẩu</p>
-                            <p class="text-xs text-slate-500 mt-0.5">Được bảo vệ bằng mã hóa BCrypt.</p>
-                        </div>
-                    </div>
-                    <button type="button" onclick="openPwModal()" class="btn-secondary w-full mt-4">
-                        <span class="material-symbols-outlined text-[16px]">lock_reset</span>
-                        Đổi mật khẩu
+                <!-- Quick nav menu -->
+                <nav class="acc-card p-3">
+                    <a href="#tongQuan" class="quick-nav-item active" data-quick-nav="tongQuan">
+                        <span class="material-symbols-outlined">space_dashboard</span> Tổng quan
+                    </a>
+                    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="quick-nav-item">
+                        <span class="material-symbols-outlined">calendar_month</span> Lịch đặt sân
+                    </a>
+                    <a href="#uyTinCuaToi" class="quick-nav-item" data-quick-nav="uyTinCuaToi">
+                        <span class="material-symbols-outlined">verified</span> Uy tín của tôi
+                    </a>
+                    <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=cua-toi" class="quick-nav-item">
+                        <span class="material-symbols-outlined">groups</span> Ghép kèo của tôi
+                    </a>
+                    <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=tim-doi-thu" class="quick-nav-item">
+                        <span class="material-symbols-outlined">person_search</span> Tìm đối thủ
+                    </a>
+                    <a href="#personalInfoCard" class="quick-nav-item" data-quick-nav="personalInfoCard">
+                        <span class="material-symbols-outlined">badge</span> Thông tin cá nhân
+                    </a>
+                    <button type="button" onclick="openPwModal()" class="quick-nav-item w-full text-left">
+                        <span class="material-symbols-outlined">lock_reset</span> Đổi mật khẩu
                     </button>
-                </div>
-
-                <!-- Quick links -->
-                <div class="acc-card p-4">
-                    <a href="${pageContext.request.contextPath}/customer/dat-san" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-                        <span class="material-symbols-outlined text-[18px] text-slate-400">calendar_add_on</span>
-                        <span class="text-sm font-semibold text-slate-700">Đặt sân mới</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-                        <span class="material-symbols-outlined text-[18px] text-slate-400">history</span>
-                        <span class="text-sm font-semibold text-slate-700">Lịch sử đặt sân</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/index.jsp" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-                        <span class="material-symbols-outlined text-[18px] text-slate-400">home</span>
-                        <span class="text-sm font-semibold text-slate-700">Trang chủ</span>
-                    </a>
-                </div>
+                </nav>
             </div>
 
             <!-- RIGHT COLUMN -->
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- Quick statistics -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div id="tongQuan" class="grid grid-cols-2 sm:grid-cols-4 gap-3 scroll-mt-24">
                     <div class="acc-card px-4 py-4 text-center">
                         <p class="text-2xl font-extrabold text-emerald-600">${upcomingCount}</p>
                         <p class="text-[11px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Lịch sắp tới</p>
@@ -180,6 +191,36 @@
                         <p class="text-[11px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Tổng lịch đặt</p>
                     </div>
                 </div>
+
+                <!-- Ghép kèo & Tìm đối thủ preview -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="acc-card p-6">
+                        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-emerald-600 text-[18px]">groups</span>
+                            Kèo đang tham gia
+                        </h3>
+                        <p class="text-3xl font-black text-slate-900 mb-1">0</p>
+                        <p class="text-xs text-slate-500 mb-4">Bạn chưa tham gia kèo nào. Tạo hoặc tham gia một kèo để giao lưu cùng người chơi khác.</p>
+                        <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn-secondary w-full">
+                            <span class="material-symbols-outlined text-[16px]">add</span>
+                            Xem ghép kèo
+                        </a>
+                    </div>
+                    <div class="acc-card p-6">
+                        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-emerald-600 text-[18px]">person_search</span>
+                            Đối thủ gần bạn
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-4">Chức năng gợi ý đối thủ gần bạn dựa trên môn thể thao, trình độ và điểm uy tín đang được phát triển.</p>
+                        <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=tim-doi-thu" class="btn-secondary w-full">
+                            <span class="material-symbols-outlined text-[16px]">search</span>
+                            Tìm đối thủ gần nhất
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Điểm uy tín -->
+                <jsp:include page="/customer/common/reputation-card.jsp" />
 
                 <!-- Upcoming booking -->
                 <div class="acc-card p-6">
@@ -230,6 +271,11 @@
                                     </p>
                                 </div>
                                 <div class="flex sm:flex-col gap-2 shrink-0">
+                                    <c:if test="${nearestBookingUrgentEligible}">
+                                        <button type="button" onclick="openUrgentOpponentModal()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 font-bold text-[12px] hover:bg-amber-100 transition-colors whitespace-nowrap">
+                                            <span class="material-symbols-outlined text-[15px]">bolt</span> Tìm đối thủ gấp
+                                        </button>
+                                    </c:if>
                                     <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="btn-secondary text-[12px] px-4 py-2 whitespace-nowrap">Xem chi tiết</a>
                                     <a href="${pageContext.request.contextPath}/customer/dat-san?openHistory=true" class="text-emerald-600 text-[12px] font-bold text-center hover:underline whitespace-nowrap">Xem tất cả lịch đặt</a>
                                 </div>
@@ -249,7 +295,7 @@
                 </div>
 
                 <!-- Personal information -->
-                <div class="acc-card p-6" id="personalInfoCard">
+                <div class="acc-card p-6 scroll-mt-24" id="personalInfoCard">
                     <div class="flex items-center justify-between mb-5">
                         <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
                             <span class="material-symbols-outlined text-emerald-600 text-[18px]">badge</span>
@@ -749,6 +795,16 @@
                 document.getElementById('pwConfirm').value = '';
             });
     }
+
+    // Quick nav active state on click
+    document.querySelectorAll('.quick-nav-item[data-quick-nav]').forEach(function (link) {
+        link.addEventListener('click', function () {
+            document.querySelectorAll('.quick-nav-item[data-quick-nav]').forEach(function (el) { el.classList.remove('active'); });
+            link.classList.add('active');
+        });
+    });
 </script>
+
+<jsp:include page="/customer/common/urgent-opponent-modal.jsp" />
 </body>
 </html>

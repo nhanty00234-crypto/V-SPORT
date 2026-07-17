@@ -197,18 +197,24 @@
             font-family: 'Barlow Condensed', sans-serif;
         }
         .court-card-cta {
-            background: #1a1c1e;
-            color: #ffffff;
+            background: #afd639;
+            color: #111827;
             border-radius: 0px !important;
             font-family: 'Barlow Condensed', sans-serif;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 700;
+            box-shadow: 0 4px 14px rgba(175, 214, 57, 0.28);
             transition: all 0.2s ease;
         }
         .court-card-cta:hover:not(:disabled) {
-            background: #506600;
-            color: #ffffff;
+            background: #97bd2e;
+            color: #111827;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(175, 214, 57, 0.4);
+        }
+        .court-card-cta:active:not(:disabled) {
+            transform: scale(0.97);
         }
         
         /* Form inputs inside modals */
