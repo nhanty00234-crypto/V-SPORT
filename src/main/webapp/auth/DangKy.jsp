@@ -16,22 +16,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <style>
         :root {
-            --theme-purple: #8b5cf6;
-            --theme-purple-hover: #7c3aed;
+            --theme-purple: #047857;
+            --theme-purple-hover: #065f46;
             --text-dark: #0f172a;
         }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            color: var(--text-dark); 
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
             background-color: #f8fafc;
-            overflow: hidden;
         }
         .font-display { font-family: 'Oswald', sans-serif; }
         .font-serif-italic { font-family: 'Playfair Display', serif; font-style: italic; }
 
         /* Right panel style with grid and mesh in purple theme */
         .right-panel {
-            background: linear-gradient(135deg, #3b0764 0%, #0b011a 100%);
+            background: linear-gradient(135deg, #052e1f 0%, #03150e 100%);
             position: relative;
         }
         .right-panel::before {
@@ -58,14 +57,14 @@
         .blob-1 {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(168, 85, 247, 0) 70%);
+            background: radial-gradient(circle, rgba(4, 120, 87, 0.35) 0%, rgba(4, 120, 87, 0) 70%);
             top: -100px;
             left: -100px;
         }
         .blob-2 {
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(192, 132, 252, 0.3) 0%, rgba(192, 132, 252, 0) 70%);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0) 70%);
             bottom: -150px;
             right: -100px;
             animation-delay: -5s;
@@ -94,7 +93,7 @@
         }
         .floating-icon {
             position: absolute;
-            color: rgba(192, 132, 252, 0.09); /* slightly more visible purple */
+            color: rgba(52, 211, 153, 0.09);
             pointer-events: none;
             user-select: none;
             z-index: 2;
@@ -145,7 +144,7 @@
         }
         .input-field:focus {
             border-color: var(--theme-purple);
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(4, 120, 87, 0.12);
         }
         .input-icon {
             position: absolute;
@@ -169,7 +168,7 @@
         .btn-submit {
             width: 100%;
             height: 50px;
-            background-color: #6d28d9;
+            background-color: #047857;
             color: white;
             border-radius: 10px;
             font-weight: 600;
@@ -184,9 +183,9 @@
             border: none;
         }
         .btn-submit:hover {
-            background-color: #5b21b6;
+            background-color: #065f46;
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px -6px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 8px 20px -6px rgba(4, 120, 87, 0.3);
         }
         .btn-submit:active {
             transform: translateY(0);
@@ -203,8 +202,8 @@
         }
     </style>
 </head>
-<body class="min-h-screen h-screen w-screen overflow-hidden bg-[#f8fafc]">
-    <div id="auth-container" class="min-h-screen h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-[#f8fafc] relative">
+<body class="min-h-[100dvh] w-full bg-[#f8fafc]">
+    <div id="auth-container" class="min-h-[100dvh] w-full flex flex-col md:flex-row bg-[#f8fafc] relative">
 
     <!-- Back to Home Button (Floating Top Left) -->
     <a href="${pageContext.request.contextPath}/index.jsp" class="absolute top-6 left-6 z-[100] flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white md:text-slate-600 md:bg-white/80 md:border-slate-200/80 backdrop-blur-md transition-all shadow-sm">
@@ -213,14 +212,14 @@
     </a>
 
     <!-- LEFT PANEL (50%) - Registration Form -->
-    <div class="register-form-panel w-full md:w-1/2 h-full flex flex-col justify-center bg-[#f8fafc] px-8 sm:px-16 md:px-20 py-12 overflow-y-auto relative z-20 animate-slide-left form-container">
+    <div class="register-form-panel w-full md:w-1/2 min-h-[100dvh] md:h-full flex flex-col justify-center bg-[#f8fafc] px-6 sm:px-16 md:px-20 py-12 overflow-y-auto relative z-20 animate-slide-left form-container">
         
         <!-- Center Box to match design padding -->
         <div class="w-full max-w-[500px] mx-auto flex flex-col justify-center my-auto">
 
             <!-- Small Badge: System Role Indicator -->
-            <div class="inline-flex items-center gap-2 bg-white border border-purple-200/80 text-purple-600 rounded-full py-1.5 px-4 text-[12px] font-bold w-fit shadow-sm mb-5">
-                <div class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+            <div class="inline-flex items-center gap-2 bg-white border border-emerald-200/80 text-emerald-600 rounded-full py-1.5 px-4 text-[12px] font-bold w-fit shadow-sm mb-5">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                 <span>Hệ thống V-Sport</span>
             </div>
 
@@ -243,42 +242,42 @@
                 
                 <!-- Section 1: Thông tin tài khoản -->
                 <div class="border-b border-slate-100 pb-3 mb-4">
-                    <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-3 block">1. Thông tin tài khoản</span>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-3 block">1. Thông tin tài khoản</span>
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="input-wrapper">
-                            <label class="form-label">Tên đăng nhập</label>
+                            <label class="form-label" for="reg-username">Tên đăng nhập</label>
                             <div class="relative">
-                                <input type="text" name="username" required placeholder="Nhập tên đăng nhập" class="input-field">
+                                <input type="text" name="username" id="reg-username" required placeholder="Nhập tên đăng nhập" autocomplete="username" class="input-field">
                                 <span class="material-symbols-outlined input-icon">person</span>
                             </div>
                         </div>
                         <div class="input-wrapper">
-                            <label class="form-label">Email</label>
+                            <label class="form-label" for="reg-email">Email</label>
                             <div class="relative">
-                                <input type="email" name="email" required placeholder="Nhập địa chỉ email" class="input-field">
+                                <input type="email" name="email" id="reg-email" required placeholder="Nhập địa chỉ email" autocomplete="email" class="input-field">
                                 <span class="material-symbols-outlined input-icon">mail</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="input-wrapper mb-2">
-                            <label class="form-label">Mật khẩu</label>
+                            <label class="form-label" for="reg-pass">Mật khẩu</label>
                             <div class="relative">
                                 <input type="password" name="password" id="reg-pass" required placeholder="Tạo mật khẩu" oninput="updateRegPwStrength(this)" class="input-field">
                                 <span class="material-symbols-outlined input-icon">key</span>
-                                <button type="button" onclick="togglePass('reg-pass', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-600 transition-all">
+                                <button type="button" onclick="togglePass('reg-pass', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-all">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </button>
                             </div>
                         </div>
                         <div class="input-wrapper mb-2">
-                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <label class="form-label" for="reg-confirm-pass">Xác nhận mật khẩu</label>
                             <div class="relative">
                                 <input type="password" name="confirm_password" id="reg-confirm-pass" required placeholder="Nhập lại mật khẩu" class="input-field">
                                 <span class="material-symbols-outlined input-icon">key</span>
-                                <button type="button" onclick="togglePass('reg-confirm-pass', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-600 transition-all">
+                                <button type="button" onclick="togglePass('reg-confirm-pass', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-all">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </button>
                             </div>
@@ -299,29 +298,29 @@
 
                 <!-- Section 2: Thông tin cá nhân -->
                 <div class="border-b border-slate-100 pb-3 mb-4">
-                    <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-3 block">2. Thông tin cá nhân</span>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-3 block">2. Thông tin cá nhân</span>
                     
-                    <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
                         <div class="input-wrapper mb-0">
-                            <label class="form-label">Họ và Tên</label>
+                            <label class="form-label" for="reg-fullname">Họ và Tên</label>
                             <div class="relative">
-                                <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="input-field">
+                                <input type="text" name="fullname" id="reg-fullname" required placeholder="Nhập họ và tên" autocomplete="name" class="input-field">
                                 <span class="material-symbols-outlined input-icon">badge</span>
                             </div>
                         </div>
                         <div class="input-wrapper mb-0">
-                            <label class="form-label">Số điện thoại</label>
+                            <label class="form-label" for="reg-phone">Số điện thoại</label>
                             <div class="relative">
-                                <input type="tel" name="phone" required placeholder="Nhập số điện thoại" class="input-field">
+                                <input type="tel" name="phone" id="reg-phone" required placeholder="Nhập số điện thoại" autocomplete="tel" class="input-field">
                                 <span class="material-symbols-outlined input-icon">call</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="input-wrapper mb-0">
-                        <label class="form-label">Giới tính</label>
+                        <label class="form-label" for="reg-gender">Giới tính</label>
                         <div class="relative">
-                            <select name="gender" required class="input-field select-field">
+                            <select name="gender" id="reg-gender" required class="input-field select-field">
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
                             </select>
@@ -333,12 +332,12 @@
 
                 <!-- Section 3: Thể thao & Sở trường -->
                 <div class="border-b border-slate-100 pb-4 mb-5">
-                    <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-3 block">3. Thể thao & kỹ năng</span>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-3 block">3. Thể thao & kỹ năng</span>
                     
                     <div class="input-wrapper mb-4">
-                        <label class="form-label">Vị trí sở trường</label>
+                        <label class="form-label" for="reg-vitri">Vị trí sở trường</label>
                         <div class="relative">
-                            <input type="text" name="viTriSoTruong" placeholder="Ví dụ: Tiền đạo, Hậu vệ, Đập cầu..." class="input-field">
+                            <input type="text" name="viTriSoTruong" id="reg-vitri" placeholder="Ví dụ: Tiền đạo, Hậu vệ, Đập cầu..." class="input-field">
                             <span class="material-symbols-outlined input-icon">sports_handball</span>
                         </div>
                     </div>
@@ -346,20 +345,20 @@
                     <div>
                         <label class="form-label text-slate-400">Môn thể thao yêu thích</label>
                         <div class="grid grid-cols-2 gap-3 mt-2">
-                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-purple-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
-                                <input type="checkbox" name="sport" value="Bóng đá" class="w-4 h-4 accent-purple-600 rounded">
+                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-emerald-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
+                                <input type="checkbox" name="sport" value="Bóng đá" class="w-4 h-4 accent-emerald-600 rounded">
                                 Bóng đá
                             </label>
-                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-purple-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
-                                <input type="checkbox" name="sport" value="Cầu lông" class="w-4 h-4 accent-purple-600 rounded">
+                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-emerald-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
+                                <input type="checkbox" name="sport" value="Cầu lông" class="w-4 h-4 accent-emerald-600 rounded">
                                 Cầu lông
                             </label>
-                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-purple-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
-                                <input type="checkbox" name="sport" value="Pickleball" class="w-4 h-4 accent-purple-600 rounded">
+                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-emerald-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
+                                <input type="checkbox" name="sport" value="Pickleball" class="w-4 h-4 accent-emerald-600 rounded">
                                 Pickleball
                             </label>
-                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-purple-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
-                                <input type="checkbox" name="sport" value="Tennis" class="w-4 h-4 accent-purple-600 rounded">
+                            <label class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-xl cursor-pointer hover:border-emerald-600/40 transition-colors font-medium text-xs text-slate-700 select-none shadow-sm">
+                                <input type="checkbox" name="sport" value="Tennis" class="w-4 h-4 accent-emerald-600 rounded">
                                 Tennis
                             </label>
                         </div>
@@ -368,9 +367,9 @@
 
                 <!-- Agreement checkbox -->
                 <div class="flex items-center gap-3 mb-6 select-none">
-                    <input type="checkbox" name="agree" value="Đồng ý" required class="w-4.5 h-4.5 accent-purple-600 rounded border-slate-300 cursor-pointer">
+                    <input type="checkbox" name="agree" value="Đồng ý" required class="w-4.5 h-4.5 accent-emerald-600 rounded border-slate-300 cursor-pointer">
                     <span class="text-[12.5px] text-slate-500 font-semibold leading-tight">
-                        Tôi đồng ý với các <a href="#" class="text-purple-600 font-bold hover:underline">điều khoản</a> và <a href="#" class="text-purple-600 font-bold hover:underline">chính sách</a> của hệ thống.
+                        Tôi đồng ý với các <a href="#" class="text-emerald-600 font-bold hover:underline">điều khoản</a> và <a href="#" class="text-emerald-600 font-bold hover:underline">chính sách</a> của hệ thống.
                     </span>
                 </div>
 
@@ -381,7 +380,7 @@
                         <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
                     </span>
                     <!-- Loading Spinner -->
-                    <div class="loading-spinner hidden absolute inset-0 bg-[#6d28d9] flex items-center justify-center">
+                    <div class="loading-spinner hidden absolute inset-0 bg-[#047857] flex items-center justify-center">
                         <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                     </div>
                 </button>
@@ -391,7 +390,7 @@
             <div class="mt-6 text-center border-t border-slate-100 pt-5">
                 <p class="text-[13px] text-slate-500 font-medium">
                     Đã có tài khoản? 
-                    <a href="${pageContext.request.contextPath}/dangnhap" class="font-bold text-purple-600 hover:underline ml-1">
+                    <a href="${pageContext.request.contextPath}/dangnhap" class="font-bold text-emerald-600 hover:underline ml-1">
                         Đăng nhập ngay
                     </a>
                 </p>
@@ -414,7 +413,7 @@
 
         <!-- Logo Container -->
         <div class="relative z-10 flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-4 w-fit backdrop-blur-md self-end">
-            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#051937] font-bold text-base shadow-inner">
+            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#052e1f] font-bold text-base shadow-inner">
                 VS
             </div>
             <div class="flex flex-col leading-none">
@@ -436,8 +435,8 @@
             
             <!-- Dedicated "Đăng nhập tại đây" Button -->
             <a href="${pageContext.request.contextPath}/dangnhap" class="group mt-2 flex items-center gap-4 px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all hover:scale-[1.02] hover:border-white/20 backdrop-blur-md w-fit">
-                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#3b0764] transition-transform group-hover:-translate-x-1 shadow-md">
-                    <span class="material-symbols-outlined text-[18px] text-[#3b0764]">arrow_back</span>
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#052e1f] transition-transform group-hover:-translate-x-1 shadow-md">
+                    <span class="material-symbols-outlined text-[18px] text-[#052e1f]">arrow_back</span>
                 </div>
                 <div class="flex flex-col text-left">
                     <span class="text-[9px] font-bold uppercase tracking-widest text-[#d8b4fe]">Đã có tài khoản?</span>
@@ -514,7 +513,7 @@
             if (s >= 4) strength = 3;
             if (s >= 5) strength = 4;
             
-            const cols = ['#f43f5e', '#f59e0b', '#8b5cf6', '#10b981'];
+            const cols = ['#f43f5e', '#f59e0b', '#10b981', '#10b981'];
             for (let i = 1; i <= 4; i++) {
                 const el = document.getElementById('regStr' + i);
                 if (el) {

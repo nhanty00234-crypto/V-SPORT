@@ -13,6 +13,7 @@
 <head>
     <title>Tìm Sân - V-SPORT Elite Arena</title>
     <jsp:include page="/common/head.jsp" />
+    <jsp:include page="/customer/common/vsport-theme.jsp" />
     <script id="tailwind-config">
         tailwind.config = {
           darkMode: "class",
@@ -22,18 +23,18 @@
                       "on-surface-variant": "#444936",
                       "outline": "#757964",
                       "on-primary": "#ffffff",
-                      "surface-tint": "#506600",
+                      "surface-tint": "#047857",
                       "on-error-container": "#93000a",
-                      "inverse-primary": "#aed538",
+                      "inverse-primary": "#34d399",
                       "secondary-fixed-dim": "#c6c6c7",
                       "error-container": "#ffdad6",
                       "on-secondary-fixed-variant": "#454747",
                       "on-secondary-fixed": "#1a1c1c",
-                      "primary": "#506600",
+                      "primary": "#047857",
                       "secondary-fixed": "#e2e2e2",
                       "on-secondary-container": "#616363",
                       "on-tertiary": "#ffffff",
-                      "on-primary-fixed-variant": "#3b4d00",
+                      "on-primary-fixed-variant": "#065f46",
                       "surface-variant": "#e0e3e5",
                       "surface-dim": "#d8dadc",
                       "inverse-on-surface": "#eff1f3",
@@ -44,8 +45,8 @@
                       "tertiary-fixed": "#d8e3fb",
                       "on-surface": "#191c1e",
                       "tertiary": "#545f73",
-                      "on-primary-container": "#465a00",
-                      "on-primary-fixed": "#161f00",
+                      "on-primary-container": "#065f46",
+                      "on-primary-fixed": "#022c22",
                       "inverse-surface": "#2d3133",
                       "on-tertiary-fixed": "#111c2d",
                       "surface-container-lowest": "#ffffff",
@@ -57,14 +58,14 @@
                       "on-secondary": "#ffffff",
                       "surface-container-highest": "#e0e3e5",
                       "surface-container": "#eceef0",
-                      "primary-fixed-dim": "#aed538",
+                      "primary-fixed-dim": "#34d399",
                       "surface-container-high": "#e6e8ea",
                       "surface-container-low": "#f2f4f6",
-                      "primary-fixed": "#c9f253",
+                      "primary-fixed": "#a7f3d0",
                       "on-tertiary-fixed-variant": "#3c475a",
                       "on-tertiary-container": "#354053",
                       "error": "#ba1a1a",
-                      "primary-container": "#afd639",
+                      "primary-container": "#059669",
                       "on-error": "#ffffff"
               },
               "borderRadius": {
@@ -112,7 +113,7 @@
         body { font-family: 'Barlow', 'Inter', sans-serif; background-color: #faf9fd; color: #1a1c1e; }
         .ambient-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
         .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
-        .search-input:focus { border-color: #506600; box-shadow: 0 0 0 2px rgba(80, 102, 0, 0.16); }
+        .search-input:focus { border-color: #047857; box-shadow: 0 0 0 2px rgba(80, 102, 0, 0.16); }
         .booking-hero {
             background:
                 radial-gradient(circle at 12% 8%, rgba(175, 214, 57, 0.16) 0, rgba(175, 214, 57, 0) 30%),
@@ -188,7 +189,7 @@
             border-radius: 0px;
             background: #ffffff;
             border: 1px solid #c5c9b0;
-            color: #506600;
+            color: #047857;
             font-size: 10px;
             font-weight: 700;
             line-height: 1;
@@ -197,7 +198,7 @@
             font-family: 'Barlow Condensed', sans-serif;
         }
         .court-card-cta {
-            background: #afd639;
+            background: #059669;
             color: #111827;
             border-radius: 0px !important;
             font-family: 'Barlow Condensed', sans-serif;
@@ -208,7 +209,7 @@
             transition: all 0.2s ease;
         }
         .court-card-cta:hover:not(:disabled) {
-            background: #97bd2e;
+            background: #047857;
             color: #111827;
             transform: translateY(-1px);
             box-shadow: 0 6px 18px rgba(175, 214, 57, 0.4);
@@ -226,14 +227,14 @@
             font-family: 'Barlow', sans-serif;
         }
         .form-input:focus {
-            border-color: #506600; outline: none; background-color: #fff;
+            border-color: #047857; outline: none; background-color: #fff;
             box-shadow: none;
         }
         .form-label {
             display: block; font-size: 11px; font-weight: 700;
             font-family: 'Barlow Condensed', sans-serif;
             text-transform: uppercase; letter-spacing: 0.08em;
-            color: #506600; margin-bottom: 0.4rem;
+            color: #047857; margin-bottom: 0.4rem;
         }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
         @keyframes slide-up-fade {
@@ -257,7 +258,7 @@
             letter-spacing: 0.08em;
             font-family: 'Barlow Condensed', sans-serif;
         }
-        .chip-filter:hover { border-color: #506600; color: #506600; }
+        .chip-filter:hover { border-color: #047857; color: #047857; }
         .chip-filter-active {
             background-color: #1a1c1e !important;
             border-color: #1a1c1e !important;
@@ -275,7 +276,7 @@
         }
         .custom-option:hover {
             background-color: #f1f0f4;
-            color: #506600 !important;
+            color: #047857 !important;
         }
         .select-arrow {
             transition: transform 0.2s ease;
@@ -296,7 +297,7 @@
                     TÌM KIẾM SIÊU TỐC
                 </span>
                 <h1 class="font-['Barlow_Condensed'] text-[44px] md:text-[60px] leading-[1.0] font-bold tracking-tight uppercase text-on-surface mb-3">TÌM SÂN PHÙ HỢP VỚI LỊCH CỦA BẠN</h1>
-                <p class="font-['Barlow'] text-sm md:text-base text-on-surface-variant mb-8 max-w-xl">Chọn môn thể thao, cơ sở và ngày chơi — chúng tôi sẽ sắp xếp phần còn lại.</p>
+                <p class="font-['Barlow'] text-sm md:text-base text-on-surface-variant mb-8 max-w-xl">Chọn môn thể thao, cơ sở và ngày chơi. Chúng tôi sẽ sắp xếp phần còn lại.</p>
 
                 <!-- Alerts -->
                 <c:if test="${not empty sessionScope.error}">
@@ -410,7 +411,7 @@
 
             <!-- Filter chips + branch dropdown + history -->
             <div class="results-toolbar flex flex-col md:flex-row md:items-center md:justify-between gap-5 pb-6 mb-8 border-b border-outline-variant/30 px-0 bg-transparent">
-                <div id="sport-chip-row" class="flex flex-wrap gap-2">
+                <div id="sport-chip-row" class="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto pb-1 md:pb-0" style="-webkit-overflow-scrolling:touch;">
                     <button type="button" onclick="selectSportChip(0, this)" class="chip-filter chip-filter-active">Tất cả</button>
                     <c:forEach var="mon" items="${dsMon}">
                         <button type="button" onclick="selectSportChip(${mon.monTheThaoID}, this)" class="chip-filter">${mon.tenMon}</button>
@@ -434,9 +435,22 @@
 
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-md">
                 <h2 class="section-title">Sân đấu khả dụng</h2>
-                <span class="results-stat">
-                    Đang hiển thị <span id="court-count" class="font-bold">0</span> kết quả (<span id="court-status-summary"></span>)
-                </span>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="results-stat">
+                        Đang hiển thị <span id="court-count" class="font-bold">0</span> kết quả (<span id="court-status-summary"></span>)
+                    </span>
+                    <!-- List/Map view toggle. Map view lands in Phase 3 (route /customer/ban-do). -->
+                    <div class="inline-flex border border-neutral-200 rounded-none overflow-hidden shrink-0" role="group" aria-label="Chuyển đổi chế độ xem">
+                        <button type="button" disabled
+                                class="flex items-center gap-1.5 px-4 py-2 text-[11px] font-['Barlow_Condensed'] font-bold uppercase tracking-wider bg-[#1a1c1e] text-white">
+                            <span class="material-symbols-outlined text-[16px]">view_list</span> Danh sách
+                        </button>
+                        <button type="button" onclick="showMapComingSoon()"
+                                class="flex items-center gap-1.5 px-4 py-2 text-[11px] font-['Barlow_Condensed'] font-bold uppercase tracking-wider bg-white text-neutral-500 hover:text-emerald-700 hover:bg-neutral-50 transition-colors border-l border-neutral-200">
+                            <span class="material-symbols-outlined text-[16px]">map</span> Bản đồ
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div id="courts-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-gutter gap-y-10">
@@ -446,7 +460,7 @@
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                  src="${not empty s.hinhAnh ? s.hinhAnh : 'https://images.unsplash.com/photo-1518605368461-1ee7e57c6691?auto=format&fit=crop&w=600&q=80'}"
                                  alt="${s.tenSan}" />
-                            <div class="absolute top-3 left-3 z-10 font-['Barlow_Condensed'] font-bold text-[10px] tracking-widest uppercase px-3.5 py-1 border court-card-status bg-white/95 ${s.trangThai == 'Sẵn sàng' ? 'border-[#506600] text-[#506600]' : (s.trangThai == 'Đang dùng' ? 'border-[#427CF0] text-[#427CF0]' : 'border-neutral-300 text-neutral-500')}">
+                            <div class="absolute top-3 left-3 z-10 font-['Barlow_Condensed'] font-bold text-[10px] tracking-widest uppercase px-3.5 py-1 border court-card-status bg-white/95 ${s.trangThai == 'Sẵn sàng' ? 'border-[#047857] text-[#047857]' : (s.trangThai == 'Đang dùng' ? 'border-[#427CF0] text-[#427CF0]' : 'border-neutral-300 text-neutral-500')}">
                                 ${s.trangThai}
                             </div>
                         </div>
@@ -520,7 +534,7 @@
         <div>
             <h4 class="font-headline-sm text-headline-sm text-primary-fixed uppercase mb-6 font-['Barlow_Condensed'] tracking-wider">VĂN PHÒNG</h4>
             <address class="font-body-md text-body-md text-secondary-fixed-dim not-italic space-y-2">
-                <p>Việt Nam —</p>
+                <p>Việt Nam,</p>
                 <p>123 Nguyễn Trãi, Quận 1,</p>
                 <p>TP. Hồ Chí Minh</p>
                 <a class="block text-white hover:text-primary-fixed transition-colors mt-4" href="mailto:support@vsport.vn">support@vsport.vn</a>
@@ -568,7 +582,7 @@
             <c:if test="${sessionScope.user != null}">
                 <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-200 flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-none bg-[#506600]/5 text-[#506600] flex items-center justify-center font-extrabold text-sm border border-[#506600]/20 font-['Barlow_Condensed'] uppercase tracking-wider">
+                        <div class="w-10 h-10 rounded-none bg-[#047857]/5 text-[#047857] flex items-center justify-center font-extrabold text-sm border border-[#047857]/20 font-['Barlow_Condensed'] uppercase tracking-wider">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.user.fullName}">${fn:substring(sessionScope.user.fullName, 0, 1)}</c:when>
                                 <c:otherwise>${fn:substring(sessionScope.user.username, 0, 1)}</c:otherwise>
@@ -582,7 +596,7 @@
                     <div class="flex gap-4">
                         <div class="text-center px-4 py-1.5 bg-white rounded-none border border-neutral-200 shadow-sm">
                             <span class="text-[9px] text-neutral-400 font-bold block uppercase tracking-wider">ĐÃ ĐẶT</span>
-                            <span class="text-sm font-bold text-[#506600] font-['Barlow_Condensed'] block mt-0.5">${fn:length(dsLich)} ca</span>
+                            <span class="text-sm font-bold text-[#047857] font-['Barlow_Condensed'] block mt-0.5">${fn:length(dsLich)} ca</span>
                         </div>
                         <div class="text-center px-4 py-1.5 bg-white rounded-none border border-neutral-200 shadow-sm">
                             <span class="text-[9px] text-neutral-400 font-bold block uppercase tracking-wider">UY TÍN</span>
@@ -622,7 +636,7 @@
                                         <div class="flex items-start gap-1.5 flex-wrap mb-0.5">
                                             <span class="font-bold text-neutral-800 text-sm">${tenSanHienThi}</span>
                                             <c:if test="${lichStatus.first}">
-                                                <span class="inline-flex items-center gap-0.5 bg-[#506600] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none tracking-wider font-['Barlow_Condensed'] uppercase">
+                                                <span class="inline-flex items-center gap-0.5 bg-[#047857] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none tracking-wider font-['Barlow_Condensed'] uppercase">
                                                     MỚI NHẤT
                                                 </span>
                                             </c:if>
@@ -642,7 +656,7 @@
                                     </td>
                                     <td class="p-4 text-center">
                                         <span class="font-bold text-neutral-700 block">${lich.ngayDat}</span>
-                                        <span class="text-xs text-[#506600] font-bold font-mono">${lich.gioBatDau.toString().substring(0,5)} — ${lich.gioKetThuc.toString().substring(0,5)}</span>
+                                        <span class="text-xs text-[#047857] font-bold font-mono">${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
                                     </td>
                                     <td class="p-4 text-right font-bold text-neutral-800 text-sm font-mono">
                                         <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
@@ -658,7 +672,7 @@
                                                 <span class="bg-amber-500/5 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Chờ duyệt</span>
                                             </c:when>
                                             <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
-                                                <span class="bg-[#506600]/5 text-[#506600] border border-[#506600]/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Đã duyệt</span>
+                                                <span class="bg-[#047857]/5 text-[#047857] border border-[#047857]/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Đã duyệt</span>
                                             </c:when>
                                             <c:when test="${lich.trangThai == 'Đang sử dụng'}">
                                                 <span class="bg-purple-500/5 text-purple-700 border border-purple-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Đang sử dụng</span>
@@ -690,7 +704,7 @@
                                                     <button type="submit" class="px-3 py-1 border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px] rounded-none">Hủy thanh toán</button>
                                                 </form>
                                             </c:if>
-                                            <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px]">—</span></c:if>
+                                            <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px]">-</span></c:if>
                                             <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-teal-600 text-[10px] font-bold">✓ Đã chơi</span></c:if>
                                         </div>
                                     </td>
@@ -718,7 +732,7 @@
             <!-- Header with steps -->
             <div class="bg-[#1a1c1e] px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-[#afd639] flex items-center justify-center flex-shrink-0">
+                    <div class="w-8 h-8 bg-[#059669] flex items-center justify-center flex-shrink-0">
                         <span class="material-symbols-outlined text-[#1a1c1e] text-[18px]">sports_soccer</span>
                     </div>
                     <div>
@@ -739,13 +753,13 @@
                 <div class="flex-1 min-w-0">
                     <h4 id="modal-court-name" class="font-['Barlow_Condensed'] font-bold text-[#111] text-lg uppercase leading-tight truncate">Tên sân</h4>
                     <p id="modal-court-branch" class="text-[11px] text-neutral-500 font-semibold flex items-center gap-1 mt-0.5">
-                        <span class="material-symbols-outlined text-[13px] text-[#506600]">location_on</span> <span>Cơ sở</span>
+                        <span class="material-symbols-outlined text-[13px] text-[#047857]">location_on</span> <span>Cơ sở</span>
                     </p>
                 </div>
                 <div class="flex-shrink-0 flex flex-col items-end gap-1.5">
-                    <span id="modal-court-type" class="text-[9px] font-['Barlow_Condensed'] font-bold tracking-widest uppercase text-[#506600] border border-[#506600]/30 bg-[#506600]/5 px-2 py-0.5">Loại sân</span>
+                    <span id="modal-court-type" class="text-[9px] font-['Barlow_Condensed'] font-bold tracking-widest uppercase text-[#047857] border border-[#047857]/30 bg-[#047857]/5 px-2 py-0.5">Loại sân</span>
                     <div id="branch-hours-info" class="flex items-center gap-1 text-[10px] text-neutral-500 font-bold font-mono">
-                        <span class="material-symbols-outlined text-[12px] text-[#506600]">schedule</span>
+                        <span class="material-symbols-outlined text-[12px] text-[#047857]">schedule</span>
                         <span id="modal-branch-hours">--:-- - --:--</span>
                     </div>
                 </div>
@@ -762,10 +776,10 @@
                     <!-- Date field -->
                     <div>
                         <label class="form-label mb-2 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px] text-[#506600]">calendar_today</span>
+                            <span class="material-symbols-outlined text-[14px] text-[#047857]">calendar_today</span>
                             Ngày thi đấu <span class="text-red-500 ml-0.5">*</span>
                         </label>
-                        <div class="relative focus-within:ring-1 focus-within:ring-[#506600] border border-neutral-200 bg-white transition-all">
+                        <div class="relative focus-within:ring-1 focus-within:ring-[#047857] border border-neutral-200 bg-white transition-all">
                             <input type="date" name="ngayDat" id="ngayDat" required
                                 class="w-full px-4 py-3.5 text-[#111] font-bold font-['Barlow'] text-sm bg-transparent border-none outline-none cursor-pointer"
                                 onchange="onBookingDateChange()">
@@ -775,11 +789,11 @@
                     <!-- Time fields -->
                     <div>
                         <label class="form-label mb-2 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px] text-[#506600]">access_time</span>
+                            <span class="material-symbols-outlined text-[14px] text-[#047857]">access_time</span>
                             Khung giờ <span class="text-red-500 ml-0.5">*</span>
                         </label>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#506600] transition-all">
+                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#047857] transition-all">
                                 <p class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-['Barlow_Condensed'] px-4 pt-2.5">Bắt đầu</p>
                                 <div class="relative">
                                     <select name="gioBatDau" id="gioBatDau" required
@@ -788,13 +802,13 @@
                                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none text-[18px]">expand_more</span>
                                 </div>
                             </div>
-                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#506600] transition-all">
+                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#047857] transition-all">
                                 <p class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-['Barlow_Condensed'] px-4 pt-2.5">Kết thúc</p>
                                 <div class="relative">
                                     <select name="gioKetThuc" id="gioKetThuc" required
                                         class="w-full px-4 pb-2.5 pt-0.5 text-sm font-bold text-[#111] bg-transparent border-none outline-none appearance-none cursor-pointer pr-8 font-['Barlow']"
                                         onchange="onEndTimeSelectChange()">
-                                        <option value="">— Chọn giờ bắt đầu trước</option>
+                                        <option value="">-- Chọn giờ bắt đầu trước</option>
                                     </select>
                                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none text-[18px]">expand_more</span>
                                 </div>
@@ -817,14 +831,14 @@
                     </div>
 
                     <!-- Live cost preview -->
-                    <div id="live-cost-preview" class="hidden bg-[#f9fbf2] border border-[#afd639]/40 p-4 flex items-center justify-between gap-4">
+                    <div id="live-cost-preview" class="hidden bg-[#f9fbf2] border border-[#059669]/40 p-4 flex items-center justify-between gap-4">
                         <div class="space-y-0.5">
                             <p class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 font-['Barlow_Condensed']">Ước tính chi phí</p>
-                            <p class="font-['Barlow_Condensed'] font-bold text-[#506600] text-2xl" id="live-cost-amount">—</p>
+                            <p class="font-['Barlow_Condensed'] font-bold text-[#047857] text-2xl" id="live-cost-amount">-</p>
                         </div>
                         <div class="text-right space-y-0.5">
-                            <p class="text-[10px] text-neutral-400 font-bold font-['Barlow_Condensed'] uppercase tracking-wider" id="live-cost-duration">—</p>
-                            <p class="text-[10px] text-neutral-500 font-semibold" id="live-cost-rate">—</p>
+                            <p class="text-[10px] text-neutral-400 font-bold font-['Barlow_Condensed'] uppercase tracking-wider" id="live-cost-duration">-</p>
+                            <p class="text-[10px] text-neutral-500 font-semibold" id="live-cost-rate">-</p>
                             <p id="live-cost-lights" class="text-[10px] text-amber-600 font-bold hidden flex items-center gap-0.5">
                                 <span class="material-symbols-outlined text-[11px]">wb_twilight</span> Có phụ thu đèn
                             </p>
@@ -834,7 +848,7 @@
                     <!-- Dịch vụ đi kèm (Phase 8A / 8A.2 redesign) -->
                     <div>
                         <label class="mb-0.5 flex items-center gap-1.5 text-[13px] font-bold text-neutral-900 font-['Barlow_Condensed'] uppercase tracking-wide">
-                            <span class="material-symbols-outlined text-[16px] text-[#506600]">local_cafe</span>
+                            <span class="material-symbols-outlined text-[16px] text-[#047857]">local_cafe</span>
                             Dịch vụ đi kèm <span class="text-neutral-400 font-medium normal-case tracking-normal">(không bắt buộc)</span>
                         </label>
                         <p class="text-[11px] text-neutral-500 mb-2.5 ml-[22px]">Chọn trước dịch vụ để cơ sở chuẩn bị. Thanh toán tại quầy.</p>
@@ -857,9 +871,9 @@
 
                         <div id="booking-services-list" class="border border-neutral-200 rounded-lg divide-y divide-neutral-100 max-h-64 overflow-y-auto bg-white shadow-sm hidden"></div>
 
-                        <div id="booking-services-total-row" class="hidden flex items-center justify-between mt-2.5 px-3.5 py-2.5 bg-[#f4f9e6] border border-[#afd639]/40 rounded-lg">
+                        <div id="booking-services-total-row" class="hidden flex items-center justify-between mt-2.5 px-3.5 py-2.5 bg-[#f4f9e6] border border-[#059669]/40 rounded-lg">
                             <span class="text-[11px] font-bold uppercase tracking-widest text-[#3d4d00] font-['Barlow_Condensed']">Tổng dịch vụ</span>
-                            <span id="booking-services-total" class="text-base font-bold text-[#506600] font-['Barlow_Condensed']">0 đ</span>
+                            <span id="booking-services-total" class="text-base font-bold text-[#047857] font-['Barlow_Condensed']">0 đ</span>
                         </div>
 
                         <p class="text-[11px] text-neutral-500 mt-2 leading-relaxed flex items-start gap-1.5">
@@ -875,7 +889,7 @@
                             Ghi chú yêu cầu
                         </label>
                         <textarea name="ghiChu" id="ghiChu" rows="2"
-                            class="w-full px-4 py-3 border border-neutral-200 bg-white text-sm text-[#111] placeholder-neutral-300 font-['Barlow'] resize-none focus:outline-none focus:ring-1 focus:ring-[#506600] focus:border-[#506600] transition-all"
+                            class="w-full px-4 py-3 border border-neutral-200 bg-white text-sm text-[#111] placeholder-neutral-300 font-['Barlow'] resize-none focus:outline-none focus:ring-1 focus:ring-[#047857] focus:border-[#047857] transition-all"
                             placeholder="Thuê bóng, mượn áo tập, yêu cầu khác..."></textarea>
                     </div>
                 </div>
@@ -889,13 +903,13 @@
                     <c:choose>
                         <c:when test="${sessionScope.user != null}">
                             <button type="button" id="next-checkout-btn" onclick="goToCheckout()" disabled
-                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#506600] hover:bg-[#3d4d00] uppercase tracking-widest text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#047857] hover:bg-[#3d4d00] uppercase tracking-widest text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                                 Tiếp tục thanh toán <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                             </button>
                         </c:when>
                         <c:otherwise>
                             <a href="${pageContext.request.contextPath}/dangnhap"
-                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#506600] hover:bg-[#3d4d00] uppercase tracking-widest text-[13px] transition-colors flex items-center justify-center gap-2">
+                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#047857] hover:bg-[#3d4d00] uppercase tracking-widest text-[13px] transition-colors flex items-center justify-center gap-2">
                                 Đăng nhập để đặt <span class="material-symbols-outlined text-[16px]">login</span>
                             </a>
                         </c:otherwise>
@@ -938,7 +952,7 @@
                         </div>
                         <div class="pt-3 mt-1 border-t border-neutral-200 flex justify-between items-center">
                             <span class="text-xs font-bold uppercase text-neutral-500 tracking-wider font-['Barlow_Condensed']">Tiền sân</span>
-                            <span id="summary-total" class="text-2xl font-bold text-[#506600] font-['Barlow_Condensed']">-</span>
+                            <span id="summary-total" class="text-2xl font-bold text-[#047857] font-['Barlow_Condensed']">-</span>
                         </div>
                         <div id="summary-services-row" class="hidden flex justify-between items-center text-neutral-600">
                             <span class="flex items-center gap-1.5 text-xs"><span class="material-symbols-outlined text-[14px]">local_cafe</span>Dịch vụ đi kèm <span class="text-[9px] text-neutral-400">(tại quầy)</span></span>
@@ -954,18 +968,18 @@
                 <!-- Payment method -->
                 <div>
                     <label class="form-label mb-3 flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[14px] text-[#506600]">payment</span>
+                        <span class="material-symbols-outlined text-[14px] text-[#047857]">payment</span>
                         Phương thức thanh toán
                     </label>
                     <div class="grid grid-cols-2 gap-2.5">
                         <button type="button" onclick="selectPaymentMethod('payos')" id="payment-opt-payos"
-                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#506600]/40 transition-all text-center gap-2 active:scale-95">
-                            <span class="material-symbols-outlined text-[24px] text-[#506600]">qr_code_2</span>
+                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#047857]/40 transition-all text-center gap-2 active:scale-95">
+                            <span class="material-symbols-outlined text-[24px] text-[#047857]">qr_code_2</span>
                             <span class="text-xs font-extrabold text-neutral-800 font-['Barlow_Condensed'] uppercase tracking-wide">PayOS</span>
                             <span class="text-[9px] text-neutral-400 font-bold">Giữ sân 10 phút</span>
                         </button>
                         <button type="button" onclick="selectPaymentMethod('sau')" id="payment-opt-sau"
-                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#506600]/40 transition-all text-center gap-2 active:scale-95">
+                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#047857]/40 transition-all text-center gap-2 active:scale-95">
                             <span class="material-symbols-outlined text-[24px] text-neutral-500">payments</span>
                             <span class="text-xs font-extrabold text-neutral-800 font-['Barlow_Condensed'] uppercase tracking-wide">Tại quầy</span>
                             <span class="text-[9px] text-neutral-400 font-bold">Đặt cọc tiền mặt</span>
@@ -983,18 +997,18 @@
                         <p class="text-[11px] text-neutral-500 mt-1 leading-relaxed">Vui lòng đến trước 15 phút để làm thủ tục nhận sân và thanh toán.</p>
                     </div>
                 </div>
-                <div id="payment-info-payos" class="hidden bg-[#f9fbf2] border border-[#afd639]/40 p-4 flex items-start gap-3">
-                    <div class="w-8 h-8 bg-[#506600] flex items-center justify-center flex-shrink-0">
+                <div id="payment-info-payos" class="hidden bg-[#f9fbf2] border border-[#059669]/40 p-4 flex items-start gap-3">
+                    <div class="w-8 h-8 bg-[#047857] flex items-center justify-center flex-shrink-0">
                         <span class="material-symbols-outlined text-[16px] text-white">bolt</span>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-neutral-800">Chuyển khoản — Giữ sân tức thì 10 phút</p>
+                        <p class="text-xs font-bold text-neutral-800">Chuyển khoản, giữ sân tức thì 10 phút</p>
                         <p class="text-[11px] text-neutral-500 mt-1 leading-relaxed">Mã QR sẽ được tạo tự động. Hoàn tất trong 10 phút để giữ sân.</p>
                     </div>
                 </div>
 
                 <button onclick="confirmBooking()"
-                    class="w-full bg-[#506600] hover:bg-[#3d4d00] text-white font-['Barlow_Condensed'] font-bold h-13 py-3.5 text-[13px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                    class="w-full bg-[#047857] hover:bg-[#3d4d00] text-white font-['Barlow_Condensed'] font-bold h-13 py-3.5 text-[13px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">verified</span> Hoàn tất đặt sân
                 </button>
             </div>
@@ -1027,11 +1041,11 @@
                     <div class="pt-6 border-t border-neutral-100 flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-neutral-400 uppercase tracking-wider block">Tổng tiền dịch vụ thêm</span>
-                            <span class="text-2xl font-bold text-[#506600] font-['Barlow_Condensed']" id="customer-service-total">0 đ</span>
+                            <span class="text-2xl font-bold text-[#047857] font-['Barlow_Condensed']" id="customer-service-total">0 đ</span>
                         </div>
                         <div class="flex gap-3">
                             <button type="button" onclick="closeCustomerServiceModal()" class="px-6 py-3 rounded-none font-['Barlow_Condensed'] font-bold text-neutral-500 bg-neutral-100 hover:bg-neutral-200 uppercase tracking-widest text-[12px] transition-colors">Hủy</button>
-                            <button type="submit" class="px-8 py-3 rounded-none font-['Barlow_Condensed'] font-bold text-white bg-[#506600] hover:bg-[#3d4d00] uppercase tracking-widest text-[12px] transition-all">Xác nhận đặt</button>
+                            <button type="submit" class="px-8 py-3 rounded-none font-['Barlow_Condensed'] font-bold text-white bg-[#047857] hover:bg-[#3d4d00] uppercase tracking-widest text-[12px] transition-all">Xác nhận đặt</button>
                         </div>
                     </div>
                 </form>
@@ -1268,14 +1282,14 @@
                             <span class="text-xs font-semibold text-neutral-600">\${formatServicePrice(sp)}</span>
                             \${stockText ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded \${outOfStock ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-100 text-neutral-600'}">\${stockText}</span>` : ''}
                         </div>
-                        \${lineTotal ? `<p class="text-[11px] font-bold text-[#506600] mt-1">Thành tiền: \${lineTotal}</p>` : ''}
+                        \${lineTotal ? `<p class="text-[11px] font-bold text-[#047857] mt-1">Thành tiền: \${lineTotal}</p>` : ''}
                     </div>
                     <div class="flex items-center gap-2.5 flex-shrink-0">
                         <button type="button" onclick="changeServiceQty(\${sp.sanPhamId}, -1)" \${(outOfStock || qty === 0) ? 'disabled' : ''}
-                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || qty === 0) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#506600] hover:bg-[#506600] hover:text-white active:scale-95'}">−</button>
+                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || qty === 0) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#047857] hover:bg-[#047857] hover:text-white active:scale-95'}">−</button>
                         <span class="w-6 text-center text-sm font-bold text-neutral-900">\${qty}</span>
                         <button type="button" onclick="changeServiceQty(\${sp.sanPhamId}, 1)" \${(outOfStock || atMax) ? 'disabled' : ''}
-                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || atMax) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#506600] hover:bg-[#506600] hover:text-white active:scale-95'}">+</button>
+                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || atMax) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#047857] hover:bg-[#047857] hover:text-white active:scale-95'}">+</button>
                     </div>
                 </div>`;
             }).join("");
@@ -1365,10 +1379,30 @@
             bar.classList.toggle('flex');
         }
 
+        // ─── Map view (Phase 3, route /customer/ban-do) ───
+        function showMapComingSoon() {
+            if (window.__vsToastTimer) clearTimeout(window.__vsToastTimer);
+            let el = document.getElementById('mapComingSoonToast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'mapComingSoonToast';
+                el.setAttribute('role', 'status');
+                el.className = 'fixed left-1/2 z-[400] px-4 py-2.5 rounded-full text-[13px] font-semibold text-white shadow-lg';
+                el.style.cssText = 'bottom:88px;transform:translateX(-50%) translateY(12px);background:#0f172a;opacity:0;transition:opacity .2s ease, transform .2s ease;';
+                document.body.appendChild(el);
+            }
+            el.textContent = 'Chế độ xem bản đồ sắp ra mắt';
+            requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)'; });
+            window.__vsToastTimer = setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(-50%) translateY(12px)';
+            }, 2000);
+        }
+
         // ─── Status helpers ───
         function getCourtStatusInfo(status) {
             const s = (status || '').trim();
-            if (s === 'Sẵn sàng') return { label: 'Sẵn Sàng', bookable: true, actionDisabled: false, actionLabel: 'Đặt sân', badgeClass: 'border-[#506600] text-[#506600] bg-white/95', dotClass: 'bg-green-500 animate-pulse' };
+            if (s === 'Sẵn sàng') return { label: 'Sẵn Sàng', bookable: true, actionDisabled: false, actionLabel: 'Đặt sân', badgeClass: 'border-[#047857] text-[#047857] bg-white/95', dotClass: 'bg-green-500 animate-pulse' };
             if (s === 'Đang dùng') return { label: 'Đang Dùng', bookable: false, actionDisabled: true, actionLabel: 'Đang dùng', badgeClass: 'border-[#427CF0] text-[#427CF0] bg-white/95', dotClass: 'bg-amber-400 animate-pulse' };
             if (s === 'Bảo trì' || s === 'Đang bảo trì' || s === 'Tạm đóng') return { label: s, bookable: false, actionDisabled: true, actionLabel: 'Tạm đóng', badgeClass: 'border-neutral-300 text-neutral-500 bg-white/95', dotClass: '' };
             return { label: s || 'Không rõ', bookable: false, actionDisabled: true, actionLabel: 'Chi tiết', badgeClass: 'border-neutral-300 text-neutral-500 bg-white/95', dotClass: '' };
@@ -1619,7 +1653,7 @@
             const type = courtTypes[court.typeId] || { name: "Không rõ", priceDay: 0, priceNight: 0, sportId: 0, lightTime: "17:30:00" };
             const branch = branches[court.branchId] || { name: "Cơ sở", address: "", openTime: DEFAULT_OPEN_TIME, closeTime: DEFAULT_CLOSE_TIME };
             document.getElementById("modal-court-name").textContent = court.name;
-            document.getElementById("modal-court-branch").innerHTML = `<span class="material-symbols-outlined text-[13px] text-[#506600]">location_on</span> <span>\${branch.name}</span>`;
+            document.getElementById("modal-court-branch").innerHTML = `<span class="material-symbols-outlined text-[13px] text-[#047857]">location_on</span> <span>\${branch.name}</span>`;
             document.getElementById("modal-court-type").textContent = type.name;
 
             // Set image dynamically
@@ -1688,11 +1722,11 @@
             const infoPOS = document.getElementById("payment-info-payos"), infoSau = document.getElementById("payment-info-sau");
             if (!btnPOS || !btnSau) return;
             if (method === 'payos') {
-                btnPOS.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#506600] bg-[#506600]/5 text-center gap-1.5 active:scale-95";
+                btnPOS.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#047857] bg-[#047857]/5 text-center gap-1.5 active:scale-95";
                 btnSau.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-neutral-200 hover:border-neutral-300 text-center gap-1.5 active:scale-95";
                 infoPOS.classList.remove("hidden"); infoSau.classList.add("hidden");
             } else {
-                btnSau.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#506600] bg-[#506600]/5 text-center gap-1.5 active:scale-95";
+                btnSau.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#047857] bg-[#047857]/5 text-center gap-1.5 active:scale-95";
                 btnPOS.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-neutral-200 hover:border-neutral-300 text-center gap-1.5 active:scale-95";
                 infoSau.classList.remove("hidden"); infoPOS.classList.add("hidden");
             }
@@ -2060,5 +2094,6 @@
             setTimeout(() => { modal.classList.add("hidden"); modal.classList.remove("flex"); }, 300);
         }
     </script>
+<jsp:include page="/customer/common/bottom-nav.jsp" />
 </body>
 </html>

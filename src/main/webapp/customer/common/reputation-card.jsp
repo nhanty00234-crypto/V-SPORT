@@ -69,4 +69,8 @@
         <p class="text-xs text-slate-600 flex items-start gap-2"><span class="material-symbols-outlined text-rose-500 text-[15px] mt-0.5">error</span> Không đến sân bị trừ điểm nhiều hơn hủy sát giờ.</p>
         <p class="text-xs text-slate-600 flex items-start gap-2"><span class="material-symbols-outlined text-emerald-600 text-[15px] mt-0.5">add_circle</span> Hoàn thành trận đấu sẽ được cộng điểm.</p>
     </div>
+
+    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="mt-4 inline-flex items-center gap-1.5 text-emerald-700 text-xs font-bold hover:underline">
+        <span class="material-symbols-outlined text-[16px]">history</span> Xem lịch sử uy tín
+    </a>
 </div>

@@ -46,147 +46,45 @@
 <!DOCTYPE html>
 <html class="light" lang="vi">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>V-SPORT - Hệ Thống Đặt Sân Thể Thao</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=DM+Sans:wght@400;500;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "secondary-fixed": "#e5e2e1",
-                        "outline-variant": "#c5c9b0",
-                        "surface": "#faf9fd",
-                        "on-primary-fixed-variant": "#3b4d00",
-                        "secondary-fixed-dim": "#c8c6c5",
-                        "on-primary": "#ffffff",
-                        "inverse-on-surface": "#f1f0f4",
-                        "error": "#ba1a1a",
-                        "surface-bright": "#faf9fd",
-                        "primary-container": "#afd639",
-                        "inverse-surface": "#2f3033",
-                        "surface-dim": "#dad9dd",
-                        "on-error-container": "#93000a",
-                        "error-container": "#ffdad6",
-                        "on-tertiary-fixed-variant": "#00419c",
-                        "on-error": "#ffffff",
-                        "on-tertiary": "#ffffff",
-                        "outline": "#757964",
-                        "on-secondary-fixed-variant": "#474646",
-                        "on-surface": "#1a1c1e",
-                        "secondary": "#5f5e5e",
-                        "surface-container-low": "#f4f3f7",
-                        "tertiary-fixed-dim": "#b0c6ff",
-                        "surface-container": "#eeedf1",
-                        "surface-container-lowest": "#ffffff",
-                        "on-secondary-fixed": "#1c1b1b",
-                        "on-background": "#1a1c1e",
-                        "surface-tint": "#506600",
-                        "on-tertiary-container": "#004db6",
-                        "secondary-container": "#e5e2e1",
-                        "on-surface-variant": "#444936",
-                        "tertiary-fixed": "#d9e2ff",
-                        "on-secondary": "#ffffff",
-                        "on-primary-container": "#465a00",
-                        "on-primary-fixed": "#161f00",
-                        "surface-container-highest": "#e3e2e6",
-                        "court-blue": "#427CF0",
-                        "primary-fixed-dim": "#aed538",
-                        "tertiary": "#0458cb",
-                        "primary-fixed": "#c9f253",
-                        "inverse-primary": "#aed538",
-                        "surface-container-high": "#e8e8ec",
-                        "tertiary-container": "#b2c7ff",
-                        "primary": "#506600",
-                        "on-tertiary-fixed": "#001945",
-                        "background": "#faf9fd",
-                        "on-secondary-container": "#656464",
-                        "surface-variant": "#e3e2e6"
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.25rem",
-                        lg: "0.5rem",
-                        xl: "0.75rem",
-                        full: "9999px"
-                    },
-                    spacing: {
-                        base: "8px",
-                        "container-max": "1680px",
-                        "margin-desktop": "32px",
-                        "margin-mobile": "16px",
-                        gutter: "24px"
-                    },
-                    fontFamily: {
-                        "headline-sm": ["Barlow Condensed", "sans-serif"],
-                        "body-md": ["Barlow", "sans-serif"],
-                        "headline-lg": ["Barlow Condensed", "sans-serif"],
-                        "label-md": ["Barlow", "sans-serif"],
-                        "headline-md": ["Barlow Condensed", "sans-serif"],
-                        "headline-lg-mobile": ["Barlow Condensed", "sans-serif"],
-                        "display-lg": ["Barlow Condensed", "sans-serif"],
-                        "label-lg": ["Barlow", "sans-serif"],
-                        "body-lg": ["Barlow", "sans-serif"]
-                    },
-                    fontSize: {
-                        "headline-sm": ["24px", { lineHeight: "1.2", fontWeight: "600" }],
-                        "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
-                        "headline-lg": ["48px", { lineHeight: "1.1", fontWeight: "700" }],
-                        "label-md": ["12px", { lineHeight: "1.0", fontWeight: "500" }],
-                        "headline-md": ["32px", { lineHeight: "1.2", fontWeight: "600" }],
-                        "headline-lg-mobile": ["32px", { lineHeight: "1.1", fontWeight: "700" }],
-                        "display-lg": ["72px", { lineHeight: "1.0", letterSpacing: "-0.02em", fontWeight: "700" }],
-                        "label-lg": ["14px", { lineHeight: "1.0", letterSpacing: "0.05em", fontWeight: "700" }],
-                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }]
-                    },
-                    keyframes: {
-                        marquee: {
-                            "0%":   { transform: "translateX(0)" },
-                            "100%": { transform: "translateX(-50%)" }
-                        }
-                    },
-                    animation: {
-                        "marquee": "marquee 20s linear infinite"
-                    }
-                }
-            }
-        }
-    </script>
-<style>
-        .hover-outline:hover { box-shadow: 0 0 0 1px #0F0F0F; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>V-SPORT - Hệ Thống Đặt Sân Thể Thao</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 
-        /* Scroll reveal system styles */
-        .scroll-reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform;
-        }
-        .scroll-reveal.reveal-fade {
-            transform: none;
-        }
-        .scroll-reveal.reveal-3d {
-            transform: perspective(1000px) rotateX(12deg) translateY(35px) scale(0.96);
-            transform-origin: top center;
-            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .scroll-reveal.reveal-visible {
-            opacity: 1;
-            transform: translateY(0) rotateX(0deg) scale(1);
-        }
-        .delay-100 { transition-delay: 100ms; }
-        .delay-150 { transition-delay: 150ms; }
-        .delay-200 { transition-delay: 200ms; }
-        .delay-300 { transition-delay: 300ms; }
+    <jsp:include page="/customer/common/vsport-theme.jsp" />
 
-        /* VIP PRO Premium styles */
+    <style>
+        /* ---- Typography tokens (Montserrat: same family the reference uses; OFL, full Vietnamese) ---- */
+        :root {
+            --font-family-ui: 'Montserrat', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-size-xs: 11.5px;
+            --font-size-sm: 13px;
+            --font-size-md: 14.5px;
+            --font-size-lg: 18px;
+            --font-weight-regular: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+        }
+        body {
+            background-color: var(--vs-surface);
+            font-family: var(--font-family-ui);
+        }
+
+        /* Custom scrollbar hiding */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Shimmer text style */
         .shimmer-text {
-            background: linear-gradient(to right, #0F0F0F 20%, #a8cc00 40%, #a8cc00 60%, #0F0F0F 80%);
+            background: linear-gradient(to right, #ffffff 20%, #d1fae5 40%, #a7f3d0 60%, #ffffff 80%);
             background-size: 200% auto;
             color: transparent;
             -webkit-background-clip: text;
@@ -197,1173 +95,525 @@
             to { background-position: 200% center; }
         }
 
-        .btn-pulse-glow {
-            position: relative;
-            z-index: 1;
-        }
-        .btn-pulse-glow::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            background: inherit;
-            border-radius: inherit;
-            z-index: -1;
-            opacity: 0.45;
-            transform: scale(1);
-            animation: pulse-glow 2s infinite;
-            pointer-events: none;
-        }
-        @keyframes pulse-glow {
-            0% { transform: scale(1); opacity: 0.45; }
-            100% { transform: scale(1.08, 1.16); opacity: 0; }
-        }
-
-        .card-glow-sweep {
-            position: relative;
-            overflow: hidden;
-        }
-        .card-glow-sweep::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -85%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 100%);
-            transform: skewX(-25deg);
-            z-index: 10;
-            pointer-events: none;
-            transition: none;
-        }
-        .card-glow-sweep:hover::before {
-            left: 130%;
-            transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
+        /* Facility card details hover effect */
         .img-ken-burns {
-            transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .group:hover .img-ken-burns {
-            transform: scale(1.08) rotate(1deg);
+            transform: scale(1.06);
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(3deg); }
-        }
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
+        /* Custom spacing class */
+        .px-safe-bottom {
+            padding-bottom: calc(var(--vs-bottomnav-h, 62px) + env(safe-area-inset-bottom, 0px));
         }
 
-        /* Hero Drop Down Animation */
-        @keyframes drop-down {
-            0% {
-                transform: translateY(-100%);
-            }
-            100% {
-                transform: translateY(0);
-            }
-        }
-        .hero-drop {
-            transform: translateY(-100%);
-            animation: drop-down 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .hero-drop-1 {
-            animation-delay: 0.1s;
-        }
-        .hero-drop-2 {
-            animation-delay: 0.3s;
-        }
-        .hero-drop-3 {
-            animation-delay: 0.5s;
-        }
+        /* Full-width application shell: tight outer gutters, not a centered column. */
+        .vs-shell { width: 100%; padding-left: 8px; padding-right: 8px; }
+        @media (min-width: 768px) { .vs-shell { padding-left: 12px; padding-right: 12px; } }
 
-        /* Navigation Links Modern Style */
-        .nav-link {
-            font-family: 'Poppins', sans-serif !important;
-            font-size: 15px !important;
-            font-weight: 500 !important;
-            color: #4b5563 !important; /* gray-600 */
-            text-transform: none !important; /* normal capitalization */
-            letter-spacing: -0.1px !important;
-            padding: 8px 16px !important;
-            border-radius: 9999px !important; /* capsule pill */
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-            position: relative !important;
-            display: inline-block !important;
-            text-decoration: none !important;
+        /* ============================ Top header (green band) ========================= */
+        .vs-topband {
+            width: 100%; background: #047857; position: relative; overflow: hidden;
+            padding: 9px 10px 9px;
         }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background-color: #afd639; /* neon lime green */
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            transform: translateX(-50%);
+        @media (min-width: 768px) { .vs-topband { padding: 9px 12px 9px; } }
+        /* Abstract organic green shapes (CSS only, no external asset) — echoes the
+           patterned sports band of the reference without copying any artwork. */
+        .vs-topband::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 420px 200px at 22% 130%, rgba(52, 211, 153, 0.38), transparent 62%),
+                radial-gradient(ellipse 520px 260px at 48% -40%, rgba(16, 185, 129, 0.42), transparent 60%),
+                radial-gradient(ellipse 380px 240px at 72% 140%, rgba(6, 78, 59, 0.70), transparent 65%),
+                radial-gradient(ellipse 300px 190px at 90% -30%, rgba(110, 231, 183, 0.30), transparent 60%),
+                radial-gradient(ellipse 260px 170px at 99% 110%, rgba(4, 60, 44, 0.60), transparent 68%),
+                linear-gradient(112deg, transparent 34%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0.06) 39%, transparent 39%),
+                linear-gradient(112deg, transparent 58%, rgba(255,255,255,0.05) 58%, rgba(255,255,255,0.05) 61%, transparent 61%);
         }
-        .nav-link:hover {
-            color: #000000 !important;
-            background-color: #f3f4f6 !important; /* soft grey capsule pill background */
+        .vs-topband-row { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .vs-topband-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .vs-topband-logo {
+            width: 62px; height: 62px; border-radius: 50%; flex-shrink: 0;
+            background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center;
         }
-        .nav-link:hover::after {
-            width: 30% !important; /* elegant center highlight line */
-        }
-        .nav-link.active {
-            color: #000000 !important;
-            font-weight: 600 !important;
-            background-color: #f3f4f6 !important;
-        }
-        .nav-link.active::after {
-            width: 30% !important;
-        }
+        .vs-topband-logo .material-symbols-outlined { font-size: 33px; color: #fff; }
+        .vs-topband-date { font-size: 14.5px; font-weight: 600; color: #fff; }
 
-        /* Side Drawer Offcanvas CSS */
-        .side-drawer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999;
-            visibility: hidden;
-            transition: visibility 0.3s ease;
+        /* Auth cluster (logged-out) — rectangular buttons, tight group under logo/date. */
+        .vs-authcluster { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+        .vs-auth-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 34px; padding: 0 20px; border-radius: 6px;
+            font-size: 13px; font-weight: 700; white-space: nowrap;
+            cursor: pointer; text-decoration: none; transition: background-color .15s ease, color .15s ease;
+            min-width: 150px;
         }
-        .side-drawer.open {
-            visibility: visible;
+        @media (min-width: 640px) { .vs-auth-btn { min-width: 235px; } }
+        .vs-auth-btn-login { background: #fff; color: #047857; border: 1px solid #fff; }
+        .vs-auth-btn-login:hover { background: #ecfdf5; }
+        .vs-auth-btn-register { background: transparent; color: #fff; border: 2px solid #fff; }
+        .vs-auth-btn-register:hover { background: rgba(255,255,255,0.12); }
+
+        /* Session cluster (logged-in). */
+        .vs-session-cluster { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .vs-session-avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.35); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .vs-session-name { font-size: 13px; font-weight: 700; color: #fff; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .vs-session-btn { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 6px; font-size: 12.5px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background-color .15s ease; }
+        .vs-session-btn-schedule { background: rgba(255,255,255,0.14); color: #fff; }
+        .vs-session-btn-schedule:hover { background: rgba(255,255,255,0.24); }
+        .vs-session-btn-logout { background: #dc2626; color: #fff; }
+        .vs-session-btn-logout:hover { background: #b91c1c; }
+
+        /* ============================ Utility bar ============================= */
+        /* ONE seamless white block: a single grid, cells separated only by thin
+           vertical dividers. No per-cell radius, shadow, gap, or inner boxes. */
+        .vs-utilitybar-wrap { padding: 4px 6px 0; }
+        .vs-utilitybar {
+            width: 100%; background: #fff; border: 1px solid #d9e6e1; border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+            display: grid; grid-template-columns: 50px minmax(320px, 1.9fr) 64px 1fr 1fr 1fr;
+            height: 51px; padding: 0; overflow: hidden;
+            position: sticky; top: 0; z-index: 40;
         }
-        .side-drawer-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .vs-utilitybar:focus-within { border-color: var(--vs-accent); }
+        .vs-ub-ic { display: flex; align-items: center; justify-content: center; height: 100%; }
+        .vs-ub-ic svg { width: 29px; height: 29px; }
+        .vs-ub-input {
+            width: 100%; height: 100%; min-width: 0;
+            border: none; outline: none; border-radius: 0; background: transparent; box-shadow: none;
+            border-left: 1px solid #e8efec;
+            padding: 0 14px; font-size: 14px; font-family: var(--font-family-ui); color: #1f2937;
         }
-        .side-drawer.open .side-drawer-overlay {
-            opacity: 1;
+        .vs-ub-input::placeholder { color: #94a3b8; }
+        .vs-ub-filter {
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            border: none; border-left: 1px solid #e8efec; border-radius: 0;
+            background: transparent; box-shadow: none; cursor: pointer;
+            color: #047857; transition: background-color .15s ease;
         }
-        .side-drawer-content {
-            position: absolute;
-            top: 0;
-            right: -360px;
-            width: 360px;
-            height: 100%;
-            background-color: #ffffff;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            transition: right 0.3s ease;
-            padding: 24px;
-            box-sizing: border-box;
-            overflow-y: auto;
+        .vs-ub-filter .material-symbols-outlined { font-size: 21px; }
+        .vs-ub-filter:hover { background: #ecfdf5; }
+        .vs-ub-action {
+            display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%;
+            border-left: 1px solid #e8efec; border-radius: 0; box-shadow: none; background: transparent;
+            text-decoration: none; color: #1f2937;
+            font-size: 13.5px; font-weight: 600; white-space: nowrap; transition: background-color .15s ease;
+            padding: 0 8px; min-width: 0;
         }
-        .side-drawer.open .side-drawer-content {
-            right: 0;
-        }
-        .side-drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-        .side-drawer-close {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #999999;
-            transition: color 0.2s;
-            line-height: 1;
-        }
-        .side-drawer-close:hover {
-            color: #333333;
-        }
-        .side-drawer-section {
-            margin-bottom: 30px;
-        }
-        .section-title {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: #999999;
-            letter-spacing: 0.1em;
-            margin-bottom: 16px;
-            margin-top: 0;
-            text-transform: uppercase;
-        }
-        .user-section {
-            background-color: #f9f9f9;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid #f0f0f0;
-        }
-        .drawer-user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .avatar-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: #9dc93c;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 700;
-        }
-        .user-details {
-            flex: 1;
-        }
-        .user-name {
-            font-weight: 600;
-            color: #333333;
-            margin: 0;
-            font-size: 15px;
-        }
-        .user-role {
-            font-size: 12px;
-            color: #999999;
-            margin: 0;
-        }
-        .drawer-user-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .btn-drawer-action {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #444444;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 8px;
-            border-radius: 4px;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .btn-drawer-action:hover {
-            background-color: #f0f0f0;
-            color: #000000;
-        }
-        .drawer-guest-info {
-            text-align: center;
-            padding: 8px 0;
-        }
-        .guest-msg {
-            font-size: 13px;
-            color: #666666;
-            margin-bottom: 14px;
-        }
-        .btn-drawer-login {
-            background-color: #333333;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background-color 0.2s;
-            width: 100%;
-        }
-        .btn-drawer-login:hover {
-            background-color: #000000;
-        }
-        .drawer-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #333333;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 600;
-            padding: 10px 0;
-            border-bottom: 1px solid #f9f9f9;
-            transition: color 0.2s, padding-left 0.2s;
-        }
-        .drawer-link:hover {
-            color: #9dc93c;
-            padding-left: 6px;
-        }
-        .support-channels {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .channel-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #333333;
-            font-weight: 600;
-            font-size: 14px;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-            transition: all 0.2s;
-        }
-        .channel-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .zalo-btn {
-            background-color: #f4f8ff;
-            border-color: #cbdcff;
-        }
-        .zalo-btn:hover {
-            background-color: #e8f1ff;
-            border-color: #a3c3ff;
-        }
-        .messenger-btn {
-            background-color: #fff2f9;
-            border-color: #ffdceb;
-        }
-        .messenger-btn:hover {
-            background-color: #ffe6f3;
-            border-color: #ffb8d9;
-        }
-        .channel-icon {
-            width: 24px;
-            height: 24px;
-        }
-        .side-drawer-footer {
-            margin-top: auto;
-            border-top: 1px solid #f0f0f0;
-            padding-top: 20px;
-        }
-        .contact-item {
-            display: flex;
-            flex-direction: column;
+        .vs-ub-action:hover { background: #ecfdf5; }
+        .vs-ub-action .material-symbols-outlined { font-size: 20px; color: #047857; flex-shrink: 0; }
+
+        /* ============================ Promotional banner ============================= */
+        /* Tri-zone composition: real V-SPORT imagery left + right, message center. */
+        .vs-banner {
+            position: relative; width: 100%; height: 160px;
+            border-radius: 10px; overflow: hidden;
+            background: linear-gradient(90deg, #065f46 0%, #047857 55%, #059669 100%);
+            display: flex; align-items: center; justify-content: center;
             margin-bottom: 12px;
         }
-        .contact-item .label {
-            font-size: 12px;
-            color: #999999;
+        @media (min-width: 768px)  { .vs-banner { height: 210px; } }
+        @media (min-width: 1280px) { .vs-banner { height: 260px; } }
+        .vs-banner-side { position: absolute; top: 0; bottom: 0; width: 34%; pointer-events: none; }
+        .vs-banner-side img { width: 100%; height: 100%; object-fit: cover; }
+        .vs-banner-side-l { left: 0; }
+        .vs-banner-side-r { right: 0; }
+        .vs-banner-side-l::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(90deg, rgba(6,95,70,0.20) 0%, rgba(6,95,70,0.55) 55%, #065f46 100%);
         }
-        .contact-item .value {
-            font-size: 15px;
-            font-weight: 700;
-            color: #333333;
+        .vs-banner-side-r::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(270deg, rgba(5,150,105,0.20) 0%, rgba(5,150,105,0.55) 55%, #058a61 100%);
+        }
+        .vs-banner-content { position: relative; z-index: 2; text-align: center; padding: 0 16px; max-width: 760px; }
+        .vs-banner-kicker {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+            color: #a7f3d0; margin-bottom: 6px;
+        }
+        .vs-banner-title {
+            font-family: var(--font-family-ui); font-weight: 800; color: #fff;
+            font-size: 20px; line-height: 1.2; margin-bottom: 6px;
+            text-shadow: 0 2px 10px rgba(4, 47, 34, 0.45);
+            text-wrap: balance;
+        }
+        @media (min-width: 768px)  { .vs-banner-title { font-size: 27px; } }
+        @media (min-width: 1280px) { .vs-banner-title { font-size: 32px; } }
+        .vs-banner-sub { font-size: 12.5px; font-weight: 500; color: #d1fae5; margin-bottom: 14px; }
+        @media (min-width: 768px) { .vs-banner-sub { font-size: 14px; } }
+        .vs-banner-ctas { display: flex; gap: 10px; justify-content: center; }
+        .vs-banner-cta-main {
+            display: inline-flex; align-items: center; height: 38px; padding: 0 22px;
+            background: #f59e0b; color: #1f2937; font-size: 13px; font-weight: 800;
+            border-radius: 8px; text-decoration: none; transition: background-color .15s ease;
+        }
+        .vs-banner-cta-main:hover { background: #d97706; }
+        .vs-banner-cta-alt {
+            display: inline-flex; align-items: center; height: 38px; padding: 0 22px;
+            background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.75);
+            color: #fff; font-size: 13px; font-weight: 700;
+            border-radius: 8px; text-decoration: none; transition: background-color .15s ease;
+        }
+        .vs-banner-cta-alt:hover { background: rgba(255,255,255,0.22); }
+        @media (max-width: 640px) {
+            .vs-banner-side { width: 26%; }
+            .vs-banner-sub { display: none; }
+        }
+
+        /* Mobile: same single container, two rows — icon+search+filter on top,
+           the three actions below. Still one seamless block, no separate cards. */
+        @media (max-width: 767px) {
+            .vs-utilitybar { grid-template-columns: repeat(6, 1fr); grid-template-rows: 48px 46px; height: auto; }
+            .vs-ub-ic { grid-column: span 1; }
+            .vs-ub-ic svg { width: 26px; height: 26px; }
+            .vs-ub-input { grid-column: span 4; padding: 0 12px; font-size: 13px; }
+            .vs-ub-filter { grid-column: span 1; }
+            .vs-ub-action { grid-column: span 2; border-top: 1px solid #e8efec; font-size: 12.5px; gap: 6px; }
+            .vs-ub-action:first-of-type { border-left: none; }
+            .vs-topband-logo { width: 48px; height: 48px; }
+            .vs-topband-logo .material-symbols-outlined { font-size: 26px; }
+            .vs-topband-date { font-size: 12.5px; }
+            .vs-auth-btn { min-width: 0; flex: 1; padding: 0 12px; }
+            .vs-authcluster { width: 100%; }
         }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body-md antialiased overflow-x-hidden">
+<body class="bg-surface text-on-surface antialiased overflow-x-hidden">
 
-<!-- TopNavBar -->
-<nav class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 w-full sticky top-0 z-50 bg-white border-b border-outline-variant select-none">
-    <!-- Logo -->
-    <a href="<%= ctx %>/index.jsp" class="flex items-center gap-2 no-underline hover:scale-[1.03] transition-transform">
-        <img src="<%= ctx %>/resources/logo.png" alt="V-SPORT Logo" class="h-9 w-9 object-cover rounded-md select-none border border-neutral-100 shadow-sm"/>
-        <span class="font-['Poppins'] font-bold text-xl md:text-2xl uppercase text-[#111827] tracking-tight">V-SPORT<span class="text-[#afd639]">.</span></span>
-    </a>
-    
-    <!-- Navigation Links -->
-    <div class="hidden md:flex gap-2 items-center">
-        <a class="nav-link active" href="<%= ctx %>/index.jsp">Trang chủ</a>
-        <a class="nav-link" href="<%= ctx %>/customer/dat-san">Đặt sân</a>
-        <a class="nav-link" href="<%= ctx %>/customer/ghep-keo">Ghép kèo</a>
-        <a class="nav-link" href="<%= ctx %>/customer/lich-su-dat-san">Lịch của tôi</a>
-        <a class="nav-link" href="<%= ctx %>/customer/tai-khoan">Tài khoản</a>
-    </div>
-    
-    <!-- Action Icons -->
-    <div class="flex items-center gap-6">
-        <!-- Cart / Booking Bag -->
-        <a href="<%= ctx %>/customer/dat-san" class="relative group flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
-            <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-            <span class="absolute -bottom-0.5 -right-0.5 w-[15px] h-[15px] bg-[#9dc93c] rounded-full border border-white flex items-center justify-center text-[9px] font-bold text-white leading-none">0</span>
-        </a>
-        
-        <!-- User Icon -->
-        <div class="relative group">
-            <button id="header-user-btn" onclick="handleUserClick(this)" aria-haspopup="true" aria-expanded="false" aria-label="Tài khoản" class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
-                <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
+    <!-- Top green header band (matches reference screen) -->
+    <header class="vs-topband select-none">
+        <div class="vs-topband-row">
+            <!-- Left: Logo + date + (logged-out) auth cluster -->
+            <div class="vs-topband-brand">
+                <a href="<%= ctx %>/index.jsp" class="vs-topband-logo" aria-label="V-SPORT — Trang chủ" title="V-SPORT">
+                    <span class="material-symbols-outlined" aria-hidden="true">sports_tennis</span>
+                </a>
+                <div>
+                    <div class="vs-topband-date" id="current-date-el"><!-- Loaded dynamically via JS --></div>
+                    <% if (!isLoggedIn) { %>
+                        <div class="vs-authcluster">
+                            <a href="<%= ctx %>/dangnhap" class="vs-auth-btn vs-auth-btn-login" aria-label="Đăng nhập" title="Đăng nhập">Đăng nhập</a>
+                            <button type="button" onclick="openAuthModal('register')" class="vs-auth-btn vs-auth-btn-register" aria-label="Đăng ký" title="Đăng ký">Đăng ký</button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Right: Logged-in session cluster only (mutually exclusive with auth cluster above) -->
+            <% if (isLoggedIn) { %>
+                <div class="vs-session-cluster">
+                    <div class="vs-session-avatar" aria-hidden="true"><%= avatarCharSafe %></div>
+                    <span class="vs-session-name"><%= displayNameSafe %></span>
+                    <a href="<%= ctx %>/customer/lich-su-dat-san" class="vs-session-btn vs-session-btn-schedule" aria-label="Lịch của tôi" title="Lịch của tôi">Lịch của tôi</a>
+                    <a href="<%= ctx %>/logout" class="vs-session-btn vs-session-btn-logout" aria-label="Đăng xuất" title="Đăng xuất">Đăng xuất</a>
+                </div>
+            <% } %>
+        </div>
+    </header>
+
+    <!-- Search & shortcuts utility bar: ONE seamless white block (grid cells + thin dividers) -->
+    <div class="vs-utilitybar-wrap">
+        <section class="vs-utilitybar" aria-label="Tìm kiếm và điều hướng nhanh">
+            <span class="vs-ub-ic" aria-hidden="true">
+                <%-- Original V-SPORT shuttlecock mark (hand-drawn inline SVG, not a copied asset) --%>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="7" cy="17" r="2.7" fill="#047857" stroke="none"/>
+                    <path d="M9.3 14.7 L18.4 5.6"/>
+                    <path d="M9.9 15.8 L20.6 9.6"/>
+                    <path d="M8.2 14.1 L14.4 3.6"/>
+                    <path d="M14.4 3.6 Q19.2 4.6 20.6 9.6"/>
                 </svg>
+            </span>
+            <label for="facilitySearchInput" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Tìm sân, cơ sở hoặc môn thể thao</label>
+            <input type="text" id="facilitySearchInput" class="vs-ub-input" onkeyup="searchFacilities()" placeholder="Tìm sân, cơ sở hoặc môn thể thao" aria-label="Tìm sân, cơ sở hoặc môn thể thao" />
+            <button type="button" onclick="redirectToBookingSearch()" class="vs-ub-filter" aria-label="Lọc chi tiết" title="Lọc chi tiết">
+                <span class="material-symbols-outlined" aria-hidden="true">tune</span>
             </button>
-            <% if (isLoggedIn) { %>
-                <!-- Dropdown for Logged-In User -->
-                <div id="user-profile-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-md overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-neutral-100">
-                    <div class="px-4 py-2.5 bg-neutral-50 border-b border-neutral-100">
-                        <p class="text-xs text-neutral-400">Tài khoản</p>
-                        <p class="text-sm font-semibold text-[#0F0F0F] truncate"><%= displayNameSafe %></p>
-                    </div>
-                    <a href="<%= ctx %>/customer/tai-khoan" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Tài khoản</a>
-                    <a href="<%= ctx %>/customer/lich-su-dat-san" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Lịch của tôi</a>
-                    <a href="<%= ctx %>/customer/ghep-keo" class="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">Ghép kèo</a>
-                    <a href="<%= ctx %>/logout" class="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-neutral-100">Đăng xuất</a>
-                </div>
-            <% } %>
-        </div>
-        
-        <!-- Search Icon -->
-        <button class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
-            <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-        </button>
-        
-        <!-- Nine-dots grid -->
-        <button onclick="openSideDrawer()" class="flex items-center justify-center w-8 h-8 text-[#333333] hover:text-[#000000] transition-transform hover:scale-105 active:scale-95">
-            <svg class="w-[20px] h-[20px]" fill="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="4" height="4" rx="0.5" />
-                <rect x="10" y="3" width="4" height="4" rx="0.5" />
-                <rect x="17" y="3" width="4" height="4" rx="0.5" />
-                <rect x="3" y="10" width="4" height="4" rx="0.5" />
-                <rect x="10" y="10" width="4" height="4" rx="0.5" />
-                <rect x="17" y="10" width="4" height="4" rx="0.5" />
-                <rect x="3" y="17" width="4" height="4" rx="0.5" />
-                <rect x="10" y="17" width="4" height="4" rx="0.5" />
-                <rect x="17" y="17" width="4" height="4" rx="0.5" />
-            </svg>
-        </button>
-    </div>
-</nav>
-
-<!-- Hero Section -->
-<section class="relative w-full h-[65vh] md:h-[75vh] flex items-center justify-center overflow-hidden bg-neutral-900 select-none">
-    <!-- Background Image -->
-    <div class="absolute inset-0 z-0">
-        <img class="w-full h-full object-cover object-center img-ken-burns opacity-55" alt="Cơ sở thể thao hiện đại V-SPORT" src="<%= ctx %>/assets/images/home/hero-sports-facility.webp"/>
-        <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-900/60 to-transparent"></div>
-    </div>
-    
-    <!-- Hero Content -->
-    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
-        <span class="font-label-lg text-label-lg text-[#afd639] uppercase mb-3 tracking-widest text-xs md:text-sm animate-fade-in font-bold">HỆ THỐNG ĐẶT SÂN THỂ THAO HÀNG ĐẦU</span>
-        <h1 class="font-display-lg text-display-lg text-white uppercase mb-4 text-3xl md:text-5xl lg:text-6xl leading-tight shimmer-text font-extrabold tracking-wide">Tìm kiếm và đặt sân thể thao nhanh chóng</h1>
-        <p class="text-neutral-300 font-medium text-sm md:text-base lg:text-lg max-w-2xl mb-8 leading-relaxed font-body-md">
-            Trải nghiệm tìm kiếm thông minh, thanh toán an toàn PayOS và quản lý lịch đặt tiện lợi.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4">
-            <a class="inline-flex items-center justify-center gap-2 bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg btn-pulse-glow" href="<%= ctx %>/customer/dat-san">
-                <span class="material-symbols-outlined text-[18px]">calendar_add_on</span> Đặt sân ngay
+            <a href="<%= ctx %>/customer/ban-do" class="vs-ub-action" aria-label="Bản đồ" title="Bản đồ">
+                <span class="material-symbols-outlined" aria-hidden="true">map</span>
+                <span>Bản đồ</span>
             </a>
-            <a class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform backdrop-blur-md" href="<%= ctx %>/customer/ghep-keo?tab=tim-doi-thu">
-                <span class="material-symbols-outlined text-[18px]">person_search</span> Tìm đối thủ
+            <a href="<%= ctx %>/customer/lich-su-dat-san" class="vs-ub-action" aria-label="Sân đã đặt" title="Sân đã đặt">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                <span>Sân đã đặt</span>
             </a>
-            <a class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold uppercase py-3.5 px-8 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform backdrop-blur-md" href="<%= ctx %>/customer/ghep-keo?tab=tao-keo">
-                <span class="material-symbols-outlined text-[18px]">add_circle</span> Tạo kèo
+            <a href="<%= ctx %>/customer/ghep-keo" class="vs-ub-action" aria-label="Ghép trận" title="Ghép trận">
+                <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+                <span>Ghép trận</span>
             </a>
-        </div>
+        </section>
     </div>
-</section>
 
-<!-- Quick Booking Bar -->
-<section class="max-w-[95%] xl:max-w-[92%] mx-auto px-margin-mobile md:px-margin-desktop relative z-20">
-    <div class="flex justify-center -mt-10 md:-mt-16">
-        <form action="<%= ctx %>/customer/dat-san" method="GET" class="w-full max-w-5xl bg-white border border-neutral-200/80 shadow-2xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-4 gap-6 select-none relative rounded-none">
-            <!-- Chọn Môn Thể Thao -->
-            <div class="flex flex-col">
-                <label for="sportId" class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">Chọn Môn Thể Thao</label>
-                <div class="relative">
-                    <select id="sportId" name="sportId" class="w-full bg-neutral-50 border border-neutral-200 rounded-none py-3 px-4 text-neutral-800 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-neutral-400 appearance-none cursor-pointer">
-                        <option value="">Tất cả môn thể thao</option>
-                        <% if (dsMon != null) {
-                            for (MonTheThao m : dsMon) { %>
-                                <option value="<%= m.getMonTheThaoID() %>"><%= m.getTenMon() %></option>
-                            <% }
-                        } %>
-                    </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-neutral-400">
-                        <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Chọn Cơ Sở -->
-            <div class="flex flex-col">
-                <label for="branchId" class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">Chọn Cơ Sở</label>
-                <div class="relative">
-                    <select id="branchId" name="branchId" class="w-full bg-neutral-50 border border-neutral-200 rounded-none py-3 px-4 text-neutral-800 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-neutral-400 appearance-none cursor-pointer">
-                        <option value="">Tất cả cơ sở</option>
-                        <% if (dsCoSo != null) {
-                            for (CoSo c : dsCoSo) { %>
-                                <option value="<%= c.getCoSoID() %>"><%= c.getTenCoSo() %></option>
-                            <% }
-                        } %>
-                    </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-neutral-400">
-                        <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Chọn Ngày -->
-            <div class="flex flex-col">
-                <label for="date" class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">Chọn Ngày</label>
-                <input type="date" id="date" name="date" class="w-full bg-neutral-50 border border-neutral-200 rounded-none py-2.5 px-4 text-neutral-800 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-neutral-400 cursor-pointer"/>
-            </div>
-            
-            <!-- Nút Tìm Kiếm -->
-            <div class="flex items-end">
-                <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-bold uppercase py-3.5 px-6 rounded-none tracking-wider transition-colors shadow-md hover:shadow-lg active:scale-[0.98] transition-all text-sm">
-                    TÌM SÂN NGAY
-                </button>
-            </div>
-        </form>
-    </div>
-</section>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const homeDateInput = document.getElementById('date');
-        if (homeDateInput) {
-            const today = new Date().toISOString().split('T')[0];
-            homeDateInput.min = today;
-            homeDateInput.value = today;
-        }
-    });
-</script>
-
-<!-- Trust Bar -->
-<div class="bg-court-blue text-on-primary py-4 overflow-hidden whitespace-nowrap border-b border-surface">
-<div class="flex">
-<div class="flex flex-shrink-0 animate-marquee whitespace-nowrap">
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-<span class="font-label-lg text-label-lg uppercase px-12">ĐẶT SÂN NHANH &bull; GIỮ CHỖ AN TOÀN &bull; THANH TOÁN PAYOS &bull; XÁC NHẬN TỰ ĐỘNG</span>
-</div>
-</div>
-</div>
-
-<!-- Partner Logos -->
-<div class="w-full bg-white py-12 border-b border-surface-variant px-margin-mobile md:px-margin-desktop select-none scroll-reveal reveal-fade">
-    <div class="max-w-[95%] xl:max-w-[92%] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
-        <!-- Left Spacer to balance the text on the right and center the logos -->
-        <div class="hidden lg:block w-[220px] flex-shrink-0"></div>
+    <main class="w-full vs-shell py-3 px-safe-bottom">
         
-        <!-- Logos Centered -->
-        <div class="flex flex-wrap lg:flex-nowrap items-center justify-center gap-8 xl:gap-12 text-[#cccccc] flex-grow">
-            <!-- Deltab -->
-            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
-                <svg class="h-10 w-auto fill-none stroke-current" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 6v20 M14 6v20 M14 6h4a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10h-4"/>
-                    <text x="38" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="700" font-size="19" fill="currentColor" stroke="none" letter-spacing="-0.03em">Deltab</text>
-                </svg>
+        <!-- V-SPORT promotional banner: real facility imagery left/right, message center -->
+        <div class="vs-banner select-none">
+            <div class="vs-banner-side vs-banner-side-l" aria-hidden="true">
+                <img src="<%= ctx %>/assets/images/home/hero-sports-facility.webp" alt="" loading="eager" />
             </div>
-            
-            <!-- Tennis Ball -->
-            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
-                <svg class="h-12 w-12 fill-none stroke-current" stroke-width="2" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="13"/>
-                    <path d="M10 6 A 13 13 0 0 0 10 26" stroke-width="1.8"/>
-                    <path d="M22 6 A 13 13 0 0 1 22 26" stroke-width="1.8"/>
-                </svg>
+            <div class="vs-banner-side vs-banner-side-r" aria-hidden="true">
+                <img src="<%= ctx %>/assets/images/home/booking-cta.webp" alt="" loading="eager" />
             </div>
-            
-            <!-- Ausgrid -->
-            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
-                <svg class="h-10 w-auto fill-none stroke-current" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 22l6-6-6-6 M12 22l6-6-6-6 M18 22l6-6-6-6"/>
-                    <text x="38" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="700" font-size="19" fill="currentColor" stroke="none" letter-spacing="-0.02em">Ausgrid</text>
-                </svg>
-            </div>
-            
-            <!-- Crossed Tennis Rackets -->
-            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
-                <svg class="h-12 w-12 fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <g transform="translate(16,16) rotate(45) translate(-16,-16)">
-                        <path d="M16 19v9"/>
-                        <ellipse cx="16" cy="11" rx="4.5" ry="6"/>
-                        <path d="M13 11h6 M12.5 8.5h7 M12.5 13.5h7 M16 5v12 M14 6v10 M18 6v10" stroke-width="0.8"/>
-                    </g>
-                    <g transform="translate(16,16) rotate(-45) translate(-16,-16)">
-                        <path d="M16 19v9"/>
-                        <ellipse cx="16" cy="11" rx="4.5" ry="6"/>
-                        <path d="M13 11h6 M12.5 8.5h7 M12.5 13.5h7 M16 5v12 M14 6v10 M18 6v10" stroke-width="0.8"/>
-                    </g>
-                </svg>
-            </div>
-            
-            <!-- Quizlet -->
-            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
-                <svg class="h-10 w-auto" viewBox="0 0 90 32" xmlns="http://www.w3.org/2000/svg">
-                    <text x="5" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="700" font-size="21" fill="currentColor" letter-spacing="-0.02em">Quizlet</text>
-                </svg>
-            </div>
-            
-            <!-- LEAGO -->
-            <div class="flex items-center hover:text-[#999999] transition-colors duration-300 cursor-pointer">
-                <svg class="h-10 w-auto fill-none stroke-current" stroke-width="2.5" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
-                    <text x="5" y="23" font-family="'DM Sans', 'Inter', sans-serif" font-weight="900" font-size="19" fill="currentColor" stroke="none" letter-spacing="0.05em">LEAGO</text>
-                    <circle cx="94" cy="16" r="7" stroke-width="2"/>
-                    <circle cx="94" cy="16" r="2.5" fill="currentColor" stroke="none"/>
-                    <path d="M87 16h14 M94 9v14" stroke-width="1"/>
-                </svg>
+            <div class="vs-banner-content">
+                <span class="vs-banner-kicker">
+                    <span class="material-symbols-outlined text-[14px]" aria-hidden="true">sports_soccer</span>
+                    V-SPORT
+                </span>
+                <h1 class="vs-banner-title">Tìm sân và kết nối người chơi gần bạn</h1>
+                <p class="vs-banner-sub">Đặt sân giữ chỗ trong 2 phút, thanh toán QR tự động qua PayOS.</p>
+                <div class="vs-banner-ctas">
+                    <a href="<%= ctx %>/customer/dat-san" class="vs-banner-cta-main">Đặt sân ngay</a>
+                    <a href="<%= ctx %>/customer/ghep-keo" class="vs-banner-cta-alt">Tìm kèo ghép</a>
+                </div>
             </div>
         </div>
-        
-        <!-- Text -->
-        <div class="text-center lg:text-right w-full lg:w-[220px] mt-4 lg:mt-0 flex-shrink-0">
-            <h4 class="font-bold text-sm text-[#111111] tracking-wider leading-tight uppercase font-body-md">
-                CHECK OUR BEST<br/>CLIENTS AND PARTNERS
-            </h4>
-        </div>
-    </div>
-</div>
 
-<!-- Sport Categories Grid -->
-<section class="max-w-[95%] xl:max-w-[92%] mx-auto px-margin-mobile md:px-margin-desktop py-16">
-    <div class="scroll-reveal mb-12 text-center">
-        <span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-2">DANH MỤC THỂ THAO</span>
-        <h2 class="font-headline-lg text-headline-lg text-on-surface uppercase font-bold">KHÁM PHÁ CÁC BỘ MÔN</h2>
-    </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        <!-- Item 1: Bóng đá -->
-        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=1'">
-            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân bóng đá cỏ nhân tạo" src="<%= ctx %>/assets/images/home/sport-football.webp"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
-                <div class="flex flex-col w-full text-center">
-                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Bóng đá</h3>
-                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
-                </div>
-            </div>
-        </div>
-        <!-- Item 2: Cầu lông -->
-        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-100 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=2'">
-            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân cầu lông trong nhà" src="<%= ctx %>/assets/images/home/sport-badminton.webp"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
-                <div class="flex flex-col w-full text-center">
-                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Cầu lông</h3>
-                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
-                </div>
-            </div>
-        </div>
-        <!-- Item 3: Pickleball -->
-        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-200 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=3'">
-            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân pickleball ngoài trời" src="<%= ctx %>/assets/images/home/sport-pickleball.webp"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
-                <div class="flex flex-col w-full text-center">
-                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Pickleball</h3>
-                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
-                </div>
-            </div>
-        </div>
-        <!-- Item 4: Tennis -->
-        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-300 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=4'">
-            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân tennis ngoài trời" src="<%= ctx %>/assets/images/home/sport-tennis.webp"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
-                <div class="flex flex-col w-full text-center">
-                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Tennis</h3>
-                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
-                </div>
-            </div>
-        </div>
-        <!-- Item 5: Bóng bàn -->
-        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-100 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=5'">
-            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Sân bóng bàn trong nhà" src="<%= ctx %>/assets/images/home/sport-tabletennis.webp"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
-                <div class="flex flex-col w-full text-center">
-                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Bóng bàn</h3>
-                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
-                </div>
-            </div>
-        </div>
-        <!-- Item 6: Gym / Fitness -->
-        <div class="group relative overflow-hidden aspect-[3/4] bg-surface-container cursor-pointer scroll-reveal reveal-3d delay-200 card-glow-sweep rounded-none" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=6'">
-            <img class="w-full h-full object-cover img-ken-burns transition-transform duration-500 group-hover:scale-105" alt="Phòng tập gym cao cấp" src="<%= ctx %>/assets/images/home/sport-gym.webp"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
-                <div class="flex flex-col w-full text-center">
-                    <h3 class="font-bold text-lg tracking-wider text-white uppercase font-headline-sm">Gym / Fitness</h3>
-                    <span class="text-xs text-neutral-300 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-md">ĐẶT SÂN &rarr;</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Popular Courts -->
-<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center">
-    <div class="scroll-reveal">
-        <span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest block mb-2">DANH MỤC SÂN ĐẶT HÀNG ĐẦU</span>
-        <h2 class="font-headline-lg text-headline-lg text-on-surface uppercase mb-16 font-bold">CÁC KHU VỰC SÂN PHỔ BIẾN</h2>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-        <!-- Court 1 -->
-        <div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=1'">
-            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
-                <img class="w-full h-full object-cover img-ken-burns" alt="Sân bóng đá cỏ nhân tạo 5 người" src="<%= ctx %>/assets/images/home/sport-football.webp"/>
-            </div>
-            <div>
-                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">BÓNG ĐÁ</span>
-                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN BÓNG ĐÁ 5 NGƯỜI TIÊU CHUẨN</h3>
-                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 150.000đ/giờ</p>
-                <div class="flex text-primary-container text-sm gap-0.5">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-            </div>
-        </div>
-        <!-- Court 2 -->
-        <div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=2'">
-            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
-                <img class="w-full h-full object-cover img-ken-burns" alt="Sân cầu lông trong nhà" src="<%= ctx %>/assets/images/home/sport-badminton.webp"/>
-            </div>
-            <div>
-                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">CẦU LÔNG</span>
-                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN CẦU LÔNG THẢM PVC CHUYÊN NGHIỆP</h3>
-                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 80.000đ/giờ</p>
-                <div class="flex text-primary-container text-sm gap-0.5">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-            </div>
-        </div>
-        <!-- Court 3 -->
-        <div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=4'">
-            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
-                <img class="w-full h-full object-cover img-ken-burns" alt="Sân tennis ngoài trời" src="<%= ctx %>/assets/images/home/sport-tennis.webp"/>
-            </div>
-            <div>
-                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">TENNIS</span>
-                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN TENNIS ĐẤT CỨNG CHUẨN QUỐC TẾ</h3>
-                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 120.000đ/giờ</p>
-                <div class="flex text-primary-container text-sm gap-0.5">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-            </div>
-        </div>
-        <!-- Court 4 -->
-        <div class="group cursor-pointer scroll-reveal reveal-3d" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=3'">
-            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
-                <img class="w-full h-full object-cover img-ken-burns" alt="Sân pickleball hiện đại" src="<%= ctx %>/assets/images/home/sport-pickleball.webp"/>
-            </div>
-            <div>
-                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">PICKLEBALL</span>
-                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN PICKLEBALL TRONG NHÀ CAO CẤP</h3>
-                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 100.000đ/giờ</p>
-                <div class="flex text-primary-container text-sm gap-0.5">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-            </div>
-        </div>
-        <!-- Court 5 -->
-        <div class="group cursor-pointer scroll-reveal reveal-3d delay-100" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=5'">
-            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
-                <img class="w-full h-full object-cover img-ken-burns" alt="Sân bóng bàn trong nhà" src="<%= ctx %>/assets/images/home/sport-tabletennis.webp"/>
-            </div>
-            <div>
-                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">BÓNG BÀN</span>
-                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">SÂN BÓNG BÀN ĐA NĂNG</h3>
-                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 50.000đ/giờ</p>
-                <div class="flex text-primary-container text-sm gap-0.5">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-            </div>
-        </div>
-        <!-- Court 6 -->
-        <div class="group cursor-pointer scroll-reveal reveal-3d delay-200" onclick="location.href='<%= ctx %>/customer/dat-san?sportId=6'">
-            <div class="bg-surface-container-low aspect-[16/10] mb-6 relative overflow-hidden card-glow-sweep border border-neutral-200/65">
-                <img class="w-full h-full object-cover img-ken-burns" alt="Phòng gym fitness hiện đại" src="<%= ctx %>/assets/images/home/sport-gym.webp"/>
-            </div>
-            <div>
-                <span class="font-label-md text-xs font-bold text-primary uppercase tracking-wider">GYM / FITNESS</span>
-                <h3 class="font-headline-sm text-headline-sm text-on-surface uppercase mb-2 mt-1 font-bold">PHÒNG GYM VA FITNESS CAO CẤP</h3>
-                <p class="font-label-lg text-label-lg text-on-surface-variant mb-3 font-semibold">Giá từ 60.000đ/giờ</p>
-                <div class="flex text-primary-container text-sm gap-0.5">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="mt-16 scroll-reveal">
-        <a class="inline-block bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-4 px-8 tracking-widest transition-transform hover:scale-105 active:scale-95 btn-pulse-glow" href="<%= ctx %>/customer/dat-san">XEM TẤT CẢ SÂN</a>
-    </div>
-</section>
-
-<!-- Testimonials -->
-<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20 md:py-24 overflow-hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-        <!-- Left Side: Header & Avatars -->
-        <div class="scroll-reveal flex flex-col justify-start">
-            <span class="font-['Barlow_Condensed'] text-[14px] font-bold text-neutral-400 uppercase tracking-[0.15em] block mb-2">ABOUT US</span>
-            <h2 class="font-['Barlow_Condensed'] text-[48px] font-bold text-neutral-900 uppercase leading-[1.1] mb-8">TESTIMONIALS</h2>
-            
-            <!-- Avatars & Dynamic Name Block -->
-            <div class="flex flex-col items-start gap-4">
-                <!-- Avatars Row -->
-                <div class="flex gap-4 items-center" id="testi-avatars">
-                    <button type="button" onclick="vsGoToTesti(0)" data-testi-avatar="0" class="relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer transition-all duration-300 outline-none">
-                        <img class="w-full h-full rounded-full object-cover" alt="Henry Phillips" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZg3AoA6AEoYuJHVQm8eDr5_KJaEfoJf7IjdPd909yrQ13UzEGmS35rBkMz0NwQOhLroGtgtIorWGaQPbbnP8Xa2XStS-P-cmIL-vqMgEURd0zzwlzz1y_zQlFrySB7HQ4WAPARw_XmR3UaR9FRdrYfaWh80dCqaRmPjz4ORCR9FlkLLTOPsFqacukfbrJz2iMM6VF70MZvJKy90-1vSHtvTC9RXHXAsM2VpPZUyDqTKlwu266YHP3"/>
-                        <span data-testi-badge="0" class="absolute -bottom-1 -right-1 w-[20px] h-[20px] rounded-full bg-[#afd639] border border-white flex items-center justify-center shadow-sm">
-                            <svg class="w-2.5 h-2.5 text-black font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        </span>
+        <!-- Sport category chips selector (filters the grid instantly) -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none mb-3" style="-webkit-overflow-scrolling:touch;">
+            <button type="button" class="vs-chip is-active" data-sport-filter="all" onclick="filterBySport('all', this)">
+                Tất cả
+            </button>
+            <% if (dsMon != null) {
+                for (MonTheThao m : dsMon) { %>
+                    <button type="button" class="vs-chip" data-sport-filter="<%= m.getTenMon() %>" onclick="filterBySport('<%= m.getTenMon() %>', this)">
+                        <%= m.getTenMon() %>
                     </button>
-                    <button type="button" onclick="vsGoToTesti(1)" data-testi-avatar="1" class="relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer opacity-40 scale-[0.85] transition-all duration-300 outline-none">
-                        <img class="w-full h-full rounded-full object-cover" alt="Blonde Woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmu54KJzg42CGnwOVK8JMJBxKSL1NcQEXwiHq8SJYlqu30VIukeHAqKJtjY2bV5lFizEZxFP5u0Whse3W0e15EEvg8mR7tJVkFjIGve73Iruzu4YKLmGeiH66TWo5MtiU4qJHB5TIZm0UL_cxsN-FWl5edcAhb4Zl2iguPsea-dWHZyGX9jFl8o_ZGMUdEkVF9NVCxJ3lVmosITKh75vSmni9xwBGFA0cHwF9nOdWeYEejDRSGoMdm"/>
-                        <span data-testi-badge="1" class="hidden absolute -bottom-1 -right-1 w-[20px] h-[20px] rounded-full bg-[#afd639] border border-white flex items-center justify-center shadow-sm">
-                            <svg class="w-2.5 h-2.5 text-black font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        </span>
-                    </button>
-                    <button type="button" onclick="vsGoToTesti(2)" data-testi-avatar="2" class="relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer opacity-40 scale-[0.85] transition-all duration-300 outline-none">
-                        <img class="w-full h-full rounded-full object-cover" alt="Visor Woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv06aMFJYR3sOdfCnuOAUtbt0Te9kIQPzs6DKqRclM1BzX3LmhysNMm2hlM0rzDy8peJBU4ry2QyoGpSsraCkCvwTJj3-x9TYbNr_3-g24eEwE2hPH7P-f5uSTEfpsX8XQc20eZ3PsvmJSuDU5g8thzC-bX2tzkpiRsJvoO4PVrulDkc_bv56QTh_aQgsUUdad5MYauX07tx_B-YdvNqGYBBzlWub22aw_1WM8CkuN37jaLA921-kW"/>
-                        <span data-testi-badge="2" class="hidden absolute -bottom-1 -right-1 w-[20px] h-[20px] rounded-full bg-[#afd639] border border-white flex items-center justify-center shadow-sm">
-                            <svg class="w-2.5 h-2.5 text-black font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        </span>
-                    </button>
-                </div>
-                
-                <!-- Active Info Block -->
-                <div class="mt-2 min-h-[50px]">
-                    <h4 id="testi-name" class="font-['Barlow_Condensed'] text-[15px] font-bold text-neutral-900 uppercase tracking-wide m-0">HENRY PHILLIPS</h4>
-                    <p id="testi-location" class="font-['DM_Sans'] text-[12px] text-neutral-400 m-0">Sacramento</p>
-                </div>
-            </div>
+                <% }
+            } %>
         </div>
-        
-        <!-- Right Side: Testimonial Text & Navigation -->
-        <div class="flex flex-col justify-center scroll-reveal delay-150">
-            <div id="testi-quote" class="font-['DM_Sans'] text-[16px] leading-[1.65] text-neutral-600 space-y-4 mb-8">
-                <p>Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit fugit, sed. Beatae vitae dicta. Adipiscing elit, sed do eiusmod tempor incididunt.</p>
-                <p>Labore et dolore magna aliqua ut enim ad minim. Adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <button type="button" onclick="vsTestiPrev()" aria-label="Trước" class="w-[42px] h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-all duration-300 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                </button>
-                <button type="button" onclick="vsTestiNext()" aria-label="Tiếp" class="w-[42px] h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-all duration-300 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Booking CTA Banner -->
-<section class="relative w-full py-24 md:py-32 flex items-center justify-center overflow-hidden bg-neutral-900 select-none scroll-reveal">
-    <!-- Background Image -->
-    <div class="absolute inset-0 z-0">
-        <img class="w-full h-full object-cover object-center img-ken-burns opacity-45" alt="Trải nghiệm thể thao V-SPORT" src="<%= ctx %>/assets/images/home/booking-cta.webp"/>
-        <div class="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-transparent"></div>
-    </div>
-    
-    <!-- Content -->
-    <div class="relative z-10 text-left px-margin-mobile md:px-margin-desktop max-w-[95%] xl:max-w-[92%] w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div>
-            <h2 class="font-headline-lg text-headline-lg text-white uppercase mb-4 font-extrabold leading-tight">Bạn Đã Sẵn Sàng Trải Nghiệm Sân Chơi?</h2>
-            <p class="text-neutral-300 font-medium text-sm md:text-base max-w-lg mb-8 leading-relaxed font-body-md">
-                Hệ thống đặt sân V-SPORT giúp bạn giữ chỗ chỉ trong 1 phút. Nhanh chóng, tiện lợi, đảm bảo giữ sân.
-            </p>
-            <a class="inline-block bg-[#afd639] hover:bg-[#97bd2e] text-neutral-950 font-bold uppercase py-4 px-10 tracking-widest text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg btn-pulse-glow" href="<%= ctx %>/customer/dat-san">ĐẶT LỊCH NGAY</a>
-        </div>
-    </div>
-</section>
-
-<!-- News -->
-<section class="relative bg-gradient-to-br from-[#4a5424] via-[#232a12] to-[#0a0a09] text-white py-20 md:py-24 px-margin-mobile md:px-margin-desktop border-t border-white/10 overflow-hidden">
-<div class="relative max-w-[1180px] mx-auto text-center">
-<div class="scroll-reveal">
-<span class="font-label-lg text-label-lg uppercase tracking-widest block mb-3 text-white/85">TIN TỨC</span>
-<h2 class="font-headline-lg text-headline-lg uppercase mb-14 text-white">TIN TỨC NỔI BẬT</h2>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter text-left">
-<article class="bg-white text-on-surface flex flex-col scroll-reveal">
-<div class="p-6 pb-4">
-<p class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-3"><span class="font-bold uppercase text-on-surface">Nổi Bật</span><i class="not-italic text-outline-variant">&middot;</i><time datetime="2026-07-08">08/07/2026</time></p>
-<h3 class="font-headline-sm text-headline-sm uppercase leading-tight min-h-[2.3em]">5 Bài Tập Giúp Bạn Bứt Tốc Trên Sân Cầu Lông</h3>
-</div>
-<div class="aspect-square overflow-hidden">
-<img class="w-full h-full object-cover" alt="Cầu lông" loading="lazy" src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80"/>
-</div>
-<a href="#" class="flex items-center gap-2 p-6 font-label-lg text-label-lg uppercase hover:text-primary transition-colors">Đọc thêm <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
-</article>
-<article class="bg-white text-on-surface flex flex-col scroll-reveal delay-100">
-<div class="p-6 pb-4">
-<p class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-3"><span class="font-bold uppercase text-on-surface">Nổi Bật</span><i class="not-italic text-outline-variant">&middot;</i><time datetime="2026-07-05">05/07/2026</time></p>
-<h3 class="font-headline-sm text-headline-sm uppercase leading-tight min-h-[2.3em]">Vì Sao Pickleball Đang Phủ Sóng Khắp Việt Nam?</h3>
-</div>
-<div class="aspect-square overflow-hidden">
-<img class="w-full h-full object-cover" alt="Pickleball" loading="lazy" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=600&q=80"/>
-</div>
-<a href="#" class="flex items-center gap-2 p-6 font-label-lg text-label-lg uppercase hover:text-primary transition-colors">Đọc thêm <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
-</article>
-<article class="bg-white text-on-surface flex flex-col scroll-reveal delay-200">
-<div class="p-6 pb-4">
-<p class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-3"><span class="font-bold uppercase text-on-surface">Nổi Bật</span><i class="not-italic text-outline-variant">&middot;</i><time datetime="2026-07-02">02/07/2026</time></p>
-<h3 class="font-headline-sm text-headline-sm uppercase leading-tight min-h-[2.3em]">Đặt Sân Nhóm: Mẹo Chia Chi Phí Cùng Bạn Bè</h3>
-</div>
-<div class="aspect-square overflow-hidden">
-<img class="w-full h-full object-cover" alt="Đặt sân nhóm" loading="lazy" src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80"/>
-</div>
-<a href="#" class="flex items-center gap-2 p-6 font-label-lg text-label-lg uppercase hover:text-primary transition-colors">Đọc thêm <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
-</article>
-</div>
-</div>
-</section>
-
-<script>
-    (function() {
-        var vsTestimonials = [
-            {
-                name: 'HENRY PHILLIPS',
-                location: 'Sacramento',
-                quote: [
-                    'Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit fugit, sed. Beatae vitae dicta. Adipiscing elit, sed do eiusmod tempor incididunt.',
-                    'Labore et dolore magna aliqua ut enim ad minim. Adipiscing elit, sed do eiusmod tempor incididunt ut labore.'
-                ]
-            },
-            {
-                name: 'SARAH JENKINS',
-                location: 'Los Angeles',
-                quote: [
-                    'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
-                    'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.'
-                ]
-            },
-            {
-                name: 'AMANDA CLARK',
-                location: 'Miami',
-                quote: [
-                    'Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.',
-                    'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.'
-                ]
-            }
-        ];
-        var vsTestiIndex = 0;
-
-        window.vsGoToTesti = function(idx) {
-            vsTestiIndex = (idx + vsTestimonials.length) % vsTestimonials.length;
-            var t = vsTestimonials[vsTestiIndex];
-            document.getElementById('testi-name').textContent = t.name;
-            document.getElementById('testi-location').textContent = t.location;
-            document.getElementById('testi-quote').innerHTML = t.quote.map(function(p) { return '<p>' + p + '</p>'; }).join('');
-            
-            document.querySelectorAll('[data-testi-avatar]').forEach(function(btn) {
-                var isActive = Number(btn.getAttribute('data-testi-avatar')) === vsTestiIndex;
-                if (isActive) {
-                    btn.className = 'relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer transition-all duration-300 outline-none';
-                } else {
-                    btn.className = 'relative w-[64px] h-[64px] rounded-full p-0 cursor-pointer opacity-40 scale-[0.85] transition-all duration-300 outline-none';
-                }
-            });
-            
-            document.querySelectorAll('[data-testi-badge]').forEach(function(badge) {
-                var isActive = Number(badge.getAttribute('data-testi-badge')) === vsTestiIndex;
-                if (isActive) {
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
-            });
-        };
-        window.vsTestiPrev = function() { vsGoToTesti(vsTestiIndex - 1); };
-        window.vsTestiNext = function() { vsGoToTesti(vsTestiIndex + 1); };
-    })();
-</script>
-
-<!-- Footer -->
-<footer class="bg-on-background dark:bg-surface-container-lowest grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop py-16 w-full text-white flat no shadows scroll-reveal reveal-fade">
-<div>
-<h4 class="font-headline-sm text-headline-sm text-primary-fixed uppercase mb-6">CHÀO MỪNG ĐẾN V-SPORT</h4>
-<p class="font-body-md text-body-md text-secondary-fixed-dim">Hệ thống đặt sân thể thao hàng đầu Việt Nam. Nhanh chóng, tin cậy và tiện lợi.</p>
-</div>
-<div>
-<h4 class="font-headline-sm text-headline-sm text-primary-fixed uppercase mb-6">VĂN PHÒNG</h4>
-<address class="font-body-md text-body-md text-secondary-fixed-dim not-italic space-y-2">
-<p>Việt Nam</p>
-<p>123 Nguyễn Trãi, Quận 1,</p>
-<p>TP. Hồ Chí Minh</p>
-<a class="block text-white hover:text-primary-fixed transition-colors mt-4" href="mailto:support@vsport.vn">support@vsport.vn</a>
-<p class="text-white font-bold mt-2">1900 1234</p>
-</address>
-</div>
-<div>
-<h4 class="font-headline-sm text-headline-sm text-primary-fixed uppercase mb-6">LIÊN KẾT</h4>
-<ul class="font-body-md text-body-md text-secondary-fixed-dim space-y-2">
-<li><a class="hover:text-primary-fixed transition-colors" href="<%= ctx %>/index.jsp">Trang Chủ</a></li>
-<li><a class="hover:text-primary-fixed transition-colors" href="#">Giới Thiệu</a></li>
-<li><a class="hover:text-primary-fixed transition-colors" href="#">Tin Tức</a></li>
-<li><a class="hover:text-primary-fixed transition-colors" href="<%= ctx %>/customer/dat-san">Tìm Sân</a></li>
-<li><a class="hover:text-primary-fixed transition-colors" href="#">Liên Hệ</a></li>
-</ul>
-</div>
-<div>
-<h4 class="font-headline-sm text-headline-sm text-primary-fixed uppercase mb-6">KẾT NỐI</h4>
-<ul class="font-body-md text-body-md text-secondary-fixed-dim space-y-2">
-<li><a class="hover:text-primary-fixed transition-colors flex items-center gap-2" href="#"><span class="w-4">f</span> Facebook</a></li>
-<li><a class="hover:text-primary-fixed transition-colors flex items-center gap-2" href="#"><span class="w-4">𝕏</span> Twitter</a></li>
-<li><a class="hover:text-primary-fixed transition-colors flex items-center gap-2" href="#"><span class="w-4">▶</span> YouTube</a></li>
-<li><a class="hover:text-primary-fixed transition-colors flex items-center gap-2" href="#"><span class="w-4">In</span> Instagram</a></li>
-</ul>
-</div>
-<div class="col-span-1 md:col-span-4 border-t border-white/10 mt-12 pt-8 flex justify-between items-center text-sm text-secondary-fixed-dim">
-<p>V-SPORT © 2025. Bản quyền thuộc về V-SPORT Việt Nam.</p>
-<button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="w-10 h-10 border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined">arrow_upward</span>
-</button>
-</div>
-</footer>
-
-<script>
-    window.handleUserClick = function(btn) {
-        const isLoggedIn = <%= isLoggedIn ? "true" : "false" %>;
-        if (isLoggedIn) {
-            const userDropdown = document.getElementById('user-profile-dropdown');
-            if (userDropdown) {
-                userDropdown.classList.toggle('opacity-0');
-                userDropdown.classList.toggle('invisible');
-                const isOpen = !userDropdown.classList.contains('invisible');
-                btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            }
-        } else {
-            openAuthModal('login', btn);
-        }
-    };
-
-    // Close dropdown on outside click
-    document.addEventListener('click', (e) => {
-        const userDropdown = document.getElementById('user-profile-dropdown');
-        const userBtn = document.getElementById('header-user-btn');
-        if (userDropdown && userBtn && !userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
-            userDropdown.classList.add('opacity-0', 'invisible');
-            userBtn.setAttribute('aria-expanded', 'false');
-        }
-    });
-
-    // Close dropdown on Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const userDropdown = document.getElementById('user-profile-dropdown');
-            const userBtn = document.getElementById('header-user-btn');
-            if (userDropdown) {
-                userDropdown.classList.add('opacity-0', 'invisible');
-            }
-            if (userBtn) {
-                userBtn.setAttribute('aria-expanded', 'false');
-            }
-        }
-    });
-</script>
-
-<!-- Right Sidebar Drawer (Offcanvas Menu) -->
-<div id="side-drawer" class="side-drawer">
-    <div class="side-drawer-overlay" onclick="closeSideDrawer()"></div>
-    <div class="side-drawer-content">
-        <!-- Close button & Logo -->
-        <div class="side-drawer-header">
-            <a href="<%= ctx %>/index.jsp" class="side-drawer-logo flex items-center gap-2">
-                <img alt="V-SPORT Logo" style="height: 36px; border-radius: 4px;" src="<%= ctx %>/resources/logo.png"/>
-                <span class="font-['Poppins'] font-bold text-xl uppercase text-[#111827] tracking-tight">V-SPORT<span class="text-[#afd639]">.</span></span>
+        <!-- Section Title -->
+        <div class="flex items-center justify-between mb-2.5 select-none">
+            <h2 class="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-700 text-[18px]">stars</span>
+                Cơ sở nổi bật
+            </h2>
+            <a href="<%= ctx %>/customer/dat-san" class="text-xs font-bold text-emerald-700 hover:underline">
+                Xem tất cả &rarr;
             </a>
-            <button class="side-drawer-close" onclick="closeSideDrawer()">&times;</button>
         </div>
 
-        <!-- User Profile Section -->
-        <div class="side-drawer-section user-section">
-            <% if (isLoggedIn) { %>
-                <div class="drawer-user-info">
-                    <div class="avatar-circle">
-                        <%= avatarCharSafe %>
+        <!-- High-density dynamic grid of facilities (matches reference mockup cards) -->
+        <div id="facilityGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <% if (dsCoSo != null && !dsCoSo.isEmpty()) {
+                for (CoSo cs : dsCoSo) {
+                    String csImg = cs.getHinhAnh() != null ? cs.getHinhAnh().trim() : "";
+                    String csOpen = cs.getGioMoCua() != null ? cs.getGioMoCua().toString().substring(0,5) : "06:00";
+                    String csClose = cs.getGioDongCua() != null ? cs.getGioDongCua().toString().substring(0,5) : "23:00";
+                    String businessType = cs.getLoaiHinhKinhDoanh() != null ? cs.getLoaiHinhKinhDoanh() : "";
+                    String csName = cs.getTenCoSo() != null ? cs.getTenCoSo() : "";
+                    String csNameSafe = csName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+                    String csAddr = cs.getDiaChi() != null ? cs.getDiaChi() : "";
+                    String csAddrSafe = csAddr.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+
+                    // Deterministic per-sport fallback image (never one repeated photo for everything).
+                    String sportsLower = businessType.toLowerCase();
+                    String fbImg = "hero-sports-facility.webp";
+                    if (sportsLower.contains("bóng đá") || sportsLower.contains("bong da")) fbImg = "sport-football.webp";
+                    else if (sportsLower.contains("cầu lông") || sportsLower.contains("cau long")) fbImg = "sport-badminton.webp";
+                    else if (sportsLower.contains("pickle")) fbImg = "sport-pickleball.webp";
+                    else if (sportsLower.contains("tennis")) fbImg = "sport-tennis.webp";
+                    else if (sportsLower.contains("bóng bàn") || sportsLower.contains("bong ban")) fbImg = "sport-tabletennis.webp";
+                    else if (sportsLower.contains("gym") || sportsLower.contains("fitness")) fbImg = "sport-gym.webp";
+                    String fbImgUrl = ctx + "/assets/images/home/" + fbImg;
+
+                    // Resolve the card image server-side: remote URLs pass through (client
+                    // onerror still guards them); local paths are checked on disk so a
+                    // missing upload never produces a 404 -> blank image.
+                    String cardImgUrl = fbImgUrl;
+                    if (csImg.startsWith("http")) {
+                        cardImgUrl = csImg;
+                    } else if (csImg.contains("/")) {
+                        String rel = csImg.startsWith("/") ? csImg : "/" + csImg;
+                        String realPath = application.getRealPath(rel);
+                        if (realPath != null && new java.io.File(realPath).isFile()) {
+                            cardImgUrl = ctx + rel;
+                        }
+                    }
+
+                    // First sport for the image badge (real data only; no badge when unset).
+                    String firstSport = businessType.contains(",") ? businessType.substring(0, businessType.indexOf(',')).trim() : businessType.trim();
+                    String firstSportSafe = firstSport.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+            %>
+                <div class="facility-card vs-card overflow-hidden group flex flex-col relative bg-white border border-gray-100 hover:shadow-md transition-shadow duration-300"
+                     data-name="<%= csName.toLowerCase() %>"
+                     data-address="<%= csAddr.toLowerCase() %>"
+                     data-sport="<%= sportsLower %>">
+
+                    <!-- Top Image & Badges/Overlay -->
+                    <div class="relative w-full h-[122px] overflow-hidden bg-gray-100 shrink-0">
+                        <img class="w-full h-full object-cover img-ken-burns"
+                             src="<%= cardImgUrl %>"
+                             onerror="this.onerror=null;this.src='<%= fbImgUrl %>';"
+                             alt="<%= csNameSafe %>" />
+                        <!-- Badges (real data only) -->
+                        <div class="absolute top-1.5 left-1.5 flex gap-1 z-10">
+                            <span class="text-[10px] font-bold text-white bg-emerald-600 px-2 py-0.5 rounded shadow-sm">Đơn ngày</span>
+                            <% if (!firstSport.isEmpty()) { %>
+                                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50/95 px-2 py-0.5 rounded shadow-sm"><%= firstSportSafe %></span>
+                            <% } %>
+                        </div>
+                        <!-- Favorite & Share floating shortcuts -->
+                        <div class="absolute top-1.5 right-1.5 flex gap-1 z-10">
+                            <button onclick="toggleFavorite('<%= cs.getCoSoID() %>', this)" aria-label="Lưu cơ sở yêu thích" title="Yêu thích" class="w-7 h-7 bg-white/95 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-colors border-none cursor-pointer">
+                                <span class="material-symbols-outlined text-[15px]" aria-hidden="true">favorite</span>
+                            </button>
+                            <button onclick="shareFacility('<%= csNameSafe %>', '<%= cs.getCoSoID() %>')" aria-label="Chia sẻ cơ sở" title="Chia sẻ" class="w-7 h-7 bg-white/95 rounded-full flex items-center justify-center text-gray-400 hover:text-emerald-700 shadow-sm transition-colors border-none cursor-pointer">
+                                <span class="material-symbols-outlined text-[15px]" aria-hidden="true">share</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="user-details">
-                        <p class="user-name"><%= displayNameSafe %></p>
-                        <p class="user-role">Thành viên</p>
+
+                    <!-- Information Content -->
+                    <div class="px-3 py-2.5 flex gap-2.5 items-start">
+                        <!-- Facility Sport Icon -->
+                        <div class="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shrink-0 select-none mt-0.5">
+                            <span class="material-symbols-outlined text-[17px]" aria-hidden="true">sports_tennis</span>
+                        </div>
+
+                        <!-- Texts block -->
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-gray-900 text-[14px] leading-snug truncate group-hover:text-emerald-700 transition-colors" title="<%= csNameSafe %>">
+                                <%= csNameSafe %>
+                            </h3>
+                            <p class="text-[12px] text-gray-500 truncate mt-0.5 flex items-center gap-1" title="<%= csAddrSafe %>">
+                                <span class="material-symbols-outlined text-[13px] text-emerald-600 shrink-0" aria-hidden="true">location_on</span>
+                                <span class="truncate"><%= csAddr.isEmpty() ? "Chưa cập nhật" : csAddrSafe %></span>
+                            </p>
+                            <p class="text-[12px] text-gray-500 mt-0.5 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px] text-emerald-600" aria-hidden="true">schedule</span>
+                                <span><%= csOpen %> - <%= csClose %></span>
+                            </p>
+                        </div>
+
+                        <!-- Booking trigger CTA button (positioned to the right) -->
+                        <div class="shrink-0 self-center">
+                            <a href="<%= ctx %>/customer/dat-san?facilityId=<%= cs.getCoSoID() %>" aria-label="Đặt lịch tại <%= csNameSafe %>" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 text-[11.5px] font-extrabold px-3 py-2 rounded-md tracking-wide transition-colors shadow-sm whitespace-nowrap text-decoration-none">
+                                ĐẶT LỊCH
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="drawer-user-actions">
-                    <a href="<%= ctx %>/customer/tai-khoan" class="btn-drawer-action"><i class="fa-regular fa-user"></i> Chỉnh sửa Profile</a>
-                    <a href="<%= ctx %>/customer/dat-san?openHistory=true" class="btn-drawer-action"><i class="fa-regular fa-calendar-check"></i> Lịch sử đặt sân</a>
-                </div>
-            <% } else { %>
-                <div class="drawer-guest-info">
-                    <p class="guest-msg">Đăng nhập để xem lịch sử đặt sân và quản lý hồ sơ của bạn.</p>
-                    <button class="btn-drawer-login" onclick="closeSideDrawer(); openAuthModal('login')">Đăng Nhập Ngay</button>
+            <% }
+            } else { %>
+                <div class="col-span-full py-14 text-center">
+                    <span class="material-symbols-outlined text-[48px] text-gray-300 block mb-3">domain_disabled</span>
+                    <p class="text-sm text-gray-400 font-semibold">Chưa có cơ sở nào được thiết lập.</p>
                 </div>
             <% } %>
         </div>
 
-        <!-- Navigation Menu -->
-        <div class="side-drawer-section links-section">
-            <h4 class="section-title">TIỆN ÍCH HỆ THỐNG</h4>
-            <a href="<%= ctx %>/index.jsp" class="drawer-link"><i class="fa-solid fa-house"></i> Trang Chủ</a>
-            <a href="<%= ctx %>/customer/dat-san" class="drawer-link"><i class="fa-solid fa-calendar-days"></i> Tìm Sân Đặt Lịch</a>
-            <a href="<%= ctx %>/index.jsp#pricing" class="drawer-link"><i class="fa-solid fa-tags"></i> Bảng Giá Dịch Vụ</a>
-        </div>
+    </main>
 
-        <!-- Support Channels (Zalo & Messenger) -->
-        <div class="side-drawer-section support-section">
-            <h4 class="section-title">HỖ TRỢ TRỰC TUYẾN</h4>
-            <div class="support-channels">
-                <a href="https://zalo.me/0987654321" target="_blank" class="channel-btn zalo-btn">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" class="channel-icon" />
-                    <span>Hỗ trợ qua Zalo</span>
-                </a>
-                <a href="https://m.me/vsport" target="_blank" class="channel-btn messenger-btn">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Facebook_Messenger_logo_2020.svg" alt="Messenger" class="channel-icon" />
-                    <span>Hỗ trợ qua Messenger</span>
-                </a>
-            </div>
-        </div>
+    <!-- Navigation Modals and Toasts (Self-contained) -->
+    <div id="vsHomeToast" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:calc(var(--vs-bottomnav-h, 62px) + 26px);transform:translateX(-50%) translateY(12px);z-index:1300;background:#0f172a;color:#fff;padding:10px 16px;border-radius:9999px;font-size:13px;font-weight:600;opacity:0;visibility:hidden;transition:opacity .2s ease,transform .2s ease;box-shadow:0 6px 18px rgba(15,23,42,.25);"></div>
 
-        <!-- Footer / Contact Info -->
-        <div class="side-drawer-footer">
-            <div class="contact-item">
-                <span class="label">Hotline hỗ trợ:</span>
-                <span class="value">1900 1234</span>
-            </div>
-            <div class="contact-item">
-                <span class="label">Email liên hệ:</span>
-                <span class="value">support@vsport.vn</span>
-            </div>
-        </div>
-    </div>
-</div>
+    <jsp:include page="/auth/AuthModal.jsp" />
+    <jsp:include page="/customer/common/bottom-nav.jsp" />
 
-<script>
-    window.openSideDrawer = function() {
-        const drawer = document.getElementById('side-drawer');
-        if (drawer) drawer.classList.add('open');
-    };
-    window.closeSideDrawer = function() {
-        const drawer = document.getElementById('side-drawer');
-        if (drawer) drawer.classList.remove('open');
-    };
-</script>
+    <script>
+        // Set dynamic date in header
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
+            const today = new Date().toLocaleDateString('vi-VN', dateOptions);
+            const formattedDate = today.charAt(0).toUpperCase() + today.slice(1);
+            const dateEl = document.getElementById('current-date-el');
+            if (dateEl) {
+                dateEl.textContent = formattedDate;
+            }
+        });
 
-<jsp:include page="/auth/AuthModal.jsp" />
+        // Redirect tune filter to main search page
+        function redirectToBookingSearch() {
+            window.location.href = "<%= ctx %>/customer/dat-san";
+        }
 
-<!-- Scroll reveal Javascript observer initialization -->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const reveals = document.querySelectorAll(".scroll-reveal");
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("reveal-visible");
-                    observer.unobserve(entry.target);
+        // Show generic home toast
+        let vsHomeToastTimer = null;
+        function showHomeToast(msg) {
+            const toast = document.getElementById('vsHomeToast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            toast.style.visibility = 'visible';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            clearTimeout(vsHomeToastTimer);
+            vsHomeToastTimer = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(12px)';
+                setTimeout(() => { toast.style.visibility = 'hidden'; }, 220);
+            }, 2000);
+        }
+
+        // Toast triggers
+        function showFavoriteToast() {
+            showHomeToast("Danh sách yêu thích sẽ được cập nhật trong phiên bản tới");
+        }
+
+        function toggleFavorite(id, btn) {
+            event.stopPropagation();
+            const iconEl = btn.querySelector('.material-symbols-outlined');
+            if (iconEl.classList.contains('fill-current')) {
+                iconEl.classList.remove('fill-current');
+                btn.classList.add('text-gray-400');
+                btn.classList.remove('text-red-500');
+                showHomeToast("Đã bỏ lưu cơ sở");
+            } else {
+                iconEl.classList.add('fill-current');
+                btn.classList.remove('text-gray-400');
+                btn.classList.add('text-red-500');
+                showHomeToast("Đã thêm vào danh sách yêu thích");
+            }
+        }
+
+        function shareFacility(name, id) {
+            event.stopPropagation();
+            if (navigator.clipboard) {
+                const url = window.location.origin + "<%= ctx %>/customer/dat-san?facilityId=" + id;
+                navigator.clipboard.writeText(url).then(() => {
+                    showHomeToast("Đã sao chép liên kết chia sẻ cơ sở " + name);
+                }).catch(() => {
+                    showHomeToast("Không thể sao chép liên kết");
+                });
+            } else {
+                showHomeToast("Trình duyệt không hỗ trợ sao chép liên kết");
+            }
+        }
+
+        // Client-side instant search
+        function searchFacilities() {
+            const query = document.getElementById('facilitySearchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.facility-card');
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const address = card.getAttribute('data-address');
+                const sport = card.getAttribute('data-sport');
+                if (name.includes(query) || address.includes(query) || sport.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
                 }
             });
-        }, {
-            threshold: 0.02, // trigger when 2% of the element is visible for snappier responses
-            rootMargin: "0px 0px -10px 0px"
-        });
-        
-        reveals.forEach(reveal => {
-            observer.observe(reveal);
-        });
-    });
-</script>
+        }
+
+        // Client-side sport chips filtering
+        function filterBySport(sport, btn) {
+            const chips = btn.parentElement.querySelectorAll('.vs-chip');
+            chips.forEach(c => c.classList.remove('is-active'));
+            btn.classList.add('is-active');
+
+            const cards = document.querySelectorAll('.facility-card');
+            cards.forEach(card => {
+                const sportData = card.getAttribute('data-sport');
+                if (sport === 'all' || sportData.includes(sport.toLowerCase())) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

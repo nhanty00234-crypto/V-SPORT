@@ -6,6 +6,7 @@
 <head>
     <title>${san.tenSan} - V-SPORT</title>
     <jsp:include page="/common/head.jsp" />
+    <jsp:include page="/customer/common/vsport-theme.jsp" />
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -650,5 +651,6 @@
         document.addEventListener("touchmove",  onDocPointerMove, { passive: false });
         document.addEventListener("touchend",   onDocPointerUp);
     </script>
+<jsp:include page="/customer/common/bottom-nav.jsp" />
 </body>
 </html>

@@ -11,24 +11,49 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <jsp:include page="/common/head.jsp" />
+    <jsp:include page="/customer/common/vsport-theme.jsp" />
     <style>
         /* Ghi đè triệt để màu nền ấm (beige) và màu chữ mặc định từ head.jsp */
-        body { 
+        body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-            background-color: #f8fafc !important; /* Force slate-50 background */
-            color: #0f172a !important; /* Force slate-900 text */
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
         }
         .premium-card {
             background: #ffffff;
-            border: 1px solid #f1f5f9;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
         }
-        .history-mobile-card {
-            background: #ffffff;
-            border: 1px solid #f1f5f9;
-            border-radius: 18px;
-            padding: 16px;
+        .hs-hero {
+            position: relative; overflow: hidden; color: #fff; border-radius: 20px;
+            background: linear-gradient(135deg, #065f46 0%, #0f766e 55%, #047857 100%);
+        }
+        .hs-hero::after {
+            content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(255,255,255,.14), transparent 68%); pointer-events: none;
+        }
+        .hs-filter-chip {
+            display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:9999px;
+            font-size:12.5px; font-weight:700; color:#475569; background:#fff; border:1px solid #e2e8f0;
+            cursor:pointer; white-space:nowrap; transition:all .15s ease;
+        }
+        .hs-filter-chip:hover { border-color:#5eead4; color:#0f172a; }
+        .hs-filter-chip.is-active { background:#047857; border-color:#047857; color:#fff; }
+
+        /* Booking card: one responsive layout, no table, no horizontal overflow */
+        .hs-card {
+            background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:16px 18px;
+            display:flex; flex-direction:column; gap:12px; transition: border-color .15s ease;
+        }
+        .hs-card:hover { border-color:#a7f3d0; }
+        .hs-card-top { display:flex; items-align:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+        .hs-badge { display:inline-block; padding:3px 10px; border-radius:8px; font-size:10.5px; font-weight:800; white-space:nowrap; }
+        .hs-meta { display:flex; flex-wrap:wrap; gap-column: 14px; gap:6px 14px; font-size:12.5px; color:#475569; font-weight:600; }
+        .hs-meta .material-symbols-outlined { font-size:15px; color:#94a3b8; vertical-align:-3px; margin-right:3px; }
+        .hs-actions { display:flex; flex-wrap:wrap; gap:8px; padding-top:10px; border-top:1px dashed #e2e8f0; }
+        .hs-action-btn {
+            display:inline-flex; align-items:center; gap:5px; padding:7px 13px; border-radius:9px;
+            font-size:11.5px; font-weight:700; transition:all .15s ease; white-space:nowrap;
         }
     </style>
 </head>
@@ -38,40 +63,43 @@
     <jsp:include page="/common/header.jsp" />
 
     <!-- Main Content Area -->
-    <main class="flex-grow pt-[120px] pb-24">
-        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- 1. Green Hero Banner matching DatSan.jsp -->
-            <div class="mb-10 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden animate-fade-in-up">
-                <!-- Decorative background elements -->
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                <div class="absolute -left-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                
+    <main class="flex-grow pt-20 md:pt-24 pb-10">
+        <div class="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Breadcrumb -->
+            <nav class="text-xs text-slate-500 mb-3 flex items-center gap-1.5" aria-label="Breadcrumb">
+                <a href="${pageContext.request.contextPath}/index.jsp" class="hover:text-emerald-600 transition-colors">Trang chủ</a>
+                <span class="material-symbols-outlined text-[13px] text-slate-300">chevron_right</span>
+                <span class="text-slate-700 font-semibold">Lịch sử đặt sân</span>
+            </nav>
+
+            <!-- Hero -->
+            <div class="hs-hero mb-5 p-5 sm:p-7">
                 <div class="relative z-10 max-w-2xl">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-md">
-                        <i class="fa-solid fa-clock-rotate-left"></i> Hoạt động của bạn
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/25 text-[11px] font-bold uppercase tracking-wider mb-3">
+                        <span class="material-symbols-outlined text-[14px]">history</span> Hoạt động của bạn
                     </span>
-                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">Lịch Sử Đặt Sân</h1>
-                    <p class="text-white/80 text-sm sm:text-base leading-relaxed">
-                        Theo dõi danh sách ca chơi, quản lý các yêu cầu đặt sân trực tuyến và kiểm tra trạng thái duyệt lịch của bạn.
+                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-2">Lịch sử đặt sân</h1>
+                    <p class="text-white/80 text-xs sm:text-sm leading-relaxed">
+                        Theo dõi các đơn đặt sân, trạng thái duyệt lịch và tác động điểm uy tín của bạn.
                     </p>
                 </div>
             </div>
 
             <!-- Success Alert Message -->
             <c:if test="${not empty sessionScope.message}">
-                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-xs font-bold flex items-center gap-3 shadow-sm max-w-xl animate-fade-in-up">
+                <div class="mb-5 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-xs font-bold flex items-center gap-3 shadow-sm animate-fade-in-up">
                     <span class="material-symbols-outlined text-emerald-600 text-[20px]">check_circle</span>
                     <span>${sessionScope.message}</span>
                     <% session.removeAttribute("message"); %>
                 </div>
             </c:if>
 
-            <!-- 2. Responsive 2-Column Dashboard Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                
-                <!-- Sidebar: User Stats & Quick Links (1 Column) -->
-                <div class="lg:col-span-1 space-y-6">
+            <!-- Responsive layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+
+                <!-- Sidebar: User Stats & Quick Links -->
+                <div class="lg:col-span-1 space-y-5 lg:sticky lg:top-24 lg:self-start">
                     <div class="premium-card p-6 flex flex-col items-center text-center">
                         <!-- User Initial Avatar -->
                         <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-extrabold text-2xl shadow-inner mb-4">
@@ -86,11 +114,11 @@
                         </div>
                         <h3 class="font-extrabold text-slate-800 text-base leading-tight">${user.fullName}</h3>
                         <p class="text-slate-450 text-xs mt-1 font-medium">${user.email}</p>
-                        
+
                         <div class="w-full border-t border-slate-100 my-5"></div>
-                        
+
                         <!-- Simple stats -->
-                        <div class="w-full grid grid-cols-2 gap-4">
+                        <div class="w-full grid grid-cols-2 gap-3">
                             <div class="text-center bg-slate-50 rounded-xl p-3 border border-slate-100">
                                 <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">Đặt Sân</span>
                                 <span class="text-lg font-black text-emerald-600 mt-1 block">${dsLich.size()}</span>
@@ -120,161 +148,160 @@
                     </div>
                 </div>
 
-                <!-- Main Content: History Table Card (3 Columns) -->
+                <!-- Main Content: booking cards -->
                 <div class="lg:col-span-3">
-                    <div class="premium-card p-6 overflow-hidden">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                            <h2 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                                <span class="material-symbols-outlined text-emerald-600 text-[20px]">calendar_month</span>
-                                Danh sách đơn đặt sân hôm nay & trước đó
-                            </h2>
-                            <div class="relative w-full sm:max-w-xs">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-slate-400">search</span>
-                                <input type="search" id="historySearchInput" autocomplete="off" placeholder="Tìm kiếm theo mã, tên sân..." 
-                                       class="h-9 w-full pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all">
+                    <div class="premium-card p-5 sm:p-6">
+                        <div class="flex flex-col gap-4 mb-5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <h2 class="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-emerald-600 text-[19px]">calendar_month</span>
+                                    Danh sách đơn đặt sân
+                                </h2>
+                                <div class="relative w-full sm:max-w-xs">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-slate-400">search</span>
+                                    <input type="search" id="historySearchInput" autocomplete="off" placeholder="Tìm theo mã, tên sân..."
+                                           class="h-9 w-full pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all">
+                                </div>
+                            </div>
+                            <!-- Status filter chips (client-side, layered on top of existing search/pagination) -->
+                            <div class="flex items-center gap-2 overflow-x-auto pb-1" id="historyStatusChips">
+                                <button type="button" class="hs-filter-chip is-active" data-status-filter="all">Tất cả</button>
+                                <button type="button" class="hs-filter-chip" data-status-filter="upcoming">Sắp tới</button>
+                                <button type="button" class="hs-filter-chip" data-status-filter="completed">Đã hoàn thành</button>
+                                <button type="button" class="hs-filter-chip" data-status-filter="cancelled">Đã hủy / Không đến</button>
                             </div>
                         </div>
-                        
-                        <div class="overflow-x-auto rounded-2xl border border-slate-100">
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-500 font-bold">
-                                        <th class="p-4">Sân & Địa điểm</th>
-                                        <th class="p-4 text-center">Thời gian thi đấu</th>
-                                        <th class="p-4 text-right">Chi phí</th>
-                                        <th class="p-4 text-center">Trạng thái</th>
-                                        <th class="p-4 text-center">Tác động uy tín</th>
-                                        <th class="p-4 text-center">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody" class="divide-y divide-slate-100 bg-white">
-                                    <c:forEach var="lich" items="${dsLich}">
-                                        <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
-                                        <c:set var="branchHienThi" value="" />
-                                        <c:forEach var="s" items="${dsSan}">
-                                            <c:if test="${s.sanID == lich.sanId}">
-                                                <c:set var="tenSanHienThi" value="${s.tenSan}" />
-                                                <c:forEach var="cs" items="${dsCoSo}">
-                                                    <c:if test="${cs.coSoID == s.coSoID}">
-                                                        <c:set var="branchHienThi" value="${cs.tenCoSo}" />
-                                                    </c:if>
-                                                </c:forEach>
+
+                        <div id="historyTableBody" class="flex flex-col gap-3">
+                            <c:forEach var="lich" items="${dsLich}">
+                                <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
+                                <c:set var="branchHienThi" value="" />
+                                <c:forEach var="s" items="${dsSan}">
+                                    <c:if test="${s.sanID == lich.sanId}">
+                                        <c:set var="tenSanHienThi" value="${s.tenSan}" />
+                                        <c:forEach var="cs" items="${dsCoSo}">
+                                            <c:if test="${cs.coSoID == s.coSoID}">
+                                                <c:set var="branchHienThi" value="${cs.tenCoSo}" />
                                             </c:if>
                                         </c:forEach>
+                                    </c:if>
+                                </c:forEach>
 
-                                        <tr class="hover:bg-slate-50/30 transition-colors history-row">
-                                            <td class="p-4">
-                                                <div class="flex flex-col gap-0.5">
-                                                    <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
-                                                    <span class="text-[10px] text-slate-450 font-bold flex items-center gap-1">
-                                                        <c:if test="${not empty branchHienThi}">
-                                                            <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span>
-                                                            ${branchHienThi} &middot;
-                                                        </c:if>
-                                                        Mã: #${lich.datSanId}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td class="p-4 text-center">
-                                                <div class="flex flex-col gap-0.5">
-                                                    <span class="font-bold text-slate-700">${lich.ngayDat}</span>
-                                                    <span class="text-xs text-emerald-600 font-extrabold font-mono">${lich.gioBatDau.toString().substring(0,5)} — ${lich.gioKetThuc.toString().substring(0,5)}</span>
-                                                </div>
-                                            </td>
-                                            <td class="p-4 text-right font-extrabold text-slate-900 text-sm">
-                                                <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
-                                            </td>
-                                            <td class="p-4 text-center">
+                                <c:set var="hsStatusGroup" value="other" />
+                                <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt' || lich.trangThai == 'Đang sử dụng'}"><c:set var="hsStatusGroup" value="upcoming" /></c:if>
+                                <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><c:set var="hsStatusGroup" value="completed" /></c:if>
+                                <c:if test="${lich.trangThai == 'Đã hủy' || lich.trangThai == 'Không đến'}"><c:set var="hsStatusGroup" value="cancelled" /></c:if>
+
+                                <div class="hs-card history-row" data-status-group="${hsStatusGroup}">
+                                    <div class="hs-card-top">
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                                <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
                                                 <c:choose>
                                                     <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
-                                                        <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Chờ duyệt</span>
+                                                        <span class="hs-badge bg-amber-50 text-amber-700 border border-amber-200">Chờ duyệt</span>
                                                     </c:when>
                                                     <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
-                                                        <span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã duyệt</span>
+                                                        <span class="hs-badge bg-green-50 text-green-700 border border-green-200">Đã duyệt</span>
                                                     </c:when>
                                                     <c:when test="${lich.trangThai == 'Đang sử dụng'}">
-                                                        <span class="bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đang đá</span>
+                                                        <span class="hs-badge bg-purple-50 text-purple-700 border border-purple-200">Đang đá</span>
                                                     </c:when>
                                                     <c:when test="${lich.trangThai == 'Đã hủy'}">
-                                                        <span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Đã hủy</span>
+                                                        <span class="hs-badge bg-red-50 text-red-700 border border-red-200">Đã hủy</span>
                                                     </c:when>
                                                     <c:when test="${lich.trangThai == 'Không đến'}">
-                                                        <span class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Không đến</span>
+                                                        <span class="hs-badge bg-rose-50 text-rose-700 border border-rose-200">Không đến</span>
                                                     </c:when>
                                                     <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
-                                                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">Hoàn thành</span>
+                                                        <span class="hs-badge bg-emerald-50 text-emerald-700 border border-emerald-200">Hoàn thành</span>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <span class="bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold inline-block">${lich.trangThai}</span>
+                                                        <span class="hs-badge bg-slate-100 text-slate-500 border border-slate-200">${lich.trangThai}</span>
                                                     </c:otherwise>
                                                 </c:choose>
-                                            </td>
-                                            <td class="p-4 text-center">
-                                                <c:set var="repHist" value="${reputationByDatSanId[lich.datSanId]}" />
-                                                <c:choose>
-                                                    <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
-                                                        <span class="text-emerald-600 text-[10px] font-bold inline-flex items-center gap-1">
-                                                            <span class="material-symbols-outlined text-[13px]">add_circle</span> +Điểm uy tín
-                                                        </span>
-                                                    </c:when>
-                                                    <c:when test="${not empty repHist && repHist.actionType == 'LATE_CANCEL'}">
-                                                        <span class="text-amber-600 text-[10px] font-bold inline-flex items-center gap-1">
-                                                            <span class="material-symbols-outlined text-[13px]">warning</span> Hủy sát giờ (${repHist.scoreDelta} điểm)
-                                                        </span>
-                                                    </c:when>
-                                                    <c:when test="${not empty repHist && repHist.actionType == 'NO_SHOW'}">
-                                                        <span class="text-rose-600 text-[10px] font-bold inline-flex items-center gap-1">
-                                                            <span class="material-symbols-outlined text-[13px]">error</span> Không đến (${repHist.scoreDelta} điểm)
-                                                        </span>
-                                                    </c:when>
-                                                    <c:when test="${lich.trangThai == 'Đã hủy'}">
-                                                        <span class="text-slate-400 text-[10px] font-bold inline-flex items-center gap-1">
-                                                            <span class="material-symbols-outlined text-[13px]">check_circle</span> Hủy sớm, không trừ điểm
-                                                        </span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="text-slate-300 text-[10px]">&mdash;</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="p-4 text-center">
-                                                <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                                    <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
-                                                        <button type="button"
-                                                                onclick="openCancelBookingModal(${lich.datSanId}, '${lich.ngayDat}', '${lich.gioBatDau}')"
-                                                                class="px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-bold hover:bg-red-50 hover:border-red-300 transition-all active:scale-95 text-[10px]">
-                                                            Hủy
-                                                        </button>
-                                                    </c:if>
-                                                    <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
-                                                        <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-all active:scale-95 text-[10px]">
-                                                            Dịch vụ
-                                                        </button>
-                                                    </c:if>
-                                                    <c:if test="${lich.trangThai == 'Đã xác nhận'}">
-                                                        <button type="button" onclick="openUrgentOpponentModal()" class="px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 font-bold hover:bg-amber-100 transition-all active:scale-95 text-[10px] inline-flex items-center gap-1">
-                                                            <span class="material-symbols-outlined text-[13px]">bolt</span> Tìm đối thủ gấp
-                                                        </button>
-                                                    </c:if>
-                                                    <c:if test="${lich.trangThai == 'Đã hủy' || lich.trangThai == 'Không đến'}">
-                                                        <span class="text-slate-400 text-[10px] line-through">Không khả dụng</span>
-                                                    </c:if>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                    <c:if test="${empty dsLich}">
-                                        <tr>
-                                            <td colspan="6" class="p-16 text-center">
-                                                <span class="material-symbols-outlined text-[40px] text-slate-200 block mb-4">event_busy</span>
-                                                <p class="text-slate-400 text-[11px] font-extrabold uppercase tracking-widest">Chưa có dữ liệu lịch sử đặt sân</p>
-                                            </td>
-                                        </tr>
+                                            </div>
+                                            <div class="hs-meta">
+                                                <c:if test="${not empty branchHienThi}">
+                                                    <span><span class="material-symbols-outlined">location_on</span>${branchHienThi}</span>
+                                                </c:if>
+                                                <span><span class="material-symbols-outlined">tag</span>Mã #${lich.datSanId}</span>
+                                                <span><span class="material-symbols-outlined">calendar_month</span>${lich.ngayDat}</span>
+                                                <span class="text-emerald-700 font-mono"><span class="material-symbols-outlined">schedule</span>${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Tổng chi phí</p>
+                                            <p class="font-extrabold text-slate-900 text-base"><fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" /></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reputation impact -->
+                                    <c:set var="repHist" value="${reputationByDatSanId[lich.datSanId]}" />
+                                    <c:choose>
+                                        <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
+                                            <span class="text-emerald-600 text-[11px] font-bold inline-flex items-center gap-1 w-fit">
+                                                <span class="material-symbols-outlined text-[14px]">add_circle</span> Đã cộng điểm uy tín
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${not empty repHist && repHist.actionType == 'LATE_CANCEL'}">
+                                            <span class="text-amber-600 text-[11px] font-bold inline-flex items-center gap-1 w-fit">
+                                                <span class="material-symbols-outlined text-[14px]">warning</span> Hủy sát giờ &middot; ${repHist.scoreDelta} điểm uy tín
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${not empty repHist && repHist.actionType == 'NO_SHOW'}">
+                                            <span class="text-rose-600 text-[11px] font-bold inline-flex items-center gap-1 w-fit">
+                                                <span class="material-symbols-outlined text-[14px]">error</span> Không đến sân &middot; ${repHist.scoreDelta} điểm uy tín
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${lich.trangThai == 'Đã hủy'}">
+                                            <span class="text-slate-400 text-[11px] font-bold inline-flex items-center gap-1 w-fit">
+                                                <span class="material-symbols-outlined text-[14px]">check_circle</span> Hủy sớm, không trừ điểm
+                                            </span>
+                                        </c:when>
+                                    </c:choose>
+
+                                    <!-- Cancellation reason, when present -->
+                                    <c:if test="${(lich.trangThai == 'Đã hủy' || lich.trangThai == 'Không đến') && not empty lich.ghiChu}">
+                                        <p class="text-[11px] text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+                                            <span class="font-bold text-slate-600">Lý do:</span> ${fn:escapeXml(lich.ghiChu)}
+                                        </p>
                                     </c:if>
-                                </tbody>
-                            </table>
+
+                                    <!-- Actions -->
+                                    <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
+                                        <div class="hs-actions">
+                                            <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
+                                                <button type="button"
+                                                        onclick="openCancelBookingModal(${lich.datSanId}, '${lich.ngayDat}', '${lich.gioBatDau}')"
+                                                        class="hs-action-btn border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 active:scale-95">
+                                                    <span class="material-symbols-outlined text-[14px]">cancel</span> Hủy đặt sân
+                                                </button>
+                                            </c:if>
+                                            <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="hs-action-btn border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:scale-95">
+                                                <span class="material-symbols-outlined text-[14px]">coffee</span> Thêm dịch vụ
+                                            </button>
+                                            <c:if test="${lich.trangThai == 'Đã xác nhận'}">
+                                                <button type="button" onclick="openUrgentOpponentModal()" class="hs-action-btn border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 active:scale-95">
+                                                    <span class="material-symbols-outlined text-[14px]">bolt</span> Tìm người chơi gấp
+                                                </button>
+                                            </c:if>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:forEach>
+                            <c:if test="${empty dsLich}">
+                                <div class="p-14 text-center">
+                                    <span class="material-symbols-outlined text-[40px] text-slate-200 block mb-4">event_busy</span>
+                                    <p class="text-slate-400 text-[11px] font-extrabold uppercase tracking-widest">Chưa có dữ liệu lịch sử đặt sân</p>
+                                    <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn-primary inline-flex mt-5">
+                                        <span class="material-symbols-outlined text-[16px]">add</span> Đặt sân ngay
+                                    </a>
+                                </div>
+                            </c:if>
                         </div>
-                        <div id="historyPagination" class="hidden px-5 py-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-white/50 rounded-b-2xl">
+
+                        <div id="historyPagination" class="hidden px-1 pt-4 mt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                             <span id="historyPaginationInfo">Hiển thị...</span>
                             <div class="flex items-center gap-1" id="historyPaginationBtns"></div>
                         </div>
@@ -295,11 +322,12 @@
             navHistory.classList.add('active');
         }
 
-        // Pagination & Search script
+        // Search + status-filter + pagination script
         document.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('historyTableBody');
             const pagPanel = document.getElementById('historyPagination');
             const searchInput = document.getElementById('historySearchInput');
+            const statusChips = document.querySelectorAll('#historyStatusChips [data-status-filter]');
             if (!tableBody || !pagPanel) return;
 
             const rows = Array.from(tableBody.querySelectorAll('.history-row'));
@@ -307,6 +335,7 @@
 
             const pageSize = 5;
             let currentPage = 1;
+            let activeStatus = 'all';
 
             function applyFilters(resetPage = true) {
                 if (resetPage) {
@@ -317,7 +346,8 @@
 
                 rows.forEach(row => {
                     const text = row.innerText.toLowerCase();
-                    if (text.includes(searchValue)) {
+                    const statusOk = activeStatus === 'all' || row.getAttribute('data-status-group') === activeStatus;
+                    if (statusOk && text.includes(searchValue)) {
                         matchedRows.push(row);
                     } else {
                         row.style.display = 'none';
@@ -412,6 +442,15 @@
                 searchInput.addEventListener('input', () => applyFilters(true));
             }
 
+            statusChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    statusChips.forEach(c => c.classList.remove('is-active'));
+                    chip.classList.add('is-active');
+                    activeStatus = chip.getAttribute('data-status-filter');
+                    applyFilters(true);
+                });
+            });
+
             applyFilters(true);
         });
     </script>
@@ -427,22 +466,22 @@
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            
+
             <div class="p-6 md:p-8 max-h-[70vh] overflow-y-auto">
                 <form id="customer-service-form" action="${pageContext.request.contextPath}/customer/dat-dich-vu" method="post" class="space-y-6">
                     <input type="hidden" name="datSanId" id="customer-service-datsan-id">
-                    
+
                     <div id="customer-service-loading" class="text-center py-10 text-slate-500">
                         <span class="material-symbols-outlined animate-spin text-[32px] text-emerald-600 mb-2">sync</span>
                         <p class="text-sm font-medium">Đang tải danh sách dịch vụ...</p>
                     </div>
-                    
+
                     <div id="customer-service-container" class="hidden space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="customer-products-grid">
                             <!-- Populated dynamically via JS -->
                         </div>
                     </div>
-                    
+
                     <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase block">Tổng tiền dịch vụ thêm</span>
@@ -501,17 +540,17 @@
 
         function openCustomerServiceModal(datSanId) {
             document.getElementById("customer-service-datsan-id").value = datSanId;
-            
+
             const modal = document.getElementById("customerServiceModal");
             const loading = document.getElementById("customer-service-loading");
             const container = document.getElementById("customer-service-container");
             const grid = document.getElementById("customer-products-grid");
-            
+
             modal.classList.remove("hidden");
             modal.classList.add("flex");
             loading.classList.remove("hidden");
             container.classList.add("hidden");
-            
+
             setTimeout(() => {
                 modal.classList.remove("opacity-0");
                 modal.querySelector(".bg-white").classList.remove("scale-95");
@@ -523,10 +562,10 @@
                 .then(data => {
                     customerProducts = data.products || [];
                     customerOrdered = data.ordered || [];
-                    
+
                     loading.classList.add("hidden");
                     container.classList.remove("hidden");
-                    
+
                     grid.innerHTML = "";
                     if (customerProducts.length === 0) {
                         grid.innerHTML = `<div class="col-span-2 text-center text-slate-400 py-8 italic">Cơ sở này hiện không có sản phẩm/dịch vụ nào đang kinh doanh.</div>`;
@@ -536,7 +575,7 @@
                     customerProducts.forEach(prod => {
                         const ord = customerOrdered.find(o => o.SanPhamID === prod.SanPhamID);
                         const qty = ord ? ord.SoLuong : 0;
-                        
+
                         const itemHtml = `
                             <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm">
                                 <div class="flex-grow min-w-0 pr-4">
@@ -555,7 +594,7 @@
                         `;
                         grid.insertAdjacentHTML("beforeend", itemHtml);
                     });
-                    
+
                     recalculateCustomerTotal();
                 })
                 .catch(err => {
@@ -568,19 +607,19 @@
         function adjustCustomerQty(spId, delta) {
             const input = document.getElementById(`cust-qty-${spId}`);
             if (!input) return;
-            
+
             const prod = customerProducts.find(p => p.SanPhamID === spId);
             if (!prod) return;
-            
+
             let val = parseInt(input.value) || 0;
             val += delta;
-            
+
             if (val < 0) val = 0;
             if (val > prod.SoLuongTon) {
                 alert(`Không thể chọn vượt quá số lượng tồn kho (${prod.SoLuongTon})`);
                 val = prod.SoLuongTon;
             }
-            
+
             input.value = val;
             recalculateCustomerTotal();
         }
@@ -640,5 +679,6 @@
     </script>
 
     <jsp:include page="/customer/common/urgent-opponent-modal.jsp" />
+    <jsp:include page="/customer/common/bottom-nav.jsp" />
 </body>
 </html>

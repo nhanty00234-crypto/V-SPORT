@@ -41,7 +41,8 @@ public class DangNhapServlet extends HttpServlet {
             req.setAttribute("loi", "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
             req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
         } else {
-            resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login");
+            // Trang đăng nhập toàn màn hình (thay cho modal auth trên trang chủ).
+            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
         }
     }
 
