@@ -203,8 +203,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="acc-label">Cơ sở</label>
-                            <select class="acc-input">
+                            <label class="acc-label" for="gkCoSoSelect">Cơ sở</label>
+                            <select class="acc-input" id="gkCoSoSelect">
                                 <option value="">-- Chọn cơ sở --</option>
                                 <c:forEach var="cs" items="${dsCoSo}">
                                     <option value="${cs.coSoID}">${fn:escapeXml(cs.tenCoSo)}</option>
@@ -369,6 +369,20 @@
     });
 
     activateTab(initialTab);
+
+    // Pre-select cơ sở khi được điều hướng từ modal "Chọn hình thức đặt"
+    // ở trang chủ (?tab=tao-keo&coSoId=...). Chỉ nhận id có trong danh sách thật.
+    (function () {
+        var coSoParam = new URLSearchParams(window.location.search).get('coSoId');
+        var select = document.getElementById('gkCoSoSelect');
+        if (!coSoParam || !select) return;
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === coSoParam) {
+                select.value = coSoParam;
+                break;
+            }
+        }
+    })();
 
     function showToast(title, message) {
         var toast = document.getElementById('gkToast');

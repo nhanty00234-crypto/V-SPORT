@@ -38,7 +38,7 @@
 
         /* ---- shell heights ---- */
         --vs-bottomnav-h: 70px;
-        --vs-bottomnav-h-desktop: 84px;
+        --vs-bottomnav-h-desktop: 80px;
 
         /* Re-point the shared header's var-driven accent to V-SPORT green. */
         --primary: var(--vs-accent) !important;
@@ -136,6 +136,8 @@
         line-height: 1.15; border: none; background: transparent; cursor: pointer;
     }
     .vs-bn-item .vs-bn-ic { font-size: 24px; line-height: 1; }
+    /* Lucide inline SVG icons (bottom-nav.jsp) size via width/height, not font-size. */
+    svg.vs-bn-ic { width: 25px; height: 25px; flex-shrink: 0; }
     .vs-bn-item.is-active { color: var(--vs-primary); font-weight: 700; }
     .vs-bn-item.is-active .vs-bn-ic { color: var(--vs-primary); }
     .vs-bn-item:focus-visible { outline: 2px solid var(--vs-accent); outline-offset: -2px; border-radius: 6px; }
@@ -144,26 +146,29 @@
        only intensifies (darker border) when the route is actually active. */
     .vs-bn-center { position: relative; justify-content: flex-end; padding-bottom: 10px; }
     .vs-bn-fab {
-        position: absolute; top: -19px; left: 50%; transform: translateX(-50%);
-        width: 62px; height: 62px; border-radius: 50%;
+        position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+        width: 64px; height: 64px; border-radius: 50%;
         background: #fff; color: var(--vs-primary);
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.10);
+        box-shadow: 0 0 0 5px #edf9f3, 0 3px 10px rgba(15, 23, 42, 0.10);
         border: 2px solid var(--vs-primary);
     }
     .vs-bn-fab .vs-bn-ic { font-size: 27px; color: var(--vs-primary); }
+    .vs-bn-fab svg.vs-bn-ic { width: 28px; height: 28px; }
     .vs-bn-center .vs-bn-fablabel { font-size: 13px; font-weight: 500; color: #9a9a9a; line-height: 1.15; }
     .vs-bn-center.is-active .vs-bn-fab { border-color: var(--vs-primary-strong); border-width: 2.5px; }
     .vs-bn-center.is-active .vs-bn-fablabel { color: var(--vs-primary); font-weight: 700; }
 
-    /* Desktop: taller bar (84px envelope), larger circle, larger touch targets. */
+    /* Desktop: taller bar (80px envelope), larger circle, larger touch targets. */
     @media (min-width: 1024px) {
         .vs-bottomnav { height: var(--vs-bottomnav-h-desktop); }
         .vs-bn-item { font-size: 14px; gap: 6px; }
         .vs-bn-item .vs-bn-ic { font-size: 26px; }
-        .vs-bn-center { padding-bottom: 14px; }
-        .vs-bn-fab { width: 66px; height: 66px; top: -21px; }
+        svg.vs-bn-ic { width: 27px; height: 27px; }
+        .vs-bn-center { padding-bottom: 12px; }
+        .vs-bn-fab { width: 72px; height: 72px; top: -22px; }
         .vs-bn-fab .vs-bn-ic { font-size: 29px; }
+        .vs-bn-fab svg.vs-bn-ic { width: 31px; height: 31px; }
         .vs-bn-center .vs-bn-fablabel { font-size: 14px; }
     }
 </style>

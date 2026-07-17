@@ -15,12 +15,27 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
-@WebServlet("/dangnhap")
+@WebServlet({"/dangnhap", "/he-thong/dang-nhap"})
 public class DangNhapServlet extends HttpServlet {
 
     private static final Logger LOGGER = LogManager.getLogger(DangNhapServlet.class);
     private TaiKhoanDAO TaiKhoanDAO = new TaiKhoanDAOImpl();
     private final FacilityAccessService facilityAccessService = new FacilityAccessService();
+
+    /** Portal của request: theo route GET hoặc hidden input POST (allowlist, không cấp role). */
+    private String resolvePortal(HttpServletRequest req) {
+        if ("/he-thong/dang-nhap".equals(req.getServletPath())) {
+            return org.example.util.AuthPortalPolicy.PORTAL_INTERNAL;
+        }
+        return org.example.util.AuthPortalPolicy.parsePortal(req.getParameter("portal"));
+    }
+
+    /** JSP đăng nhập tương ứng với portal. */
+    private String loginJspFor(String portal) {
+        return org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(portal)
+                ? "/auth/DangNhapNoiBo.jsp"
+                : "/auth/DangNhap.jsp";
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -29,6 +44,9 @@ public class DangNhapServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/logout");
             return;
         }
+
+        String portal = resolvePortal(req);
+        req.setAttribute("portal", portal);
 
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
@@ -39,39 +57,80 @@ public class DangNhapServlet extends HttpServlet {
         } else if ("true".equals(req.getParameter("facilityInactive"))) {
             // ActiveFacilityFilter vừa invalidate session vì cơ sở của tài khoản đã ngừng hoạt động.
             req.setAttribute("loi", "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
-            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
         } else {
             // Trang đăng nhập toàn màn hình (thay cho modal auth trên trang chủ).
-            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String portal = resolvePortal(req);
+        req.setAttribute("portal", portal);
+        String loginMethod = "phone".equals(req.getParameter("loginMethod")) ? "phone" : "account";
+        boolean isPhoneLogin = "phone".equals(loginMethod);
         String usernameOrEmail = req.getParameter("username");
+        String rawPhone = req.getParameter("phone");
         String password = req.getParameter("password");
+        req.setAttribute("loginMethod", loginMethod);
 
         String requestedWith = req.getHeader("X-Requested-With");
         boolean isAjax = "XMLHttpRequest".equals(requestedWith);
 
-        if (usernameOrEmail == null || usernameOrEmail.trim().isEmpty() ||
+        String identifier = isPhoneLogin ? rawPhone : usernameOrEmail;
+        if (identifier == null || identifier.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
 
+            String emptyMsg = isPhoneLogin
+                    ? "Số điện thoại và mật khẩu không được để trống!"
+                    : "Tài khoản và mật khẩu không được để trống!";
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"Tài khoản và mật khẩu không được để trống!\"}");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + emptyMsg + "\"}");
                 return;
             }
 
-            req.setAttribute("loi", "Tài khoản và mật khẩu không được để trống!");
-            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            req.setAttribute("loi", emptyMsg);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
             return;
         }
 
+        String normalizedPhone = null;
+        if (isPhoneLogin) {
+            normalizedPhone = org.example.util.PhoneUtil.normalizeVN(rawPhone);
+            if (normalizedPhone == null) {
+                String invalidMsg = "Số điện thoại không hợp lệ. Vui lòng nhập số di động Việt Nam (0, +84 hoặc 84).";
+                if (isAjax) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\": false, \"loi\": \"" + invalidMsg + "\"}");
+                    return;
+                }
+                req.setAttribute("loi", invalidMsg);
+                req.setAttribute("phone", rawPhone);
+                req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
+                return;
+            }
+        }
+
         TaiKhoan taiKhoan = null;
+        boolean ambiguousPhone = false;
         String dbErrorMsg = null;
         try {
-            taiKhoan = TaiKhoanDAO.dangNhapKhachHang(usernameOrEmail, password);
+            if (isPhoneLogin) {
+                // Tái sử dụng đúng pipeline xác thực: tra cứu account rồi so BCrypt,
+                // phần kiểm tra trạng thái/cơ sở/session/redirect bên dưới dùng chung.
+                java.util.List<TaiKhoan> matches = TaiKhoanDAO
+                        .timTaiKhoanHoatDongTheoPhone(org.example.util.PhoneUtil.lookupVariants(normalizedPhone));
+                if (matches.size() > 1) {
+                    ambiguousPhone = true;
+                } else if (matches.size() == 1
+                        && org.mindrot.jbcrypt.BCrypt.checkpw(password, matches.get(0).getPassword())) {
+                    taiKhoan = matches.get(0);
+                }
+            } else {
+                taiKhoan = TaiKhoanDAO.dangNhapKhachHang(usernameOrEmail, password);
+            }
         } catch (ExceptionInInitializerError e) {
             LOGGER.error("Lỗi khởi tạo cấu hình kết nối database: ", e);
             dbErrorMsg = getDatabaseErrorMessage(e);
@@ -95,7 +154,52 @@ public class DangNhapServlet extends HttpServlet {
             }
             req.setAttribute("loi", dbErrorMsg);
             req.setAttribute("username", usernameOrEmail);
-            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            req.setAttribute("phone", rawPhone);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
+            return;
+        }
+
+        if (ambiguousPhone) {
+            // Không tự chọn tài khoản khi một số điện thoại gắn với nhiều account.
+            LOGGER.warn("Login blocked - ambiguous phone match for normalized phone (not logged for privacy)");
+            String ambiguousMsg = "Số điện thoại này đang được liên kết với nhiều tài khoản. "
+                    + "Vui lòng đăng nhập bằng email hoặc tên đăng nhập.";
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + ambiguousMsg + "\"}");
+                return;
+            }
+            req.setAttribute("loi", ambiguousMsg);
+            req.setAttribute("phone", rawPhone);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
+            return;
+        }
+
+        // Chính sách hai cổng: chỉ kiểm tra SAU khi mật khẩu đã xác thực đúng,
+        // để không tiết lộ role của tài khoản qua thông báo lỗi. Sai cổng → không tạo session.
+        if (taiKhoan != null && !org.example.util.AuthPortalPolicy.isRoleAllowed(portal, taiKhoan.getRoleId())) {
+            boolean accountIsInternal = org.example.util.AuthPortalPolicy.isInternalRole(taiKhoan.getRoleId());
+            String accountPortal = accountIsInternal
+                    ? org.example.util.AuthPortalPolicy.PORTAL_INTERNAL
+                    : org.example.util.AuthPortalPolicy.PORTAL_CUSTOMER;
+            String wrongPortalMsg = accountIsInternal
+                    ? "Tài khoản này thuộc Cổng vận hành V-SPORT. Vui lòng đăng nhập tại Cổng dành cho Quản trị viên, Quản lý và Nhân viên."
+                    : "Tài khoản này thuộc Cổng khách hàng V-SPORT. Vui lòng quay lại trang đăng nhập dành cho khách đặt sân.";
+            String portalUrl = req.getContextPath()
+                    + (accountIsInternal ? "/he-thong/dang-nhap" : "/dangnhap");
+            LOGGER.warn("Login blocked - wrong portal: accountId={}, roleId={}, attemptedPortal={}",
+                    taiKhoan.getAccountId(), taiKhoan.getRoleId(), portal);
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\": false, \"code\": \"WRONG_PORTAL\", \"loi\": \""
+                        + wrongPortalMsg + "\", \"portalUrl\": \"" + portalUrl + "\"}");
+                return;
+            }
+            req.setAttribute("wrongPortal", accountPortal);
+            req.setAttribute("wrongPortalMsg", wrongPortalMsg);
+            req.setAttribute("username", usernameOrEmail);
+            req.setAttribute("phone", rawPhone);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
             return;
         }
 
@@ -112,7 +216,8 @@ public class DangNhapServlet extends HttpServlet {
             }
             req.setAttribute("loi", facilityInactiveMsg);
             req.setAttribute("username", usernameOrEmail);
-            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            req.setAttribute("phone", rawPhone);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
             return;
         }
 
@@ -146,15 +251,19 @@ public class DangNhapServlet extends HttpServlet {
             resp.sendRedirect(redirectUrl);
 
         } else {
+            String wrongMsg = isPhoneLogin
+                    ? "Số điện thoại hoặc mật khẩu không đúng."
+                    : "Tên đăng nhập hoặc mật khẩu không đúng.";
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"Tên đăng nhập hoặc mật khẩu không đúng.\"}");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + wrongMsg + "\"}");
                 return;
             }
 
-            req.setAttribute("loi", "Tên đăng nhập hoặc mật khẩu không đúng.");
+            req.setAttribute("loi", wrongMsg);
             req.setAttribute("username", usernameOrEmail);
-            req.getRequestDispatcher("/auth/DangNhap.jsp").forward(req, resp);
+            req.setAttribute("phone", rawPhone);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
         }
     }
 

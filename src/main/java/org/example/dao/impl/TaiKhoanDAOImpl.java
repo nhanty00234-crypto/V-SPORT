@@ -333,6 +333,58 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     }
 
     @Override
+    public List<TaiKhoan> timTaiKhoanHoatDongTheoPhone(List<String> phoneVariants) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT a FROM TaiKhoan a WHERE a.phoneNumber IN :phones " +
+                    "AND a.isLocked = false AND (a.isDeleted = false OR a.isDeleted IS NULL)",
+                    TaiKhoan.class)
+                .setParameter("phones", phoneVariants)
+                .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Boolean kiemtraPhone(List<String> phoneVariants) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            Long count = em.createQuery(
+                    "SELECT COUNT(a) FROM TaiKhoan a WHERE a.phoneNumber IN :phones " +
+                    "AND (a.isDeleted = false OR a.isDeleted IS NULL)", Long.class)
+                .setParameter("phones", phoneVariants)
+                .getSingleResult();
+            return count > 0;
+        } catch (Exception e) {
+            logger.error("Lỗi kiểm tra số điện thoại: {}", e.getMessage(), e);
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public TaiKhoan timTaiKhoanTheoEmail(String email) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            List<TaiKhoan> accounts = em.createQuery(
+                    "SELECT a FROM TaiKhoan a WHERE a.email = :email " +
+                    "AND (a.isDeleted = false OR a.isDeleted IS NULL)", TaiKhoan.class)
+                .setParameter("email", email)
+                .setMaxResults(1)
+                .getResultList();
+            return accounts.isEmpty() ? null : accounts.get(0);
+        } catch (Exception e) {
+            logger.error("Lỗi tìm tài khoản theo email: {}", e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public Boolean kiemTraEmailTonTai(String email) {
         return kiemtraEmail(email);
     }

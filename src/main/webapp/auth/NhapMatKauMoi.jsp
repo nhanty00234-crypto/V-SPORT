@@ -11,6 +11,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .btn-spinner { display: none; }
+        .is-loading .btn-text { visibility: hidden; }
+        .is-loading .btn-spinner {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-spinner::after {
+            content: '';
+            width: 24px; height: 24px; border-radius: 50%;
+            border: 3px solid rgba(255,255,255,.35);
+            border-top-color: #fff;
+            animation: vs-rotate .8s linear infinite;
+        }
+        @keyframes vs-rotate { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .btn-spinner::after { animation-duration: 2.4s; } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900/60 backdrop-blur-sm">
@@ -74,11 +89,12 @@
             </div>
             
             <!-- Submit Button -->
-            <button type="submit" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
+            <button type="submit" id="newPwSubmit" aria-busy="false" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
                 <span class="btn-text flex items-center gap-1.5">
                     Lưu mật khẩu mới
                     <span class="material-symbols-outlined text-[18px]">save</span>
                 </span>
+                <span class="btn-spinner" aria-hidden="true"></span>
             </button>
         </form>
     </div>
@@ -92,21 +108,33 @@
         }
 
         const form = document.getElementById('newPasswordForm');
+        const submitBtn = document.getElementById('newPwSubmit');
+        function setLoading(on) {
+            submitBtn.classList.toggle('is-loading', on);
+            submitBtn.disabled = on;
+            submitBtn.setAttribute('aria-busy', on ? 'true' : 'false');
+            if (!on) form.dataset.submitted = '';
+        }
         form.addEventListener('submit', function(e) {
+            if (form.dataset.submitted === 'true') { e.preventDefault(); return; }
             const p1 = document.getElementById('password').value;
             const p2 = document.getElementById('confirm_password').value;
-            
+
             if (p1.trim() === '') {
                 e.preventDefault();
                 alert('Mật khẩu không được để trống hoặc chỉ chứa khoảng trắng!');
                 return;
             }
-            
+
             if (p1 !== p2) {
                 e.preventDefault();
                 alert('Mật khẩu xác nhận chưa trùng khớp!');
+                return;
             }
+            form.dataset.submitted = 'true';
+            setLoading(true);
         });
+        window.addEventListener('pageshow', function () { setLoading(false); });
     </script>
 </body>
 </html>

@@ -27,7 +27,11 @@ import org.example.util.RoleRedirectUtil;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Trang "Tài khoản của tôi" cho Customer: hồ sơ cá nhân, thống kê đặt sân,
@@ -78,6 +82,7 @@ public class CustomerAccountServlet extends HttpServlet {
         int cancelledCount = 0;
         Lichdatsan nearestBooking = null;
         LocalDateTime now = LocalDateTime.now();
+        List<Lichdatsan> upcomingBookings = new ArrayList<>();
 
         for (Lichdatsan lich : dsLich) {
             String trangThai = lich.getTrangThai();
@@ -95,6 +100,7 @@ public class CustomerAccountServlet extends HttpServlet {
             LocalDateTime end = LocalDateTime.of(lich.getNgayDat(), lich.getGioKetThuc());
             if (end.isAfter(now)) {
                 upcomingCount++;
+                upcomingBookings.add(lich);
                 if (nearestBooking == null) {
                     nearestBooking = lich;
                 } else {
@@ -104,6 +110,32 @@ public class CustomerAccountServlet extends HttpServlet {
                         nearestBooking = lich;
                     }
                 }
+            }
+        }
+
+        // "Danh sách đặt lịch" (view mặc định): tối đa 5 lịch sắp tới, gần nhất trước.
+        upcomingBookings.sort(Comparator.comparing(l -> LocalDateTime.of(l.getNgayDat(), l.getGioBatDau())));
+        if (upcomingBookings.size() > 5) {
+            upcomingBookings = new ArrayList<>(upcomingBookings.subList(0, 5));
+        }
+        Map<Integer, String> upcomingSanNames = new HashMap<>();
+        Map<Integer, String> upcomingCoSoNames = new HashMap<>();
+        for (Lichdatsan lich : upcomingBookings) {
+            Integer sanId = lich.getSanId();
+            if (sanId == null || upcomingSanNames.containsKey(sanId)) {
+                continue;
+            }
+            try {
+                San san = sanDAO.getSanById(sanId);
+                if (san != null) {
+                    upcomingSanNames.put(sanId, san.getTenSan());
+                    CoSo coSo = coSoDAO.getCoSoById(san.getCoSoID());
+                    if (coSo != null) {
+                        upcomingCoSoNames.put(sanId, coSo.getTenCoSo());
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Không thể tải thông tin sân SanID={} cho danh sách đặt lịch: {}", sanId, e.getMessage());
             }
         }
 
@@ -137,6 +169,9 @@ public class CustomerAccountServlet extends HttpServlet {
         req.setAttribute("nearestCoSo", nearestCoSo);
         req.setAttribute("nearestLoaiSan", nearestLoaiSan);
         req.setAttribute("nearestBookingUrgentEligible", nearestBookingUrgentEligible);
+        req.setAttribute("upcomingBookings", upcomingBookings);
+        req.setAttribute("upcomingSanNames", upcomingSanNames);
+        req.setAttribute("upcomingCoSoNames", upcomingCoSoNames);
 
         req.getRequestDispatcher("/customer/TaiKhoan.jsp").forward(req, resp);
     }

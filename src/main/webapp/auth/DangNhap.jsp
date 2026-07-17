@@ -1,211 +1,329 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
-<%@ page import="org.example.model.TaiKhoan" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%
-    String ctx = request.getContextPath();
-%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%-- Tab đang chọn: ưu tiên giá trị servlet echo lại; mặc định là Số điện thoại,
+     riêng khi có sẵn username (ví dụ sau đăng ký thành công) thì mở tab Email. --%>
+<c:set var="activeMethod"
+       value="${not empty loginMethod ? loginMethod : (not empty username ? 'account' : 'phone')}"/>
 <!DOCTYPE html>
-<html lang="vi" class="light">
+<html lang="vi">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Đăng nhập - V-SPORT</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <%@ include file="common/auth-theme.jsp" %>
     <style>
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            min-height: 100dvh;
-            background-color: #0b8a60;
-            background-image:
-                radial-gradient(130% 95% at 88% -12%, rgba(52, 211, 153, 0.15), transparent 55%),
-                radial-gradient(150% 110% at -25% 115%, rgba(3, 56, 38, 0.45), transparent 62%),
-                radial-gradient(95% 75% at 112% 82%, rgba(52, 211, 153, 0.08), transparent 55%),
-                radial-gradient(1400px 720px at 50% 125%, rgba(6, 78, 59, 0.65), transparent 66%);
-            background-attachment: fixed;
+        /* ===== Tabs phương thức đăng nhập (riêng trang Login) ===== */
+        .auth-tabs {
+            display: flex;
+            height: 58px;
+            background: #eef1ef;
             position: relative;
         }
+        .auth-tab {
+            flex: 1;
+            position: relative;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 17px;
+            font-weight: 600;
+            color: #96a29b;
+            background: transparent;
+            z-index: 1;
+            transition: color .15s ease;
+        }
+        .auth-tab:hover { color: #6d7b74; }
+        .auth-tab:focus-visible { outline: 2px solid var(--vs-green-600); outline-offset: -4px; }
+        .auth-tab[aria-selected="true"] {
+            background: #fff;
+            color: var(--vs-green-900);
+            font-weight: 700;
+            z-index: 2;
+            cursor: default;
+        }
+        /* Mảnh cong chuyển tiếp giữa tab trắng và nền xám */
+        .auth-tab[aria-selected="true"]::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 46px;
+        }
+        #tab-phone[aria-selected="true"]::after {
+            right: -45px;
+            background: #fff;
+            border-radius: 0 100% 0 0;
+            box-shadow: 12px 0 16px -8px rgba(0, 0, 0, .22);
+        }
+        #tab-account[aria-selected="true"]::after {
+            left: -45px;
+            background: #fff;
+            border-radius: 100% 0 0 0;
+            box-shadow: -12px 0 16px -8px rgba(0, 0, 0, .22);
+        }
 
-        /* Input overrides to matches visual specifications */
-        .login-input:focus {
-            outline: none;
-            border-color: #059669;
-            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        /* Callout Cổng vận hành (ngoài card) */
+        .ops-callout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: min(600px, 100%);
+            margin-top: 26px;
+            padding: 13px 16px;
+            border: 1px solid rgba(255, 255, 255, .28);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .10);
+            backdrop-filter: blur(2px);
+        }
+        .ops-callout .material-symbols-outlined {
+            font-size: 22px;
+            color: rgba(255, 255, 255, .92);
+            flex-shrink: 0;
+        }
+        .ops-callout p {
+            margin: 0;
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, .88);
+        }
+        .ops-callout a {
+            color: #fff;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) {
+            .auth-tabs { height: 52px; }
+            .auth-tab { font-size: 15px; }
         }
     </style>
 </head>
-<body class="text-gray-900 antialiased flex flex-col justify-between">
+<body class="auth-body" data-portal="customer">
+    <%@ include file="common/auth-waves.jsp" %>
+    <%@ include file="common/auth-transition.jsp" %>
 
-    <!-- Background sports lines layout overlays (pure CSS geometry) -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <svg class="absolute w-[200%] h-[200%] -top-[50%] -left-[50%] opacity-[0.06]" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="0.25" />
-            <circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="0.2" />
-            <path d="M 0 50 Q 50 15 100 50" fill="none" stroke="white" stroke-width="0.25" />
-            <path d="M 0 50 Q 50 85 100 50" fill="none" stroke="white" stroke-width="0.25" />
-            <line x1="50" y1="0" x2="50" y2="100" stroke="white" stroke-width="0.2" />
-        </svg>
-    </div>
-
-    <!-- Header bar -->
-    <header class="w-full h-14 md:h-16 flex items-center justify-between px-4 md:px-8 bg-black/10 select-none relative z-10 border-b border-white/5">
-        <!-- Back button (links to index.jsp) -->
-        <a href="<%= ctx %>/index.jsp" id="login-back-btn" class="text-white hover:text-emerald-100 flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 transition-colors text-decoration-none" aria-label="Quay lại trang chủ">
-            <span class="material-symbols-outlined text-[24px]">chevron_left</span>
+    <header class="auth-topbar">
+        <a href="${ctx}/index.jsp" class="auth-back" data-auth-back aria-label="Quay lại">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back_ios_new</span>
         </a>
-
-        <!-- Centered title -->
-        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <h1 class="text-white font-extrabold text-base md:text-lg tracking-wide uppercase font-['Outfit']">Đăng nhập</h1>
-        </div>
-
-        <!-- Placeholder balance block -->
-        <div class="w-10"></div>
+        <h1>Đăng nhập</h1>
     </header>
 
-    <!-- Main Form Content -->
-    <main class="flex-grow flex flex-col justify-center items-center py-8 px-4 z-10 relative">
-        <div class="w-full max-w-[600px] bg-white rounded-lg shadow-2xl overflow-hidden border border-gray-100">
-            <!-- Double-tab layout: Email (active) / Phone (disabled since database only checks username/email) -->
-            <div class="flex border-b border-gray-100 select-none h-14">
-                <div class="flex-1 flex items-center justify-center font-bold text-[#047857] border-b-2 border-[#047857] text-sm md:text-base bg-white">
-                    Email / Tên đăng nhập
-                </div>
-                <div onclick="showPhoneLoginNotice()" class="flex-1 flex items-center justify-center font-semibold text-gray-400 bg-gray-50/50 cursor-pointer text-sm md:text-base hover:bg-gray-100/70 transition-colors" title="Tính năng đăng nhập qua số điện thoại">
-                    Số điện thoại
-                </div>
+    <main class="auth-main">
+        <div class="auth-card">
+            <div class="auth-tabs" role="tablist" aria-label="Phương thức đăng nhập">
+                <button type="button" class="auth-tab" id="tab-phone" role="tab"
+                        aria-selected="${activeMethod eq 'phone'}" aria-controls="panel-phone"
+                        tabindex="${activeMethod eq 'phone' ? '0' : '-1'}">Số điện thoại</button>
+                <button type="button" class="auth-tab" id="tab-account" role="tab"
+                        aria-selected="${activeMethod eq 'account'}" aria-controls="panel-account"
+                        tabindex="${activeMethod eq 'account' ? '0' : '-1'}">Email</button>
             </div>
 
-            <div class="p-6 md:p-8">
-                <!-- Errors alerts -->
+            <div class="auth-card-body">
+                <c:if test="${not empty thongbao}">
+                    <div class="auth-alert auth-alert-success" role="status">
+                        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                        <span><c:out value="${thongbao}"/></span>
+                    </div>
+                </c:if>
+                <c:if test="${not empty wrongPortalMsg}">
+                    <div class="auth-alert auth-alert-info" role="alert">
+                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                        <span>
+                            <c:out value="${wrongPortalMsg}"/>
+                            <a href="${ctx}/he-thong/dang-nhap" data-portal-link="internal">Đi đến Cổng vận hành</a>
+                        </span>
+                    </div>
+                </c:if>
                 <c:if test="${not empty loi}">
-                    <div class="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg p-3.5 mb-6 text-sm font-semibold leading-relaxed" role="alert" id="login-error">
-                        <span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5" aria-hidden="true">error</span>
+                    <div class="auth-alert auth-alert-error" role="alert" id="login-server-error">
+                        <span class="material-symbols-outlined" aria-hidden="true">error</span>
                         <span><c:out value="${loi}"/></span>
                     </div>
                 </c:if>
 
-                <!-- Login form -->
-                <form id="main-login-form" action="<%= ctx %>/dangnhap" method="POST" autocomplete="off">
-                    <input type="hidden" name="loginType" value="customer" />
+                <form id="login-form" action="${ctx}/dangnhap" method="POST" data-auth-form data-auth-transition novalidate>
+                    <input type="hidden" name="portal" value="customer"/>
+                    <input type="hidden" name="loginMethod" id="login-method"
+                           value="${activeMethod eq 'account' ? 'account' : 'phone'}"/>
 
-                    <!-- Username/Email input -->
-                    <div class="mb-6">
-                        <label for="login-username" class="block text-sm font-bold text-[#047857] mb-2 font-['Outfit'] uppercase tracking-wide">Tài khoản của bạn?</label>
-                        <input type="text" name="username" id="login-username" value="<c:out value='${username}'/>"
-                               placeholder="Nhập email hoặc tên đăng nhập"
-                               class="login-input w-full h-[50px] border border-gray-200 rounded-lg px-4 text-sm text-gray-800 bg-white placeholder-gray-400 font-medium transition-all"
-                               autocomplete="username" required
-                               <c:if test="${not empty loi}">aria-describedby="login-error" style="border-color:#fca5a5;"</c:if> />
-                    </div>
-
-                    <!-- Password input -->
-                    <div class="mb-6">
-                        <label for="login-pass" class="block text-sm font-bold text-[#047857] mb-2 font-['Outfit'] uppercase tracking-wide">Mật khẩu (*)</label>
-                        <div class="relative">
-                            <input type="password" name="password" id="login-pass"
-                                   placeholder="Nhập mật khẩu (*)"
-                                   class="login-input w-full h-[50px] border border-gray-200 rounded-lg pl-4 pr-12 text-sm text-gray-800 bg-white placeholder-gray-400 font-medium transition-all"
-                                   autocomplete="current-password" required />
-                            <!-- Visibility toggle button -->
-                            <button type="button" id="login-eye-btn" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-emerald-700 bg-transparent border-none cursor-pointer rounded-lg" aria-label="Hiện mật khẩu" title="Hiện mật khẩu">
-                                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">visibility_off</span>
-                            </button>
+                    <div id="panel-phone" role="tabpanel" aria-labelledby="tab-phone"
+                         <c:if test="${activeMethod ne 'phone'}">hidden</c:if>>
+                        <div class="auth-field">
+                            <label class="auth-label" for="login-phone">Số điện thoại của bạn?</label>
+                            <div class="auth-input-wrap ${not empty loi and activeMethod eq 'phone' ? 'is-invalid' : ''}">
+                                <span class="auth-phone-prefix" aria-hidden="true">
+                                    <svg class="vn-flag" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                                        <circle cx="12" cy="12" r="12" fill="#da251d"/>
+                                        <path d="M12 5.1l1.66 5.1h5.36l-4.34 3.15 1.66 5.1L12 15.3l-4.34 3.15 1.66-5.1-4.34-3.15h5.36z" fill="#ffde00"/>
+                                    </svg>
+                                    <span>+84</span>
+                                    <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                                </span>
+                                <input class="auth-input" type="tel" name="phone" id="login-phone"
+                                       inputmode="numeric" autocomplete="tel" maxlength="16"
+                                       placeholder="Nhập số điện thoại"
+                                       aria-describedby="login-phone-error"
+                                       value="<c:out value='${phone}'/>"
+                                       <c:if test="${activeMethod ne 'phone'}">disabled</c:if>/>
+                            </div>
+                            <p class="auth-field-error" id="login-phone-error"></p>
                         </div>
                     </div>
 
-                    <!-- Submit action button -->
-                    <button type="submit" id="main-login-btn" class="w-full h-[50px] bg-[#047857] hover:bg-[#065f46] text-white font-extrabold rounded-lg tracking-wider text-sm transition-colors border-none cursor-pointer uppercase">
-                        ĐĂNG NHẬP
-                    </button>
-
-                    <!-- Forgot password link -->
-                    <div class="text-center mt-5 text-xs font-semibold text-gray-500">
-                        Bạn quên mật khẩu?
-                        <a href="<%= ctx %>/quenmatkhau" class="text-[#047857] hover:underline font-bold ml-1">Quên mật khẩu</a>
+                    <div id="panel-account" role="tabpanel" aria-labelledby="tab-account"
+                         <c:if test="${activeMethod ne 'account'}">hidden</c:if>>
+                        <div class="auth-field">
+                            <label class="auth-label" for="login-username">Email của bạn?</label>
+                            <div class="auth-input-wrap ${not empty loi and activeMethod eq 'account' ? 'is-invalid' : ''}">
+                                <input class="auth-input" type="text" name="username" id="login-username"
+                                       autocomplete="username"
+                                       placeholder="Nhập email hoặc tên đăng nhập"
+                                       aria-describedby="login-username-error"
+                                       value="<c:out value='${username}'/>"
+                                       <c:if test="${activeMethod ne 'account'}">disabled</c:if>/>
+                                <button type="button" class="auth-input-btn auth-clear-btn"
+                                        data-clear-for="login-username" aria-label="Xóa nội dung email">
+                                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">cancel</span>
+                                </button>
+                            </div>
+                            <p class="auth-field-error" id="login-username-error"></p>
+                        </div>
                     </div>
+
+                    <div class="auth-field">
+                        <label class="auth-label" for="login-pass">Mật khẩu (*)</label>
+                        <div class="auth-input-wrap">
+                            <input class="auth-input" type="password" name="password" id="login-pass"
+                                   autocomplete="current-password" placeholder="Nhập mật khẩu (*)"
+                                   aria-describedby="login-pass-error" required/>
+                            <button type="button" class="auth-input-btn" data-toggle-password="login-pass"
+                                    aria-label="Hiện mật khẩu" title="Hiện mật khẩu">
+                                <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+                            </button>
+                        </div>
+                        <p class="auth-field-error" id="login-pass-error"></p>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary auth-submit-gap"
+                            data-loading-text="ĐANG ĐĂNG NHẬP...">ĐĂNG NHẬP</button>
+
+                    <p class="auth-subline">
+                        Bạn quên mật khẩu?
+                        <a href="${ctx}/quenmatkhau">Quên mật khẩu</a>
+                    </p>
                 </form>
             </div>
         </div>
 
-        <!-- Register switch helper link -->
-        <p class="text-white text-sm font-semibold mt-6 select-none">
+        <p class="auth-switch-line">
             Bạn chưa có tài khoản?
-            <a href="<%= ctx %>/dangky" class="text-yellow-400 hover:underline font-bold ml-1">Đăng ký</a>
+            <a href="${ctx}/dangky">Đăng ký</a>
         </p>
 
-        <!-- System role login helpful alert box -->
-        <div class="w-full max-w-[600px] mt-6 bg-white/10 border border-white/20 rounded-lg p-4 text-emerald-100 text-xs text-center font-medium leading-relaxed select-none">
-            Bạn là Nhân viên, Quản lý hoặc Quản trị viên? Đăng nhập bằng tài khoản hệ thống — hệ thống sẽ tự chuyển đến trang phù hợp với vai trò của bạn.
+        <div class="ops-callout">
+            <span class="material-symbols-outlined" aria-hidden="true">shield_person</span>
+            <p>
+                Bạn thuộc đội ngũ vận hành V-SPORT? Đăng nhập bằng tài khoản Admin, Manager hoặc Staff.
+                <a href="${ctx}/he-thong/dang-nhap" data-portal-link="internal">Chuyển sang Cổng vận hành</a>
+            </p>
         </div>
     </main>
 
-    <!-- Footer generic spacing container -->
-    <footer class="w-full py-4 text-center select-none relative z-10 text-emerald-100/50 text-[10px] font-semibold">
-        V-SPORT © 2026.
-    </footer>
-
-    <!-- Toast elements for page operations feedback -->
-    <div id="vsLoginToast" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);z-index:1300;background:#0f172a;color:#fff;padding:10px 16px;border-radius:9999px;font-size:13px;font-weight:600;opacity:0;visibility:hidden;transition:opacity .2s ease,transform .2s ease;box-shadow:0 6px 18px rgba(15,23,42,.25);"></div>
-
     <script>
         (function () {
-            // Toast control function
-            let vsLoginToastTimer = null;
-            function showLoginToast(msg) {
-                const toast = document.getElementById('vsLoginToast');
-                if (!toast) return;
-                toast.textContent = msg;
-                toast.style.opacity = '1';
-                toast.style.visibility = 'visible';
-                toast.style.transform = 'translateX(-50%) translateY(0)';
-                clearTimeout(vsLoginToastTimer);
-                vsLoginToastTimer = setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(-50%) translateY(12px)';
-                    setTimeout(() => { toast.style.visibility = 'hidden'; }, 220);
-                }, 2500);
-            }
+            'use strict';
 
-            // Phone login inactive state alert
-            window.showPhoneLoginNotice = function() {
-                showLoginToast("Hệ thống chưa hỗ trợ đăng nhập qua SĐT. Vui lòng dùng Email/Tên đăng nhập.");
+            var tabs = [document.getElementById('tab-phone'), document.getElementById('tab-account')];
+            var panels = {
+                'tab-phone': document.getElementById('panel-phone'),
+                'tab-account': document.getElementById('panel-account')
             };
+            var methodInput = document.getElementById('login-method');
+            var phoneInput = document.getElementById('login-phone');
+            var usernameInput = document.getElementById('login-username');
+            var passInput = document.getElementById('login-pass');
+            var form = document.getElementById('login-form');
 
-            // Back button control
-            const backBtn = document.getElementById('login-back-btn');
-            if (backBtn) {
-                backBtn.addEventListener('click', function (e) {
-                    if (document.referrer && document.referrer.indexOf(window.location.host) > -1 && history.length > 1) {
-                        e.preventDefault();
-                        history.back();
+            function activate(tab, focus) {
+                tabs.forEach(function (t) {
+                    var selected = t === tab;
+                    t.setAttribute('aria-selected', selected ? 'true' : 'false');
+                    t.tabIndex = selected ? 0 : -1;
+                    var panel = panels[t.id];
+                    panel.hidden = !selected;
+                    panel.querySelectorAll('input').forEach(function (inp) { inp.disabled = !selected; });
+                });
+                methodInput.value = tab.id === 'tab-phone' ? 'phone' : 'account';
+                clearFieldErrors();
+                if (focus) tab.focus();
+            }
+
+            tabs.forEach(function (tab, i) {
+                tab.addEventListener('click', function () { activate(tab, false); });
+                tab.addEventListener('keydown', function (e) {
+                    var next = null;
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = tabs[(i + 1) % tabs.length];
+                    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = tabs[(i - 1 + tabs.length) % tabs.length];
+                    else if (e.key === 'Home') next = tabs[0];
+                    else if (e.key === 'End') next = tabs[tabs.length - 1];
+                    if (next) { e.preventDefault(); activate(next, true); }
+                });
+            });
+
+            function setFieldError(input, msg) {
+                var errorEl = document.getElementById(input.id + '-error');
+                var wrap = input.closest('.auth-input-wrap');
+                if (msg) {
+                    errorEl.textContent = msg;
+                    errorEl.classList.add('show');
+                    if (wrap) wrap.classList.add('is-invalid');
+                } else {
+                    errorEl.textContent = '';
+                    errorEl.classList.remove('show');
+                    if (wrap) wrap.classList.remove('is-invalid');
+                }
+            }
+
+            function clearFieldErrors() {
+                [phoneInput, usernameInput, passInput].forEach(function (inp) { setFieldError(inp, null); });
+            }
+
+            // Validation client trước khi submit (server vẫn validate lại đầy đủ)
+            form.addEventListener('submit', function (e) {
+                clearFieldErrors();
+                var isPhone = methodInput.value === 'phone';
+                var ok = true;
+
+                if (isPhone) {
+                    var digits = phoneInput.value.trim().replace(/[\s().-]/g, '');
+                    if (!digits) {
+                        setFieldError(phoneInput, 'Vui lòng nhập số điện thoại.');
+                        ok = false;
+                    } else if (!/^(0|\+84|84)[35789][0-9]{8}$/.test(digits)) {
+                        setFieldError(phoneInput, 'Số điện thoại không hợp lệ. Ví dụ: 0786041209.');
+                        ok = false;
                     }
-                });
-            }
+                } else if (!usernameInput.value.trim()) {
+                    setFieldError(usernameInput, 'Vui lòng nhập email hoặc tên đăng nhập.');
+                    ok = false;
+                }
 
-            // Password visibility toggle behavior
-            const eyeBtn = document.getElementById('login-eye-btn');
-            const passInput = document.getElementById('login-pass');
-            if (eyeBtn && passInput) {
-                eyeBtn.addEventListener('click', function () {
-                    const showing = passInput.type === 'text';
-                    passInput.type = showing ? 'password' : 'text';
-                    eyeBtn.setAttribute('aria-label', showing ? 'Hiện mật khẩu' : 'Ẩn mật khẩu');
-                    eyeBtn.setAttribute('title', showing ? 'Hiện mật khẩu' : 'Ẩn mật khẩu');
-                    eyeBtn.querySelector('.material-symbols-outlined').textContent = showing ? 'visibility_off' : 'visibility';
-                });
-            }
+                if (!passInput.value) {
+                    setFieldError(passInput, 'Vui lòng nhập mật khẩu.');
+                    ok = false;
+                }
 
-            // Double submit guard logic
-            const form = document.getElementById('main-login-form');
-            const submitBtn = document.getElementById('main-login-btn');
-            if (form && submitBtn) {
-                form.addEventListener('submit', function () {
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'ĐANG ĐĂNG NHẬP...';
-                });
-            }
+                if (!ok) {
+                    e.preventDefault();
+                    var firstInvalid = form.querySelector('.auth-input-wrap.is-invalid .auth-input');
+                    if (firstInvalid) firstInvalid.focus();
+                }
+            });
         })();
     </script>
 </body>

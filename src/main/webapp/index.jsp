@@ -52,6 +52,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 
     <jsp:include page="/customer/common/vsport-theme.jsp" />
 
@@ -264,6 +265,216 @@
 
         /* Mobile: same single container, two rows — icon+search+filter on top,
            the three actions below. Still one seamless block, no separate cards. */
+        /* ============================================================
+           Booking-choice modal + facility detail bottom sheet
+           (Lucide inline icons, Be Vietnam Pro, tokens theo customer theme)
+           ============================================================ */
+        :root {
+            --vsx-font: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif;
+            --vs-mint-100: #e7faef;
+            --vs-mint-50: #f3fcf7;
+            --vs-pink-100: #fae8f8;
+            --vs-pink-600: #c83db3;
+            --vs-overlay: rgba(0, 35, 20, 0.68);
+            --vsx-border: #dbe9e1;
+            --vsx-text: #153d2b;
+            --vsx-muted: #6f8379;
+        }
+        .lci { width: 20px; height: 20px; flex-shrink: 0; }
+
+        /* [hidden] phải thắng cả các class có display:flex/inline-flex */
+        [hidden] { display: none !important; }
+
+        .vsx-overlay {
+            position: fixed; inset: 0; background: var(--vs-overlay);
+            z-index: 1240; opacity: 0; transition: opacity 220ms ease;
+        }
+        .vsx-overlay.is-open { opacity: 1; }
+
+        /* ---- Modal "Chọn hình thức đặt" ---- */
+        .vsbc-modal {
+            position: fixed; left: 50%; top: 50%;
+            transform: translate(-50%, -50%) scale(.96);
+            width: min(600px, calc(100vw - 24px));
+            max-height: calc(100dvh - 32px); overflow-y: auto;
+            background: #fff; border-radius: 18px; padding: 18px;
+            z-index: 1250; opacity: 0;
+            box-shadow: 0 22px 60px rgba(0, 35, 20, 0.28);
+            transition: opacity 200ms ease, transform 200ms ease;
+            font-family: var(--vsx-font); color: var(--vsx-text);
+        }
+        .vsbc-modal.is-open { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .vsbc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+        .vsbc-title { font-size: 20px; font-weight: 800; text-align: center; flex: 1; padding-left: 36px; }
+        .vsbc-sub { text-align: center; font-size: 13px; color: var(--vsx-muted); margin: 2px 0 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .vsbc-x {
+            width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+            background: #f1f7f4; color: var(--vsx-text);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: background-color .15s ease;
+        }
+        .vsbc-x:hover { background: #e2eee8; }
+        .vsbc-x:focus-visible { outline: 2px solid #009b52; outline-offset: 2px; }
+        .vsbc-option {
+            display: flex; align-items: center; gap: 14px;
+            width: 100%; padding: 16px; border-radius: 14px; border: 1px solid transparent;
+            text-decoration: none; cursor: pointer; text-align: left;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .vsbc-option + .vsbc-option { margin-top: 10px; }
+        .vsbc-option:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0, 35, 20, 0.10); }
+        .vsbc-option:focus-visible { outline: 2.5px solid #009b52; outline-offset: 2px; }
+        .vsbc-option-direct { background: var(--vs-mint-100); border-color: #cdeeda; }
+        .vsbc-option-direct .vsbc-opt-title { color: #007a45; }
+        .vsbc-option-direct .vsbc-opt-ic { background: #d3f3e0; color: #007a45; }
+        .vsbc-option-match { background: var(--vs-pink-100); border-color: #f3d3ef; }
+        .vsbc-option-match .vsbc-opt-title { color: var(--vs-pink-600); }
+        .vsbc-option-match .vsbc-opt-ic { background: #f5d9f1; color: var(--vs-pink-600); }
+        .vsbc-opt-ic { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .vsbc-opt-ic .lci { width: 24px; height: 24px; }
+        .vsbc-opt-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .vsbc-opt-desc { font-size: 13.5px; color: #48604f; margin-top: 3px; line-height: 1.45; }
+        .vsbc-badge {
+            font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+            background: var(--vs-pink-600); color: #fff; padding: 2px 8px; border-radius: 9999px;
+        }
+        .vsbc-arrow {
+            width: 38px; height: 38px; border-radius: 10px; margin-left: auto; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; color: #fff;
+        }
+        .vsbc-option-direct .vsbc-arrow { background: #12b76a; }
+        .vsbc-option-match .vsbc-arrow { background: #d879cd; }
+
+        /* ---- Facility detail bottom sheet ---- */
+        .vsfs-sheet {
+            position: fixed; left: 0; right: 0; bottom: 0; width: 100%;
+            max-height: 82dvh;
+            background: #fff; border-radius: 24px 24px 0 0;
+            z-index: 1250; transform: translateY(100%);
+            transition: transform 300ms cubic-bezier(.22, 1, .36, 1);
+            box-shadow: 0 -18px 50px rgba(0, 35, 20, 0.30);
+            display: flex; flex-direction: column;
+            font-family: var(--vsx-font); color: var(--vsx-text);
+        }
+        .vsfs-sheet.is-open { transform: translateY(0); }
+        .vsfs-handle-wrap { padding: 8px 0 2px; display: flex; justify-content: center; cursor: grab; touch-action: none; flex-shrink: 0; }
+        .vsfs-handle { width: 48px; height: 5px; border-radius: 9999px; background: #d5e2db; }
+        .vsfs-topbar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 2px 16px 8px; flex-shrink: 0; }
+        .vsfs-iconbtn {
+            width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--vsx-border);
+            background: #fff; color: var(--vsx-text); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background-color .15s ease, color .15s ease;
+        }
+        .vsfs-iconbtn:hover { background: var(--vs-mint-50); }
+        .vsfs-iconbtn:focus-visible { outline: 2px solid #009b52; outline-offset: 2px; }
+        .vsfs-iconbtn.is-fav { color: #e11d48; border-color: #fecdd3; background: #fff1f2; }
+        .vsfs-scroll { overflow-y: auto; min-height: 0; flex: 1; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+        .vsfs-inner { width: 100%; max-width: 1360px; margin: 0 auto; padding: 0 16px 18px; }
+        @media (min-width: 1024px) { .vsfs-inner { padding: 0 28px 24px; } }
+        .vsfs-cols { display: grid; grid-template-columns: 1fr; gap: 18px; }
+        @media (min-width: 1024px) { .vsfs-cols { grid-template-columns: 42% minmax(0, 1fr); gap: 26px; align-items: start; } }
+        .vsfs-hero {
+            position: relative; border-radius: 16px; overflow: hidden; background: #eef4f1;
+            aspect-ratio: 16 / 10;
+        }
+        .vsfs-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .vsfs-name { font-size: 24px; font-weight: 800; line-height: 1.25; }
+        @media (min-width: 1024px) { .vsfs-name { font-size: 28px; } }
+        .vsfs-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .vsfs-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 9999px;
+            background: var(--vs-mint-100); color: #007a45; border: 1px solid #cdeeda;
+        }
+        .vsfs-chip.is-warn { background: #fff7e6; color: #b45309; border-color: #fde4b8; }
+        .vsfs-meta { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .vsfs-meta-row { display: flex; align-items: flex-start; gap: 9px; font-size: 14px; color: #3c5a4b; }
+        .vsfs-meta-row .lci { width: 18px; height: 18px; color: #009b52; margin-top: 1px; }
+        .vsfs-price { font-size: 15px; font-weight: 800; color: #007a45; margin-top: 10px; }
+        .vsfs-tabs {
+            display: flex; gap: 4px; margin-top: 18px; border-bottom: 1px solid var(--vsx-border);
+            overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .vsfs-tabs::-webkit-scrollbar { display: none; }
+        .vsfs-tab {
+            border: none; background: transparent; cursor: pointer;
+            padding: 10px 14px; font-family: inherit; font-size: 14px; font-weight: 700;
+            color: var(--vsx-muted); border-bottom: 2.5px solid transparent;
+            white-space: nowrap; transition: color .15s ease, border-color .15s ease;
+            min-height: 44px;
+        }
+        .vsfs-tab:hover { color: var(--vsx-text); }
+        .vsfs-tab:focus-visible { outline: 2px solid #009b52; outline-offset: -2px; }
+        .vsfs-tab[aria-selected="true"] { color: #007a45; border-bottom-color: #009b52; }
+        .vsfs-panel { padding: 14px 2px 4px; font-size: 14px; line-height: 1.6; color: #3c5a4b; }
+        .vsfs-court {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+            border: 1px solid var(--vsx-border); border-radius: 12px; padding: 12px 14px;
+        }
+        .vsfs-court + .vsfs-court { margin-top: 8px; }
+        .vsfs-court-name { font-size: 14.5px; font-weight: 800; color: var(--vsx-text); }
+        .vsfs-court-sub { font-size: 12.5px; color: var(--vsx-muted); margin-top: 2px; }
+        .vsfs-court-price { font-size: 13.5px; font-weight: 800; color: #007a45; white-space: nowrap; }
+        .vsfs-status {
+            display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px;
+            border-radius: 9999px; margin-left: 8px; vertical-align: 2px;
+        }
+        .vsfs-status.is-ready { background: var(--vs-mint-100); color: #007a45; }
+        .vsfs-status.is-other { background: #f1f5f9; color: #64748b; }
+        .vsfs-court-cta {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12.5px; font-weight: 800; text-decoration: none;
+            color: #007a45; border: 1px solid #9adfba; background: var(--vs-mint-50);
+            padding: 8px 14px; border-radius: 8px; white-space: nowrap;
+            transition: background-color .15s ease; min-height: 38px;
+        }
+        .vsfs-court-cta:hover { background: var(--vs-mint-100); }
+        .vsfs-service { display: flex; justify-content: space-between; gap: 12px; padding: 9px 2px; border-bottom: 1px solid #edf4f0; font-size: 13.5px; }
+        .vsfs-service b { font-weight: 800; color: #007a45; white-space: nowrap; }
+        .vsfs-imggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+        .vsfs-imggrid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: #eef4f1; }
+        .vsfs-policy-item { display: flex; gap: 9px; align-items: flex-start; }
+        .vsfs-policy-item + .vsfs-policy-item { margin-top: 9px; }
+        .vsfs-policy-item .lci { width: 17px; height: 17px; color: #009b52; margin-top: 2px; }
+        .vsfs-actionbar {
+            flex-shrink: 0; border-top: 1px solid var(--vsx-border); background: #fff;
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+        .vsfs-actionbar-inner { width: 100%; max-width: 1360px; margin: 0 auto; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+        .vsfs-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 46px; padding: 0 22px; border-radius: 10px; cursor: pointer;
+            font-family: inherit; font-size: 14.5px; font-weight: 800; text-decoration: none;
+            border: 1px solid transparent; transition: background-color .15s ease;
+        }
+        .vsfs-btn:focus-visible { outline: 2.5px solid #009b52; outline-offset: 2px; }
+        .vsfs-btn-primary { background: #008249; color: #fff; }
+        .vsfs-btn-primary:hover { background: #006c3c; }
+        .vsfs-btn-ghost { background: #fff; color: var(--vsx-text); border-color: var(--vsx-border); }
+        .vsfs-btn-ghost:hover { background: var(--vs-mint-50); }
+        @media (max-width: 767px) {
+            .vsfs-sheet { max-height: 92dvh; border-radius: 22px 22px 0 0; }
+            .vsfs-actionbar-inner { justify-content: stretch; }
+            .vsfs-actionbar .vsfs-btn-primary { flex: 1; }
+        }
+
+        /* Skeleton shimmer */
+        .vsx-skel {
+            background: linear-gradient(90deg, #eef4f1 25%, #e2ece7 37%, #eef4f1 63%);
+            background-size: 400% 100%; animation: vsxShimmer 1.4s ease infinite;
+            border-radius: 8px;
+        }
+        @keyframes vsxShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+        .vsfs-error { text-align: center; padding: 34px 16px; }
+        .vsfs-error p { font-size: 14.5px; font-weight: 600; color: var(--vsx-muted); margin-bottom: 14px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .vsx-overlay, .vsbc-modal, .vsfs-sheet { transition: none !important; }
+            .vsx-skel { animation: none; }
+        }
+
         @media (max-width: 767px) {
             .vs-utilitybar { grid-template-columns: repeat(6, 1fr); grid-template-rows: 48px 46px; height: auto; }
             .vs-ub-ic { grid-column: span 1; }
@@ -295,7 +506,7 @@
                     <% if (!isLoggedIn) { %>
                         <div class="vs-authcluster">
                             <a href="<%= ctx %>/dangnhap" class="vs-auth-btn vs-auth-btn-login" aria-label="Đăng nhập" title="Đăng nhập">Đăng nhập</a>
-                            <button type="button" onclick="openAuthModal('register')" class="vs-auth-btn vs-auth-btn-register" aria-label="Đăng ký" title="Đăng ký">Đăng ký</button>
+                            <a href="<%= ctx %>/dangky" class="vs-auth-btn vs-auth-btn-register" aria-label="Đăng ký" title="Đăng ký">Đăng ký</a>
                         </div>
                     <% } %>
                 </div>
@@ -437,10 +648,15 @@
                     String firstSport = businessType.contains(",") ? businessType.substring(0, businessType.indexOf(',')).trim() : businessType.trim();
                     String firstSportSafe = firstSport.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
             %>
-                <div class="facility-card vs-card overflow-hidden group flex flex-col relative bg-white border border-gray-100 hover:shadow-md transition-shadow duration-300"
+                <div class="facility-card vs-card overflow-hidden group flex flex-col relative bg-white border border-gray-100 hover:shadow-md transition-shadow duration-300 cursor-pointer"
                      data-name="<%= csName.toLowerCase() %>"
                      data-address="<%= csAddr.toLowerCase() %>"
-                     data-sport="<%= sportsLower %>">
+                     data-sport="<%= sportsLower %>"
+                     data-coso-id="<%= cs.getCoSoID() %>"
+                     data-facility-name="<%= csNameSafe %>"
+                     data-card-image="<%= cardImgUrl.replace("\"", "&quot;") %>"
+                     role="button" tabindex="0"
+                     aria-label="Xem chi tiết <%= csNameSafe %>">
 
                     <!-- Top Image & Badges/Overlay -->
                     <div class="relative w-full h-[122px] overflow-hidden bg-gray-100 shrink-0">
@@ -488,11 +704,15 @@
                             </p>
                         </div>
 
-                        <!-- Booking trigger CTA button (positioned to the right) -->
+                        <!-- Booking trigger CTA button: opens the "Chọn hình thức đặt" modal -->
                         <div class="shrink-0 self-center">
-                            <a href="<%= ctx %>/customer/dat-san?facilityId=<%= cs.getCoSoID() %>" aria-label="Đặt lịch tại <%= csNameSafe %>" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 text-[11.5px] font-extrabold px-3 py-2 rounded-md tracking-wide transition-colors shadow-sm whitespace-nowrap text-decoration-none">
+                            <button type="button" data-book-trigger
+                                    data-coso-id="<%= cs.getCoSoID() %>"
+                                    data-facility-name="<%= csNameSafe %>"
+                                    aria-label="Đặt lịch tại <%= csNameSafe %>" aria-haspopup="dialog"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 text-[11.5px] font-extrabold px-3 py-2 rounded-md tracking-wide transition-colors shadow-sm whitespace-nowrap border-none cursor-pointer">
                                 ĐẶT LỊCH
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -510,7 +730,149 @@
     <!-- Navigation Modals and Toasts (Self-contained) -->
     <div id="vsHomeToast" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:calc(var(--vs-bottomnav-h, 62px) + 26px);transform:translateX(-50%) translateY(12px);z-index:1300;background:#0f172a;color:#fff;padding:10px 16px;border-radius:9999px;font-size:13px;font-weight:600;opacity:0;visibility:hidden;transition:opacity .2s ease,transform .2s ease;box-shadow:0 6px 18px rgba(15,23,42,.25);"></div>
 
-    <jsp:include page="/auth/AuthModal.jsp" />
+    <!-- ============ Modal "Chọn hình thức đặt" (một instance dùng chung) ============ -->
+    <div id="bookingChoiceOverlay" class="vsx-overlay" hidden></div>
+    <div id="bookingChoiceModal" class="vsbc-modal" role="dialog" aria-modal="true" aria-labelledby="bookingChoiceTitle" hidden>
+        <div class="vsbc-head">
+            <h2 id="bookingChoiceTitle" class="vsbc-title">Chọn hình thức đặt</h2>
+            <button type="button" id="bcCloseBtn" class="vsbc-x" aria-label="Đóng hộp thoại">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <p id="bcFacilityName" class="vsbc-sub"></p>
+
+        <a id="bcOptionDirect" class="vsbc-option vsbc-option-direct" href="#">
+            <span class="vsbc-opt-ic">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+            </span>
+            <span style="min-width:0;">
+                <span class="vsbc-opt-title">Đặt sân trực tiếp</span>
+                <span class="vsbc-opt-desc" style="display:block;">Chọn sân, ngày và khung giờ phù hợp để đặt sân ngay.</span>
+            </span>
+            <span class="vsbc-arrow" aria-hidden="true">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+        </a>
+
+        <a id="bcOptionMatch" class="vsbc-option vsbc-option-match" href="#">
+            <span class="vsbc-opt-ic">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+            </span>
+            <span style="min-width:0;">
+                <span class="vsbc-opt-title">Tạo kèo / Tìm người chơi <span class="vsbc-badge">Ghép trận</span></span>
+                <span class="vsbc-opt-desc" style="display:block;">Tạo một trận mới hoặc tìm thêm người chơi phù hợp tại sân này.</span>
+            </span>
+            <span class="vsbc-arrow" aria-hidden="true">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+        </a>
+    </div>
+
+    <!-- ============ Facility detail bottom sheet (một instance dùng chung) ============ -->
+    <div id="facilitySheetOverlay" class="vsx-overlay" hidden></div>
+    <section id="facilitySheet" class="vsfs-sheet" role="dialog" aria-modal="true" aria-labelledby="fsName" hidden>
+        <div class="vsfs-handle-wrap" id="fsHandle" aria-hidden="true"><span class="vsfs-handle"></span></div>
+        <div class="vsfs-topbar">
+            <button type="button" id="fsFavBtn" class="vsfs-iconbtn" aria-label="Lưu cơ sở yêu thích">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+            <button type="button" id="fsShareBtn" class="vsfs-iconbtn" aria-label="Chia sẻ cơ sở">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+            </button>
+            <a id="fsMapBtn" class="vsfs-iconbtn" href="#" aria-label="Xem trên bản đồ" hidden>
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/></svg>
+            </a>
+            <button type="button" id="fsCloseBtn" class="vsfs-iconbtn" aria-label="Đóng chi tiết sân">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="vsfs-scroll" id="fsScroll">
+            <div class="vsfs-inner">
+                <!-- Skeleton state -->
+                <div id="fsSkeleton" class="vsfs-cols">
+                    <div class="vsx-skel" style="aspect-ratio:16/10;border-radius:16px;"></div>
+                    <div>
+                        <div class="vsx-skel" style="height:30px;width:62%;"></div>
+                        <div class="vsx-skel" style="height:15px;width:88%;margin-top:14px;"></div>
+                        <div class="vsx-skel" style="height:15px;width:74%;margin-top:9px;"></div>
+                        <div class="vsx-skel" style="height:15px;width:52%;margin-top:9px;"></div>
+                    </div>
+                </div>
+
+                <!-- Error state -->
+                <div id="fsError" class="vsfs-error" hidden>
+                    <p>Không thể tải thông tin sân. Vui lòng thử lại.</p>
+                    <button type="button" id="fsRetryBtn" class="vsfs-btn vsfs-btn-ghost">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        Thử lại
+                    </button>
+                </div>
+
+                <!-- Loaded content -->
+                <div id="fsContent" hidden>
+                    <div class="vsfs-cols">
+                        <div class="vsfs-hero"><img id="fsHeroImg" src="" alt=""></div>
+                        <div style="min-width:0;">
+                            <h2 class="vsfs-name" id="fsName"></h2>
+                            <div class="vsfs-chips" id="fsChips"></div>
+                            <div class="vsfs-meta" id="fsMeta"></div>
+                            <p class="vsfs-price" id="fsPrice" hidden></p>
+                        </div>
+                    </div>
+
+                    <div class="vsfs-tabs" role="tablist" aria-label="Thông tin chi tiết cơ sở" id="fsTablist">
+                        <button type="button" class="vsfs-tab" role="tab" id="fsTab-overview" aria-controls="fsPanel-overview" aria-selected="true" data-fstab="overview">Tổng quan</button>
+                        <button type="button" class="vsfs-tab" role="tab" id="fsTab-courts" aria-controls="fsPanel-courts" aria-selected="false" data-fstab="courts">Sân &amp; bảng giá</button>
+                        <button type="button" class="vsfs-tab" role="tab" id="fsTab-services" aria-controls="fsPanel-services" aria-selected="false" data-fstab="services">Dịch vụ</button>
+                        <button type="button" class="vsfs-tab" role="tab" id="fsTab-images" aria-controls="fsPanel-images" aria-selected="false" data-fstab="images">Hình ảnh</button>
+                        <button type="button" class="vsfs-tab" role="tab" id="fsTab-policy" aria-controls="fsPanel-policy" aria-selected="false" data-fstab="policy">Chính sách</button>
+                    </div>
+                    <div class="vsfs-panel" role="tabpanel" id="fsPanel-overview" aria-labelledby="fsTab-overview" tabindex="0"></div>
+                    <div class="vsfs-panel" role="tabpanel" id="fsPanel-courts" aria-labelledby="fsTab-courts" tabindex="0" hidden></div>
+                    <div class="vsfs-panel" role="tabpanel" id="fsPanel-services" aria-labelledby="fsTab-services" tabindex="0" hidden></div>
+                    <div class="vsfs-panel" role="tabpanel" id="fsPanel-images" aria-labelledby="fsTab-images" tabindex="0" hidden></div>
+                    <div class="vsfs-panel" role="tabpanel" id="fsPanel-policy" aria-labelledby="fsTab-policy" tabindex="0" hidden>
+                        <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--vsx-muted);margin-bottom:10px;">Chính sách chung của V-SPORT</p>
+                        <div class="vsfs-policy-item">
+                            <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>Hủy sân miễn phí khi hủy trước giờ bắt đầu ít nhất 6 tiếng (áp dụng cho đơn chờ xác nhận).</span>
+                        </div>
+                        <div class="vsfs-policy-item">
+                            <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Thanh toán online qua PayOS: sân được giữ chỗ trong 10 phút chờ thanh toán.</span>
+                        </div>
+                        <div class="vsfs-policy-item">
+                            <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>Hủy sát giờ hoặc không đến sân sẽ ảnh hưởng điểm uy tín người chơi của bạn.</span>
+                        </div>
+                        <div class="vsfs-policy-item">
+                            <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                            <span>Mỗi tài khoản đặt tối đa 3 ca hoạt động trong cùng một ngày trên toàn hệ thống.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="vsfs-actionbar">
+            <div class="vsfs-actionbar-inner">
+                <a id="fsCallBtn" class="vsfs-btn vsfs-btn-ghost" href="#" hidden>
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
+                    Gọi cơ sở
+                </a>
+                <a id="fsMapActionBtn" class="vsfs-btn vsfs-btn-ghost" href="<%= ctx %>/customer/ban-do">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>
+                    Xem bản đồ
+                </a>
+                <button type="button" id="fsBookBtn" class="vsfs-btn vsfs-btn-primary">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+                    Đặt sân
+                </button>
+            </div>
+        </div>
+    </section>
+
     <jsp:include page="/customer/common/bottom-nav.jsp" />
 
     <script>
@@ -614,6 +976,466 @@
                 }
             });
         }
+
+        /* ======================================================================
+           Booking-choice modal + facility detail bottom sheet
+           ====================================================================== */
+        window.VSPORT_CONTEXT_PATH = '<%= ctx %>';
+        (function () {
+            'use strict';
+            const CTX = window.VSPORT_CONTEXT_PATH;
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            // ---- Shared helpers -------------------------------------------------
+            let scrollLocks = 0;
+            function lockScroll()   { scrollLocks++; document.body.style.overflow = 'hidden'; }
+            function unlockScroll() { scrollLocks = Math.max(0, scrollLocks - 1); if (!scrollLocks) document.body.style.overflow = ''; }
+
+            function focusables(container) {
+                return Array.from(container.querySelectorAll(
+                    'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                )).filter(el => !el.hidden && el.offsetParent !== null);
+            }
+            function trapTab(container, e) {
+                if (e.key !== 'Tab') return;
+                const list = focusables(container);
+                if (!list.length) { e.preventDefault(); return; }
+                const first = list[0], last = list[list.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+            function fmtVnd(n) {
+                if (typeof n !== 'number' || !isFinite(n) || n <= 0) return null;
+                return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + 'đ';
+            }
+            function resolveImg(v) {
+                if (!v) return null;
+                if (v.startsWith('http://') || v.startsWith('https://')) return v;
+                return CTX + (v.startsWith('/') ? v : '/' + v);
+            }
+
+            // ================= Booking-choice modal =============================
+            const bcOverlay = document.getElementById('bookingChoiceOverlay');
+            const bcModal = document.getElementById('bookingChoiceModal');
+            const bcClose = document.getElementById('bcCloseBtn');
+            const bcDirect = document.getElementById('bcOptionDirect');
+            const bcMatch = document.getElementById('bcOptionMatch');
+            const bcName = document.getElementById('bcFacilityName');
+            let bcReturnFocus = null;
+            let bcOpen = false;
+
+            function openBookingChoice(cosoId, facilityName, triggerEl) {
+                if (bcOpen) return;
+                bcOpen = true;
+                bcReturnFocus = triggerEl || document.activeElement;
+                bcDirect.href = CTX + '/customer/dat-san?branchId=' + encodeURIComponent(cosoId);
+                bcMatch.href = CTX + '/customer/ghep-keo?tab=tao-keo&coSoId=' + encodeURIComponent(cosoId);
+                bcName.textContent = facilityName || '';
+                bcOverlay.hidden = false;
+                bcModal.hidden = false;
+                requestAnimationFrame(() => {
+                    bcOverlay.classList.add('is-open');
+                    bcModal.classList.add('is-open');
+                });
+                lockScroll();
+                bcDirect.focus();
+            }
+            function closeBookingChoice() {
+                if (!bcOpen) return;
+                bcOpen = false;
+                bcOverlay.classList.remove('is-open');
+                bcModal.classList.remove('is-open');
+                const done = () => { bcOverlay.hidden = true; bcModal.hidden = true; };
+                reduceMotion ? done() : setTimeout(done, 210);
+                unlockScroll();
+                if (bcReturnFocus && document.contains(bcReturnFocus)) bcReturnFocus.focus();
+                bcReturnFocus = null;
+            }
+            bcClose.addEventListener('click', closeBookingChoice);
+            bcOverlay.addEventListener('click', closeBookingChoice);
+            bcModal.addEventListener('keydown', e => trapTab(bcModal, e));
+
+            // ================= Facility detail bottom sheet =====================
+            const fsOverlay = document.getElementById('facilitySheetOverlay');
+            const fsSheet = document.getElementById('facilitySheet');
+            const fsSkeleton = document.getElementById('fsSkeleton');
+            const fsErrorBox = document.getElementById('fsError');
+            const fsContent = document.getElementById('fsContent');
+            const fsScrollEl = document.getElementById('fsScroll');
+            const detailCache = new Map();
+            let fsOpen = false;
+            let fsReturnFocus = null;
+            let fsAbort = null;
+            let fsCurrentId = null;
+            let fsCurrentName = '';
+            let fsCardImage = null;
+            let fsPushedState = false;
+
+            function openFacilitySheet(card) {
+                const cosoId = card.getAttribute('data-coso-id');
+                if (!cosoId) return;
+                fsReturnFocus = card;
+                fsCurrentId = cosoId;
+                fsCurrentName = card.getAttribute('data-facility-name') || '';
+                fsCardImage = card.getAttribute('data-card-image') || null;
+                fsOpen = true;
+                fsOverlay.hidden = false;
+                fsSheet.hidden = false;
+                fsSheet.style.transform = '';
+                requestAnimationFrame(() => {
+                    fsOverlay.classList.add('is-open');
+                    fsSheet.classList.add('is-open');
+                });
+                lockScroll();
+                document.getElementById('fsCloseBtn').focus();
+                try {
+                    history.pushState({ vsFacilitySheet: true }, '');
+                    fsPushedState = true;
+                } catch (e) { fsPushedState = false; }
+                loadFacilityDetail(cosoId);
+            }
+
+            function closeFacilitySheet(fromPopstate) {
+                if (!fsOpen) return;
+                fsOpen = false;
+                if (fsAbort) { fsAbort.abort(); fsAbort = null; }
+                fsOverlay.classList.remove('is-open');
+                fsSheet.classList.remove('is-open');
+                fsSheet.style.transform = '';
+                const done = () => { fsOverlay.hidden = true; fsSheet.hidden = true; };
+                reduceMotion ? done() : setTimeout(done, 320);
+                unlockScroll();
+                if (fsReturnFocus && document.contains(fsReturnFocus)) fsReturnFocus.focus();
+                fsReturnFocus = null;
+                if (fsPushedState && !fromPopstate) {
+                    fsPushedState = false;
+                    try { history.back(); } catch (e) { /* noop */ }
+                } else {
+                    fsPushedState = false;
+                }
+            }
+            window.addEventListener('popstate', () => { if (fsOpen) closeFacilitySheet(true); });
+
+            function showSheetState(state) {
+                fsSkeleton.hidden = state !== 'loading';
+                fsErrorBox.hidden = state !== 'error';
+                fsContent.hidden = state !== 'content';
+            }
+
+            function loadFacilityDetail(cosoId) {
+                showSheetState('loading');
+                if (detailCache.has(cosoId)) {
+                    renderFacilityDetail(detailCache.get(cosoId));
+                    return;
+                }
+                if (fsAbort) fsAbort.abort();
+                fsAbort = new AbortController();
+                fetch(CTX + '/api/customer/facilities/detail?coSoId=' + encodeURIComponent(cosoId), { signal: fsAbort.signal })
+                    .then(r => {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.json();
+                    })
+                    .then(data => {
+                        detailCache.set(cosoId, data);
+                        if (fsOpen && fsCurrentId === cosoId) renderFacilityDetail(data);
+                    })
+                    .catch(err => {
+                        if (err && err.name === 'AbortError') return;
+                        if (fsOpen && fsCurrentId === cosoId) showSheetState('error');
+                    });
+            }
+            document.getElementById('fsRetryBtn').addEventListener('click', () => {
+                if (fsCurrentId) { detailCache.delete(fsCurrentId); loadFacilityDetail(fsCurrentId); }
+            });
+
+            // ---- Rendering (textContent only, no innerHTML with server data) ----
+            function el(tag, className, text) {
+                const node = document.createElement(tag);
+                if (className) node.className = className;
+                if (text != null) node.textContent = text;
+                return node;
+            }
+            function metaRow(iconPath, text) {
+                const row = el('div', 'vsfs-meta-row');
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'lci');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+                svg.setAttribute('stroke-width', '2');
+                svg.setAttribute('stroke-linecap', 'round');
+                svg.setAttribute('stroke-linejoin', 'round');
+                svg.setAttribute('aria-hidden', 'true');
+                iconPath.split('|').forEach(d => {
+                    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    p.setAttribute('d', d);
+                    svg.appendChild(p);
+                });
+                row.appendChild(svg);
+                row.appendChild(el('span', null, text));
+                return row;
+            }
+            const IC_PIN = 'M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0|M15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0';
+            const IC_CLOCK = 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20|M12 6v6l4 2';
+            const IC_PHONE = 'M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384';
+            const IC_INFO = 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20|M12 16v-4|M12 8h.01';
+
+            function renderFacilityDetail(data) {
+                // Hero image
+                const hero = document.getElementById('fsHeroImg');
+                const heroSrc = resolveImg(data.imageUrl) || fsCardImage;
+                hero.onerror = fsCardImage ? function () { this.onerror = null; this.src = fsCardImage; } : null;
+                hero.src = heroSrc || '';
+                hero.alt = data.tenCoSo || '';
+
+                // Identity
+                document.getElementById('fsName').textContent = data.tenCoSo || '';
+
+                const chips = document.getElementById('fsChips');
+                chips.textContent = '';
+                if (typeof data.openNow === 'boolean') {
+                    chips.appendChild(el('span', 'vsfs-chip' + (data.openNow ? '' : ' is-warn'), data.openNow ? 'Đang mở' : 'Ngoài giờ mở cửa'));
+                }
+                if (typeof data.readyCourtCount === 'number' && data.readyCourtCount > 0) {
+                    chips.appendChild(el('span', 'vsfs-chip', 'Còn ' + data.readyCourtCount + ' sân sẵn sàng'));
+                }
+                (Array.isArray(data.sports) ? data.sports : []).forEach(s => chips.appendChild(el('span', 'vsfs-chip', s)));
+                if (Array.isArray(data.services) && data.services.length) {
+                    chips.appendChild(el('span', 'vsfs-chip', 'Có dịch vụ'));
+                }
+
+                const meta = document.getElementById('fsMeta');
+                meta.textContent = '';
+                if (data.address) meta.appendChild(metaRow(IC_PIN, data.address));
+                if (data.openingTime && data.closingTime) meta.appendChild(metaRow(IC_CLOCK, data.openingTime + ' - ' + data.closingTime));
+                if (data.phone) meta.appendChild(metaRow(IC_PHONE, data.phone));
+
+                const priceEl = document.getElementById('fsPrice');
+                const minPrice = fmtVnd(data.minPrice);
+                priceEl.hidden = !minPrice;
+                if (minPrice) priceEl.textContent = 'Giá từ ' + minPrice + '/giờ';
+
+                // Tab: Tổng quan
+                const ov = document.getElementById('fsPanel-overview');
+                ov.textContent = '';
+                ov.appendChild(el('p', null, data.description || 'Thông tin này đang được cơ sở cập nhật.'));
+                const ovMeta = el('div', 'vsfs-meta');
+                ovMeta.style.marginTop = '12px';
+                if (data.address) ovMeta.appendChild(metaRow(IC_PIN, data.address));
+                if (data.openingTime && data.closingTime) ovMeta.appendChild(metaRow(IC_CLOCK, 'Giờ hoạt động: ' + data.openingTime + ' - ' + data.closingTime));
+                if (data.phone) ovMeta.appendChild(metaRow(IC_PHONE, 'Liên hệ: ' + data.phone));
+                if (Array.isArray(data.sports) && data.sports.length) ovMeta.appendChild(metaRow(IC_INFO, 'Môn thể thao: ' + data.sports.join(', ')));
+                ov.appendChild(ovMeta);
+                const mapLink = el('a', 'vsfs-court-cta', 'Xem trên bản đồ');
+                mapLink.href = CTX + '/customer/ban-do';
+                mapLink.style.marginTop = '14px';
+                mapLink.style.display = 'inline-flex';
+                ov.appendChild(mapLink);
+
+                // Tab: Sân & bảng giá
+                const courtsPanel = document.getElementById('fsPanel-courts');
+                courtsPanel.textContent = '';
+                const courts = Array.isArray(data.courts) ? data.courts : [];
+                if (courts.length) {
+                    courts.forEach(c => {
+                        const row = el('div', 'vsfs-court');
+                        const left = el('div');
+                        left.style.minWidth = '0';
+                        const nameLine = el('div', 'vsfs-court-name', c.tenSan || '');
+                        if (c.trangThai) {
+                            nameLine.appendChild(el('span',
+                                'vsfs-status ' + (c.trangThai === 'Sẵn sàng' ? 'is-ready' : 'is-other'), c.trangThai));
+                        }
+                        left.appendChild(nameLine);
+                        const subParts = [];
+                        if (c.loaiSan) subParts.push(c.loaiSan);
+                        if (c.monTheThao) subParts.push(c.monTheThao);
+                        if (subParts.length) left.appendChild(el('div', 'vsfs-court-sub', subParts.join(' · ')));
+                        row.appendChild(left);
+
+                        const right = el('div');
+                        right.style.display = 'flex';
+                        right.style.alignItems = 'center';
+                        right.style.gap = '12px';
+                        const gia = fmtVnd(c.giaKhongDen);
+                        const giaDen = fmtVnd(c.giaCoDen);
+                        if (gia) {
+                            right.appendChild(el('span', 'vsfs-court-price',
+                                giaDen && giaDen !== gia ? gia + ' - ' + giaDen + '/giờ' : gia + '/giờ'));
+                        }
+                        const cta = el('a', 'vsfs-court-cta', 'Đặt sân');
+                        cta.href = CTX + '/customer/chi-tiet-san?id=' + encodeURIComponent(c.sanId);
+                        right.appendChild(cta);
+                        row.appendChild(right);
+                        courtsPanel.appendChild(row);
+                    });
+                } else {
+                    courtsPanel.appendChild(el('p', null, 'Thông tin này đang được cơ sở cập nhật.'));
+                }
+
+                // Tab: Dịch vụ (ẩn tab khi không có dữ liệu)
+                const services = Array.isArray(data.services) ? data.services : [];
+                const svTab = document.getElementById('fsTab-services');
+                const svPanel = document.getElementById('fsPanel-services');
+                svPanel.textContent = '';
+                svTab.hidden = !services.length;
+                services.forEach(s => {
+                    const row = el('div', 'vsfs-service');
+                    row.appendChild(el('span', null, s.tenSanPham || ''));
+                    const price = fmtVnd(s.donGia);
+                    row.appendChild(el('b', null, price ? price + (s.donViTinh ? '/' + s.donViTinh : '') : (s.donViTinh || '')));
+                    svPanel.appendChild(row);
+                });
+
+                // Tab: Hình ảnh (ẩn tab khi không có ảnh thật)
+                const images = (Array.isArray(data.images) ? data.images : []).map(resolveImg).filter(Boolean);
+                const imgTab = document.getElementById('fsTab-images');
+                const imgPanel = document.getElementById('fsPanel-images');
+                imgPanel.textContent = '';
+                imgTab.hidden = !images.length;
+                if (images.length) {
+                    const grid = el('div', 'vsfs-imggrid');
+                    images.forEach(src => {
+                        const img = document.createElement('img');
+                        img.loading = 'lazy';
+                        img.alt = data.tenCoSo || '';
+                        img.onerror = function () { this.remove(); };
+                        img.src = src;
+                        grid.appendChild(img);
+                    });
+                    imgPanel.appendChild(grid);
+                }
+
+                // Header/action-bar buttons
+                const mapBtn = document.getElementById('fsMapBtn');
+                const hasCoords = typeof data.latitude === 'number' && typeof data.longitude === 'number'
+                    && (data.latitude !== 0 || data.longitude !== 0);
+                mapBtn.hidden = !hasCoords;
+                mapBtn.href = CTX + '/customer/ban-do';
+
+                const callBtn = document.getElementById('fsCallBtn');
+                callBtn.hidden = !data.phone;
+                if (data.phone) callBtn.href = 'tel:' + String(data.phone).replace(/[^+\d]/g, '');
+
+                selectSheetTab('overview');
+                showSheetState('content');
+            }
+
+            // ---- Tabs -----------------------------------------------------------
+            const tabButtons = Array.from(document.querySelectorAll('.vsfs-tab'));
+            function selectSheetTab(key) {
+                tabButtons.forEach(btn => {
+                    const selected = btn.getAttribute('data-fstab') === key;
+                    btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+                    document.getElementById('fsPanel-' + btn.getAttribute('data-fstab')).hidden = !selected;
+                });
+            }
+            tabButtons.forEach((btn, idx) => {
+                btn.addEventListener('click', () => selectSheetTab(btn.getAttribute('data-fstab')));
+                btn.addEventListener('keydown', e => {
+                    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                    e.preventDefault();
+                    const visible = tabButtons.filter(b => !b.hidden);
+                    const pos = visible.indexOf(btn);
+                    const next = visible[(pos + (e.key === 'ArrowRight' ? 1 : visible.length - 1)) % visible.length];
+                    next.focus();
+                    selectSheetTab(next.getAttribute('data-fstab'));
+                });
+            });
+
+            // ---- Sheet header buttons ------------------------------------------
+            document.getElementById('fsCloseBtn').addEventListener('click', () => closeFacilitySheet(false));
+            fsOverlay.addEventListener('click', () => closeFacilitySheet(false));
+            fsSheet.addEventListener('keydown', e => trapTab(fsSheet, e));
+            document.getElementById('fsFavBtn').addEventListener('click', function () {
+                this.classList.toggle('is-fav');
+                showHomeToast(this.classList.contains('is-fav') ? 'Đã thêm vào danh sách yêu thích' : 'Đã bỏ lưu cơ sở');
+            });
+            document.getElementById('fsShareBtn').addEventListener('click', function () {
+                const url = window.location.origin + CTX + '/customer/dat-san?branchId=' + encodeURIComponent(fsCurrentId || '');
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url)
+                        .then(() => showHomeToast('Đã sao chép liên kết chia sẻ cơ sở ' + fsCurrentName))
+                        .catch(() => showHomeToast('Không thể sao chép liên kết'));
+                } else {
+                    showHomeToast('Trình duyệt không hỗ trợ sao chép liên kết');
+                }
+            });
+            document.getElementById('fsBookBtn').addEventListener('click', function () {
+                const cosoId = fsCurrentId;
+                const name = fsCurrentName;
+                const returnTo = fsReturnFocus;
+                closeFacilitySheet(false);
+                const wait = reduceMotion ? 0 : 240;
+                setTimeout(() => openBookingChoice(cosoId, name, returnTo), wait);
+            });
+
+            // ---- Escape closes topmost layer -----------------------------------
+            document.addEventListener('keydown', e => {
+                if (e.key !== 'Escape') return;
+                if (bcOpen) { closeBookingChoice(); return; }
+                if (fsOpen) closeFacilitySheet(false);
+            });
+
+            // ---- Drag-down to close (mobile) -----------------------------------
+            (function initDrag() {
+                const handle = document.getElementById('fsHandle');
+                let startY = null, delta = 0, dragging = false;
+                function onStart(e) {
+                    dragging = true;
+                    startY = (e.touches ? e.touches[0] : e).clientY;
+                    delta = 0;
+                    fsSheet.style.transition = 'none';
+                }
+                function onMove(e) {
+                    if (!dragging || startY == null) return;
+                    const y = (e.touches ? e.touches[0] : e).clientY;
+                    delta = Math.max(0, y - startY);
+                    fsSheet.style.transform = 'translateY(' + delta + 'px)';
+                }
+                function onEnd() {
+                    if (!dragging) return;
+                    dragging = false;
+                    fsSheet.style.transition = '';
+                    if (delta > 110) {
+                        closeFacilitySheet(false);
+                    } else {
+                        fsSheet.style.transform = '';
+                    }
+                    startY = null;
+                }
+                handle.addEventListener('touchstart', onStart, { passive: true });
+                handle.addEventListener('touchmove', onMove, { passive: true });
+                handle.addEventListener('touchend', onEnd);
+                handle.addEventListener('mousedown', e => { onStart(e); e.preventDefault(); });
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onEnd);
+            })();
+
+            // ---- Wire up cards (delegation; no per-card modal instances) --------
+            const grid = document.getElementById('facilityGrid');
+            if (grid) {
+                grid.addEventListener('click', e => {
+                    const bookBtn = e.target.closest('[data-book-trigger]');
+                    if (bookBtn) {
+                        e.stopPropagation();
+                        openBookingChoice(bookBtn.getAttribute('data-coso-id'), bookBtn.getAttribute('data-facility-name'), bookBtn);
+                        return;
+                    }
+                    if (e.target.closest('button, a')) return; // favorite/share/other controls
+                    const card = e.target.closest('.facility-card');
+                    if (card) openFacilitySheet(card);
+                });
+                grid.addEventListener('keydown', e => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return;
+                    const card = e.target.closest('.facility-card');
+                    if (card && e.target === card) {
+                        e.preventDefault();
+                        openFacilitySheet(card);
+                    }
+                });
+            }
+        })();
     </script>
 </body>
 </html>

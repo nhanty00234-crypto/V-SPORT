@@ -996,5 +996,3 @@
         if (drawer) drawer.classList.remove('open');
     };
 </script>
-
-<jsp:include page="/auth/AuthModal.jsp" />
