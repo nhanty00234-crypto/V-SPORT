@@ -23,8 +23,10 @@
             /* 1024-1199px (tablet tier): ~300-330px. >=1200px: ~376-380px regardless of
                how wide the viewport gets beyond that (target spec is a fixed density,
                not a proportionally-scaling one at large desktop sizes). */
-            --account-sidebar-width: clamp(300px, 26vw, 330px);
-            --account-header-height: 56px;
+            --account-sidebar-width: clamp(300px, 26vw, 340px);
+            --account-header-height: 46px;
+            /* V-SPORT brand identity (navy/blue/cyan) — matches vsport-theme.jsp used
+               on every other customer page. Scoped to this JSP's own <style>. */
             --sidebar-bg: #EEF7FC;
             --sidebar-surface: #ffffff;
             --sidebar-border: #DCE5EF;
@@ -33,14 +35,21 @@
             --primary-bright: #18C8E8;
             --ink-green: #102A43;
             --muted-green: #829AB1;
+            --content-bg: #F2F7FC;
+            --settings-icon: #185A9D;
+            --settings-text: #29435C;
+            --settings-chev: #9DAEC2;
+            --settings-border: #DCE5EF;
         }
         @media (min-width: 1200px) {
-            :root { --account-sidebar-width: clamp(376px, 23vw, 380px); }
+            :root { --account-sidebar-width: 378px; }
         }
         body {
-            font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif !important;
+            font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
             background-color: #ffffff !important;
             color: var(--ink-green) !important;
+            font-size: 14px;
+            line-height: 1.4;
         }
         h1, h2, h3, h4, h5, h6 { font-family: inherit; }
         [hidden] { display: none !important; }
@@ -66,6 +75,9 @@
             background: var(--sidebar-bg);
             border-right: 1px solid var(--sidebar-border);
             min-width: 0;
+            /* Clip the decorative wave's ±6% horizontal bleed so it can't cause a
+               horizontal scrollbar when the sidebar is full-width on mobile. */
+            overflow-x: hidden;
         }
         .account-sidebar-scroll { display: flex; flex-direction: column; }
         @media (min-width: 1024px) {
@@ -80,9 +92,9 @@
         /* Green top section with soft wave bottom */
         .account-sidebar-top {
             position: relative;
-            background: linear-gradient(155deg, var(--primary-dark) 0%, var(--primary-mid) 62%, #18C8E8 100%);
+            background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary-mid) 62%, var(--primary-bright) 100%);
             padding: 20px 16px 0;
-            height: 228px;
+            height: 230px;
         }
         .account-sidebar-top::after {
             content: "";
@@ -99,9 +111,9 @@
         .side-profile-row {
             position: relative; z-index: 1;
             display: flex; align-items: center; gap: 10px;
-            width: 100%; min-height: 58px; padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.13);
-            border: 1px solid #e8c25a;
+            width: 100%; min-height: 56px; padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid #E8BE35;
             border-radius: 8px;
             color: #fff; text-align: left; text-decoration: none; cursor: pointer;
             transition: background-color .15s ease;
@@ -161,7 +173,7 @@
         .side-quick-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 7px; min-height: 84px; padding: 8px 4px;
-            background: #fff; border: 1px solid #e2f0e8; border-radius: 10px;
+            background: #fff; border: 1px solid #DCE5EF; border-radius: 8px;
             text-decoration: none; cursor: pointer;
             transition: border-color .15s ease, background-color .15s ease, transform .1s ease;
         }
@@ -207,12 +219,14 @@
         .side-menu-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: -2px; }
         .side-menu-item .lci { width: 22px; height: 22px; flex-shrink: 0; color: var(--primary-mid); }
         .side-menu-item .lci-chev { width: 18px; height: 18px; margin-left: auto; color: #9db5a8; }
+        /* Active item: bolder text/icon only — no blue background, no left border (target). */
         .side-menu-item.is-current {
-            background: var(--vs-cyan-50, #F0FCFE);
-            border-left-color: var(--primary-mid);
+            background: transparent;
+            border-left-color: transparent;
             color: var(--primary-dark);
+            font-weight: 700;
         }
-        .side-menu-item.is-current .lci { color: var(--primary-mid); }
+        .side-menu-item.is-current .lci { color: var(--primary-dark); }
         .side-menu-item.is-danger { color: #b91c1c; }
         .side-menu-item.is-danger .lci { color: #dc2626; }
         .side-menu-item.is-danger:hover { background: #fef2f2; }
@@ -225,7 +239,7 @@
 
         /* ===================== Main workspace ===================== */
         .account-main {
-            background: #fff;
+            background: var(--content-bg);
             min-width: 0;
             display: flex;
             flex-direction: column;
@@ -238,14 +252,15 @@
         }
         .account-header h1 {
             margin: 0; color: #fff;
-            font-size: 20px; font-weight: 700; letter-spacing: .01em;
+            font-size: 18px; font-weight: 700; letter-spacing: .01em;
+            line-height: var(--account-header-height);
         }
         .account-body {
             flex: 1;
             display: flex; flex-direction: column;
-            padding: 18px 16px 32px;
+            padding: 15px 16px 32px;
         }
-        @media (min-width: 1024px) { .account-body { padding: 20px 28px 40px; } }
+        @media (min-width: 1024px) { .account-body { padding: 16px 28px 40px; } }
 
         .acc-toolbar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
         .btn-viewall {
@@ -378,28 +393,29 @@
         .pw-eye.is-visible .eye-closed { display: none; }
 
         /* ===================== Cài đặt (Settings) ===================== */
+        /* Each row is its own full-width card with a gap between — not one joined box. */
         .customer-settings-page .settings-card {
-            background: #fff; border: 1px solid #DCE5EF; border-radius: 12px;
-            overflow: hidden; max-width: 640px;
+            background: transparent; border: none; border-radius: 0; overflow: visible;
+            display: flex; flex-direction: column; gap: 15px;
+            width: 100%; max-width: 1040px;
         }
         .customer-settings-page .settings-row {
             display: flex; align-items: center; gap: 12px;
-            width: 100%; min-height: 44px; padding: 11px 16px;
-            background: transparent; border: none; font-family: inherit;
-            font-size: 14.5px; font-weight: 600; color: var(--primary-dark);
+            width: 100%; min-height: 46px; height: 46px; padding: 0 14px 0 16px;
+            background: #fff; border: 1px solid var(--settings-border); border-radius: 8px;
+            font-family: inherit; font-size: 14px; font-weight: 500; color: var(--settings-text);
             text-align: left; text-decoration: none; cursor: pointer;
-            transition: background-color .15s ease;
+            transition: border-color .15s ease, background-color .15s ease;
         }
-        .customer-settings-page .settings-row + .settings-row { border-top: 1px solid #eef3f8; }
         .customer-settings-page .settings-row:hover,
-        .customer-settings-page .settings-row:focus-visible { background: #F0FCFE; }
-        .customer-settings-page .settings-row:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: -2px; }
-        .customer-settings-page .settings-row .lci { color: var(--primary-mid); }
-        .customer-settings-page .settings-row .lci-chev { margin-left: auto; color: #9db5a8; }
-        .customer-settings-page .settings-row.is-danger { color: #E5484D; }
+        .customer-settings-page .settings-row:focus-visible { border-color: var(--primary-bright); }
+        .customer-settings-page .settings-row:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+        .customer-settings-page .settings-row .lci { width: 20px; height: 20px; color: var(--settings-icon); stroke-width: 1.9; }
+        .customer-settings-page .settings-row .lci-chev { width: 18px; height: 18px; margin-left: auto; color: var(--settings-chev); }
+        .customer-settings-page .settings-row.is-danger { color: #FF2D35; }
         .customer-settings-page .settings-row.is-danger .lci,
-        .customer-settings-page .settings-row.is-danger .lci-chev { color: #E5484D; }
-        .customer-settings-page .settings-row.is-danger:hover { background: #fef2f2; }
+        .customer-settings-page .settings-row.is-danger .lci-chev { color: #FF2D35; }
+        .customer-settings-page .settings-row.is-danger:hover { border-color: #FF2D35; }
     </style>
 </head>
 <body class="antialiased">

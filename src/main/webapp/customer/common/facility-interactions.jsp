@@ -776,8 +776,12 @@
             if (data.phone) ovMeta.appendChild(metaRow(IC_PHONE, 'Liên hệ: ' + data.phone));
             if (Array.isArray(data.sports) && data.sports.length) ovMeta.appendChild(metaRow(IC_INFO, 'Môn thể thao: ' + data.sports.join(', ')));
             ov.appendChild(ovMeta);
+            const ovHasCoords = typeof data.latitude === 'number' && typeof data.longitude === 'number'
+                && (data.latitude !== 0 || data.longitude !== 0);
             const mapLink = el('a', 'vsfs-court-cta', 'Xem trên bản đồ');
-            mapLink.href = CTX + '/customer/ban-do';
+            mapLink.href = ovHasCoords
+                ? CTX + '/customer/ban-do?facilityId=' + encodeURIComponent(fsCurrentId)
+                : CTX + '/customer/ban-do';
             mapLink.style.marginTop = '14px';
             mapLink.style.display = 'inline-flex';
             ov.appendChild(mapLink);
@@ -857,7 +861,15 @@
             const hasCoords = typeof data.latitude === 'number' && typeof data.longitude === 'number'
                 && (data.latitude !== 0 || data.longitude !== 0);
             mapBtn.hidden = !hasCoords;
-            mapBtn.href = CTX + '/customer/ban-do';
+            mapBtn.href = CTX + '/customer/ban-do?facilityId=' + encodeURIComponent(fsCurrentId);
+
+            const mapActionBtn = document.getElementById('fsMapActionBtn');
+            if (mapActionBtn) {
+                mapActionBtn.href = hasCoords
+                    ? CTX + '/customer/ban-do?facilityId=' + encodeURIComponent(fsCurrentId)
+                    : CTX + '/customer/ban-do';
+                mapActionBtn.title = hasCoords ? '' : 'Cơ sở chưa cập nhật vị trí';
+            }
 
             const callBtn = document.getElementById('fsCallBtn');
             callBtn.hidden = !data.phone;

@@ -284,6 +284,33 @@
         .rotate-180 {
             transform: rotate(180deg);
         }
+
+        /* ===================== PayOS error alert (contextual, not full-bleed) ===================== */
+        .payos-alert {
+            display: flex; align-items: flex-start; gap: 12px;
+            background: #FFF7F5; border: 1px solid #FFD1C7; border-left: 4px solid #F26A4B;
+            border-radius: 12px; padding: 14px 16px; text-align: left;
+        }
+        .payos-alert .payos-alert-icon { width: 21px; height: 21px; flex-shrink: 0; color: #E4573D; margin-top: 1px; }
+        .payos-alert-body { flex: 1; min-width: 0; }
+        .payos-alert-title { font-size: 14.5px; font-weight: 700; color: var(--vs-primary-900, #0B2545); margin: 0 0 2px; }
+        .payos-alert-desc { font-size: 13.5px; color: #6b5450; line-height: 1.5; margin: 0; }
+        .payos-alert-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .payos-alert-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
+            font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid transparent;
+            transition: background-color .15s ease, opacity .15s ease;
+        }
+        .payos-alert-btn:disabled { opacity: .6; cursor: not-allowed; }
+        .payos-alert-btn.is-outline { background: #fff; color: var(--vs-primary-600, #1677D2); border-color: var(--vs-primary-600, #1677D2); }
+        .payos-alert-btn.is-outline:hover { background: var(--vs-cyan-50, #F0FCFE); }
+        .payos-alert-btn.is-primary { background: var(--vs-primary-600, #1677D2); color: #fff; }
+        .payos-alert-btn.is-primary:hover { background: var(--vs-primary-700, #185A9D); }
+        .payos-alert-close {
+            width: 24px; height: 24px; flex-shrink: 0; border: none; background: transparent; cursor: pointer;
+            color: #b08d88; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        }
+        .payos-alert-close:hover { background: rgba(242, 106, 75, .12); }
     </style>
 </head>
 <body class="bg-[#faf9fd] text-on-surface antialiased flex flex-col min-h-screen">
@@ -301,11 +328,39 @@
 
                 <!-- Alerts -->
                 <c:if test="${not empty sessionScope.error}">
-                    <div class="mb-5 w-full max-w-5xl p-4 bg-red-50 border border-red-200 rounded-none text-red-700 text-sm flex items-start gap-3 text-left">
-                        <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
-                        <span>${sessionScope.error}</span>
-                        <% session.removeAttribute("error"); %>
-                    </div>
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.errorCode && sessionScope.errorCode ne 'null'}">
+                            <%-- Lỗi PayOS có phân loại: alert card gọn, đúng theme V-SPORT hiện tại. --%>
+                            <div class="mb-4 w-full max-w-5xl payos-alert" id="payosAlert"
+                                 data-datsanid="${sessionScope.errorDatSanId}"
+                                 data-retryable="${sessionScope.errorRetryable}">
+                                <svg class="payos-alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                <div class="payos-alert-body">
+                                    <p class="payos-alert-title">Chưa thể khởi tạo thanh toán trực tuyến</p>
+                                    <p class="payos-alert-desc" id="payosAlertDesc">${sessionScope.error}</p>
+                                    <c:if test="${not empty sessionScope.errorDatSanId}">
+                                        <div class="payos-alert-actions">
+                                            <c:if test="${sessionScope.errorRetryable}">
+                                                <button type="button" class="payos-alert-btn is-outline" id="payosRetryBtn">Thử lại</button>
+                                            </c:if>
+                                            <button type="button" class="payos-alert-btn is-primary" id="payosPayCounterBtn">Thanh toán tại quầy</button>
+                                        </div>
+                                    </c:if>
+                                </div>
+                                <button type="button" class="payos-alert-close" onclick="document.getElementById('payosAlert').remove();" aria-label="Đóng">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="mb-5 w-full max-w-5xl p-4 bg-red-50 border border-red-200 rounded-none text-red-700 text-sm flex items-start gap-3 text-left">
+                                <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                                <span>${sessionScope.error}</span>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                    <% session.removeAttribute("error"); session.removeAttribute("errorCode");
+                       session.removeAttribute("errorDatSanId"); session.removeAttribute("errorRetryable"); %>
                 </c:if>
                 <c:if test="${not empty sessionScope.message}">
                     <div class="mb-5 w-full max-w-5xl p-4 rounded-none text-sm flex items-start gap-3 text-left" style="background-color: var(--vs-success-bg, #E5F7EF); border: 1px solid var(--vs-success, #16A36A); color: var(--vs-success, #16A36A);">
@@ -1055,6 +1110,80 @@
 
     <!-- ════ MAIN JAVASCRIPT ════ -->
     <script>
+        // ─── PayOS error alert actions (Thử lại / Thanh toán tại quầy) ───
+        (function () {
+            const CTX = '${pageContext.request.contextPath}';
+            const alertEl = document.getElementById('payosAlert');
+            if (!alertEl) return;
+            const datSanId = alertEl.getAttribute('data-datsanid');
+            const descEl = document.getElementById('payosAlertDesc');
+            const retryBtn = document.getElementById('payosRetryBtn');
+            const counterBtn = document.getElementById('payosPayCounterBtn');
+
+            function setButtonBusy(btn, busyLabel) {
+                if (!btn) return () => {};
+                const original = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = busyLabel;
+                return function restore() { btn.disabled = false; btn.textContent = original; };
+            }
+
+            if (retryBtn) {
+                retryBtn.addEventListener('click', function () {
+                    const restore = setButtonBusy(retryBtn, 'Đang tạo liên kết...');
+                    if (counterBtn) counterBtn.disabled = true;
+                    fetch(CTX + '/customer/payos-retry', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                        body: 'datSanId=' + encodeURIComponent(datSanId)
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success && data.checkoutUrl) {
+                                window.location.href = data.checkoutUrl;
+                                return;
+                            }
+                            restore();
+                            if (counterBtn) counterBtn.disabled = false;
+                            if (descEl) descEl.textContent = data.message || 'Không thể tạo liên kết thanh toán. Vui lòng thử lại.';
+                            if (retryBtn && data.retryable === false) retryBtn.remove();
+                        })
+                        .catch(() => {
+                            restore();
+                            if (counterBtn) counterBtn.disabled = false;
+                            if (descEl) descEl.textContent = 'Không thể kết nối máy chủ. Vui lòng thử lại.';
+                        });
+                });
+            }
+
+            if (counterBtn) {
+                counterBtn.addEventListener('click', function () {
+                    const restore = setButtonBusy(counterBtn, 'Đang xử lý...');
+                    if (retryBtn) retryBtn.disabled = true;
+                    fetch(CTX + '/customer/payos-pay-counter', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                        body: 'datSanId=' + encodeURIComponent(datSanId)
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = CTX + '/customer/dat-san?openHistory=true';
+                                return;
+                            }
+                            restore();
+                            if (retryBtn) retryBtn.disabled = false;
+                            if (descEl) descEl.textContent = data.message || 'Không thể chuyển sang thanh toán tại quầy. Vui lòng thử lại.';
+                        })
+                        .catch(() => {
+                            restore();
+                            if (retryBtn) retryBtn.disabled = false;
+                            if (descEl) descEl.textContent = 'Không thể kết nối máy chủ. Vui lòng thử lại.';
+                        });
+                });
+            }
+        })();
+
         // ─── Date init ───
         const dateInput = document.getElementById('ngayDat');
         const todayStr = new Date().toISOString().split('T')[0];

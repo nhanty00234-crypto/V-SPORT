@@ -487,6 +487,15 @@
                         </div>
                         <!-- Favorite & Share floating shortcuts -->
                         <div class="absolute top-1.5 right-1.5 flex gap-1 z-10">
+                            <% if (cs.getViDo() != null && cs.getKinhDo() != null) { %>
+                                <a href="<%= ctx %>/customer/ban-do?facilityId=<%= cs.getCoSoID() %>" aria-label="Xem <%= csNameSafe %> trên bản đồ" title="Xem trên bản đồ" class="w-7 h-7 bg-white/95 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-600 shadow-sm transition-colors no-underline">
+                                    <span class="material-symbols-outlined text-[15px]" aria-hidden="true">location_on</span>
+                                </a>
+                            <% } else { %>
+                                <button type="button" disabled aria-label="Cơ sở chưa cập nhật vị trí" title="Cơ sở chưa cập nhật vị trí" class="w-7 h-7 bg-white/70 rounded-full flex items-center justify-center text-gray-300 shadow-sm border-none cursor-not-allowed">
+                                    <span class="material-symbols-outlined text-[15px]" aria-hidden="true">location_on</span>
+                                </button>
+                            <% } %>
                             <button onclick="toggleFavorite('<%= cs.getCoSoID() %>', this)" aria-label="Lưu cơ sở yêu thích" title="Yêu thích" class="w-7 h-7 bg-white/95 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-colors border-none cursor-pointer">
                                 <span class="material-symbols-outlined text-[15px]" aria-hidden="true">favorite</span>
                             </button>

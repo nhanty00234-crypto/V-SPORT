@@ -21,6 +21,16 @@ import org.example.model.TaiKhoan;
 import org.example.model.San;
 import org.example.model.CustomerReputationHistory;
 import org.example.util.Constants;
+import org.example.dto.payment.PayOSCheckoutSession;
+import org.example.dto.payment.PayOSCredentials;
+import org.example.service.PayOSConfigurationService;
+import org.example.service.payos.PayOSClientFactory;
+import vn.payos.PayOS;
+import vn.payos.exception.APIException;
+import vn.payos.exception.ConnectionException;
+import vn.payos.exception.ConnectionTimeoutException;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -56,7 +66,7 @@ import java.util.logging.Logger;
  * @author DatN (Senior refactor)
  * @version 2.0
  */
-@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel", "/customer/payos-status" })
+@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel", "/customer/payos-status", "/customer/payos-retry", "/customer/payos-pay-counter" })
 public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
@@ -244,6 +254,10 @@ public class DatSanServlet extends HttpServlet {
             handleHuyDatSan(req, resp, session, user);
         } else if (path.equals("/customer/dat-dich-vu")) {
             handlePostDatDichVu(req, resp, session, user);
+        } else if (path.equals("/customer/payos-retry")) {
+            handlePayOSRetry(req, resp, user);
+        } else if (path.equals("/customer/payos-pay-counter")) {
+            handlePayOSPayCounter(req, resp, user);
         }
     }
 
@@ -727,14 +741,15 @@ public class DatSanServlet extends HttpServlet {
                         // description tối đa 25 ký tự theo giới hạn PayOS
                         String description = "VSport DS" + newDatSanId;
 
-                        try {
-                            long tPayOS0 = System.currentTimeMillis();
-                            org.example.dto.payment.PayOSCheckoutSession checkoutSession =
-                                    org.example.service.PayOSService.getInstance()
-                                            .createCheckoutSession(newDatSanId, amount, description, returnUrl, cancelUrl);
-                            LOGGER.info(String.format("handleDatSan: PayOS createCheckoutSession=%dms",
-                                    System.currentTimeMillis() - tPayOS0));
+                        long tPayOS0 = System.currentTimeMillis();
+                        PayOSLinkResult linkResult = createFacilityPayOSLink(
+                                sanCoSoID, (long) newDatSanId, amount, description, returnUrl, cancelUrl, false);
+                        LOGGER.info(String.format("handleDatSan: PayOS createPaymentLink=%dms, success=%b%s",
+                                System.currentTimeMillis() - tPayOS0, linkResult.success,
+                                linkResult.success ? "" : ", errorCode=" + linkResult.errorCode));
 
+                        if (linkResult.success) {
+                            PayOSCheckoutSession checkoutSession = linkResult.session;
                             if (isAjax) {
                                 resp.setContentType("application/json; charset=UTF-8");
                                 resp.getWriter().write(String.format(
@@ -747,25 +762,21 @@ public class DatSanServlet extends HttpServlet {
                             } else {
                                 resp.sendRedirect(checkoutSession.checkoutUrl);
                             }
-                        } catch (Exception payosEx) {
-                            LOGGER.log(Level.SEVERE, "PayOS tạo link thất bại, DatSanID=" + newDatSanId, payosEx);
-                            if (newDatSanId != -1) {
-                                try (java.sql.Connection cancelConn = org.example.util.DBUtil.getConnection()) {
-                                    String cancelSql = "UPDATE LichDatSan SET TrangThai = N'Đã hủy', " +
-                                            "GhiChu = ISNULL(GhiChu, '') + N' [Tự động hủy: Không tạo được link thanh toán PayOS]' " +
-                                            "WHERE DatSanID = ? AND TrangThai = N'Chờ thanh toán'";
-                                    try (java.sql.PreparedStatement cancelPs = cancelConn.prepareStatement(cancelSql)) {
-                                        cancelPs.setInt(1, newDatSanId);
-                                        cancelPs.executeUpdate();
-                                    }
-                                } catch (Exception ignored) {}
-                            }
+                        } else {
+                            // KHÔNG hủy booking: giữ nguyên "Chờ thanh toán" + HoldExpiresAt hiện có để
+                            // khách bấm "Thử lại" (/customer/payos-retry) hoặc "Thanh toán tại quầy"
+                            // (/customer/payos-pay-counter) trên CÙNG đơn — không tạo booking mới. Nếu
+                            // khách không làm gì, booking tự hết hạn giữ chỗ theo HoldExpiresAt sẵn có.
                             if (isAjax) {
                                 resp.setContentType("application/json; charset=UTF-8");
-                                resp.getWriter().write("{\"success\":false,\"error\":\"Không thể tạo mã QR thanh toán. Vui lòng thử lại hoặc chọn thanh toán tại quầy.\"}");
+                                resp.getWriter().write(String.format(
+                                        "{\"success\":false,\"errorCode\":\"%s\",\"message\":\"%s\",\"datSanId\":%d,\"retryable\":%b,\"fallbackAvailable\":true}",
+                                        linkResult.errorCode, jsonEscape(linkResult.message), newDatSanId, linkResult.retryable));
                             } else {
-                                session.setAttribute("error",
-                                        "Không thể tạo link thanh toán PayOS. Vui lòng thử lại hoặc chọn thanh toán tại quầy.");
+                                session.setAttribute("error", linkResult.message);
+                                session.setAttribute("errorCode", linkResult.errorCode);
+                                session.setAttribute("errorDatSanId", newDatSanId);
+                                session.setAttribute("errorRetryable", linkResult.retryable);
                                 resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
                             }
                         }
@@ -934,6 +945,275 @@ public class DatSanServlet extends HttpServlet {
 
         session.setAttribute("message", "Bạn đã hủy thanh toán. Đơn giữ chỗ đã được hủy.");
         resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+    }
+
+    // =========================================================================
+    // PHẦN 5B: PAYOS RETRY / CHUYỂN THANH TOÁN TẠI QUẦY (không tạo booking mới)
+    // =========================================================================
+
+    /**
+     * "Thử lại" sau khi tạo link PayOS lần đầu thất bại. Dùng lại ĐÚNG booking đang "Chờ thanh
+     * toán" (không insert booking mới), tính lại amount từ DB (không tin frontend), hủy link cũ
+     * (nếu có) rồi tạo link mới với cùng orderCode=DatSanID. Idempotent: bấm nhiều lần chỉ tạo
+     * một link còn hiệu lực tại một thời điểm.
+     */
+    private void handlePayOSRetry(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user) throws IOException {
+        resp.setContentType("application/json; charset=UTF-8");
+        Integer datSanId = parseIntParam(req.getParameter("datSanId"));
+        if (datSanId == null) {
+            resp.getWriter().write("{\"success\":false,\"errorCode\":\"VALIDATION_ERROR\",\"message\":\"Thiếu datSanId.\"}");
+            return;
+        }
+
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
+            String sql = "SELECT l.AccountID, l.TrangThai, l.TongTienDuKien, l.HoldExpiresAt, s.CoSoID " +
+                    "FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            int accountId, coSoId; String trangThai; java.math.BigDecimal amountDb; java.sql.Timestamp holdExpiresAt;
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, datSanId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        resp.getWriter().write("{\"success\":false,\"errorCode\":\"NOT_FOUND\",\"message\":\"Không tìm thấy đơn đặt sân.\"}");
+                        return;
+                    }
+                    accountId = rs.getInt("AccountID");
+                    trangThai = rs.getString("TrangThai");
+                    amountDb = rs.getBigDecimal("TongTienDuKien");
+                    holdExpiresAt = rs.getTimestamp("HoldExpiresAt");
+                    coSoId = rs.getInt("CoSoID");
+                }
+            }
+            if (accountId != user.getAccountId()) {
+                resp.getWriter().write("{\"success\":false,\"errorCode\":\"FORBIDDEN\",\"message\":\"Đơn đặt sân không thuộc về bạn.\"}");
+                return;
+            }
+            if (!Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai)) {
+                resp.getWriter().write("{\"success\":false,\"errorCode\":\"PAYMENT_CONFLICT\",\"message\":\"Đơn không còn ở trạng thái chờ thanh toán. Vui lòng tải lại trang.\"}");
+                return;
+            }
+            if (holdExpiresAt == null || holdExpiresAt.toLocalDateTime().isBefore(LocalDateTime.now())) {
+                resp.getWriter().write(String.format(
+                        "{\"success\":false,\"errorCode\":\"HOLD_EXPIRED\",\"message\":\"%s\"}", jsonEscape(MSG_EXPIRED)));
+                return;
+            }
+
+            long amount = amountDb.setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+            String description = "VSport DS" + datSanId;
+            String baseUrl = resolveBaseUrl(req);
+            String returnUrl = baseUrl + "/customer/payos-return?datSanId=" + datSanId;
+            String cancelUrl = baseUrl + "/customer/payos-cancel?datSanId=" + datSanId;
+
+            PayOSLinkResult linkResult = createFacilityPayOSLink(coSoId, (long) datSanId, amount, description, returnUrl, cancelUrl, true);
+            if (linkResult.success) {
+                PayOSCheckoutSession s = linkResult.session;
+                resp.getWriter().write(String.format(
+                        "{\"success\":true,\"datSanId\":%d,\"checkoutUrl\":\"%s\",\"qrCode\":\"%s\",\"amount\":%d}",
+                        datSanId, jsonEscape(s.checkoutUrl), jsonEscape(s.qrCode), s.amount));
+            } else {
+                resp.getWriter().write(String.format(
+                        "{\"success\":false,\"errorCode\":\"%s\",\"message\":\"%s\",\"retryable\":%b}",
+                        linkResult.errorCode, jsonEscape(linkResult.message), linkResult.retryable));
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi thử lại PayOS DatSanID=" + datSanId, e);
+            resp.getWriter().write("{\"success\":false,\"errorCode\":\"INTERNAL_ERROR\",\"message\":\"Có lỗi xảy ra. Vui lòng thử lại.\"}");
+        }
+    }
+
+    /**
+     * Chuyển một booking đang "Chờ thanh toán" (giữ chỗ chờ PayOS) sang thanh toán tại quầy:
+     * hủy link PayOS còn treo (best-effort) rồi đổi TrangThai -> "Chờ xác nhận" (đúng trạng thái
+     * ban đầu của luồng thanh toán sau/tại quầy), xóa HoldExpiresAt. Không tạo booking mới.
+     */
+    private void handlePayOSPayCounter(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user) throws IOException {
+        resp.setContentType("application/json; charset=UTF-8");
+        Integer datSanId = parseIntParam(req.getParameter("datSanId"));
+        if (datSanId == null) {
+            resp.getWriter().write("{\"success\":false,\"errorCode\":\"VALIDATION_ERROR\",\"message\":\"Thiếu datSanId.\"}");
+            return;
+        }
+
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
+            String sql = "SELECT l.AccountID, l.TrangThai, s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            int accountId, coSoId; String trangThai;
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, datSanId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        resp.getWriter().write("{\"success\":false,\"errorCode\":\"NOT_FOUND\",\"message\":\"Không tìm thấy đơn đặt sân.\"}");
+                        return;
+                    }
+                    accountId = rs.getInt("AccountID");
+                    trangThai = rs.getString("TrangThai");
+                    coSoId = rs.getInt("CoSoID");
+                }
+            }
+            if (accountId != user.getAccountId()) {
+                resp.getWriter().write("{\"success\":false,\"errorCode\":\"FORBIDDEN\",\"message\":\"Đơn đặt sân không thuộc về bạn.\"}");
+                return;
+            }
+            if (!Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai)) {
+                resp.getWriter().write("{\"success\":false,\"errorCode\":\"PAYMENT_CONFLICT\",\"message\":\"Đơn không còn ở trạng thái chờ thanh toán. Vui lòng tải lại trang.\"}");
+                return;
+            }
+
+            PayOSCredentials credentials = new PayOSConfigurationService().getCredentialsForPayment(coSoId);
+            if (credentials != null) {
+                PayOS client = PayOSClientFactory.create(credentials);
+                try {
+                    client.paymentRequests().cancel((long) datSanId, "Khách chuyển sang thanh toán tại quầy");
+                } catch (Exception ignoredNoExistingLink) {
+                    // Không có link đang treo (chưa từng tạo được) - bỏ qua.
+                } finally {
+                    client.close();
+                }
+            }
+
+            String updateSql = "UPDATE LichDatSan SET TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN +
+                    "', HoldExpiresAt = NULL, GhiChu = ISNULL(GhiChu, N'') + N' [Khách chuyển sang thanh toán tại quầy]' " +
+                    "WHERE DatSanID = ? AND TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "'";
+            try (java.sql.PreparedStatement up = conn.prepareStatement(updateSql)) {
+                up.setInt(1, datSanId);
+                int updated = up.executeUpdate();
+                if (updated != 1) {
+                    resp.getWriter().write("{\"success\":false,\"errorCode\":\"PAYMENT_CONFLICT\",\"message\":\"Đơn đã được xử lý bởi thao tác khác. Vui lòng tải lại trang.\"}");
+                    return;
+                }
+            }
+            LOGGER.info(String.format("PAYOS_SWITCH_TO_COUNTER datSanId=%d facilityId=%d accountId=%d", datSanId, coSoId, user.getAccountId()));
+            resp.getWriter().write("{\"success\":true,\"message\":\"Đã chuyển sang thanh toán tại quầy. Vui lòng đến sớm 15 phút để làm thủ tục nhận sân.\"}");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi chuyển thanh toán tại quầy DatSanID=" + datSanId, e);
+            resp.getWriter().write("{\"success\":false,\"errorCode\":\"INTERNAL_ERROR\",\"message\":\"Có lỗi xảy ra. Vui lòng thử lại.\"}");
+        }
+    }
+
+    private String resolveBaseUrl(HttpServletRequest req) {
+        String scheme = req.getScheme();
+        String serverName = req.getServerName();
+        int port = req.getServerPort();
+        String ctx = req.getContextPath();
+        boolean defaultPort = (scheme.equals("http") && port == 80) || (scheme.equals("https") && port == 443);
+        return scheme + "://" + serverName + (defaultPort ? "" : ":" + port) + ctx;
+    }
+
+    private Integer parseIntParam(String s) {
+        if (s == null || s.isBlank()) return null;
+        try { return Integer.parseInt(s.trim()); } catch (NumberFormatException e) { return null; }
+    }
+
+    // =========================================================================
+    // PHẦN 5C: TẠO PAYMENT LINK PAYOS THEO CƠ SỞ (thay thế PayOSService singleton dùng biến môi trường)
+    // =========================================================================
+
+    private static final String MSG_NOT_CONFIGURED = "Thanh toán trực tuyến hiện chưa khả dụng tại cơ sở này. Bạn có thể chọn thanh toán tại quầy.";
+    private static final String MSG_PROVIDER_ERROR = "PayOS đang tạm thời không phản hồi. Vui lòng thử lại sau hoặc chọn thanh toán tại quầy.";
+    private static final String MSG_NETWORK_ERROR = "Không thể kết nối đến cổng thanh toán PayOS. Vui lòng thử lại hoặc chọn thanh toán tại quầy.";
+    private static final String MSG_EXPIRED = "Phiên thanh toán đã hết hạn. Vui lòng tạo lại yêu cầu thanh toán.";
+    private static final String MSG_UNKNOWN = "Không thể tạo liên kết thanh toán lúc này. Vui lòng thử lại hoặc chọn thanh toán tại quầy.";
+
+    /** Kết quả nội bộ khi thử tạo/tái tạo payment link PayOS cho một booking cụ thể. */
+    private static final class PayOSLinkResult {
+        final boolean success;
+        final PayOSCheckoutSession session;
+        final String errorCode;
+        final String message;
+        final boolean retryable;
+
+        private PayOSLinkResult(boolean success, PayOSCheckoutSession session, String errorCode, String message, boolean retryable) {
+            this.success = success;
+            this.session = session;
+            this.errorCode = errorCode;
+            this.message = message;
+            this.retryable = retryable;
+        }
+
+        static PayOSLinkResult ok(PayOSCheckoutSession session) { return new PayOSLinkResult(true, session, null, null, false); }
+        static PayOSLinkResult fail(String errorCode, String message, boolean retryable) {
+            return new PayOSLinkResult(false, null, errorCode, message, retryable);
+        }
+    }
+
+    /**
+     * Tạo (hoặc, nếu cancelExistingFirst=true, hủy link cũ rồi tạo lại) payment link PayOS cho
+     * một booking, dùng credentials RIÊNG của cơ sở (coSoId) đọc từ database qua
+     * PayOSConfigurationService — KHÔNG dùng biến môi trường toàn cục
+     * (PAYOS_CLIENT_ID/PAYOS_API_KEY/PAYOS_CHECKSUM_KEY không còn được đọc ở đây). Không bao giờ
+     * log Client ID/API Key/Checksum Key - chỉ log trạng thái có/không cấu hình.
+     */
+    private PayOSLinkResult createFacilityPayOSLink(int coSoId, long orderCode, long amount, String description,
+                                                      String returnUrl, String cancelUrl, boolean cancelExistingFirst) {
+        PayOSCredentials credentials = new PayOSConfigurationService().getCredentialsForPayment(coSoId);
+        if (credentials == null) {
+            LOGGER.warning(String.format("PAYOS_NOT_CONFIGURED facilityId=%d orderCode=%d", coSoId, orderCode));
+            return PayOSLinkResult.fail("PAYOS_NOT_CONFIGURED", MSG_NOT_CONFIGURED, false);
+        }
+
+        PayOS client = PayOSClientFactory.create(credentials);
+        try {
+            if (cancelExistingFirst) {
+                try {
+                    client.paymentRequests().cancel(orderCode, "Khách yêu cầu tạo lại liên kết thanh toán");
+                } catch (Exception ignoredNoExistingLink) {
+                    // Không có link cũ để hủy (chưa từng tạo, hoặc đã hết hạn/hủy sẵn) - bỏ qua, tiếp tục tạo mới.
+                }
+            }
+            CreatePaymentLinkRequest request = CreatePaymentLinkRequest.builder()
+                    .orderCode(orderCode)
+                    .amount(amount)
+                    .description(description)
+                    .returnUrl(returnUrl)
+                    .cancelUrl(cancelUrl)
+                    .build();
+            CreatePaymentLinkResponse result = client.paymentRequests().create(request);
+            return PayOSLinkResult.ok(new PayOSCheckoutSession(
+                    result.getCheckoutUrl(), result.getQrCode(), result.getExpiredAt(), result.getAmount()));
+        } catch (ConnectionTimeoutException | ConnectionException e) {
+            logPayOSFailure("PAYOS_NETWORK_ERROR", coSoId, orderCode, amount, e, null);
+            return PayOSLinkResult.fail("PAYOS_NETWORK_ERROR", MSG_NETWORK_ERROR, true);
+        } catch (APIException e) {
+            Integer status = e.getStatusCode().orElse(null);
+            String payosCode = e.getErrorCode().orElse(null);
+            String payosDesc = e.getErrorDesc().orElse(null);
+            String bucket; String customerMsg; boolean retryable;
+            if (status != null && (status == 401 || status == 403)) {
+                // Sai/hết hạn Client ID hoặc API Key - KHÔNG lộ chi tiết cho khách, chỉ ghi log server.
+                bucket = "PAYOS_INVALID_CREDENTIAL"; customerMsg = MSG_PROVIDER_ERROR; retryable = true;
+            } else if (status != null && status == 400) {
+                // Best-effort: PayOS thường trả 400 kèm mô tả nhắc "order code" khi orderCode đã tồn tại/trùng.
+                boolean looksLikeDuplicateOrderCode = payosDesc != null
+                        && (payosDesc.toLowerCase().contains("order") || payosDesc.toLowerCase().contains("code"));
+                bucket = looksLikeDuplicateOrderCode ? "PAYOS_DUPLICATE_ORDER_CODE" : "PAYOS_REQUEST_INVALID";
+                customerMsg = looksLikeDuplicateOrderCode ? MSG_EXPIRED : MSG_UNKNOWN;
+                retryable = !looksLikeDuplicateOrderCode;
+            } else if (status != null && (status == 429 || status >= 500)) {
+                bucket = "PAYOS_PROVIDER_ERROR"; customerMsg = MSG_PROVIDER_ERROR; retryable = true;
+            } else {
+                bucket = "PAYOS_PROVIDER_ERROR"; customerMsg = MSG_PROVIDER_ERROR; retryable = true;
+            }
+            logPayOSFailure(bucket, coSoId, orderCode, amount, e,
+                    String.format("httpStatus=%s payosErrorCode=%s payosErrorDesc=%s", status, payosCode, payosDesc));
+            return PayOSLinkResult.fail(bucket, customerMsg, retryable);
+        } catch (Exception e) {
+            logPayOSFailure("PAYOS_UNKNOWN_ERROR", coSoId, orderCode, amount, e, null);
+            return PayOSLinkResult.fail("PAYOS_UNKNOWN_ERROR", MSG_UNKNOWN, true);
+        } finally {
+            client.close();
+        }
+    }
+
+    /** Log an toàn: loại lỗi + facilityId + orderCode + amount + tên class exception + chi tiết PayOS
+     * (status/errorCode/errorDesc do PayOS trả về - KHÔNG PHẢI secret). Không bao giờ log Client
+     * ID/API Key/Checksum Key. */
+    private void logPayOSFailure(String errorCode, int coSoId, long orderCode, long amount, Exception e, String payosDetail) {
+        LOGGER.log(Level.SEVERE, String.format(
+                "PAYOS_CREATE_FAILED errorCode=%s facilityId=%d orderCode=%d amount=%d exceptionType=%s%s",
+                errorCode, coSoId, orderCode, amount, e.getClass().getSimpleName(),
+                payosDetail != null ? " " + payosDetail : ""));
+    }
+
+    private static String jsonEscape(String s) {
+        return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     // =========================================================================

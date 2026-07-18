@@ -1,25 +1,19 @@
-# Progress Ledger — Cancel/Reputation Flow
+# Progress Ledger — Customer Profile Full-Screen Page
 
-Plan: docs/superpowers/plans/2026-07-16-cancel-reputation-flow.md
-Base branch: main (implementing directly on main, per explicit user consent)
+Plan: docs/superpowers/plans/2026-07-18-customer-profile-fullscreen.md
+Base branch: feature/customer-mobile-map-redesign (implementing directly on it, per explicit user consent; pre-existing uncommitted work — Team module, MapApiServlet, delete-account handler — left untouched)
 
-Task 1: complete (commit 9f3bf1d, review clean)
-Task 2: complete (commit 3bd2158, review clean)
-Task 3: complete (commit b1a8970, review clean)
-Task 4: complete (commit e5ac4fa, review clean)
-Task 5: complete (commit 89c0071, review clean)
-Task 6: complete (commit 3980364, review clean)
-Task 7: complete (commit b9e98f4, review clean)
-Task 8: complete (commit 0f261bd, review clean)
-Task 9: complete (commit 7ef9ed7, review clean)
-Task 10: complete (commit 91c520e, review clean)
-Task 11: complete (commit 8a60728, review clean)
-Task 12: complete (commit 92454ab, review clean)
-Task 13: complete (commit b953a8f, review clean)
-Task 14: complete (commit bf98b54, review clean)
-Task 15: complete (commit e8a1ef9, review clean)
-Task 16: complete (commits e8a1ef9..e091b05, review clean after 2 fix rounds — JSON.stringify regression caught and corrected)
-Task 17: complete (commit 400c3e1, review clean)
-Task 18: complete (commit 2f2691c, review clean — noted: BookingExtensionServiceTest mischaracterized as DB-free in report, flag to user)
+Task 1: complete (commit ae59a71, review clean)
+Task 2: complete (commit 3e7ed15, review clean)
+Task 3: complete (verification-only, no commit — confirmed Error.jsp + web.xml error-page entries intact)
+Task 4: complete (commit 4f06f44, review clean)
+Task 5: complete (commit cbe3e99, review clean)
+Task 6: complete (commit faf38e2, review clean — controller-verified ⚠️ items: DTO/MonTheThao getters match EL exactly)
+Task 7: complete (commit 5abb482, review flagged commit bundling unrelated pre-existing uncommitted work — delete-account modal, notification settings, sidebar menu restructure — confirmed by user as their own prior work, not Task 7 scope creep; Task-7-authored portion (profile-card link, #thongtin deletion, JS cleanup) independently re-verified clean)
+Task 8: complete (verification-only, no commit — mvn clean compile / test-compile / package -DskipTests all BUILD SUCCESS)
+Task 9: NOT EXECUTED — requires live Tomcat redeploy + real Customer login + manual DB migration run, none available non-interactively in this session. Documented explicitly, not claimed as passed.
 
-ALL 18 TASKS COMPLETE. Proceeding to final whole-branch review.
+ALL 9 TASKS COMPLETE (Task 9 = documented as not runtime-verified).
+Final whole-branch review (94e380e..5abb482): "With fixes" — 1 Important (modal dismiss handlers incomplete), 2 Minor (invalid CSS `justify-content: between`, name-fallback edge case). Fix dispatched, applied in commit 468a999, build re-verified BUILD SUCCESS.
+
+PLAN COMPLETE.

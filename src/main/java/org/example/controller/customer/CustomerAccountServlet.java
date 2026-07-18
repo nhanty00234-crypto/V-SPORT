@@ -24,6 +24,7 @@ import org.example.model.Lichdatsan;
 import org.example.model.San;
 import org.example.model.TaiKhoan;
 import org.example.util.RoleRedirectUtil;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -174,5 +175,59 @@ public class CustomerAccountServlet extends HttpServlet {
         req.setAttribute("upcomingCoSoNames", upcomingCoSoNames);
 
         req.getRequestDispatcher("/customer/TaiKhoan.jsp").forward(req, resp);
+    }
+
+    /**
+     * Xử lý hành động "Xóa tài khoản" từ trang Cài đặt. Route riêng cho
+     * Customer (không dùng chung UpdateProfileServlet vốn phục vụ cả
+     * admin/manager/staff) để không đổi hành vi của các role khác. Chỉ hỗ trợ
+     * action=deleteAccount — xóa mềm (soft-delete), có thể khôi phục qua
+     * TaiKhoanDAO#restoreAccount, không xóa vĩnh viễn dữ liệu.
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        HttpSession session = req.getSession(false);
+        TaiKhoan sessionUser = session != null ? (TaiKhoan) session.getAttribute("user") : null;
+        if (sessionUser == null) {
+            resp.getWriter().write("{\"success\":false,\"message\":\"Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.\"}");
+            return;
+        }
+        if (sessionUser.getRoleId() != RoleRedirectUtil.ROLE_CUSTOMER) {
+            resp.getWriter().write("{\"success\":false,\"message\":\"Trang này chỉ dành cho tài khoản Khách hàng.\"}");
+            return;
+        }
+        if (!"deleteAccount".equals(req.getParameter("action"))) {
+            resp.getWriter().write("{\"success\":false,\"message\":\"Hành động không hợp lệ.\"}");
+            return;
+        }
+
+        String password = req.getParameter("password");
+        if (password == null || password.isEmpty()) {
+            resp.getWriter().write("{\"success\":false,\"message\":\"Vui lòng nhập mật khẩu hiện tại.\"}");
+            return;
+        }
+
+        try {
+            TaiKhoan account = taiKhoanDAO.getAccountById(sessionUser.getAccountId());
+            if (account == null) {
+                resp.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy tài khoản trong hệ thống.\"}");
+                return;
+            }
+            if (!BCrypt.checkpw(password, account.getPassword())) {
+                resp.getWriter().write("{\"success\":false,\"message\":\"Mật khẩu hiện tại không chính xác.\"}");
+                return;
+            }
+            boolean ok = taiKhoanDAO.softDeleteAccount(account.getAccountId(), account.getAccountId());
+            if (!ok) {
+                resp.getWriter().write("{\"success\":false,\"message\":\"Không thể xóa tài khoản lúc này. Vui lòng thử lại.\"}");
+                return;
+            }
+            session.invalidate();
+            resp.getWriter().write("{\"success\":true,\"message\":\"Đã xóa tài khoản.\"}");
+        } catch (Exception e) {
+            logger.error("Lỗi xóa tài khoản accountId={}: {}", sessionUser.getAccountId(), e.getMessage(), e);
+            resp.getWriter().write("{\"success\":false,\"message\":\"Lỗi hệ thống. Vui lòng thử lại sau.\"}");
+        }
     }
 }

@@ -8,8 +8,7 @@ package org.example.dto.payment;
  * - File này đóng vai trò là một DTO (Data Transfer Object) để chuyển dữ liệu từ Service sang Controller.
  *
  * Được gọi bởi:
- * - PayOSService.java
- * - DatSanServlet.java
+ * - DatSanServlet.java (createFacilityPayOSLink, per-CoSo credentials)
  *
  * Lưu ý:
  * - Đây là một DTO thuần túy, không chứa logic nghiệp vụ hay truy cập cơ sở dữ liệu.
