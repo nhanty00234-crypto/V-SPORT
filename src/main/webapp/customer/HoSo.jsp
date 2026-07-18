@@ -238,9 +238,118 @@
         <button type="button" class="customer-profile-tab" id="chpTabLinksBtn" role="tab" aria-selected="false" onclick="chpSwitchTab('links')">Liên kết</button>
     </div>
 
-    <!-- Tổng quan tab content is added in Task 6 -->
-    <div id="chpTabOverview" class="customer-profile-tab-panel"></div>
-    <div id="chpTabLinks" class="customer-profile-tab-panel hidden"></div>
+    <div id="chpTabOverview" class="customer-profile-tab-panel">
+        <div class="customer-profile-section-wrap">
+
+            <div class="customer-profile-section">
+                <div class="customer-profile-section-header">
+                    <span class="customer-profile-section-title">Thông tin thể chất</span>
+                    <button type="button" class="customer-profile-section-edit" aria-label="Chỉnh sửa thông tin thể chất" onclick="openModal('chpPhysicalModal')">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
+                    </button>
+                </div>
+                <hr class="customer-profile-divider">
+                <div class="customer-profile-physical-row">
+                    <div class="customer-profile-physical-col">
+                        <div class="customer-profile-physical-label">CHIỀU CAO (CM)</div>
+                        <div id="chpHeightValue" class="customer-profile-physical-value">${not empty profileExtra.heightCm ? profileExtra.heightCm : '-'}</div>
+                    </div>
+                    <div class="customer-profile-physical-col">
+                        <div class="customer-profile-physical-label">CÂN NẶNG (KG)</div>
+                        <div id="chpWeightValue" class="customer-profile-physical-value">${not empty profileExtra.weightKg ? profileExtra.weightKg : '-'}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="customer-profile-section">
+                <div class="customer-profile-section-header">
+                    <span class="customer-profile-section-title">Ghi chú đặc biệt</span>
+                    <button type="button" class="customer-profile-section-edit" aria-label="Chỉnh sửa ghi chú đặc biệt" onclick="openNoteEdit()">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
+                    </button>
+                </div>
+                <hr class="customer-profile-divider">
+                <div class="customer-profile-note-row">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><rect width="8" height="4" x="8" y="2" rx="1"/></svg>
+                    <c:choose>
+                        <c:when test="${not empty profileExtra.specialNote}">
+                            <span id="chpNoteText" class="customer-profile-note-text">${fn:escapeXml(profileExtra.specialNote)}</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span id="chpNoteText" class="customer-profile-note-placeholder">Chưa có ghi chú</span>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+
+            <div class="customer-profile-section">
+                <div class="customer-profile-section-header">
+                    <span class="customer-profile-section-title">Cá nhân hoá</span>
+                    <button type="button" class="customer-profile-section-edit" aria-label="Chỉnh sửa cá nhân hóa" onclick="openModal('chpPersoModal')">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
+                    </button>
+                </div>
+                <hr class="customer-profile-divider">
+                <div class="customer-profile-perso-row">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span class="customer-profile-perso-label">Vị trí yêu thích</span>
+                    <span id="chpLocationValue" class="customer-profile-perso-value">${not empty profileExtra.preferredLocation ? fn:escapeXml(profileExtra.preferredLocation) : '-'}</span>
+                </div>
+                <div class="customer-profile-perso-row">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                    <span class="customer-profile-perso-label">Môn thể thao và trình độ</span>
+                    <span id="chpSportLevelValue" class="customer-profile-perso-value">
+                        <c:choose>
+                            <c:when test="${not empty profileExtra.favoriteSportName}">${fn:escapeXml(profileExtra.favoriteSportName)}<c:if test="${not empty profileExtra.skillLevel}"> - ${fn:escapeXml(profileExtra.skillLevel)}</c:if></c:when>
+                            <c:otherwise>-</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <div class="customer-profile-perso-row">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    <span class="customer-profile-perso-label">Mục tiêu</span>
+                    <span id="chpGoalValue" class="customer-profile-perso-value">${not empty profileExtra.goal ? fn:escapeXml(profileExtra.goal) : '-'}</span>
+                </div>
+                <div class="customer-profile-perso-row">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                    <span class="customer-profile-perso-label">Tần suất chơi</span>
+                    <span id="chpFrequencyValue" class="customer-profile-perso-value">${not empty profileExtra.playFrequency ? fn:escapeXml(profileExtra.playFrequency) : '-'}</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="chpTabLinks" class="customer-profile-tab-panel hidden">
+        <div class="customer-profile-section-wrap">
+            <c:choose>
+                <c:when test="${not empty myTeams}">
+                    <c:forEach var="team" items="${myTeams}">
+                        <div class="customer-profile-team-item">
+                            <c:choose>
+                                <c:when test="${not empty team.avatarPath}">
+                                    <img class="customer-profile-team-avatar" src="${pageContext.request.contextPath}${team.avatarPath}" alt="${fn:escapeXml(team.teamName)}">
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="customer-profile-team-avatar">${fn:escapeXml(fn:substring(team.teamName, 0, 1))}</span>
+                                </c:otherwise>
+                            </c:choose>
+                            <div>
+                                <div class="customer-profile-team-name">${fn:escapeXml(team.teamName)}</div>
+                                <div class="customer-profile-team-meta">${fn:escapeXml(team.myRole)} &middot; ${team.memberCount}/${team.maxMembers} thành viên</div>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <div class="customer-profile-empty">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <p>Bạn chưa tham gia đội nhóm nào.</p>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </div>
 
 </div>
 
@@ -323,6 +432,117 @@
     <div>
         <p id="accToastTitle" class="text-sm font-bold" style="color:#102A43;">Thành công</p>
         <p id="accToastMessage" class="text-xs mt-0.5" style="color:#829AB1;"></p>
+    </div>
+</div>
+
+<!-- Physical info edit modal -->
+<div id="chpPhysicalModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] border border-slate-200">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-extrabold" style="color:#102A43;">Chỉnh sửa thông tin thể chất</h3>
+            <button type="button" onclick="closeModal('chpPhysicalModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
+                <svg class="lci text-slate-500" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <form id="chpPhysicalForm" class="px-6 py-5 flex flex-col gap-4" onsubmit="return false;">
+            <div>
+                <label class="acc-label" for="chpHeightInput">Chiều cao (cm)</label>
+                <input id="chpHeightInput" type="number" min="50" max="260" class="acc-input" value="${profileExtra.heightCm}">
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="heightCm"></p>
+            </div>
+            <div>
+                <label class="acc-label" for="chpWeightInput">Cân nặng (kg)</label>
+                <input id="chpWeightInput" type="number" min="20" max="300" class="acc-input" value="${profileExtra.weightKg}">
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="weightKg"></p>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="closeModal('chpPhysicalModal')" class="btn-secondary">Hủy</button>
+                <button type="button" id="chpPhysicalSaveBtn" onclick="chpSavePhysical()" class="btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Special note edit modal -->
+<div id="chpNoteModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[440px] border border-slate-200">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-extrabold" style="color:#102A43;">Chỉnh sửa ghi chú đặc biệt</h3>
+            <button type="button" onclick="closeModal('chpNoteModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
+                <svg class="lci text-slate-500" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <form id="chpNoteForm" class="px-6 py-5 flex flex-col gap-4" onsubmit="return false;">
+            <div>
+                <label class="acc-label" for="chpNoteInput">Ghi chú đặc biệt</label>
+                <textarea id="chpNoteInput" maxlength="500" rows="4" class="acc-input" style="height:auto;padding:10px 14px;">${fn:escapeXml(profileExtra.specialNote)}</textarea>
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="note"></p>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="closeModal('chpNoteModal')" class="btn-secondary">Hủy</button>
+                <button type="button" id="chpNoteSaveBtn" onclick="chpSaveNote()" class="btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Personalization edit modal -->
+<div id="chpPersoModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[460px] border border-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-extrabold" style="color:#102A43;">Chỉnh sửa cá nhân hoá</h3>
+            <button type="button" onclick="closeModal('chpPersoModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
+                <svg class="lci text-slate-500" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <form id="chpPersoForm" class="px-6 py-5 flex flex-col gap-4" onsubmit="return false;">
+            <div>
+                <label class="acc-label" for="chpLocationInput">Vị trí yêu thích</label>
+                <input id="chpLocationInput" type="text" maxlength="255" class="acc-input" value="${fn:escapeXml(profileExtra.preferredLocation)}">
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="location"></p>
+            </div>
+            <div>
+                <label class="acc-label" for="chpSportInput">Môn thể thao yêu thích</label>
+                <select id="chpSportInput" class="acc-input">
+                    <option value="">-- Không chọn --</option>
+                    <c:forEach var="mon" items="${dsMon}">
+                        <option value="${mon.monTheThaoID}" ${mon.monTheThaoID == profileExtra.favoriteSportId ? 'selected' : ''}>${fn:escapeXml(mon.tenMon)}</option>
+                    </c:forEach>
+                </select>
+            </div>
+            <div>
+                <label class="acc-label" for="chpLevelInput">Trình độ</label>
+                <select id="chpLevelInput" class="acc-input">
+                    <option value="">-- Không chọn --</option>
+                    <option value="Mới chơi" ${profileExtra.skillLevel == 'Mới chơi' ? 'selected' : ''}>Mới chơi</option>
+                    <option value="Cơ bản" ${profileExtra.skillLevel == 'Cơ bản' ? 'selected' : ''}>Cơ bản</option>
+                    <option value="Trung bình" ${profileExtra.skillLevel == 'Trung bình' ? 'selected' : ''}>Trung bình</option>
+                    <option value="Khá" ${profileExtra.skillLevel == 'Khá' ? 'selected' : ''}>Khá</option>
+                    <option value="Nâng cao" ${profileExtra.skillLevel == 'Nâng cao' ? 'selected' : ''}>Nâng cao</option>
+                </select>
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="level"></p>
+            </div>
+            <div>
+                <label class="acc-label" for="chpGoalInput">Mục tiêu</label>
+                <input id="chpGoalInput" type="text" maxlength="255" class="acc-input" value="${fn:escapeXml(profileExtra.goal)}">
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="goal"></p>
+            </div>
+            <div>
+                <label class="acc-label" for="chpFrequencyInput">Tần suất chơi</label>
+                <select id="chpFrequencyInput" class="acc-input">
+                    <option value="">-- Không chọn --</option>
+                    <option value="1 lần/tuần" ${profileExtra.playFrequency == '1 lần/tuần' ? 'selected' : ''}>1 lần/tuần</option>
+                    <option value="2-3 lần/tuần" ${profileExtra.playFrequency == '2-3 lần/tuần' ? 'selected' : ''}>2-3 lần/tuần</option>
+                    <option value="4+ lần/tuần" ${profileExtra.playFrequency == '4+ lần/tuần' ? 'selected' : ''}>4+ lần/tuần</option>
+                    <option value="Không cố định" ${profileExtra.playFrequency == 'Không cố định' ? 'selected' : ''}>Không cố định</option>
+                </select>
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="frequency"></p>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="closeModal('chpPersoModal')" class="btn-secondary">Hủy</button>
+                <button type="button" id="chpPersoSaveBtn" onclick="chpSavePersonalization()" class="btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -528,6 +748,146 @@
                 showToast('Lỗi kết nối', 'Không thể tải ảnh lên. Vui lòng thử lại.', true);
             });
     });
+
+    // ---- Physical info ----
+    function chpSavePhysical() {
+        const heightVal = document.getElementById('chpHeightInput').value.trim();
+        const weightVal = document.getElementById('chpWeightInput').value.trim();
+        const form = document.getElementById('chpPhysicalForm');
+        clearFieldErrors(form);
+
+        const btn = document.getElementById('chpPhysicalSaveBtn');
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Đang lưu...';
+
+        const params = new URLSearchParams();
+        if (heightVal) params.append('heightCm', heightVal);
+        if (weightVal) params.append('weightKg', weightVal);
+
+        fetch(CTX + '/customer/ho-so/cap-nhat-the-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: params
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                if (data.success) {
+                    document.getElementById('chpHeightValue').textContent = heightVal || '-';
+                    document.getElementById('chpWeightValue').textContent = weightVal || '-';
+                    closeModal('chpPhysicalModal');
+                    showToast('Thành công', 'Đã cập nhật thông tin thể chất.');
+                } else {
+                    showToast('Không thể cập nhật', data.message, true);
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                showToast('Lỗi kết nối', 'Không thể kết nối máy chủ. Vui lòng thử lại.', true);
+            });
+    }
+
+    // ---- Special note ----
+    function openNoteEdit() { openModal('chpNoteModal'); }
+
+    function chpSaveNote() {
+        const note = document.getElementById('chpNoteInput').value;
+        const form = document.getElementById('chpNoteForm');
+        clearFieldErrors(form);
+
+        const btn = document.getElementById('chpNoteSaveBtn');
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Đang lưu...';
+
+        const params = new URLSearchParams();
+        params.append('note', note);
+
+        fetch(CTX + '/customer/ho-so/cap-nhat-ghi-chu', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: params
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                if (data.success) {
+                    const textEl = document.getElementById('chpNoteText');
+                    if (note.trim()) {
+                        textEl.textContent = note.trim();
+                        textEl.className = 'customer-profile-note-text';
+                    } else {
+                        textEl.textContent = 'Chưa có ghi chú';
+                        textEl.className = 'customer-profile-note-placeholder';
+                    }
+                    closeModal('chpNoteModal');
+                    showToast('Thành công', 'Đã cập nhật ghi chú.');
+                } else {
+                    showToast('Không thể cập nhật', data.message, true);
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                showToast('Lỗi kết nối', 'Không thể kết nối máy chủ. Vui lòng thử lại.', true);
+            });
+    }
+
+    // ---- Personalization ----
+    function chpSavePersonalization() {
+        const location = document.getElementById('chpLocationInput').value;
+        const sportId = document.getElementById('chpSportInput').value;
+        const sportName = sportId ? document.getElementById('chpSportInput').selectedOptions[0].textContent : '';
+        const level = document.getElementById('chpLevelInput').value;
+        const goal = document.getElementById('chpGoalInput').value;
+        const frequency = document.getElementById('chpFrequencyInput').value;
+        const form = document.getElementById('chpPersoForm');
+        clearFieldErrors(form);
+
+        const btn = document.getElementById('chpPersoSaveBtn');
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Đang lưu...';
+
+        const params = new URLSearchParams();
+        params.append('location', location);
+        if (sportId) params.append('sportId', sportId);
+        params.append('level', level);
+        params.append('goal', goal);
+        params.append('frequency', frequency);
+
+        fetch(CTX + '/customer/ho-so/cap-nhat-ca-nhan-hoa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: params
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                if (data.success) {
+                    document.getElementById('chpLocationValue').textContent = location.trim() || '-';
+                    document.getElementById('chpSportLevelValue').textContent = sportId ? (sportName + (level ? ' - ' + level : '')) : '-';
+                    document.getElementById('chpGoalValue').textContent = goal.trim() || '-';
+                    document.getElementById('chpFrequencyValue').textContent = frequency || '-';
+                    closeModal('chpPersoModal');
+                    showToast('Thành công', 'Đã cập nhật cá nhân hoá.');
+                } else if (data.code === 'VALIDATION_ERROR') {
+                    showFieldErrors(form, data.fieldErrors);
+                } else {
+                    showToast('Không thể cập nhật', data.message, true);
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                showToast('Lỗi kết nối', 'Không thể kết nối máy chủ. Vui lòng thử lại.', true);
+            });
+    }
 
     // ---- Cover upload ----
     document.getElementById('chpCoverInput').addEventListener('change', function () {
