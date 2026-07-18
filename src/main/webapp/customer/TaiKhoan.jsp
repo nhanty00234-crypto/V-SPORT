@@ -24,22 +24,24 @@
                how wide the viewport gets beyond that (target spec is a fixed density,
                not a proportionally-scaling one at large desktop sizes). */
             --account-sidebar-width: clamp(300px, 26vw, 340px);
-            --account-header-height: 46px;
-            /* V-SPORT brand identity (navy/blue/cyan) — matches vsport-theme.jsp used
-               on every other customer page. Scoped to this JSP's own <style>. */
-            --sidebar-bg: #EEF7FC;
+            --account-header-height: 54px;
+            /* V-SPORT navy/blue/cyan account theme. Every color token below is scoped to
+               this JSP's own <style>, so it recolors ONLY the customer account page and
+               never leaks to other customer pages. Values point at the shared --vs-*
+               tokens from vsport-theme.jsp so this page stays in sync with the brand. */
+            --sidebar-bg: var(--vs-surface-soft, #EDF4FA);
             --sidebar-surface: #ffffff;
-            --sidebar-border: #DCE5EF;
-            --primary-dark: #0B2545;
-            --primary-mid: #185A9D;
-            --primary-bright: #18C8E8;
-            --ink-green: #102A43;
-            --muted-green: #829AB1;
-            --content-bg: #F2F7FC;
-            --settings-icon: #185A9D;
-            --settings-text: #29435C;
-            --settings-chev: #9DAEC2;
-            --settings-border: #DCE5EF;
+            --sidebar-border: var(--vs-border, #DCE5EF);
+            --primary-dark: var(--vs-primary-900, #0B2545);
+            --primary-mid: var(--vs-primary-600, #1677D2);
+            --primary-bright: var(--vs-cyan-500, #18C8E8);
+            --ink-green: var(--vs-text, #102A43);
+            --muted-green: var(--vs-muted, #829AB1);
+            --content-bg: var(--vs-background, #F4F7FB);
+            --settings-icon: var(--vs-primary-600, #1677D2);
+            --settings-text: var(--vs-text, #102A43);
+            --settings-chev: var(--vs-muted, #829AB1);
+            --settings-border: var(--vs-border, #DCE5EF);
         }
         @media (min-width: 1200px) {
             :root { --account-sidebar-width: 378px; }
@@ -113,7 +115,7 @@
             display: flex; align-items: center; gap: 10px;
             width: 100%; min-height: 56px; padding: 8px 10px;
             background: rgba(255, 255, 255, 0.15);
-            border: 1px solid #E8BE35;
+            border: 1px solid rgba(255, 255, 255, 0.45);
             border-radius: 8px;
             color: #fff; text-align: left; text-decoration: none; cursor: pointer;
             transition: background-color .15s ease;
@@ -177,7 +179,7 @@
             text-decoration: none; cursor: pointer;
             transition: border-color .15s ease, background-color .15s ease, transform .1s ease;
         }
-        .side-quick-item:hover, .side-quick-item:focus-visible { border-color: var(--primary-bright); background: #F0FCFE; }
+        .side-quick-item:hover, .side-quick-item:focus-visible { border-color: var(--primary-bright); background: #EAF3FB; }
         .side-quick-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: 1px; }
         .side-quick-item:active { transform: translateY(1px); }
         .side-quick-item .lci { width: 22px; height: 22px; }
@@ -188,9 +190,9 @@
         @media (max-width: 380px) {
             .side-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
-        .qi-green  { color: #1677D2; }
+        .qi-green  { color: var(--vs-primary-700, #185A9D); }
         .qi-amber  { color: #d97706; }
-        .qi-blue   { color: #2563eb; }
+        .qi-blue   { color: var(--vs-cyan-600, #08A9CC); }
         .qi-rose   { color: #e11d48; }
 
         /* Menu groups */
@@ -214,8 +216,8 @@
             text-align: left; text-decoration: none; cursor: pointer;
             transition: background-color .15s ease;
         }
-        .side-menu-item + .side-menu-item { border-top: 1px solid #eef6f1; }
-        .side-menu-item:hover, .side-menu-item:focus-visible { background: #F0FCFE; }
+        .side-menu-item + .side-menu-item { border-top: 1px solid #E7F1F8; }
+        .side-menu-item:hover, .side-menu-item:focus-visible { background: #EAF3FB; }
         .side-menu-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: -2px; }
         .side-menu-item .lci { width: 22px; height: 22px; flex-shrink: 0; color: var(--primary-mid); }
         .side-menu-item .lci-chev { width: 18px; height: 18px; margin-left: auto; color: #9db5a8; }
@@ -247,7 +249,7 @@
         .account-header {
             height: var(--account-header-height);
             flex-shrink: 0;
-            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-bright) 100%);
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-mid) 55%, var(--primary-bright) 100%);
             display: flex; align-items: center; justify-content: center;
         }
         .account-header h1 {
@@ -271,7 +273,7 @@
             font-size: 14px; font-weight: 700; text-decoration: none;
             transition: background-color .15s ease;
         }
-        .btn-viewall:hover { background: #F0FCFE; }
+        .btn-viewall:hover { background: #EAF3FB; }
         .btn-viewall .lci { width: 19px; height: 19px; }
 
         .acc-section { display: flex; flex-direction: column; }
@@ -283,7 +285,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 12px; min-height: 320px; text-align: center;
         }
-        .acc-empty .lci { width: 44px; height: 44px; color: #bfe3d1; }
+        .acc-empty .lci { width: 44px; height: 44px; color: #B9D7EC; }
         .acc-empty p { font-size: 14.5px; font-weight: 600; color: var(--primary-dark); opacity: .75; }
 
         /* Booking list */
@@ -291,7 +293,7 @@
         .booking-item {
             display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
             padding: 16px 18px;
-            background: #fff; border: 1px solid #e2f0e8; border-radius: 12px;
+            background: #fff; border: 1px solid #DCE8F2; border-radius: 12px;
         }
         .booking-name { font-size: 15px; font-weight: 800; color: var(--ink-green); }
         .booking-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; color: var(--muted-green); margin-top: 4px; }
@@ -318,22 +320,22 @@
 
         /* Overview (Tổng quan) */
         .ov-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 560px; }
-        .ov-stat { background: #fff; border: 1px solid #e2f0e8; border-radius: 12px; padding: 18px 20px; }
+        .ov-stat { background: #fff; border: 1px solid #DCE8F2; border-radius: 12px; padding: 18px 20px; }
         .ov-stat .num { font-size: 30px; font-weight: 800; line-height: 1; color: var(--primary-dark); }
         .ov-stat .lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-green); text-transform: uppercase; letter-spacing: .04em; margin-top: 8px; }
         .ov-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
         /* Reputation section (styles used by reputation-card.jsp) */
-        .rep-card { background: #fff; border: 1px solid #e2f0e8; border-radius: 12px; padding: 22px; max-width: 860px; }
+        .rep-card { background: #fff; border: 1px solid #DCE8F2; border-radius: 12px; padding: 22px; max-width: 860px; }
         .rep-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 13px; border-radius: 9999px; font-size: 12.5px; font-weight: 700; }
         .rep-score-big { font-size: 44px; font-weight: 800; line-height: 1; color: var(--ink-green); }
-        .rep-bar { width: 100%; height: 8px; border-radius: 9999px; background: #eef6f1; overflow: hidden; }
+        .rep-bar { width: 100%; height: 8px; border-radius: 9999px; background: #E7F1F8; overflow: hidden; }
         .rep-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-        .rep-count { text-align: center; background: #f8fbf9; border: 1px solid #eef6f1; border-radius: 10px; padding: 12px 8px; }
+        .rep-count { text-align: center; background: #F7FAFC; border: 1px solid #E7F1F8; border-radius: 10px; padding: 12px 8px; }
         .rep-count b { display: block; font-size: 19px; font-weight: 800; color: var(--ink-green); }
         .rep-count span { font-size: 11px; font-weight: 700; color: var(--muted-green); text-transform: uppercase; letter-spacing: .03em; }
-        .rep-how { background: #f8fbf9; border: 1px solid #eef6f1; border-radius: 10px; padding: 14px 16px; }
-        .rep-how p { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; color: #33544a; }
+        .rep-how { background: #F7FAFC; border: 1px solid #E7F1F8; border-radius: 10px; padding: 14px 16px; }
+        .rep-how p { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; color: var(--vs-text-secondary, #486581); }
         .rep-how p + p { margin-top: 8px; }
         .rep-how .lci { width: 17px; height: 17px; margin-top: 1px; }
 
@@ -353,7 +355,7 @@
             border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
             transition: background-color .15s ease;
         }
-        .info-avatar-btn:hover { background: #F0FCFE; }
+        .info-avatar-btn:hover { background: #EAF3FB; }
         .info-avatar-btn .lci { width: 17px; height: 17px; }
 
         .acc-field-view dt { font-size: 12px; font-weight: 700; color: var(--muted-green); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
@@ -364,27 +366,27 @@
             font-family: inherit;
             transition: border-color .15s ease, box-shadow .15s ease;
         }
-        .acc-input:focus { outline: none; border-color: var(--primary-bright); box-shadow: 0 0 0 3px rgba(24, 200, 232, .22); }
-        .acc-label { display: block; font-size: 12.5px; font-weight: 700; color: #33544a; margin-bottom: 6px; }
+        .acc-input:focus { outline: none; border-color: var(--primary-bright); box-shadow: 0 0 0 3px rgba(24, 200, 232, .28); }
+        .acc-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--vs-text-secondary, #486581); margin-bottom: 6px; }
         .btn-primary {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-            background: var(--vs-primary-600, #1677D2); color: #fff; font-weight: 700; font-size: 14px;
+            background: var(--primary-mid); color: #fff; font-weight: 700; font-size: 14px;
             padding: 11px 18px; border-radius: 8px; text-decoration: none; cursor: pointer;
             font-family: inherit; border: none;
             transition: background-color .15s ease, transform .1s ease;
         }
-        .btn-primary:hover { background: var(--vs-primary-700, #185A9D); }
+        .btn-primary:hover { background: var(--primary-dark); }
         .btn-primary:active { transform: scale(.98); }
         .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
         .btn-primary .lci { width: 17px; height: 17px; }
         .btn-secondary {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-            background: #fff; color: #33544a; font-weight: 700; font-size: 14px;
+            background: #fff; color: var(--vs-text-secondary, #486581); font-weight: 700; font-size: 14px;
             padding: 11px 18px; border-radius: 8px; border: 1px solid #DCE5EF;
             text-decoration: none; cursor: pointer; font-family: inherit;
             transition: background-color .15s ease;
         }
-        .btn-secondary:hover { background: #f8fbf9; }
+        .btn-secondary:hover { background: #F7FAFC; }
         .btn-secondary .lci { width: 17px; height: 17px; }
 
         #accToast { transition: opacity .25s ease, transform .25s ease; }
@@ -416,6 +418,61 @@
         .customer-settings-page .settings-row.is-danger .lci,
         .customer-settings-page .settings-row.is-danger .lci-chev { color: #FF2D35; }
         .customer-settings-page .settings-row.is-danger:hover { border-color: #FF2D35; }
+
+        /* ===================== Cài đặt (main list) — mint full-width rows =====================
+           Scoped to .vs-account-settings only (the top-level "Cài đặt" list section). Sub-pages
+           (Cài đặt thông báo / Ngôn ngữ / etc.) keep the existing .settings-row styling above. */
+        .vs-account-settings {
+            background: var(--content-bg);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            /* Cancel the parent .account-body padding so the mint background reaches the
+               edges of the content column, then re-apply our own compact padding on top. */
+            margin: -15px -16px -32px;
+            padding: 18px 16px 28px;
+        }
+        @media (min-width: 1024px) {
+            .vs-account-settings { margin: -16px -28px -40px; padding: 18px 24px 40px; }
+        }
+        .vs-settings-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .vs-settings-row {
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 54px;
+            background: #fff;
+            border: 1px solid var(--settings-border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 0 24px 0 26px;
+            font-family: inherit;
+            font-size: 15.5px;
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--settings-text);
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+            transition: border-color .15s ease;
+        }
+        .vs-settings-row:hover,
+        .vs-settings-row:focus-visible { border-color: var(--primary-mid); }
+        .vs-settings-row:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+        .vs-settings-row .lci { width: 20px; height: 20px; flex-shrink: 0; color: inherit; stroke-width: 1.9; }
+        .vs-settings-row .lci-chev { width: 20px; height: 20px; margin-left: auto; flex-shrink: 0; color: var(--settings-chev); }
+        .vs-settings-row.is-danger { color: #ff1f2d; }
+        .vs-settings-row.is-danger .lci,
+        .vs-settings-row.is-danger .lci-chev { color: #ff1f2d; }
+        .vs-settings-row.is-danger:hover,
+        .vs-settings-row.is-danger:focus-visible { border-color: rgba(255, 31, 45, .4); }
     </style>
 </head>
 <body class="antialiased">
@@ -620,29 +677,29 @@
             </section>
 
             <!-- ===== Section: Cài đặt ===== -->
-            <section class="acc-section customer-settings-page" data-section="caidat" aria-label="Cài đặt" hidden>
-                <div class="settings-card">
-                    <button type="button" class="settings-row" data-section="thongbao">
+            <section class="acc-section vs-account-settings" data-section="caidat" aria-label="Cài đặt" hidden>
+                <div class="vs-settings-list">
+                    <a class="vs-settings-row" href="${pageContext.request.contextPath}/customer/notification-settings">
                         <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
                         Cài đặt thông báo
                         <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                    </button>
-                    <button type="button" class="settings-row" data-section="ngonngu">
+                    </a>
+                    <button type="button" class="vs-settings-row" data-section="ngonngu">
                         <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         Ngôn ngữ - Tiếng Việt
                         <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                     </button>
-                    <button type="button" class="settings-row" onclick="openPwModal()">
+                    <a class="vs-settings-row" href="${pageContext.request.contextPath}/customer/doi-mat-khau">
                         <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         Đổi mật khẩu
                         <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                    </button>
-                    <a class="settings-row" href="${pageContext.request.contextPath}/logout">
+                    </a>
+                    <a class="vs-settings-row" href="${pageContext.request.contextPath}/logout">
                         <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
                         Đăng xuất tài khoản
                         <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                     </a>
-                    <button type="button" class="settings-row is-danger" onclick="openDeleteAccountModal()">
+                    <button type="button" class="vs-settings-row is-danger" onclick="openDeleteAccountModal()">
                         <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                         Xóa tài khoản
                         <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
@@ -650,27 +707,8 @@
                 </div>
             </section>
 
-            <!-- ===== Section: Cài đặt thông báo ===== -->
-            <section class="acc-section customer-settings-page" data-section="thongbao" aria-label="Cài đặt thông báo" hidden>
-                <div class="settings-card" style="max-width:640px;">
-                    <label class="settings-row" style="cursor:pointer;">
-                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-                        <span style="flex:1;">Nhắc lịch đặt sân sắp tới</span>
-                        <input type="checkbox" class="js-notif-toggle" data-key="reminder" style="width:18px;height:18px;">
-                    </label>
-                    <label class="settings-row" style="cursor:pointer;">
-                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
-                        <span style="flex:1;">Lời mời &amp; yêu cầu tham gia đội</span>
-                        <input type="checkbox" class="js-notif-toggle" data-key="team" style="width:18px;height:18px;">
-                    </label>
-                    <label class="settings-row" style="cursor:pointer;">
-                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/></svg>
-                        <span style="flex:1;">Kèo ghép trận mới phù hợp</span>
-                        <input type="checkbox" class="js-notif-toggle" data-key="matchmaking" style="width:18px;height:18px;">
-                    </label>
-                </div>
-                <p style="font-size:12.5px;color:var(--muted-green);margin:10px 4px 0;max-width:640px;">Tùy chọn được lưu trên thiết bị này.</p>
-            </section>
+            <!-- "Cài đặt thông báo" đã tách sang trang riêng full-screen:
+                 /customer/notification-settings (CaiDatThongBao.jsp). -->
 
             <!-- ===== Section: Ngôn ngữ ===== -->
             <section class="acc-section customer-settings-page" data-section="ngonngu" aria-label="Ngôn ngữ" hidden>
@@ -753,66 +791,8 @@
     </div>
 </div>
 
-<!-- Change password modal -->
-<div id="pwModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[420px] border border-slate-200">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 class="text-sm font-extrabold flex items-center gap-2" style="color:var(--ink-green);">
-                <svg class="lci" style="color:var(--vs-primary-600, #1677D2);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Đổi mật khẩu
-            </h3>
-            <button type="button" onclick="closeModal('pwModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
-                <svg class="lci text-slate-500" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-        </div>
-        <form id="pwForm" class="px-6 py-5 flex flex-col gap-4" onsubmit="return false;" autocomplete="off">
-            <div>
-                <label class="acc-label" for="pwCurrent">Mật khẩu hiện tại</label>
-                <div class="relative">
-                    <input type="password" id="pwCurrent" class="acc-input pr-10" autocomplete="new-password">
-                    <button type="button" onclick="togglePw('pwCurrent', this)" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" aria-label="Hiện/ẩn mật khẩu">
-                        <svg class="lci eye-closed" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
-                        <svg class="lci eye-open" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                </div>
-                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="currentPassword"></p>
-            </div>
-            <div>
-                <label class="acc-label" for="pwNew">Mật khẩu mới</label>
-                <div class="relative">
-                    <input type="password" id="pwNew" class="acc-input pr-10" autocomplete="new-password" oninput="updatePwStrength()">
-                    <button type="button" onclick="togglePw('pwNew', this)" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" aria-label="Hiện/ẩn mật khẩu">
-                        <svg class="lci eye-closed" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
-                        <svg class="lci eye-open" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                </div>
-                <div class="flex gap-1 mt-2">
-                    <div class="h-1 flex-1 rounded-full bg-slate-100" id="pwStr1"></div>
-                    <div class="h-1 flex-1 rounded-full bg-slate-100" id="pwStr2"></div>
-                    <div class="h-1 flex-1 rounded-full bg-slate-100" id="pwStr3"></div>
-                    <div class="h-1 flex-1 rounded-full bg-slate-100" id="pwStr4"></div>
-                </div>
-                <p id="pwStrengthLabel" class="text-[12px] text-slate-400 mt-1"></p>
-                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="newPassword"></p>
-            </div>
-            <div>
-                <label class="acc-label" for="pwConfirm">Xác nhận mật khẩu mới</label>
-                <div class="relative">
-                    <input type="password" id="pwConfirm" class="acc-input pr-10" autocomplete="new-password">
-                    <button type="button" onclick="togglePw('pwConfirm', this)" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" aria-label="Hiện/ẩn mật khẩu">
-                        <svg class="lci eye-closed" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
-                        <svg class="lci eye-open" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                </div>
-                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="confirmPassword"></p>
-            </div>
-        </form>
-        <div class="px-6 pb-5 flex justify-end gap-3">
-            <button type="button" onclick="closeModal('pwModal')" class="btn-secondary">Hủy</button>
-            <button type="button" id="pwSaveBtn" onclick="savePassword()" class="btn-primary">Đổi mật khẩu</button>
-        </div>
-    </div>
-</div>
+<!-- "Đổi mật khẩu" đã tách sang trang riêng full-screen:
+     /customer/doi-mat-khau (DoiMatKhau.jsp). -->
 
 <!-- Delete account modal -->
 <div id="deleteAccountModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
@@ -856,7 +836,6 @@
         tongquan: 'Tổng quan tài khoản',
         uytin: 'Điểm uy tín',
         caidat: 'Cài đặt',
-        thongbao: 'Cài đặt thông báo',
         ngonngu: 'Ngôn ngữ',
         phienban: 'Thông tin phiên bản',
         dieukhoan: 'Điều khoản và chính sách',
@@ -868,7 +847,7 @@
         tongQuan: 'tongquan'
     };
     // Các section con của "Cài đặt" vẫn giữ mục sidebar "Cài đặt" ở trạng thái active.
-    const SECTION_SIDEBAR_PARENT = { thongbao: 'caidat', ngonngu: 'caidat' };
+    const SECTION_SIDEBAR_PARENT = { ngonngu: 'caidat' };
 
     function showAccountSection(key, opts) {
         if (!SECTION_TITLES[key]) key = 'datlich';
@@ -924,29 +903,14 @@
     function closeModal(id) {
         document.getElementById(id).classList.add('hidden');
     }
-    document.querySelectorAll('#pwModal, #deleteAccountModal').forEach(overlay => {
+    document.querySelectorAll('#deleteAccountModal').forEach(overlay => {
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay.id); });
     });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            closeModal('pwModal');
             closeModal('deleteAccountModal');
         }
     });
-
-    // ---- Cài đặt thông báo (lưu trên thiết bị, chưa có backend riêng) ----
-    (function initNotifToggles() {
-        const STORAGE_KEY = 'vsport_notif_prefs';
-        let prefs = {};
-        try { prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { prefs = {}; }
-        document.querySelectorAll('.js-notif-toggle').forEach(function (el) {
-            el.checked = prefs[el.dataset.key] !== false;
-            el.addEventListener('change', function () {
-                prefs[el.dataset.key] = el.checked;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-            });
-        });
-    })();
 
     // ---- Xóa tài khoản ----
     function openDeleteAccountModal() {
@@ -1008,101 +972,22 @@
         });
     }
 
-    // ---- Change password ----
-    function openPwModal() {
-        document.getElementById('pwForm').reset();
-        clearFieldErrors(document.getElementById('pwForm'));
-        ['pwStr1', 'pwStr2', 'pwStr3', 'pwStr4'].forEach(id => { document.getElementById(id).style.backgroundColor = ''; });
-        document.getElementById('pwStrengthLabel').textContent = '';
-        openModal('pwModal');
-    }
-
+    // ---- Show/hide mật khẩu (dùng cho modal Xóa tài khoản) ----
     function togglePw(id, btn) {
         const input = document.getElementById(id);
         if (input.type === 'password') { input.type = 'text'; btn.classList.add('is-visible'); }
         else { input.type = 'password'; btn.classList.remove('is-visible'); }
     }
 
-    function updatePwStrength() {
-        const v = document.getElementById('pwNew').value;
-        let score = 0;
-        if (v.length >= 8) score++;
-        if (/[A-Z]/.test(v)) score++;
-        if (/[0-9]/.test(v)) score++;
-        if (/[^A-Za-z0-9]/.test(v)) score++;
-        const colors = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'];
-        const labels = ['', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById('pwStr' + i).style.backgroundColor = i <= score ? colors[score - 1] : '';
+    // ---- Flash message sau khi đổi mật khẩu ở trang /customer/doi-mat-khau ----
+    (function showPwFlash() {
+        let msg = null;
+        try { msg = sessionStorage.getItem('vsport_flash'); } catch (e) { msg = null; }
+        if (msg) {
+            try { sessionStorage.removeItem('vsport_flash'); } catch (e) { /* ignore */ }
+            showToast('Thành công', msg);
         }
-        document.getElementById('pwStrengthLabel').textContent = v.length ? labels[score] : '';
-    }
-
-    function savePassword() {
-        const form = document.getElementById('pwForm');
-        const currentPassword = document.getElementById('pwCurrent').value;
-        const newPassword = document.getElementById('pwNew').value;
-        const confirmPassword = document.getElementById('pwConfirm').value;
-        clearFieldErrors(form);
-
-        let hasError = false;
-        if (!currentPassword) {
-            form.querySelector('[data-error-for="currentPassword"]').textContent = 'Vui lòng nhập mật khẩu hiện tại.';
-            form.querySelector('[data-error-for="currentPassword"]').classList.remove('hidden');
-            hasError = true;
-        }
-        if (!newPassword) {
-            form.querySelector('[data-error-for="newPassword"]').textContent = 'Vui lòng nhập mật khẩu mới.';
-            form.querySelector('[data-error-for="newPassword"]').classList.remove('hidden');
-            hasError = true;
-        }
-        if (newPassword && newPassword !== confirmPassword) {
-            form.querySelector('[data-error-for="confirmPassword"]').textContent = 'Xác nhận mật khẩu mới không khớp.';
-            form.querySelector('[data-error-for="confirmPassword"]').classList.remove('hidden');
-            hasError = true;
-        }
-        if (hasError) return;
-
-        const btn = document.getElementById('pwSaveBtn');
-        btn.disabled = true;
-        const originalText = btn.textContent;
-        btn.textContent = 'Đang lưu...';
-
-        const params = new URLSearchParams();
-        params.append('action', 'changePassword');
-        params.append('currentPassword', currentPassword);
-        params.append('newPassword', newPassword);
-        params.append('confirmPassword', confirmPassword);
-
-        fetch(CTX + '/account/update-profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: params
-        })
-            .then(r => r.json())
-            .then(data => {
-                btn.disabled = false;
-                btn.textContent = originalText;
-                if (data.success) {
-                    form.reset();
-                    closeModal('pwModal');
-                    showToast('Thành công', 'Mật khẩu đã được cập nhật.');
-                } else {
-                    form.querySelector('[data-error-for="currentPassword"]').textContent = data.message || 'Không thể đổi mật khẩu.';
-                    form.querySelector('[data-error-for="currentPassword"]').classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                btn.disabled = false;
-                btn.textContent = originalText;
-                showToast('Lỗi kết nối', 'Không thể kết nối máy chủ. Vui lòng thử lại.', true);
-            })
-            .finally(() => {
-                document.getElementById('pwCurrent').value = '';
-                document.getElementById('pwNew').value = '';
-                document.getElementById('pwConfirm').value = '';
-            });
-    }
+    })();
 </script>
 
 <jsp:include page="/customer/common/urgent-opponent-modal.jsp" />

@@ -15,91 +15,108 @@
     <style>
         body {
             font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif !important;
-            background-color: #F4F7FB !important;
-            color: #102A43 !important;
+            background-color: #00783E !important;
+            color: #063B24 !important;
             margin: 0;
         }
-        .customer-profile-page { max-width: 1648px; margin: 0 auto; padding-bottom: 32px; }
+        /* Full-screen green profile page (ALO-style layout). NO max-width / NO
+           centered desktop container. The --vs-* overrides below recolor the
+           shared navy/cyan tokens to green for THIS page only. */
+        .customer-profile-page {
+            min-height: 100vh;
+            width: 100%;
+            background: #00783E;
+            color: #063B24;
+            overflow-x: hidden;
+            padding-bottom: 24px;
+            --vs-primary-900: #00532B;
+            --vs-primary-800: #00633A;
+            --vs-primary-700: #00693A;
+            --vs-primary-600: #00783E;
+            --vs-primary-500: #08A24C;
+            --vs-cyan-500: #12B15A;
+        }
         .customer-profile-hero {
             position: relative;
             width: 100%;
-            height: 170px;
-            background: linear-gradient(135deg, var(--vs-primary-900, #0B2545), var(--vs-cyan-500, #18C8E8));
-            border-radius: 0 0 18px 18px;
+            height: 150px;
+            background: linear-gradient(135deg, #00532B 0%, #00783E 55%, #12B15A 100%);
+            border-radius: 0;
             overflow: hidden;
         }
         .customer-profile-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        .customer-profile-hero-overlay { position: absolute; inset: 0; background: rgba(11, 37, 69, 0.28); }
+        .customer-profile-hero-overlay { position: absolute; inset: 0; background: rgba(0, 40, 20, 0.25); }
         .customer-profile-icon-btn {
             position: absolute; top: 12px; width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(11, 37, 69, 0.55); color: #fff; display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 45, 22, 0.45); color: #fff; display: flex; align-items: center; justify-content: center;
             border: none; cursor: pointer; z-index: 2;
         }
-        .customer-profile-icon-btn:hover { background: rgba(11, 37, 69, 0.75); }
+        .customer-profile-icon-btn:hover { background: rgba(0, 45, 22, 0.68); }
         .customer-profile-icon-btn .lci { width: 18px; height: 18px; }
         #chpBackBtn { left: 12px; }
         #chpCoverBtn { right: 12px; }
 
         .customer-profile-card {
             position: relative; z-index: 3;
-            margin: -60px 12px 0;
-            background: rgba(255, 255, 255, 0.92);
+            margin: -46px 12px 0;
+            background: rgba(255, 255, 255, 0.10);
             backdrop-filter: blur(6px);
-            border: 1px solid rgba(220, 229, 239, 0.8);
-            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 14px;
             min-height: 100px;
             padding: 16px 20px;
             display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
         }
         .customer-profile-avatar-wrap { position: relative; flex-shrink: 0; }
         .customer-profile-avatar {
-            width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
-            background: var(--vs-primary-600, #1677D2); color: #fff;
+            width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+            background: #00532B; color: #fff;
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: 800; border: 2px solid #fff;
+            font-size: 20px; font-weight: 800; border: 2px solid rgba(255, 255, 255, 0.85);
         }
         .customer-profile-avatar-cam {
             position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%;
-            background: var(--vs-primary-600, #1677D2); color: #fff; border: 2px solid #fff;
+            background: #00783E; color: #fff; border: 2px solid #fff;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .customer-profile-avatar-cam .lci { width: 12px; height: 12px; }
         .customer-profile-identity { min-width: 0; }
-        .customer-profile-name { font-size: 19px; font-weight: 700; color: #102A43; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+        .customer-profile-name { font-size: 20px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
         .customer-profile-email-pill {
             display: inline-flex; align-items: center; gap: 5px; margin-top: 4px;
-            background: #EEF7FC; border-radius: 999px; padding: 3px 10px;
-            font-size: 10.5px; color: #33544a; max-width: 240px;
+            background: rgba(255, 255, 255, 0.16); border-radius: 999px; padding: 3px 10px;
+            font-size: 10.5px; color: rgba(255, 255, 255, 0.92); max-width: 240px;
         }
         .customer-profile-email-pill span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .customer-profile-email-pill .lci { width: 12px; height: 12px; flex-shrink: 0; }
         .customer-profile-facts { display: flex; gap: 28px; margin-left: auto; flex-wrap: wrap; }
         .customer-profile-fact { text-align: center; min-width: 72px; }
-        .customer-profile-fact .lci { width: 15px; height: 15px; color: var(--vs-primary-600, #1677D2); }
-        .customer-profile-fact-label { font-size: 10.5px; font-weight: 700; color: #829AB1; text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
-        .customer-profile-fact-value { font-size: 13px; font-weight: 700; color: #102A43; margin-top: 1px; }
+        .customer-profile-fact .lci { width: 15px; height: 15px; color: #fff; }
+        .customer-profile-fact-label { font-size: 10.5px; font-weight: 700; color: rgba(255, 255, 255, 0.72); text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
+        .customer-profile-fact-value { font-size: 13px; font-weight: 700; color: #fff; margin-top: 1px; }
         .customer-profile-edit-btn {
             display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
-            background: #fff; border: 1px solid var(--vs-primary-600, #1677D2); color: var(--vs-primary-900, #0B2545);
+            background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.5); color: #fff;
             border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit;
         }
-        .customer-profile-edit-btn:hover { background: #F0FCFE; }
+        .customer-profile-edit-btn:hover { background: rgba(255, 255, 255, 0.24); }
         .customer-profile-edit-btn .lci { width: 14px; height: 14px; }
 
         .customer-profile-tabs {
-            display: flex; margin: 14px 12px 0; background: var(--vs-primary-900, #0B2545);
-            border-radius: 8px; padding: 3px; gap: 3px; height: 36px;
+            display: flex; margin: 14px 12px 0; background: transparent;
+            border-radius: 10px; padding: 0; gap: 10px; height: 44px;
         }
         .customer-profile-tab {
-            flex: 1; border: none; background: transparent; color: rgba(255,255,255,.85);
-            font-family: inherit; font-size: 13.5px; font-weight: 700; border-radius: 7px; cursor: pointer;
+            flex: 1; border: 2px solid rgba(255,255,255,.55); background: rgba(255,255,255,.10); color: #fff;
+            font-family: inherit; font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer;
+            transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
         }
-        .customer-profile-tab.is-active { background: #fff; color: var(--vs-primary-900, #0B2545); }
+        .customer-profile-tab.is-active { background: #fff; color: #00783E; border-color: #fff; }
 
         .customer-profile-section-wrap { margin: 12px; background: #fff; border-radius: 12px; padding: 22px; min-height: 320px; }
         .customer-profile-section + .customer-profile-section { margin-top: 26px; }
         .customer-profile-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .customer-profile-section-title { font-size: 14.5px; font-weight: 700; color: var(--vs-primary-900, #0B2545); flex: 1; }
+        .customer-profile-section-title { font-size: 14.5px; font-weight: 700; color: #00783E; flex: 1; }
         .customer-profile-section-edit { background: none; border: none; cursor: pointer; color: #829AB1; padding: 4px; }
         .customer-profile-section-edit .lci { width: 16px; height: 16px; }
         .customer-profile-divider { border: none; border-top: 1px solid #EEF1F5; margin: 10px 0 16px; }

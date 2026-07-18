@@ -119,7 +119,7 @@ public class BookingExtensionService {
                         "WHERE SanID = ? AND IsDeleted = 0 AND DatSanID <> ? " +
                         "AND (NgayDat = ? OR NgayDat = ?) " +
                         "AND (TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                        "     OR (TrangThai = N'Chờ thanh toán' AND HoldExpiresAt > GETDATE()))";
+                        "     OR (TrangThai = N'Chờ thanh toán' AND HoldExpiresAt > SYSUTCDATETIME()))";
                 try (PreparedStatement psNext = conn.prepareStatement(sqlNext)) {
                     psNext.setInt(1, sanId);
                     psNext.setInt(2, datSanId);
@@ -353,7 +353,7 @@ public class BookingExtensionService {
                     "WHERE SanID = ? AND IsDeleted = 0 AND DatSanID <> ? " +
                     "AND (NgayDat = ? OR NgayDat = ?) " +
                     "AND (TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                    "     OR (TrangThai = N'Chờ thanh toán' AND HoldExpiresAt > GETDATE()))";
+                    "     OR (TrangThai = N'Chờ thanh toán' AND HoldExpiresAt > SYSUTCDATETIME()))";
             try (PreparedStatement psNext = conn.prepareStatement(sqlNext)) {
                 psNext.setInt(1, sanId);
                 psNext.setInt(2, datSanId);

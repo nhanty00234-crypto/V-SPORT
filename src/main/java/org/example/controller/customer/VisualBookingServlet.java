@@ -391,11 +391,11 @@ public class VisualBookingServlet extends HttpServlet {
         // TUYỆT ĐỐI không render bảng toàn ô trống giả.
         List<BookingSlot> bookings;
         List<BookingSlot> softHolds;
+        HttpSession session = req.getSession(false);
+        Integer currentAccountId = session != null && session.getAttribute("user") != null
+                ? ((TaiKhoan) session.getAttribute("user")).getAccountId() : null;
         try {
             bookings = loadBlockingBookings(coSoId, date);
-            HttpSession session = req.getSession(false);
-            Integer currentAccountId = session != null && session.getAttribute("user") != null
-                    ? ((TaiKhoan) session.getAttribute("user")).getAccountId() : null;
             softHolds = loadActiveSoftHolds(coSoId, date, currentAccountId);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Availability query failed for coSoId=" + coSoId + " date=" + date
@@ -447,11 +447,27 @@ public class VisualBookingServlet extends HttpServlet {
                     reason = "Khung giờ đã qua";
                 }
 
+                Integer holdSelfDatSanId = null;
                 if ("AVAILABLE".equals(status)) {
                     for (BookingSlot b : bookings) {
                         if (b.sanId == s.getSanID() && overlaps(t, slotEnd, b.start, b.end)) {
-                            status = "BOOKED";
-                            reason = "Đã có người đặt (" + b.trangThai + ")";
+                            boolean isPaymentHold = Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(b.trangThai);
+                            if (isPaymentHold) {
+                                // Đơn PayOS chưa thanh toán: KHÔNG phải "Đã đặt". Là giữ chỗ tạm.
+                                if (currentAccountId != null && currentAccountId.equals(b.accountId)) {
+                                    // Của chính khách đang xem → cho phép bấm để tiếp tục thanh toán.
+                                    status = "HOLD_SELF";
+                                    reason = "Đơn của bạn đang chờ thanh toán";
+                                    holdSelfDatSanId = b.datSanId;
+                                } else {
+                                    // Của người khác → chỉ hiện "đang được giữ", không lộ thông tin người đặt.
+                                    status = "HOLD";
+                                    reason = "Khung giờ đang được giữ";
+                                }
+                            } else {
+                                status = "BOOKED";
+                                reason = "Đã có người đặt";
+                            }
                             break;
                         }
                     }
@@ -472,6 +488,7 @@ public class VisualBookingServlet extends HttpServlet {
                 slot.put("startMinute", t.getHour() * 60 + t.getMinute());
                 slot.put("status", status);
                 if (reason != null) slot.put("reason", reason);
+                if (holdSelfDatSanId != null) slot.put("datSanId", holdSelfDatSanId);
                 slots.add(slot);
             }
             courtNode.put("slots", slots);
@@ -603,8 +620,14 @@ public class VisualBookingServlet extends HttpServlet {
         final LocalTime start;
         final LocalTime end;
         final String trangThai;
+        final Integer accountId;   // chủ đơn (để phân biệt hold của chính khách đang xem)
+        final int datSanId;        // để build link "Tiếp tục thanh toán" cho hold của chính mình
         BookingSlot(int sanId, LocalTime start, LocalTime end, String trangThai) {
+            this(sanId, start, end, trangThai, null, 0);
+        }
+        BookingSlot(int sanId, LocalTime start, LocalTime end, String trangThai, Integer accountId, int datSanId) {
             this.sanId = sanId; this.start = start; this.end = end; this.trangThai = trangThai;
+            this.accountId = accountId; this.datSanId = datSanId;
         }
     }
 
@@ -620,24 +643,27 @@ public class VisualBookingServlet extends HttpServlet {
      */
     private List<BookingSlot> loadBlockingBookings(int coSoId, LocalDate date) throws SQLException {
         List<BookingSlot> result = new ArrayList<>();
-        String sql = "SELECT l.SanID, l.GioBatDau, l.GioKetThuc, l.TrangThai " +
+        String sql = "SELECT l.DatSanID, l.AccountID, l.SanID, l.GioBatDau, l.GioKetThuc, l.TrangThai " +
                 "FROM LichDatSan l JOIN San s ON l.SanID = s.SanID " +
                 "WHERE s.CoSoID = ? AND l.NgayDat = ? AND l.IsDeleted = 0 " +
                 "AND (l.TrangThai IN (N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "', " +
                 "N'" + Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
                 "N'" + Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "') " +
-                "OR (l.TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND l.HoldExpiresAt > GETDATE()))";
+                "OR (l.TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND l.HoldExpiresAt > SYSUTCDATETIME()))";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
             ps.setDate(2, java.sql.Date.valueOf(date));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    int acc = rs.getInt("AccountID");
                     result.add(new BookingSlot(
                             rs.getInt("SanID"),
                             rs.getTime("GioBatDau").toLocalTime(),
                             rs.getTime("GioKetThuc").toLocalTime(),
-                            rs.getString("TrangThai")));
+                            rs.getString("TrangThai"),
+                            rs.wasNull() ? null : acc,
+                            rs.getInt("DatSanID")));
                 }
             }
         }

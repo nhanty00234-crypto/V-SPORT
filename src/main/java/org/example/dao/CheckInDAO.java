@@ -794,6 +794,16 @@ public class CheckInDAO {
                          "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
                          invoiceJoin +
                          "WHERE lds.NgayDat = ? AND s.CoSoID = ? " +
+                         // Check-in chỉ hiển thị đơn đủ điều kiện vận hành. LOẠI TRỪ triệt để:
+                         //  - N'Chờ thanh toán' (PayOS chưa xác nhận qua webhook) — không được lộ ở quầy.
+                         //  - N'Đã hủy' và N'Quá hạn' — đơn đã kết thúc, không có gì để check-in.
+                         // GIỮ N'Chờ xác nhận' (trả tại quầy) để nhân viên mở sân/duyệt tại chỗ theo luồng hiện có.
+                         "AND lds.TrangThai IN (" +
+                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "', " +
+                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
+                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
+                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_HOAN_THANH + "', " +
+                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_KHONG_DEN + "') " +
                          "ORDER BY lds.GioBatDau ASC";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setDate(1, java.sql.Date.valueOf(LocalDate.now()));

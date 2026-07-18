@@ -8,9 +8,19 @@
     - Tokens are namespaced --vs-* to avoid clashing with page-level vars.
     - Also re-themes the shared header.jsp accent to V-SPORT blue ON CUSTOMER PAGES ONLY
       (targeted !important overrides; admin/manager never load this file).
+    - Typography: ONE font system for customer pages (--vs-font-sans == --vs-font-heading).
+      Overrides the GLOBAL `h1..h6 { Barlow Condensed }` rule from common/head.jsp — but
+      SCOPED to customer pages only (this file is never included by admin/manager/staff).
 --%>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
     :root {
+        /* ---- Typography tokens (customer design system) ----
+           Single sans family, tuned for Vietnamese; headings share it (no condensed/display). */
+        --vs-font-sans: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        --vs-font-heading: var(--vs-font-sans);
+        --vs-text-primary: #102A43;
+
         /* ---- Brand navy ---- */
         --vs-primary-950: #071A2F;
         --vs-primary-900: #0B2545;
@@ -79,6 +89,14 @@
         --primary: var(--vs-primary-600) !important;
         --primary-hover: var(--vs-primary-900) !important;
     }
+
+    /* ===== Typography normalisation (customer pages only) =====
+       common/head.jsp sets a GLOBAL `body { Barlow }` + `h1..h6 { Barlow Condensed }`.
+       On customer pages we unify onto the V-SPORT sans stack. This file is included AFTER
+       head.jsp, so equal-specificity selectors here win; individual pages that set their own
+       font in a later <style> still override (intentional per-page choices are preserved). */
+    body { font-family: var(--vs-font-sans); }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--vs-font-heading); }
 
     /* Reserve space so the fixed bottom nav never covers content, at every width. */
     body { padding-bottom: calc(var(--vs-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 6px); }

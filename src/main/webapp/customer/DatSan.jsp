@@ -624,159 +624,301 @@
     </footer>
 
     <!-- ════ HISTORY MODAL ════ -->
-    <div id="historyModalOverlay" class="fixed inset-0 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4" style="background-color: var(--vs-overlay, rgba(7, 26, 47, 0.68));">
-        <div id="historyPanel" class="bg-white w-full max-w-4xl rounded-none border border-neutral-200 shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
-            <div class="bg-[#1a1c1e] px-6 py-4 flex items-center justify-between text-white border-b border-neutral-800">
-                <h3 class="font-['Barlow_Condensed'] font-bold text-lg uppercase tracking-wider flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[20px]">history</span> Lịch sử đặt sân của bạn
-                </h3>
-                <button type="button" onclick="closeHistoryModal()" class="text-white/80 hover:text-white p-1 transition-colors">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
+    <%-- ════ LỊCH SỬ ĐẶT SÂN — redesign đồng bộ theme Customer V-SPORT (navy/cyan/cam, --vs-font-sans) ════ --%>
+    <style>
+        /* Scope toàn bộ dưới .vs-bhm để không ảnh hưởng trang khác. Dùng token --vs-* + font hệ thống. */
+        .vs-bhm-overlay { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center;
+            padding: 20px; background: var(--vs-overlay, rgba(7,26,47,.68)); backdrop-filter: blur(3px);
+            opacity: 0; transition: opacity .25s ease; overflow-y: auto; }
+        .vs-bhm-overlay.is-open { display: flex; opacity: 1; }
+        .vs-bhm { font-family: var(--vs-font-sans); color: var(--vs-text, #102A43); background: #fff;
+            width: 100%; max-width: 1040px; max-height: 86vh; margin: auto; border-radius: 20px; overflow: hidden;
+            display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(7,26,47,.32);
+            transform: translateY(12px) scale(.98); transition: transform .25s ease; }
+        .vs-bhm-overlay.is-open .vs-bhm { transform: none; }
+        .vs-bhm *, .vs-bhm button, .vs-bhm input, .vs-bhm a { font-family: inherit; }
+
+        /* Header navy */
+        .vs-bhm-head { background: var(--vs-primary-900, #0B2545); color: #fff; padding: 16px 20px;
+            display: flex; align-items: center; gap: 13px; flex-shrink: 0; }
+        .vs-bhm-head-ic { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; display: inline-flex;
+            align-items: center; justify-content: center; background: rgba(24,200,232,.16); color: var(--vs-cyan-500, #18C8E8); }
+        .vs-bhm-head-tt { flex: 1; min-width: 0; }
+        .vs-bhm-head-tt h3 { font-size: 17px; font-weight: 700; margin: 0; }
+        .vs-bhm-head-tt p { font-size: 12.5px; color: #b6c2d4; margin: 2px 0 0; font-weight: 500; }
+        .vs-bhm-close { width: 38px; height: 38px; border-radius: 999px; flex-shrink: 0; border: none; cursor: pointer;
+            background: rgba(255,255,255,.08); color: #fff; display: inline-flex; align-items: center; justify-content: center;
+            transition: background-color .15s ease; }
+        .vs-bhm-close:hover { background: rgba(255,255,255,.18); }
+        .vs-bhm-close:focus-visible { outline: 3px solid var(--vs-cyan-500, #18C8E8); outline-offset: 2px; }
+
+        /* Summary bar */
+        .vs-bhm-summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+            padding: 14px 20px; background: var(--vs-surface-soft, #EDF4FA); border-bottom: 1px solid var(--vs-border, #DCE5EF); flex-shrink: 0; }
+        .vs-bhm-user { display: flex; align-items: center; gap: 11px; min-width: 0; }
+        .vs-bhm-avatar { width: 42px; height: 42px; border-radius: 999px; flex-shrink: 0; display: inline-flex; align-items: center;
+            justify-content: center; background: var(--vs-primary-600, #1677D2); color: #fff; font-weight: 700; font-size: 16px; }
+        .vs-bhm-user-name { font-size: 14px; font-weight: 700; color: var(--vs-primary-900, #0B2545); }
+        .vs-bhm-user-mail { font-size: 12px; color: var(--vs-text-secondary, #486581); font-weight: 500; }
+        .vs-bhm-stats { display: flex; gap: 8px; }
+        .vs-bhm-stat { min-width: 78px; text-align: center; padding: 7px 12px; border-radius: 12px;
+            background: var(--vs-cyan-50, #F0FCFE); border: 1px solid var(--vs-cyan-100, #DDF8FC); }
+        .vs-bhm-stat .k { display: block; font-size: 10px; font-weight: 600; color: var(--vs-text-secondary, #486581); }
+        .vs-bhm-stat .v { display: block; font-size: 16px; font-weight: 700; color: var(--vs-primary-700, #185A9D); margin-top: 1px; }
+
+        /* Filter tabs */
+        .vs-bhm-tabs { display: flex; gap: 7px; padding: 12px 20px 0; overflow-x: auto; flex-shrink: 0; }
+        .vs-bhm-tab { flex-shrink: 0; border: 1px solid var(--vs-border, #DCE5EF); background: #fff; cursor: pointer;
+            border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; color: var(--vs-text-secondary, #486581);
+            display: inline-flex; align-items: center; gap: 6px; transition: all .15s ease; white-space: nowrap; }
+        .vs-bhm-tab:hover { border-color: var(--vs-cyan-500, #18C8E8); color: var(--vs-primary-600, #1677D2); }
+        .vs-bhm-tab.is-active { background: var(--vs-primary-600, #1677D2); border-color: var(--vs-primary-600, #1677D2); color: #fff; }
+        .vs-bhm-tab-count { background: var(--vs-surface-soft, #EDF4FA); color: var(--vs-text-secondary, #486581);
+            border-radius: 999px; padding: 0 6px; font-size: 11px; font-weight: 700; min-width: 18px; text-align: center; }
+        .vs-bhm-tab.is-active .vs-bhm-tab-count { background: rgba(255,255,255,.22); color: #fff; }
+
+        /* Scroll body + card list */
+        .vs-bhm-body { padding: 14px 20px 20px; overflow-y: auto; flex: 1; }
+        .vs-bhm-card { display: grid; grid-template-columns: 1.5fr 1fr auto auto; align-items: center; gap: 14px;
+            padding: 14px 16px; border: 1px solid var(--vs-border, #DCE5EF); border-radius: 14px; margin-bottom: 10px; background: #fff; }
+        .vs-bhm-card:hover { border-color: var(--vs-cyan-500, #18C8E8); }
+        .vs-bhm-facility { min-width: 0; }
+        .vs-bhm-facility-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .vs-bhm-facility-name { font-size: 14.5px; font-weight: 700; color: var(--vs-primary-900, #0B2545); }
+        .vs-bhm-new { font-size: 10px; font-weight: 700; color: #fff; background: var(--vs-orange-500, #FF8A24);
+            border-radius: 6px; padding: 1px 7px; }
+        .vs-bhm-meta { font-size: 12px; color: var(--vs-text-secondary, #486581); font-weight: 500; margin-top: 3px;
+            display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .vs-bhm-meta .material-symbols-outlined { font-size: 14px; }
+        .vs-bhm-time { font-size: 13px; }
+        .vs-bhm-time .d { font-weight: 700; color: var(--vs-text, #102A43); }
+        .vs-bhm-time .h { color: var(--vs-primary-600, #1677D2); font-weight: 700; }
+        .vs-bhm-price { font-size: 15px; font-weight: 700; color: var(--vs-primary-900, #0B2545); text-align: right; white-space: nowrap; }
+        .vs-bhm-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+        .vs-bhm-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px;
+            font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+        .vs-bhm-badge .material-symbols-outlined { font-size: 13px; }
+        .vs-bhm-badge.warn { background: var(--vs-warning-bg, #FFF7DA); color: #8a6116; }
+        .vs-bhm-badge.amber { background: #FFF3E0; color: #9a5b00; }
+        .vs-bhm-badge.ok { background: var(--vs-success-bg, #E5F7EF); color: var(--vs-success, #16A36A); }
+        .vs-bhm-badge.info { background: var(--vs-cyan-100, #DDF8FC); color: var(--vs-primary-700, #185A9D); }
+        .vs-bhm-badge.danger { background: var(--vs-danger-bg, #FDEBEC); color: var(--vs-danger, #E5484D); }
+        .vs-bhm-badge.neutral { background: var(--vs-surface-soft, #EDF4FA); color: var(--vs-text-secondary, #486581); }
+
+        .vs-bhm-actions { display: flex; align-items: center; gap: 7px; justify-content: flex-end; flex-wrap: wrap; }
+        .vs-bhm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px;
+            padding: 0 14px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; font-size: 12.5px; font-weight: 700;
+            text-decoration: none; transition: background-color .15s ease, border-color .15s ease, transform .08s ease; }
+        .vs-bhm-btn:active { transform: translateY(1px); }
+        .vs-bhm-btn .material-symbols-outlined { font-size: 16px; }
+        .vs-bhm-btn-primary { background: var(--vs-orange-500, #FF8A24); color: #fff; }
+        .vs-bhm-btn-primary:hover { background: var(--vs-orange-600, #F97316); }
+        .vs-bhm-btn-primary[disabled] { background: #d9a06e; cursor: not-allowed; }
+        .vs-bhm-btn-ghost { background: #fff; color: var(--vs-primary-600, #1677D2); border-color: var(--vs-border, #DCE5EF); }
+        .vs-bhm-btn-ghost:hover { border-color: var(--vs-cyan-500, #18C8E8); background: var(--vs-cyan-50, #F0FCFE); }
+        .vs-bhm-btn-danger { background: #fff; color: var(--vs-danger, #E5484D); border-color: #f3cfd1; }
+        .vs-bhm-btn-danger:hover { background: var(--vs-danger-bg, #FDEBEC); }
+        .vs-bhm-done { font-size: 12.5px; font-weight: 700; color: var(--vs-success, #16A36A); }
+        .vs-bhm-muted { font-size: 12.5px; color: var(--vs-muted, #829AB1); }
+        .vs-bhm-btn .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4);
+            border-top-color: #fff; animation: vsBhmSpin .8s linear infinite; }
+        @keyframes vsBhmSpin { to { transform: rotate(360deg); } }
+
+        /* Empty state */
+        .vs-bhm-empty { text-align: center; padding: 48px 20px; }
+        .vs-bhm-empty-ic { width: 66px; height: 66px; border-radius: 999px; margin: 0 auto 14px; display: flex; align-items: center;
+            justify-content: center; background: var(--vs-surface-soft, #EDF4FA); color: var(--vs-primary-600, #1677D2); }
+        .vs-bhm-empty h4 { font-size: 16px; font-weight: 700; color: var(--vs-primary-900, #0B2545); margin: 0 0 5px; }
+        .vs-bhm-empty p { font-size: 13.5px; color: var(--vs-text-secondary, #486581); margin: 0 0 16px; }
+        .vs-bhm-empty-cta { display: inline-flex; align-items: center; gap: 7px; background: var(--vs-orange-500, #FF8A24);
+            color: #fff; border-radius: 11px; padding: 11px 20px; font-size: 13.5px; font-weight: 700; text-decoration: none; }
+        .vs-bhm-empty-cta:hover { background: var(--vs-orange-600, #F97316); }
+        .vs-bhm-noresult { display: none; text-align: center; padding: 36px 20px; color: var(--vs-text-secondary, #486581); font-size: 13.5px; }
+
+        /* Confirm dialog */
+        .vs-bhm-confirm { position: absolute; inset: 0; z-index: 5; display: none; align-items: center; justify-content: center;
+            padding: 20px; background: rgba(7,26,47,.55); }
+        .vs-bhm-confirm.is-open { display: flex; }
+        .vs-bhm-confirm-box { background: #fff; border-radius: 16px; padding: 20px; max-width: 380px; width: 100%; }
+        .vs-bhm-confirm-box h4 { font-size: 16px; font-weight: 700; color: var(--vs-primary-900, #0B2545); margin: 0 0 7px; }
+        .vs-bhm-confirm-box p { font-size: 13.5px; color: var(--vs-text-secondary, #486581); margin: 0 0 16px; line-height: 1.5; }
+        .vs-bhm-confirm-actions { display: flex; gap: 9px; }
+        .vs-bhm-confirm-actions .vs-bhm-btn { flex: 1; }
+        .vs-bhm-btn-confirm-danger { background: var(--vs-danger, #E5484D); color: #fff; }
+        .vs-bhm-btn-confirm-danger:hover { background: #cf3b40; }
+
+        @media (max-width: 720px) {
+            .vs-bhm-overlay { padding: 0; align-items: flex-end; }
+            .vs-bhm { max-width: 100%; max-height: 92vh; border-radius: 18px 18px 0 0; }
+            .vs-bhm-card { grid-template-columns: 1fr; gap: 8px; }
+            .vs-bhm-price { text-align: left; }
+            .vs-bhm-right { align-items: stretch; }
+            .vs-bhm-actions { justify-content: stretch; }
+            .vs-bhm-actions .vs-bhm-btn { flex: 1; }
+        }
+        @media (min-width: 721px) and (max-width: 960px) {
+            .vs-bhm-card { grid-template-columns: 1.4fr 1fr; }
+            .vs-bhm-price { text-align: left; }
+            .vs-bhm-right { align-items: flex-start; grid-column: 1 / -1; flex-direction: row; justify-content: space-between; }
+        }
+        @media (prefers-reduced-motion: reduce) { .vs-bhm, .vs-bhm-overlay { transition: none; } .vs-bhm-btn .spinner { animation-duration: 2.4s; } }
+    </style>
+
+    <div id="historyModalOverlay" class="vs-bhm-overlay" role="dialog" aria-modal="true" aria-labelledby="vsBhmTitle">
+        <div id="historyPanel" class="vs-bhm">
+            <div class="vs-bhm-head">
+                <span class="vs-bhm-head-ic material-symbols-outlined" aria-hidden="true">history</span>
+                <div class="vs-bhm-head-tt">
+                    <h3 id="vsBhmTitle">Lịch sử đặt sân</h3>
+                    <p>Theo dõi lịch đặt và tiếp tục các khoản thanh toán đang chờ.</p>
+                </div>
+                <button type="button" onclick="closeHistoryModal()" class="vs-bhm-close" aria-label="Đóng lịch sử đặt sân">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
                 </button>
             </div>
+
             <c:if test="${sessionScope.user != null}">
-                <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-200 flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-none bg-[#1677D2]/5 text-[#1677D2] flex items-center justify-center font-extrabold text-sm border border-[#1677D2]/20 font-['Barlow_Condensed'] uppercase tracking-wider">
-                            <c:choose>
-                                <c:when test="${not empty sessionScope.user.fullName}">${fn:substring(sessionScope.user.fullName, 0, 1)}</c:when>
-                                <c:otherwise>${fn:substring(sessionScope.user.username, 0, 1)}</c:otherwise>
-                            </c:choose>
-                        </div>
+                <div class="vs-bhm-summary">
+                    <div class="vs-bhm-user">
+                        <div class="vs-bhm-avatar" aria-hidden="true"><c:out value="${fn:substring(not empty sessionScope.user.fullName ? sessionScope.user.fullName : sessionScope.user.username, 0, 1)}"/></div>
                         <div>
-                            <h4 class="font-bold text-neutral-800 text-sm">${sessionScope.user.fullName}</h4>
-                            <p class="text-[10px] text-neutral-400 font-semibold">${sessionScope.user.email}</p>
+                            <div class="vs-bhm-user-name"><c:out value="${not empty sessionScope.user.fullName ? sessionScope.user.fullName : sessionScope.user.username}"/></div>
+                            <div class="vs-bhm-user-mail"><c:out value="${sessionScope.user.email}"/></div>
                         </div>
                     </div>
-                    <div class="flex gap-4">
-                        <div class="text-center px-4 py-1.5 bg-white rounded-none border border-neutral-200 shadow-sm">
-                            <span class="text-[9px] text-neutral-400 font-bold block uppercase tracking-wider">ĐÃ ĐẶT</span>
-                            <span class="text-sm font-bold text-[#1677D2] font-['Barlow_Condensed'] block mt-0.5">${fn:length(dsLich)} ca</span>
-                        </div>
-                        <div class="text-center px-4 py-1.5 bg-white rounded-none border border-neutral-200 shadow-sm">
-                            <span class="text-[9px] text-neutral-400 font-bold block uppercase tracking-wider">UY TÍN</span>
-                            <span class="text-sm font-bold text-neutral-700 font-['Barlow_Condensed'] block mt-0.5">${sessionScope.user.diemUyTin != null ? sessionScope.user.diemUyTin : 100}</span>
-                        </div>
+                    <div class="vs-bhm-stats">
+                        <div class="vs-bhm-stat"><span class="k">Đã đặt</span><span class="v">${fn:length(dsLich)}</span></div>
+                        <div class="vs-bhm-stat"><span class="k">Uy tín</span><span class="v">${sessionScope.user.diemUyTin != null ? sessionScope.user.diemUyTin : 100}</span></div>
                     </div>
                 </div>
             </c:if>
-            <div class="p-6">
-                <div class="overflow-x-auto rounded-none border border-neutral-200 max-h-[400px] overflow-y-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-neutral-50 border-b border-neutral-200 text-neutral-500 font-bold sticky top-0 z-10 font-['Barlow_Condensed'] uppercase tracking-wider">
-                                <th class="p-4 bg-neutral-50">Chi tiết sân</th>
-                                <th class="p-4 bg-neutral-50 text-center">Thời gian chơi</th>
-                                <th class="p-4 bg-neutral-50 text-right">Chi phí</th>
-                                <th class="p-4 bg-neutral-50 text-center">Trạng thái</th>
-                                <th class="p-4 bg-neutral-50 text-center">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-neutral-200 bg-white">
-                            <c:forEach var="lich" items="${dsLich}" varStatus="lichStatus">
-                                <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
-                                <c:set var="branchHienThi" value="" />
-                                <c:forEach var="s" items="${dsSan}">
-                                    <c:if test="${s.sanID == lich.sanId}">
-                                        <c:set var="tenSanHienThi" value="${s.tenSan}" />
-                                        <c:forEach var="cs" items="${dsCoSo}">
-                                            <c:if test="${cs.coSoID == s.coSoID}">
-                                                <c:set var="branchHienThi" value="${cs.tenCoSo}" />
-                                            </c:if>
-                                        </c:forEach>
-                                    </c:if>
-                                </c:forEach>
-                                <tr class="hover:bg-neutral-50/40 transition-colors">
-                                    <td class="p-4">
-                                        <div class="flex items-start gap-1.5 flex-wrap mb-0.5">
-                                            <span class="font-bold text-neutral-800 text-sm">${tenSanHienThi}</span>
-                                            <c:if test="${lichStatus.first}">
-                                                <span class="inline-flex items-center gap-0.5 bg-[#FF8A24] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none tracking-wider font-['Barlow_Condensed'] uppercase">
-                                                    MỚI NHẤT
-                                                </span>
-                                            </c:if>
-                                        </div>
-                                        <span class="text-[10px] text-neutral-400 font-semibold flex items-center gap-1">
-                                            <c:if test="${not empty branchHienThi}">
-                                                <span class="material-symbols-outlined text-[12px]">location_on</span>${branchHienThi} &middot;
-                                            </c:if>
-                                            Mã #${lich.datSanId}
-                                        </span>
-                                        <c:if test="${not empty lich.createdTime}">
-                                            <span class="text-[10px] text-neutral-400 font-semibold flex items-center gap-0.5 mt-0.5">
-                                                <span class="material-symbols-outlined text-[11px]">schedule</span>
-                                                Đặt lúc: ${fn:replace(fn:substring(lich.createdTime.toString(), 0, 16), 'T', ' ')}
-                                            </span>
+
+            <c:if test="${not empty dsLich}">
+                <div class="vs-bhm-tabs" role="tablist" aria-label="Lọc theo trạng thái">
+                    <button type="button" class="vs-bhm-tab is-active" role="tab" aria-selected="true" data-filter="all">Tất cả <span class="vs-bhm-tab-count" data-count="all">0</span></button>
+                    <button type="button" class="vs-bhm-tab" role="tab" aria-selected="false" data-filter="paying">Chờ thanh toán <span class="vs-bhm-tab-count" data-count="paying">0</span></button>
+                    <button type="button" class="vs-bhm-tab" role="tab" aria-selected="false" data-filter="confirmed">Đã xác nhận <span class="vs-bhm-tab-count" data-count="confirmed">0</span></button>
+                    <button type="button" class="vs-bhm-tab" role="tab" aria-selected="false" data-filter="done">Đã hoàn thành <span class="vs-bhm-tab-count" data-count="done">0</span></button>
+                    <button type="button" class="vs-bhm-tab" role="tab" aria-selected="false" data-filter="ended">Đã hủy / Quá hạn <span class="vs-bhm-tab-count" data-count="ended">0</span></button>
+                </div>
+            </c:if>
+
+            <div class="vs-bhm-body" id="vsBhmBody">
+                <c:choose>
+                    <c:when test="${empty dsLich}">
+                        <div class="vs-bhm-empty">
+                            <div class="vs-bhm-empty-ic"><span class="material-symbols-outlined" style="font-size:32px;" aria-hidden="true">event_available</span></div>
+                            <h4>Bạn chưa có lịch đặt</h4>
+                            <p>Tìm sân phù hợp và bắt đầu lịch chơi đầu tiên của bạn.</p>
+                            <a class="vs-bhm-empty-cta" href="${pageContext.request.contextPath}/customer/dat-san">
+                                <span class="material-symbols-outlined" aria-hidden="true">search</span> Tìm sân ngay
+                            </a>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="lich" items="${dsLich}" varStatus="lichStatus">
+                            <c:set var="tenSanHienThi" value="Sân #${lich.sanId}" />
+                            <c:set var="branchHienThi" value="" />
+                            <c:forEach var="s" items="${dsSan}">
+                                <c:if test="${s.sanID == lich.sanId}">
+                                    <c:set var="tenSanHienThi" value="${s.tenSan}" />
+                                    <c:forEach var="cs" items="${dsCoSo}">
+                                        <c:if test="${cs.coSoID == s.coSoID}">
+                                            <c:set var="branchHienThi" value="${cs.tenCoSo}" />
                                         </c:if>
-                                    </td>
-                                    <td class="p-4 text-center">
-                                        <span class="font-bold text-neutral-700 block">${lich.ngayDat}</span>
-                                        <span class="text-xs text-[#1677D2] font-bold font-mono">${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
-                                    </td>
-                                    <td class="p-4 text-right font-bold text-neutral-800 text-sm font-mono">
-                                        <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
-                                    </td>
-                                    <td class="p-4 text-center">
+                                    </c:forEach>
+                                </c:if>
+                            </c:forEach>
+
+                            <%-- Nhóm trạng thái cho filter (map từ trạng thái thật, không bịa) --%>
+                            <c:set var="grp" value="ended" />
+                            <c:if test="${lich.trangThai == 'Chờ thanh toán'}"><c:set var="grp" value="paying" /></c:if>
+                            <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt' || lich.trangThai == 'Đang sử dụng'}"><c:set var="grp" value="confirmed" /></c:if>
+                            <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><c:set var="grp" value="done" /></c:if>
+
+                            <div class="vs-bhm-card" data-group="${grp}">
+                                <div class="vs-bhm-facility">
+                                    <div class="vs-bhm-facility-top">
+                                        <span class="vs-bhm-facility-name"><c:out value="${tenSanHienThi}"/></span>
+                                        <c:if test="${lichStatus.first}"><span class="vs-bhm-new">Mới nhất</span></c:if>
+                                    </div>
+                                    <div class="vs-bhm-meta">
+                                        <c:if test="${not empty branchHienThi}"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><c:out value="${branchHienThi}"/> ·</c:if>
+                                        <span>Mã #${lich.datSanId}</span>
+                                    </div>
+                                    <c:if test="${not empty lich.createdTime}">
+                                        <div class="vs-bhm-meta"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>Đặt lúc ${fn:replace(fn:substring(lich.createdTime.toString(), 0, 16), 'T', ' ')}</div>
+                                    </c:if>
+                                </div>
+                                <div class="vs-bhm-time">
+                                    <div class="d">${lich.ngayDat}</div>
+                                    <div class="h">${fn:substring(lich.gioBatDau, 0, 5)} – ${fn:substring(lich.gioKetThuc, 0, 5)}</div>
+                                </div>
+                                <div class="vs-bhm-price"><fmt:formatNumber value="${lich.tongTienDuKien}" pattern="#,##0"/> ₫</div>
+                                <div class="vs-bhm-right">
+                                    <%-- Badge trạng thái --%>
+                                    <c:choose>
+                                        <c:when test="${lich.trangThai == 'Chờ thanh toán'}"><span class="vs-bhm-badge warn"><span class="material-symbols-outlined" aria-hidden="true">hourglass_top</span>Chờ thanh toán</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Chờ xác nhận'}"><span class="vs-bhm-badge amber"><span class="material-symbols-outlined" aria-hidden="true">pending</span>Chờ duyệt</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}"><span class="vs-bhm-badge ok"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Đã xác nhận</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Đang sử dụng'}"><span class="vs-bhm-badge info"><span class="material-symbols-outlined" aria-hidden="true">sports_tennis</span>Đang chơi</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Đã hoàn thành'}"><span class="vs-bhm-badge ok"><span class="material-symbols-outlined" aria-hidden="true">verified</span>Hoàn thành</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Quá hạn'}"><span class="vs-bhm-badge neutral"><span class="material-symbols-outlined" aria-hidden="true">timer_off</span>Quá hạn</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Đã hủy'}"><span class="vs-bhm-badge danger"><span class="material-symbols-outlined" aria-hidden="true">cancel</span>Đã hủy</span></c:when>
+                                        <c:when test="${lich.trangThai == 'Không đến'}"><span class="vs-bhm-badge danger"><span class="material-symbols-outlined" aria-hidden="true">person_off</span>Không đến</span></c:when>
+                                        <c:otherwise><span class="vs-bhm-badge neutral"><c:out value="${lich.trangThai}"/></span></c:otherwise>
+                                    </c:choose>
+
+                                    <%-- Thao tác theo trạng thái thật --%>
+                                    <div class="vs-bhm-actions">
                                         <c:choose>
                                             <c:when test="${lich.trangThai == 'Chờ thanh toán'}">
-                                                <span class="bg-[#427CF0]/5 text-[#427CF0] border border-[#427CF0]/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-flex items-center gap-1">
-                                                    <span class="material-symbols-outlined text-[11px]">hourglass_top</span>Chờ TT
-                                                </span>
+                                                <a class="vs-bhm-btn vs-bhm-btn-primary" data-resume href="${pageContext.request.contextPath}/customer/thanh-toan-qr?datSanId=${lich.datSanId}">
+                                                    <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span><span class="vs-bhm-btn-label">Tiếp tục thanh toán</span>
+                                                </a>
+                                                <button type="button" class="vs-bhm-btn vs-bhm-btn-danger"
+                                                        data-cancel-payos="${lich.datSanId}"
+                                                        data-confirm-msg="Hủy đơn thanh toán này? Mã QR sẽ ngừng hiệu lực và khung giờ được giải phóng cho người khác.">Hủy thanh toán</button>
                                             </c:when>
-                                            <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
-                                                <span class="bg-amber-500/5 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Chờ duyệt</span>
+                                            <c:when test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
+                                                <button type="button" class="vs-bhm-btn vs-bhm-btn-danger"
+                                                        data-cancel-booking="${lich.datSanId}"
+                                                        data-confirm-msg="Hủy đặt sân này? Thao tác không thể hoàn tác và khung giờ sẽ được giải phóng.">Hủy đặt sân</button>
                                             </c:when>
-                                            <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
-                                                <span class="px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block" style="background-color: rgba(22,163,106,0.05); color: var(--vs-success, #16A36A); border: 1px solid rgba(22,163,106,0.2);">Đã duyệt</span>
+                                            <c:when test="${lich.trangThai == 'Quá hạn'}">
+                                                <a class="vs-bhm-btn vs-bhm-btn-ghost" href="${pageContext.request.contextPath}/customer/dat-lich-truc-quan"><span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>Đặt lại</a>
                                             </c:when>
-                                            <c:when test="${lich.trangThai == 'Đang sử dụng'}">
-                                                <span class="bg-purple-500/5 text-purple-700 border border-purple-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Đang sử dụng</span>
-                                            </c:when>
-                                            <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
-                                                <span class="px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block" style="background-color: rgba(22,163,106,0.05); color: var(--vs-success, #16A36A); border: 1px solid rgba(22,163,106,0.2);">Hoàn thành</span>
-                                            </c:when>
-                                            <c:when test="${lich.trangThai == 'Đã hủy'}">
-                                                <span class="bg-red-500/5 text-red-600 border border-red-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-flex items-center gap-1">
-                                                    <span class="material-symbols-outlined text-[11px]">cancel</span>Đã hủy
-                                                </span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="bg-neutral-100 text-neutral-500 border border-neutral-200 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">${lich.trangThai}</span>
-                                            </c:otherwise>
+                                            <c:when test="${lich.trangThai == 'Đã hoàn thành'}"><span class="vs-bhm-done">✓ Đã chơi</span></c:when>
+                                            <c:otherwise><span class="vs-bhm-muted">—</span></c:otherwise>
                                         </c:choose>
-                                    </td>
-                                    <td class="p-4 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
-                                                <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn chắc chắn muốn hủy lịch đặt sân này?');" class="inline-block">
-                                                    <input type="hidden" name="id" value="${lich.datSanId}">
-                                                    <button type="submit" class="px-3 py-1 border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px] rounded-none">Hủy đặt sân</button>
-                                                </form>
-                                            </c:if>
-                                            <c:if test="${lich.trangThai == 'Chờ thanh toán'}">
-                                                <form action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn thanh toán PayOS này?');" class="inline-block">
-                                                    <input type="hidden" name="id" value="${lich.datSanId}">
-                                                    <button type="submit" class="px-3 py-1 border border-red-200 text-red-500 font-bold hover:bg-red-50 text-[10px] rounded-none">Hủy thanh toán</button>
-                                                </form>
-                                            </c:if>
-                                            <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px]">-</span></c:if>
-                                            <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-[10px] font-bold" style="color: var(--vs-success, #16A36A);">✓ Đã chơi</span></c:if>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                            <c:if test="${empty dsLich}">
-                                <tr><td colspan="5" class="p-16 text-center">
-                                    <span class="material-symbols-outlined text-[40px] text-neutral-200 block mb-4">event_busy</span>
-                                    <p class="text-neutral-400 text-[11px] font-extrabold uppercase tracking-widest font-['Barlow_Condensed']">Chưa có lịch sử đặt sân</p>
-                                </td></tr>
-                            </c:if>
-                        </tbody>
-                    </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                        <div class="vs-bhm-noresult" id="vsBhmNoResult">Không có đơn nào trong mục này.</div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+
+            <%-- Confirm dialog (không dùng window.confirm) --%>
+            <div class="vs-bhm-confirm" id="vsBhmConfirm" role="alertdialog" aria-modal="true" aria-labelledby="vsBhmConfirmTitle" aria-describedby="vsBhmConfirmMsg">
+                <div class="vs-bhm-confirm-box">
+                    <h4 id="vsBhmConfirmTitle">Xác nhận huỷ</h4>
+                    <p id="vsBhmConfirmMsg">Bạn có chắc chắn?</p>
+                    <div class="vs-bhm-confirm-actions">
+                        <button type="button" class="vs-bhm-btn vs-bhm-btn-ghost" id="vsBhmConfirmBack">Quay lại</button>
+                        <button type="button" class="vs-bhm-btn vs-bhm-btn-confirm-danger" id="vsBhmConfirmOk">Xác nhận huỷ</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <%-- Form ẩn để hủy đặt sân (POST) — tránh nested form, submit bằng JS sau khi xác nhận. --%>
+    <form id="vsBhmCancelBookingForm" action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post" style="display:none;">
+        <input type="hidden" name="id" id="vsBhmCancelBookingId" value="" />
+    </form>
 
     <!-- ════ BOOKING MODAL FLOW ════ -->
     <div id="bookingModalOverlay" class="fixed inset-0 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-6 px-4" style="background-color: var(--vs-overlay, rgba(7, 26, 47, 0.68));">
@@ -1139,8 +1281,9 @@
                     })
                         .then(r => r.json())
                         .then(data => {
-                            if (data.success && data.checkoutUrl) {
-                                window.location.href = data.checkoutUrl;
+                            if (data.success && data.redirectUrl) {
+                                // Luồng mới: mở trang QR nhúng của V-SPORT (không redirect checkout PayOS).
+                                window.location.href = data.redirectUrl;
                                 return;
                             }
                             restore();
@@ -1829,21 +1972,136 @@
             setTimeout(() => overlay.classList.add("hidden"), 300);
         }
 
-        function openHistoryModal() {
+        // ─────────── Lịch sử đặt sân (Booking History Center) ───────────
+        let vsBhmLastFocus = null;
+        let vsBhmKeyHandler = null;
+        function openHistoryModal(trigger) {
             const overlay = document.getElementById("historyModalOverlay");
-            const panel = document.getElementById("historyPanel");
-            if (!overlay || !panel) return;
-            overlay.classList.remove("hidden"); overlay.classList.add("flex");
-            setTimeout(() => { overlay.classList.remove("opacity-0"); panel.classList.remove("scale-95"); }, 10);
+            if (!overlay) return;
+            vsBhmLastFocus = trigger || document.activeElement;
+            overlay.classList.add("is-open");
+            document.body.style.overflow = "hidden";      // khóa scroll trang nền
+            vsBhmInitCounts();
+            // Focus vào nút đóng để bắt đầu focus trap.
+            const closeBtn = overlay.querySelector(".vs-bhm-close");
+            if (closeBtn) closeBtn.focus();
+            vsBhmKeyHandler = function (e) {
+                if (e.key === "Escape") {
+                    if (document.getElementById("vsBhmConfirm").classList.contains("is-open")) { vsBhmCloseConfirm(); return; }
+                    closeHistoryModal(); return;
+                }
+                if (e.key === "Tab") vsBhmTrapFocus(e, overlay);
+            };
+            document.addEventListener("keydown", vsBhmKeyHandler);
         }
-
         function closeHistoryModal() {
             const overlay = document.getElementById("historyModalOverlay");
-            const panel = document.getElementById("historyPanel");
-            if (!overlay || !panel) return;
-            overlay.classList.add("opacity-0"); panel.classList.add("scale-95");
-            setTimeout(() => { overlay.classList.add("hidden"); overlay.classList.remove("flex"); }, 300);
+            if (!overlay) return;
+            vsBhmCloseConfirm();
+            overlay.classList.remove("is-open");
+            document.body.style.overflow = "";
+            if (vsBhmKeyHandler) { document.removeEventListener("keydown", vsBhmKeyHandler); vsBhmKeyHandler = null; }
+            if (vsBhmLastFocus && typeof vsBhmLastFocus.focus === "function") vsBhmLastFocus.focus();
         }
+        function vsBhmTrapFocus(e, root) {
+            const f = root.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])');
+            const vis = Array.prototype.filter.call(f, el => el.offsetParent !== null);
+            if (!vis.length) return;
+            const first = vis[0], last = vis[vis.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+
+        // Overlay click đóng; click bên trong panel không đóng.
+        (function () {
+            const overlay = document.getElementById("historyModalOverlay");
+            if (overlay) overlay.addEventListener("mousedown", function (e) { if (e.target === overlay) closeHistoryModal(); });
+        })();
+
+        // Filter tabs (client-side, dữ liệu đã tải sẵn).
+        function vsBhmInitCounts() {
+            const cards = document.querySelectorAll("#vsBhmBody .vs-bhm-card");
+            if (!cards.length) return;
+            const counts = { all: cards.length, paying: 0, confirmed: 0, done: 0, ended: 0 };
+            cards.forEach(c => { const g = c.getAttribute("data-group"); if (counts[g] != null) counts[g]++; });
+            document.querySelectorAll(".vs-bhm-tab-count").forEach(el => {
+                const k = el.getAttribute("data-count"); if (counts[k] != null) el.textContent = counts[k];
+            });
+        }
+        document.querySelectorAll(".vs-bhm-tab").forEach(function (tab) {
+            tab.addEventListener("click", function () {
+                const filter = tab.getAttribute("data-filter");
+                document.querySelectorAll(".vs-bhm-tab").forEach(t => { t.classList.remove("is-active"); t.setAttribute("aria-selected", "false"); });
+                tab.classList.add("is-active"); tab.setAttribute("aria-selected", "true");
+                let shown = 0;
+                document.querySelectorAll("#vsBhmBody .vs-bhm-card").forEach(function (c) {
+                    const match = filter === "all" || c.getAttribute("data-group") === filter;
+                    c.style.display = match ? "" : "none";
+                    if (match) shown++;
+                });
+                const nr = document.getElementById("vsBhmNoResult");
+                if (nr) nr.style.display = shown === 0 ? "block" : "none";
+            });
+        });
+
+        // Resume "Tiếp tục thanh toán": chống double-click + spinner, rồi điều hướng tới QR cũ (không tạo đơn mới).
+        document.querySelectorAll("#vsBhmBody a[data-resume]").forEach(function (a) {
+            a.addEventListener("click", function (e) {
+                if (a.dataset.busy === "1") { e.preventDefault(); return; }
+                a.dataset.busy = "1";
+                const label = a.querySelector(".vs-bhm-btn-label");
+                a.querySelector(".material-symbols-outlined").outerHTML = '<span class="spinner" aria-hidden="true"></span>';
+                if (label) label.textContent = "Đang mở...";
+                // để điều hướng mặc định tiếp tục (href = /customer/thanh-toan-qr?datSanId=...)
+            });
+        });
+
+        // Confirm dialog riêng của V-SPORT (không dùng window.confirm).
+        let vsBhmPendingAction = null;
+        function vsBhmOpenConfirm(msg, action) {
+            document.getElementById("vsBhmConfirmMsg").textContent = msg || "Bạn có chắc chắn?";
+            vsBhmPendingAction = action;
+            const c = document.getElementById("vsBhmConfirm");
+            c.classList.add("is-open");
+            document.getElementById("vsBhmConfirmOk").focus();
+        }
+        function vsBhmCloseConfirm() {
+            const c = document.getElementById("vsBhmConfirm");
+            if (c) c.classList.remove("is-open");
+            vsBhmPendingAction = null;
+        }
+        (function () {
+            const back = document.getElementById("vsBhmConfirmBack");
+            const ok = document.getElementById("vsBhmConfirmOk");
+            const box = document.getElementById("vsBhmConfirm");
+            if (back) back.addEventListener("click", vsBhmCloseConfirm);
+            if (box) box.addEventListener("mousedown", function (e) { if (e.target === box) vsBhmCloseConfirm(); });
+            if (ok) ok.addEventListener("click", function () {
+                if (!vsBhmPendingAction) return;
+                ok.disabled = true; ok.innerHTML = '<span class="spinner" aria-hidden="true"></span> Đang xử lý...';
+                const act = vsBhmPendingAction; vsBhmPendingAction = null;
+                act();
+            });
+            // Hủy thanh toán PayOS (ownership-checked + hủy link + giải phóng slot).
+            document.querySelectorAll("#vsBhmBody [data-cancel-payos]").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    const id = b.getAttribute("data-cancel-payos");
+                    vsBhmOpenConfirm(b.getAttribute("data-confirm-msg"), function () {
+                        window.location.href = CTX + "/customer/payos-cancel?datSanId=" + encodeURIComponent(id);
+                    });
+                });
+            });
+            // Hủy đặt sân (POST /customer/huy-dat-san qua form ẩn).
+            document.querySelectorAll("#vsBhmBody [data-cancel-booking]").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    const id = b.getAttribute("data-cancel-booking");
+                    vsBhmOpenConfirm(b.getAttribute("data-confirm-msg"), function () {
+                        document.getElementById("vsBhmCancelBookingId").value = id;
+                        document.getElementById("vsBhmCancelBookingForm").submit();
+                    });
+                });
+            });
+        })();
 
         function selectPaymentMethod(method) {
             document.getElementById("input-payment-method").value = method;

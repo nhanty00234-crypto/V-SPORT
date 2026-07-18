@@ -189,7 +189,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 "WHERE DatSanID = ? AND AccountID = ? AND (" +
                 "TrangThai = N'Chờ xác nhận' " +
                 "OR TrangThai = N'Đã xác nhận' " +
-                "OR (TrangThai = N'Chờ thanh toán' AND (HoldExpiresAt IS NULL OR HoldExpiresAt > GETDATE())))";
+                "OR (TrangThai = N'Chờ thanh toán' AND (HoldExpiresAt IS NULL OR HoldExpiresAt > SYSUTCDATETIME())))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, cancelType);
             ps.setString(2, cancelReason);

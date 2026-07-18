@@ -160,6 +160,9 @@
         .ttv-slot.is-past   { background: #EDF0F3; color: #9aa4b0; }
         .ttv-slot.is-booked { background: #FF6268; color: #fff; }
         .ttv-slot.is-hold   { background: #FFD76A; color: #6b4d00; }
+        /* Đơn CHỜ THANH TOÁN của CHÍNH khách đang xem — cam nhạt, bấm được để tiếp tục thanh toán. */
+        .ttv-slot.is-hold_self { background: var(--vs-orange-100, #FFF1E5); color: #8a4b12; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--vs-orange-500, #FF8A24); }
+        .ttv-slot.is-hold_self:hover { background: #ffe6cf; }
         .ttv-slot.is-locked { background: #B7BDC5; color: #3f4750; }
         .ttv-slot:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(24,200,232,.35)); outline-offset: -3px; z-index: 2; }
         .ttv-slot.is-merged { padding: 0 6px; }
@@ -673,6 +676,12 @@
             cell.appendChild(lbl);
         }
         cell.addEventListener('click', function () { onSlotClick(court.sanId, first); });
+        if (first.status === 'HOLD_SELF') {
+            cell.setAttribute('tabindex', '0');
+            cell.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSlotClick(court.sanId, first); }
+            });
+        }
         addNowMarker(cell, first.startMinute, span * SLOT_MIN, false);
         return cell;
     }
@@ -681,7 +690,8 @@
         switch (s) {
             case 'AVAILABLE': return 'Trống';
             case 'BOOKED': return 'Đã đặt';
-            case 'HOLD': return 'Đang giữ chỗ';
+            case 'HOLD': return 'Đang được giữ';
+            case 'HOLD_SELF': return 'Chờ thanh toán · bấm để tiếp tục';
             case 'LOCKED': return 'Khoá / bảo trì';
             case 'PAST': return 'Đã qua';
             default: return s;
@@ -699,6 +709,11 @@
     }
 
     function onSlotClick(sanId, slot) {
+        // Đơn CHỜ THANH TOÁN của chính khách → mở lại trang QR để tiếp tục thanh toán (không tạo đơn mới).
+        if (slot.status === 'HOLD_SELF' && slot.datSanId) {
+            window.location.href = CTX + '/customer/thanh-toan-qr?datSanId=' + slot.datSanId;
+            return;
+        }
         if (slot.status !== 'AVAILABLE') {
             let msg = 'Khung giờ này không khả dụng.';
             if (slot.status === 'BOOKED') msg = 'Khung giờ này không còn trống.';

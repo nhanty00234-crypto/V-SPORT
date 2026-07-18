@@ -21,7 +21,9 @@ import org.example.model.TaiKhoan;
 import org.example.model.San;
 import org.example.model.CustomerReputationHistory;
 import org.example.util.Constants;
+import org.example.util.DBUtil;
 import org.example.dto.payment.PayOSCheckoutSession;
+import org.example.dto.payment.PayosQrData;
 import org.example.dto.payment.PayOSCredentials;
 import org.example.service.PayOSConfigurationService;
 import org.example.service.payos.PayOSClientFactory;
@@ -132,7 +134,7 @@ public class DatSanServlet extends HttpServlet {
         } else if (path.equals("/customer/payos-return")) {
             handlePayOSReturn(req, resp, session);
         } else if (path.equals("/customer/payos-cancel")) {
-            handlePayOSCancel(req, resp, session);
+            handlePayOSCancel(req, resp, session, user);
         } else if (path.equals("/customer/payos-status")) {
             handlePayOSStatus(req, resp, user);
         }
@@ -527,7 +529,7 @@ public class DatSanServlet extends HttpServlet {
                             "AND (TrangThai IN (N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
                             "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
                             "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') " +
-                            "     OR (TrangThai = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND HoldExpiresAt > GETDATE())) " +
+                            "     OR (TrangThai = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND HoldExpiresAt > SYSUTCDATETIME())) " +
                             "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
 
                     boolean hasOverlap;
@@ -621,11 +623,12 @@ public class DatSanServlet extends HttpServlet {
                     String initialStatus = isOnlineDeposit
                             ? org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
                             : org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN;
-                    // HoldExpiresAt luôn tính bằng GETDATE() phía SQL Server, không bao giờ nhận từ
-                    // frontend/request — Constants.BOOKING_HOLD_MINUTES là hằng số compile-time, không
-                    // phải input người dùng, nên nối trực tiếp vào SQL an toàn (không có rủi ro injection).
+                    // HoldExpiresAt là MỐC TUYỆT ĐỐI (instant) → lưu bằng SYSUTCDATETIME() (UTC), không
+                    // phụ thuộc timezone máy chủ DB. Mọi nơi so sánh với HoldExpiresAt cũng dùng
+                    // SYSUTCDATETIME() (SQL) hoặc Instant.now() qua TimeUtil (Java) → nhất quán UTC.
+                    // Không bao giờ nhận từ frontend; BOOKING_HOLD_MINUTES là hằng số compile-time.
                     String holdExpiresAtExpr = isOnlineDeposit
-                            ? "DATEADD(MINUTE, " + org.example.util.Constants.BOOKING_HOLD_MINUTES + ", GETDATE())"
+                            ? "DATEADD(MINUTE, " + org.example.util.Constants.BOOKING_HOLD_MINUTES + ", SYSUTCDATETIME())"
                             : "NULL";
 
                     String insertSql = "INSERT INTO LichDatSan " +
@@ -750,17 +753,17 @@ public class DatSanServlet extends HttpServlet {
 
                         if (linkResult.success) {
                             PayOSCheckoutSession checkoutSession = linkResult.session;
+                            // Lưu QR (session + best-effort DB cache) để trang QR nhúng render lại được
+                            // khi reload/đa tab, KHÔNG gọi lại PayOS. KHÔNG redirect sang checkout PayOS.
+                            stashAndPersistQr(session, newDatSanId, checkoutSession, amount, description);
+                            String qrPageUrl = req.getContextPath() + "/customer/thanh-toan-qr?datSanId=" + newDatSanId;
                             if (isAjax) {
                                 resp.setContentType("application/json; charset=UTF-8");
                                 resp.getWriter().write(String.format(
-                                        "{\"success\":true,\"datSanId\":%d,\"qrCode\":\"%s\",\"amount\":%d,\"expiredAt\":%s}",
-                                        newDatSanId,
-                                        checkoutSession.qrCode.replace("\\", "\\\\").replace("\"", "\\\""),
-                                        checkoutSession.amount,
-                                        checkoutSession.expiredAt != null ? checkoutSession.expiredAt.toString() : "null"
-                                ));
+                                        "{\"success\":true,\"datSanId\":%d,\"redirectUrl\":\"%s\"}",
+                                        newDatSanId, jsonEscape(qrPageUrl)));
                             } else {
-                                resp.sendRedirect(checkoutSession.checkoutUrl);
+                                resp.sendRedirect(qrPageUrl);
                             }
                         } else {
                             // KHÔNG hủy booking: giữ nguyên "Chờ thanh toán" + HoldExpiresAt hiện có để
@@ -901,15 +904,46 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
         String trangThai = lich.getTrangThai();
+        LocalDateTime holdExpiresAt = lich.getHoldExpiresAt();
+        // HoldExpiresAt lưu UTC → so sánh bằng Instant UTC (TimeUtil), không dùng giờ JVM/VN.
+        boolean holdExpired = org.example.util.TimeUtil.isPastUtc(holdExpiresAt);
+
+        // status: giá trị gọn để frontend polling quyết định dừng (paid/cancelled/expired/pending).
         String status;
-        if ("Đã xác nhận".equals(trangThai)) {
+        String ctx = req.getContextPath();
+        String redirectUrl = null;
+        if (Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(trangThai)) {
             status = "paid";
-        } else if ("Đã hủy".equals(trangThai)) {
+            redirectUrl = ctx + "/customer/dat-san?openHistory=true";
+        } else if (Constants.TRANG_THAI_DAT_SAN_DA_HUY.equals(trangThai)) {
             status = "cancelled";
-        } else {
+        } else if (Constants.TRANG_THAI_DAT_SAN_QUA_HAN.equals(trangThai)
+                || (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai) && holdExpired)) {
+            status = "expired";
+        } else if (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai)) {
             status = "pending";
+        } else {
+            // "Chờ xác nhận" (trả tại quầy) hoặc trạng thái khác -> coi như đã xử lý xong với luồng QR.
+            status = "settled";
         }
-        resp.getWriter().write("{\"status\":\"" + status + "\"}");
+
+        long remainingSeconds = 0L;
+        if ("pending".equals(status)) {
+            remainingSeconds = org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt);
+        }
+
+        StringBuilder json = new StringBuilder();
+        json.append("{\"success\":true")
+            .append(",\"status\":\"").append(status).append("\"")
+            .append(",\"bookingStatus\":\"").append(jsonEscape(trangThai != null ? trangThai : "")).append("\"")
+            .append(",\"remainingSeconds\":").append(remainingSeconds);
+        if (redirectUrl != null) {
+            json.append(",\"redirectUrl\":\"").append(jsonEscape(redirectUrl)).append("\"");
+        } else {
+            json.append(",\"redirectUrl\":null");
+        }
+        json.append("}");
+        resp.getWriter().write(json.toString());
     }
 
     private void handlePayOSReturn(HttpServletRequest req, HttpServletResponse resp,
@@ -920,31 +954,74 @@ public class DatSanServlet extends HttpServlet {
     }
 
     private void handlePayOSCancel(HttpServletRequest req, HttpServletResponse resp,
-            HttpSession session) throws IOException {
-        int datSanId = -1;
-        String paramId = req.getParameter("datSanId");
-        if (paramId == null) paramId = req.getParameter("orderCode");
-        try {
-            if (paramId != null) datSanId = Integer.parseInt(paramId.trim());
-        } catch (NumberFormatException ignored) {}
-
-        if (datSanId != -1) {
-            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
-                String sql = "UPDATE LichDatSan " +
-                        "SET TrangThai = N'Đã hủy', " +
-                        "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Người dùng hủy thanh toán PayOS]') " +
-                        "WHERE DatSanID = ? AND TrangThai = N'Chờ thanh toán'";
-                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setInt(1, datSanId);
-                    ps.executeUpdate();
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Lỗi khi hủy booking PayOS DatSanID=" + datSanId, e);
-            }
+            HttpSession session, TaiKhoan user) throws IOException {
+        Integer datSanId = parseIntParam(req.getParameter("datSanId"));
+        if (datSanId == null) datSanId = parseIntParam(req.getParameter("orderCode"));
+        if (datSanId == null) {
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+            return;
         }
 
-        session.setAttribute("message", "Bạn đã hủy thanh toán. Đơn giữ chỗ đã được hủy.");
+        boolean cancelled = false;
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
+            // Kiểm tra quyền sở hữu + trạng thái TRƯỚC khi hủy (không cho đoán DatSanID của người khác).
+            int ownerAccountId = -1, coSoId = -1; String trangThai = null;
+            String checkSql = "SELECT l.AccountID, l.TrangThai, s.CoSoID FROM LichDatSan l " +
+                    "JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                ps.setInt(1, datSanId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        ownerAccountId = rs.getInt("AccountID");
+                        trangThai = rs.getString("TrangThai");
+                        coSoId = rs.getInt("CoSoID");
+                    }
+                }
+            }
+
+            if (trangThai == null || ownerAccountId != user.getAccountId()) {
+                session.setAttribute("error", "Không tìm thấy đơn đặt sân của bạn.");
+                resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+                return;
+            }
+
+            if (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai)) {
+                // Hủy link PayOS còn treo (best-effort) rồi giải phóng slot + đánh dấu hủy trong 1 UPDATE.
+                cancelPayosLinkQuietly(coSoId, datSanId);
+                String sql = "UPDATE LichDatSan SET TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_DA_HUY + "', " +
+                        "HoldExpiresAt = NULL, " +
+                        "GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Người dùng hủy thanh toán PayOS]') " +
+                        "WHERE DatSanID = ? AND TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "'";
+                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setInt(1, datSanId);
+                    cancelled = ps.executeUpdate() == 1;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Lỗi khi hủy booking PayOS DatSanID=" + datSanId, e);
+        }
+
+        session.removeAttribute(PayosQrData.sessionKey(datSanId));
+        session.setAttribute("message", cancelled
+                ? "Bạn đã hủy thanh toán. Khung giờ đã được giải phóng."
+                : "Đơn không còn ở trạng thái có thể hủy.");
         resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+    }
+
+    /** Hủy payment link PayOS (best-effort) cho một booking; không ném lỗi ra ngoài. */
+    private void cancelPayosLinkQuietly(int coSoId, long datSanId) {
+        try {
+            PayOSCredentials credentials = new PayOSConfigurationService().getCredentialsForPayment(coSoId);
+            if (credentials == null) return;
+            PayOS client = PayOSClientFactory.create(credentials);
+            try {
+                client.paymentRequests().cancel(datSanId, "Khách hủy thanh toán");
+            } finally {
+                client.close();
+            }
+        } catch (Exception ignored) {
+            // Không có link treo / PayOS lỗi - state nội bộ vẫn được xử lý an toàn ở caller.
+        }
     }
 
     // =========================================================================
@@ -991,7 +1068,9 @@ public class DatSanServlet extends HttpServlet {
                 resp.getWriter().write("{\"success\":false,\"errorCode\":\"PAYMENT_CONFLICT\",\"message\":\"Đơn không còn ở trạng thái chờ thanh toán. Vui lòng tải lại trang.\"}");
                 return;
             }
-            if (holdExpiresAt == null || holdExpiresAt.toLocalDateTime().isBefore(LocalDateTime.now())) {
+            // holdExpiresAt (Timestamp) lưu UTC → so sánh bằng Instant UTC (TimeUtil.fromDb), không dùng giờ JVM.
+            java.time.Instant holdInstant = org.example.util.TimeUtil.fromDb(holdExpiresAt);
+            if (holdInstant == null || holdInstant.isBefore(java.time.Instant.now())) {
                 resp.getWriter().write(String.format(
                         "{\"success\":false,\"errorCode\":\"HOLD_EXPIRED\",\"message\":\"%s\"}", jsonEscape(MSG_EXPIRED)));
                 return;
@@ -1006,9 +1085,12 @@ public class DatSanServlet extends HttpServlet {
             PayOSLinkResult linkResult = createFacilityPayOSLink(coSoId, (long) datSanId, amount, description, returnUrl, cancelUrl, true);
             if (linkResult.success) {
                 PayOSCheckoutSession s = linkResult.session;
+                // Cập nhật cache QR mới (session + DB) rồi để frontend nạp lại trang QR nhúng.
+                stashAndPersistQr(req.getSession(), datSanId, s, amount, description);
+                String qrPageUrl = req.getContextPath() + "/customer/thanh-toan-qr?datSanId=" + datSanId;
                 resp.getWriter().write(String.format(
-                        "{\"success\":true,\"datSanId\":%d,\"checkoutUrl\":\"%s\",\"qrCode\":\"%s\",\"amount\":%d}",
-                        datSanId, jsonEscape(s.checkoutUrl), jsonEscape(s.qrCode), s.amount));
+                        "{\"success\":true,\"datSanId\":%d,\"redirectUrl\":\"%s\"}",
+                        datSanId, jsonEscape(qrPageUrl)));
             } else {
                 resp.getWriter().write(String.format(
                         "{\"success\":false,\"errorCode\":\"%s\",\"message\":\"%s\",\"retryable\":%b}",
@@ -1102,6 +1184,46 @@ public class DatSanServlet extends HttpServlet {
         try { return Integer.parseInt(s.trim()); } catch (NumberFormatException e) { return null; }
     }
 
+    /**
+     * Lưu snapshot QR PayOS cho một booking để trang QR nhúng của V-SPORT render lại được mà không
+     * gọi lại PayOS: (1) HttpSession holder — dùng ngay, không phụ thuộc migration; (2) best-effort
+     * UPDATE các cột cache trên LichDatSan — bền vững qua reload/đa tab, BỎ QUA êm nếu cột chưa tồn
+     * tại (chưa chạy migrate_customer_embedded_payos_payment.sql). Chạy trên connection RIÊNG (auto-
+     * commit) nên không ảnh hưởng transaction đặt sân. Không bao giờ log payload/secret.
+     */
+    private void stashAndPersistQr(HttpSession session, int datSanId, PayOSCheckoutSession s,
+                                   long amount, String description) {
+        Long orderCode = s.orderCode != null ? s.orderCode : (long) datSanId;
+        PayosQrData data = new PayosQrData(datSanId, orderCode, s.paymentLinkId, s.qrCode, s.checkoutUrl,
+                s.bin, s.accountNumber, s.accountName, amount, description, s.expiredAt);
+        session.setAttribute(PayosQrData.sessionKey(datSanId), data);
+
+        String sql = "UPDATE LichDatSan SET PayosOrderCode=?, PayosPaymentLinkId=?, PayosQrPayload=?, "
+                + "PayosCheckoutUrl=?, PayosBin=?, PayosAccountNumber=?, PayosAccountName=?, PayosAmount=?, "
+                + "PayosDescription=?, PayosExpiresAt=? WHERE DatSanID=?";
+        try (java.sql.Connection c = DBUtil.getConnection();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, orderCode);
+            ps.setString(2, s.paymentLinkId);
+            ps.setString(3, s.qrCode);
+            ps.setString(4, s.checkoutUrl);
+            ps.setString(5, s.bin);
+            ps.setString(6, s.accountNumber);
+            ps.setString(7, s.accountName);
+            ps.setBigDecimal(8, BigDecimal.valueOf(amount));
+            ps.setString(9, description);
+            // PayosExpiresAt là instant → lưu UTC nhất quán với HoldExpiresAt (qua TimeUtil).
+            ps.setTimestamp(10, s.expiredAt != null
+                    ? org.example.util.TimeUtil.toDb(java.time.Instant.ofEpochSecond(s.expiredAt)) : null);
+            ps.setInt(11, datSanId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            // Cột cache chưa tồn tại (chưa migrate) hoặc lỗi ghi cache - không nghiêm trọng: session
+            // holder vẫn cho trang QR hoạt động trong phiên hiện tại.
+            LOGGER.fine("QR cache persist bỏ qua (có thể chưa chạy migration) datSanId=" + datSanId);
+        }
+    }
+
     // =========================================================================
     // PHẦN 5C: TẠO PAYMENT LINK PAYOS THEO CƠ SỞ (thay thế PayOSService singleton dùng biến môi trường)
     // =========================================================================
@@ -1167,7 +1289,9 @@ public class DatSanServlet extends HttpServlet {
                     .build();
             CreatePaymentLinkResponse result = client.paymentRequests().create(request);
             return PayOSLinkResult.ok(new PayOSCheckoutSession(
-                    result.getCheckoutUrl(), result.getQrCode(), result.getExpiredAt(), result.getAmount()));
+                    result.getCheckoutUrl(), result.getQrCode(), result.getExpiredAt(), result.getAmount(),
+                    result.getBin(), result.getAccountNumber(), result.getAccountName(),
+                    result.getDescription(), result.getOrderCode(), result.getPaymentLinkId()));
         } catch (ConnectionTimeoutException | ConnectionException e) {
             logPayOSFailure("PAYOS_NETWORK_ERROR", coSoId, orderCode, amount, e, null);
             return PayOSLinkResult.fail("PAYOS_NETWORK_ERROR", MSG_NETWORK_ERROR, true);

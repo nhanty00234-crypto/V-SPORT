@@ -188,7 +188,7 @@
                                 </c:forEach>
 
                                 <c:set var="hsStatusGroup" value="other" />
-                                <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt' || lich.trangThai == 'Đang sử dụng'}"><c:set var="hsStatusGroup" value="upcoming" /></c:if>
+                                <c:if test="${lich.trangThai == 'Chờ thanh toán' || lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt' || lich.trangThai == 'Đang sử dụng'}"><c:set var="hsStatusGroup" value="upcoming" /></c:if>
                                 <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><c:set var="hsStatusGroup" value="completed" /></c:if>
                                 <c:if test="${lich.trangThai == 'Đã hủy' || lich.trangThai == 'Không đến'}"><c:set var="hsStatusGroup" value="cancelled" /></c:if>
 
@@ -198,6 +198,9 @@
                                             <div class="flex items-center gap-2 flex-wrap mb-1">
                                                 <span class="font-extrabold text-sm text-slate-900">${tenSanHienThi}</span>
                                                 <c:choose>
+                                                    <c:when test="${lich.trangThai == 'Chờ thanh toán'}">
+                                                        <span class="hs-badge bg-orange-50 text-orange-700 border border-orange-200">Chờ thanh toán</span>
+                                                    </c:when>
                                                     <c:when test="${lich.trangThai == 'Chờ xác nhận'}">
                                                         <span class="hs-badge bg-amber-50 text-amber-700 border border-amber-200">Chờ duyệt</span>
                                                     </c:when>
@@ -269,6 +272,19 @@
                                     </c:if>
 
                                     <!-- Actions -->
+                                    <c:if test="${lich.trangThai == 'Chờ thanh toán'}">
+                                        <div class="hs-actions">
+                                            <a href="${pageContext.request.contextPath}/customer/thanh-toan-qr?datSanId=${lich.datSanId}"
+                                               class="hs-action-btn text-white active:scale-95" style="background: var(--vs-orange-500, #FF8A24); border: 1px solid var(--vs-orange-500, #FF8A24);">
+                                                <span class="material-symbols-outlined text-[14px]">qr_code_2</span> Tiếp tục thanh toán
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/customer/payos-cancel?datSanId=${lich.datSanId}"
+                                               onclick="return confirm('Hủy đơn thanh toán này? Khung giờ sẽ được giải phóng.');"
+                                               class="hs-action-btn border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 active:scale-95">
+                                                <span class="material-symbols-outlined text-[14px]">cancel</span> Hủy thanh toán
+                                            </a>
+                                        </div>
+                                    </c:if>
                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
                                         <div class="hs-actions">
                                             <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">

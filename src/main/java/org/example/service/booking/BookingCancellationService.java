@@ -90,8 +90,10 @@ public class BookingCancellationService {
             return CancelResult.fail("Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận', 'Đã xác nhận' hoặc " +
                     "'Chờ thanh toán'. Đơn của bạn hiện đang ở trạng thái '" + lich.getTrangThai() + "'.");
         }
+        // HoldExpiresAt lưu UTC → so sánh bằng Instant UTC (TimeUtil), không dùng giờ JVM/VN.
+        // (NgayDat/GioBatDau bên dưới là giờ theo lịch địa phương — giữ nguyên so sánh local.)
         if (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(lich.getTrangThai())
-                && lich.getHoldExpiresAt() != null && !lich.getHoldExpiresAt().isAfter(LocalDateTime.now())) {
+                && org.example.util.TimeUtil.isPastUtc(lich.getHoldExpiresAt())) {
             return CancelResult.fail("Đơn giữ chỗ đã hết hạn, không thể hủy (đã tự động giải phóng).");
         }
 

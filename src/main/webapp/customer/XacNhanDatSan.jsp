@@ -16,7 +16,7 @@
     <jsp:include page="/common/head.jsp" />
     <jsp:include page="/customer/common/vsport-theme.jsp" />
     <style>
-        html, body { background: var(--vs-bg, #F4F7FB); color: var(--vs-text, #102A43); font-family: 'Inter', 'Barlow', system-ui, sans-serif; }
+        html, body { background: var(--vs-background, #F4F7FB); color: var(--vs-text, #102A43); font-family: var(--vs-font-sans); }
         body { padding-bottom: 110px !important; }
 
         .xn-header {
@@ -63,7 +63,7 @@
         .xn-row .v { font-weight: 700; text-align: right; }
         .xn-row.total { border-top: 1px dashed var(--vs-border, #DCE5EF); margin-top: 6px; padding-top: 10px; }
         .xn-row.total .k { font-weight: 800; color: var(--vs-text, #102A43); font-size: 14px; }
-        .xn-row.total .v { font-weight: 900; font-size: 17px; color: var(--vs-primary-900, #0B2545); }
+        .xn-row.total .v { font-weight: 800; font-size: 17px; color: var(--vs-primary-900, #0B2545); }
         .xn-promo-empty { font-size: 12.5px; color: var(--vs-muted, #829AB1); font-weight: 600; }
 
         .xn-input, .xn-textarea {
@@ -107,11 +107,11 @@
         .xn-ctabar-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
         .xn-ctabar-total { color: #fff; }
         .xn-ctabar-total .lbl { font-size: 10px; color: #b6c2d4; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-        .xn-ctabar-total .val { font-size: 19px; font-weight: 900; line-height: 1.15; }
+        .xn-ctabar-total .val { font-size: 19px; font-weight: 800; line-height: 1.15; }
         .xn-cta {
             flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             height: 56px; border-radius: 12px; border: none; cursor: pointer;
-            background: var(--vs-orange-500, #FF8A24); color: #fff; font-weight: 900; font-size: 14.5px;
+            background: var(--vs-orange-500, #FF8A24); color: #fff; font-weight: 800; font-size: 14.5px;
             letter-spacing: .04em; text-transform: uppercase;
             transition: background-color 120ms ease, box-shadow 80ms ease, transform 80ms ease;
         }
@@ -131,7 +131,7 @@
             background: var(--vs-primary-950, #071A2F);
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: #fff;
         }
-        .xn-step-loading-brand { font-size: 26px; font-weight: 900; letter-spacing: .14em; font-family: 'Barlow Condensed', sans-serif; }
+        .xn-step-loading-brand { font-size: 26px; font-weight: 800; letter-spacing: .12em; font-family: var(--vs-font-heading); }
         .xn-step-loading-brand span { color: var(--vs-cyan-500, #18C8E8); }
         .xn-step-loading-ring {
             width: 44px; height: 44px; border-radius: 50%;
