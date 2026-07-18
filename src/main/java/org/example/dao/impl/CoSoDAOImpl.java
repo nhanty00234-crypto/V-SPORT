@@ -33,6 +33,44 @@ public class CoSoDAOImpl implements CoSoDAO {
     }
 
     @Override
+    public List<CoSo> searchCoSo(String keyword, Integer monTheThaoId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder(
+                    "SELECT DISTINCT c FROM CoSo c WHERE (c.isDeleted = false OR c.isDeleted IS NULL) " +
+                    "AND c.TrangThai NOT IN ('Chờ duyệt', 'Từ chối')");
+
+            String trimmedKeyword = keyword != null ? keyword.trim() : "";
+            boolean hasKeyword = !trimmedKeyword.isEmpty();
+            if (hasKeyword) {
+                jpql.append(" AND (LOWER(c.TenCoSo) LIKE :kw ESCAPE '\\' OR LOWER(c.DiaChi) LIKE :kw ESCAPE '\\')");
+            }
+            if (monTheThaoId != null) {
+                jpql.append(" AND EXISTS (SELECT 1 FROM San s JOIN LoaiSan ls ON s.loaiSanID = ls.loaiSanID " +
+                        "WHERE s.coSoID = c.CoSoID AND (s.isDeleted = false OR s.isDeleted IS NULL) " +
+                        "AND ls.monTheThaoID = :monTheThaoId)");
+            }
+
+            jakarta.persistence.TypedQuery<CoSo> query = em.createQuery(jpql.toString(), CoSo.class);
+            if (hasKeyword) {
+                // Escape LIKE wildcards trong keyword người dùng nhập để tránh họ tự ý
+                // dùng % / _ làm ký tự đại diện ngoài ý muốn ứng dụng.
+                String escaped = trimmedKeyword.toLowerCase()
+                        .replace("\\", "\\\\")
+                        .replace("%", "\\%")
+                        .replace("_", "\\_");
+                query.setParameter("kw", "%" + escaped + "%");
+            }
+            if (monTheThaoId != null) {
+                query.setParameter("monTheThaoId", monTheThaoId);
+            }
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public List<CoSo> getAllCoSoIncludingPending() {
         EntityManager em = JPAUtil.getEntityManager();
         try {

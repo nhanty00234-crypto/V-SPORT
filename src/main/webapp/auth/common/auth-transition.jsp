@@ -24,9 +24,9 @@
         justify-content: center;
         gap: 0;
         background:
-            radial-gradient(90% 70% at 50% 30%, rgba(22, 122, 82, .55), transparent 70%),
-            linear-gradient(170deg, #07402c 0%, #052e20 55%, #032016 100%);
-        background-color: #052e20;
+            radial-gradient(90% 70% at 50% 30%, rgba(24, 200, 232, .35), transparent 70%),
+            linear-gradient(170deg, #123A63 0%, #0B2545 55%, #071A2F 100%);
+        background-color: #071A2F;
         opacity: 0;
         visibility: hidden;
         transition: opacity .28s ease, visibility .28s ease;
@@ -69,16 +69,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 0 0 10px rgba(255,255,255,.06), 0 0 60px rgba(52, 211, 153, .35);
+        box-shadow: 0 0 0 10px rgba(255,255,255,.06), 0 0 60px rgba(24, 200, 232, .40);
         animation: vs-glow 3s ease-in-out infinite;
     }
     .vs-transition-logo .material-symbols-outlined {
         font-size: 56px;
-        color: #0a6b4a;
+        color: #185A9D;
     }
     @keyframes vs-glow {
-        0%, 100% { box-shadow: 0 0 0 10px rgba(255,255,255,.06), 0 0 46px rgba(52,211,153,.28); }
-        50%      { box-shadow: 0 0 0 10px rgba(255,255,255,.09), 0 0 72px rgba(52,211,153,.45); }
+        0%, 100% { box-shadow: 0 0 0 10px rgba(255,255,255,.06), 0 0 46px rgba(24,200,232,.32); }
+        50%      { box-shadow: 0 0 0 10px rgba(255,255,255,.09), 0 0 72px rgba(24,200,232,.50); }
     }
 
     /* Vòng orbit icon thể thao */

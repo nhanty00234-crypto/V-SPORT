@@ -19,6 +19,15 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
 
     private static final Logger logger = LogManager.getLogger(TaiKhoanDAOImpl.class);
 
+    /**
+     * Hash BCrypt hợp lệ cố định, không gắn với tài khoản thật nào. Dùng để chạy
+     * một lần checkpw() "giả" khi username/email không khớp account nào, để thời
+     * gian phản hồi gần bằng trường hợp account tồn tại nhưng sai mật khẩu — chống
+     * timing attack dùng để dò email/username tồn tại trong hệ thống.
+     */
+    private static final String DUMMY_BCRYPT_HASH =
+            "$2a$10$e8vvlxZLrBB2hA2WySDYK.ILi34msUoVA8ngsFmy/8gfSI.T4majO";
+
     @Override
     public boolean addAccountByAdmin(TaiKhoan TaiKhoan) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -323,6 +332,11 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
                 if (BCrypt.checkpw(password, acc.getPassword())) {
                     return acc;
                 }
+            } else {
+                // Không tìm thấy account nào: vẫn chạy BCrypt trên dummy hash cố định
+                // để thời gian phản hồi gần bằng trường hợp account tồn tại nhưng sai
+                // mật khẩu (chống timing attack dùng để dò email/username tồn tại).
+                BCrypt.checkpw(password, DUMMY_BCRYPT_HASH);
             }
         } catch (Exception e) {
             logger.error("Lỗi đăng nhập khách hàng {}: {}", usernameOrEmail, e.getMessage(), e);

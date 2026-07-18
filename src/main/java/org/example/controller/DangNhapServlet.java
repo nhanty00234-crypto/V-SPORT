@@ -10,6 +10,7 @@ import org.example.model.TaiKhoan;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.service.FacilityAccessService;
+import org.example.service.reset.SimpleRateLimiter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +22,27 @@ public class DangNhapServlet extends HttpServlet {
     private static final Logger LOGGER = LogManager.getLogger(DangNhapServlet.class);
     private TaiKhoanDAO TaiKhoanDAO = new TaiKhoanDAOImpl();
     private final FacilityAccessService facilityAccessService = new FacilityAccessService();
+
+    /**
+     * Thông báo lỗi DUY NHẤT cho mọi trường hợp đăng nhập thất bại (không tồn tại,
+     * sai mật khẩu, sai portal, tài khoản bị khóa...). Không được phân nhánh message
+     * theo nguyên nhân — xem AuthPortalPolicy và phần xử lý portal-mismatch bên dưới.
+     */
+    private static final String GENERIC_LOGIN_FAIL_MSG =
+            "Email, số điện thoại hoặc mật khẩu không chính xác.";
+
+    /**
+     * Hash BCrypt hợp lệ cố định, không gắn với tài khoản thật nào, dùng để chạy
+     * một lần checkpw() "giả" khi không tìm thấy account — giữ thời gian phản hồi
+     * gần bằng trường hợp account tồn tại nhưng sai mật khẩu (chống timing attack
+     * dùng để dò email/sđt tồn tại trong hệ thống).
+     */
+    private static final String DUMMY_BCRYPT_HASH =
+            "$2a$10$e8vvlxZLrBB2hA2WySDYK.ILi34msUoVA8ngsFmy/8gfSI.T4majO";
+
+    private static final int LOGIN_ID_MAX_ATTEMPTS = 5;
+    private static final int LOGIN_IP_MAX_ATTEMPTS = 20;
+    private static final long LOGIN_RATE_WINDOW_MS = 5 * 60_000L;
 
     /** Portal của request: theo route GET hoặc hidden input POST (allowlist, không cấp role). */
     private String resolvePortal(HttpServletRequest req) {
@@ -113,6 +135,31 @@ public class DangNhapServlet extends HttpServlet {
             }
         }
 
+        // ===== Rate limit server-side (theo identifier chuẩn hóa và theo IP) =====
+        // Áp dụng TRƯỚC khi lookup DB để một attacker không thể dùng độ trễ DB
+        // làm oracle, và để chặn brute-force trước khi tốn một lần BCrypt.
+        long now = System.currentTimeMillis();
+        String normalizedIdentifierForKey = isPhoneLogin
+                ? normalizedPhone
+                : (usernameOrEmail == null ? "" : usernameOrEmail.trim().toLowerCase());
+        String idKey = "login-id:" + portal + ":" + loginMethod + ":" + normalizedIdentifierForKey;
+        String ipKey = "login-ip:" + portal + ":" + req.getRemoteAddr();
+        if (!SimpleRateLimiter.SHARED.tryAcquire(idKey, LOGIN_ID_MAX_ATTEMPTS, LOGIN_RATE_WINDOW_MS, now)
+                || !SimpleRateLimiter.SHARED.tryAcquire(ipKey, LOGIN_IP_MAX_ATTEMPTS, LOGIN_RATE_WINDOW_MS, now)) {
+            LOGGER.warn("LOGIN_RATE_LIMITED portal={} method={} identifier={} ip={}",
+                    portal, loginMethod, maskIdentifier(isPhoneLogin, usernameOrEmail, normalizedPhone), req.getRemoteAddr());
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + GENERIC_LOGIN_FAIL_MSG + "\"}");
+                return;
+            }
+            req.setAttribute("loi", GENERIC_LOGIN_FAIL_MSG);
+            req.setAttribute("username", usernameOrEmail);
+            req.setAttribute("phone", rawPhone);
+            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
+            return;
+        }
+
         TaiKhoan taiKhoan = null;
         boolean ambiguousPhone = false;
         String dbErrorMsg = null;
@@ -124,9 +171,19 @@ public class DangNhapServlet extends HttpServlet {
                         .timTaiKhoanHoatDongTheoPhone(org.example.util.PhoneUtil.lookupVariants(normalizedPhone));
                 if (matches.size() > 1) {
                     ambiguousPhone = true;
-                } else if (matches.size() == 1
-                        && org.mindrot.jbcrypt.BCrypt.checkpw(password, matches.get(0).getPassword())) {
-                    taiKhoan = matches.get(0);
+                    // Vẫn chạy một lần BCrypt "giả" để giữ thời gian phản hồi tương đồng
+                    // với các nhánh khác — tránh việc riêng nhánh ambiguous phản hồi nhanh
+                    // hơn hẳn và trở thành oracle cho việc dò số điện thoại tồn tại.
+                    org.mindrot.jbcrypt.BCrypt.checkpw(password, DUMMY_BCRYPT_HASH);
+                } else if (matches.size() == 1) {
+                    if (org.mindrot.jbcrypt.BCrypt.checkpw(password, matches.get(0).getPassword())) {
+                        taiKhoan = matches.get(0);
+                    }
+                } else {
+                    // Không tìm thấy account nào theo số điện thoại: vẫn chạy BCrypt trên
+                    // dummy hash cố định để thời gian phản hồi gần bằng trường hợp account
+                    // tồn tại nhưng sai mật khẩu (chống timing attack dò số điện thoại).
+                    org.mindrot.jbcrypt.BCrypt.checkpw(password, DUMMY_BCRYPT_HASH);
                 }
             } else {
                 taiKhoan = TaiKhoanDAO.dangNhapKhachHang(usernameOrEmail, password);
@@ -161,42 +218,36 @@ public class DangNhapServlet extends HttpServlet {
 
         if (ambiguousPhone) {
             // Không tự chọn tài khoản khi một số điện thoại gắn với nhiều account.
-            LOGGER.warn("Login blocked - ambiguous phone match for normalized phone (not logged for privacy)");
-            String ambiguousMsg = "Số điện thoại này đang được liên kết với nhiều tài khoản. "
-                    + "Vui lòng đăng nhập bằng email hoặc tên đăng nhập.";
+            // Dùng đúng generic message — không tiết lộ rằng số điện thoại này tồn tại
+            // và đang liên kết với (nhiều) tài khoản thật.
+            LOGGER.warn("LOGIN_AMBIGUOUS_PHONE portal={} identifier={} ip={}",
+                    portal, maskIdentifier(true, usernameOrEmail, normalizedPhone), req.getRemoteAddr());
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"" + ambiguousMsg + "\"}");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + GENERIC_LOGIN_FAIL_MSG + "\"}");
                 return;
             }
-            req.setAttribute("loi", ambiguousMsg);
+            req.setAttribute("loi", GENERIC_LOGIN_FAIL_MSG);
             req.setAttribute("phone", rawPhone);
             req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
             return;
         }
 
-        // Chính sách hai cổng: chỉ kiểm tra SAU khi mật khẩu đã xác thực đúng,
-        // để không tiết lộ role của tài khoản qua thông báo lỗi. Sai cổng → không tạo session.
+        // Chính sách hai cổng: chỉ kiểm tra SAU khi mật khẩu đã xác thực đúng.
+        // Sai cổng → không tạo session, và KHÔNG được tiết lộ role/portal thật của
+        // tài khoản qua message — dùng đúng generic message như mọi lỗi đăng nhập khác.
+        // Chi tiết thật (role, cổng đúng) chỉ được ghi vào server log, không trả về client.
         if (taiKhoan != null && !org.example.util.AuthPortalPolicy.isRoleAllowed(portal, taiKhoan.getRoleId())) {
             boolean accountIsInternal = org.example.util.AuthPortalPolicy.isInternalRole(taiKhoan.getRoleId());
-            String accountPortal = accountIsInternal
-                    ? org.example.util.AuthPortalPolicy.PORTAL_INTERNAL
-                    : org.example.util.AuthPortalPolicy.PORTAL_CUSTOMER;
-            String wrongPortalMsg = accountIsInternal
-                    ? "Tài khoản này thuộc Cổng vận hành V-SPORT. Vui lòng đăng nhập tại Cổng dành cho Quản trị viên, Quản lý và Nhân viên."
-                    : "Tài khoản này thuộc Cổng khách hàng V-SPORT. Vui lòng quay lại trang đăng nhập dành cho khách đặt sân.";
-            String portalUrl = req.getContextPath()
-                    + (accountIsInternal ? "/he-thong/dang-nhap" : "/dangnhap");
-            LOGGER.warn("Login blocked - wrong portal: accountId={}, roleId={}, attemptedPortal={}",
-                    taiKhoan.getAccountId(), taiKhoan.getRoleId(), portal);
+            LOGGER.warn("LOGIN_WRONG_PORTAL accountId={} roleId={} attemptedPortal={} accountPortal={} ip={}",
+                    taiKhoan.getAccountId(), taiKhoan.getRoleId(), portal,
+                    accountIsInternal ? "internal" : "customer", req.getRemoteAddr());
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"code\": \"WRONG_PORTAL\", \"loi\": \""
-                        + wrongPortalMsg + "\", \"portalUrl\": \"" + portalUrl + "\"}");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + GENERIC_LOGIN_FAIL_MSG + "\"}");
                 return;
             }
-            req.setAttribute("wrongPortal", accountPortal);
-            req.setAttribute("wrongPortalMsg", wrongPortalMsg);
+            req.setAttribute("loi", GENERIC_LOGIN_FAIL_MSG);
             req.setAttribute("username", usernameOrEmail);
             req.setAttribute("phone", rawPhone);
             req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
@@ -205,8 +256,8 @@ public class DangNhapServlet extends HttpServlet {
 
         if (taiKhoan != null && taiKhoan.getCoSoId() != null
                 && !facilityAccessService.isFacilityActive(taiKhoan.getCoSoId())) {
-            LOGGER.warn("Login blocked - facility inactive: accountId={}, username={}, roleId={}, coSoId={}",
-                    taiKhoan.getAccountId(), taiKhoan.getUsername(), taiKhoan.getRoleId(), taiKhoan.getCoSoId());
+            LOGGER.warn("LOGIN_DISABLED_ACCOUNT accountId={} roleId={} coSoId={} ip={}",
+                    taiKhoan.getAccountId(), taiKhoan.getRoleId(), taiKhoan.getCoSoId(), req.getRemoteAddr());
             String facilityInactiveMsg = "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.";
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
@@ -237,9 +288,9 @@ public class DangNhapServlet extends HttpServlet {
             String redirectUrl = req.getContextPath()
                     + org.example.util.RoleRedirectUtil.getHomePathByRoleId(taiKhoan.getRoleId());
 
-            LOGGER.info("Login success: accountId={}, username={}, roleId={}, redirect={}",
-                    taiKhoan.getAccountId(), taiKhoan.getUsername(),
-                    taiKhoan.getRoleId(), redirectUrl);
+            LOGGER.info("LOGIN_SUCCESS accountId={} roleId={} portal={} redirect={} ip={} userAgent={}",
+                    taiKhoan.getAccountId(), taiKhoan.getRoleId(), portal, redirectUrl,
+                    req.getRemoteAddr(), req.getHeader("User-Agent"));
 
             // Phản hồi kết quả đăng nhập thành công
             if (isAjax) {
@@ -251,20 +302,48 @@ public class DangNhapServlet extends HttpServlet {
             resp.sendRedirect(redirectUrl);
 
         } else {
-            String wrongMsg = isPhoneLogin
-                    ? "Số điện thoại hoặc mật khẩu không đúng."
-                    : "Tên đăng nhập hoặc mật khẩu không đúng.";
+            // Không tìm thấy account HOẶC sai mật khẩu: cùng một generic message,
+            // không phân biệt nguyên nhân (chống account enumeration). Chi tiết thật
+            // (không tìm thấy vs. sai mật khẩu) chỉ được ghi vào server log.
+            LOGGER.warn("{} portal={} method={} identifier={} ip={}",
+                    "LOGIN_ACCOUNT_NOT_FOUND",
+                    portal, loginMethod, maskIdentifier(isPhoneLogin, usernameOrEmail, normalizedPhone),
+                    req.getRemoteAddr());
             if (isAjax) {
                 resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"" + wrongMsg + "\"}");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + GENERIC_LOGIN_FAIL_MSG + "\"}");
                 return;
             }
 
-            req.setAttribute("loi", wrongMsg);
+            req.setAttribute("loi", GENERIC_LOGIN_FAIL_MSG);
             req.setAttribute("username", usernameOrEmail);
             req.setAttribute("phone", rawPhone);
             req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
         }
+    }
+
+    /**
+     * Che email/số điện thoại để ghi log audit mà không lộ toàn bộ identifier.
+     * Email: n***@gmail.com — giữ ký tự đầu + domain.
+     * Phone: 078****209 — giữ 3 số đầu + 3 số cuối.
+     * Không phân biệt "wrong password" và "not found" ở đây — cả hai đều dùng
+     * LOGIN_ACCOUNT_NOT_FOUND làm code chung để tránh vô tình tạo oracle qua log
+     * code khác nhau bị lộ ra (ví dụ qua response timing/side channel khác).
+     */
+    private String maskIdentifier(boolean isPhone, String usernameOrEmail, String normalizedPhone) {
+        if (isPhone) {
+            String p = normalizedPhone != null ? normalizedPhone : "";
+            if (p.length() <= 6) return "***";
+            return p.substring(0, 3) + "****" + p.substring(p.length() - 3);
+        }
+        String v = usernameOrEmail != null ? usernameOrEmail.trim() : "";
+        int at = v.indexOf('@');
+        if (at > 0) {
+            String domain = v.substring(at + 1);
+            return v.charAt(0) + "***@" + domain;
+        }
+        if (v.isEmpty()) return "***";
+        return v.charAt(0) + "***";
     }
 
     private boolean isDatabaseConfigError(Throwable e) {

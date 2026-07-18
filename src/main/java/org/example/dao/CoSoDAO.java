@@ -7,6 +7,18 @@ public interface CoSoDAO {
     List<CoSo> getAllCoSo();
 
     /**
+     * Tìm kiếm cơ sở đang hoạt động theo từ khóa (tên/địa chỉ) và tùy chọn lọc
+     * theo môn thể thao. Dùng cho trang tìm kiếm Customer Portal (/customer/tim-kiem).
+     * Toàn bộ tham số đều bind qua JPQL parameter — không nối chuỗi SQL.
+     *
+     * @param keyword từ khóa tìm theo tên cơ sở hoặc địa chỉ (case-insensitive,
+     *                khớp một phần); null/rỗng nghĩa là không lọc theo từ khóa.
+     * @param monTheThaoId lọc cơ sở có ít nhất một sân thuộc môn thể thao này
+     *                     (qua San -&gt; LoaiSan -&gt; MonTheThao); null nghĩa là không lọc.
+     */
+    List<CoSo> searchCoSo(String keyword, Integer monTheThaoId);
+
+    /**
      * Toàn bộ CoSo chưa bị xóa mềm, KHÔNG lọc theo TrangThai — dùng riêng cho
      * trang Quản lý Owner (cần thấy cả "Chờ duyệt"/"Từ chối" để build các tab).
      * Không dùng cho trang Quản lý Cơ sở/Nhân sự/booking (dùng getAllCoSo()).

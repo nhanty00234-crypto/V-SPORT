@@ -339,6 +339,11 @@ body { font-family: 'Inter', sans-serif; }
         </label>
         <input type="text" id="adminDiaChi" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
                class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+        <input type="hidden" id="adminViDo">
+        <input type="hidden" id="adminKinhDo">
+        <p id="adminGeoStatus" class="text-[11px] font-semibold mt-0.5 text-amber-600">
+          <i class="ti ti-map-pin-off text-sm align-[-2px]"></i> Chưa xác định tọa độ — nhấn "Định vị địa chỉ / Tọa độ GG Map"
+        </p>
       </div>
 
       <div class="flex justify-end gap-3 pt-3 border-t border-zinc-50">
@@ -396,6 +401,8 @@ body { font-family: 'Inter', sans-serif; }
         <input type="hidden" name="email"       id="hEmail">
         <input type="hidden" name="soDienThoai" id="hPhone">
         <input type="hidden" name="diaChi"      id="hDiaChi">
+        <input type="hidden" name="viDo"        id="hViDo">
+        <input type="hidden" name="kinhDo"      id="hKinhDo">
 
         <div>
           <p class="text-sm font-semibold text-zinc-800 mb-0.5">Cấu hình cơ sở <span class="text-green-600 text-xs font-normal">✓ Email đã xác thực</span></p>
@@ -548,7 +555,8 @@ body { font-family: 'Inter', sans-serif; }
     document.getElementById('modalThem').classList.add('hidden');
     adminGoStep(1);
     document.getElementById('formThemCoSo').reset();
-    ['adminTenCoSo','adminEmail','adminPhone','adminDiaChi'].forEach(id => document.getElementById(id).value = '');
+    ['adminTenCoSo','adminEmail','adminPhone','adminDiaChi','adminViDo','adminKinhDo'].forEach(id => document.getElementById(id).value = '');
+    setGeoStatus('adminGeoStatus', 'none');
     updateTotalCourts();
     admOtpFails = 0; admResendCount = 0;
     clearInterval(admResendTimer);
@@ -665,6 +673,8 @@ body { font-family: 'Inter', sans-serif; }
         document.getElementById('hEmail').value   = document.getElementById('adminEmail').value.trim();
         document.getElementById('hPhone').value   = document.getElementById('adminPhone').value.trim();
         document.getElementById('hDiaChi').value  = document.getElementById('adminDiaChi').value.trim();
+        document.getElementById('hViDo').value    = document.getElementById('adminViDo').value;
+        document.getElementById('hKinhDo').value  = document.getElementById('adminKinhDo').value;
         adminGoStep(3);
       } else {
         admOtpFails++;
@@ -733,6 +743,12 @@ body { font-family: 'Inter', sans-serif; }
       alert('Vui lòng chọn ít nhất một môn thể thao và nhập số sân lớn hơn 0.');
       return false;
     }
+    const viDo = document.getElementById('hViDo').value;
+    const kinhDo = document.getElementById('hKinhDo').value;
+    if (!viDo || !kinhDo) {
+      alert('Vị trí cơ sở chưa hợp lệ. Vui lòng chọn lại vị trí trên bản đồ hoặc nhập đầy đủ tọa độ.');
+      return false;
+    }
     return true;
   }
 
@@ -764,6 +780,13 @@ body { font-family: 'Inter', sans-serif; }
   // ==========================================
   let activeGeoTargetId = 'adminDiaChi';
 
+  // Mỗi form (Thêm/Sửa) có bộ 3 field riêng: input địa chỉ hiển thị, hidden viDo/kinhDo,
+  // và dòng trạng thái. Tra theo id input địa chỉ đang active để biết ghi vào đâu.
+  const GEO_FIELD_MAP = {
+    adminDiaChi: { viDo: 'adminViDo', kinhDo: 'adminKinhDo', status: 'adminGeoStatus' },
+    suaDiaChi:   { viDo: 'suaViDo',   kinhDo: 'suaKinhDo',   status: 'suaGeoStatus' }
+  };
+
   function autoFillAddress(targetId) {
     activeGeoTargetId = targetId || 'adminDiaChi';
     document.getElementById('geoInput').value = "";
@@ -775,20 +798,49 @@ body { font-family: 'Inter', sans-serif; }
     document.getElementById('geoModal').classList.add('hidden');
   }
 
+  // Parse tọa độ từ nhiều định dạng: decimal "lat, lon", DMS "10°23'07.3\"N 107°07'20.4\"E",
+  // hoặc Google Maps URL chứa "@lat,lon" hay "q=lat,lon". Trả về {lat, lon} hoặc null.
+  function parseCoordInput(raw) {
+    const input = raw.trim();
+
+    let m = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+        || input.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/)
+        || input.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (m) return { lat: parseFloat(m[1]), lon: parseFloat(m[2]) };
+
+    const dms = /(\d+)[°\s](\d+)['’′]\s*([\d.]+)[\"”″]?\s*([NSns])[,\s]+(\d+)[°\s](\d+)['’′]\s*([\d.]+)[\"”″]?\s*([EWew])/;
+    m = input.match(dms);
+    if (m) {
+      const toDec = (deg, min, sec, dir) => {
+        let v = parseInt(deg, 10) + parseInt(min, 10) / 60 + parseFloat(sec) / 3600;
+        if (/[SsWw]/.test(dir)) v = -v;
+        return v;
+      };
+      return { lat: toDec(m[1], m[2], m[3], m[4]), lon: toDec(m[5], m[6], m[7], m[8]) };
+    }
+
+    m = input.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+    if (m) return { lat: parseFloat(m[1]), lon: parseFloat(m[2]) };
+
+    return null;
+  }
+
+  function isValidLatLon(lat, lon) {
+    return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+  }
+
   function submitGeoInput() {
     const input = document.getElementById('geoInput').value.trim();
     if (!input) {
       alert("Vui lòng dán tọa độ hoặc link Google Map.");
       return;
     }
-    const match = input.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
-    if (match) {
-      const lat = match[1];
-      const lon = match[2];
+    const coord = parseCoordInput(input);
+    if (coord && isValidLatLon(coord.lat, coord.lon)) {
       closeGeoModal();
-      fetchAddressFromCoords(lat, lon);
+      fetchAddressFromCoords(coord.lat, coord.lon);
     } else {
-      alert("Không tìm thấy tọa độ hợp lệ. Ví dụ định dạng: 10.7626, 106.6601");
+      alert("Không tìm thấy tọa độ hợp lệ. Ví dụ: 10.7626, 106.6601 hoặc link Google Maps.");
     }
   }
 
@@ -801,7 +853,7 @@ body { font-family: 'Inter', sans-serif; }
     const originalText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-zinc-700 border-t-transparent rounded-full mr-2"></span> Đang định vị GPS...';
-    
+
     navigator.geolocation.getCurrentPosition(
       function(pos) {
         btn.disabled = false;
@@ -826,29 +878,76 @@ body { font-family: 'Inter', sans-serif; }
     );
   }
 
+  // Debounce guard: tránh spam Nominatim nếu người dùng bấm định vị liên tục.
+  let geoFetchInFlight = false;
+
+  function setGeoStatus(statusId, state, lat, lon) {
+    const status = document.getElementById(statusId);
+    if (!status) return;
+    if (state === 'ok') {
+      status.className = 'text-[11px] font-semibold mt-0.5 text-emerald-600';
+      status.innerHTML = '<i class="ti ti-map-pin-check text-sm align-[-2px]"></i> Đã xác định vị trí (' + lat.toFixed(7) + ', ' + lon.toFixed(7) + ')';
+    } else if (state === 'partial') {
+      status.className = 'text-[11px] font-semibold mt-0.5 text-amber-600';
+      status.innerHTML = '<i class="ti ti-map-pin-check text-sm align-[-2px]"></i> Đã lưu tọa độ (' + lat.toFixed(7) + ', ' + lon.toFixed(7) + ') — chưa lấy được địa chỉ chữ, vui lòng nhập tay.';
+    } else {
+      status.className = 'text-[11px] font-semibold mt-0.5 text-amber-600';
+      status.innerHTML = '<i class="ti ti-map-pin-off text-sm align-[-2px]"></i> Chưa xác định tọa độ — nhấn "Định vị địa chỉ / Tọa độ GG Map"';
+    }
+  }
+
   function fetchAddressFromCoords(lat, lon) {
+    if (!isValidLatLon(lat, lon)) {
+      alert("Tọa độ không hợp lệ (vĩ độ -90..90, kinh độ -180..180).");
+      return;
+    }
+    if (geoFetchInFlight) return;
+    geoFetchInFlight = true;
+
+    const fields = GEO_FIELD_MAP[activeGeoTargetId] || GEO_FIELD_MAP.adminDiaChi;
     const addrInput = document.getElementById(activeGeoTargetId);
+
+    // Lưu tọa độ ngay — dù reverse geocode thất bại vẫn không mất vị trí đã xác định.
+    const viDoEl = document.getElementById(fields.viDo);
+    const kinhDoEl = document.getElementById(fields.kinhDo);
+    if (viDoEl) viDoEl.value = lat;
+    if (kinhDoEl) kinhDoEl.value = lon;
+    setGeoStatus(fields.status, 'partial', lat, lon);
+
     const originalPlaceholder = addrInput.placeholder || "";
     addrInput.disabled = true;
     addrInput.value = "";
     addrInput.placeholder = "Đang lấy địa chỉ từ tọa độ [" + parseFloat(lat).toFixed(4) + ", " + parseFloat(lon).toFixed(4) + "]...";
-    
-    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&accept-language=vi')
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&accept-language=vi',
+          { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
+        clearTimeout(timeoutId);
         addrInput.disabled = false;
         addrInput.placeholder = originalPlaceholder;
         if (data && data.display_name) {
           addrInput.value = data.display_name;
+          setGeoStatus(fields.status, 'ok', lat, lon);
         } else {
-          alert("Không thể chuyển đổi tọa độ này thành địa chỉ.");
+          setGeoStatus(fields.status, 'partial', lat, lon);
+          alert("Không thể chuyển đổi tọa độ này thành địa chỉ. Tọa độ vẫn được lưu — vui lòng nhập địa chỉ thủ công.");
         }
       })
       .catch(err => {
+        clearTimeout(timeoutId);
         addrInput.disabled = false;
         addrInput.placeholder = originalPlaceholder;
-        alert("Lỗi kết nối dịch vụ địa chỉ. Vui lòng nhập thủ công.");
-      });
+        setGeoStatus(fields.status, 'partial', lat, lon);
+        const msg = (err && err.name === 'AbortError')
+          ? "Hết thời gian chờ dịch vụ địa chỉ. Tọa độ vẫn được lưu — vui lòng nhập địa chỉ thủ công."
+          : "Lỗi kết nối dịch vụ địa chỉ. Tọa độ vẫn được lưu — vui lòng nhập địa chỉ thủ công.";
+        alert(msg);
+      })
+      .finally(() => { geoFetchInFlight = false; });
   }
 
   // ==========================================
@@ -865,6 +964,14 @@ body { font-family: 'Inter', sans-serif; }
         document.getElementById('suaDiaChi').value = data.diaChi;
         document.getElementById('suaGioMoCua').value = data.gioMoCua.substring(0, 5);
         document.getElementById('suaGioDongCua').value = data.gioDongCua.substring(0, 5);
+
+        document.getElementById('suaViDo').value = data.viDo || '';
+        document.getElementById('suaKinhDo').value = data.kinhDo || '';
+        if (data.viDo && data.kinhDo) {
+          setGeoStatus('suaGeoStatus', 'ok', parseFloat(data.viDo), parseFloat(data.kinhDo));
+        } else {
+          setGeoStatus('suaGeoStatus', 'none');
+        }
 
         setupSportCheckbox('sua_BongDa', 'sua_soLuongSan_BongDa', data.countBongDa);
         setupSportCheckbox('sua_CauLong', 'sua_soLuongSan_CauLong', data.countCauLong);
@@ -915,6 +1022,12 @@ body { font-family: 'Inter', sans-serif; }
     const total = parseInt(document.getElementById('sua_soLuongSanDuKien').value) || 0;
     if (total <= 0) {
       alert('Vui lòng chọn ít nhất một môn thể thao và nhập số sân lớn hơn 0.');
+      return false;
+    }
+    const viDo = document.getElementById('suaViDo').value;
+    const kinhDo = document.getElementById('suaKinhDo').value;
+    if (!viDo || !kinhDo) {
+      alert('Vị trí cơ sở chưa hợp lệ. Vui lòng chọn lại vị trí trên bản đồ hoặc nhập đầy đủ tọa độ.');
       return false;
     }
     return true;
@@ -1154,6 +1267,11 @@ body { font-family: 'Inter', sans-serif; }
           </label>
           <input type="text" name="diaChi" id="suaDiaChi" required placeholder="Số nhà, tên đường..."
                  class="h-10 px-3 rounded-xl border border-zinc-200 text-sm focus:border-blue-450 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium">
+          <input type="hidden" name="viDo" id="suaViDo">
+          <input type="hidden" name="kinhDo" id="suaKinhDo">
+          <p id="suaGeoStatus" class="text-[11px] font-semibold mt-0.5 text-amber-600">
+            <i class="ti ti-map-pin-off text-sm align-[-2px]"></i> Chưa xác định tọa độ — nhấn "Định vị địa chỉ / Tọa độ GG Map"
+          </p>
         </div>
 
         <!-- Số điện thoại -->

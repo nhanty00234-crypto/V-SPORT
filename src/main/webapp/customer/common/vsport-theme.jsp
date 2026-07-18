@@ -1,35 +1,70 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%--
-    V-SPORT Customer Design System (Phase 1)
+    V-SPORT Customer Design System (Color Rebrand)
     Scope: CUSTOMER pages only. Do NOT include from admin/manager/staff.
-    - One accent lock: emerald "V-SPORT green" (unifies the older lime + emerald mix).
+    - Brand identity: Navy + Sport Blue + Electric Cyan + Orange CTA.
+    - Green is reserved exclusively for Success semantics (paid, active, confirmed, in-stock).
     - One radius scale. Flat surfaces, restrained shadows (minimalist-skill discipline).
     - Tokens are namespaced --vs-* to avoid clashing with page-level vars.
-    - Also re-themes the shared header.jsp accent to emerald ON CUSTOMER PAGES ONLY
+    - Also re-themes the shared header.jsp accent to V-SPORT blue ON CUSTOMER PAGES ONLY
       (targeted !important overrides; admin/manager never load this file).
 --%>
 <style>
     :root {
-        /* ---- V-SPORT green (emerald family), single locked accent ---- */
-        --vs-primary: #047857;        /* solid buttons / white-text surfaces (AA on white) */
-        --vs-primary-strong: #065f46; /* hover / pressed */
-        --vs-accent: #059669;         /* icons, active states */
-        --vs-primary-50: #ecfdf5;     /* chip / tint backgrounds */
-        --vs-primary-100: #d1fae5;
+        /* ---- Brand navy ---- */
+        --vs-primary-950: #071A2F;
+        --vs-primary-900: #0B2545;
+        --vs-primary-800: #123A63;
+        --vs-primary-700: #185A9D;
+        --vs-primary-600: #1677D2;
+        --vs-primary-500: #2196F3;
 
-        /* ---- neutrals ---- */
-        --vs-ink: #0f172a;
-        --vs-text: #1f2937;
-        --vs-muted: #64748b;
-        --vs-surface: #f6f7f9;
-        --vs-card: #ffffff;
-        --vs-border: #e5e7eb;
+        /* ---- Technology / location accent (cyan) ---- */
+        --vs-cyan-600: #08A9CC;
+        --vs-cyan-500: #18C8E8;
+        --vs-cyan-100: #DDF8FC;
+        --vs-cyan-50: #F0FCFE;
 
-        /* ---- semantic ---- */
-        --vs-danger: #dc2626;
-        --vs-warn: #d97706;
-        --vs-warn-bg: #fffbeb;
-        --vs-ok-bg: #ecfdf5;
+        /* ---- Main CTA (orange) ---- */
+        --vs-orange-600: #F97316;
+        --vs-orange-500: #FF8A24;
+        --vs-orange-100: #FFF1E5;
+
+        /* ---- Back-compat aliases used across existing customer/auth markup ---- */
+        --vs-primary: var(--vs-primary-600);        /* solid buttons / white-text surfaces (AA on white) */
+        --vs-primary-strong: var(--vs-primary-900);  /* hover / pressed / deep navy */
+        --vs-accent: var(--vs-cyan-500);             /* icons, active accents, focus */
+        --vs-primary-50: var(--vs-cyan-50);          /* chip / tint backgrounds */
+        --vs-primary-100: var(--vs-cyan-100);
+
+        /* ---- neutrals / surfaces ---- */
+        --vs-background: #F4F7FB;
+        --vs-ink: #102A43;
+        --vs-text: #102A43;
+        --vs-text-secondary: #486581;
+        --vs-muted: #829AB1;
+        --vs-surface: #F4F7FB;
+        --vs-surface-soft: #EDF4FA;
+        --vs-card: #FFFFFF;
+        --vs-border: #DCE5EF;
+
+        /* ---- semantic (Green stays Success only; never rebranded) ---- */
+        --vs-success: #16A36A;
+        --vs-success-bg: #E5F7EF;
+        --vs-warning: #F4B740;
+        --vs-warning-bg: #FFF7DA;
+        --vs-danger: #E5484D;
+        --vs-danger-bg: #FDEBEC;
+
+        /* legacy semantic aliases kept so existing markup keeps working */
+        --vs-danger-legacy: var(--vs-danger);
+        --vs-warn: var(--vs-warning);
+        --vs-warn-bg: var(--vs-warning-bg);
+        --vs-ok-bg: var(--vs-success-bg);
+
+        /* ---- interaction ---- */
+        --vs-focus-ring: rgba(24, 200, 232, 0.35);
+        --vs-overlay: rgba(7, 26, 47, 0.68);
 
         /* ---- radius scale (one system) ---- */
         --vs-r-card: 14px;
@@ -40,9 +75,9 @@
         --vs-bottomnav-h: 70px;
         --vs-bottomnav-h-desktop: 80px;
 
-        /* Re-point the shared header's var-driven accent to V-SPORT green. */
-        --primary: var(--vs-accent) !important;
-        --primary-hover: var(--vs-primary) !important;
+        /* Re-point the shared header's var-driven accent to V-SPORT blue. */
+        --primary: var(--vs-primary-600) !important;
+        --primary-hover: var(--vs-primary-900) !important;
     }
 
     /* Reserve space so the fixed bottom nav never covers content, at every width. */
@@ -52,14 +87,14 @@
     }
 
     /* ================= Header accent unification (customer pages only) ============= */
-    .navbar .nav-links a::after { background-color: var(--vs-accent) !important; }
+    .navbar .nav-links a::after { background-color: var(--vs-primary-600) !important; }
     .navbar .header-icon-badge,
-    .side-drawer .avatar-circle { background-color: var(--vs-accent) !important; }
-    .side-drawer .drawer-link:hover { color: var(--vs-primary) !important; }
+    .side-drawer .avatar-circle { background-color: var(--vs-primary-600) !important; }
+    .side-drawer .drawer-link:hover { color: var(--vs-primary-600) !important; }
     .btn-register-shimmer {
-        background: linear-gradient(135deg, var(--vs-accent) 0%, var(--vs-primary) 100%) !important;
+        background: linear-gradient(135deg, var(--vs-orange-500) 0%, var(--vs-orange-600) 100%) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 14px rgba(4, 120, 87, 0.22) !important;
+        box-shadow: 0 4px 14px rgba(249, 115, 22, 0.25) !important;
     }
     .user-avatar { color: #ffffff !important; }
 
@@ -81,10 +116,19 @@
         white-space: nowrap;
     }
     .vs-btn:active { transform: translateY(1px); }
-    .vs-btn-primary { background: var(--vs-primary); color: #fff; }
-    .vs-btn-primary:hover { background: var(--vs-primary-strong); color: #fff; }
+    .vs-btn:focus-visible { outline: 3px solid var(--vs-focus-ring); outline-offset: 2px; }
+    .vs-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* Primary CTA (booking / payment / confirm actions) -> Orange */
+    .vs-btn-primary { background: var(--vs-orange-500); color: #fff; }
+    .vs-btn-primary:hover { background: var(--vs-orange-600); color: #fff; }
+
+    /* Secondary action -> Blue */
+    .vs-btn-secondary { background: var(--vs-primary-600); color: #fff; }
+    .vs-btn-secondary:hover { background: var(--vs-primary-700); color: #fff; }
+
     .vs-btn-ghost { background: #fff; color: var(--vs-text); border-color: var(--vs-border); }
-    .vs-btn-ghost:hover { border-color: var(--vs-accent); color: var(--vs-primary); }
+    .vs-btn-ghost:hover { border-color: var(--vs-cyan-500); color: var(--vs-primary-600); }
 
     /* Category / filter chips */
     .vs-chip {
@@ -95,8 +139,8 @@
         cursor: pointer; white-space: nowrap; text-decoration: none;
         transition: all .16s ease;
     }
-    .vs-chip:hover { border-color: var(--vs-accent); color: var(--vs-primary); }
-    .vs-chip.is-active { background: var(--vs-primary); border-color: var(--vs-primary); color: #fff; }
+    .vs-chip:hover { border-color: var(--vs-cyan-500); color: var(--vs-primary-600); }
+    .vs-chip.is-active { background: var(--vs-primary-600); border-color: var(--vs-primary-600); color: #fff; }
 
     /* Search bar */
     .vs-search {
@@ -104,17 +148,23 @@
         background: #fff; border: 1px solid var(--vs-border);
         border-radius: var(--vs-r-btn); padding: 12px 14px;
     }
+    .vs-search:focus-within { border-color: var(--vs-cyan-500); box-shadow: 0 0 0 3px var(--vs-focus-ring); }
     .vs-search input {
         flex: 1; border: none; outline: none; background: transparent;
         font-size: 15px; color: var(--vs-text); min-width: 0;
     }
     .vs-search input::placeholder { color: var(--vs-muted); }
 
-    /* Reputation badge */
+    /* Reputation badge (Success/Warning/Danger stay semantic — never rebranded) */
     .vs-rep { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; font-size: 12.5px; font-weight: 700; }
-    .vs-rep-good  { background: var(--vs-ok-bg);  color: var(--vs-primary); }
-    .vs-rep-watch { background: var(--vs-warn-bg); color: var(--vs-warn); }
-    .vs-rep-bad   { background: #fef2f2; color: var(--vs-danger); }
+    .vs-rep-good  { background: var(--vs-success-bg);  color: var(--vs-success); }
+    .vs-rep-watch { background: var(--vs-warning-bg); color: #8a6116; }
+    .vs-rep-bad   { background: var(--vs-danger-bg); color: var(--vs-danger); }
+
+    /* Generic status utility classes for use across customer pages */
+    .vs-status-success { background: var(--vs-success-bg); color: var(--vs-success); }
+    .vs-status-warning { background: var(--vs-warning-bg); color: #8a6116; }
+    .vs-status-danger  { background: var(--vs-danger-bg); color: var(--vs-danger); }
 
     /* ============================== Bottom navigation ============================== */
     /* Visible at every width, full-width, no side margins. Bar height IS the full
@@ -124,7 +174,7 @@
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 1200;
         display: grid; grid-template-columns: repeat(5, 1fr);
         align-items: stretch;
-        background: #fff; border-top: 1px solid #dbe4e1;
+        background: #fff; border-top: 1px solid var(--vs-border);
         height: calc(var(--vs-bottomnav-h) + env(safe-area-inset-bottom, 0px));
         padding-bottom: env(safe-area-inset-bottom, 0px);
         box-shadow: 0 -1px 4px rgba(15, 23, 42, 0.04);
@@ -132,32 +182,32 @@
     .vs-bn-item {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         gap: 5px; height: 100%; min-width: 44px; min-height: 44px;
-        color: #9a9a9a; text-decoration: none; font-size: 13px; font-weight: 500;
+        color: var(--vs-muted); text-decoration: none; font-size: 13px; font-weight: 500;
         line-height: 1.15; border: none; background: transparent; cursor: pointer;
     }
     .vs-bn-item .vs-bn-ic { font-size: 24px; line-height: 1; }
     /* Lucide inline SVG icons (bottom-nav.jsp) size via width/height, not font-size. */
     svg.vs-bn-ic { width: 25px; height: 25px; flex-shrink: 0; }
-    .vs-bn-item.is-active { color: var(--vs-primary); font-weight: 700; }
-    .vs-bn-item.is-active .vs-bn-ic { color: var(--vs-primary); }
-    .vs-bn-item:focus-visible { outline: 2px solid var(--vs-accent); outline-offset: -2px; border-radius: 6px; }
+    .vs-bn-item.is-active { color: var(--vs-primary-600); font-weight: 700; }
+    .vs-bn-item.is-active .vs-bn-ic { color: var(--vs-primary-600); }
+    .vs-bn-item:focus-visible { outline: 2px solid var(--vs-cyan-500); outline-offset: -2px; border-radius: 6px; }
 
-    /* Center raised action: Ghép trận. White fill, green outline by default —
+    /* Center raised action: Ghép trận. White fill, navy outline by default —
        only intensifies (darker border) when the route is actually active. */
     .vs-bn-center { position: relative; justify-content: flex-end; padding-bottom: 10px; }
     .vs-bn-fab {
         position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
         width: 64px; height: 64px; border-radius: 50%;
-        background: #fff; color: var(--vs-primary);
+        background: var(--vs-primary-900); color: #fff;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 0 0 5px #edf9f3, 0 3px 10px rgba(15, 23, 42, 0.10);
-        border: 2px solid var(--vs-primary);
+        box-shadow: 0 0 0 5px var(--vs-cyan-100), 0 3px 10px rgba(15, 23, 42, 0.10);
+        border: 2px solid var(--vs-cyan-500);
     }
-    .vs-bn-fab .vs-bn-ic { font-size: 27px; color: var(--vs-primary); }
+    .vs-bn-fab .vs-bn-ic { font-size: 27px; color: #fff; }
     .vs-bn-fab svg.vs-bn-ic { width: 28px; height: 28px; }
-    .vs-bn-center .vs-bn-fablabel { font-size: 13px; font-weight: 500; color: #9a9a9a; line-height: 1.15; }
-    .vs-bn-center.is-active .vs-bn-fab { border-color: var(--vs-primary-strong); border-width: 2.5px; }
-    .vs-bn-center.is-active .vs-bn-fablabel { color: var(--vs-primary); font-weight: 700; }
+    .vs-bn-center .vs-bn-fablabel { font-size: 13px; font-weight: 500; color: var(--vs-muted); line-height: 1.15; }
+    .vs-bn-center.is-active .vs-bn-fab { border-color: var(--vs-orange-500); border-width: 2.5px; }
+    .vs-bn-center.is-active .vs-bn-fablabel { color: var(--vs-primary-600); font-weight: 700; }
 
     /* Desktop: taller bar (80px envelope), larger circle, larger touch targets. */
     @media (min-width: 1024px) {

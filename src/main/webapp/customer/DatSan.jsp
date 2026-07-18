@@ -23,18 +23,18 @@
                       "on-surface-variant": "#444936",
                       "outline": "#757964",
                       "on-primary": "#ffffff",
-                      "surface-tint": "#047857",
+                      "surface-tint": "#1677D2",
                       "on-error-container": "#93000a",
-                      "inverse-primary": "#34d399",
+                      "inverse-primary": "#18C8E8",
                       "secondary-fixed-dim": "#c6c6c7",
                       "error-container": "#ffdad6",
                       "on-secondary-fixed-variant": "#454747",
                       "on-secondary-fixed": "#1a1c1c",
-                      "primary": "#047857",
+                      "primary": "#1677D2",
                       "secondary-fixed": "#e2e2e2",
                       "on-secondary-container": "#616363",
                       "on-tertiary": "#ffffff",
-                      "on-primary-fixed-variant": "#065f46",
+                      "on-primary-fixed-variant": "#0B2545",
                       "surface-variant": "#e0e3e5",
                       "surface-dim": "#d8dadc",
                       "inverse-on-surface": "#eff1f3",
@@ -45,8 +45,8 @@
                       "tertiary-fixed": "#d8e3fb",
                       "on-surface": "#191c1e",
                       "tertiary": "#545f73",
-                      "on-primary-container": "#065f46",
-                      "on-primary-fixed": "#022c22",
+                      "on-primary-container": "#0B2545",
+                      "on-primary-fixed": "#071A2F",
                       "inverse-surface": "#2d3133",
                       "on-tertiary-fixed": "#111c2d",
                       "surface-container-lowest": "#ffffff",
@@ -58,14 +58,14 @@
                       "on-secondary": "#ffffff",
                       "surface-container-highest": "#e0e3e5",
                       "surface-container": "#eceef0",
-                      "primary-fixed-dim": "#34d399",
+                      "primary-fixed-dim": "#18C8E8",
                       "surface-container-high": "#e6e8ea",
                       "surface-container-low": "#f2f4f6",
-                      "primary-fixed": "#a7f3d0",
+                      "primary-fixed": "#DDF8FC",
                       "on-tertiary-fixed-variant": "#3c475a",
                       "on-tertiary-container": "#354053",
                       "error": "#ba1a1a",
-                      "primary-container": "#059669",
+                      "primary-container": "#1677D2",
                       "on-error": "#ffffff"
               },
               "borderRadius": {
@@ -113,11 +113,11 @@
         body { font-family: 'Barlow', 'Inter', sans-serif; background-color: #faf9fd; color: #1a1c1e; }
         .ambient-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
         .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
-        .search-input:focus { border-color: #047857; box-shadow: 0 0 0 2px rgba(80, 102, 0, 0.16); }
+        .search-input:focus { border-color: #18C8E8; box-shadow: 0 0 0 2px var(--vs-focus-ring, rgba(24, 200, 232, 0.35)); }
         .booking-hero {
             background:
-                radial-gradient(circle at 12% 8%, rgba(175, 214, 57, 0.16) 0, rgba(175, 214, 57, 0) 30%),
-                radial-gradient(circle at 88% 0%, rgba(66, 124, 240, 0.10) 0, rgba(66, 124, 240, 0) 28%),
+                radial-gradient(circle at 12% 8%, rgba(24, 200, 232, 0.16) 0, rgba(24, 200, 232, 0) 30%),
+                radial-gradient(circle at 88% 0%, rgba(22, 119, 210, 0.10) 0, rgba(22, 119, 210, 0) 28%),
                 linear-gradient(180deg, #f4f3f7 0%, #ffffff 42%, #ffffff 100%);
         }
         .hero-shell {
@@ -189,7 +189,7 @@
             border-radius: 0px;
             background: #ffffff;
             border: 1px solid #c5c9b0;
-            color: #047857;
+            color: #1677D2;
             font-size: 10px;
             font-weight: 700;
             line-height: 1;
@@ -198,21 +198,21 @@
             font-family: 'Barlow Condensed', sans-serif;
         }
         .court-card-cta {
-            background: #059669;
-            color: #111827;
+            background: #FF8A24;
+            color: #ffffff;
             border-radius: 0px !important;
             font-family: 'Barlow Condensed', sans-serif;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 700;
-            box-shadow: 0 4px 14px rgba(175, 214, 57, 0.28);
+            box-shadow: 0 4px 14px rgba(255, 138, 36, 0.28);
             transition: all 0.2s ease;
         }
         .court-card-cta:hover:not(:disabled) {
-            background: #047857;
-            color: #111827;
+            background: #F97316;
+            color: #ffffff;
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(175, 214, 57, 0.4);
+            box-shadow: 0 6px 18px rgba(249, 115, 22, 0.4);
         }
         .court-card-cta:active:not(:disabled) {
             transform: scale(0.97);
@@ -227,14 +227,14 @@
             font-family: 'Barlow', sans-serif;
         }
         .form-input:focus {
-            border-color: #047857; outline: none; background-color: #fff;
+            border-color: #18C8E8; outline: none; background-color: #fff;
             box-shadow: none;
         }
         .form-label {
             display: block; font-size: 11px; font-weight: 700;
             font-family: 'Barlow Condensed', sans-serif;
             text-transform: uppercase; letter-spacing: 0.08em;
-            color: #047857; margin-bottom: 0.4rem;
+            color: #1677D2; margin-bottom: 0.4rem;
         }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
         @keyframes slide-up-fade {
@@ -258,7 +258,7 @@
             letter-spacing: 0.08em;
             font-family: 'Barlow Condensed', sans-serif;
         }
-        .chip-filter:hover { border-color: #047857; color: #047857; }
+        .chip-filter:hover { border-color: #1677D2; color: #1677D2; }
         .chip-filter-active {
             background-color: #1a1c1e !important;
             border-color: #1a1c1e !important;
@@ -276,7 +276,7 @@
         }
         .custom-option:hover {
             background-color: #f1f0f4;
-            color: #047857 !important;
+            color: #1677D2 !important;
         }
         .select-arrow {
             transition: transform 0.2s ease;
@@ -308,7 +308,7 @@
                     </div>
                 </c:if>
                 <c:if test="${not empty sessionScope.message}">
-                    <div class="mb-5 w-full max-w-5xl p-4 bg-green-50 border border-green-200 rounded-none text-green-700 text-sm flex items-start gap-3 text-left">
+                    <div class="mb-5 w-full max-w-5xl p-4 rounded-none text-sm flex items-start gap-3 text-left" style="background-color: var(--vs-success-bg, #E5F7EF); border: 1px solid var(--vs-success, #16A36A); color: var(--vs-success, #16A36A);">
                         <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
                         <span>${sessionScope.message}</span>
                         <% session.removeAttribute("message"); %>
@@ -446,7 +446,7 @@
                             <span class="material-symbols-outlined text-[16px]">view_list</span> Danh sách
                         </button>
                         <button type="button" onclick="showMapComingSoon()"
-                                class="flex items-center gap-1.5 px-4 py-2 text-[11px] font-['Barlow_Condensed'] font-bold uppercase tracking-wider bg-white text-neutral-500 hover:text-emerald-700 hover:bg-neutral-50 transition-colors border-l border-neutral-200">
+                                class="flex items-center gap-1.5 px-4 py-2 text-[11px] font-['Barlow_Condensed'] font-bold uppercase tracking-wider bg-white text-neutral-500 hover:text-[#18C8E8] hover:bg-neutral-50 transition-colors border-l border-neutral-200">
                             <span class="material-symbols-outlined text-[16px]">map</span> Bản đồ
                         </button>
                     </div>
@@ -460,7 +460,7 @@
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                  src="${not empty s.hinhAnh ? s.hinhAnh : 'https://images.unsplash.com/photo-1518605368461-1ee7e57c6691?auto=format&fit=crop&w=600&q=80'}"
                                  alt="${s.tenSan}" />
-                            <div class="absolute top-3 left-3 z-10 font-['Barlow_Condensed'] font-bold text-[10px] tracking-widest uppercase px-3.5 py-1 border court-card-status bg-white/95 ${s.trangThai == 'Sẵn sàng' ? 'border-[#047857] text-[#047857]' : (s.trangThai == 'Đang dùng' ? 'border-[#427CF0] text-[#427CF0]' : 'border-neutral-300 text-neutral-500')}">
+                            <div class="absolute top-3 left-3 z-10 font-['Barlow_Condensed'] font-bold text-[10px] tracking-widest uppercase px-3.5 py-1 border court-card-status bg-white/95 ${s.trangThai == 'Sẵn sàng' ? 'border-[#16A36A] text-[#16A36A]' : (s.trangThai == 'Đang dùng' ? 'border-[#427CF0] text-[#427CF0]' : 'border-neutral-300 text-neutral-500')}">
                                 ${s.trangThai}
                             </div>
                         </div>
@@ -569,7 +569,7 @@
     </footer>
 
     <!-- ════ HISTORY MODAL ════ -->
-    <div id="historyModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+    <div id="historyModalOverlay" class="fixed inset-0 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4" style="background-color: var(--vs-overlay, rgba(7, 26, 47, 0.68));">
         <div id="historyPanel" class="bg-white w-full max-w-4xl rounded-none border border-neutral-200 shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
             <div class="bg-[#1a1c1e] px-6 py-4 flex items-center justify-between text-white border-b border-neutral-800">
                 <h3 class="font-['Barlow_Condensed'] font-bold text-lg uppercase tracking-wider flex items-center gap-2">
@@ -582,7 +582,7 @@
             <c:if test="${sessionScope.user != null}">
                 <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-200 flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-none bg-[#047857]/5 text-[#047857] flex items-center justify-center font-extrabold text-sm border border-[#047857]/20 font-['Barlow_Condensed'] uppercase tracking-wider">
+                        <div class="w-10 h-10 rounded-none bg-[#1677D2]/5 text-[#1677D2] flex items-center justify-center font-extrabold text-sm border border-[#1677D2]/20 font-['Barlow_Condensed'] uppercase tracking-wider">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.user.fullName}">${fn:substring(sessionScope.user.fullName, 0, 1)}</c:when>
                                 <c:otherwise>${fn:substring(sessionScope.user.username, 0, 1)}</c:otherwise>
@@ -596,7 +596,7 @@
                     <div class="flex gap-4">
                         <div class="text-center px-4 py-1.5 bg-white rounded-none border border-neutral-200 shadow-sm">
                             <span class="text-[9px] text-neutral-400 font-bold block uppercase tracking-wider">ĐÃ ĐẶT</span>
-                            <span class="text-sm font-bold text-[#047857] font-['Barlow_Condensed'] block mt-0.5">${fn:length(dsLich)} ca</span>
+                            <span class="text-sm font-bold text-[#1677D2] font-['Barlow_Condensed'] block mt-0.5">${fn:length(dsLich)} ca</span>
                         </div>
                         <div class="text-center px-4 py-1.5 bg-white rounded-none border border-neutral-200 shadow-sm">
                             <span class="text-[9px] text-neutral-400 font-bold block uppercase tracking-wider">UY TÍN</span>
@@ -636,7 +636,7 @@
                                         <div class="flex items-start gap-1.5 flex-wrap mb-0.5">
                                             <span class="font-bold text-neutral-800 text-sm">${tenSanHienThi}</span>
                                             <c:if test="${lichStatus.first}">
-                                                <span class="inline-flex items-center gap-0.5 bg-[#047857] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none tracking-wider font-['Barlow_Condensed'] uppercase">
+                                                <span class="inline-flex items-center gap-0.5 bg-[#FF8A24] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none tracking-wider font-['Barlow_Condensed'] uppercase">
                                                     MỚI NHẤT
                                                 </span>
                                             </c:if>
@@ -656,7 +656,7 @@
                                     </td>
                                     <td class="p-4 text-center">
                                         <span class="font-bold text-neutral-700 block">${lich.ngayDat}</span>
-                                        <span class="text-xs text-[#047857] font-bold font-mono">${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
+                                        <span class="text-xs text-[#1677D2] font-bold font-mono">${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
                                     </td>
                                     <td class="p-4 text-right font-bold text-neutral-800 text-sm font-mono">
                                         <fmt:formatNumber value="${lich.tongTienDuKien}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
@@ -672,13 +672,13 @@
                                                 <span class="bg-amber-500/5 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Chờ duyệt</span>
                                             </c:when>
                                             <c:when test="${lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đã đặt'}">
-                                                <span class="bg-[#047857]/5 text-[#047857] border border-[#047857]/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Đã duyệt</span>
+                                                <span class="px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block" style="background-color: rgba(22,163,106,0.05); color: var(--vs-success, #16A36A); border: 1px solid rgba(22,163,106,0.2);">Đã duyệt</span>
                                             </c:when>
                                             <c:when test="${lich.trangThai == 'Đang sử dụng'}">
                                                 <span class="bg-purple-500/5 text-purple-700 border border-purple-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Đang sử dụng</span>
                                             </c:when>
                                             <c:when test="${lich.trangThai == 'Đã hoàn thành'}">
-                                                <span class="bg-teal-500/5 text-teal-700 border border-teal-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block">Hoàn thành</span>
+                                                <span class="px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-block" style="background-color: rgba(22,163,106,0.05); color: var(--vs-success, #16A36A); border: 1px solid rgba(22,163,106,0.2);">Hoàn thành</span>
                                             </c:when>
                                             <c:when test="${lich.trangThai == 'Đã hủy'}">
                                                 <span class="bg-red-500/5 text-red-600 border border-red-500/20 px-2.5 py-0.5 rounded-none text-[10px] font-['Barlow_Condensed'] tracking-wider uppercase font-bold inline-flex items-center gap-1">
@@ -705,7 +705,7 @@
                                                 </form>
                                             </c:if>
                                             <c:if test="${lich.trangThai == 'Đã hủy'}"><span class="text-slate-400 text-[10px]">-</span></c:if>
-                                            <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-teal-600 text-[10px] font-bold">✓ Đã chơi</span></c:if>
+                                            <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><span class="text-[10px] font-bold" style="color: var(--vs-success, #16A36A);">✓ Đã chơi</span></c:if>
                                         </div>
                                     </td>
                                 </tr>
@@ -724,7 +724,7 @@
     </div>
 
     <!-- ════ BOOKING MODAL FLOW ════ -->
-    <div id="bookingModalOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-6 px-4">
+    <div id="bookingModalOverlay" class="fixed inset-0 backdrop-blur-sm z-[200] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-6 px-4" style="background-color: var(--vs-overlay, rgba(7, 26, 47, 0.68));">
 
         <!-- Step 1: Form -->
         <div id="bookingFormPanel" class="bg-white w-full max-w-2xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto" style="border-radius:0;">
@@ -732,8 +732,8 @@
             <!-- Header with steps -->
             <div class="bg-[#1a1c1e] px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-[#059669] flex items-center justify-center flex-shrink-0">
-                        <span class="material-symbols-outlined text-[#1a1c1e] text-[18px]">sports_soccer</span>
+                    <div class="w-8 h-8 bg-[#FF8A24] flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-white text-[18px]">sports_soccer</span>
                     </div>
                     <div>
                         <p class="text-[10px] text-white/50 font-bold uppercase tracking-[0.15em] font-['Barlow_Condensed']">Bước 1 / 2</p>
@@ -753,13 +753,13 @@
                 <div class="flex-1 min-w-0">
                     <h4 id="modal-court-name" class="font-['Barlow_Condensed'] font-bold text-[#111] text-lg uppercase leading-tight truncate">Tên sân</h4>
                     <p id="modal-court-branch" class="text-[11px] text-neutral-500 font-semibold flex items-center gap-1 mt-0.5">
-                        <span class="material-symbols-outlined text-[13px] text-[#047857]">location_on</span> <span>Cơ sở</span>
+                        <span class="material-symbols-outlined text-[13px] text-[#1677D2]">location_on</span> <span>Cơ sở</span>
                     </p>
                 </div>
                 <div class="flex-shrink-0 flex flex-col items-end gap-1.5">
-                    <span id="modal-court-type" class="text-[9px] font-['Barlow_Condensed'] font-bold tracking-widest uppercase text-[#047857] border border-[#047857]/30 bg-[#047857]/5 px-2 py-0.5">Loại sân</span>
+                    <span id="modal-court-type" class="text-[9px] font-['Barlow_Condensed'] font-bold tracking-widest uppercase text-[#1677D2] border border-[#1677D2]/30 bg-[#1677D2]/5 px-2 py-0.5">Loại sân</span>
                     <div id="branch-hours-info" class="flex items-center gap-1 text-[10px] text-neutral-500 font-bold font-mono">
-                        <span class="material-symbols-outlined text-[12px] text-[#047857]">schedule</span>
+                        <span class="material-symbols-outlined text-[12px] text-[#1677D2]">schedule</span>
                         <span id="modal-branch-hours">--:-- - --:--</span>
                     </div>
                 </div>
@@ -776,10 +776,10 @@
                     <!-- Date field -->
                     <div>
                         <label class="form-label mb-2 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px] text-[#047857]">calendar_today</span>
+                            <span class="material-symbols-outlined text-[14px] text-[#1677D2]">calendar_today</span>
                             Ngày thi đấu <span class="text-red-500 ml-0.5">*</span>
                         </label>
-                        <div class="relative focus-within:ring-1 focus-within:ring-[#047857] border border-neutral-200 bg-white transition-all">
+                        <div class="relative focus-within:ring-1 focus-within:ring-[#18C8E8] border border-neutral-200 bg-white transition-all">
                             <input type="date" name="ngayDat" id="ngayDat" required
                                 class="w-full px-4 py-3.5 text-[#111] font-bold font-['Barlow'] text-sm bg-transparent border-none outline-none cursor-pointer"
                                 onchange="onBookingDateChange()">
@@ -789,11 +789,11 @@
                     <!-- Time fields -->
                     <div>
                         <label class="form-label mb-2 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px] text-[#047857]">access_time</span>
+                            <span class="material-symbols-outlined text-[14px] text-[#1677D2]">access_time</span>
                             Khung giờ <span class="text-red-500 ml-0.5">*</span>
                         </label>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#047857] transition-all">
+                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#18C8E8] transition-all">
                                 <p class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-['Barlow_Condensed'] px-4 pt-2.5">Bắt đầu</p>
                                 <div class="relative">
                                     <select name="gioBatDau" id="gioBatDau" required
@@ -802,7 +802,7 @@
                                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none text-[18px]">expand_more</span>
                                 </div>
                             </div>
-                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#047857] transition-all">
+                            <div class="relative border border-neutral-200 bg-white focus-within:ring-1 focus-within:ring-[#18C8E8] transition-all">
                                 <p class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-['Barlow_Condensed'] px-4 pt-2.5">Kết thúc</p>
                                 <div class="relative">
                                     <select name="gioKetThuc" id="gioKetThuc" required
@@ -831,10 +831,10 @@
                     </div>
 
                     <!-- Live cost preview -->
-                    <div id="live-cost-preview" class="hidden bg-[#f9fbf2] border border-[#059669]/40 p-4 flex items-center justify-between gap-4">
+                    <div id="live-cost-preview" class="hidden bg-[#FFF1E5] border border-[#FF8A24]/40 p-4 flex items-center justify-between gap-4">
                         <div class="space-y-0.5">
                             <p class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 font-['Barlow_Condensed']">Ước tính chi phí</p>
-                            <p class="font-['Barlow_Condensed'] font-bold text-[#047857] text-2xl" id="live-cost-amount">-</p>
+                            <p class="font-['Barlow_Condensed'] font-bold text-[#FF8A24] text-2xl" id="live-cost-amount">-</p>
                         </div>
                         <div class="text-right space-y-0.5">
                             <p class="text-[10px] text-neutral-400 font-bold font-['Barlow_Condensed'] uppercase tracking-wider" id="live-cost-duration">-</p>
@@ -848,7 +848,7 @@
                     <!-- Dịch vụ đi kèm (Phase 8A / 8A.2 redesign) -->
                     <div>
                         <label class="mb-0.5 flex items-center gap-1.5 text-[13px] font-bold text-neutral-900 font-['Barlow_Condensed'] uppercase tracking-wide">
-                            <span class="material-symbols-outlined text-[16px] text-[#047857]">local_cafe</span>
+                            <span class="material-symbols-outlined text-[16px] text-[#1677D2]">local_cafe</span>
                             Dịch vụ đi kèm <span class="text-neutral-400 font-medium normal-case tracking-normal">(không bắt buộc)</span>
                         </label>
                         <p class="text-[11px] text-neutral-500 mb-2.5 ml-[22px]">Chọn trước dịch vụ để cơ sở chuẩn bị. Thanh toán tại quầy.</p>
@@ -871,9 +871,9 @@
 
                         <div id="booking-services-list" class="border border-neutral-200 rounded-lg divide-y divide-neutral-100 max-h-64 overflow-y-auto bg-white shadow-sm hidden"></div>
 
-                        <div id="booking-services-total-row" class="hidden flex items-center justify-between mt-2.5 px-3.5 py-2.5 bg-[#f4f9e6] border border-[#059669]/40 rounded-lg">
-                            <span class="text-[11px] font-bold uppercase tracking-widest text-[#3d4d00] font-['Barlow_Condensed']">Tổng dịch vụ</span>
-                            <span id="booking-services-total" class="text-base font-bold text-[#047857] font-['Barlow_Condensed']">0 đ</span>
+                        <div id="booking-services-total-row" class="hidden flex items-center justify-between mt-2.5 px-3.5 py-2.5 bg-[#FFF1E5] border border-[#FF8A24]/40 rounded-lg">
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-[#F97316] font-['Barlow_Condensed']">Tổng dịch vụ</span>
+                            <span id="booking-services-total" class="text-base font-bold text-[#FF8A24] font-['Barlow_Condensed']">0 đ</span>
                         </div>
 
                         <p class="text-[11px] text-neutral-500 mt-2 leading-relaxed flex items-start gap-1.5">
@@ -889,7 +889,7 @@
                             Ghi chú yêu cầu
                         </label>
                         <textarea name="ghiChu" id="ghiChu" rows="2"
-                            class="w-full px-4 py-3 border border-neutral-200 bg-white text-sm text-[#111] placeholder-neutral-300 font-['Barlow'] resize-none focus:outline-none focus:ring-1 focus:ring-[#047857] focus:border-[#047857] transition-all"
+                            class="w-full px-4 py-3 border border-neutral-200 bg-white text-sm text-[#111] placeholder-neutral-300 font-['Barlow'] resize-none focus:outline-none focus:ring-1 focus:ring-[#18C8E8] focus:border-[#18C8E8] transition-all"
                             placeholder="Thuê bóng, mượn áo tập, yêu cầu khác..."></textarea>
                     </div>
                 </div>
@@ -903,13 +903,13 @@
                     <c:choose>
                         <c:when test="${sessionScope.user != null}">
                             <button type="button" id="next-checkout-btn" onclick="goToCheckout()" disabled
-                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#047857] hover:bg-[#3d4d00] uppercase tracking-widest text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#FF8A24] hover:bg-[#F97316] uppercase tracking-widest text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                                 Tiếp tục thanh toán <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                             </button>
                         </c:when>
                         <c:otherwise>
                             <a href="${pageContext.request.contextPath}/dangnhap"
-                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#047857] hover:bg-[#3d4d00] uppercase tracking-widest text-[13px] transition-colors flex items-center justify-center gap-2">
+                                class="flex-1 max-w-xs py-3 font-['Barlow_Condensed'] font-bold text-white bg-[#FF8A24] hover:bg-[#F97316] uppercase tracking-widest text-[13px] transition-colors flex items-center justify-center gap-2">
                                 Đăng nhập để đặt <span class="material-symbols-outlined text-[16px]">login</span>
                             </a>
                         </c:otherwise>
@@ -952,7 +952,7 @@
                         </div>
                         <div class="pt-3 mt-1 border-t border-neutral-200 flex justify-between items-center">
                             <span class="text-xs font-bold uppercase text-neutral-500 tracking-wider font-['Barlow_Condensed']">Tiền sân</span>
-                            <span id="summary-total" class="text-2xl font-bold text-[#047857] font-['Barlow_Condensed']">-</span>
+                            <span id="summary-total" class="text-2xl font-bold text-[#FF8A24] font-['Barlow_Condensed']">-</span>
                         </div>
                         <div id="summary-services-row" class="hidden flex justify-between items-center text-neutral-600">
                             <span class="flex items-center gap-1.5 text-xs"><span class="material-symbols-outlined text-[14px]">local_cafe</span>Dịch vụ đi kèm <span class="text-[9px] text-neutral-400">(tại quầy)</span></span>
@@ -968,18 +968,18 @@
                 <!-- Payment method -->
                 <div>
                     <label class="form-label mb-3 flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[14px] text-[#047857]">payment</span>
+                        <span class="material-symbols-outlined text-[14px] text-[#1677D2]">payment</span>
                         Phương thức thanh toán
                     </label>
                     <div class="grid grid-cols-2 gap-2.5">
                         <button type="button" onclick="selectPaymentMethod('payos')" id="payment-opt-payos"
-                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#047857]/40 transition-all text-center gap-2 active:scale-95">
-                            <span class="material-symbols-outlined text-[24px] text-[#047857]">qr_code_2</span>
+                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#1677D2]/40 transition-all text-center gap-2 active:scale-95">
+                            <span class="material-symbols-outlined text-[24px] text-[#1677D2]">qr_code_2</span>
                             <span class="text-xs font-extrabold text-neutral-800 font-['Barlow_Condensed'] uppercase tracking-wide">PayOS</span>
                             <span class="text-[9px] text-neutral-400 font-bold">Giữ sân 10 phút</span>
                         </button>
                         <button type="button" onclick="selectPaymentMethod('sau')" id="payment-opt-sau"
-                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#047857]/40 transition-all text-center gap-2 active:scale-95">
+                            class="flex flex-col items-center justify-center py-4 px-3 border-2 border-neutral-200 hover:border-[#1677D2]/40 transition-all text-center gap-2 active:scale-95">
                             <span class="material-symbols-outlined text-[24px] text-neutral-500">payments</span>
                             <span class="text-xs font-extrabold text-neutral-800 font-['Barlow_Condensed'] uppercase tracking-wide">Tại quầy</span>
                             <span class="text-[9px] text-neutral-400 font-bold">Đặt cọc tiền mặt</span>
@@ -997,8 +997,8 @@
                         <p class="text-[11px] text-neutral-500 mt-1 leading-relaxed">Vui lòng đến trước 15 phút để làm thủ tục nhận sân và thanh toán.</p>
                     </div>
                 </div>
-                <div id="payment-info-payos" class="hidden bg-[#f9fbf2] border border-[#059669]/40 p-4 flex items-start gap-3">
-                    <div class="w-8 h-8 bg-[#047857] flex items-center justify-center flex-shrink-0">
+                <div id="payment-info-payos" class="hidden bg-[#F0FCFE] border border-[#18C8E8]/40 p-4 flex items-start gap-3">
+                    <div class="w-8 h-8 bg-[#1677D2] flex items-center justify-center flex-shrink-0">
                         <span class="material-symbols-outlined text-[16px] text-white">bolt</span>
                     </div>
                     <div>
@@ -1008,7 +1008,7 @@
                 </div>
 
                 <button onclick="confirmBooking()"
-                    class="w-full bg-[#047857] hover:bg-[#3d4d00] text-white font-['Barlow_Condensed'] font-bold h-13 py-3.5 text-[13px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                    class="w-full bg-[#FF8A24] hover:bg-[#F97316] text-white font-['Barlow_Condensed'] font-bold h-13 py-3.5 text-[13px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">verified</span> Hoàn tất đặt sân
                 </button>
             </div>
@@ -1018,7 +1018,7 @@
 
 
     <!-- ════ CUSTOMER SERVICE MODAL ════ -->
-    <div id="customerServiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[210] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
+    <div id="customerServiceModal" class="fixed inset-0 backdrop-blur-sm z-[210] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4" style="background-color: var(--vs-overlay, rgba(7, 26, 47, 0.68));">
         <div class="bg-white w-full max-w-2xl rounded-none border border-neutral-200 shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
             <div class="bg-[#1a1c1e] px-6 py-4 flex items-center justify-between text-white border-b border-neutral-800">
                 <h3 class="font-['Barlow_Condensed'] font-bold text-lg uppercase tracking-wider flex items-center gap-2">
@@ -1041,11 +1041,11 @@
                     <div class="pt-6 border-t border-neutral-100 flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-neutral-400 uppercase tracking-wider block">Tổng tiền dịch vụ thêm</span>
-                            <span class="text-2xl font-bold text-[#047857] font-['Barlow_Condensed']" id="customer-service-total">0 đ</span>
+                            <span class="text-2xl font-bold text-[#FF8A24] font-['Barlow_Condensed']" id="customer-service-total">0 đ</span>
                         </div>
                         <div class="flex gap-3">
                             <button type="button" onclick="closeCustomerServiceModal()" class="px-6 py-3 rounded-none font-['Barlow_Condensed'] font-bold text-neutral-500 bg-neutral-100 hover:bg-neutral-200 uppercase tracking-widest text-[12px] transition-colors">Hủy</button>
-                            <button type="submit" class="px-8 py-3 rounded-none font-['Barlow_Condensed'] font-bold text-white bg-[#047857] hover:bg-[#3d4d00] uppercase tracking-widest text-[12px] transition-all">Xác nhận đặt</button>
+                            <button type="submit" class="px-8 py-3 rounded-none font-['Barlow_Condensed'] font-bold text-white bg-[#FF8A24] hover:bg-[#F97316] uppercase tracking-widest text-[12px] transition-all">Xác nhận đặt</button>
                         </div>
                     </div>
                 </form>
@@ -1272,7 +1272,7 @@
                 const stockText = formatServiceStock(sp);
                 const rowClasses = outOfStock
                     ? 'bg-neutral-50 opacity-60'
-                    : (isSelected ? 'bg-[#f4f9e6] border-l-4 border-l-[#7a9a00]' : 'bg-white hover:bg-neutral-50');
+                    : (isSelected ? 'bg-[#FFF1E5] border-l-4 border-l-[#FF8A24]' : 'bg-white hover:bg-neutral-50');
                 const lineTotal = qty > 0 ? Math.round(sp.donGia * qty).toLocaleString('vi-VN') + ' đ' : null;
                 return `
                 <div class="flex items-center justify-between gap-3 px-3.5 py-3 transition-colors \${rowClasses}">
@@ -1282,14 +1282,14 @@
                             <span class="text-xs font-semibold text-neutral-600">\${formatServicePrice(sp)}</span>
                             \${stockText ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded \${outOfStock ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-100 text-neutral-600'}">\${stockText}</span>` : ''}
                         </div>
-                        \${lineTotal ? `<p class="text-[11px] font-bold text-[#047857] mt-1">Thành tiền: \${lineTotal}</p>` : ''}
+                        \${lineTotal ? `<p class="text-[11px] font-bold text-[#FF8A24] mt-1">Thành tiền: \${lineTotal}</p>` : ''}
                     </div>
                     <div class="flex items-center gap-2.5 flex-shrink-0">
                         <button type="button" onclick="changeServiceQty(\${sp.sanPhamId}, -1)" \${(outOfStock || qty === 0) ? 'disabled' : ''}
-                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || qty === 0) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#047857] hover:bg-[#047857] hover:text-white active:scale-95'}">−</button>
+                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || qty === 0) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#FF8A24] hover:bg-[#FF8A24] hover:text-white active:scale-95'}">−</button>
                         <span class="w-6 text-center text-sm font-bold text-neutral-900">\${qty}</span>
                         <button type="button" onclick="changeServiceQty(\${sp.sanPhamId}, 1)" \${(outOfStock || atMax) ? 'disabled' : ''}
-                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || atMax) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#047857] hover:bg-[#047857] hover:text-white active:scale-95'}">+</button>
+                            class="w-8 h-8 flex items-center justify-center rounded-md border-2 font-bold text-base leading-none transition-colors \${(outOfStock || atMax) ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-700 hover:border-[#FF8A24] hover:bg-[#FF8A24] hover:text-white active:scale-95'}">+</button>
                     </div>
                 </div>`;
             }).join("");
@@ -1402,7 +1402,7 @@
         // ─── Status helpers ───
         function getCourtStatusInfo(status) {
             const s = (status || '').trim();
-            if (s === 'Sẵn sàng') return { label: 'Sẵn Sàng', bookable: true, actionDisabled: false, actionLabel: 'Đặt sân', badgeClass: 'border-[#047857] text-[#047857] bg-white/95', dotClass: 'bg-green-500 animate-pulse' };
+            if (s === 'Sẵn sàng') return { label: 'Sẵn Sàng', bookable: true, actionDisabled: false, actionLabel: 'Đặt sân', badgeClass: 'border-[#16A36A] text-[#16A36A] bg-white/95', dotClass: 'bg-[#16A36A] animate-pulse' };
             if (s === 'Đang dùng') return { label: 'Đang Dùng', bookable: false, actionDisabled: true, actionLabel: 'Đang dùng', badgeClass: 'border-[#427CF0] text-[#427CF0] bg-white/95', dotClass: 'bg-amber-400 animate-pulse' };
             if (s === 'Bảo trì' || s === 'Đang bảo trì' || s === 'Tạm đóng') return { label: s, bookable: false, actionDisabled: true, actionLabel: 'Tạm đóng', badgeClass: 'border-neutral-300 text-neutral-500 bg-white/95', dotClass: '' };
             return { label: s || 'Không rõ', bookable: false, actionDisabled: true, actionLabel: 'Chi tiết', badgeClass: 'border-neutral-300 text-neutral-500 bg-white/95', dotClass: '' };
@@ -1433,7 +1433,7 @@
             const inUseCount = filteredCourts.filter(c => c.status === 'Đang dùng').length;
             const otherCount = filteredCourts.length - availableCount - inUseCount;
             const parts = [];
-            if (availableCount > 0) parts.push('<span class="text-green-600">' + availableCount + ' trống</span>');
+            if (availableCount > 0) parts.push('<span style="color: var(--vs-success, #16A36A);">' + availableCount + ' trống</span>');
             if (inUseCount > 0) parts.push('<span class="text-amber-500">' + inUseCount + ' đang dùng</span>');
             if (otherCount > 0) parts.push('<span class="text-red-400">' + otherCount + ' không khả dụng</span>');
             document.getElementById("court-status-summary").innerHTML = parts.join(' · ');
@@ -1653,7 +1653,7 @@
             const type = courtTypes[court.typeId] || { name: "Không rõ", priceDay: 0, priceNight: 0, sportId: 0, lightTime: "17:30:00" };
             const branch = branches[court.branchId] || { name: "Cơ sở", address: "", openTime: DEFAULT_OPEN_TIME, closeTime: DEFAULT_CLOSE_TIME };
             document.getElementById("modal-court-name").textContent = court.name;
-            document.getElementById("modal-court-branch").innerHTML = `<span class="material-symbols-outlined text-[13px] text-[#047857]">location_on</span> <span>\${branch.name}</span>`;
+            document.getElementById("modal-court-branch").innerHTML = `<span class="material-symbols-outlined text-[13px] text-[#1677D2]">location_on</span> <span>\${branch.name}</span>`;
             document.getElementById("modal-court-type").textContent = type.name;
 
             // Set image dynamically
@@ -1722,11 +1722,11 @@
             const infoPOS = document.getElementById("payment-info-payos"), infoSau = document.getElementById("payment-info-sau");
             if (!btnPOS || !btnSau) return;
             if (method === 'payos') {
-                btnPOS.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#047857] bg-[#047857]/5 text-center gap-1.5 active:scale-95";
+                btnPOS.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#1677D2] bg-[#1677D2]/5 text-center gap-1.5 active:scale-95";
                 btnSau.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-neutral-200 hover:border-neutral-300 text-center gap-1.5 active:scale-95";
                 infoPOS.classList.remove("hidden"); infoSau.classList.add("hidden");
             } else {
-                btnSau.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#047857] bg-[#047857]/5 text-center gap-1.5 active:scale-95";
+                btnSau.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-[#1677D2] bg-[#1677D2]/5 text-center gap-1.5 active:scale-95";
                 btnPOS.className = "flex flex-col items-center justify-center p-3 rounded-none border-2 border-neutral-200 hover:border-neutral-300 text-center gap-1.5 active:scale-95";
                 infoSau.classList.remove("hidden"); infoPOS.classList.add("hidden");
             }
@@ -1905,7 +1905,7 @@
             if (isPayOS) {
                 const info = document.getElementById('payment-info-payos');
                 if (info) {
-                    info.innerHTML = '<div class="flex items-center justify-center gap-2 text-emerald-700 font-semibold text-sm py-1">' +
+                    info.innerHTML = '<div class="flex items-center justify-center gap-2 font-semibold text-sm py-1" style="color: #08A9CC;">' +
                         '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>' +
                         '<span>Đang kết nối PayOS, vui lòng chờ...</span></div>';
                 }

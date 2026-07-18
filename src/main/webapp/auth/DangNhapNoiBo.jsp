@@ -132,15 +132,6 @@
                     <p>Dành cho Quản trị viên, Quản lý và Nhân viên V-SPORT.</p>
                 </div>
 
-                <c:if test="${not empty wrongPortalMsg}">
-                    <div class="auth-alert auth-alert-info" role="alert">
-                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
-                        <span>
-                            <c:out value="${wrongPortalMsg}"/>
-                            <a href="${ctx}/dangnhap" data-portal-link="customer">Quay về Cổng khách hàng</a>
-                        </span>
-                    </div>
-                </c:if>
                 <c:if test="${not empty loi}">
                     <div class="auth-alert auth-alert-error" role="alert" id="internal-server-error">
                         <span class="material-symbols-outlined" aria-hidden="true">error</span>

@@ -106,7 +106,7 @@
             background: var(--vs-primary);
             border: 3px solid #ffffff;
             border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.4);
+            box-shadow: 0 4px 10px rgba(22, 119, 210, 0.4);
             color: #ffffff;
         }
 
@@ -116,8 +116,8 @@
         }
 
         .vs-marker-self {
-            background: #3b82f6;
-            box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3);
+            background: var(--vs-cyan-500);
+            box-shadow: 0 0 0 6px rgba(24, 200, 232, 0.3);
             border-color: #ffffff;
         }
 
@@ -140,6 +140,15 @@
         .pb-safe {
             padding-bottom: env(safe-area-inset-bottom, 0px);
         }
+
+        .vs-focus-cyan:focus {
+            border-color: var(--vs-cyan-500);
+            box-shadow: 0 0 0 1px var(--vs-cyan-500);
+        }
+
+        .peer:checked ~ .vs-toggle-track {
+            background: var(--vs-primary-600);
+        }
     </style>
 </head>
 <body class="antialiased text-on-surface">
@@ -152,7 +161,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-emerald-700">explore</span>
+                        <span class="material-symbols-outlined" style="color: var(--vs-cyan-500);">explore</span>
                         Khám phá V-SPORT
                     </h2>
                     <p class="text-xs text-gray-500 mt-0.5">Tìm sân đấu thể thao quanh bạn</p>
@@ -178,7 +187,7 @@
                 <!-- Bán kính tìm kiếm -->
                 <div>
                     <label for="radiusSelect" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bán kính tìm kiếm</label>
-                    <select id="radiusSelect" class="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-semibold text-gray-800 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none" onchange="filterMap()">
+                    <select id="radiusSelect" class="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-semibold text-gray-800 vs-focus-cyan outline-none" onchange="filterMap()">
                         <option value="">Toàn thành phố</option>
                         <option value="2">Trong vòng 2 km</option>
                         <option value="5">Trong vòng 5 km</option>
@@ -192,15 +201,15 @@
                     <label class="flex items-center justify-between cursor-pointer select-none">
                         <span class="text-sm font-semibold text-gray-700">Đang mở cửa</span>
                         <input type="checkbox" id="openNowCheck" class="sr-only peer" onchange="filterMap()" />
-                        <span class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:height-4 after:width-4 after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 relative after:top-[2px] after:left-[2px]"></span>
+                        <span class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:height-4 after:width-4 after:h-4 after:w-4 after:transition-all vs-toggle-track relative after:top-[2px] after:left-[2px]"></span>
                     </label>
                 </div>
             </div>
 
             <!-- List Results summary -->
             <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                <span>Tìm thấy <strong id="resultsCount" class="text-emerald-700">0</strong> cơ sở</span>
-                <button type="button" class="text-emerald-700 font-bold hover:underline" onclick="resetFilters()">Đặt lại</button>
+                <span>Tìm thấy <strong id="resultsCount" style="color: var(--vs-primary-600);">0</strong> cơ sở</span>
+                <button type="button" class="font-bold hover:underline" style="color: var(--vs-primary-600);" onclick="resetFilters()">Đặt lại</button>
             </div>
         </div>
 
@@ -223,7 +232,7 @@
                     <h3 id="bsTitle" class="font-bold text-gray-900 text-lg truncate">Tên cơ sở</h3>
                     <p id="bsAddress" class="text-xs text-gray-500 line-clamp-2 mt-1">Địa chỉ</p>
                     <div class="flex items-center gap-2 mt-2 flex-wrap">
-                        <span id="bsDistance" class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">0.0 km</span>
+                        <span id="bsDistance" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded" style="color: var(--vs-cyan-600); background: var(--vs-cyan-100);">0.0 km</span>
                         <span id="bsCourts" class="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded">0 sân sẵn sàng</span>
                     </div>
                 </div>
@@ -232,7 +241,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Giá từ</div>
-                    <div id="bsPrice" class="text-base font-extrabold text-emerald-700">100.000đ/giờ</div>
+                    <div id="bsPrice" class="text-base font-extrabold" style="color: var(--vs-primary-600);">100.000đ/giờ</div>
                 </div>
                 <a id="bsBookingLink" href="#" class="vs-btn vs-btn-primary py-2 px-5 rounded-lg text-sm">
                     <span>Đặt sân</span>
@@ -434,12 +443,12 @@
                         <h4 class="font-bold text-gray-900 text-sm mb-0.5 truncate">${fac.tenCoSo}</h4>
                         <p class="text-xs text-gray-500 mb-2 truncate">${fac.address}</p>
                         <div class="flex items-center gap-1.5 mb-2.5">
-                            <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">${distanceStr}</span>
+                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded" style="color: var(--vs-cyan-600); background: var(--vs-cyan-100);">${distanceStr}</span>
                             <span class="text-[10px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">${fac.readyCourtCount} sân trống</span>
                         </div>
                         <div class="flex items-center justify-between border-t border-gray-100 pt-2 mt-2">
-                            <span class="font-extrabold text-emerald-700 text-sm">${formatCurrency(fac.minPrice)}</span>
-                            <a href="${ctx}/customer/dat-san?facilityId=${fac.coSoId}" class="inline-flex items-center gap-0.5 text-[11px] font-bold text-white bg-emerald-700 hover:bg-emerald-800 px-2.5 py-1.5 rounded transition-colors text-decoration-none">
+                            <span class="font-extrabold text-sm" style="color: var(--vs-primary-600);">${formatCurrency(fac.minPrice)}</span>
+                            <a href="${ctx}/customer/dat-san?facilityId=${fac.coSoId}" class="inline-flex items-center gap-0.5 text-[11px] font-bold text-white px-2.5 py-1.5 rounded transition-colors text-decoration-none" style="background: var(--vs-orange-500);" onmouseover="this.style.background='var(--vs-orange-600)'" onmouseout="this.style.background='var(--vs-orange-500)'">
                                 Đặt sân
                             </a>
                         </div>

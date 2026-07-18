@@ -10,17 +10,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=swap" rel="stylesheet"/>
 <style>
     :root {
-        --vs-green-900: #05402c;
-        --vs-green-800: #07543a;
-        --vs-green-700: #0a6b4a;
-        --vs-green-600: #0d8a5f;
-        --vs-green-500: #16a06f;
-        --vs-ink: #24382f;
-        --vs-ink-soft: #5b6d64;
-        --vs-line: #d8e0da;
+        --vs-green-900: #071A2F;
+        --vs-green-800: #0B2545;
+        --vs-green-700: #123A63;
+        --vs-green-600: #1677D2;
+        --vs-green-500: #18C8E8;
+        --vs-ink: #102A43;
+        --vs-ink-soft: #486581;
+        --vs-line: #DCE5EF;
         --vs-danger: #c0392b;
         --vs-danger-soft: #fdecec;
         --vs-danger-line: #f3bcb6;
+        --vs-orange-600: #F97316;
+        --vs-orange-500: #FF8A24;
     }
 
     * { box-sizing: border-box; }
@@ -33,8 +35,8 @@
         width: 100%;
         overflow-x: hidden;
         color: var(--vs-ink);
-        background-color: #1d9268;
-        background-image: linear-gradient(168deg, #24a173 0%, #17915f 46%, #0d7a4e 100%);
+        background-color: #0B2545;
+        background-image: linear-gradient(168deg, #123A63 0%, #185A9D 46%, #0B2545 100%);
         -webkit-font-smoothing: antialiased;
     }
 
@@ -137,8 +139,8 @@
         transition: border-color .15s ease, box-shadow .15s ease;
     }
     .auth-input-wrap:focus-within {
-        border-color: var(--vs-green-600);
-        box-shadow: 0 0 0 3px rgba(13, 138, 95, .14);
+        border-color: var(--vs-green-500);
+        box-shadow: 0 0 0 3px rgba(24, 200, 232, .22);
     }
     .auth-input-wrap.is-invalid { border-color: #e08c84; }
     .auth-input-wrap.is-invalid:focus-within {
@@ -195,7 +197,7 @@
         transition: color .15s ease;
     }
     .auth-input-btn:hover { color: var(--vs-green-900); }
-    .auth-input-btn:focus-visible { outline: 2px solid var(--vs-green-600); outline-offset: -2px; }
+    .auth-input-btn:focus-visible { outline: 2px solid var(--vs-green-500); outline-offset: -2px; }
     .auth-input-btn .material-symbols-outlined { font-size: 22px; }
     .auth-input-btn.auth-clear-btn { color: var(--vs-green-700); }
 
@@ -223,7 +225,7 @@
         height: 52px;
         border: none;
         border-radius: 5px;
-        background: var(--vs-green-700);
+        background: var(--vs-orange-500);
         color: #fff;
         font-family: inherit;
         font-size: 15px;
@@ -232,9 +234,9 @@
         cursor: pointer;
         transition: background-color .15s ease, transform .1s ease;
     }
-    .auth-btn-primary:hover { background: var(--vs-green-800); }
+    .auth-btn-primary:hover { background: var(--vs-orange-600); }
     .auth-btn-primary:active { transform: scale(.99); }
-    .auth-btn-primary:focus-visible { outline: 3px solid rgba(13, 138, 95, .45); outline-offset: 2px; }
+    .auth-btn-primary:focus-visible { outline: 3px solid rgba(24, 200, 232, .45); outline-offset: 2px; }
     .auth-btn-primary[disabled] { opacity: .75; cursor: default; }
 
     /* ===== Alert trong card ===== */
@@ -256,14 +258,14 @@
         color: #9f2f2d;
     }
     .auth-alert-success {
-        background: #edf6f0;
-        border: 1px solid #bfe0cd;
-        color: #1e6b45;
+        background: #E5F7EF;
+        border: 1px solid #9BE0BF;
+        color: #16A36A;
     }
     .auth-alert-info {
-        background: #eef6f3;
-        border: 1px solid #c3ddd1;
-        color: #165840;
+        background: #F0FCFE;
+        border: 1px solid #B7ECF5;
+        color: #08657D;
     }
     .auth-alert-info a {
         display: inline-block;

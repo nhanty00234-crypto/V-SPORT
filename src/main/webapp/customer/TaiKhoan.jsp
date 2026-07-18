@@ -22,14 +22,14 @@
         :root {
             --account-sidebar-width: clamp(420px, 23vw, 470px);
             --account-header-height: 56px;
-            --sidebar-bg: #edf9f3;
+            --sidebar-bg: #EDF4FA;
             --sidebar-surface: #ffffff;
-            --sidebar-border: #d7ebe0;
-            --primary-dark: #006b3d;
-            --primary-mid: #009a50;
-            --primary-bright: #05b95f;
-            --ink-green: #174431;
-            --muted-green: #6f847a;
+            --sidebar-border: #DCE5EF;
+            --primary-dark: #0B2545;
+            --primary-mid: #185A9D;
+            --primary-bright: #18C8E8;
+            --ink-green: #102A43;
+            --muted-green: #829AB1;
         }
         body {
             font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif !important;
@@ -74,7 +74,7 @@
         /* Green top section with soft wave bottom */
         .account-sidebar-top {
             position: relative;
-            background: linear-gradient(155deg, var(--primary-dark) 0%, var(--primary-mid) 62%, #02a854 100%);
+            background: linear-gradient(155deg, var(--primary-dark) 0%, var(--primary-mid) 62%, #18C8E8 100%);
             padding: 20px 16px 0;
             height: 228px;
         }
@@ -159,14 +159,14 @@
             text-decoration: none; cursor: pointer;
             transition: border-color .15s ease, background-color .15s ease;
         }
-        .side-quick-item:hover, .side-quick-item:focus-visible { border-color: var(--primary-bright); background: #f6fcf9; }
+        .side-quick-item:hover, .side-quick-item:focus-visible { border-color: var(--primary-bright); background: #F0FCFE; }
         .side-quick-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: 1px; }
         .side-quick-item .lci { width: 26px; height: 26px; }
         .side-quick-item span {
             font-size: 12.5px; font-weight: 600; color: var(--ink-green);
             text-align: center; line-height: 1.25;
         }
-        .qi-green  { color: #059669; }
+        .qi-green  { color: #1677D2; }
         .qi-amber  { color: #d97706; }
         .qi-blue   { color: #2563eb; }
         .qi-rose   { color: #e11d48; }
@@ -193,7 +193,7 @@
             transition: background-color .15s ease;
         }
         .side-menu-item + .side-menu-item { border-top: 1px solid #eef6f1; }
-        .side-menu-item:hover, .side-menu-item:focus-visible { background: #f2faf6; }
+        .side-menu-item:hover, .side-menu-item:focus-visible { background: #F0FCFE; }
         .side-menu-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: -2px; }
         .side-menu-item .lci { width: 21px; height: 21px; color: var(--primary-mid); }
         .side-menu-item .lci-chev { width: 18px; height: 18px; margin-left: auto; color: #9db5a8; }
@@ -245,7 +245,7 @@
             font-size: 14px; font-weight: 700; text-decoration: none;
             transition: background-color .15s ease;
         }
-        .btn-viewall:hover { background: #f2faf6; }
+        .btn-viewall:hover { background: #F0FCFE; }
         .btn-viewall .lci { width: 19px; height: 19px; }
 
         .acc-section { display: flex; flex-direction: column; }
@@ -277,7 +277,7 @@
             border-radius: 8px; font-size: 11.5px; font-weight: 700; border: 1px solid;
         }
         .chip-wait  { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-        .chip-ok    { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .chip-ok    { background: #E5F7EF; color: #16A36A; border-color: #9BE0BF; }
         .chip-live  { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
         .chip-muted { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
         .booking-actions { display: flex; gap: 8px; flex-shrink: 0; }
@@ -312,14 +312,14 @@
         .rep-how .lci { width: 17px; height: 17px; margin-top: 1px; }
 
         /* Personal info */
-        .info-card { background: #fff; border: 1px solid #e2f0e8; border-radius: 12px; padding: 22px; max-width: 860px; }
+        .info-card { background: #fff; border: 1px solid #DCE5EF; border-radius: 12px; padding: 22px; max-width: 860px; }
         .info-avatar-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
         .info-avatar {
             width: 76px; height: 76px; border-radius: 50%; object-fit: cover;
             background: var(--primary-mid); color: #fff;
             display: flex; align-items: center; justify-content: center;
             font-size: 28px; font-weight: 800; flex-shrink: 0;
-            border: 3px solid #d7ebe0;
+            border: 3px solid #DCE5EF;
         }
         .info-avatar-btn {
             display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px;
@@ -327,34 +327,34 @@
             border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
             transition: background-color .15s ease;
         }
-        .info-avatar-btn:hover { background: #f2faf6; }
+        .info-avatar-btn:hover { background: #F0FCFE; }
         .info-avatar-btn .lci { width: 17px; height: 17px; }
 
         .acc-field-view dt { font-size: 12px; font-weight: 700; color: var(--muted-green); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
         .acc-field-view dd { font-size: 14.5px; font-weight: 600; color: var(--ink-green); }
         .acc-input {
             width: 100%; height: 44px; padding: 0 14px; border-radius: 8px;
-            border: 1px solid #c9ded2; background: #fff; font-size: 14px; color: var(--ink-green);
+            border: 1px solid #DCE5EF; background: #fff; font-size: 14px; color: var(--ink-green);
             font-family: inherit;
             transition: border-color .15s ease, box-shadow .15s ease;
         }
-        .acc-input:focus { outline: none; border-color: var(--primary-mid); box-shadow: 0 0 0 3px rgba(0, 154, 80, .12); }
+        .acc-input:focus { outline: none; border-color: var(--primary-bright); box-shadow: 0 0 0 3px rgba(24, 200, 232, .22); }
         .acc-label { display: block; font-size: 12.5px; font-weight: 700; color: #33544a; margin-bottom: 6px; }
         .btn-primary {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-            background: var(--primary-dark); color: #fff; font-weight: 700; font-size: 14px;
+            background: var(--vs-primary-600, #1677D2); color: #fff; font-weight: 700; font-size: 14px;
             padding: 11px 18px; border-radius: 8px; text-decoration: none; cursor: pointer;
             font-family: inherit; border: none;
             transition: background-color .15s ease, transform .1s ease;
         }
-        .btn-primary:hover { background: #00552f; }
+        .btn-primary:hover { background: var(--vs-primary-700, #185A9D); }
         .btn-primary:active { transform: scale(.98); }
         .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
         .btn-primary .lci { width: 17px; height: 17px; }
         .btn-secondary {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
             background: #fff; color: #33544a; font-weight: 700; font-size: 14px;
-            padding: 11px 18px; border-radius: 8px; border: 1px solid #c9ded2;
+            padding: 11px 18px; border-radius: 8px; border: 1px solid #DCE5EF;
             text-decoration: none; cursor: pointer; font-family: inherit;
             transition: background-color .15s ease;
         }
@@ -602,7 +602,7 @@
 
                     <div class="flex items-center justify-between mb-5">
                         <h3 class="text-[15px] font-extrabold" style="color:var(--ink-green);">Thông tin cá nhân</h3>
-                        <button type="button" id="editToggleBtn" onclick="enterEditMode(true)" class="info-avatar-btn" style="border-color:#c9ded2;">
+                        <button type="button" id="editToggleBtn" onclick="enterEditMode(true)" class="info-avatar-btn" style="border-color:#DCE5EF;">
                             <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
                             Chỉnh sửa
                         </button>
@@ -696,7 +696,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] border border-slate-200">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-sm font-extrabold flex items-center gap-2" style="color:var(--ink-green);">
-                <svg class="lci text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="m16 19 2 2 4-4"/></svg>
+                <svg class="lci" style="color:var(--vs-primary-600, #1677D2);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="m16 19 2 2 4-4"/></svg>
                 Xác thực email mới
             </h3>
             <button type="button" onclick="closeModal('emailOtpModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
@@ -720,7 +720,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[420px] border border-slate-200">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-sm font-extrabold flex items-center gap-2" style="color:var(--ink-green);">
-                <svg class="lci text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg class="lci" style="color:var(--vs-primary-600, #1677D2);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Đổi mật khẩu
             </h3>
             <button type="button" onclick="closeModal('pwModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">

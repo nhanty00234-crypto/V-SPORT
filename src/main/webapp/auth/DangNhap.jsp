@@ -130,15 +130,6 @@
                         <span><c:out value="${thongbao}"/></span>
                     </div>
                 </c:if>
-                <c:if test="${not empty wrongPortalMsg}">
-                    <div class="auth-alert auth-alert-info" role="alert">
-                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
-                        <span>
-                            <c:out value="${wrongPortalMsg}"/>
-                            <a href="${ctx}/he-thong/dang-nhap" data-portal-link="internal">Đi đến Cổng vận hành</a>
-                        </span>
-                    </div>
-                </c:if>
                 <c:if test="${not empty loi}">
                     <div class="auth-alert auth-alert-error" role="alert" id="login-server-error">
                         <span class="material-symbols-outlined" aria-hidden="true">error</span>

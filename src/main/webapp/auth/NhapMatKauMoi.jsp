@@ -40,7 +40,7 @@
         <!-- Header -->
         <div class="mb-6">
             <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-[#378b76] animate-pulse"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-[#1677D2] animate-pulse"></div>
                 <span>Thiết lập mật khẩu</span>
             </div>
             <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Mật khẩu mới</h2>
@@ -89,7 +89,7 @@
             </div>
             
             <!-- Submit Button -->
-            <button type="submit" id="newPwSubmit" aria-busy="false" class="w-full h-12 bg-[#378b76] hover:bg-[#2c6f5e] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-emerald-50">
+            <button type="submit" id="newPwSubmit" aria-busy="false" class="w-full h-12 bg-[#FF8A24] hover:bg-[#F97316] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-orange-100">
                 <span class="btn-text flex items-center gap-1.5">
                     Lưu mật khẩu mới
                     <span class="material-symbols-outlined text-[18px]">save</span>
