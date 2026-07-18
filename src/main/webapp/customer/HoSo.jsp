@@ -98,7 +98,7 @@
 
         .customer-profile-section-wrap { margin: 12px; background: #fff; border-radius: 12px; padding: 22px; min-height: 320px; }
         .customer-profile-section + .customer-profile-section { margin-top: 26px; }
-        .customer-profile-section-header { display: flex; align-items: center; justify-content: between; margin-bottom: 10px; }
+        .customer-profile-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         .customer-profile-section-title { font-size: 14.5px; font-weight: 700; color: var(--vs-primary-900, #0B2545); flex: 1; }
         .customer-profile-section-edit { background: none; border: none; cursor: pointer; color: #829AB1; padding: 4px; }
         .customer-profile-section-edit .lci { width: 16px; height: 16px; }
@@ -562,11 +562,11 @@
 
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-    document.querySelectorAll('#chpBaseInfoModal, #emailOtpModal').forEach(overlay => {
+    document.querySelectorAll('#chpBaseInfoModal, #emailOtpModal, #chpPhysicalModal, #chpNoteModal, #chpPersoModal').forEach(overlay => {
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay.id); });
     });
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeModal('chpBaseInfoModal'); closeModal('emailOtpModal'); }
+        if (e.key === 'Escape') { closeModal('chpBaseInfoModal'); closeModal('emailOtpModal'); closeModal('chpPhysicalModal'); closeModal('chpNoteModal'); closeModal('chpPersoModal'); }
     });
 
     function openBaseInfoEdit() { openModal('chpBaseInfoModal'); }
