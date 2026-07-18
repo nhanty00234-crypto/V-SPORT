@@ -20,9 +20,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --account-sidebar-width: clamp(420px, 23vw, 470px);
+            /* 1024-1199px (tablet tier): ~300-330px. >=1200px: ~376-380px regardless of
+               how wide the viewport gets beyond that (target spec is a fixed density,
+               not a proportionally-scaling one at large desktop sizes). */
+            --account-sidebar-width: clamp(300px, 26vw, 330px);
             --account-header-height: 56px;
-            --sidebar-bg: #EDF4FA;
+            --sidebar-bg: #EEF7FC;
             --sidebar-surface: #ffffff;
             --sidebar-border: #DCE5EF;
             --primary-dark: #0B2545;
@@ -30,6 +33,9 @@
             --primary-bright: #18C8E8;
             --ink-green: #102A43;
             --muted-green: #829AB1;
+        }
+        @media (min-width: 1200px) {
+            :root { --account-sidebar-width: clamp(376px, 23vw, 380px); }
         }
         body {
             font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif !important;
@@ -92,52 +98,52 @@
         /* Profile row (compact, amber border) */
         .side-profile-row {
             position: relative; z-index: 1;
-            display: flex; align-items: center; gap: 12px;
-            width: 100%; min-height: 70px; padding: 10px 12px;
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; min-height: 58px; padding: 8px 12px;
             background: rgba(255, 255, 255, 0.13);
             border: 1px solid #e8c25a;
             border-radius: 8px;
-            color: #fff; text-align: left; cursor: pointer;
+            color: #fff; text-align: left; text-decoration: none; cursor: pointer;
             transition: background-color .15s ease;
         }
         .side-profile-row:hover, .side-profile-row:focus-visible { background: rgba(255, 255, 255, 0.2); }
         .side-profile-row:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
         .side-avatar {
-            width: 50px; height: 50px; border-radius: 50%;
+            width: 42px; height: 42px; border-radius: 50%;
             object-fit: cover; flex-shrink: 0;
             background: rgba(255, 255, 255, 0.22);
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: 800; color: #fff;
+            font-size: 17px; font-weight: 800; color: #fff;
             border: 2px solid rgba(255, 255, 255, 0.55);
         }
         .side-profile-name {
-            font-size: 16px; font-weight: 700; line-height: 1.25;
+            font-size: 14.5px; font-weight: 700; line-height: 1.25;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .side-profile-email {
-            font-size: 12px; font-weight: 500; color: rgba(255, 255, 255, 0.85);
+            font-size: 11px; font-weight: 400; color: rgba(255, 255, 255, 0.85);
             line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .side-profile-row .lci-chev { width: 22px; height: 22px; margin-left: auto; color: rgba(255,255,255,.9); }
+        .side-profile-row .lci-chev { width: 20px; height: 20px; margin-left: auto; color: rgba(255,255,255,.9); }
 
         /* Reputation row (replaces "membership tier") */
         .side-rep-row {
             position: relative; z-index: 1;
             display: flex; align-items: center; gap: 10px;
-            width: 100%; min-height: 48px; padding: 0 14px;
-            margin-top: 12px;
+            width: 100%; min-height: 44px; padding: 0 14px;
+            margin-top: 10px;
             background: rgba(255, 255, 255, 0.13);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            color: #fff; font-size: 14px; font-weight: 700;
+            color: #fff; font-size: 13px; font-weight: 700;
             text-align: left; cursor: pointer;
             transition: background-color .15s ease;
         }
         .side-rep-row:hover, .side-rep-row:focus-visible { background: rgba(255, 255, 255, 0.2); }
         .side-rep-row:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
         .side-rep-row .rep-score { font-weight: 800; }
-        .side-rep-row .rep-label { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.88); }
-        .side-rep-row .lci-chev { width: 20px; height: 20px; margin-left: auto; color: rgba(255,255,255,.9); }
+        .side-rep-row .rep-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.88); }
+        .side-rep-row .lci-chev { width: 18px; height: 18px; margin-left: auto; color: rgba(255,255,255,.9); }
 
         /* Quick actions 4-up, overlapping the wave */
         .side-quick {
@@ -150,21 +156,25 @@
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 8px;
-            box-shadow: 0 4px 16px rgba(0, 107, 61, 0.07);
+            box-shadow: 0 4px 16px rgba(11, 37, 69, 0.08);
         }
         .side-quick-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 7px; min-height: 78px; padding: 8px 4px;
+            gap: 7px; min-height: 84px; padding: 8px 4px;
             background: #fff; border: 1px solid #e2f0e8; border-radius: 10px;
             text-decoration: none; cursor: pointer;
-            transition: border-color .15s ease, background-color .15s ease;
+            transition: border-color .15s ease, background-color .15s ease, transform .1s ease;
         }
         .side-quick-item:hover, .side-quick-item:focus-visible { border-color: var(--primary-bright); background: #F0FCFE; }
         .side-quick-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-        .side-quick-item .lci { width: 26px; height: 26px; }
+        .side-quick-item:active { transform: translateY(1px); }
+        .side-quick-item .lci { width: 22px; height: 22px; }
         .side-quick-item span {
-            font-size: 12.5px; font-weight: 600; color: var(--ink-green);
+            font-size: 12px; font-weight: 600; color: var(--ink-green);
             text-align: center; line-height: 1.25;
+        }
+        @media (max-width: 380px) {
+            .side-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         .qi-green  { color: #1677D2; }
         .qi-amber  { color: #d97706; }
@@ -173,9 +183,9 @@
 
         /* Menu groups */
         .side-group-label {
-            font-size: 13px; font-weight: 800; color: var(--primary-dark);
+            font-size: 13px; font-weight: 700; color: var(--primary-dark);
             text-transform: uppercase; letter-spacing: .04em;
-            margin: 20px 16px 8px; padding: 0 4px;
+            margin: 18px 0 8px 16px; padding: 0 4px;
         }
         .side-group {
             margin: 0 16px;
@@ -185,23 +195,24 @@
             overflow: hidden;
         }
         .side-menu-item {
-            display: flex; align-items: center; gap: 12px;
-            width: 100%; min-height: 50px; padding: 0 14px;
+            display: flex; align-items: center; gap: 11px;
+            width: 100%; min-height: 44px; padding: 0 13px;
             background: transparent; border: none; border-left: 3px solid transparent;
-            font-family: inherit; font-size: 14.5px; font-weight: 600; color: var(--ink-green);
+            font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink-green);
             text-align: left; text-decoration: none; cursor: pointer;
             transition: background-color .15s ease;
         }
         .side-menu-item + .side-menu-item { border-top: 1px solid #eef6f1; }
         .side-menu-item:hover, .side-menu-item:focus-visible { background: #F0FCFE; }
         .side-menu-item:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: -2px; }
-        .side-menu-item .lci { width: 21px; height: 21px; color: var(--primary-mid); }
+        .side-menu-item .lci { width: 22px; height: 22px; flex-shrink: 0; color: var(--primary-mid); }
         .side-menu-item .lci-chev { width: 18px; height: 18px; margin-left: auto; color: #9db5a8; }
         .side-menu-item.is-current {
-            background: #e6f7ee;
+            background: var(--vs-cyan-50, #F0FCFE);
             border-left-color: var(--primary-mid);
             color: var(--primary-dark);
         }
+        .side-menu-item.is-current .lci { color: var(--primary-mid); }
         .side-menu-item.is-danger { color: #b91c1c; }
         .side-menu-item.is-danger .lci { color: #dc2626; }
         .side-menu-item.is-danger:hover { background: #fef2f2; }
@@ -365,6 +376,30 @@
         .pw-eye .eye-open { display: none; }
         .pw-eye.is-visible .eye-open { display: block; }
         .pw-eye.is-visible .eye-closed { display: none; }
+
+        /* ===================== Cài đặt (Settings) ===================== */
+        .customer-settings-page .settings-card {
+            background: #fff; border: 1px solid #DCE5EF; border-radius: 12px;
+            overflow: hidden; max-width: 640px;
+        }
+        .customer-settings-page .settings-row {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%; min-height: 44px; padding: 11px 16px;
+            background: transparent; border: none; font-family: inherit;
+            font-size: 14.5px; font-weight: 600; color: var(--primary-dark);
+            text-align: left; text-decoration: none; cursor: pointer;
+            transition: background-color .15s ease;
+        }
+        .customer-settings-page .settings-row + .settings-row { border-top: 1px solid #eef3f8; }
+        .customer-settings-page .settings-row:hover,
+        .customer-settings-page .settings-row:focus-visible { background: #F0FCFE; }
+        .customer-settings-page .settings-row:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: -2px; }
+        .customer-settings-page .settings-row .lci { color: var(--primary-mid); }
+        .customer-settings-page .settings-row .lci-chev { margin-left: auto; color: #9db5a8; }
+        .customer-settings-page .settings-row.is-danger { color: #E5484D; }
+        .customer-settings-page .settings-row.is-danger .lci,
+        .customer-settings-page .settings-row.is-danger .lci-chev { color: #E5484D; }
+        .customer-settings-page .settings-row.is-danger:hover { background: #fef2f2; }
     </style>
 </head>
 <body class="antialiased">
@@ -377,7 +412,7 @@
 
             <div class="account-sidebar-top">
                 <!-- Profile row -->
-                <button type="button" class="side-profile-row" data-section="thongtin" aria-label="Mở thông tin cá nhân">
+                <a href="${pageContext.request.contextPath}/customer/ho-so" class="side-profile-row" aria-label="Mở hồ sơ cá nhân">
                     <c:choose>
                         <c:when test="${not empty account.avatarUrl}">
                             <img class="side-avatar js-avatar-img" src="${pageContext.request.contextPath}${account.avatarUrl}" alt="Ảnh đại diện">
@@ -392,7 +427,7 @@
                         <span id="accSummaryEmail" class="side-profile-email" style="display:block;">${not empty account.email ? fn:escapeXml(account.email) : 'Chưa cập nhật email'}</span>
                     </span>
                     <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
+                </a>
 
                 <!-- Reputation row -->
                 <button type="button" class="side-rep-row" data-section="uytin" aria-label="Mở điểm uy tín">
@@ -427,14 +462,9 @@
             <!-- Menu: Hoạt động -->
             <p class="side-group-label" id="groupHoatDong">Hoạt động</p>
             <nav class="side-group" aria-labelledby="groupHoatDong">
-                <button type="button" class="side-menu-item" data-section="tongquan">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                    Tổng quan tài khoản
-                    <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
-                <a class="side-menu-item" href="${pageContext.request.contextPath}/customer/lich-su-dat-san">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                    Lịch đặt sân
+                <a class="side-menu-item" href="${pageContext.request.contextPath}/customer/doi-nhom">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Nhóm của tôi
                     <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                 </a>
                 <a class="side-menu-item" href="${pageContext.request.contextPath}/customer/ghep-keo?tab=cua-toi">
@@ -447,31 +477,31 @@
                     Tìm đối thủ
                     <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                 </a>
-                <button type="button" class="side-menu-item" data-section="uytin">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-                    Điểm uy tín
-                    <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
             </nav>
 
-            <!-- Menu: Tài khoản -->
-            <p class="side-group-label" id="groupTaiKhoan">Tài khoản</p>
-            <nav class="side-group" aria-labelledby="groupTaiKhoan" style="margin-bottom:4px;">
-                <button type="button" class="side-menu-item" data-section="thongtin">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
-                    Thông tin cá nhân
+            <!-- Menu: Hệ thống -->
+            <p class="side-group-label" id="groupHeThong">Hệ thống</p>
+            <nav class="side-group" aria-labelledby="groupHeThong" style="margin-bottom:4px;">
+                <button type="button" class="side-menu-item" data-section="caidat">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Cài đặt
                     <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
-                <button type="button" class="side-menu-item" onclick="openPwModal()">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Đổi mật khẩu
+                <button type="button" class="side-menu-item" data-section="phienban">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    Thông tin phiên bản
                     <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
-                <a class="side-menu-item is-danger" href="${pageContext.request.contextPath}/logout">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                    Đăng xuất
+                <button type="button" class="side-menu-item" data-section="dieukhoan">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                    Điều khoản và chính sách
                     <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                </a>
+                </button>
+                <button type="button" class="side-menu-item" data-section="whatsnew">
+                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+                    Ứng dụng có gì mới
+                    <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
             </nav>
 
             <p class="side-version">Phiên bản 1.0-SNAPSHOT</p>
@@ -573,107 +603,123 @@
                 <jsp:include page="/customer/common/reputation-card.jsp" />
             </section>
 
-            <!-- ===== Section: Thông tin cá nhân ===== -->
-            <section class="acc-section" data-section="thongtin" aria-label="Thông tin cá nhân" hidden>
-                <div class="info-card" id="personalInfoCard">
-                    <div class="info-avatar-wrap">
-                        <c:choose>
-                            <c:when test="${not empty account.avatarUrl}">
-                                <img id="accAvatarPreview" class="info-avatar js-avatar-img" src="${pageContext.request.contextPath}${account.avatarUrl}" alt="Ảnh đại diện">
-                            </c:when>
-                            <c:otherwise>
-                                <span id="accAvatarInitial" class="info-avatar js-avatar-initial" aria-hidden="true"><c:choose><c:when test="${not empty account.fullName}">${fn:escapeXml(fn:substring(account.fullName, 0, 1))}</c:when><c:otherwise>${fn:escapeXml(fn:substring(account.username, 0, 1))}</c:otherwise></c:choose></span>
-                                <img id="accAvatarPreview" class="info-avatar js-avatar-img" src="" alt="Ảnh đại diện" hidden>
-                            </c:otherwise>
-                        </c:choose>
-                        <div>
-                            <label for="accAvatarInput" class="info-avatar-btn">
-                                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                                Đổi ảnh đại diện
-                            </label>
-                            <input id="accAvatarInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
-                            <p class="text-[12px] mt-2" style="color:var(--muted-green);">JPG, PNG, WEBP hoặc GIF, tối đa 2MB.</p>
-                            <p id="accAvatarError" class="hidden mt-2 text-[12px] font-semibold text-red-600"></p>
-                        </div>
-                        <c:if test="${account.createdAt != null}">
-                            <p class="text-[12.5px] font-semibold ml-auto self-start" style="color:var(--muted-green);">Tham gia <fmt:formatDate value="${account.createdAt}" pattern="MM/yyyy"/></p>
-                        </c:if>
-                    </div>
+            <!-- ===== Section: Cài đặt ===== -->
+            <section class="acc-section customer-settings-page" data-section="caidat" aria-label="Cài đặt" hidden>
+                <div class="settings-card">
+                    <button type="button" class="settings-row" data-section="thongbao">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+                        Cài đặt thông báo
+                        <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <button type="button" class="settings-row" data-section="ngonngu">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        Ngôn ngữ - Tiếng Việt
+                        <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <button type="button" class="settings-row" onclick="openPwModal()">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Đổi mật khẩu
+                        <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <a class="settings-row" href="${pageContext.request.contextPath}/logout">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        Đăng xuất tài khoản
+                        <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </a>
+                    <button type="button" class="settings-row is-danger" onclick="openDeleteAccountModal()">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                        Xóa tài khoản
+                        <svg class="lci lci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </section>
 
-                    <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-[15px] font-extrabold" style="color:var(--ink-green);">Thông tin cá nhân</h3>
-                        <button type="button" id="editToggleBtn" onclick="enterEditMode(true)" class="info-avatar-btn" style="border-color:#DCE5EF;">
-                            <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-                            Chỉnh sửa
-                        </button>
-                    </div>
+            <!-- ===== Section: Cài đặt thông báo ===== -->
+            <section class="acc-section customer-settings-page" data-section="thongbao" aria-label="Cài đặt thông báo" hidden>
+                <div class="settings-card" style="max-width:640px;">
+                    <label class="settings-row" style="cursor:pointer;">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+                        <span style="flex:1;">Nhắc lịch đặt sân sắp tới</span>
+                        <input type="checkbox" class="js-notif-toggle" data-key="reminder" style="width:18px;height:18px;">
+                    </label>
+                    <label class="settings-row" style="cursor:pointer;">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                        <span style="flex:1;">Lời mời &amp; yêu cầu tham gia đội</span>
+                        <input type="checkbox" class="js-notif-toggle" data-key="team" style="width:18px;height:18px;">
+                    </label>
+                    <label class="settings-row" style="cursor:pointer;">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/></svg>
+                        <span style="flex:1;">Kèo ghép trận mới phù hợp</span>
+                        <input type="checkbox" class="js-notif-toggle" data-key="matchmaking" style="width:18px;height:18px;">
+                    </label>
+                </div>
+                <p style="font-size:12.5px;color:var(--muted-green);margin:10px 4px 0;max-width:640px;">Tùy chọn được lưu trên thiết bị này.</p>
+            </section>
 
-                    <!-- View mode -->
-                    <dl id="infoViewMode" class="acc-field-view grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            <!-- ===== Section: Ngôn ngữ ===== -->
+            <section class="acc-section customer-settings-page" data-section="ngonngu" aria-label="Ngôn ngữ" hidden>
+                <div class="settings-card" style="max-width:640px;">
+                    <div class="settings-row" style="cursor:default;">
+                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+                        <span style="flex:1;">Tiếng Việt</span>
+                        <span style="font-size:12px;font-weight:700;color:var(--primary-mid);">Đang dùng</span>
+                    </div>
+                </div>
+                <p style="font-size:12.5px;color:var(--muted-green);margin:10px 4px 0;max-width:640px;">V-SPORT hiện chỉ hỗ trợ Tiếng Việt.</p>
+            </section>
+
+            <!-- ===== Section: Thông tin phiên bản ===== -->
+            <section class="acc-section customer-settings-page" data-section="phienban" aria-label="Thông tin phiên bản" hidden>
+                <div class="info-card" style="max-width:640px;">
+                    <dl class="acc-field-view grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                         <div>
-                            <dt>Họ và tên</dt>
-                            <dd id="viewFullName">${not empty account.fullName ? fn:escapeXml(account.fullName) : '-'}</dd>
+                            <dt>Ứng dụng</dt>
+                            <dd>V-SPORT</dd>
                         </div>
                         <div>
-                            <dt>Email</dt>
-                            <dd id="viewEmail">${not empty account.email ? fn:escapeXml(account.email) : '-'}</dd>
-                        </div>
-                        <div>
-                            <dt>Số điện thoại</dt>
-                            <dd id="viewPhone">${not empty account.phoneNumber ? fn:escapeXml(account.phoneNumber) : '-'}</dd>
-                        </div>
-                        <div>
-                            <dt>Ngày sinh</dt>
-                            <dd id="viewBirthday">
-                                <c:choose>
-                                    <c:when test="${account.ngaySinh != null}"><fmt:formatDate value="${account.ngaySinh}" pattern="dd/MM/yyyy"/></c:when>
-                                    <c:otherwise>-</c:otherwise>
-                                </c:choose>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt>Giới tính</dt>
-                            <dd id="viewGender">${not empty account.gioiTinh ? fn:escapeXml(account.gioiTinh) : '-'}</dd>
+                            <dt>Phiên bản</dt>
+                            <dd>1.0-SNAPSHOT</dd>
                         </div>
                     </dl>
+                    <p style="font-size:13.5px;color:var(--muted-green);margin-top:16px;line-height:1.6;">Nền tảng đặt sân, ghép trận và quản lý đội nhóm thể thao.</p>
+                </div>
+            </section>
 
-                    <!-- Edit mode -->
-                    <form id="infoEditForm" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4" onsubmit="return false;" autocomplete="off">
-                        <div>
-                            <label class="acc-label" for="editFullName">Họ và tên</label>
-                            <input id="editFullName" type="text" class="acc-input" value="${fn:escapeXml(account.fullName)}" maxlength="100">
-                            <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="fullName"></p>
-                        </div>
-                        <div>
-                            <label class="acc-label" for="editEmail">Email</label>
-                            <input id="editEmail" type="email" class="acc-input" value="${fn:escapeXml(account.email)}">
-                            <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="email"></p>
-                        </div>
-                        <div>
-                            <label class="acc-label" for="editPhone">Số điện thoại</label>
-                            <input id="editPhone" type="tel" class="acc-input" value="${fn:escapeXml(account.phoneNumber)}">
-                            <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="phone"></p>
-                        </div>
-                        <div>
-                            <label class="acc-label" for="editBirthday">Ngày sinh</label>
-                            <input id="editBirthday" type="date" class="acc-input" value="<c:if test="${account.ngaySinh != null}"><fmt:formatDate value="${account.ngaySinh}" pattern="yyyy-MM-dd"/></c:if>">
-                            <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="birthday"></p>
-                        </div>
-                        <div>
-                            <label class="acc-label" for="editGender">Giới tính</label>
-                            <select id="editGender" class="acc-input">
-                                <option value="" ${empty account.gioiTinh ? 'selected' : ''}>-- Không chọn --</option>
-                                <option value="Nam" ${account.gioiTinh == 'Nam' ? 'selected' : ''}>Nam</option>
-                                <option value="Nữ" ${account.gioiTinh == 'Nữ' ? 'selected' : ''}>Nữ</option>
-                                <option value="Khác" ${account.gioiTinh == 'Khác' ? 'selected' : ''}>Khác</option>
-                            </select>
-                            <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="gender"></p>
-                        </div>
-                        <div class="sm:col-span-2 flex justify-end gap-3 pt-2">
-                            <button type="button" onclick="enterEditMode(false)" class="btn-secondary">Hủy</button>
-                            <button type="button" id="saveInfoBtn" onclick="saveProfileInfo()" class="btn-primary">Lưu thay đổi</button>
-                        </div>
-                    </form>
+            <!-- ===== Section: Điều khoản và chính sách ===== -->
+            <section class="acc-section customer-settings-page" data-section="dieukhoan" aria-label="Điều khoản và chính sách" hidden>
+                <div class="info-card" style="max-width:640px;display:flex;flex-direction:column;gap:16px;">
+                    <div>
+                        <h3 class="text-[14.5px] font-extrabold mb-1.5" style="color:var(--ink-green);">Quy định đặt sân</h3>
+                        <p style="font-size:13.5px;color:var(--muted-green);line-height:1.6;">Khách hàng đặt và giữ đúng khung giờ đã xác nhận. Việc hủy hoặc đổi lịch cần thực hiện trước thời gian quy định tại từng cơ sở.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-[14.5px] font-extrabold mb-1.5" style="color:var(--ink-green);">Bảo mật thông tin</h3>
+                        <p style="font-size:13.5px;color:var(--muted-green);line-height:1.6;">Thông tin cá nhân chỉ được dùng để xử lý đặt sân, ghép trận và liên hệ hỗ trợ, không chia sẻ cho bên thứ ba ngoài mục đích vận hành dịch vụ.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-[14.5px] font-extrabold mb-1.5" style="color:var(--ink-green);">Điểm uy tín</h3>
+                        <p style="font-size:13.5px;color:var(--muted-green);line-height:1.6;">Hành vi hủy lịch trễ hoặc không đến có thể ảnh hưởng đến điểm uy tín của tài khoản.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Section: Ứng dụng có gì mới ===== -->
+            <section class="acc-section customer-settings-page" data-section="whatsnew" aria-label="Ứng dụng có gì mới" hidden>
+                <div class="info-card" style="max-width:640px;">
+                    <ul style="display:flex;flex-direction:column;gap:14px;list-style:none;margin:0;padding:0;">
+                        <li style="display:flex;gap:10px;align-items:flex-start;">
+                            <svg class="lci" style="color:var(--primary-mid);margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            <span style="font-size:13.5px;color:var(--ink-green);line-height:1.55;"><b>Đội nhóm</b> — tạo đội, mời thành viên, duyệt yêu cầu tham gia.</span>
+                        </li>
+                        <li style="display:flex;gap:10px;align-items:flex-start;">
+                            <svg class="lci" style="color:var(--primary-mid);margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/></svg>
+                            <span style="font-size:13.5px;color:var(--ink-green);line-height:1.55;"><b>Ghép kèo</b> — tìm đối thủ và tạo kèo giao lưu.</span>
+                        </li>
+                        <li style="display:flex;gap:10px;align-items:flex-start;">
+                            <svg class="lci" style="color:var(--primary-mid);margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                            <span style="font-size:13.5px;color:var(--ink-green);line-height:1.55;"><b>Điểm uy tín</b> — theo dõi mức độ tin cậy khi đặt sân.</span>
+                        </li>
+                    </ul>
                 </div>
             </section>
 
@@ -688,30 +734,6 @@
     <div>
         <p id="accToastTitle" class="text-sm font-bold" style="color:var(--ink-green);">Thành công</p>
         <p id="accToastMessage" class="text-xs mt-0.5" style="color:var(--muted-green);"></p>
-    </div>
-</div>
-
-<!-- Email OTP modal -->
-<div id="emailOtpModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] border border-slate-200">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 class="text-sm font-extrabold flex items-center gap-2" style="color:var(--ink-green);">
-                <svg class="lci" style="color:var(--vs-primary-600, #1677D2);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="m16 19 2 2 4-4"/></svg>
-                Xác thực email mới
-            </h3>
-            <button type="button" onclick="closeModal('emailOtpModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
-                <svg class="lci text-slate-500" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-        </div>
-        <div class="px-6 py-5">
-            <p class="text-sm text-slate-600">Mã OTP đã được gửi đến <strong id="otpTargetEmail" class="text-slate-900"></strong>. Nhập mã để hoàn tất thay đổi.</p>
-            <input id="otpInput" type="text" maxlength="6" inputmode="numeric" placeholder="••••••" class="acc-input mt-4 text-center text-xl font-black tracking-[0.3em]">
-            <p id="otpError" class="hidden mt-2 text-[12px] font-semibold text-red-600"></p>
-        </div>
-        <div class="px-6 pb-5 flex justify-end gap-3">
-            <button type="button" onclick="closeModal('emailOtpModal')" class="btn-secondary">Hủy</button>
-            <button type="button" id="otpConfirmBtn" onclick="verifyEmailOtp()" class="btn-primary">Xác thực</button>
-        </div>
     </div>
 </div>
 
@@ -776,23 +798,61 @@
     </div>
 </div>
 
+<!-- Delete account modal -->
+<div id="deleteAccountModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[420px] border border-slate-200">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-extrabold flex items-center gap-2 text-red-600">
+                <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                Xóa tài khoản
+            </h3>
+            <button type="button" onclick="closeModal('deleteAccountModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
+                <svg class="lci text-slate-500" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <form id="deleteAccountForm" class="px-6 py-5 flex flex-col gap-4" onsubmit="return false;" autocomplete="off">
+            <p class="text-sm text-slate-600">Tài khoản của bạn sẽ bị vô hiệu hóa và không thể đăng nhập lại. Nhập mật khẩu hiện tại để xác nhận.</p>
+            <div>
+                <label class="acc-label" for="deleteAccountPassword">Mật khẩu hiện tại</label>
+                <div class="relative">
+                    <input type="password" id="deleteAccountPassword" class="acc-input pr-10" autocomplete="new-password">
+                    <button type="button" onclick="togglePw('deleteAccountPassword', this)" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" aria-label="Hiện/ẩn mật khẩu">
+                        <svg class="lci eye-closed" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                        <svg class="lci eye-open" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+                <p class="hidden text-[12px] text-red-600 font-semibold mt-1" data-error-for="deleteAccountPassword"></p>
+            </div>
+        </form>
+        <div class="px-6 pb-5 flex justify-end gap-3">
+            <button type="button" onclick="closeModal('deleteAccountModal')" class="btn-secondary">Hủy</button>
+            <button type="button" id="deleteAccountBtn" onclick="confirmDeleteAccount()" class="btn-primary" style="background:#E5484D;">Xóa tài khoản</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const CTX = '${pageContext.request.contextPath}';
-    document.getElementById('editBirthday').max = new Date().toISOString().split('T')[0];
 
     // ---- Section router: main workspace chỉ hiển thị một section tại một thời điểm ----
     const SECTION_TITLES = {
         datlich: 'Danh sách đặt lịch',
         tongquan: 'Tổng quan tài khoản',
         uytin: 'Điểm uy tín',
-        thongtin: 'Thông tin cá nhân'
+        caidat: 'Cài đặt',
+        thongbao: 'Cài đặt thông báo',
+        ngonngu: 'Ngôn ngữ',
+        phienban: 'Thông tin phiên bản',
+        dieukhoan: 'Điều khoản và chính sách',
+        whatsnew: 'Ứng dụng có gì mới'
     };
     // Alias giữ tương thích các anchor cũ (#uyTinCuaToi từ LichSuDatSan.jsp, ...).
     const SECTION_ALIASES = {
         uyTinCuaToi: 'uytin',
-        personalInfoCard: 'thongtin',
         tongQuan: 'tongquan'
     };
+    // Các section con của "Cài đặt" vẫn giữ mục sidebar "Cài đặt" ở trạng thái active.
+    const SECTION_SIDEBAR_PARENT = { thongbao: 'caidat', ngonngu: 'caidat' };
 
     function showAccountSection(key, opts) {
         if (!SECTION_TITLES[key]) key = 'datlich';
@@ -801,8 +861,9 @@
         });
         document.getElementById('accountHeaderTitle').textContent = SECTION_TITLES[key];
         document.getElementById('accToolbar').hidden = key !== 'datlich';
+        var highlightKey = SECTION_SIDEBAR_PARENT[key] || key;
         document.querySelectorAll('.side-menu-item[data-section]').forEach(function (item) {
-            item.classList.toggle('is-current', item.dataset.section === key);
+            item.classList.toggle('is-current', item.dataset.section === highlightKey);
         });
         if (history.replaceState) {
             history.replaceState(null, '', key === 'datlich' ? location.pathname : ('#' + key));
@@ -847,15 +908,77 @@
     function closeModal(id) {
         document.getElementById(id).classList.add('hidden');
     }
-    document.querySelectorAll('#pwModal, #emailOtpModal').forEach(overlay => {
+    document.querySelectorAll('#pwModal, #deleteAccountModal').forEach(overlay => {
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay.id); });
     });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeModal('pwModal');
-            closeModal('emailOtpModal');
+            closeModal('deleteAccountModal');
         }
     });
+
+    // ---- Cài đặt thông báo (lưu trên thiết bị, chưa có backend riêng) ----
+    (function initNotifToggles() {
+        const STORAGE_KEY = 'vsport_notif_prefs';
+        let prefs = {};
+        try { prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { prefs = {}; }
+        document.querySelectorAll('.js-notif-toggle').forEach(function (el) {
+            el.checked = prefs[el.dataset.key] !== false;
+            el.addEventListener('change', function () {
+                prefs[el.dataset.key] = el.checked;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+            });
+        });
+    })();
+
+    // ---- Xóa tài khoản ----
+    function openDeleteAccountModal() {
+        document.getElementById('deleteAccountForm').reset();
+        clearFieldErrors(document.getElementById('deleteAccountForm'));
+        openModal('deleteAccountModal');
+    }
+
+    function confirmDeleteAccount() {
+        const password = document.getElementById('deleteAccountPassword').value;
+        const errEl = document.querySelector('[data-error-for="deleteAccountPassword"]');
+        if (!password) {
+            errEl.textContent = 'Vui lòng nhập mật khẩu hiện tại.';
+            errEl.classList.remove('hidden');
+            return;
+        }
+        const btn = document.getElementById('deleteAccountBtn');
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Đang xử lý...';
+
+        const params = new URLSearchParams();
+        params.append('action', 'deleteAccount');
+        params.append('password', password);
+
+        fetch(CTX + '/customer/tai-khoan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: params
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = CTX + '/dangnhap';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                    errEl.textContent = data.message || 'Không thể xóa tài khoản.';
+                    errEl.classList.remove('hidden');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                errEl.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+                errEl.classList.remove('hidden');
+            });
+    }
 
     function clearFieldErrors(scopeEl) {
         scopeEl.querySelectorAll('[data-error-for]').forEach(el => { el.textContent = ''; el.classList.add('hidden'); });
@@ -868,185 +991,6 @@
             if (el) { el.textContent = fieldErrors[key]; el.classList.remove('hidden'); }
         });
     }
-
-    // ---- Edit mode toggle ----
-    function enterEditMode(on) {
-        const viewMode = document.getElementById('infoViewMode');
-        const editForm = document.getElementById('infoEditForm');
-        const toggleBtn = document.getElementById('editToggleBtn');
-        if (on) {
-            showAccountSection('thongtin');
-            viewMode.classList.add('hidden');
-            editForm.classList.remove('hidden');
-            toggleBtn.classList.add('hidden');
-        } else {
-            viewMode.classList.remove('hidden');
-            editForm.classList.add('hidden');
-            toggleBtn.classList.remove('hidden');
-            clearFieldErrors(editForm);
-        }
-    }
-
-    // ---- Save profile info ----
-    function saveProfileInfo() {
-        const fullName = document.getElementById('editFullName').value;
-        const email = document.getElementById('editEmail').value;
-        const phone = document.getElementById('editPhone').value;
-        const birthday = document.getElementById('editBirthday').value;
-        const gender = document.getElementById('editGender').value;
-
-        const btn = document.getElementById('saveInfoBtn');
-        btn.disabled = true;
-        const originalText = btn.textContent;
-        btn.textContent = 'Đang lưu...';
-
-        const params = new URLSearchParams();
-        params.append('action', 'updateInfo');
-        params.append('fullName', fullName);
-        params.append('email', email);
-        params.append('phoneNumber', phone);
-        params.append('birthday', birthday);
-        params.append('gender', gender);
-
-        fetch(CTX + '/account/update-profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: params
-        })
-            .then(r => r.json())
-            .then(data => {
-                btn.disabled = false;
-                btn.textContent = originalText;
-                if (data.success) {
-                    if (data.requiresOtp) {
-                        document.getElementById('otpTargetEmail').textContent = data.email || email;
-                        document.getElementById('otpInput').value = '';
-                        document.getElementById('otpError').classList.add('hidden');
-                        openModal('emailOtpModal');
-                        showToast('Đã gửi mã OTP', data.message);
-                        return;
-                    }
-                    syncProfileUi(data);
-                    enterEditMode(false);
-                    showToast('Thành công', 'Đã cập nhật thông tin cá nhân.');
-                } else if (data.code === 'VALIDATION_ERROR') {
-                    showFieldErrors(document.getElementById('infoEditForm'), data.fieldErrors);
-                } else {
-                    showToast('Không thể cập nhật', data.message, true);
-                }
-            })
-            .catch(() => {
-                btn.disabled = false;
-                btn.textContent = originalText;
-                showToast('Lỗi kết nối', 'Không thể kết nối máy chủ. Vui lòng thử lại.', true);
-            });
-    }
-
-    function verifyEmailOtp() {
-        const otp = document.getElementById('otpInput').value.trim();
-        const err = document.getElementById('otpError');
-        if (!/^\d{6}$/.test(otp)) {
-            err.textContent = 'Vui lòng nhập mã OTP gồm 6 chữ số.';
-            err.classList.remove('hidden');
-            return;
-        }
-        const btn = document.getElementById('otpConfirmBtn');
-        btn.disabled = true;
-
-        const params = new URLSearchParams();
-        params.append('action', 'verifyEmailOtp');
-        params.append('otp', otp);
-
-        fetch(CTX + '/account/update-profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: params
-        })
-            .then(r => r.json())
-            .then(data => {
-                btn.disabled = false;
-                if (data.success) {
-                    syncProfileUi(data);
-                    closeModal('emailOtpModal');
-                    enterEditMode(false);
-                    showToast('Thành công', 'Đã cập nhật thông tin cá nhân.');
-                } else {
-                    err.textContent = data.message || 'Không thể xác thực OTP.';
-                    err.classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                btn.disabled = false;
-                err.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
-                err.classList.remove('hidden');
-            });
-    }
-
-    function syncProfileUi(data) {
-        document.getElementById('viewFullName').textContent = data.fullName || '-';
-        document.getElementById('viewEmail').textContent = data.email || '-';
-        document.getElementById('viewPhone').textContent = data.phoneNumber || '-';
-        document.getElementById('viewBirthday').textContent = data.birthday ? formatDateVn(data.birthday) : '-';
-        document.getElementById('viewGender').textContent = data.gender || '-';
-
-        document.getElementById('editFullName').value = data.fullName || '';
-        document.getElementById('editEmail').value = data.email || '';
-        document.getElementById('editPhone').value = data.phoneNumber || '';
-        document.getElementById('editBirthday').value = data.birthday || '';
-        document.getElementById('editGender').value = data.gender || '';
-
-        document.getElementById('accSummaryName').textContent = data.fullName || '';
-        document.getElementById('accSummaryEmail').textContent = data.email || 'Chưa cập nhật email';
-        const phoneEl = document.getElementById('accSummaryPhone');
-        if (phoneEl) phoneEl.textContent = data.phoneNumber || 'Chưa cập nhật số điện thoại';
-    }
-
-    function formatDateVn(iso) {
-        const parts = iso.split('-');
-        return parts.length === 3 ? (parts[2] + '/' + parts[1] + '/' + parts[0]) : iso;
-    }
-
-    // ---- Avatar upload ----
-    document.getElementById('accAvatarInput').addEventListener('change', function () {
-        const file = this.files && this.files[0];
-        const errEl = document.getElementById('accAvatarError');
-        errEl.classList.add('hidden');
-        if (!file) return;
-
-        if (file.size > 2 * 1024 * 1024) {
-            errEl.textContent = 'Ảnh quá lớn. Vui lòng chọn ảnh dưới 2MB.';
-            errEl.classList.remove('hidden');
-            this.value = '';
-            return;
-        }
-        if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-            errEl.textContent = 'Chỉ hỗ trợ định dạng JPG, PNG, WEBP hoặc GIF.';
-            errEl.classList.remove('hidden');
-            this.value = '';
-            return;
-        }
-
-        const fd = new FormData();
-        fd.append('action', 'updateAvatar');
-        fd.append('avatar', file);
-
-        fetch(CTX + '/account/update-profile', { method: 'POST', body: fd })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    document.querySelectorAll('.js-avatar-img').forEach(img => { img.src = data.avatarUrl; img.hidden = false; img.classList.remove('hidden'); });
-                    document.querySelectorAll('.js-avatar-initial').forEach(el => { el.hidden = true; });
-                    showToast('Thành công', 'Đã cập nhật ảnh đại diện.');
-                } else {
-                    errEl.textContent = data.message || 'Không thể tải ảnh lên.';
-                    errEl.classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                errEl.textContent = 'Lỗi kết nối khi tải ảnh. Vui lòng thử lại.';
-                errEl.classList.remove('hidden');
-            });
-    });
 
     // ---- Change password ----
     function openPwModal() {
