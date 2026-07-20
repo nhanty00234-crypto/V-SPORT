@@ -445,7 +445,9 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                      "JOIN San s ON l.SanID = s.SanID " +
                      "LEFT JOIN Accounts a ON l.AccountID = a.AccountID " +
                      "WHERE s.CoSoID = ? AND l.IsDeleted = 0 " +
-                     "ORDER BY l.NgayDat DESC, l.GioBatDau DESC";
+                     // Sắp xếp theo thời điểm TẠO đơn (CreatedTime), không phải ngày/giờ SÂN được đặt (NgayDat/GioBatDau) —
+                     // hai khái niệm khác nhau: đơn tạo gần đây cho slot tuần sau phải hiện trên đơn tạo hôm qua cho slot hôm nay.
+                     "ORDER BY ISNULL(l.CreatedTime, CAST('1900-01-01' AS DATETIME)) DESC, l.DatSanID DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
