@@ -253,8 +253,8 @@
 <div class="dc-confirm" id="dcInviteDialog" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dcInviteTitle">
     <p id="dcInviteTitle" style="font-weight:700;font-size:14.5px;margin:0 0 4px;">Mời thành viên</p>
     <div class="dt-field" style="text-align:left;">
-        <label style="display:block;font-size:12.5px;font-weight:700;margin:10px 0 6px;">Tên đăng nhập</label>
-        <input type="text" id="dcInviteUsername" class="dt-input" placeholder="username" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--vs-border);"/>
+        <label style="display:block;font-size:12.5px;font-weight:700;margin:10px 0 6px;">Email</label>
+        <input type="email" id="dcInviteUsername" class="dt-input" placeholder="name@example.com" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--vs-border);"/>
     </div>
     <div class="row" style="margin-top:14px;">
         <button type="button" id="dcInviteCancel">Hủy</button>
@@ -425,8 +425,8 @@
     inviteBackdrop.addEventListener('click', closeInvite);
     document.getElementById('dcInviteSend').addEventListener('click', function () {
         var username = document.getElementById('dcInviteUsername').value.trim();
-        if (!username) { toast('Vui lòng nhập tên đăng nhập.', 'danger'); return; }
-        post(CTX + '/customer/doi-nhom/moi-thanh-vien', { teamId: TEAM_ID, username: username }).then(function (data) {
+        if (!username) { toast('Vui lòng nhập email.', 'danger'); return; }
+        post(CTX + '/customer/doi-nhom/moi-thanh-vien', { teamId: TEAM_ID, email: username }).then(function (data) {
             toast(data.message, data.success ? 'success' : 'danger');
             if (data.success) closeInvite();
         });

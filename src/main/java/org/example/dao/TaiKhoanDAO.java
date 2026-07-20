@@ -29,6 +29,7 @@ public interface TaiKhoanDAO {
     Boolean kiemTraEmailTonTai(String email);
     Boolean capNhatMatKhau(String email, String newPassword);
     TaiKhoan findByUsername(String username);
+    TaiKhoan findByEmail(String email);
 
     // Logic previously in service
     String sendRegistrationOTP(String email, String fullName);

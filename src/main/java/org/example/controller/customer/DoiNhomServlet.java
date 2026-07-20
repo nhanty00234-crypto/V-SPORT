@@ -382,14 +382,14 @@ public class DoiNhomServlet extends HttpServlet {
         TaiKhoan user = requireCustomerJson(req, resp);
         if (user == null) return;
         Integer teamId = parseIntSafe(req.getParameter("teamId"));
-        String username = req.getParameter("username");
-        if (teamId == null || username == null || username.trim().isEmpty()) {
-            writeJson(resp, 400, Map.of("success", false, "message", "Vui lòng nhập tên đăng nhập cần mời."));
+        String email = req.getParameter("email");
+        if (teamId == null || email == null || email.trim().isEmpty()) {
+            writeJson(resp, 400, Map.of("success", false, "message", "Vui lòng nhập email cần mời."));
             return;
         }
-        TaiKhoan invited = taiKhoanDAO.findByUsername(username.trim());
+        TaiKhoan invited = taiKhoanDAO.findByEmail(email.trim());
         if (invited == null || (invited.isDeleted() != null && invited.isDeleted()) || invited.isLocked()) {
-            writeJson(resp, 404, Map.of("success", false, "message", "Không tìm thấy tài khoản khách hàng hợp lệ với tên đăng nhập này."));
+            writeJson(resp, 404, Map.of("success", false, "message", "Không tìm thấy tài khoản khách hàng hợp lệ với email này."));
             return;
         }
         if (invited.getRoleId() != RoleRedirectUtil.ROLE_CUSTOMER) {

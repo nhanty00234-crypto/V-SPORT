@@ -307,10 +307,6 @@
                     <input type="hidden" name="gender" value="Khác">
 
                     <div class="authdd-field">
-                        <label class="authdd-label">Tên đăng nhập</label>
-                        <input type="text" name="username" required placeholder="Tên đăng nhập" class="authdd-input">
-                    </div>
-                    <div class="authdd-field">
                         <label class="authdd-label">Họ và tên</label>
                         <input type="text" name="fullname" required placeholder="Nhập họ và tên" class="authdd-input">
                     </div>
@@ -652,7 +648,6 @@
         const errorBanner = document.getElementById('register-error-banner');
         if (errorBanner) errorBanner.hidden = true;
 
-        const username = form.username.value.trim();
         const email = form.email.value.trim();
         const phone = form.phone.value.trim();
         const password = document.getElementById('modal-reg-pass').value;
@@ -662,8 +657,6 @@
             if (errorBanner) { errorBanner.querySelector('.error-msg').textContent = msg; errorBanner.hidden = false; }
         }
 
-        if (username.indexOf(' ') >= 0) { showError("Tên đăng nhập không được chứa khoảng trắng!"); return; }
-        if (username.length < 3 || username.length > 50) { showError("Tên đăng nhập phải từ 3 đến 50 ký tự!"); return; }
         if (email.indexOf(' ') >= 0) { showError("Email không được chứa khoảng trắng!"); return; }
         if (!/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) { showError("Định dạng Email không hợp lệ!"); return; }
         if (!/^(0|\+84)[35789][0-9]{8}$/.test(phone)) { showError("Số điện thoại không hợp lệ (Phải bắt đầu bằng 0 hoặc +84 và có 10 số)!"); return; }

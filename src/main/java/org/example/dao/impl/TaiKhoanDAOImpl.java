@@ -289,6 +289,22 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     }
 
     @Override
+    public TaiKhoan findByEmail(String email) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            List<TaiKhoan> accounts = em.createQuery("SELECT a FROM TaiKhoan a WHERE a.email = :email", TaiKhoan.class)
+                                       .setParameter("email", email)
+                                       .getResultList();
+            return accounts.isEmpty() ? null : accounts.get(0);
+        } catch (Exception e) {
+            logger.error("Lỗi tìm tài khoản theo email {}: {}", email, e.getMessage(), e);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public Boolean kiemtraUsername(String username) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
