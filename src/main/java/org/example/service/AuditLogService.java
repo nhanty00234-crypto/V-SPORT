@@ -57,6 +57,7 @@ public class AuditLogService {
     public static final String ENTITY_YEU_CAU_NGHI = "YeuCauNghi";
     public static final String ENTITY_DAT_SAN    = "LichDatSan";
     public static final String ENTITY_REPUTATION = "CustomerReputation";
+    public static final String ENTITY_HOA_DON    = "HoaDon";
 
     /**
      * Ghi một bản ghi audit log. Không ném exception ra ngoài — lỗi log không được phá request chính.
