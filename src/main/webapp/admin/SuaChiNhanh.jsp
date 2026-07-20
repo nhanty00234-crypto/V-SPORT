@@ -85,85 +85,9 @@ body { font-family: 'Inter', sans-serif; }
                 </select>
             </div>
 
-            <div class="flex flex-col gap-1.5 col-span-1 md:col-span-2">
-                <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Môn thể thao (Cung cấp tại Cơ Sở)</label>
-                <div class="flex flex-col gap-3 p-4 bg-zinc-50 rounded-xl border border-zinc-100">
-                    <div class="flex items-center justify-between gap-4 py-1.5 border-b border-zinc-200/60 last:border-b-0">
-                        <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer select-none">
-                            <input type="checkbox" name="loaiHinhKinhDoanh" value="Bóng đá" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Bóng đá') ? 'checked' : ''} 
-                                   onchange="toggleSportCount(this, 'soLuongSan_BongDa')" 
-                                   class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600"> 
-                            <span class="font-medium">Bóng đá</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-zinc-500">Số sân:</span>
-                            <input type="number" id="soLuongSan_BongDa" name="soLuongSan_BongDa" 
-                                   value="${countBongDa > 0 ? countBongDa : (chiNhanh.loaiHinhKinhDoanh.contains('Bóng đá') ? 1 : 0)}" 
-                                   min="1" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Bóng đá') ? '' : 'disabled'} 
-                                   oninput="updateTotalCourts()" 
-                                   class="sport-count w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm focus:border-zinc-400 focus:outline-none transition-all font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400">
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between gap-4 py-1.5 border-b border-zinc-200/60 last:border-b-0">
-                        <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer select-none">
-                            <input type="checkbox" name="loaiHinhKinhDoanh" value="Cầu lông" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Cầu lông') ? 'checked' : ''} 
-                                   onchange="toggleSportCount(this, 'soLuongSan_CauLong')" 
-                                   class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600"> 
-                            <span class="font-medium">Cầu lông</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-zinc-500">Số sân:</span>
-                            <input type="number" id="soLuongSan_CauLong" name="soLuongSan_CauLong" 
-                                   value="${countCauLong > 0 ? countCauLong : (chiNhanh.loaiHinhKinhDoanh.contains('Cầu lông') ? 1 : 0)}" 
-                                   min="1" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Cầu lông') ? '' : 'disabled'} 
-                                   oninput="updateTotalCourts()" 
-                                   class="sport-count w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm focus:border-zinc-400 focus:outline-none transition-all font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 py-1.5 border-b border-zinc-200/60 last:border-b-0">
-                        <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer select-none">
-                            <input type="checkbox" name="loaiHinhKinhDoanh" value="Tennis" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Tennis') ? 'checked' : ''} 
-                                   onchange="toggleSportCount(this, 'soLuongSan_Tennis')" 
-                                   class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600"> 
-                            <span class="font-medium">Tennis</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-zinc-500">Số sân:</span>
-                            <input type="number" id="soLuongSan_Tennis" name="soLuongSan_Tennis" 
-                                   value="${countTennis > 0 ? countTennis : (chiNhanh.loaiHinhKinhDoanh.contains('Tennis') ? 1 : 0)}" 
-                                   min="1" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Tennis') ? '' : 'disabled'} 
-                                   oninput="updateTotalCourts()" 
-                                   class="sport-count w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm focus:border-zinc-400 focus:outline-none transition-all font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 py-1.5 border-b border-zinc-200/60 last:border-b-0">
-                        <label class="flex items-center gap-2.5 text-sm text-zinc-600 cursor-pointer select-none">
-                            <input type="checkbox" name="loaiHinhKinhDoanh" value="Pickleball" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Pickleball') ? 'checked' : ''} 
-                                   onchange="toggleSportCount(this, 'soLuongSan_Pickleball')" 
-                                   class="sport-checkbox w-4 h-4 rounded border-zinc-300 text-blue-600"> 
-                            <span class="font-medium">Pickleball</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-zinc-500">Số sân:</span>
-                            <input type="number" id="soLuongSan_Pickleball" name="soLuongSan_Pickleball" 
-                                   value="${countPickleball > 0 ? countPickleball : (chiNhanh.loaiHinhKinhDoanh.contains('Pickleball') ? 1 : 0)}" 
-                                   min="1" 
-                                   ${chiNhanh.loaiHinhKinhDoanh.contains('Pickleball') ? '' : 'disabled'} 
-                                   oninput="updateTotalCourts()" 
-                                   class="sport-count w-16 h-8 px-2 rounded-lg border border-zinc-200 text-sm focus:border-zinc-400 focus:outline-none transition-all font-semibold bg-white text-center disabled:bg-zinc-100 disabled:text-zinc-400">
-                        </div>
-                    </div>
-                </div>
+            <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-blue-700 col-span-1 md:col-span-2">
+                <i class="ti ti-info-circle text-sm shrink-0"></i>
+                <span>Môn thể thao và số sân do Quản lý cơ sở cấu hình tại trang "Quản lý Sân" của chi nhánh — Admin không chỉnh tại đây.</span>
             </div>
 
             <!-- Địa chỉ + Button định vị -->
@@ -192,12 +116,6 @@ body { font-family: 'Inter', sans-serif; }
             <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Số điện thoại</label>
                 <input type="text" name="soDienThoai" value="${chiNhanh.soDienThoai}" required class="h-10 px-4 rounded-xl border border-zinc-200 text-sm focus:border-zinc-900 focus:outline-none transition-all font-medium">
-            </div>
-
-            <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Tổng số lượng sân dự kiến</label>
-                <input type="number" id="soLuongSanDuKienDisplay" readonly value="${chiNhanh.soLuongSanDuKien}" class="h-10 px-4 rounded-xl border border-zinc-200 text-sm focus:outline-none bg-zinc-100 font-black text-zinc-500 select-none">
-                <input type="hidden" name="soLuongSanDuKien" id="soLuongSanDuKien" value="${chiNhanh.soLuongSanDuKien}">
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -262,42 +180,7 @@ body { font-family: 'Inter', sans-serif; }
         document.getElementById('sidebar').classList.toggle('-translate-x-full');
     });
 
-    function toggleSportCount(checkbox, inputId) {
-        const input = document.getElementById(inputId);
-        if (checkbox.checked) {
-            input.removeAttribute('disabled');
-            if (parseInt(input.value) <= 0 || !input.value) {
-                input.value = 1;
-            }
-        } else {
-            input.setAttribute('disabled', 'true');
-            input.value = 0;
-        }
-        updateTotalCourts();
-    }
-
-    function updateTotalCourts() {
-        let total = 0;
-        const countInputs = document.querySelectorAll('.sport-count');
-        countInputs.forEach(input => {
-            if (!input.hasAttribute('disabled')) {
-                const val = parseInt(input.value) || 0;
-                total += val;
-            }
-        });
-        const display = document.getElementById('soLuongSanDuKienDisplay');
-        const hidden = document.getElementById('soLuongSanDuKien');
-        if (display) display.value = total;
-        if (hidden) hidden.value = total;
-    }
-
     function validateForm() {
-        updateTotalCourts();
-        const total = parseInt(document.getElementById('soLuongSanDuKien').value) || 0;
-        if (total <= 0) {
-            alert('Vui lòng chọn ít nhất một môn thể thao và nhập số lượng sân lớn hơn 0.');
-            return false;
-        }
         const viDo = document.getElementById('viDoInput').value;
         const kinhDo = document.getElementById('kinhDoInput').value;
         if (!viDo || !kinhDo) {
@@ -306,11 +189,6 @@ body { font-family: 'Inter', sans-serif; }
         }
         return true;
     }
-
-    // Initialize counts on page load
-    window.addEventListener('DOMContentLoaded', () => {
-        updateTotalCourts();
-    });
 
     // ==========================================
     // GEOLOCATION LOOKUP SCRIPTS
