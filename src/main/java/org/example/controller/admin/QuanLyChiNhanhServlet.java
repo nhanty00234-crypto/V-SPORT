@@ -161,8 +161,8 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                     String diaChi = chiNhanh.getDiaChi() != null ? chiNhanh.getDiaChi().replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") : "";
                     String sdt = chiNhanh.getSoDienThoai() != null ? chiNhanh.getSoDienThoai().replace("\"", "\\\"") : "";
                     String trangThai = chiNhanh.getTrangThai() != null ? chiNhanh.getTrangThai().replace("\"", "\\\"") : "";
-                    String gioMo = chiNhanh.getGioMoCua() != null ? chiNhanh.getGioMoCua().toString() : "00:00";
-                    String gioDong = chiNhanh.getGioDongCua() != null ? chiNhanh.getGioDongCua().toString() : "00:00";
+                    String gioMo = chiNhanh.getGioMoCua() != null ? chiNhanh.getGioMoCua().toString() : null;
+                    String gioDong = chiNhanh.getGioDongCua() != null ? chiNhanh.getGioDongCua().toString() : null;
                     String viDo = chiNhanh.getViDo() != null ? chiNhanh.getViDo().toPlainString() : "";
                     String kinhDo = chiNhanh.getKinhDo() != null ? chiNhanh.getKinhDo().toPlainString() : "";
 
@@ -173,8 +173,8 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                         + "\"diaChi\":\"" + diaChi + "\","
                         + "\"soDienThoai\":\"" + sdt + "\","
                         + "\"trangThai\":\"" + trangThai + "\","
-                        + "\"gioMoCua\":\"" + gioMo + "\","
-                        + "\"gioDongCua\":\"" + gioDong + "\","
+                        + "\"gioMoCua\":" + (gioMo != null ? "\"" + gioMo + "\"" : "null") + ","
+                        + "\"gioDongCua\":" + (gioDong != null ? "\"" + gioDong + "\"" : "null") + ","
                         + "\"soLuongSanDuKien\":" + chiNhanh.getSoLuongSanDuKien() + ","
                         + "\"viDo\":\"" + viDo + "\","
                         + "\"kinhDo\":\"" + kinhDo + "\","
@@ -328,11 +328,19 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             chiNhanh.setDiaChi(diaChi);
             chiNhanh.setSoDienThoai(soDienThoai);
             chiNhanh.setTrangThai(trangThai);
-            chiNhanh.setGioMoCua(gioMo);
-            chiNhanh.setGioDongCua(gioDong);
+            // Chỉ ghi đè giờ hoạt động khi form thực sự gửi giá trị — không tự gán
+            // mặc định 8:00/22:00 (đó chỉ dùng cho "Thêm Cơ Sở"). Nếu form để trống,
+            // giữ nguyên giá trị đã nạp từ DB ở trên (kể cả khi giá trị đó là NULL).
+            if (gioMoStr != null && !gioMoStr.isEmpty()) {
+                chiNhanh.setGioMoCua(LocalTime.parse(gioMoStr));
+            }
+            if (gioDongStr != null && !gioDongStr.isEmpty()) {
+                chiNhanh.setGioDongCua(LocalTime.parse(gioDongStr));
+            }
             chiNhanh.setMoTa(moTa);
-            chiNhanh.setLoaiHinhKinhDoanh(loaiHinh);
-            chiNhanh.setSoLuongSanDuKien(totalCourts);
+            // Môn thể thao / số sân KHÔNG được chỉnh ở form sửa cơ sở (Admin) — thuộc
+            // quyền Quản lý cơ sở tại trang "Quản lý Sân". Không gọi setLoaiHinhKinhDoanh/
+            // setSoLuongSanDuKien/syncCourtsForBranch ở đây để tránh xóa nhầm sân/lịch đặt.
             // Chỉ cập nhật vị trí khi form gửi tọa độ mới; nếu không đổi vị trí thì
             // giữ nguyên ViDo/KinhDo cũ đã nạp từ DB ở trên.
             if (viDo != null && kinhDo != null) {
@@ -341,8 +349,6 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             }
 
             chiNhanhDAO.updateCoSo(chiNhanh);
-            // Dynamic court synchronization for edited branch
-            syncCourtsForBranch(id, sportCounts);
             if (user != null) {
                 AuditLogService.log(req, user,
                     AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_CO_SO,
