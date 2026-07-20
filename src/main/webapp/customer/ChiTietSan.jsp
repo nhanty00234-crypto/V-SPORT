@@ -46,7 +46,7 @@
 </head>
 <body class="bg-[#f7f9fb] text-[#191c1e] font-sans antialiased min-h-screen flex flex-col">
 
-    <jsp:include page="/common/header.jsp" />
+    <jsp:include page="/customer/common/vsport-header.jsp" />
 
     <main class="flex-grow pt-[80px] pb-24 lg:pb-16">
         <div class="w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-8">

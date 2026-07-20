@@ -60,7 +60,7 @@
 <body class="min-h-screen flex flex-col antialiased">
 
     <!-- Header Navigation -->
-    <jsp:include page="/common/header.jsp" />
+    <jsp:include page="/customer/common/vsport-header.jsp" />
 
     <!-- Main Content Area -->
     <main class="flex-grow pt-20 md:pt-24 pb-10">

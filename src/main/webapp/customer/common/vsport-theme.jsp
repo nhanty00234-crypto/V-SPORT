@@ -19,26 +19,26 @@
            Single sans family, tuned for Vietnamese; headings share it (no condensed/display). */
         --vs-font-sans: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         --vs-font-heading: var(--vs-font-sans);
-        --vs-text-primary: #102A43;
+        --vs-text-primary: #111111;
 
-        /* ---- Brand navy ---- */
-        --vs-primary-950: #071A2F;
-        --vs-primary-900: #0B2545;
-        --vs-primary-800: #123A63;
-        --vs-primary-700: #185A9D;
-        --vs-primary-600: #1677D2;
-        --vs-primary-500: #2196F3;
+        /* ---- Brand Black/Dark (formerly navy) ---- */
+        --vs-primary-950: #000000;
+        --vs-primary-900: #111111;
+        --vs-primary-800: #222222;
+        --vs-primary-700: #333333;
+        --vs-primary-600: #e3000f; /* Red as primary action */
+        --vs-primary-500: #ff1a2b;
 
-        /* ---- Technology / location accent (cyan) ---- */
-        --vs-cyan-600: #08A9CC;
-        --vs-cyan-500: #18C8E8;
-        --vs-cyan-100: #DDF8FC;
-        --vs-cyan-50: #F0FCFE;
+        /* ---- Accent (Red instead of cyan) ---- */
+        --vs-cyan-600: #c2000d;
+        --vs-cyan-500: #e3000f;
+        --vs-cyan-100: #ffe5e6;
+        --vs-cyan-50: #fff0f1;
 
-        /* ---- Main CTA (orange) ---- */
-        --vs-orange-600: #F97316;
-        --vs-orange-500: #FF8A24;
-        --vs-orange-100: #FFF1E5;
+        /* ---- Main CTA (Red instead of orange) ---- */
+        --vs-orange-600: #c2000d;
+        --vs-orange-500: #e3000f;
+        --vs-orange-100: #ffe5e6;
 
         /* ---- Back-compat aliases used across existing customer/auth markup ---- */
         --vs-primary: var(--vs-primary-600);        /* solid buttons / white-text surfaces (AA on white) */
@@ -48,23 +48,23 @@
         --vs-primary-100: var(--vs-cyan-100);
 
         /* ---- neutrals / surfaces ---- */
-        --vs-background: #F4F7FB;
-        --vs-ink: #102A43;
-        --vs-text: #102A43;
-        --vs-text-secondary: #486581;
-        --vs-muted: #829AB1;
-        --vs-surface: #F4F7FB;
-        --vs-surface-soft: #EDF4FA;
+        --vs-background: #f8f9fa; /* Light gray background */
+        --vs-ink: #111111;
+        --vs-text: #111111;
+        --vs-text-secondary: #444444;
+        --vs-muted: #777777;
+        --vs-surface: #f8f9fa;
+        --vs-surface-soft: #eeeeee;
         --vs-card: #FFFFFF;
-        --vs-border: #DCE5EF;
+        --vs-border: #dddddd;
 
         /* ---- semantic (Green stays Success only; never rebranded) ---- */
         --vs-success: #16A36A;
         --vs-success-bg: #E5F7EF;
         --vs-warning: #F4B740;
         --vs-warning-bg: #FFF7DA;
-        --vs-danger: #E5484D;
-        --vs-danger-bg: #FDEBEC;
+        --vs-danger: #e3000f;
+        --vs-danger-bg: #ffe5e6;
 
         /* legacy semantic aliases kept so existing markup keeps working */
         --vs-danger-legacy: var(--vs-danger);
@@ -73,8 +73,8 @@
         --vs-ok-bg: var(--vs-success-bg);
 
         /* ---- interaction ---- */
-        --vs-focus-ring: rgba(24, 200, 232, 0.35);
-        --vs-overlay: rgba(7, 26, 47, 0.68);
+        --vs-focus-ring: rgba(227, 0, 15, 0.35); /* Red focus ring */
+        --vs-overlay: rgba(0, 0, 0, 0.68);
 
         /* ---- radius scale (one system) ---- */
         --vs-r-card: 14px;

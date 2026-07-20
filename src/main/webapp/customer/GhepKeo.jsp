@@ -696,7 +696,7 @@
 </head>
 <body class="vs-matchmaking-page">
 
-<jsp:include page="/common/header.jsp" />
+<jsp:include page="/customer/common/vsport-header.jsp" />
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
