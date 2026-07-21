@@ -18,7 +18,7 @@
 
     <style>
         :root {
-            --vs-red: #ff2433;
+            --vs-red: #2563eb;
             --vs-red-hover: #d91b26;
             --vs-black: #111827;
             --vs-gray-900: #1f2937;

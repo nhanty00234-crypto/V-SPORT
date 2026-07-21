@@ -15,70 +15,244 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/vsport-customer.css">
-    <link rel="stylesheet" href="assets/css/vsport-home-enhanced.css">
+    <link rel="stylesheet" href="assets/css/vsport-customer.css?v=2">
+    <link rel="stylesheet" href="assets/css/vsport-home-enhanced.css?v=2">
 </head>
 <body>
 
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <!-- Top Contact Bar -->
-    <div class="top-bar">
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+        }
+        
+        .new-header {
+            background-color: #ffffff;
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .new-header .container {
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .new-header .logo a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #111;
+        }
+
+        .new-header .logo-icon {
+            background-color: var(--primary-blue);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .new-header .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .new-header .main-menu ul {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .new-header .main-menu a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: none !important;
+            transition: color 0.2s;
+        }
+
+        .new-header .main-menu a:hover {
+            color: var(--primary-blue);
+        }
+        
+        .new-header .header-left {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .new-header .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .new-header .location {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #4b5563;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .new-header .location i {
+            color: var(--primary-blue);
+        }
+
+        .new-header .action-icon {
+            color: #4b5563;
+            font-size: 18px;
+            text-decoration: none;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .new-header .action-icon:hover {
+            color: var(--primary-blue);
+        }
+
+        .new-header .notification-icon {
+            position: relative;
+            color: #4b5563;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .new-header .notification-icon:hover {
+            color: var(--primary-blue);
+        }
+
+        .new-header .notification-dot {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+            border: 1px solid #fff;
+        }
+
+        .new-header .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .new-header .user-profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .new-header .user-profile span {
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+        }
+
+        .new-header .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            transition: background-color 0.2s;
+        }
+
+        .new-header .btn-primary:hover {
+            background-color: #1d4ed8;
+            color: white;
+        }
+    </style>
+
+    <!-- Main Navbar -->
+    <header class="new-header">
         <div class="container">
-            <div class="top-bar-left">
-                <span><i class="fa-solid fa-phone"></i> Hỗ trợ: 1900 1234</span>
-                <span class="divider">|</span>
-                <span><i class="fa-solid fa-envelope"></i> contact@v-sport.vn</span>
+            <div class="header-left">
+                <div class="logo">
+                    <a href="${pageContext.request.contextPath}/">
+                        <div class="logo-icon">S</div>
+                        <span class="logo-text">Sânzy</span>
+                    </a>
+                </div>
+                
+                <nav class="main-menu">
+                    <ul>
+                        <li><a href="${pageContext.request.contextPath}/">Khám phá</a></li>
+                        <li><a href="${pageContext.request.contextPath}/customer/tim-kiem">Tìm sân</a></li>
+                        <li><a href="${pageContext.request.contextPath}/customer/ghep-keo">Gắn bạn</a></li>
+                        <li><a href="#">Cộng đồng</a></li>
+                        <li><a href="#">Ưu đãi</a></li>
+                    </ul>
+                </nav>
             </div>
-            <div class="top-bar-right">
-                <a href="#">Tải Ứng Dụng</a>
-                <span class="divider">|</span>
-                <a href="#">Trở thành đối tác</a>
-                <span class="divider">|</span>
+            
+            <div class="nav-actions">
+                <div class="location">
+                    <i class="fa-solid fa-location-dot"></i> Hà Nội
+                </div>
+                
+                <a href="#" class="action-icon"><i class="fa-regular fa-heart"></i></a>
+                
+                <div class="notification-icon">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </div>
+                
                 <% if (session != null && session.getAttribute("user") != null) {
                     org.example.model.TaiKhoan user = (org.example.model.TaiKhoan) session.getAttribute("user");
                     String displayName = (user.getFullName() != null && !user.getFullName().trim().isEmpty()) ? user.getFullName() : "Khách hàng";
                     String rolePath = org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
                 %>
-                    <div class="user-profile-menu" style="display:inline-flex; align-items:center; gap: 8px;">
-                        <i class="fa-solid fa-circle-user" style="font-size: 16px; color: var(--accent-red, #ff2433);"></i>
-                        <a href="${pageContext.request.contextPath}<%= rolePath %>" style="font-weight: 600;"><%= displayName %></a>
-                        <span class="divider">|</span>
-                        <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
-                    </div>
+                    <a href="${pageContext.request.contextPath}<%= rolePath %>" class="user-profile">
+                        <img src="${pageContext.request.contextPath}/assets/images/default-avatar.png" alt="Avatar" onerror="this.src='https://ui-avatars.com/api/?name=<%= displayName %>&background=random'">
+                        <span><%= displayName %></span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: #6b7280;"></i>
+                    </a>
                 <% } else { %>
-                    <a href="javascript:void(0)" onclick="openAuthModal('login')">Đăng nhập</a>
-                    <a href="javascript:void(0)" onclick="openAuthModal('register')" class="btn-register-topbar">Đăng ký</a>
+                    <div class="user-profile" onclick="toggleAuthDropdown('login')">
+                        <img src="https://ui-avatars.com/api/?name=Hiền&background=f3f4f6&color=333" alt="Avatar">
+                        <span>Hiền</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: #6b7280;"></i>
+                    </div>
+                    <div class="auth-dropdown-wrapper" id="authDropdownWrapper" style="display:none;">
+                        <jsp:include page="/auth/AuthDropdown.jsp" />
+                    </div>
                 <% } %>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Navbar -->
-    <header class="navbar">
-        <div class="container">
-            <div class="logo">
-                <a href="#">
-                    V<span class="logo-icon"><i class="fa-solid fa-bolt text-red" style="margin: 0 5px;"></i></span>SPORT
-                </a>
-            </div>
-            <nav class="main-menu">
-                <ul>
-                    <li class="active"><a href="#">TRANG CHỦ</a></li>
-                    <li><a href="${pageContext.request.contextPath}/customer/tim-kiem">TÌM SÂN</a></li>
-                    <li><a href="#matchmaking">GHÉP TRẬN</a></li>
-                    <li><a href="#trusted-players">CỘNG ĐỒNG</a></li>
-                    <li><a href="#">BẢNG GIÁ</a></li>
-                </ul>
-            </nav>
-            <div class="nav-actions">
-                <a href="#" class="action-icon"><i class="fa-solid fa-magnifying-glass"></i></a>
-                <a href="#" class="action-icon cart-icon">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="cart-badge">2</span>
-                </a>
-                <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-primary btn-ripple" style="padding: 10px 20px; font-size: 13px;">Đặt Sân</a>
+                
+                <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn-primary">Đặt sân</a>
             </div>
         </div>
     </header>
@@ -101,7 +275,7 @@
     </div>
 
     <!-- Hero Banner (Enhanced) -->
-    <section class="hero-banner" style="background: linear-gradient(135deg, rgba(17,17,17,0.95) 0%, rgba(135,15,23,0.85) 100%), url('assets/images/vsport/hero/hero-bg.jpg') center/cover fixed;">
+    <section class="hero-banner" style="background: linear-gradient(135deg, rgba(37,99,235,0.95) 0%, rgba(29,78,216,0.85) 100%), url('assets/images/vsport/hero/hero-bg.jpg') center/cover fixed;">
         <div class="hero-overlay"></div>
         <div class="container hero-content">
             <div class="hero-text reveal">
@@ -109,7 +283,7 @@
                 <p>Nền tảng tìm sân trống theo giờ, xem đánh giá thực tế và kết nối với hàng ngàn người chơi cùng trình độ trong khu vực của bạn.</p>
                 <div class="hero-btns">
                     <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-primary btn-ripple">Tìm Sân Trống</a>
-                    <a href="#matchmaking" class="btn-secondary btn-ripple">Ghép Trận Ngay</a>
+                    <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn-secondary btn-ripple">Ghép Trận Ngay</a>
                 </div>
             </div>
             
@@ -314,7 +488,7 @@
     </section>
 
     <!-- Ecosystem Section -->
-    <section class="vs-ecosystem-section">
+    <section class="vs-ecosystem-section" style="padding: 80px 0;">
         <div class="container ecosystem-layout">
             <div class="ecosystem-orbit-wrapper">
                 <div class="ecosystem-orbit">
@@ -326,24 +500,18 @@
                     </div>
 
                     <!-- Sports Icons -->
-                    <button class="orbit-icon icon-sport" style="top: 4%; left: 48%;" data-tooltip="Bóng đá"><i class="fa-regular fa-futbol"></i></button>
-                    <button class="orbit-icon icon-sport" style="top: 14%; left: 18%;" data-tooltip="Cầu lông"><i class="fa-solid fa-table-tennis-paddle-ball"></i></button>
-                    <button class="orbit-icon icon-sport" style="top: 20%; right: 8%;" data-tooltip="Tennis"><i class="fa-solid fa-baseball"></i></button>
-                    <button class="orbit-icon icon-sport" style="top: 50%; right: -27px; margin-top:-27px;" data-tooltip="Pickleball"><i class="fa-solid fa-table-tennis-paddle-ball"></i></button>
-                    <button class="orbit-icon icon-sport" style="bottom: 15%; right: 12%;" data-tooltip="Bóng rổ"><i class="fa-solid fa-basketball"></i></button>
-                    <button class="orbit-icon icon-sport" style="bottom: 4%; left: 45%;" data-tooltip="Bóng chuyền"><i class="fa-solid fa-volleyball"></i></button>
+                    <button class="orbit-icon icon-sport" style="top: 0; left: 50%; transform: translateX(-50%);" data-tooltip="Bóng đá"><i class="fa-regular fa-futbol"></i></button>
+                    <button class="orbit-icon icon-sport" style="top: 25%; right: 0;" data-tooltip="Cầu lông"><i class="fa-solid fa-table-tennis-paddle-ball"></i></button>
+                    <button class="orbit-icon icon-sport" style="bottom: 0; left: 50%; transform: translateX(-50%);" data-tooltip="Tennis"><i class="fa-solid fa-baseball"></i></button>
+                    <button class="orbit-icon icon-sport" style="top: 25%; left: 0;" data-tooltip="Pickleball"><i class="fa-solid fa-table-tennis"></i></button>
 
                     <!-- Function Icons -->
-                    <button class="orbit-icon icon-func" style="bottom: 16%; left: 10%;" data-tooltip="Đặt sân"><i class="fa-solid fa-calendar-check"></i></button>
-                    <button class="orbit-icon icon-func" style="top: 50%; left: -27px; margin-top:-27px;" data-tooltip="Ghép kèo"><i class="fa-solid fa-handshake"></i></button>
-                    <button class="orbit-icon icon-func" style="top: 10%; right: 28%;" data-tooltip="Bản đồ sân"><i class="fa-solid fa-map-location-dot"></i></button>
-                    <button class="orbit-icon icon-func" style="bottom: 8%; right: 35%;" data-tooltip="Thanh toán"><i class="fa-solid fa-credit-card"></i></button>
-                    <button class="orbit-icon icon-func" style="top: 35%; left: 5%;" data-tooltip="Check-in"><i class="fa-solid fa-qrcode"></i></button>
-                    <button class="orbit-icon icon-func" style="bottom: 35%; left: 2%;" data-tooltip="Uy tín"><i class="fa-solid fa-shield-halved"></i></button>
-                    <button class="orbit-icon icon-func" style="top: 25%; right: 0;" data-tooltip="Đánh giá"><i class="fa-solid fa-star"></i></button>
-                    <button class="orbit-icon icon-func" style="bottom: 25%; right: -15px;" data-tooltip="Thông báo"><i class="fa-solid fa-bell"></i></button>
-                    <button class="orbit-icon icon-func" style="top: -15px; right: 25%;" data-tooltip="Chat"><i class="fa-solid fa-comment-dots"></i></button>
-                    <button class="orbit-icon icon-func" style="bottom: -15px; left: 25%;" data-tooltip="Lịch sử"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                    <button class="orbit-icon icon-func" style="top: 10%; right: 15%;" data-tooltip="Đặt sân"><i class="fa-solid fa-calendar-check"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 25%; right: 0;" data-tooltip="Ghép kèo"><i class="fa-solid fa-handshake"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 10%; right: 15%;" data-tooltip="Bản đồ sân"><i class="fa-solid fa-map-location-dot"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 10%; left: 15%;" data-tooltip="Thanh toán"><i class="fa-solid fa-credit-card"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 25%; left: 0;" data-tooltip="Check-in"><i class="fa-solid fa-qrcode"></i></button>
+                    <button class="orbit-icon icon-func" style="top: 10%; left: 15%;" data-tooltip="Uy tín"><i class="fa-solid fa-shield-halved"></i></button>
                 </div>
             </div>
             <div class="ecosystem-copy">
@@ -459,66 +627,6 @@
         </div>
     </section>
 
-    <!-- Enhanced Matchmaking -->
-    <section id="matchmaking" class="section-padding matchmaking-section">
-        <div class="container">
-            <div class="section-heading reveal">
-                <div class="sub-title"><span class="line"></span><span class="text">GHÉP TRẬN</span><span class="line"></span></div>
-                <h2 style="color:#fff;">Tìm Đối Thủ Cùng Trình Độ</h2>
-            </div>
-            
-            <div class="matchmaking-grid reveal">
-                <div class="match-form-box tilt-card">
-                    <h3>Tạo Kèo Nhanh</h3>
-                    <div class="form-group"><label>Môn Thể Thao</label><select><option>Bóng đá 5v5</option><option>Cầu lông đôi</option></select></div>
-                    <div class="form-group"><label>Trình độ mong muốn</label><select><option>Khá</option><option>Giỏi</option></select></div>
-                    <div class="form-group"><label>Số người còn thiếu</label><input type="number" min="1" value="1"></div>
-                    <button class="btn-search btn-ripple" style="width:100%; justify-content:center; margin-top:10px;" onclick="showEnhancedToast('Đã tạo yêu cầu ghép trận', 'success')">Tạo Trận Phù Hợp</button>
-                </div>
-
-                <div class="match-list">
-                    <div class="match-card-enhanced">
-                        <div class="match-header">
-                            <div class="match-creator">
-                                <img src="assets/images/vsport/matches/match-avatar-01.jpg" loading="lazy" alt="Avatar">
-                                <div><h4 style="margin:0;">FC Hùng Dũng</h4><div style="font-size:12px; color:#aaa;">Uy tín: 95/100</div></div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="color:var(--accent-red); font-weight:700; font-size:18px;">Bóng đá 5v5</div>
-                                <div style="font-size:12px; color:#aaa;">Trình độ: Trung bình khá</div>
-                            </div>
-                        </div>
-                        <div style="font-size:13px; color:#ccc; margin-bottom:10px;"><i class="fa-solid fa-location-dot"></i> Sân Chảo Lửa • <i class="fa-solid fa-clock"></i> 19:00 Hôm nay</div>
-                        <div class="match-badges">
-                            <span class="m-badge highlight">Thiếu 2 người</span><span class="m-badge">Gần bạn</span><span class="m-badge">Cần chốt sớm</span>
-                        </div>
-                        <div class="match-progress"><div class="progress-bar" style="width: 80%;"></div></div>
-                        <button class="btn-primary btn-ripple" style="width:100%; text-align:center; padding:10px; border-radius:8px;" onclick="showEnhancedToast('Đã gửi yêu cầu tham gia', 'success')">Xin Tham Gia</button>
-                    </div>
-
-                    <div class="match-card-enhanced stagger-1">
-                        <div class="match-header">
-                            <div class="match-creator">
-                                <img src="assets/images/vsport/matches/match-avatar-02.jpg" loading="lazy" alt="Avatar">
-                                <div><h4 style="margin:0;">Team Cầu Lông Cuối Tuần</h4><div style="font-size:12px; color:#aaa;">Uy tín: 98/100</div></div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="color:var(--accent-red); font-weight:700; font-size:18px;">Cầu lông đôi</div>
-                                <div style="font-size:12px; color:#aaa;">Trình độ: Khá</div>
-                            </div>
-                        </div>
-                        <div style="font-size:13px; color:#ccc; margin-bottom:10px;"><i class="fa-solid fa-location-dot"></i> V-Star Badminton • <i class="fa-solid fa-clock"></i> 17:00 Ngày mai</div>
-                        <div class="match-badges">
-                            <span class="m-badge highlight">Thiếu 1 người</span><span class="m-badge">Cùng trình độ</span>
-                        </div>
-                        <div class="match-progress"><div class="progress-bar" style="width: 90%;"></div></div>
-                        <button class="btn-primary btn-ripple" style="width:100%; text-align:center; padding:10px; border-radius:8px;" onclick="showEnhancedToast('Đã gửi yêu cầu tham gia', 'success')">Xin Tham Gia</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Hot Matches Carousel -->
     <section class="section-padding">
         <div class="container">
@@ -593,7 +701,7 @@
             <div class="community-copy">
                 <h2>Chơi Cùng Nhau, Dù Bạn Ở Đâu</h2>
                 <p>V-Sport giúp bạn tìm đồng đội, tạo kèo, tham gia trận gần khu vực và kết nối với những người chơi cùng trình độ.</p>
-                <a href="#matchmaking" class="btn-text-arrow">Khám phá ghép trận <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn-text-arrow">Khám phá ghép trận <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             <div class="community-visual">
                 <div class="community-collage">
@@ -786,26 +894,6 @@
         </div>
     </section>
 
-    <!-- App Mockup -->
-    <section class="section-padding app-section">
-        <div class="container app-container reveal">
-            <div class="app-mockup-wrapper">
-                <img src="assets/images/vsport/app/app-mockup.png" loading="lazy" alt="App V-SPORT" class="app-phone">
-            </div>
-            <div>
-                <h2 style="font-size:40px; font-family:var(--font-heading); margin-bottom:30px;">Đặt Sân Mọi Lúc,<br>Mọi Nơi</h2>
-                <ul class="app-features">
-                    <li><i class="fa-solid fa-mobile-screen"></i><div><h4 style="font-size:18px;">App Tối Ưu, Mượt Mà</h4><p style="color:#aaa; font-size:14px;">Trải nghiệm thao tác trên di động tốt nhất.</p></div></li>
-                    <li><i class="fa-solid fa-bell"></i><div><h4 style="font-size:18px;">Nhận Thông Báo Push</h4><p style="color:#aaa; font-size:14px;">Không bỏ lỡ lịch thi đấu hay thông báo ghép trận.</p></div></li>
-                    <li><i class="fa-solid fa-qrcode"></i><div><h4 style="font-size:18px;">Check-in Bằng QR Code</h4><p style="color:#aaa; font-size:14px;">Đến sân check-in chỉ trong 1 giây nhanh chóng.</p></div></li>
-                </ul>
-                <div style="display:flex; gap:15px; margin-top:30px;">
-                    <a href="#" class="btn-primary btn-ripple"><i class="fa-brands fa-apple"></i> App Store</a>
-                    <a href="#" class="btn-secondary btn-ripple"><i class="fa-brands fa-google-play"></i> Google Play</a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- User Reviews -->
     <section class="section-padding" style="background:#fff;">
@@ -852,7 +940,7 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="stats-section" style="background: linear-gradient(rgba(17, 17, 17, 0.9), rgba(135, 15, 23, 0.8)), url('assets/images/vsport/hero/hero-bg.jpg') center/cover; background-attachment: fixed;">
+    <section class="stats-section" style="background: linear-gradient(rgba(37, 99, 235, 0.9), rgba(29, 78, 216, 0.8)), url('assets/images/vsport/hero/hero-bg.jpg') center/cover; background-attachment: fixed;">
         <div class="container">
             <div class="stats-grid reveal">
                 <div class="stat-item"><h3 class="counter" data-target="12000">0</h3><p>Lượt đặt sân</p></div>
@@ -948,17 +1036,16 @@
         </div>
     </footer>
 
-    <!-- Mobile Sticky CTA -->
     <div class="mobile-sticky-cta">
         <a href="#quick-booking" class="active"><i class="fa-solid fa-calendar-check"></i> Đặt Sân</a>
-        <a href="#matchmaking"><i class="fa-solid fa-users"></i> Ghép Trận</a>
+        <a href="${pageContext.request.contextPath}/customer/ghep-keo"><i class="fa-solid fa-users"></i> Ghép Trận</a>
         <a href="#"><i class="fa-solid fa-map-location-dot"></i> Bản Đồ</a>
     </div>
 
     <!-- Custom JS -->
     <script src="assets/js/vsport-customer.js"></script>
     <script src="assets/js/vsport-home-enhanced.js"></script>
-    <jsp:include page="/auth/AuthModal.jsp" />
+    <!-- Removed old AuthModal.jsp -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const urlParams = new URLSearchParams(window.location.search);

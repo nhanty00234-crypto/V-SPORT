@@ -468,9 +468,9 @@
         .vs-settings-row:focus-visible { outline: 2px solid var(--primary-mid); outline-offset: 1px; }
         .vs-settings-row .lci { width: 20px; height: 20px; flex-shrink: 0; color: inherit; stroke-width: 1.9; }
         .vs-settings-row .lci-chev { width: 20px; height: 20px; margin-left: auto; flex-shrink: 0; color: var(--settings-chev); }
-        .vs-settings-row.is-danger { color: #ff1f2d; }
+        .vs-settings-row.is-danger { color: #2563eb; }
         .vs-settings-row.is-danger .lci,
-        .vs-settings-row.is-danger .lci-chev { color: #ff1f2d; }
+        .vs-settings-row.is-danger .lci-chev { color: #2563eb; }
         .vs-settings-row.is-danger:hover,
         .vs-settings-row.is-danger:focus-visible { border-color: rgba(255, 31, 45, .4); }
     </style>
