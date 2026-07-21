@@ -126,9 +126,13 @@ public class DatSanServlet extends HttpServlet {
         if (path.equals("/customer/chi-tiet-san")) {
             handleGetChiTietSan(req, resp);
         } else if (isBookingPage(path)) {
-            loadBookingPage(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/customer/tim-kiem");
         } else if (path.equals("/customer/lich-su-dat-san")) {
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san?openHistory=true");
+            if (user == null) {
+                resp.sendRedirect(req.getContextPath() + "/dangnhap");
+                return;
+            }
+            loadHistoryPage(req, resp, user);
         } else if (path.equals("/customer/dat-dich-vu")) {
             handleGetDichVu(req, resp, user);
         } else if (path.equals("/customer/payos-return")) {

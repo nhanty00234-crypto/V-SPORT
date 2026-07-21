@@ -26,7 +26,7 @@
         }
         .hs-hero {
             position: relative; overflow: hidden; color: #fff; border-radius: 20px;
-            background: linear-gradient(135deg, #0B2545 0%, #123A63 55%, #185A9D 100%);
+            background: linear-gradient(135deg, #111111 0%, #4a0005 55%, #e3000f 100%);
         }
         .hs-hero::after {
             content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px;
@@ -37,8 +37,8 @@
             font-size:12.5px; font-weight:700; color:#475569; background:#fff; border:1px solid #e2e8f0;
             cursor:pointer; white-space:nowrap; transition:all .15s ease;
         }
-        .hs-filter-chip:hover { border-color:#18C8E8; color:#0f172a; }
-        .hs-filter-chip.is-active { background:#1677D2; border-color:#1677D2; color:#fff; }
+        .hs-filter-chip:hover { border-color:#e3000f; color:#0f172a; }
+        .hs-filter-chip.is-active { background:#e3000f; border-color:#e3000f; color:#fff; }
 
         /* Booking card: one responsive layout, no table, no horizontal overflow */
         .hs-card {
@@ -68,7 +68,7 @@
 
             <!-- Breadcrumb -->
             <nav class="text-xs text-slate-500 mb-3 flex items-center gap-1.5" aria-label="Breadcrumb">
-                <a href="${pageContext.request.contextPath}/index.jsp" class="hover:text-blue-600 transition-colors">Trang chủ</a>
+                <a href="${pageContext.request.contextPath}/index.jsp" class="hover:text-red-600 transition-colors">Trang chủ</a>
                 <span class="material-symbols-outlined text-[13px] text-slate-300">chevron_right</span>
                 <span class="text-slate-700 font-semibold">Lịch sử đặt sân</span>
             </nav>
@@ -102,7 +102,7 @@
                 <div class="lg:col-span-1 space-y-5 lg:sticky lg:top-24 lg:self-start">
                     <div class="premium-card p-6 flex flex-col items-center text-center">
                         <!-- User Initial Avatar -->
-                        <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-extrabold text-2xl shadow-inner mb-4">
+                        <div class="w-16 h-16 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-extrabold text-2xl shadow-inner mb-4">
                             <c:choose>
                                 <c:when test="${not empty user.fullName}">
                                     ${fn:substring(user.fullName, 0, 1).toUpperCase()}
@@ -121,7 +121,7 @@
                         <div class="w-full grid grid-cols-2 gap-3">
                             <div class="text-center bg-slate-50 rounded-xl p-3 border border-slate-100">
                                 <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">Đặt Sân</span>
-                                <span class="text-lg font-black text-blue-600 mt-1 block">${dsLich.size()}</span>
+                                <span class="text-lg font-black text-red-600 mt-1 block">${dsLich.size()}</span>
                             </div>
                             <div class="text-center bg-slate-50 rounded-xl p-3 border border-slate-100">
                                 <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">Điểm Uy Tín</span>
@@ -129,11 +129,11 @@
                             </div>
                         </div>
 
-                        <a href="${pageContext.request.contextPath}/customer/tai-khoan#uyTinCuaToi" class="w-full mt-4 text-blue-600 text-[11px] font-bold text-center hover:underline">
+                        <a href="${pageContext.request.contextPath}/customer/tai-khoan#uyTinCuaToi" class="w-full mt-4 text-red-600 text-[11px] font-bold text-center hover:underline">
                             Xem chi tiết điểm uy tín &rarr;
                         </a>
 
-                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="w-full mt-3 bg-[#FF8A24] hover:bg-[#F97316] text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-orange-600/10 active:scale-95 duration-200">
+                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="w-full mt-3 bg-[#e3000f] hover:bg-[#c2000d] text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-red-600/10 active:scale-95 duration-200">
                             <span class="material-symbols-outlined text-[16px]">add_circle</span>
                             Đặt sân mới ngay
                         </a>
@@ -154,13 +154,13 @@
                         <div class="flex flex-col gap-4 mb-5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <h2 class="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-blue-600 text-[19px]">calendar_month</span>
+                                    <span class="material-symbols-outlined text-red-600 text-[19px]">calendar_month</span>
                                     Danh sách đơn đặt sân
                                 </h2>
                                 <div class="relative w-full sm:max-w-xs">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-slate-400">search</span>
                                     <input type="search" id="historySearchInput" autocomplete="off" placeholder="Tìm theo mã, tên sân..."
-                                           class="h-9 w-full pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400 transition-all">
+                                           class="h-9 w-full pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
                                 </div>
                             </div>
                             <!-- Status filter chips (client-side, layered on top of existing search/pagination) -->
@@ -230,7 +230,7 @@
                                                 </c:if>
                                                 <span><span class="material-symbols-outlined">tag</span>Mã #${lich.datSanId}</span>
                                                 <span><span class="material-symbols-outlined">calendar_month</span>${lich.ngayDat}</span>
-                                                <span class="text-blue-700 font-mono"><span class="material-symbols-outlined">schedule</span>${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
+                                                <span class="text-red-700 font-mono"><span class="material-symbols-outlined">schedule</span>${lich.gioBatDau.toString().substring(0,5)} - ${lich.gioKetThuc.toString().substring(0,5)}</span>
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0">
@@ -275,7 +275,7 @@
                                     <c:if test="${lich.trangThai == 'Chờ thanh toán'}">
                                         <div class="hs-actions">
                                             <a href="${pageContext.request.contextPath}/customer/thanh-toan-qr?datSanId=${lich.datSanId}"
-                                               class="hs-action-btn text-white active:scale-95" style="background: var(--vs-orange-500, #FF8A24); border: 1px solid var(--vs-orange-500, #FF8A24);">
+                                               class="hs-action-btn text-white active:scale-95" style="background: var(--vs-primary-500, #e3000f); border: 1px solid var(--vs-primary-500, #e3000f);">
                                                 <span class="material-symbols-outlined text-[14px]">qr_code_2</span> Tiếp tục thanh toán
                                             </a>
                                             <a href="${pageContext.request.contextPath}/customer/payos-cancel?datSanId=${lich.datSanId}"
@@ -294,7 +294,7 @@
                                                     <span class="material-symbols-outlined text-[14px]">cancel</span> Hủy đặt sân
                                                 </button>
                                             </c:if>
-                                            <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="hs-action-btn border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 active:scale-95">
+                                            <button type="button" onclick="openCustomerServiceModal(${lich.datSanId})" class="hs-action-btn border border-slate-200 bg-slate-50 text-red-700 hover:bg-slate-100 active:scale-95">
                                                 <span class="material-symbols-outlined text-[14px]">coffee</span> Thêm dịch vụ
                                             </button>
                                             <c:if test="${lich.trangThai == 'Đã xác nhận'}">
@@ -474,7 +474,7 @@
     <!-- CUSTOMER SERVICE BOOKING MODAL -->
     <div id="customerServiceModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 overflow-y-auto py-10 px-4">
         <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 relative my-auto">
-            <div class="bg-gradient-to-r from-[#0B2545] to-[#185A9D] px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-gradient-to-r from-[#111111] to-[#e3000f] px-6 py-4 flex items-center justify-between text-white">
                 <h3 class="font-bold text-lg flex items-center gap-2">
                     <span class="material-symbols-outlined">coffee</span> Đặt thêm Dịch vụ / Nước uống
                 </h3>
@@ -488,7 +488,7 @@
                     <input type="hidden" name="datSanId" id="customer-service-datsan-id">
 
                     <div id="customer-service-loading" class="text-center py-10 text-slate-500">
-                        <span class="material-symbols-outlined animate-spin text-[32px] text-cyan-600 mb-2">sync</span>
+                        <span class="material-symbols-outlined animate-spin text-[32px] text-red-600 mb-2">sync</span>
                         <p class="text-sm font-medium">Đang tải danh sách dịch vụ...</p>
                     </div>
 
@@ -501,13 +501,13 @@
                     <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase block">Tổng tiền dịch vụ thêm</span>
-                            <span class="text-xl font-bold text-blue-600" id="customer-service-total">0 đ</span>
+                            <span class="text-xl font-bold text-red-600" id="customer-service-total">0 đ</span>
                         </div>
                         <div class="flex gap-3">
                             <button type="button" onclick="closeCustomerServiceModal()" class="px-6 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
                                 Hủy
                             </button>
-                            <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-[#FF8A24] hover:bg-[#F97316] transition-all shadow-md hover:shadow-orange-600/20 active:scale-95 duration-200">
+                            <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-[#e3000f] hover:bg-[#c2000d] transition-all shadow-md hover:shadow-red-600/20 active:scale-95 duration-200">
                                 Xác nhận đặt
                             </button>
                         </div>
