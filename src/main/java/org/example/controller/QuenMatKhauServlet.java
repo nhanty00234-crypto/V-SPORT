@@ -72,8 +72,8 @@ public class QuenMatKhauServlet extends HttpServlet {
             session.removeAttribute("authType");
             session.removeAttribute("isVerified");
         }
-        req.setAttribute("portal", portal);
-        req.getRequestDispatcher(requestJspFor(portal)).forward(req, resp);
+        // Điều hướng sang trang chủ với biến auth để mở modal quên mật khẩu
+        resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=forgot-password");
     }
 
     @Override
@@ -135,9 +135,9 @@ public class QuenMatKhauServlet extends HttpServlet {
             return;
         }
 
+        // Đã gỡ bỏ chính sách AuthPortalPolicy.isRoleAllowed theo yêu cầu
         boolean eligible = account != null
                 && !account.isLocked()
-                && AuthPortalPolicy.isRoleAllowed(portal, account.getRoleId())
                 && account.getEmail() != null
                 && ValidationUtil.isValidEmail(account.getEmail());
 

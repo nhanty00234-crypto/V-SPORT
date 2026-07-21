@@ -36,7 +36,21 @@
                 <span class="divider">|</span>
                 <a href="#">Trở thành đối tác</a>
                 <span class="divider">|</span>
-                <a href="#">Đăng nhập</a>
+                <% if (session != null && session.getAttribute("user") != null) {
+                    org.example.model.TaiKhoan user = (org.example.model.TaiKhoan) session.getAttribute("user");
+                    String displayName = (user.getFullName() != null && !user.getFullName().trim().isEmpty()) ? user.getFullName() : "Khách hàng";
+                    String rolePath = org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
+                %>
+                    <div class="user-profile-menu" style="display:inline-flex; align-items:center; gap: 8px;">
+                        <i class="fa-solid fa-circle-user" style="font-size: 16px; color: var(--accent-red, #ff2433);"></i>
+                        <a href="${pageContext.request.contextPath}<%= rolePath %>" style="font-weight: 600;"><%= displayName %></a>
+                        <span class="divider">|</span>
+                        <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+                    </div>
+                <% } else { %>
+                    <a href="javascript:void(0)" onclick="openAuthModal('login')">Đăng nhập</a>
+                    <a href="javascript:void(0)" onclick="openAuthModal('register')" class="btn-register-topbar">Đăng ký</a>
+                <% } %>
             </div>
         </div>
     </div>
@@ -52,7 +66,7 @@
             <nav class="main-menu">
                 <ul>
                     <li class="active"><a href="#">TRANG CHỦ</a></li>
-                    <li><a href="#quick-booking">TÌM SÂN</a></li>
+                    <li><a href="${pageContext.request.contextPath}/customer/tim-kiem">TÌM SÂN</a></li>
                     <li><a href="#matchmaking">GHÉP TRẬN</a></li>
                     <li><a href="#trusted-players">CỘNG ĐỒNG</a></li>
                     <li><a href="#">BẢNG GIÁ</a></li>
@@ -64,7 +78,7 @@
                     <i class="fa-solid fa-bell"></i>
                     <span class="cart-badge">2</span>
                 </a>
-                <a href="#" class="btn-primary btn-ripple" style="padding: 10px 20px; font-size: 13px;">Đặt Sân</a>
+                <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-primary btn-ripple" style="padding: 10px 20px; font-size: 13px;">Đặt Sân</a>
             </div>
         </div>
     </header>
@@ -94,7 +108,7 @@
                 <h1>Đặt Sân Nhanh,<br><span class="text-red" style="position:relative;">Ghép Trận Dễ Dàng<span style="position:absolute; bottom:-5px; left:0; width:100%; height:4px; background:var(--accent-red); border-radius:2px;"></span></span></h1>
                 <p>Nền tảng tìm sân trống theo giờ, xem đánh giá thực tế và kết nối với hàng ngàn người chơi cùng trình độ trong khu vực của bạn.</p>
                 <div class="hero-btns">
-                    <a href="#quick-booking" class="btn-primary btn-ripple">Tìm Sân Trống</a>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-primary btn-ripple">Tìm Sân Trống</a>
                     <a href="#matchmaking" class="btn-secondary btn-ripple">Ghép Trận Ngay</a>
                 </div>
             </div>
@@ -121,25 +135,31 @@
     <!-- Quick Booking Bar -->
     <section id="quick-booking" class="quick-booking-section">
         <div class="container">
-            <div class="quick-booking-bar reveal tilt-card">
+            <form action="${pageContext.request.contextPath}/customer/tim-kiem" method="GET" class="quick-booking-bar reveal tilt-card">
                 <div class="booking-field">
                     <label><i class="fa-solid fa-volleyball text-red"></i> Môn Thể Thao</label>
-                    <select><option>Bóng đá</option><option>Cầu lông</option><option>Tennis</option><option>Pickleball</option></select>
+                    <select name="sportId">
+                        <option value="">Tất cả</option>
+                        <option value="1">Bóng đá</option>
+                        <option value="2">Cầu lông</option>
+                        <option value="3">Tennis</option>
+                        <option value="4">Pickleball</option>
+                    </select>
                 </div>
                 <div class="booking-field">
                     <label><i class="fa-solid fa-location-dot text-red"></i> Khu Vực</label>
-                    <select><option>Quận 1, TP.HCM</option><option>Quận 7, TP.HCM</option><option>Quận Cầu Giấy, HN</option></select>
+                    <input type="text" name="q" placeholder="Nhập tên sân, khu vực..." style="border:1px solid #ddd; padding:8px; border-radius:8px; width:100%; outline:none;">
                 </div>
                 <div class="booking-field">
                     <label><i class="fa-solid fa-calendar-day text-red"></i> Ngày Chơi</label>
-                    <input type="date" value="2026-07-20">
+                    <input type="date" value="2026-07-21">
                 </div>
                 <div class="booking-field">
                     <label><i class="fa-solid fa-clock text-red"></i> Giờ Bắt Đầu</label>
                     <select><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option></select>
                 </div>
-                <button class="btn-search btn-ripple" onclick="showEnhancedToast('Đang tìm kiếm sân trống...', 'info')"><i class="fa-solid fa-magnifying-glass"></i> Tìm Sân Trống</button>
-            </div>
+                <button type="submit" class="btn-search btn-ripple"><i class="fa-solid fa-magnifying-glass"></i> Tìm Sân Trống</button>
+            </form>
         </div>
     </section>
 
@@ -289,6 +309,47 @@
                     <h3>Uy Tín Rõ Ràng</h3>
                     <p>Hệ thống đánh giá người chơi giúp xây dựng môi trường văn minh.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ecosystem Section -->
+    <section class="vs-ecosystem-section">
+        <div class="container ecosystem-layout">
+            <div class="ecosystem-orbit-wrapper">
+                <div class="ecosystem-orbit">
+                    <div class="orbit-ring orbit-ring-main"></div>
+                    <div class="orbit-ring orbit-ring-secondary"></div>
+
+                    <div class="ecosystem-center">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/community/ecosystem-center.png" alt="V-SPORT App">
+                    </div>
+
+                    <!-- Sports Icons -->
+                    <button class="orbit-icon icon-sport" style="top: 4%; left: 48%;" data-tooltip="Bóng đá"><i class="fa-regular fa-futbol"></i></button>
+                    <button class="orbit-icon icon-sport" style="top: 14%; left: 18%;" data-tooltip="Cầu lông"><i class="fa-solid fa-table-tennis-paddle-ball"></i></button>
+                    <button class="orbit-icon icon-sport" style="top: 20%; right: 8%;" data-tooltip="Tennis"><i class="fa-solid fa-baseball"></i></button>
+                    <button class="orbit-icon icon-sport" style="top: 50%; right: -27px; margin-top:-27px;" data-tooltip="Pickleball"><i class="fa-solid fa-table-tennis-paddle-ball"></i></button>
+                    <button class="orbit-icon icon-sport" style="bottom: 15%; right: 12%;" data-tooltip="Bóng rổ"><i class="fa-solid fa-basketball"></i></button>
+                    <button class="orbit-icon icon-sport" style="bottom: 4%; left: 45%;" data-tooltip="Bóng chuyền"><i class="fa-solid fa-volleyball"></i></button>
+
+                    <!-- Function Icons -->
+                    <button class="orbit-icon icon-func" style="bottom: 16%; left: 10%;" data-tooltip="Đặt sân"><i class="fa-solid fa-calendar-check"></i></button>
+                    <button class="orbit-icon icon-func" style="top: 50%; left: -27px; margin-top:-27px;" data-tooltip="Ghép kèo"><i class="fa-solid fa-handshake"></i></button>
+                    <button class="orbit-icon icon-func" style="top: 10%; right: 28%;" data-tooltip="Bản đồ sân"><i class="fa-solid fa-map-location-dot"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 8%; right: 35%;" data-tooltip="Thanh toán"><i class="fa-solid fa-credit-card"></i></button>
+                    <button class="orbit-icon icon-func" style="top: 35%; left: 5%;" data-tooltip="Check-in"><i class="fa-solid fa-qrcode"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 35%; left: 2%;" data-tooltip="Uy tín"><i class="fa-solid fa-shield-halved"></i></button>
+                    <button class="orbit-icon icon-func" style="top: 25%; right: 0;" data-tooltip="Đánh giá"><i class="fa-solid fa-star"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: 25%; right: -15px;" data-tooltip="Thông báo"><i class="fa-solid fa-bell"></i></button>
+                    <button class="orbit-icon icon-func" style="top: -15px; right: 25%;" data-tooltip="Chat"><i class="fa-solid fa-comment-dots"></i></button>
+                    <button class="orbit-icon icon-func" style="bottom: -15px; left: 25%;" data-tooltip="Lịch sử"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                </div>
+            </div>
+            <div class="ecosystem-copy">
+                <h2>Mọi Trải Nghiệm Thể Thao Trong Một Nơi</h2>
+                <p>Từ tìm sân, đặt lịch, ghép kèo, xem bản đồ, thanh toán đến đánh giá sau trận — tất cả được kết nối trong một hệ sinh thái V-SPORT duy nhất.</p>
+                <a href="#booking-steps" class="btn-text-arrow">Tìm hiểu cách hoạt động <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
     </section>
@@ -521,6 +582,36 @@
                         </div>
                         <button class="btn-primary btn-ripple" style="width:100%; padding:8px; text-align:center;" onclick="showEnhancedToast('Chuyển tới trang chi tiết', 'info')">Tham Gia</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Matchmaking Section -->
+    <section class="vs-community-section">
+        <div class="container community-container">
+            <div class="community-copy">
+                <h2>Chơi Cùng Nhau, Dù Bạn Ở Đâu</h2>
+                <p>V-Sport giúp bạn tìm đồng đội, tạo kèo, tham gia trận gần khu vực và kết nối với những người chơi cùng trình độ.</p>
+                <a href="#matchmaking" class="btn-text-arrow">Khám phá ghép trận <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <div class="community-visual">
+                <div class="community-collage">
+                    <div class="community-photo-card card-left">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-01.jpg" alt="Đội bóng">
+                    </div>
+                    <div class="community-photo-card card-center">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-03.jpg" alt="V-SPORT App">
+                    </div>
+                    <div class="community-photo-card card-right">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-02.jpg" alt="Nhóm bạn">
+                    </div>
+                </div>
+                <div class="community-avatar-stack">
+                    <img src="${pageContext.request.contextPath}/assets/images/vsport/matches/match-avatar-01.jpg" alt="User">
+                    <img src="${pageContext.request.contextPath}/assets/images/vsport/matches/match-avatar-02.jpg" alt="User">
+                    <img src="${pageContext.request.contextPath}/assets/images/vsport/players/person-01.jpg" alt="User">
+                    <span class="avatar-badge">+98</span>
                 </div>
             </div>
         </div>
@@ -867,5 +958,19 @@
     <!-- Custom JS -->
     <script src="assets/js/vsport-customer.js"></script>
     <script src="assets/js/vsport-home-enhanced.js"></script>
+    <jsp:include page="/auth/AuthModal.jsp" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const authAction = urlParams.get('auth');
+            if (authAction === 'login') {
+                openAuthModal('login');
+            } else if (authAction === 'register') {
+                openAuthModal('register');
+            } else if (authAction === 'forgot-password') {
+                openAuthModal('forgot-password');
+            }
+        });
+    </script>
 </body>
 </html>

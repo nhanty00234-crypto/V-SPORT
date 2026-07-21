@@ -78,5 +78,6 @@
 
     <!-- Custom JS -->
     <script src="<%= ctxPath %>/assets/js/vsport-customer.js"></script>
+    <jsp:include page="/auth/AuthModal.jsp" />
 </body>
 </html>

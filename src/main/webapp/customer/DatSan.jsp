@@ -113,11 +113,11 @@
         body { font-family: 'Barlow', 'Inter', sans-serif; background-color: #faf9fd; color: #111111; }
         .ambient-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
         .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
-        .search-input:focus { border-color: #c2000d; box-shadow: 0 0 0 2px var(--vs-focus-ring, rgba(24, 200, 232, 0.35)); }
+        .search-input:focus { border-color: #c2000d; box-shadow: 0 0 0 2px var(--vs-focus-ring, rgba(227, 0, 15, 0.35)); }
         .booking-hero {
             background:
-                radial-gradient(circle at 12% 8%, rgba(24, 200, 232, 0.16) 0, rgba(24, 200, 232, 0) 30%),
-                radial-gradient(circle at 88% 0%, rgba(22, 119, 210, 0.10) 0, rgba(22, 119, 210, 0) 28%),
+                radial-gradient(circle at 12% 8%, rgba(227, 0, 15, 0.16) 0, rgba(227, 0, 15, 0) 30%),
+                radial-gradient(circle at 88% 0%, rgba(17, 17, 17, 0.10) 0, rgba(17, 17, 17, 0) 28%),
                 linear-gradient(180deg, #f4f3f7 0%, #ffffff 42%, #ffffff 100%);
         }
         .hero-shell {
@@ -303,9 +303,9 @@
         }
         .payos-alert-btn:disabled { opacity: .6; cursor: not-allowed; }
         .payos-alert-btn.is-outline { background: #fff; color: var(--vs-primary-600, #e3000f); border-color: var(--vs-primary-600, #e3000f); }
-        .payos-alert-btn.is-outline:hover { background: var(--vs-cyan-50, #F0FCFE); }
+        .payos-alert-btn.is-outline:hover { background: var(--vs-cyan-50, #ffe5e6); }
         .payos-alert-btn.is-primary { background: var(--vs-primary-600, #e3000f); color: #fff; }
-        .payos-alert-btn.is-primary:hover { background: var(--vs-primary-700, #185A9D); }
+        .payos-alert-btn.is-primary:hover { background: var(--vs-primary-700, #93000a); }
         .payos-alert-close {
             width: 24px; height: 24px; flex-shrink: 0; border: none; background: transparent; cursor: pointer;
             color: #b08d88; border-radius: 6px; display: flex; align-items: center; justify-content: center;
@@ -602,7 +602,7 @@
         .vs-bhm-head { background: var(--vs-primary-900, #111111); color: #fff; padding: 16px 20px;
             display: flex; align-items: center; gap: 13px; flex-shrink: 0; }
         .vs-bhm-head-ic { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; display: inline-flex;
-            align-items: center; justify-content: center; background: rgba(24,200,232,.16); color: var(--vs-cyan-500, #c2000d); }
+            align-items: center; justify-content: center; background: rgba(227,0,15,.16); color: var(--vs-cyan-500, #c2000d); }
         .vs-bhm-head-tt { flex: 1; min-width: 0; }
         .vs-bhm-head-tt h3 { font-size: 17px; font-weight: 700; margin: 0; }
         .vs-bhm-head-tt p { font-size: 12.5px; color: #b6c2d4; margin: 2px 0 0; font-weight: 500; }
@@ -622,9 +622,9 @@
         .vs-bhm-user-mail { font-size: 12px; color: var(--vs-text-secondary, #486581); font-weight: 500; }
         .vs-bhm-stats { display: flex; gap: 8px; }
         .vs-bhm-stat { min-width: 78px; text-align: center; padding: 7px 12px; border-radius: 12px;
-            background: var(--vs-cyan-50, #F0FCFE); border: 1px solid var(--vs-cyan-100, #ffe5e6); }
+            background: var(--vs-cyan-50, #ffe5e6); border: 1px solid var(--vs-cyan-100, #ffe5e6); }
         .vs-bhm-stat .k { display: block; font-size: 10px; font-weight: 600; color: var(--vs-text-secondary, #486581); }
-        .vs-bhm-stat .v { display: block; font-size: 16px; font-weight: 700; color: var(--vs-primary-700, #185A9D); margin-top: 1px; }
+        .vs-bhm-stat .v { display: block; font-size: 16px; font-weight: 700; color: var(--vs-primary-700, #93000a); margin-top: 1px; }
 
         /* Filter tabs */
         .vs-bhm-tabs { display: flex; gap: 7px; padding: 12px 20px 0; overflow-x: auto; flex-shrink: 0; }
@@ -662,7 +662,7 @@
         .vs-bhm-badge.warn { background: var(--vs-warning-bg, #FFF7DA); color: #8a6116; }
         .vs-bhm-badge.amber { background: #FFF3E0; color: #9a5b00; }
         .vs-bhm-badge.ok { background: var(--vs-success-bg, #E5F7EF); color: var(--vs-success, #16A36A); }
-        .vs-bhm-badge.info { background: var(--vs-cyan-100, #ffe5e6); color: var(--vs-primary-700, #185A9D); }
+        .vs-bhm-badge.info { background: var(--vs-cyan-100, #ffe5e6); color: var(--vs-primary-700, #93000a); }
         .vs-bhm-badge.danger { background: var(--vs-danger-bg, #FDEBEC); color: var(--vs-danger, #E5484D); }
         .vs-bhm-badge.neutral { background: var(--vs-surface-soft, #EDF4FA); color: var(--vs-text-secondary, #486581); }
 
@@ -676,7 +676,7 @@
         .vs-bhm-btn-primary:hover { background: var(--vs-orange-600, #c2000d); }
         .vs-bhm-btn-primary[disabled] { background: #d9a06e; cursor: not-allowed; }
         .vs-bhm-btn-ghost { background: #fff; color: var(--vs-primary-600, #e3000f); border-color: var(--vs-border, #DCE5EF); }
-        .vs-bhm-btn-ghost:hover { border-color: var(--vs-cyan-500, #c2000d); background: var(--vs-cyan-50, #F0FCFE); }
+        .vs-bhm-btn-ghost:hover { border-color: var(--vs-cyan-500, #c2000d); background: var(--vs-cyan-50, #ffe5e6); }
         .vs-bhm-btn-danger { background: #fff; color: var(--vs-danger, #E5484D); border-color: #f3cfd1; }
         .vs-bhm-btn-danger:hover { background: var(--vs-danger-bg, #FDEBEC); }
         .vs-bhm-done { font-size: 12.5px; font-weight: 700; color: var(--vs-success, #16A36A); }
@@ -1154,7 +1154,7 @@
                         <p class="text-[11px] text-neutral-500 mt-1 leading-relaxed">Vui lòng đến trước 15 phút để làm thủ tục nhận sân và thanh toán.</p>
                     </div>
                 </div>
-                <div id="payment-info-payos" class="hidden bg-[#F0FCFE] border border-[#c2000d]/40 p-4 flex items-start gap-3">
+                <div id="payment-info-payos" class="hidden bg-[#ffe5e6] border border-[#c2000d]/40 p-4 flex items-start gap-3">
                     <div class="w-8 h-8 bg-[#e3000f] flex items-center justify-center flex-shrink-0">
                         <span class="material-symbols-outlined text-[16px] text-white">bolt</span>
                     </div>

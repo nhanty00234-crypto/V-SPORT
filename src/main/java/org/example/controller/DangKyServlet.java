@@ -28,8 +28,8 @@ public class DangKyServlet extends HttpServlet {
         if (session != null && session.getAttribute("user") != null) {
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
         } else {
-            // Trang đăng ký toàn màn hình (thay cho modal auth trên trang chủ).
-            req.getRequestDispatcher("/auth/DangKy.jsp").forward(req, resp);
+            // Điều hướng sang trang chủ với biến auth để mở modal
+            resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=register");
         }
     }
 

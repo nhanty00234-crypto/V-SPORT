@@ -41,7 +41,7 @@
         }
 
         /* ============ Header navy (compact, 2 tầng, cao ~110px) ============ */
-        .ttv-header { background: var(--vs-primary-900, #0B2D52); color: #fff; }
+        .ttv-header { background: var(--vs-primary-900, #111111); color: #fff; }
         .ttv-header-top {
             display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
             gap: 10px; padding: 14px 12px 8px; min-height: 64px;
@@ -62,7 +62,7 @@
             letter-spacing: 0; text-transform: none; white-space: nowrap;
         }
         @media (min-width: 768px) { .ttv-title { font-size: 16px; } }
-        .ttv-title small { display: block; font-size: 11px; font-weight: 500; color: #9db4d0; opacity: .72; letter-spacing: 0; text-transform: none; }
+        .ttv-title small { display: block; font-size: 11px; font-weight: 500; color: #c5c9b0; opacity: .72; letter-spacing: 0; text-transform: none; }
         @media (min-width: 768px) { .ttv-title small { font-size: 12px; } }
         .ttv-date-group { justify-self: end; display: inline-flex; align-items: center; gap: 4px; }
         .ttv-icon-btn {
@@ -75,10 +75,10 @@
         .ttv-icon-btn:disabled { opacity: .35; cursor: not-allowed; }
         .ttv-date-input {
             padding: 4px 8px; height: 30px; background: #fff; border: none; border-radius: 7px;
-            font-size: 14px; font-weight: 600; color: var(--vs-primary-900, #0B2D52);
+            font-size: 14px; font-weight: 600; color: var(--vs-primary-900, #111111);
             font-family: 'Inter', 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
-        .ttv-date-input:focus { outline: none; box-shadow: 0 0 0 3px var(--vs-focus-ring, rgba(24,200,232,.35)); }
+        .ttv-date-input:focus { outline: none; box-shadow: 0 0 0 3px var(--vs-focus-ring, rgba(227,0,15,.35)); }
 
         /* Tầng dưới header: legend một hàng ngang. */
         .ttv-header-legend {
@@ -89,21 +89,21 @@
         .ttv-header-legend::-webkit-scrollbar { display: none; }
         @media (min-width: 1024px) { .ttv-header-legend { padding: 6px 20px 12px; } }
         .ttv-legend-item {
-            display: inline-flex; align-items: center; gap: 5px; color: #d5e0ee; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 5px; color: #e0e3e5; font-weight: 600;
             font-family: 'Inter', 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 13px; white-space: nowrap; flex-shrink: 0;
         }
         .ttv-legend-swatch { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(255,255,255,.4); flex-shrink: 0; }
         .ttv-legend-swatch.is-avail  { background: #FFFFFF; }
-        .ttv-legend-swatch.is-select { background: #1689E8; border-color: #1689E8; }
+        .ttv-legend-swatch.is-select { background: #e3000f; border-color: #e3000f; }
         .ttv-legend-swatch.is-booked { background: #FF6268; border-color: #FF6268; }
         .ttv-legend-swatch.is-hold   { background: #FFD76A; border-color: #FFD76A; }
         .ttv-legend-swatch.is-locked { background: #B7BDC5; border-color: #B7BDC5; }
 
         /* ============ Dòng lưu ý ============ */
         .ttv-note {
-            padding: 6px 14px; background: var(--vs-cyan-50, #ECF8FA);
-            border-bottom: 1px solid var(--vs-border, #DCE5EF);
+            padding: 6px 14px; background: var(--vs-primary-50, #ffe5e6);
+            border-bottom: 1px solid var(--vs-border, #e0e3e5);
             font-size: 11.5px; text-align: center; color: var(--vs-text-secondary, #486581); font-weight: 600;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
@@ -118,12 +118,12 @@
             scrollbar-width: thin; -ms-overflow-style: auto;
         }
         .ttv-tt-scroll::-webkit-scrollbar { display: block; width: 8px; height: 8px; }
-        .ttv-tt-scroll::-webkit-scrollbar-thumb { background: #c3ced9; border-radius: 4px; }
-        .ttv-tt-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .ttv-tt-scroll::-webkit-scrollbar-thumb { background: #e0e3e5; border-radius: 4px; }
+        .ttv-tt-scroll::-webkit-scrollbar-track { background: #f2f4f6; }
         .ttv-tt { display: grid; font-size: 12px; user-select: none; }
         .ttv-tt-head-cell {
-            position: sticky; top: 0; z-index: 5; background: #f8fafc;
-            border-bottom: 1px solid var(--vs-border, #DCE5EF); border-right: 1px solid #eef2f6;
+            position: sticky; top: 0; z-index: 5; background: #faf9fd;
+            border-bottom: 1px solid var(--vs-border, #e0e3e5); border-right: 1px solid #eceef0;
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 11px; color: var(--vs-text-secondary, #486581); height: var(--ttv-head-h);
             position: sticky;
@@ -131,31 +131,31 @@
         .ttv-court-label {
             position: sticky; left: 0; z-index: 4; background: #fff;
             padding: 3px 8px; display: flex; flex-direction: column; justify-content: center;
-            border-right: 2px solid var(--vs-border, #DCE5EF); border-bottom: 1px solid #eef2f6;
+            border-right: 2px solid var(--vs-border, #e0e3e5); border-bottom: 1px solid #eceef0;
             overflow: hidden; height: var(--ttv-row-h);
             box-shadow: 2px 0 6px -4px rgba(15,23,42,.24);
         }
-        .ttv-court-label-head { background: #f8fafc; z-index: 6; height: var(--ttv-head-h); justify-content: center; font-weight: 800; font-size: 11px; color: var(--vs-text-secondary, #486581); border-bottom: 1px solid var(--vs-border, #DCE5EF); }
+        .ttv-court-label-head { background: #faf9fd; z-index: 6; height: var(--ttv-head-h); justify-content: center; font-weight: 800; font-size: 11px; color: var(--vs-text-secondary, #486581); border-bottom: 1px solid var(--vs-border, #e0e3e5); }
         .ttv-court-name {
             font-size: 12px; font-weight: 800; color: var(--vs-text, #102A43); line-height: 1.2;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .ttv-court-price { font-size: 10px; color: var(--vs-cyan-600, #08A9CC); font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ttv-court-price { font-size: 10px; color: var(--vs-primary-600, #e3000f); font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ttv-head-minor { font-size: 9.5px; font-weight: 600; color: #94a3b8; }
         .ttv-slot {
-            background: #fff; border-right: 1px solid #eef2f6; border-bottom: 1px solid #eef2f6;
+            background: #fff; border-right: 1px solid #eceef0; border-bottom: 1px solid #eceef0;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             height: var(--ttv-row-h); position: relative;
             transition: background-color 90ms ease;
         }
         /* Hover: chỉ đổi nền nhẹ, không chuyển động. */
-        .ttv-slot:hover:not(.is-blocked):not(.is-selected) { background: var(--vs-cyan-50, #ECF8FA); }
+        .ttv-slot:hover:not(.is-blocked):not(.is-selected) { background: var(--vs-primary-50, #ffe5e6); }
         /* Press: lún nhẹ. */
         .ttv-slot:active:not(.is-blocked) { transform: translateY(1px) scale(0.99); }
-        .ttv-slot.is-selected { background: #1689E8; border-color: #1177cf; color: #fff; }
+        .ttv-slot.is-selected { background: #e3000f; border-color: #c2000d; color: #fff; }
         .ttv-slot.is-selected.is-selected-start { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
         .ttv-slot.is-selected.is-selected-end   { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
-        .ttv-slot.is-hover { background: rgba(22,137,232,.14); }
+        .ttv-slot.is-hover { background: rgba(227,0,15,.14); }
         .ttv-slot.is-blocked { cursor: not-allowed; }
         .ttv-slot.is-past   { background: #EDF0F3; color: #9aa4b0; }
         .ttv-slot.is-booked { background: #FF6268; color: #fff; }
@@ -164,7 +164,7 @@
         .ttv-slot.is-hold_self { background: var(--vs-orange-100, #FFF1E5); color: #8a4b12; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--vs-orange-500, #FF8A24); }
         .ttv-slot.is-hold_self:hover { background: #ffe6cf; }
         .ttv-slot.is-locked { background: #B7BDC5; color: #3f4750; }
-        .ttv-slot:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(24,200,232,.35)); outline-offset: -3px; z-index: 2; }
+        .ttv-slot:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(227,0,15,.35)); outline-offset: -3px; z-index: 2; }
         .ttv-slot.is-merged { padding: 0 6px; }
         .ttv-slot-run-label {
             font-size: 10.5px; font-weight: 800; white-space: nowrap;
@@ -172,26 +172,26 @@
         }
         /* Kẻ đậm hơn ở mốc mỗi giờ tròn. */
         .ttv-slot.is-hour-start, .ttv-tt-head-cell.is-hour-start { border-left: 1px solid #d6dee8; }
-        .ttv-now-marker { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--vs-cyan-500, #18BFEA); pointer-events: none; z-index: 3; }
+        .ttv-now-marker { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--vs-primary-500, #e3000f); pointer-events: none; z-index: 3; }
         .ttv-now-chip {
             position: absolute; top: 1px; left: 50%; transform: translateX(-50%);
-            background: var(--vs-cyan-500, #18BFEA); color: #072435;
+            background: var(--vs-primary-500, #e3000f); color: #072435;
             font-size: 9px; font-weight: 800; padding: 0 6px; border-radius: 999px;
             pointer-events: none; z-index: 7; white-space: nowrap;
         }
         .ttv-tt-empty { padding: 48px 24px; text-align: center; color: var(--vs-text-secondary, #486581); font-size: 13px; }
         .ttv-btn-ghost {
             display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 7px 14px; min-height: 36px; background: #fff; border: 1px solid var(--vs-border, #DCE5EF); border-radius: 8px;
+            padding: 7px 14px; min-height: 36px; background: #fff; border: 1px solid var(--vs-border, #e0e3e5); border-radius: 8px;
             color: var(--vs-text, #102A43); font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: none;
             transition: border-color 100ms ease, color 100ms ease;
         }
-        .ttv-btn-ghost:hover { border-color: var(--vs-primary-600, #1677D2); color: var(--vs-primary-600, #1677D2); }
+        .ttv-btn-ghost:hover { border-color: var(--vs-primary-600, #e3000f); color: var(--vs-primary-600, #e3000f); }
         .ttv-btn-ghost:active { transform: translateY(1px) scale(0.99); }
 
         /* ============ Footer cố định: Tổng giờ / Tổng tiền + CTA lớn ============ */
         .ttv-summary {
-            background: var(--vs-primary-900, #0B2D52); color: #fff;
+            background: var(--vs-primary-900, #111111); color: #fff;
             box-shadow: 0 -8px 24px rgba(7,26,47,.24);
             padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
         }
@@ -200,9 +200,9 @@
             gap: 12px; padding: 0 4px 8px; min-height: 24px;
         }
         .ttv-summary-stat { display: inline-flex; align-items: baseline; gap: 7px; min-width: 0; }
-        .ttv-summary-stat span { font-size: 10.5px; color: #9db4d0; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+        .ttv-summary-stat span { font-size: 10.5px; color: #c5c9b0; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
         .ttv-summary-stat strong { font-size: 15px; font-weight: 800; color: #fff; white-space: nowrap; }
-        .ttv-summary-stat.is-total strong { font-size: 18px; font-weight: 900; color: var(--vs-cyan-500, #18BFEA); }
+        .ttv-summary-stat.is-total strong { font-size: 18px; font-weight: 900; color: var(--vs-primary-500, #e3000f); }
         .ttv-summary-sel { flex: 1 1 auto; min-width: 0; text-align: center; font-size: 11.5px; color: #b6c2d4; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (max-width: 639px) { .ttv-summary-sel { display: none; } }
         .ttv-summary-cta {
@@ -216,7 +216,7 @@
         .ttv-summary-cta:hover:not(:disabled) { background: var(--vs-orange-600, #F97316); }
         .ttv-summary-cta:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
         .ttv-summary-cta:disabled { background: #5c6f88; color: #cdd8e4; cursor: not-allowed; opacity: 1; }
-        .ttv-summary-cta:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(24,200,232,.35)); outline-offset: 2px; }
+        .ttv-summary-cta:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(227,0,15,.35)); outline-offset: 2px; }
         .ttv-summary-cta .ttv-btn-spinner {
             width: 18px; height: 18px; border-radius: 50%;
             border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff;
@@ -227,8 +227,8 @@
         /* ============ Toast ============ */
         .ttv-inline-alert {
             position: fixed; left: 50%; bottom: 118px; transform: translateX(-50%);
-            background: var(--vs-primary-900, #0B2D52); color: #fff; padding: 10px 16px; border-radius: 999px;
-            font-size: 13px; font-weight: 700; box-shadow: 0 12px 30px rgba(11,37,69,.32);
+            background: var(--vs-primary-900, #111111); color: #fff; padding: 10px 16px; border-radius: 999px;
+            font-size: 13px; font-weight: 700; box-shadow: 0 12px 30px rgba(0,0,0,.32);
             opacity: 0; visibility: hidden; transition: opacity .18s ease;
             z-index: 60; max-width: 92vw; text-align: center;
         }
@@ -238,7 +238,7 @@
 
         /* ============ Loading / skeleton / error / empty ============ */
         @keyframes ttvShim { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
-        .ttv-skel { background: linear-gradient(90deg, #eef2f6 25%, #dfe6ec 37%, #eef2f6 63%); background-size: 400% 100%; animation: ttvShim 1.4s ease infinite; border-radius: 6px; }
+        .ttv-skel { background: linear-gradient(90deg, #eceef0 25%, #dfe6ec 37%, #eceef0 63%); background-size: 400% 100%; animation: ttvShim 1.4s ease infinite; border-radius: 6px; }
         .ttv-loading-box { padding: 16px; }
         .ttv-loading-box .row { height: 34px; margin-bottom: 6px; }
         .ttv-error { padding: 40px 24px; text-align: center; }
@@ -250,14 +250,14 @@
         /* ============ Full-screen step loading (Navy) ============ */
         .ttv-step-loading {
             position: fixed; inset: 0; z-index: 2000;
-            background: var(--vs-primary-950, #071E38);
+            background: var(--vs-primary-950, #000000);
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: #fff;
         }
         .ttv-step-loading-brand { font-size: 26px; font-weight: 900; letter-spacing: .14em; font-family: 'Barlow Condensed', sans-serif; }
-        .ttv-step-loading-brand span { color: var(--vs-cyan-500, #18BFEA); }
+        .ttv-step-loading-brand span { color: var(--vs-primary-500, #e3000f); }
         .ttv-step-loading-ring {
             width: 44px; height: 44px; border-radius: 50%;
-            border: 4px solid rgba(255,255,255,.16); border-top-color: var(--vs-cyan-500, #18BFEA);
+            border: 4px solid rgba(255,255,255,.16); border-top-color: var(--vs-primary-500, #e3000f);
             animation: ttvSpin .9s linear infinite;
         }
         .ttv-step-loading p { font-size: 14px; font-weight: 600; color: #cbd5e1; margin: 0; }

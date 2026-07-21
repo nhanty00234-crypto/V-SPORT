@@ -2,21 +2,14 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%
-    Object roleIdObj = session.getAttribute("roleId");
-    Object fullNameObj = session.getAttribute("fullName");
-    Object emailObj = session.getAttribute("email");
-
-    int roleId = -1;
-    if (roleIdObj instanceof Number) {
-        roleId = ((Number) roleIdObj).intValue();
-    } else if (roleIdObj instanceof String) {
-        try { roleId = Integer.parseInt((String) roleIdObj); } catch (NumberFormatException ignored) {}
+    boolean isLoggedIn = session.getAttribute("user") != null;
+    org.example.model.TaiKhoan user = isLoggedIn ? (org.example.model.TaiKhoan) session.getAttribute("user") : null;
+    String displayName = "Tài khoản";
+    String rolePath = "/";
+    if (isLoggedIn) {
+        displayName = (user.getFullName() != null && !user.getFullName().trim().isEmpty()) ? user.getFullName() : "Khách hàng";
+        rolePath = org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
     }
-
-    String fullName = fullNameObj != null ? fullNameObj.toString() : "";
-    String email = emailObj != null ? emailObj.toString() : "";
-    boolean isLoggedIn = roleId != -1 || session.getAttribute("user") != null;
-    String displayName = !fullName.trim().isEmpty() ? fullName : (!email.trim().isEmpty() ? email : "Tài khoản");
     String ctxPath = request.getContextPath();
 %>
 <!-- V-SPORT New Theme Styles -->
@@ -43,11 +36,15 @@
             <a href="#">Trở thành đối tác</a>
             <span class="divider">|</span>
             <% if (isLoggedIn) { %>
-                <a href="<%= ctxPath %>/customer/tai-khoan">Xin chào, <%= fn:escapeXml(displayName) %></a>
-                <span class="divider">|</span>
-                <a href="<%= ctxPath %>/logout">Đăng xuất</a>
+                <div class="user-profile-menu" style="display:inline-flex; align-items:center; gap: 8px;">
+                    <i class="fa-solid fa-circle-user" style="font-size: 16px; color: var(--accent-red, #ff2433);"></i>
+                    <a href="<%= ctxPath %><%= rolePath %>" style="font-weight: 600;"><%= displayName %></a>
+                    <span class="divider">|</span>
+                    <a href="<%= ctxPath %>/logout">Đăng xuất</a>
+                </div>
             <% } else { %>
-                <a href="<%= ctxPath %>/dangnhap">Đăng nhập</a>
+                <a href="javascript:void(0)" onclick="openAuthModal('login')">Đăng nhập</a>
+                <a href="javascript:void(0)" onclick="openAuthModal('register')" class="btn-register-topbar">Đăng ký</a>
             <% } %>
         </div>
     </div>

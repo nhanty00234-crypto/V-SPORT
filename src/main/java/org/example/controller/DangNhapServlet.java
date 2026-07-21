@@ -79,10 +79,10 @@ public class DangNhapServlet extends HttpServlet {
         } else if ("true".equals(req.getParameter("facilityInactive"))) {
             // ActiveFacilityFilter vừa invalidate session vì cơ sở của tài khoản đã ngừng hoạt động.
             req.setAttribute("loi", "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
-            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login&error=facilityInactive");
         } else {
-            // Trang đăng nhập toàn màn hình (thay cho modal auth trên trang chủ).
-            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
+            // Điều hướng sang trang chủ với biến auth để mở modal
+            resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login");
         }
     }
 
@@ -233,26 +233,9 @@ public class DangNhapServlet extends HttpServlet {
             return;
         }
 
-        // Chính sách hai cổng: chỉ kiểm tra SAU khi mật khẩu đã xác thực đúng.
-        // Sai cổng → không tạo session, và KHÔNG được tiết lộ role/portal thật của
-        // tài khoản qua message — dùng đúng generic message như mọi lỗi đăng nhập khác.
-        // Chi tiết thật (role, cổng đúng) chỉ được ghi vào server log, không trả về client.
-        if (taiKhoan != null && !org.example.util.AuthPortalPolicy.isRoleAllowed(portal, taiKhoan.getRoleId())) {
-            boolean accountIsInternal = org.example.util.AuthPortalPolicy.isInternalRole(taiKhoan.getRoleId());
-            LOGGER.warn("LOGIN_WRONG_PORTAL accountId={} roleId={} attemptedPortal={} accountPortal={} ip={}",
-                    taiKhoan.getAccountId(), taiKhoan.getRoleId(), portal,
-                    accountIsInternal ? "internal" : "customer", req.getRemoteAddr());
-            if (isAjax) {
-                resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"" + GENERIC_LOGIN_FAIL_MSG + "\"}");
-                return;
-            }
-            req.setAttribute("loi", GENERIC_LOGIN_FAIL_MSG);
-            req.setAttribute("username", usernameOrEmail);
-            req.setAttribute("phone", rawPhone);
-            req.getRequestDispatcher(loginJspFor(portal)).forward(req, resp);
-            return;
-        }
+        // Đã gỡ bỏ chính sách hai cổng theo yêu cầu của hệ thống mới.
+        // Bất kỳ role nào cũng có thể đăng nhập từ một giao diện duy nhất (AuthModal).
+        // Sau khi đăng nhập thành công, RoleRedirectUtil sẽ tự động điều hướng đúng trang chủ của role đó.
 
         if (taiKhoan != null && taiKhoan.getCoSoId() != null
                 && !facilityAccessService.isFacilityActive(taiKhoan.getCoSoId())) {
