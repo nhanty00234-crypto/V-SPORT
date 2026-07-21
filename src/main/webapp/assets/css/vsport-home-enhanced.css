@@ -66,30 +66,32 @@
 }
 .fc-enhanced {
     position: absolute;
-    background: rgba(20, 20, 20, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #111;
     padding: 12px 20px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     z-index: 3;
     animation: float 4s ease-in-out infinite;
     transform-style: preserve-3d;
+    font-weight: 600;
 }
 .fc-enhanced .fc-icon {
     width: 35px;
     height: 35px;
-    background: var(--accent-red);
+    background: var(--primary-blue, #2563eb);
+    color: #fff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 16px;
-    box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
 }
 .fc-e1 { top: 15%; right: 75%; animation-delay: 0s; }
 .fc-e2 { top: 45%; right: -5%; animation-delay: 1.2s; }
