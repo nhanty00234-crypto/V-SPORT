@@ -90,6 +90,19 @@ public interface GhepKeoDAO {
     /** Cập nhật trạng thái participant, chỉ khi actor là chủ kèo hoặc chính participant. */
     boolean updateParticipantStatus(int chiTietKeoId, String newStatus, int actorAccountId, boolean actorIsOwner);
 
+    /**
+     * Duyệt yêu cầu tham gia (chỉ chủ kèo) với kiểm tra capacity trong transaction.
+     * Tự động chuyển kèo sang "Đã đủ người" nếu sau khi duyệt đã đủ capacity.
+     * Ném IllegalStateException nếu kèo đã đầy hoặc không phải chủ kèo.
+     */
+    boolean approveParticipantWithCapacityCheck(int chiTietKeoId, int ownerAccountId) throws Exception;
+
+    /**
+     * Người chơi rời kèo. Nếu sau khi rời, kèo đang ở "Đã đủ người" mà số lượng
+     * thực tế giảm xuống dưới capacity thì tự động mở lại thành "Đang mở".
+     */
+    boolean leaveParticipantWithReopen(int chiTietKeoId, int accountId);
+
     /** Đếm số người tham gia (trạng thái Đã tham gia). */
     int countAcceptedParticipants(int keoId);
 

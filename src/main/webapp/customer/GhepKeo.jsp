@@ -148,10 +148,10 @@
         .match-breadcrumb a { color: rgba(255, 255, 255, .68); text-decoration: none; }
         .match-breadcrumb a:hover { color: #fff; text-decoration: underline; }
         .match-breadcrumb [aria-current="page"] { color: #fff; }
-        .match-hero-title { font-size: 24px; font-weight: 800; margin: 0; line-height: 1.2; }
+        .match-hero-title { font-size: 24px; font-weight: 800; margin: 0; line-height: 1.2; color: #ffffff; }
         .match-hero-sub {
             font-size: 14px; margin: 5px 0 0;
-            color: rgba(255, 255, 255, .82); line-height: 1.45;
+            color: #ffffff; line-height: 1.45;
         }
         .match-hero-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .match-hero-cta {

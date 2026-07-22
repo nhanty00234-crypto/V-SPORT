@@ -397,6 +397,173 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
         }
     }
 
+    /**
+     * [FIX-1] Duyệt yêu cầu tham gia với kiểm tra capacity trong cùng 1 transaction.
+     * Tránh tình trạng chủ kèo duyệt vượt số lượng cho phép.
+     * Sau khi duyệt đủ người, tự động chuyển kèo sang "Đã đủ người".
+     */
+    @Override
+    public boolean approveParticipantWithCapacityCheck(int chiTietKeoId, int ownerAccountId) throws Exception {
+        try (Connection conn = DBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Bước 1: Lấy KeoID và kiểm tra chủ kèo
+                int keoId;
+                String currentParticipantStatus;
+                String sqlGetPart = "SELECT ct.KeoID, ct.TrangThaiThamGia " +
+                        "FROM ChiTietGhepKeo ct " +
+                        "JOIN GhepKeo g WITH (UPDLOCK, ROWLOCK) ON ct.KeoID = g.KeoID " +
+                        "WHERE ct.ChiTietKeoID = ? AND g.AccountID_NguoiTao = ?";
+                try (PreparedStatement ps = conn.prepareStatement(sqlGetPart)) {
+                    ps.setInt(1, chiTietKeoId);
+                    ps.setInt(2, ownerAccountId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.rollback();
+                            throw new IllegalStateException("Không tìm thấy yêu cầu hoặc bạn không phải chủ kèo.");
+                        }
+                        keoId = rs.getInt("KeoID");
+                        currentParticipantStatus = rs.getString("TrangThaiThamGia");
+                    }
+                }
+
+                if (!P_STATUS_PENDING.equals(currentParticipantStatus)) {
+                    conn.rollback();
+                    throw new IllegalStateException("Yêu cầu này không còn ở trạng thái chờ duyệt.");
+                }
+
+                // Bước 2: Đọc capacity và số người đã tham gia từ kèo
+                int capacity;
+                int accepted;
+                String sqlKeo = "SELECT g.MoTa, " +
+                        "(SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_JOINED + "') AS Accepted " +
+                        "FROM GhepKeo g WHERE g.KeoID = ?";
+                try (PreparedStatement ps = conn.prepareStatement(sqlKeo)) {
+                    ps.setInt(1, keoId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.rollback();
+                            throw new IllegalStateException("Kèo không tồn tại.");
+                        }
+                        GhepKeoView tmp = new GhepKeoView();
+                        decodeMoTaInto(rs.getString("MoTa"), tmp);
+                        capacity = tmp.soNguoiCanTim;
+                        accepted = rs.getInt("Accepted");
+                    }
+                }
+
+                if (accepted >= capacity) {
+                    conn.rollback();
+                    throw new IllegalStateException("Kèo đã đủ người (" + capacity + "/" + capacity + "), không thể duyệt thêm.");
+                }
+
+                // Bước 3: Cập nhật trạng thái participant → Đã tham gia
+                String sqlUpdate = "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE ChiTietKeoID = ?";
+                try (PreparedStatement ps = conn.prepareStatement(sqlUpdate)) {
+                    ps.setNString(1, P_STATUS_JOINED);
+                    ps.setInt(2, chiTietKeoId);
+                    ps.executeUpdate();
+                }
+
+                // Bước 4: Nếu vừa đủ người → chuyển kèo sang "Đã đủ người"
+                if ((accepted + 1) >= capacity) {
+                    String sqlClose = "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND TrangThai = ?";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlClose)) {
+                        ps.setNString(1, STATUS_FULL);
+                        ps.setInt(2, keoId);
+                        ps.setNString(3, STATUS_OPEN);
+                        ps.executeUpdate();
+                    }
+                }
+
+                conn.commit();
+                return true;
+            } catch (Exception ex) {
+                try { conn.rollback(); } catch (SQLException ignored) {}
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * [FIX-2] Người chơi rời kèo. Sau khi rời, nếu kèo đang ở "Đã đủ người"
+     * mà số thành viên thực tế giảm xuống dưới capacity, tự động mở lại thành "Đang mở".
+     */
+    @Override
+    public boolean leaveParticipantWithReopen(int chiTietKeoId, int accountId) {
+        try (Connection conn = DBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Bước 1: Lấy KeoID của participant này và kiểm tra chủ sở hữu
+                int keoId;
+                String sqlGetPart = "SELECT ct.KeoID FROM ChiTietGhepKeo ct " +
+                        "WHERE ct.ChiTietKeoID = ? AND ct.AccountID_NguoiThamGia = ? " +
+                        "AND ct.TrangThaiThamGia IN (N'" + P_STATUS_JOINED + "', N'" + P_STATUS_PENDING + "')";
+                try (PreparedStatement ps = conn.prepareStatement(sqlGetPart)) {
+                    ps.setInt(1, chiTietKeoId);
+                    ps.setInt(2, accountId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.rollback();
+                            return false;
+                        }
+                        keoId = rs.getInt("KeoID");
+                    }
+                }
+
+                // Bước 2: Cập nhật participant → Đã rời
+                String sqlLeave = "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE ChiTietKeoID = ?";
+                try (PreparedStatement ps = conn.prepareStatement(sqlLeave)) {
+                    ps.setNString(1, P_STATUS_LEFT);
+                    ps.setInt(2, chiTietKeoId);
+                    if (ps.executeUpdate() == 0) {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+
+                // Bước 3: Đọc trạng thái kèo + capacity + số người còn lại
+                String sqlKeo = "SELECT g.TrangThai, g.MoTa, " +
+                        "(SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_JOINED + "') AS Accepted " +
+                        "FROM GhepKeo g WHERE g.KeoID = ?";
+                try (PreparedStatement ps = conn.prepareStatement(sqlKeo)) {
+                    ps.setInt(1, keoId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            String keoStatus = rs.getString("TrangThai");
+                            int accepted = rs.getInt("Accepted");
+                            GhepKeoView tmp = new GhepKeoView();
+                            decodeMoTaInto(rs.getString("MoTa"), tmp);
+                            int capacity = tmp.soNguoiCanTim;
+
+                            // Bước 4: Nếu kèo đang "Đã đủ người" và giờ còn thiếu → mở lại
+                            if (STATUS_FULL.equals(keoStatus) && accepted < capacity) {
+                                String sqlReopen = "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND TrangThai = ?";
+                                try (PreparedStatement psRe = conn.prepareStatement(sqlReopen)) {
+                                    psRe.setNString(1, STATUS_OPEN);
+                                    psRe.setInt(2, keoId);
+                                    psRe.setNString(3, STATUS_FULL);
+                                    psRe.executeUpdate();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                conn.commit();
+                return true;
+            } catch (Exception ex) {
+                try { conn.rollback(); } catch (SQLException ignored) {}
+                LOGGER.log(Level.WARNING, "leaveParticipantWithReopen failed chiTietKeoId=" + chiTietKeoId, ex);
+                return false;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "leaveParticipantWithReopen connection failed", e);
+            return false;
+        }
+    }
+
+
     @Override
     public int countAcceptedParticipants(int keoId) {
         String sql = "SELECT COUNT(*) FROM ChiTietGhepKeo WHERE KeoID = ? AND TrangThaiThamGia = N'" + P_STATUS_JOINED + "'";
