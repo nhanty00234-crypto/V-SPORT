@@ -22,6 +22,12 @@
     display:flex; align-items:center; gap:6px; white-space: nowrap;
   }
   .dv-gps-btn.is-active { border-color: var(--primary); color: var(--primary-hover); background:#eafff5; }
+  .dv-tabs { display:flex; gap:6px; border-bottom: 1px solid var(--border); margin: 20px 0 4px; }
+  .dv-tab {
+    padding: 10px 18px; border: none; background: none; font-size: 14px; font-weight: 700;
+    color: var(--muted-text); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .dv-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
   .dv-quick-filters { display:flex; gap:8px; flex-wrap: wrap; margin-bottom: 22px; }
   .dv-chip {
     padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
@@ -41,6 +47,8 @@
   }
   .dv-status-open { background:#dcfce7; color:#166534; }
   .dv-status-paused { background:#f1f5f9; color:#475569; }
+  .dv-status-lowstock { background:#fef9c3; color:#854d0e; }
+  .dv-status-outofstock { background:#fee2e2; color:#991b1b; }
   .dv-card-body { padding: 14px 16px 16px; }
   .dv-card-body h3 { font-size: 15px; font-weight: 800; color: var(--navy); margin: 0 0 4px; }
   .dv-card-facility { font-size: 12.5px; color: var(--muted-text); margin: 0 0 8px; display:flex; align-items:center; gap:4px; }
@@ -72,40 +80,72 @@
 
 <main class="dv-wrap">
   <section class="dv-header">
-    <h1>Dịch vụ thể thao gần bạn</h1>
-    <p>Tìm cơ sở cung cấp dịch vụ căng lưới, sửa chữa và hỗ trợ dụng cụ thể thao phù hợp với nhu cầu của bạn.</p>
+    <h1>Cửa hàng &amp; Dịch vụ</h1>
+    <p>Tìm cơ sở cung cấp dịch vụ căng lưới, sửa chữa, hỗ trợ dụng cụ và sản phẩm thể thao phù hợp với nhu cầu của bạn.</p>
   </section>
 
-  <div class="dv-search">
-    <input type="text" id="dvSearchInput" placeholder="Tìm dịch vụ căng lưới, thay quấn cán, sửa vợt..."/>
-    <button type="button" class="dv-gps-btn" id="dvGpsBtn" onclick="useMyLocation()">
-      <i class="fa-solid fa-location-crosshairs"></i> Gần tôi
-    </button>
+  <div class="dv-tabs" id="dvTabs">
+    <button type="button" class="dv-tab active" data-tab="dich-vu">Dịch vụ</button>
+    <button type="button" class="dv-tab" data-tab="san-pham">Sản phẩm</button>
   </div>
 
-  <div class="dv-quick-filters" id="dvQuickFilters">
-    <div class="dv-chip active" data-all="1">Tất cả</div>
-    <div class="dv-chip" data-sport="cầu lông" data-type="CANG_LUOI">Căng lưới cầu lông</div>
-    <div class="dv-chip" data-sport="tennis" data-type="CANG_LUOI">Căng lưới tennis</div>
-    <div class="dv-chip" data-type="THAY_QUAN_CAN">Thay quấn cán</div>
-    <div class="dv-chip" data-type="SUA_VOT">Sửa vợt</div>
-    <div class="dv-chip" data-type="HUAN_LUYEN_VIEN">Huấn luyện viên</div>
-    <div class="dv-chip" data-open="1">Đang mở cửa</div>
-    <div class="dv-chip" data-accepting="1">Đang nhận dịch vụ</div>
-  </div>
-
-  <div id="dvGrid" class="dv-grid"></div>
-  <div id="dvEmpty" class="dv-empty" style="display:none;">
-    <i id="dvEmptyIcon" class="fa-solid fa-store"></i>
-    <p id="dvEmptyTitle" style="font-weight:800;color:var(--navy);font-size:16px;margin:0 0 6px;">Chưa có dịch vụ phù hợp</p>
-    <p id="dvEmptyMsg" style="margin:0 0 16px;">Các cơ sở đang cập nhật dịch vụ. Hãy thử lại sau hoặc thay đổi bộ lọc tìm kiếm.</p>
-    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-      <button type="button" id="dvEmptyClearBtn" class="dv-gps-btn" onclick="clearAllFilters()" style="display:none;">
-        <i class="fa-solid fa-filter-circle-xmark"></i> Xóa bộ lọc
+  <div id="dvPanelService">
+    <div class="dv-search">
+      <input type="text" id="dvSearchInput" placeholder="Tìm dịch vụ căng lưới, thay quấn cán, sửa vợt..."/>
+      <button type="button" class="dv-gps-btn" id="dvGpsBtn" onclick="useMyLocation()">
+        <i class="fa-solid fa-location-crosshairs"></i> Gần tôi
       </button>
-      <a href="${ctx}/customer/tim-kiem" class="dv-gps-btn" style="text-decoration:none;">
-        <i class="fa-solid fa-compass"></i> Khám phá sân
-      </a>
+    </div>
+
+    <div class="dv-quick-filters" id="dvQuickFilters">
+      <div class="dv-chip active" data-all="1">Tất cả</div>
+      <div class="dv-chip" data-sport="cầu lông" data-type="CANG_LUOI">Căng lưới cầu lông</div>
+      <div class="dv-chip" data-sport="tennis" data-type="CANG_LUOI">Căng lưới tennis</div>
+      <div class="dv-chip" data-type="THAY_QUAN_CAN">Thay quấn cán</div>
+      <div class="dv-chip" data-type="SUA_VOT">Sửa vợt</div>
+      <div class="dv-chip" data-type="HUAN_LUYEN_VIEN">Huấn luyện viên</div>
+      <div class="dv-chip" data-open="1">Đang mở cửa</div>
+      <div class="dv-chip" data-accepting="1">Đang nhận dịch vụ</div>
+    </div>
+
+    <div id="dvGrid" class="dv-grid"></div>
+    <div id="dvEmpty" class="dv-empty" style="display:none;">
+      <i id="dvEmptyIcon" class="fa-solid fa-store"></i>
+      <p id="dvEmptyTitle" style="font-weight:800;color:var(--navy);font-size:16px;margin:0 0 6px;">Chưa có dịch vụ phù hợp</p>
+      <p id="dvEmptyMsg" style="margin:0 0 16px;">Các cơ sở đang cập nhật dịch vụ. Hãy thử lại sau hoặc thay đổi bộ lọc tìm kiếm.</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button type="button" id="dvEmptyClearBtn" class="dv-gps-btn" onclick="clearAllFilters()" style="display:none;">
+          <i class="fa-solid fa-filter-circle-xmark"></i> Xóa bộ lọc
+        </button>
+        <a href="${ctx}/customer/tim-kiem" class="dv-gps-btn" style="text-decoration:none;">
+          <i class="fa-solid fa-compass"></i> Khám phá sân
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="dvPanelProduct" style="display:none;">
+    <div class="dv-search">
+      <input type="text" id="spSearchInput" placeholder="Tìm vợt, giày, dây cước, quấn cán..."/>
+    </div>
+
+    <div class="dv-quick-filters" id="spQuickFilters">
+      <div class="dv-chip active" data-all="1">Tất cả</div>
+    </div>
+
+    <div id="spGrid" class="dv-grid"></div>
+    <div id="spEmpty" class="dv-empty" style="display:none;">
+      <i id="spEmptyIcon" class="fa-solid fa-bag-shopping"></i>
+      <p id="spEmptyTitle" style="font-weight:800;color:var(--navy);font-size:16px;margin:0 0 6px;">Chưa có sản phẩm phù hợp</p>
+      <p id="spEmptyMsg" style="margin:0 0 16px;">Các cơ sở đang cập nhật sản phẩm. Hãy thử lại sau hoặc thay đổi bộ lọc tìm kiếm.</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button type="button" id="spEmptyClearBtn" class="dv-gps-btn" onclick="clearProductFilters()" style="display:none;">
+          <i class="fa-solid fa-filter-circle-xmark"></i> Xóa bộ lọc
+        </button>
+        <a href="${ctx}/customer/tim-kiem" class="dv-gps-btn" style="text-decoration:none;">
+          <i class="fa-solid fa-compass"></i> Khám phá sân
+        </a>
+      </div>
     </div>
   </div>
 </main>
@@ -189,6 +229,20 @@
   <div class="dv-cta-bar open" style="position:absolute; bottom:0;">
     <button type="submit" form="dvReqForm" class="dv-cta-btn" id="rq_submitBtn">Xác nhận gửi yêu cầu</button>
   </div>
+</div>
+
+<div class="dv-drawer-overlay" id="spOverlay" onclick="closeProductDetail()"></div>
+<div class="dv-drawer" id="spDrawer">
+  <div class="dv-drawer-head">
+    <h3 id="spDetailTitle" style="font-weight:800;font-size:17px;color:var(--navy);margin:0;">Chi tiết sản phẩm</h3>
+    <button type="button" onclick="closeProductDetail()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted-text);">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <div class="dv-drawer-body" id="spDetailBody"></div>
+</div>
+<div class="dv-cta-bar" id="spCtaBar">
+  <a href="#" id="spCtaBtn" class="dv-cta-btn" style="display:block; text-align:center; text-decoration:none;">Liên hệ cơ sở</a>
 </div>
 
 <style>
@@ -544,9 +598,179 @@
     });
   });
 
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeRequestForm(); closeDetail(); } });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeRequestForm(); closeDetail(); closeProductDetail(); } });
 
-  runSearch();
+  // ═══════════ Tab Sản phẩm (lazy-load, giữ trạng thái qua URL ?tab=) ═══════════
+  var productFilters = { q: '', categoryId: '', lat: null, lng: null };
+  var productLoaded = false;
+  var serviceLoaded = false;
+
+  function hasActiveProductFilter() {
+    return !!(productFilters.q || productFilters.categoryId);
+  }
+
+  function buildProductQuery() {
+    var p = new URLSearchParams();
+    if (productFilters.q) p.set('q', productFilters.q);
+    if (productFilters.categoryId) p.set('categoryId', productFilters.categoryId);
+    if (productFilters.lat != null && productFilters.lng != null) {
+      p.set('lat', productFilters.lat);
+      p.set('lng', productFilters.lng);
+      p.set('radiusKm', '20');
+    }
+    return p.toString();
+  }
+
+  function runProductSearch() {
+    fetch(ctxPath + '/api/customer/san-pham?' + buildProductQuery())
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data.success) { renderProductResults([]); return; }
+        renderProductResults(data.products || []);
+      })
+      .catch(function(){ renderProductResults([]); });
+  }
+
+  function stockLabel(status) {
+    switch (status) {
+      case 'CON_HANG': return { text: 'Còn hàng', cls: 'dv-status-open' };
+      case 'SAP_HET': return { text: 'Sắp hết', cls: 'dv-status-lowstock' };
+      default: return { text: 'Hết hàng', cls: 'dv-status-outofstock' };
+    }
+  }
+
+  function renderProductResults(list) {
+    var grid = document.getElementById('spGrid');
+    var empty = document.getElementById('spEmpty');
+    grid.innerHTML = '';
+    if (!list.length) {
+      var filtered = hasActiveProductFilter();
+      document.getElementById('spEmptyIcon').className = filtered ? 'fa-solid fa-magnifying-glass' : 'fa-solid fa-bag-shopping';
+      document.getElementById('spEmptyTitle').textContent = filtered
+        ? 'Không tìm thấy sản phẩm phù hợp'
+        : 'Chưa có sản phẩm phù hợp';
+      document.getElementById('spEmptyMsg').textContent = filtered
+        ? 'Không có sản phẩm nào khớp với bộ lọc hiện tại. Thử bỏ bớt bộ lọc hoặc từ khóa khác.'
+        : 'Các cơ sở đang cập nhật sản phẩm. Hãy thử lại sau hoặc thay đổi bộ lọc tìm kiếm.';
+      document.getElementById('spEmptyClearBtn').style.display = filtered ? 'inline-flex' : 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    list.forEach(function(p) {
+      var card = document.createElement('div');
+      card.className = 'dv-card';
+      card.onclick = function(){ openProductDetail(p.productId); };
+      var img = p.image ? (ctxPath + p.image) : '';
+      var stock = stockLabel(p.stockStatus);
+      var distanceHtml = (p.distanceKm != null) ? ('<span><i class="fa-solid fa-route"></i> ' + p.distanceKm + ' km</span>') : '';
+      card.innerHTML =
+        '<div class="dv-card-img">' + (img ? '<img src="' + img + '" alt="">' : '') +
+          '<span class="dv-status-badge ' + stock.cls + '">' + stock.text + '</span></div>' +
+        '<div class="dv-card-body">' +
+          '<h3>' + escapeHtml(p.name) + '</h3>' +
+          '<p class="dv-card-facility"><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(p.coSoName) + '</p>' +
+          '<div class="dv-card-meta">' +
+            '<span>' + escapeHtml(p.category || '') + '</span>' +
+            distanceHtml +
+          '</div>' +
+          '<div class="dv-card-meta" style="margin-top:6px;">' +
+            '<span class="dv-price">' + fmtMoney(p.price) + (p.unit ? ('/' + escapeHtml(p.unit)) : '') + '</span>' +
+          '</div>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function openProductDetail(productId) {
+    fetch(ctxPath + '/api/customer/san-pham?action=detail&productId=' + productId)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data.success) { alert(data.message || 'Không tải được chi tiết sản phẩm.'); return; }
+        renderProductDetail(data.product);
+        document.getElementById('spOverlay').classList.add('open');
+        document.getElementById('spDrawer').classList.add('open');
+        document.getElementById('spCtaBar').classList.add('open');
+      });
+  }
+
+  function renderProductDetail(p) {
+    document.getElementById('spDetailTitle').textContent = p.name;
+    var rows = '';
+    rows += row('Cơ sở', p.coSoName);
+    rows += row('Địa chỉ', p.coSoAddress);
+    if (p.gioMoCua && p.gioDongCua) rows += row('Giờ mở cửa', p.gioMoCua + ' - ' + p.gioDongCua);
+    rows += row('Danh mục', p.category || '—');
+    rows += row('Giá', fmtMoney(p.price) + (p.unit ? ('/' + p.unit) : ''));
+    var stock = stockLabel(p.stockStatus);
+    rows += row('Tình trạng', stock.text);
+    if (p.description) rows += row('Mô tả', p.description);
+    document.getElementById('spDetailBody').innerHTML = rows;
+
+    var ctaBtn = document.getElementById('spCtaBtn');
+    if (p.coSoPhone) {
+      ctaBtn.href = 'tel:' + p.coSoPhone;
+      ctaBtn.textContent = 'Liên hệ cơ sở: ' + p.coSoPhone;
+    } else {
+      ctaBtn.href = ctxPath + '/customer/tim-kiem';
+      ctaBtn.textContent = 'Xem cơ sở';
+    }
+  }
+
+  function closeProductDetail() {
+    document.getElementById('spOverlay').classList.remove('open');
+    document.getElementById('spDrawer').classList.remove('open');
+    document.getElementById('spCtaBar').classList.remove('open');
+  }
+
+  function clearProductFilters() {
+    document.querySelectorAll('#spQuickFilters .dv-chip').forEach(function(c){ c.classList.remove('active'); });
+    document.querySelector('#spQuickFilters .dv-chip[data-all]').classList.add('active');
+    productFilters.categoryId = '';
+    runProductSearch();
+  }
+
+  document.getElementById('spSearchInput').addEventListener('input', function(e) {
+    productFilters.q = e.target.value;
+    clearTimeout(window._spSearchDebounce);
+    window._spSearchDebounce = setTimeout(runProductSearch, 300);
+  });
+
+  // ═══════════ Tab switching, giữ trạng thái qua URL (?tab=dich-vu|san-pham) ═══════════
+  function switchTab(tab, updateUrl) {
+    var isProduct = tab === 'san-pham';
+    document.querySelectorAll('.dv-tab').forEach(function(t){
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    document.getElementById('dvPanelService').style.display = isProduct ? 'none' : 'block';
+    document.getElementById('dvPanelProduct').style.display = isProduct ? 'block' : 'none';
+
+    if (updateUrl !== false) {
+      var url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.pushState({ tab: tab }, '', url);
+    }
+
+    if (isProduct && !productLoaded) {
+      productLoaded = true;
+      runProductSearch();
+    } else if (!isProduct && !serviceLoaded) {
+      serviceLoaded = true;
+      runSearch();
+    }
+  }
+
+  document.querySelectorAll('.dv-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() { switchTab(btn.dataset.tab, true); });
+  });
+
+  window.addEventListener('popstate', function(e) {
+    var tab = (e.state && e.state.tab) || new URLSearchParams(window.location.search).get('tab') || 'dich-vu';
+    switchTab(tab, false);
+  });
+
+  var initialTab = new URLSearchParams(window.location.search).get('tab') === 'san-pham' ? 'san-pham' : 'dich-vu';
+  switchTab(initialTab, false);
 </script>
 
 </body>
