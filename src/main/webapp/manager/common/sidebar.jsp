@@ -166,6 +166,10 @@
       class="nav-link ${uri.contains('/manager/quan-ly-san') || uri.contains('/QuanLySan.jsp') ? 'active' : ''}">
       <i class="ti ti-building-stadium text-[19px]"></i>Quản lý sân
     </a>
+    <a href="${pageContext.request.contextPath}/manager/ma-qr-san"
+      class="nav-link ${uri.contains('/manager/ma-qr-san') || uri.contains('/MaQrSan.jsp') ? 'active' : ''}">
+      <i class="ti ti-qrcode text-[19px]"></i>Mã QR sân
+    </a>
     <a href="${pageContext.request.contextPath}/staff/checkin"
       class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
       <i class="ti ti-door-enter text-[19px]"></i>Mở sân / Check-in

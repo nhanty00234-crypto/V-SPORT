@@ -94,6 +94,40 @@ public class SanQRService {
     private static final int MAX_SHORT_CODE_GENERATION_ATTEMPTS = 20;
 
     /**
+     * Đọc thuần (không lock, không mở transaction ghi) toàn bộ SanQR hiện có
+     * ứng với danh sách sanId truyền vào - dùng để render danh sách Manager
+     * (mỗi sân hiển thị trạng thái QR mà KHÔNG tạo QR mới chỉ vì Manager mở
+     * trang danh sách). Trả Map rỗng nếu danh sách rỗng. Không kiểm tra
+     * ownership ở đây - caller (Servlet) đã tự giới hạn danh sách sanId theo
+     * đúng CoSoID của Manager trước khi gọi (ví dụ qua SanService.getSansByCoSo).
+     */
+    public java.util.Map<Integer, SanQR> findExistingBySanIds(java.util.List<Integer> sanIds) {
+        if (sanIds == null || sanIds.isEmpty()) return java.util.Collections.emptyMap();
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            java.util.List<SanQR> list = em.createQuery(
+                    "SELECT q FROM SanQR q WHERE q.sanId IN :ids", SanQR.class)
+                    .setParameter("ids", sanIds)
+                    .getResultList();
+            java.util.Map<Integer, SanQR> map = new java.util.HashMap<>();
+            for (SanQR q : list) map.put(q.getSanId(), q);
+            return map;
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Đọc thuần một SanQR theo sanId, không lock, không tạo mới. Dùng cho detail/image/print - trả null nếu sân chưa có QR. */
+    public SanQR findReadOnlyBySanId(int sanId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return findBySanId(em, sanId);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
      * Lấy QR hiện có của sân, hoặc tạo mới nếu sân chưa từng có QR (idempotent -
      * gọi nhiều lần không tạo thêm bản ghi nhờ UNIQUE constraint SanID + khóa
      * PESSIMISTIC_WRITE trên San khi kiểm tra-rồi-tạo). Dùng khi Manager mở màn
