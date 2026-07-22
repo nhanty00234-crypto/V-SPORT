@@ -199,6 +199,14 @@ public class GhepKeoServlet extends HttpServlet {
         if (keoId == null) { writeJson(resp, 400, Map.of("success", false, "error", "Thiếu keoId.")); return; }
         GhepKeoDAO.GhepKeoView view = ghepKeoDAO.getViewById(keoId);
         if (view == null) { writeJson(resp, 404, Map.of("success", false, "error", "Kèo không tồn tại.")); return; }
+
+        // [FIX-3] Nếu booking gốc bị hủy và kèo vẫn đang mở/đủ người → tự động chuyển sang "Đã hủy"
+        if ("Đã hủy".equals(view.trangThaiBooking)
+                && ("Đang mở".equals(view.trangThai) || "Đã đủ người".equals(view.trangThai))) {
+            ghepKeoDAO.updateStatusIfOwner(keoId, "Đã hủy", view.accountIdNguoiTao);
+            view.trangThai = "Đã hủy";
+        }
+
         List<GhepKeoDAO.ChiTietGhepKeoView> participants = ghepKeoDAO.listParticipants(keoId);
         HttpSession session = req.getSession(false);
         TaiKhoan user = session != null ? (TaiKhoan) session.getAttribute("user") : null;
@@ -228,11 +236,30 @@ public class GhepKeoServlet extends HttpServlet {
 
         List<GhepKeoDAO.GhepKeoView> created = ghepKeoDAO.listByCreator(user.getAccountId());
         List<GhepKeoDAO.GhepKeoView> joined = ghepKeoDAO.listByParticipant(user.getAccountId());
+
+        // [FIX-3] Đồng bộ trạng thái các kèo có booking đã bị hủy nhưng kèo chưa hủy
+        syncCancelledBookingMatches(created);
+        syncCancelledBookingMatches(joined);
+
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("success", true);
         data.put("created", created);
         data.put("joined", joined);
         writeJson(resp, 200, data);
+    }
+
+    /**
+     * [FIX-3] Duyệt danh sách kèo: nếu booking gốc bị hủy mà kèo vẫn "Đang mở"/"Đã đủ người"
+     * thì tự động chuyển sang "Đã hủy" ngay trong mục hiển thị và cập nhật DB.
+     */
+    private void syncCancelledBookingMatches(List<GhepKeoDAO.GhepKeoView> list) {
+        for (GhepKeoDAO.GhepKeoView v : list) {
+            if ("Đã hủy".equals(v.trangThaiBooking)
+                    && ("Đang mở".equals(v.trangThai) || "Đã đủ người".equals(v.trangThai))) {
+                ghepKeoDAO.updateStatusIfOwner(v.keoId, "Đã hủy", v.accountIdNguoiTao);
+                v.trangThai = "Đã hủy";
+            }
+        }
     }
 
     // ==========================================================================

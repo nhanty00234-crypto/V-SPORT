@@ -106,6 +106,7 @@ public class GhepKeoService {
     /**
      * Xin tham gia. Nếu kèo cấu hình auto → thẳng tay JOINED. Nếu manual → PENDING.
      * Chống double-join, self-join, capacity qua transaction bên trong DAO.
+     * [FIX-3] Kiểm tra booking của kèo chưa bị hủy trước khi cho phép tham gia.
      */
     public Result joinMatch(int keoId, int accountId) {
         if (accountId <= 0) return Result.fail("Vui lòng đăng nhập.");
@@ -113,6 +114,12 @@ public class GhepKeoService {
         if (view == null) return Result.fail("Kèo không tồn tại.");
         if (view.accountIdNguoiTao == accountId) return Result.fail("Bạn là chủ kèo, không cần xin tham gia.");
         if (!GhepKeoDAOImpl.STATUS_OPEN.equals(view.trangThai)) return Result.fail("Kèo hiện không nhận thêm người.");
+
+        // [FIX-3] Nếu booking gốc đã bị hủy → tự động hủy kèo và báo lỗi
+        if ("Đã hủy".equals(view.trangThaiBooking)) {
+            ghepKeoDAO.updateStatusIfOwner(keoId, GhepKeoDAOImpl.STATUS_CANCELLED, view.accountIdNguoiTao);
+            return Result.fail("Ca đặt sân của kèo này đã bị hủy, kèo không còn hợp lệ.");
+        }
 
         // Kiểm tra điểm uy tín tối thiểu
         if (view.minReputation > 0) {
@@ -140,10 +147,21 @@ public class GhepKeoService {
         }
     }
 
-    /** Chủ kèo duyệt yêu cầu tham gia. */
+    /**
+     * Chủ kèo duyệt yêu cầu tham gia.
+     * [FIX-1] Dùng approveParticipantWithCapacityCheck để kiểm tra và ngăn vượt capacity trong transaction.
+     * Tự động chuyển kèo sang "Đã đủ người" khi số lượng đạt đỉnh.
+     */
     public Result approveParticipant(int chiTietKeoId, int ownerAccountId) {
-        boolean ok = ghepKeoDAO.updateParticipantStatus(chiTietKeoId, GhepKeoDAOImpl.P_STATUS_JOINED, ownerAccountId, true);
-        return ok ? Result.ok("Đã duyệt yêu cầu.", null) : Result.fail("Không thể duyệt (bạn có thể không phải chủ kèo hoặc yêu cầu không còn hợp lệ).");
+        try {
+            boolean ok = ghepKeoDAO.approveParticipantWithCapacityCheck(chiTietKeoId, ownerAccountId);
+            return ok ? Result.ok("Đã duyệt yêu cầu.", null)
+                      : Result.fail("Không thể duyệt (bạn có thể không phải chủ kèo hoặc yêu cầu không còn hợp lệ).");
+        } catch (IllegalStateException ise) {
+            return Result.fail(ise.getMessage());
+        } catch (Exception e) {
+            return Result.fail("Lỗi khi duyệt yêu cầu. Vui lòng thử lại.");
+        }
     }
 
     /** Chủ kèo từ chối. */
@@ -152,9 +170,12 @@ public class GhepKeoService {
         return ok ? Result.ok("Đã từ chối yêu cầu.", null) : Result.fail("Không thể từ chối.");
     }
 
-    /** Người chơi tự rời kèo. */
+    /**
+     * Người chơi tự rời kèo.
+     * [FIX-2] Dùng leaveParticipantWithReopen để tự động mở lại kèo nếu cần.
+     */
     public Result leaveMatch(int chiTietKeoId, int accountId) {
-        boolean ok = ghepKeoDAO.updateParticipantStatus(chiTietKeoId, GhepKeoDAOImpl.P_STATUS_LEFT, accountId, false);
+        boolean ok = ghepKeoDAO.leaveParticipantWithReopen(chiTietKeoId, accountId);
         return ok ? Result.ok("Bạn đã rời kèo.", null) : Result.fail("Không thể rời kèo.");
     }
 
