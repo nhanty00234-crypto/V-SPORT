@@ -60,6 +60,7 @@
 
     <!-- Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-purple-600 text-white">
             <tr>
@@ -136,6 +137,7 @@
             </c:if>
             </tbody>
         </table>
+      </div>
     </div>
 </div>
 

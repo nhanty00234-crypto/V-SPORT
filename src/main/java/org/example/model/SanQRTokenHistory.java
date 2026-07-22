@@ -2,13 +2,19 @@ package org.example.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
- * Lịch sử MỌI token từng cấp cho một sân (kể cả token đang active hiện tại).
- * Khi regenerate, token cũ được ghi REVOKED tại đây. Mục đích: nếu một QR giấy
- * cũ (đã bị thay) bị quét lại, Service layer tra bảng này để trả lỗi rõ ràng
- * "mã QR đã cũ" thay vì lỗi chung "không tìm thấy" - phân biệt QR cũ với QR giả.
+ * Lịch sử MỌI token/short code từng cấp cho một sân (kể cả token đang active
+ * hiện tại). Khi regenerate, token cũ được ghi REVOKED tại đây. Mục đích: nếu
+ * một QR giấy cũ (đã bị thay) bị quét lại, Service layer tra bảng này để trả
+ * lỗi rõ ràng "mã QR đã cũ" thay vì lỗi chung "không tìm thấy" - phân biệt QR
+ * cũ với QR giả.
+ *
+ * CHỈ lưu SHA-256 hash của token/short code (TokenHash/ShortCode ở đây là giá
+ * trị plaintext short code - short code KHÔNG nhạy cảm bằng token vì nó chỉ
+ * dùng làm fallback nhập tay, xem SanQRSecurityUtil), KHÔNG lưu token plaintext
+ * - lịch sử chỉ cần trả lời "token vừa quét có từng active không", không cần
+ * đọc lại giá trị gốc để làm gì khác.
  */
 @Entity
 @Table(name = "SanQRTokenHistory")
@@ -28,8 +34,11 @@ public class SanQRTokenHistory {
     @Column(name = "SanID", nullable = false)
     private int sanId;
 
-    @Column(name = "Token", nullable = false, columnDefinition = "uniqueidentifier")
-    private UUID token;
+    @Column(name = "TokenHash", length = 64)
+    private String tokenHash;
+
+    @Column(name = "ShortCode", length = 12)
+    private String shortCode;
 
     @Column(name = "TrangThai", nullable = false, length = 20)
     private String trangThai;
@@ -64,8 +73,11 @@ public class SanQRTokenHistory {
     public int getSanId() { return sanId; }
     public void setSanId(int sanId) { this.sanId = sanId; }
 
-    public UUID getToken() { return token; }
-    public void setToken(UUID token) { this.token = token; }
+    public String getTokenHash() { return tokenHash; }
+    public void setTokenHash(String tokenHash) { this.tokenHash = tokenHash; }
+
+    public String getShortCode() { return shortCode; }
+    public void setShortCode(String shortCode) { this.shortCode = shortCode; }
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }

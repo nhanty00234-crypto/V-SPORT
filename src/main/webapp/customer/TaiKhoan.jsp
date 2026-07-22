@@ -264,8 +264,27 @@
     .quick-actions { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
+    .account-wrapper { padding: 30px 0; }
+    .account-container { padding: 0 min(20px, 5vw); gap: 20px; }
     .stats-grid { grid-template-columns: 1fr; }
     .booking-item { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .booking-actions { width: 100%; }
+    .booking-actions .btn { width: 100%; text-align: center; }
+    .page-title { font-size: 26px; }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 430px) {
+    .account-container { padding: 0 min(16px, 4vw); }
+    .profile-card { padding: 20px 16px; }
+    .profile-name { font-size: 18px; word-break: break-word; }
+    .profile-email { word-break: break-word; }
+    .booking-item { padding: 15px; }
+    .booking-meta { flex-wrap: wrap; gap: 8px; }
+    .booking-title { flex-wrap: wrap; }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .action-card { padding: 15px 10px; }
+    .action-title { font-size: 12.5px; }
+    .section-header { flex-wrap: wrap; gap: 10px; }
 }
 </style>
 </head>

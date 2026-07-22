@@ -89,7 +89,23 @@
   .dvct-modal-box textarea { width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:13.5px; }
 
   @media (max-width: 1024px) { .account-container { flex-direction:column; } .account-sidebar { width:100%; } .dvct-stats { grid-template-columns:1fr; } }
-  @media (max-width: 768px) { .dvct-drawer { max-width:100%; } }
+  @media (max-width: 768px) {
+    .dvct-drawer { max-width:100%; }
+    .account-wrapper { padding: 30px 0; }
+    .account-container { padding: 0 min(20px, 5vw); gap: 20px; }
+    .dvct-filters { align-items: stretch; }
+    .dvct-filters .field { flex: 1 1 140px; }
+  }
+  @media (max-width: 430px) {
+    .account-container { padding: 0 min(16px, 4vw); }
+    .dvct-title { font-size: 20px; }
+    .dvct-card { padding: 14px; }
+    .dvct-card > div { flex-direction: column; align-items: flex-start !important; }
+    .dvct-card > div > div:last-child { text-align: left; width: 100%; }
+    .dvct-card button.dvct-btn { width: 100%; }
+    .dvct-modal-box { padding: 18px; }
+    .dvct-action-bar { flex-direction: column; }
+  }
 </style>
 
 <jsp:include page="/common/header-xtra.jsp" />

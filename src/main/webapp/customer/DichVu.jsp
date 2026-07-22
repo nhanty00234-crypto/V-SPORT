@@ -57,6 +57,23 @@
   .dv-empty { text-align:center; padding: 60px 20px; color: var(--muted-text); }
   .dv-empty i { font-size: 40px; margin-bottom: 12px; opacity:.4; }
 
+  @media (max-width: 768px) {
+    .dv-wrap { padding: 24px min(20px, 5vw) 70px; }
+    .dv-header h1 { font-size: 24px; }
+    .dv-search { flex-direction: column; }
+    .dv-search input[type="text"] { min-width: 0; width: 100%; }
+    .dv-gps-btn { width: 100%; justify-content: center; }
+    .dv-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  }
+  @media (max-width: 430px) {
+    .dv-wrap { padding: 20px min(16px, 4vw) 70px; }
+    .dv-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dv-card-img { height: 110px; }
+    .dv-tabs { overflow-x: auto; }
+    .dv-quick-filters { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    .dv-chip { flex-shrink: 0; }
+  }
+
   .dv-drawer-overlay { position:fixed; inset:0; background:rgba(18,45,64,.5); z-index:80; display:none; }
   .dv-drawer-overlay.open { display:block; }
   .dv-drawer { position:fixed; top:0; right:0; height:100vh; width:100%; max-width:480px; background:#fff; z-index:81;
@@ -250,6 +267,11 @@
   .dv-input { width:100%; border:1px solid var(--border); border-radius:10px; padding:9px 11px; font-size:13.5px; outline:none; }
   .dv-input:focus { border-color: var(--primary); }
   .dv-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width: 430px) {
+    .dv-grid-2 { grid-template-columns: 1fr; }
+    .dv-drawer-body { padding: 16px; }
+    .dv-cta-bar { padding: 12px 16px; }
+  }
 </style>
 
 <script>

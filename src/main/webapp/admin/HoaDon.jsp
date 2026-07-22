@@ -129,6 +129,7 @@ body { font-family: 'Inter', sans-serif; }
       </select>
     </div>
     <div class="card overflow-hidden animate-fade-up delay-5">
+      <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-zinc-50 border-b border-zinc-200">
           <tr>
@@ -146,6 +147,7 @@ body { font-family: 'Inter', sans-serif; }
           <!-- Dynamic Invoices Rows -->
         </tbody>
       </table>
+      </div>
       <div class="px-4 py-3 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
         <span>Hiển thị kết quả tìm kiếm theo thời gian thực</span>
         <div class="flex items-center gap-1">
@@ -166,6 +168,7 @@ body { font-family: 'Inter', sans-serif; }
         <span class="material-symbols-outlined text-[16px]">info</span>
         <span>Các yêu cầu hoàn tiền dưới đây cần được xét duyệt. <span class="font-semibold">Bảng HoanTien</span></span>
       </div>
+      <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-zinc-50 border-b border-zinc-200">
           <tr>
@@ -182,6 +185,7 @@ body { font-family: 'Inter', sans-serif; }
           <!-- Dynamic Refunds Rows -->
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 
@@ -246,6 +250,7 @@ body { font-family: 'Inter', sans-serif; }
       <!-- Products & Services list (if any) -->
       <div id="detailServiceSection" class="hidden">
         <p class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Sản phẩm & Dịch vụ</p>
+        <div class="overflow-x-auto">
         <table class="w-full text-xs">
           <thead>
             <tr class="text-zinc-400 border-b border-zinc-150 pb-1">
@@ -259,6 +264,7 @@ body { font-family: 'Inter', sans-serif; }
             <!-- Dynamic rows -->
           </tbody>
         </table>
+        </div>
       </div>
 
       <!-- Payment Summary -->

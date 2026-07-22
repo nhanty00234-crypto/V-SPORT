@@ -254,7 +254,7 @@
       </div>
 
       <!-- Loại sân + Trạng thái cùng hàng -->
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-purple-900">Loại sân &amp; Bảng giá *</label>
           <select name="loaiSanID" id="courtTypeSelect"
@@ -383,7 +383,7 @@
         <span class="text-xs font-semibold text-purple-900">Sân không dùng đèn (không phụ thu buổi tối)</span>
       </label>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-purple-900">Giá ban ngày *</label>
           <div class="relative">
@@ -403,7 +403,7 @@
 
       <!-- Giờ lên đèn — ẩn khi chọn "không dùng đèn" -->
       <div id="lightTimeSection">
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-purple-900">Giờ bắt đầu bật đèn *</label>
             <input type="time" name="gioBatDauLenDen" id="typeLightStart" value="17:30" class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
@@ -454,7 +454,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-purple-900">Giá ngày (Không đèn) *</label>
           <div class="relative">
@@ -471,7 +471,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-purple-900">Giờ bắt đầu bật đèn *</label>
           <input type="time" name="gioBatDauLenDen" id="priceConfigLightStart" required class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">

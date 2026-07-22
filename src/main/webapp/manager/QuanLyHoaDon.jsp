@@ -346,7 +346,7 @@
         </div>
         <div class="max-h-[300px] overflow-y-auto divide-y divide-slate-50">
           <c:forEach var="sp" items="${serviceProducts}">
-            <div class="grid grid-cols-[1fr_110px_90px] gap-3 items-center px-4 py-3 service-row"
+            <div class="grid grid-cols-[1fr_80px_70px] sm:grid-cols-[1fr_110px_90px] gap-2 sm:gap-3 items-center px-3 sm:px-4 py-3 service-row"
                  data-price="${sp.donGia}">
               <div>
                 <input type="hidden" name="productId" value="${sp.sanPhamId}"/>

@@ -67,7 +67,7 @@
         .xn-promo-empty { font-size: 12.5px; color: var(--muted-text); font-weight: 600; }
 
         .xn-input, .xn-textarea {
-            width: 100%; padding: 10px 12px; min-height: 42px;
+            width: 100%; padding: 10px 12px; min-height: 44px;
             background: #fff; border: 1px solid var(--border); border-radius: 10px;
             font-size: 13.5px; color: var(--navy); font-family: inherit;
         }

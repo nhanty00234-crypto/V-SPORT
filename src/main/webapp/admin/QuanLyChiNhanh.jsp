@@ -104,6 +104,10 @@ body { font-family: 'Inter', sans-serif; }
   }
   #detailDrawer.open { transform:translateX(0); }
 
+  @media (max-width: 768px) {
+    #detailDrawer { top:0; left:0; width:100%; z-index:80; }
+  }
+
   /* Capability chip */
   .cap-chip {
     display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
@@ -493,24 +497,24 @@ var DRAWER_DATA = {};
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[560px] max-h-[92vh] flex flex-col">
 
     <!-- Header cố định -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-100 shrink-0">
-      <div class="flex items-center gap-3">
-        <h3 class="text-base font-bold text-zinc-900">Thêm Cơ Sở mới</h3>
+    <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-zinc-100 shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
+        <h3 class="text-sm sm:text-base font-bold text-zinc-900 whitespace-nowrap">Thêm Cơ Sở mới</h3>
         <!-- Step bar -->
         <div class="flex items-center gap-1">
           <span id="sDot1" class="w-6 h-1.5 rounded-full bg-blue-600 transition-all"></span>
           <span id="sDot2" class="w-6 h-1.5 rounded-full bg-zinc-200 transition-all"></span>
           <span id="sDot3" class="w-6 h-1.5 rounded-full bg-zinc-200 transition-all"></span>
         </div>
-        <span id="sLabel" class="text-xs text-zinc-400 font-medium">Bước 1 / 3</span>
+        <span id="sLabel" class="text-xs text-zinc-400 font-medium whitespace-nowrap">Bước 1 / 3</span>
       </div>
-      <button onclick="closeModalThem()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400">
+      <button onclick="closeModalThem()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 shrink-0">
         <i class="ti ti-x text-lg"></i>
       </button>
     </div>
 
     <!-- ══ BƯỚC 1: Thông tin cơ bản ══ -->
-    <div id="aStep1" class="overflow-y-auto p-6 flex flex-col gap-4">
+    <div id="aStep1" class="overflow-y-auto p-4 sm:p-6 flex flex-col gap-4">
       <div id="adminAddError" class="hidden px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium"></div>
 
       <div>
@@ -526,7 +530,7 @@ var DRAWER_DATA = {};
       </div>
 
       <!-- Email + SĐT -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-zinc-700">Email liên hệ <span class="text-red-500">*</span></label>
           <input type="email" id="adminEmail" placeholder="email@example.com"
@@ -566,7 +570,7 @@ var DRAWER_DATA = {};
     </div>
 
     <!-- ══ BƯỚC 2: Xác thực OTP ══ -->
-    <div id="aStep2" class="hidden p-6 flex flex-col gap-5">
+    <div id="aStep2" class="hidden p-4 sm:p-6 flex flex-col gap-5">
       <div class="text-center">
         <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
           <i class="ti ti-mail-check text-blue-600 text-3xl"></i>
@@ -605,7 +609,7 @@ var DRAWER_DATA = {};
 
     <!-- ══ BƯỚC 3: Cấu hình sân & Lưu ══ -->
     <div id="aStep3" class="hidden overflow-y-auto">
-      <form id="formThemCoSo" action="${pageContext.request.contextPath}/admin/chi-nhanh/them" method="post" class="p-6 flex flex-col gap-4">
+      <form id="formThemCoSo" action="${pageContext.request.contextPath}/admin/chi-nhanh/them" method="post" class="p-4 sm:p-6 flex flex-col gap-4">
         <!-- hidden fields từ bước 1 -->
         <input type="hidden" name="tenCoSo"    id="hTenCoSo">
         <input type="hidden" name="email"       id="hEmail">
@@ -680,7 +684,7 @@ var DRAWER_DATA = {};
         </div>
 
         <!-- Giờ mở / đóng cửa -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-zinc-700">Giờ mở cửa <span class="text-red-500">*</span></label>
             <input type="time" name="gioMoCua" required

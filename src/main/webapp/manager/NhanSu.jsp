@@ -161,24 +161,26 @@
 
     <!-- Leave Requests Table -->
     <div class="card overflow-hidden">
-      <table class="w-full text-left border-collapse text-xs">
-        <thead>
-          <tr class="bg-violet-50/50 text-violet-950 font-bold border-b border-violet-100">
-            <th class="p-4 w-12 text-center">#</th>
-            <th class="p-4">Nhân viên</th>
-            <th class="p-4">Vai trò</th>
-            <th class="p-4">Ngày nghỉ</th>
-            <th class="p-4">Loại nghỉ</th>
-            <th class="p-4">Lý do</th>
-            <th class="p-4">Trạng thái</th>
-            <th class="p-4">Ngày gửi</th>
-            <th class="p-4 text-right pr-6">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-violet-50" id="leaveRequestBody">
-          <!-- Populated by JS -->
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-violet-50/50 text-violet-950 font-bold border-b border-violet-100">
+              <th class="p-4 w-12 text-center">#</th>
+              <th class="p-4">Nhân viên</th>
+              <th class="p-4">Vai trò</th>
+              <th class="p-4">Ngày nghỉ</th>
+              <th class="p-4">Loại nghỉ</th>
+              <th class="p-4">Lý do</th>
+              <th class="p-4">Trạng thái</th>
+              <th class="p-4">Ngày gửi</th>
+              <th class="p-4 text-right pr-6">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-violet-50" id="leaveRequestBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
       <!-- Empty State -->
       <div id="leaveEmptyState" class="hidden flex flex-col items-center justify-center py-12 px-4 text-center">
         <span class="material-symbols-outlined text-[48px] text-violet-200 mb-2">event_busy</span>
@@ -216,7 +218,7 @@
             <label class="text-xs font-semibold text-violet-900">Email <span class="text-red-500">*</span></label>
             <input type="email" id="staffEmail" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-violet-900">Điện thoại</label>
               <input type="tel" id="staffPhone" class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">

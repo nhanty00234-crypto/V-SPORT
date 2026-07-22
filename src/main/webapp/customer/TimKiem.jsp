@@ -219,7 +219,43 @@
         
         .switch-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border); }
         .modal-actions { display: flex; gap: 15px; margin-top: 30px; }
-        
+
+        /* Đặt lịch button: đảm bảo vùng chạm tối thiểu ~44px trên mọi kích thước */
+        .fc-footer .btn {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 24px 0 60px; }
+            .product-grid { gap: 16px; }
+            .fc-image { height: 170px; }
+            .fc-content { padding: 16px; }
+            .modal-panel {
+                max-width: 100%;
+                width: min(100% - 24px, 100%);
+                padding: 24px 18px;
+                max-height: calc(100dvh - 32px);
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .filter-chips { gap: 8px; }
+            .chip { padding: 9px 18px; font-size: 13px; }
+            .fc-footer { flex-wrap: wrap; gap: 10px; }
+            .fc-footer .btn { width: 100%; }
+            .fc-time { width: 100%; }
+            .modal-panel {
+                width: min(100% - 20px, 100%);
+                padding: 20px 14px;
+                border-radius: var(--radius-medium);
+            }
+            .modal-actions { flex-direction: column; gap: 10px; }
+        }
+
     </style>
 </head>
 <body>

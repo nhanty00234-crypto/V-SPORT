@@ -29,6 +29,15 @@ public class SanQR {
     @Column(name = "Token", nullable = false, columnDefinition = "uniqueidentifier")
     private UUID token;
 
+    /**
+     * Mã ngắn dự phòng khi Customer không quét được QR bằng camera (không cấp
+     * quyền, camera lỗi, QR mờ). Sinh bằng SecureRandom qua SanQRSecurityUtil,
+     * KHÔNG suy ra được từ SanID/token. Có thể null tạm thời cho các bản ghi
+     * tạo trước khi có hardening này - Service tự backfill khi phát hiện null.
+     */
+    @Column(name = "ShortCode", length = 12)
+    private String shortCode;
+
     @Column(name = "TrangThai", nullable = false, length = 20)
     private String trangThai;
 
@@ -72,6 +81,9 @@ public class SanQR {
 
     public UUID getToken() { return token; }
     public void setToken(UUID token) { this.token = token; }
+
+    public String getShortCode() { return shortCode; }
+    public void setShortCode(String shortCode) { this.shortCode = shortCode; }
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }

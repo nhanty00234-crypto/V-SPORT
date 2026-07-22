@@ -186,7 +186,7 @@
     </div>
     <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3.5">
       <div class="field"><label>Tên dịch vụ *</label><input type="text" name="serviceName" id="f_serviceName" maxlength="150" required/></div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="field">
           <label>Loại dịch vụ *</label>
           <select name="serviceType" id="f_serviceType" onchange="onServiceTypeChange()" required>
@@ -201,12 +201,12 @@
         <div class="field"><label>Môn thể thao</label><input type="text" name="sportType" id="f_sportType" placeholder="Cầu lông, Tennis..."/></div>
       </div>
       <div class="field"><label>Mô tả ngắn</label><textarea name="description" id="f_description" rows="2"></textarea></div>
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="field"><label>Giá cơ bản (đ) *</label><input type="number" min="0" step="1000" name="basePrice" id="f_basePrice" required/></div>
         <div class="field"><label>Đơn vị tính</label><input type="text" name="unit" id="f_unit" placeholder="vợt, lần..."/></div>
         <div class="field"><label>Thời gian (phút) *</label><input type="number" min="1" name="estimatedMinutes" id="f_estimatedMinutes" required/></div>
       </div>
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="field"><label>Số đơn tối đa/ngày</label><input type="number" min="1" name="maxRequestsPerDay" id="f_maxRequestsPerDay"/></div>
         <div class="field"><label>Giờ nhận từ</label><input type="time" name="receiveTimeStart" id="f_receiveTimeStart"/></div>
         <div class="field"><label>Giờ nhận đến</label><input type="time" name="receiveTimeEnd" id="f_receiveTimeEnd"/></div>
@@ -221,14 +221,14 @@
       <div id="racketConfigBlock" class="border-t border-slate-100 pt-3.5 mt-1 flex flex-col gap-3.5">
         <p class="text-xs font-bold text-teal-700 uppercase tracking-wide">Cấu hình căng lưới</p>
         <div class="field"><label>Loại vợt nhận (CSV)</label><input type="text" name="racketTypes" id="f_racketTypes" placeholder="Cầu lông,Tennis"/></div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="field"><label>Giá công căng (đ) *</label><input type="number" min="0" step="1000" name="stringingPrice" id="f_stringingPrice"/></div>
           <div class="field">
             <label>Đơn vị mức căng</label>
             <select name="tensionUnit" id="f_tensionUnit"><option value="kg">kg</option><option value="lbs">lbs</option></select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="field"><label>Mức căng tối thiểu *</label><input type="number" min="0" step="0.5" name="minTension" id="f_minTension"/></div>
           <div class="field"><label>Mức căng tối đa *</label><input type="number" min="0" step="0.5" name="maxTension" id="f_maxTension"/></div>
         </div>
@@ -238,7 +238,7 @@
         <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
           <input type="checkbox" name="sellsString" id="f_sellsString" checked/> Có bán dây tại cơ sở
         </label>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="field"><label>Thời gian hoàn thành TB (phút)</label><input type="number" min="1" name="avgCompletionMinutes" id="f_avgCompletionMinutes"/></div>
           <div class="field"><label>Số vợt tối đa/đơn</label><input type="number" min="1" name="maxRacketsPerOrder" id="f_maxRacketsPerOrder"/></div>
         </div>
@@ -267,15 +267,15 @@
     </div>
     <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3.5">
       <div class="field"><label>Tên vật tư *</label><input type="text" name="materialName" id="m_name" maxlength="150" required/></div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="field"><label>Thương hiệu</label><input type="text" name="materialBrand" id="m_brand"/></div>
         <div class="field"><label>Mã dây</label><input type="text" name="materialCode" id="m_code"/></div>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="field"><label>Màu</label><input type="text" name="materialColor" id="m_color"/></div>
         <div class="field"><label>Môn thể thao</label><input type="text" name="materialSportType" id="m_sportType"/></div>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="field"><label>Giá vật tư (đ) *</label><input type="number" min="0" step="1000" name="materialPrice" id="m_price" required/></div>
         <div class="field"><label>Phụ phí (đ)</label><input type="number" min="0" step="1000" name="materialExtraFee" id="m_extraFee"/></div>
       </div>

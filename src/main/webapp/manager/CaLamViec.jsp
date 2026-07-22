@@ -281,8 +281,10 @@
       </div>
 
       <div class="card overflow-hidden bg-white p-4">
-        <div id="calendarGrid" class="grid gap-4">
-          </div>
+        <div class="overflow-x-auto">
+          <div id="calendarGrid" class="grid gap-4">
+            </div>
+        </div>
       </div>
   </div>
 
@@ -1760,7 +1762,7 @@ function renderCalendar() {
   const shiftsByDate = {};
   days.forEach(day => { const dateStr = day.toISOString().split('T')[0]; shiftsByDate[dateStr] = shiftList.filter(s => s.ngayLam === dateStr); });
 
-  let html = '<div class="grid grid-cols-7 gap-4">';
+  let html = '<div class="grid grid-cols-7 gap-4 min-w-[700px]">';
   days.forEach(day => {
     const dateStr = day.toISOString().split('T')[0];
     const dayShifts = shiftsByDate[dateStr] || [];
