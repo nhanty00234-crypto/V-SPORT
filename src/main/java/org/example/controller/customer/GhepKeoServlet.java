@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,6 +67,7 @@ import java.util.Map;
         "/customer/api/matches/cancel",
         "/customer/api/matches/close"
 })
+@MultipartConfig
 public class GhepKeoServlet extends HttpServlet {
 
     private static final Gson GSON = new GsonBuilder()
@@ -159,6 +161,7 @@ public class GhepKeoServlet extends HttpServlet {
         cr.soNguoiCanTim = parseIntOr(req.getParameter("soNguoiCanTim"), 1);
         cr.trinhDo = req.getParameter("trinhDo");
         cr.hinhThucDuyet = req.getParameter("hinhThucDuyet");
+        cr.minReputation = parseIntOr(req.getParameter("minReputation"), 0);
         cr.note = req.getParameter("note");
         if (cr.note != null && cr.note.length() > 240) cr.note = cr.note.substring(0, 240);
 
