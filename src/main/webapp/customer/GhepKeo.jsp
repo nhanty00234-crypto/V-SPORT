@@ -899,6 +899,22 @@
                     Xóa lọc
                 </button>
             </div>
+            <%-- Chip lọc uy tín nhanh (hiển sau bộ lọc chính) --%>
+            <div class="match-chip-row" role="group" aria-label="Lọc theo uy tín yêu cầu" style="margin-top:12px;">
+                <button type="button" class="match-chip is-active" data-rep="all" onclick="gkFilterByRep('all', this)">Tất cả</button>
+                <button type="button" class="match-chip" data-rep="0" onclick="gkFilterByRep('0', this)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Không yêu cầu uy tín
+                </button>
+                <button type="button" class="match-chip" data-rep="40" onclick="gkFilterByRep('40', this)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Tôi có thể tham gia (uy tín ≤ 40)
+                </button>
+                <button type="button" class="match-chip" data-rep="eligible" onclick="gkFilterByRep('eligible', this)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Phù hợp với tôi
+                </button>
+            </div>
         </section>
 
         <%-- Dải tóm tắt + sắp xếp (P9) --%>
@@ -913,6 +929,7 @@
                     <option value="soonest">Sắp diễn ra</option>
                     <option value="newest">Mới nhất</option>
                     <option value="slots">Còn nhiều chỗ</option>
+                    <option value="rep">Phù hợp uy tín</option>
                 </select>
             </div>
         </div>
@@ -1044,6 +1061,21 @@
                                 <option>Nâng cao</option>
                             </select>
                             <p class="match-help">Chỉ mang tính gợi ý cho người xem kèo.</p>
+                        </div>
+                        <div>
+                            <label class="match-field-label" for="gkMinRep">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Điểm uy tín tối thiểu
+                            </label>
+                            <select id="gkMinRep" class="match-input">
+                                <option value="0">Không yêu cầu</option>
+                                <option value="40">40+ — Cơ bản</option>
+                                <option value="60">60+ — Trung bình</option>
+                                <option value="70">70+ — Khá tốt</option>
+                                <option value="80">80+ — Tốt</option>
+                                <option value="90">90+ — Xuất sắc</option>
+                            </select>
+                            <p class="match-help">Người có điểm uy tín thấp hơn sẽ không thể tham gia kèo này.</p>
                         </div>
                         <div class="is-wide">
                             <span class="match-field-label" id="gkApproveLabel">Hình thức duyệt</span>
@@ -1185,7 +1217,8 @@
   "initialTab": "${initialTab}",
   "preCoSoId": <c:choose><c:when test="${not empty coSoIdParam}">${coSoIdParam}</c:when><c:otherwise>null</c:otherwise></c:choose>,
   "preSanId":  <c:choose><c:when test="${not empty sanIdParam}">${sanIdParam}</c:when><c:otherwise>null</c:otherwise></c:choose>,
-  "accountId": <c:choose><c:when test="${not empty sessionScope.user}">${sessionScope.user.accountId}</c:when><c:otherwise>null</c:otherwise></c:choose>
+  "accountId": <c:choose><c:when test="${not empty sessionScope.user}">${sessionScope.user.accountId}</c:when><c:otherwise>null</c:otherwise></c:choose>,
+  "myReputation": <c:choose><c:when test="${not empty sessionScope.user}">${sessionScope.user.diemUyTin}</c:when><c:otherwise>null</c:otherwise></c:choose>
 }
 </script>
 <script>
@@ -1193,6 +1226,7 @@
     var server = JSON.parse(document.getElementById('gkServerData').textContent);
     var CTX = server.contextPath;
     var ME_ID = server.accountId;
+    var MY_REP = (server.myReputation != null) ? server.myReputation : 100; // điểm uy tín người dùng hiện tại
 
     var STATUS_OPEN = 'Đang mở';
     var STATUS_FULL = 'Đã đủ người';
@@ -1327,6 +1361,17 @@
 
     /* -------------------- Tìm người chơi: tải danh sách -------------------- */
     var discoverData = [];
+    var discoverRepFilter = 'all';
+
+    window.gkFilterByRep = function (repStr, btn) {
+        discoverRepFilter = repStr;
+        var row = btn.closest('.match-chip-row');
+        if (row) {
+            row.querySelectorAll('.match-chip').forEach(function (c) { c.classList.remove('is-active'); });
+            btn.classList.add('is-active');
+        }
+        gkRenderDiscover();
+    };
 
     window.gkLoadDiscover = function () {
         var coSo  = document.getElementById('gkFilterCoSo').value;
@@ -1377,6 +1422,26 @@
 
         var mode = document.getElementById('gkSortSelect').value;
         var list = discoverData.slice();
+
+        // 1. Lọc theo badge uy tín
+        if (discoverRepFilter !== 'all') {
+            list = list.filter(function(m) {
+                var req = m.minReputation || 0;
+                if (discoverRepFilter === '0') return req === 0;
+                if (discoverRepFilter === '40') return req <= 40;
+                if (discoverRepFilter === 'eligible') return req === 0 || MY_REP >= req;
+                return true;
+            });
+        }
+
+        // Cập nhật lại số lượng sau khi lọc
+        document.getElementById('gkResultCount').textContent = list.length + ' kèo phù hợp';
+        if (list.length === 0) {
+            box.innerHTML = '<div class="match-empty-mini" style="grid-column: 1 / -1; margin-top: 20px;">Không có kèo nào khớp với bộ lọc uy tín.</div>';
+            return;
+        }
+
+        // 2. Sắp xếp
         if (mode === 'soonest') {
             list.sort(function (a, b) {
                 var d = String(a.ngayDat || '').localeCompare(String(b.ngayDat || ''));
@@ -1387,6 +1452,22 @@
         } else if (mode === 'slots') {
             list.sort(function (a, b) {
                 return ((b.soNguoiCanTim || 0) - (b.soNguoiThamGia || 0)) - ((a.soNguoiCanTim || 0) - (a.soNguoiThamGia || 0));
+            });
+        } else if (mode === 'rep') {
+            list.sort(function (a, b) {
+                // Ưu tiên kèo yêu cầu uy tín phù hợp nhất với mình (nhỏ hơn hoặc bằng MY_REP, và gần MY_REP nhất)
+                var reqA = a.minReputation || 0;
+                var reqB = b.minReputation || 0;
+                var aEligible = MY_REP >= reqA ? 1 : 0;
+                var bEligible = MY_REP >= reqB ? 1 : 0;
+                if (aEligible !== bEligible) return bEligible - aEligible;
+                if (aEligible) {
+                    // Cả hai đều eligible -> ưu tiên req cao hơn (gần MY_REP hơn)
+                    return reqB - reqA;
+                } else {
+                    // Cả hai đều không eligible -> ưu tiên req thấp hơn (dễ đạt hơn)
+                    return reqA - reqB;
+                }
             });
         }
         list.forEach(function (m) { box.appendChild(matchCard(m, false)); });
@@ -1405,7 +1486,9 @@
         var percent = Math.min(100, Math.round((joined / capacity) * 100));
         var trangThai = m.trangThai || STATUS_OPEN;
         var ended = isPast(m);
-        var canJoin = !ownerView && !joinedView && trangThai === STATUS_OPEN && !ended && joined < capacity;
+        var minRep = m.minReputation || 0;
+        var meEligible = (ME_ID == null || minRep === 0 || MY_REP >= minRep);
+        var canJoin = !ownerView && !joinedView && trangThai === STATUS_OPEN && !ended && joined < capacity && meEligible;
 
         var statusLabel = ended && trangThai !== STATUS_CANCEL ? 'Đã kết thúc' : trangThai;
         var statusCls = ended && trangThai !== STATUS_CANCEL ? 'is-closed' : statusClass(trangThai);
@@ -1415,28 +1498,18 @@
               + '<span class="match-badge is-sport">' + escapeHtml(m.tenMonTheThao || 'Thể thao') + '</span>'
               + '<span class="match-badge ' + statusCls + '">' + escapeHtml(statusLabel) + '</span>'
               + (joinedView ? '<span class="match-badge is-joined">Bạn đã tham gia</span>' : '')
+              + (m.minReputation > 0
+                  ? '<span class="match-badge ' + (MY_REP >= m.minReputation ? 'is-rep-good' : 'is-rep-bad') + '" title="Yêu cầu ít nhất ' + m.minReputation + ' điểm uy tín">'
+                    + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+                    + ' Uy tín ≥ ' + m.minReputation
+                  + '</span>'
+                  : '')
               + '<span class="match-badge ' + reputationClass(m.diemUyTinNguoiTao) + ' match-badge-spacer" title="Điểm uy tín chủ kèo">'
                 + escapeHtml(reputationLabel(m.diemUyTinNguoiTao))
                 + (m.diemUyTinNguoiTao != null ? (' · ' + m.diemUyTinNguoiTao + '/100') : '')
               + '</span>'
             + '</div>'
             + '<div>'
-              + '<h3 class="match-item-title">' + escapeHtml(m.tenCoSo || 'Cơ sở') + ' · ' + escapeHtml(m.tenSan || 'Sân') + '</h3>'
-              + (m.diaChiCoSo ? '<p class="match-item-addr">' + escapeHtml(m.diaChiCoSo) + '</p>' : '')
-            + '</div>'
-            + '<div class="match-item-meta">'
-              + '<span>' + icon('date') + fmtDateVi(m.ngayDat) + '</span>'
-              + '<span>' + icon('clock') + escapeHtml(m.gioBatDau || '') + '–' + escapeHtml(m.gioKetThuc || '') + '</span>'
-              + (m.trinhDo ? '<span>' + icon('level') + escapeHtml(m.trinhDo) + '</span>' : '')
-              + '<span>' + icon('user') + escapeHtml(m.tenNguoiTao || '—') + '</span>'
-            + '</div>'
-            + (m.actualNote ? '<p class="match-item-note">' + escapeHtml(m.actualNote) + '</p>' : '')
-            + '<div class="match-slots">'
-              + '<div class="match-slot-bar"><div class="match-slot-fill" style="width:' + percent + '%"></div></div>'
-              + '<div class="match-slot-text">'
-                + '<span>' + joined + '/' + capacity + ' người đã tham gia</span>'
-                + '<span>' + (joined >= capacity ? 'Đã đủ người' : 'Còn ' + (capacity - joined) + ' chỗ') + '</span>'
-              + '</div>'
             + '</div>';
 
         // Hành động theo vai trò + trạng thái (P13): không bao giờ hiện nút sai trạng thái.
@@ -1555,6 +1628,12 @@
               + '<div><b>Loại sân:</b> ' + escapeHtml(m.tenLoaiSan || '—') + '</div>'
               + '<div><b>Trình độ:</b> ' + escapeHtml(m.trinhDo || 'Không yêu cầu') + '</div>'
               + '<div><b>Hình thức duyệt:</b> ' + (m.hinhThucDuyet === 'manual' ? 'Chủ kèo duyệt từng người' : 'Tự động chấp nhận') + '</div>'
+              + '<div><b>Uy tín tối thiểu:</b> '
+                + (m.minReputation > 0
+                    ? '<span style="color:' + (MY_REP >= m.minReputation ? 'var(--vs-success,#16A36A)' : 'var(--vs-danger,#E5484D)') + ';font-weight:700;">' + m.minReputation + '/100'
+                      + (MY_REP >= m.minReputation ? ' \u2714 Bạn đủ điều kiện' : ' \u2718 Bạn không đủ (' + MY_REP + ')') + '</span>'
+                    : 'Không yêu cầu')
+              + '</div>'
               + '<div><b>Tình trạng:</b> ' + joined + '/' + capacity + ' người'
                 + (joined < capacity ? (' · Còn ' + (capacity - joined) + ' chỗ') : ' · Đã đủ') + '</div>'
             + '</div>'
@@ -1628,11 +1707,22 @@
             a.textContent = 'Đăng nhập để tham gia';
             bar.appendChild(a);
         } else if (!me && m.trangThai === STATUS_OPEN && !ended && joined < capacity) {
-            var btnJoin = document.createElement('button');
-            btnJoin.type = 'button'; btnJoin.className = 'match-action is-primary is-block';
-            btnJoin.textContent = m.hinhThucDuyet === 'manual' ? 'Gửi yêu cầu tham gia' : 'Tham gia ngay';
-            btnJoin.onclick = function () { requestJoin(m.keoId, btnJoin); };
-            bar.appendChild(btnJoin);
+            // Kiểm tra uy tín của người dùng so với yêu cầu
+            var sMinRep = m.minReputation || 0;
+            if (sMinRep > 0 && MY_REP < sMinRep) {
+                // Không đủ điểm — hiển thị cảnh báo
+                var warnBox = document.createElement('div');
+                warnBox.style.cssText = 'background:var(--vs-danger-bg,#FDEBEC);border:1px solid var(--vs-danger,#E5484D);border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;color:var(--vs-danger,#E5484D);display:flex;align-items:center;gap:8px;flex:1;';
+                warnBox.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+                    + 'Cần ' + sMinRep + ' điểm uy tín (đang có ' + MY_REP + ')';
+                bar.appendChild(warnBox);
+            } else {
+                var btnJoin = document.createElement('button');
+                btnJoin.type = 'button'; btnJoin.className = 'match-action is-primary is-block';
+                btnJoin.textContent = m.hinhThucDuyet === 'manual' ? 'Gửi yêu cầu tham gia' : 'Tham gia ngay';
+                btnJoin.onclick = function () { requestJoin(m.keoId, btnJoin); };
+                bar.appendChild(btnJoin);
+            }
         } else if (me) {
             var btnLeave = document.createElement('button');
             btnLeave.type = 'button'; btnLeave.className = 'match-action is-danger is-block';
@@ -1727,10 +1817,13 @@
         var cap = parseInt(document.getElementById('gkSoNguoi').value, 10) || 1;
         var trinhDo = document.getElementById('gkTrinhDo').value || 'Không yêu cầu';
         var note = document.getElementById('gkNote').value || '';
+        var minRepEl = document.getElementById('gkMinRep');
+        var minRepPreview = minRepEl ? parseInt(minRepEl.value, 10) || 0 : 0;
         box.innerHTML =
             '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;">'
               + '<span class="match-badge is-sport">' + escapeHtml(b.tenLoaiSan || 'Thể thao') + '</span>'
               + '<span class="match-badge is-open">Đang mở</span>'
+              + (minRepPreview > 0 ? '<span class="match-badge is-rep-watch" title="Yêu cầu uy tín"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Uy tín ≥ ' + minRepPreview + '</span>' : '')
             + '</div>'
             + '<h4 style="margin:0 0 4px;font-size:15px;font-weight:800;color:var(--vs-primary-900,#122d40);">'
               + escapeHtml(b.tenCoSo) + ' · ' + escapeHtml(b.tenSan) + '</h4>'
@@ -1755,7 +1848,7 @@
 
     document.addEventListener('input', function (e) {
         if (!e.target || !e.target.id) return;
-        if (e.target.id === 'gkSoNguoi' || e.target.id === 'gkTrinhDo' || e.target.id === 'gkNote') gkOnBookingChange();
+        if (e.target.id === 'gkSoNguoi' || e.target.id === 'gkTrinhDo' || e.target.id === 'gkNote' || e.target.id === 'gkMinRep') gkOnBookingChange();
         if (e.target.id === 'gkNote') document.getElementById('gkNoteCount').textContent = e.target.value.length;
         if (e.target.id === 'gkSoNguoi') {
             var n = parseInt(e.target.value, 10);
@@ -1763,7 +1856,7 @@
         }
     });
     document.addEventListener('change', function (e) {
-        if (e.target && e.target.id === 'gkTrinhDo') gkOnBookingChange();
+        if (e.target && (e.target.id === 'gkTrinhDo' || e.target.id === 'gkMinRep')) gkOnBookingChange();
     });
     document.querySelectorAll('.match-radio input').forEach(function (r) {
         r.addEventListener('change', function () {
@@ -1804,6 +1897,8 @@
         form.append('trinhDo', document.getElementById('gkTrinhDo').value);
         var approveEl = document.querySelector('.match-radio input[name="approve"]:checked');
         form.append('hinhThucDuyet', approveEl ? approveEl.value : 'auto');
+        var minRepEl = document.getElementById('gkMinRep');
+        form.append('minReputation', minRepEl ? parseInt(minRepEl.value, 10) || 0 : 0);
         form.append('note', document.getElementById('gkNote').value);
 
         btn.disabled = true;
