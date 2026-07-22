@@ -126,7 +126,7 @@
 }
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -299,35 +299,23 @@
 
             
             <div class="menu-card">
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=overview" class="menu-item ${empty param.tab or param.tab == 'overview' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-item active">
                     <i class="fas fa-home"></i> Tổng quan
                 </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=bookings" class="menu-item ${param.tab == 'bookings' ? 'active' : ''}">
-                    <i class="fas fa-calendar-alt"></i> Lịch đặt sân
-                </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=matches" class="menu-item ${param.tab == 'matches' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=cua-toi" class="menu-item">
                     <i class="fas fa-futbol"></i> Kèo của tôi
                 </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=groups" class="menu-item ${param.tab == 'groups' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/customer/dich-vu-cua-toi" class="menu-item">
+                    <i class="fas fa-screwdriver-wrench"></i> Dịch vụ của tôi
+                </a>
+                <a href="${pageContext.request.contextPath}/customer/doi-nhom" class="menu-item">
                     <i class="fas fa-users"></i> Nhóm của tôi
                 </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=opponents" class="menu-item ${param.tab == 'opponents' ? 'active' : ''}">
-                    <i class="fas fa-search"></i> Tìm đối thủ
-                </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=reputation" class="menu-item ${param.tab == 'reputation' ? 'active' : ''}">
-                    <i class="fas fa-shield-alt"></i> Điểm uy tín
-                </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=profile" class="menu-item ${param.tab == 'profile' ? 'active' : ''}">
-                    <i class="fas fa-user"></i> Thông tin cá nhân
-                </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=password" class="menu-item ${param.tab == 'password' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/customer/doi-mat-khau" class="menu-item">
                     <i class="fas fa-lock"></i> Đổi mật khẩu
                 </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=notifications" class="menu-item ${param.tab == 'notifications' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/customer/notification-settings" class="menu-item">
                     <i class="fas fa-bell"></i> Cài đặt thông báo
-                </a>
-                <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=policies" class="menu-item ${param.tab == 'policies' ? 'active' : ''}">
-                    <i class="fas fa-file-contract"></i> Điều khoản và chính sách
                 </a>
                 <a href="${pageContext.request.contextPath}/logout" class="menu-item danger">
                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
@@ -337,41 +325,7 @@
 
         <!-- Main Content -->
         <main class="account-main">
-            <c:choose>
-                <c:when test="${empty param.tab or param.tab == 'overview'}">
-                    <jsp:include page="/customer/fragments/overview.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'bookings'}">
-                    <jsp:include page="/customer/fragments/bookings.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'matches'}">
-                    <jsp:include page="/customer/fragments/matches.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'groups'}">
-                    <jsp:include page="/customer/fragments/groups.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'opponents'}">
-                    <jsp:include page="/customer/fragments/opponents.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'reputation'}">
-                    <jsp:include page="/customer/fragments/reputation.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'profile'}">
-                    <jsp:include page="/customer/fragments/profile.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'password'}">
-                    <jsp:include page="/customer/fragments/password.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'notifications'}">
-                    <jsp:include page="/customer/fragments/notifications.jsp" />
-                </c:when>
-                <c:when test="${param.tab == 'policies'}">
-                    <jsp:include page="/customer/fragments/policies.jsp" />
-                </c:when>
-                <c:otherwise>
-                    <jsp:include page="/customer/fragments/overview.jsp" />
-                </c:otherwise>
-            </c:choose>
+            <jsp:include page="/customer/fragments/overview.jsp" />
         </main>
     </div>
 </div>

@@ -2,6 +2,9 @@ package org.example.service.customer;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.model.*;
@@ -10,6 +13,10 @@ import org.example.util.JPAUtil;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Customer gửi yêu cầu dịch vụ (PHẦN 11/12/21). Đơn dịch vụ là thực thể độc lập,
@@ -226,4 +233,323 @@ public class ServiceOrderService {
     }
 
     private static String trim(String s) { return s == null ? null : (s.trim().isEmpty() ? null : s.trim()); }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Task 7 - Customer theo dõi đơn dịch vụ (PHẦN 4/8/11)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    public enum CancelErrorCode { NOT_FOUND, FORBIDDEN, VALIDATION, CONFLICT, SYSTEM }
+
+    public static class CancelResult {
+        public final boolean success;
+        public final CancelErrorCode errorCode;
+        public final String errorMessage;
+        public final ServiceOrder order;
+
+        private CancelResult(boolean success, CancelErrorCode errorCode, String errorMessage, ServiceOrder order) {
+            this.success = success;
+            this.errorCode = errorCode;
+            this.errorMessage = errorMessage;
+            this.order = order;
+        }
+
+        static CancelResult ok(ServiceOrder o) { return new CancelResult(true, null, null, o); }
+        static CancelResult fail(CancelErrorCode code, String message) { return new CancelResult(false, code, message, null); }
+    }
+
+    /** Nhóm trạng thái kỹ thuật -> nhóm UI (PHẦN 4). Backend vẫn trả trạng thái thật riêng. */
+    public static String uiStatusGroup(String status) {
+        if (status == null) return "khac";
+        switch (status) {
+            case ServiceOrder.PENDING_CONFIRMATION: return "cho-xac-nhan";
+            case ServiceOrder.CONFIRMED:
+            case ServiceOrder.ITEM_RECEIVED: return "da-xac-nhan";
+            case ServiceOrder.IN_PROGRESS: return "dang-xu-ly";
+            case ServiceOrder.READY_FOR_PICKUP: return "san-sang";
+            case ServiceOrder.COMPLETED: return "hoan-thanh";
+            case ServiceOrder.CANCELLED:
+            case ServiceOrder.REJECTED: return "da-huy";
+            default: return "khac";
+        }
+    }
+
+    private static final Map<String, List<String>> UI_GROUP_TO_STATUSES = new LinkedHashMap<>();
+    static {
+        UI_GROUP_TO_STATUSES.put("cho-xac-nhan", List.of(ServiceOrder.PENDING_CONFIRMATION));
+        UI_GROUP_TO_STATUSES.put("da-xac-nhan", List.of(ServiceOrder.CONFIRMED, ServiceOrder.ITEM_RECEIVED));
+        UI_GROUP_TO_STATUSES.put("dang-xu-ly", List.of(ServiceOrder.IN_PROGRESS));
+        UI_GROUP_TO_STATUSES.put("san-sang", List.of(ServiceOrder.READY_FOR_PICKUP));
+        UI_GROUP_TO_STATUSES.put("hoan-thanh", List.of(ServiceOrder.COMPLETED));
+        UI_GROUP_TO_STATUSES.put("da-huy", List.of(ServiceOrder.CANCELLED, ServiceOrder.REJECTED));
+    }
+
+    /** Chỉ các trạng thái Customer còn được tự hủy (PHẦN 11) - không dùng chung state machine Manager. */
+    private static boolean customerCanCancel(String status) {
+        return ServiceOrder.PENDING_CONFIRMATION.equals(status) || ServiceOrder.CONFIRMED.equals(status);
+    }
+
+    public static class ListResult {
+        public List<Map<String, Object>> items;
+        public int page;
+        public int pageSize;
+        public long totalItems;
+        public int totalPages;
+        public Map<String, Long> counts;
+    }
+
+    /**
+     * Danh sách đơn dịch vụ của Customer, phân trang ở tầng DB (PHẦN 4/17) - KHÔNG
+     * tải toàn bộ rồi cắt trong Java. Đúng 3 query cố định bất kể pageSize: 1 query
+     * danh sách (join SportService+CoSo 1 lượt), 1 COUNT, 1 GROUP BY status.
+     */
+    public ListResult listForCustomer(int customerId, String uiGroup, Integer coSoId,
+                                       LocalDate dateFrom, LocalDate dateTo, String orderIdSearch,
+                                       int page, int pageSize) {
+        page = Math.max(page, 1);
+        pageSize = Math.min(Math.max(pageSize, 1), 50);
+
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            StringBuilder where = new StringBuilder("WHERE o.customerID = :customerId ");
+            List<String> statuses = uiGroup != null ? UI_GROUP_TO_STATUSES.get(uiGroup) : null;
+            if (statuses != null) where.append("AND o.status IN :statuses ");
+            if (coSoId != null) where.append("AND o.coSoID = :coSoId ");
+            if (dateFrom != null) where.append("AND o.appointmentDate >= :dateFrom ");
+            if (dateTo != null) where.append("AND o.appointmentDate <= :dateTo ");
+            if (orderIdSearch != null && !orderIdSearch.trim().isEmpty()) where.append("AND CAST(o.orderID AS string) LIKE :orderIdSearch ");
+
+            String listJpql = "SELECT o, s.serviceName, s.serviceType, c.TenCoSo FROM ServiceOrder o, SportService s, CoSo c "
+                    + "WHERE o.serviceID = s.serviceID AND o.coSoID = c.CoSoID AND " + where.substring(6)
+                    + "ORDER BY o.requestedAt DESC";
+            TypedQuery<Object[]> listQuery = em.createQuery(listJpql, Object[].class);
+            bindListParams(listQuery, customerId, statuses, coSoId, dateFrom, dateTo, orderIdSearch);
+            listQuery.setFirstResult((page - 1) * pageSize);
+            listQuery.setMaxResults(pageSize);
+            List<Object[]> rows = listQuery.getResultList();
+
+            String countJpql = "SELECT COUNT(o) FROM ServiceOrder o " + where;
+            TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+            bindListParams(countQuery, customerId, statuses, coSoId, dateFrom, dateTo, orderIdSearch);
+            long totalItems = countQuery.getSingleResult();
+
+            List<Object[]> groupRows = em.createQuery(
+                    "SELECT o.status, COUNT(o) FROM ServiceOrder o WHERE o.customerID = :customerId GROUP BY o.status",
+                    Object[].class)
+                    .setParameter("customerId", customerId)
+                    .getResultList();
+            Map<String, Long> counts = new LinkedHashMap<>();
+            for (String g : UI_GROUP_TO_STATUSES.keySet()) counts.put(g, 0L);
+            for (Object[] gr : groupRows) {
+                String group = uiStatusGroup((String) gr[0]);
+                counts.merge(group, (Long) gr[1], Long::sum);
+            }
+
+            List<Map<String, Object>> items = new ArrayList<>();
+            for (Object[] row : rows) {
+                ServiceOrder o = (ServiceOrder) row[0];
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("orderId", o.getOrderID());
+                m.put("displayCode", "DV" + String.format("%06d", o.getOrderID()));
+                m.put("serviceName", row[1]);
+                m.put("serviceType", row[2]);
+                m.put("coSoName", row[3]);
+                m.put("requestedAt", str(o.getRequestedAt()));
+                m.put("appointmentDate", str(o.getAppointmentDate()));
+                m.put("expectedPickupTime", str(o.getExpectedPickupTime()));
+                m.put("estimatedPrice", o.getEstimatedPrice());
+                m.put("confirmedPrice", o.getConfirmedPrice());
+                m.put("status", o.getStatus());
+                m.put("uiStatusGroup", uiStatusGroup(o.getStatus()));
+                m.put("bookingId", o.getBookingID());
+                m.put("cancellable", customerCanCancel(o.getStatus()));
+                m.put("updatedAt", str(o.getUpdatedAt()));
+                items.add(m);
+            }
+
+            ListResult result = new ListResult();
+            result.items = items;
+            result.page = page;
+            result.pageSize = pageSize;
+            result.totalItems = totalItems;
+            result.totalPages = (int) Math.ceil(totalItems / (double) pageSize);
+            result.counts = counts;
+            return result;
+        } finally {
+            em.close();
+        }
+    }
+
+    private void bindListParams(Query q, int customerId, List<String> statuses, Integer coSoId,
+                                 LocalDate dateFrom, LocalDate dateTo, String orderIdSearch) {
+        q.setParameter("customerId", customerId);
+        if (statuses != null) q.setParameter("statuses", statuses);
+        if (coSoId != null) q.setParameter("coSoId", coSoId);
+        if (dateFrom != null) q.setParameter("dateFrom", dateFrom);
+        if (dateTo != null) q.setParameter("dateTo", dateTo);
+        if (orderIdSearch != null && !orderIdSearch.trim().isEmpty()) {
+            q.setParameter("orderIdSearch", "%" + orderIdSearch.trim() + "%");
+        }
+    }
+
+    /** Chi tiết đơn cho Customer, chỉ khi đúng chủ sở hữu (chống IDOR - trả null để servlet map 404). */
+    public Map<String, Object> getDetailForCustomer(int customerId, int orderId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            ServiceOrder o = em.find(ServiceOrder.class, orderId);
+            if (o == null || o.getCustomerID() != customerId) return null;
+
+            SportService svc = em.find(SportService.class, o.getServiceID());
+            CoSo coSo = em.find(CoSo.class, o.getCoSoID());
+
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("orderId", o.getOrderID());
+            m.put("displayCode", "DV" + String.format("%06d", o.getOrderID()));
+            m.put("status", o.getStatus());
+            m.put("uiStatusGroup", uiStatusGroup(o.getStatus()));
+            m.put("requestedAt", str(o.getRequestedAt()));
+            m.put("serviceName", svc != null ? svc.getServiceName() : null);
+            m.put("serviceType", svc != null ? svc.getServiceType() : null);
+            m.put("coSoName", coSo != null ? coSo.getTenCoSo() : null);
+            m.put("coSoAddress", coSo != null ? coSo.getDiaChi() : null);
+            m.put("coSoPhone", coSo != null ? coSo.getSoDienThoai() : null);
+            m.put("coSoGioMoCua", coSo != null && coSo.getGioMoCua() != null ? coSo.getGioMoCua().toString() : null);
+            m.put("coSoGioDongCua", coSo != null && coSo.getGioDongCua() != null ? coSo.getGioDongCua().toString() : null);
+            m.put("bookingId", o.getBookingID());
+            m.put("appointmentDate", str(o.getAppointmentDate()));
+            m.put("dropOffTime", o.getDropOffTime());
+            m.put("expectedPickupTime", str(o.getExpectedPickupTime()));
+            m.put("actualReceivedTime", str(o.getActualReceivedTime()));
+            m.put("completedTime", str(o.getCompletedTime()));
+            m.put("deliveredTime", str(o.getDeliveredTime()));
+            m.put("cancelledTime", str(o.getCancelledTime()));
+            m.put("customerNote", o.getCustomerNote());
+            m.put("estimatedPrice", o.getEstimatedPrice());
+            m.put("confirmedPrice", o.getConfirmedPrice());
+            m.put("priceChanged", o.getConfirmedPrice() != null
+                    && Math.abs(o.getConfirmedPrice() - o.getEstimatedPrice()) > 0.009);
+            m.put("cancellationReason", o.getCancellationReason());
+            m.put("cancellable", customerCanCancel(o.getStatus()));
+
+            if (svc != null && "CANG_LUOI".equals(svc.getServiceType())) {
+                RacketStringingOrderDetail rd = em.createQuery(
+                        "SELECT d FROM RacketStringingOrderDetail d WHERE d.orderID = :oid",
+                        RacketStringingOrderDetail.class)
+                        .setParameter("oid", orderId)
+                        .getResultStream().findFirst().orElse(null);
+                if (rd != null) {
+                    Map<String, Object> rc = new LinkedHashMap<>();
+                    rc.put("racketType", rd.getRacketType());
+                    rc.put("racketBrand", rd.getRacketBrand());
+                    rc.put("racketModel", rd.getRacketModel());
+                    rc.put("customerBringsString", rd.isCustomerBringsString());
+                    rc.put("tensionValue", rd.getTensionValue());
+                    rc.put("tensionUnit", rd.getTensionUnit());
+                    rc.put("stringColor", rd.getStringColor());
+                    rc.put("quantity", rd.getQuantity());
+                    if (rd.getMaterialID() != null) {
+                        ServiceMaterial mat = em.find(ServiceMaterial.class, rd.getMaterialID());
+                        if (mat != null) {
+                            rc.put("materialName", mat.getName());
+                            rc.put("materialPrice", mat.getPrice());
+                            rc.put("materialExtraFee", mat.getExtraFee());
+                        }
+                    }
+                    m.put("racketDetail", rc);
+                }
+            }
+
+            List<Map<String, Object>> timeline = new ArrayList<>();
+            List<ServiceOrderStatusHistory> history = em.createQuery(
+                    "SELECT h FROM ServiceOrderStatusHistory h WHERE h.orderID = :oid ORDER BY h.changedAt ASC",
+                    ServiceOrderStatusHistory.class)
+                    .setParameter("oid", orderId)
+                    .getResultList();
+            for (ServiceOrderStatusHistory h : history) {
+                Map<String, Object> t = new LinkedHashMap<>();
+                t.put("toStatus", h.getToStatus());
+                t.put("changedAt", str(h.getChangedAt()));
+                t.put("note", h.getNote());
+                t.put("actorLabel", actorLabel(h, customerId));
+                timeline.add(t);
+            }
+            m.put("timeline", timeline);
+
+            return m;
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Actor kỹ thuật (account ID/role) không bao giờ trả thô cho Customer - chỉ nhãn đã làm sạch. */
+    private String actorLabel(ServiceOrderStatusHistory h, int customerId) {
+        if (h.getChangedBy() == null) return "Hệ thống";
+        if (h.getChangedBy() == customerId) return "Bạn";
+        return "Cơ sở";
+    }
+
+    private static String str(Object o) { return o == null ? null : o.toString(); }
+
+    /**
+     * Customer tự hủy đơn (PHẦN 11). Chỉ cho phép ở PENDING_CONFIRMATION/CONFIRMED
+     * và CONFIRMED chỉ khi cơ sở CHƯA nhận dụng cụ (ActualReceivedTime null) - từ
+     * ITEM_RECEIVED trở đi Customer không tự hủy được qua UI này.
+     */
+    public CancelResult cancelOrderByCustomer(int customerId, int orderId, String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            return CancelResult.fail(CancelErrorCode.VALIDATION, "Vui lòng nhập lý do hủy.");
+        }
+        if (reason.trim().length() > 500) {
+            return CancelResult.fail(CancelErrorCode.VALIDATION, "Lý do hủy không được vượt quá 500 ký tự.");
+        }
+        String cleanReason = reason.trim();
+
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            ServiceOrder order = em.find(ServiceOrder.class, orderId, LockModeType.PESSIMISTIC_WRITE);
+            if (order == null) {
+                tx.rollback();
+                return CancelResult.fail(CancelErrorCode.NOT_FOUND, "Không tìm thấy đơn dịch vụ.");
+            }
+            if (order.getCustomerID() != customerId) {
+                tx.rollback();
+                logger.warn("IDOR attempt: customerId={} tried to cancel orderId={} belonging to customerId={}",
+                        customerId, orderId, order.getCustomerID());
+                return CancelResult.fail(CancelErrorCode.NOT_FOUND, "Không tìm thấy đơn dịch vụ.");
+            }
+            String fromStatus = order.getStatus();
+            boolean allowed = ServiceOrder.PENDING_CONFIRMATION.equals(fromStatus)
+                    || (ServiceOrder.CONFIRMED.equals(fromStatus) && order.getActualReceivedTime() == null);
+            if (!allowed) {
+                tx.rollback();
+                return CancelResult.fail(CancelErrorCode.CONFLICT,
+                        "Không thể hủy đơn ở trạng thái hiện tại. Đơn có thể đã được cập nhật - vui lòng tải lại.");
+            }
+
+            order.setStatus(ServiceOrder.CANCELLED);
+            order.setCancellationReason(cleanReason);
+            order.setCancelledTime(LocalDateTime.now());
+            order.setUpdatedAt(LocalDateTime.now());
+            em.merge(order);
+
+            ServiceOrderStatusHistory history = new ServiceOrderStatusHistory();
+            history.setOrderID(orderId);
+            history.setFromStatus(fromStatus);
+            history.setToStatus(ServiceOrder.CANCELLED);
+            history.setChangedBy(customerId);
+            history.setChangedAt(LocalDateTime.now());
+            history.setNote(cleanReason);
+            em.persist(history);
+
+            tx.commit();
+            return CancelResult.ok(order);
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            logger.error("Lỗi hủy đơn orderId={} customerId={}: {}", orderId, customerId, e.getMessage(), e);
+            return CancelResult.fail(CancelErrorCode.SYSTEM, "Lỗi hệ thống khi hủy đơn dịch vụ.");
+        } finally {
+            em.close();
+        }
+    }
 }
