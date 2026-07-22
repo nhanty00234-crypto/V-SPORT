@@ -185,8 +185,12 @@
     </c:if>
     <c:if test="${serviceModuleApproved}">
     <a href="${pageContext.request.contextPath}/manager/dich-vu"
-      class="nav-link ${uri.contains('/manager/dich-vu') || uri.contains('/yeu-cau-dich-vu') ? 'active' : ''}">
+      class="nav-link ${uri.contains('/manager/dich-vu') ? 'active' : ''}">
       <i class="ti ti-tools text-[19px]"></i>Quản lý dịch vụ
+    </a>
+    <a href="${pageContext.request.contextPath}/manager/yeu-cau-dich-vu"
+      class="nav-link ${uri.contains('/yeu-cau-dich-vu') ? 'active' : ''}">
+      <i class="ti ti-clipboard-list text-[19px]"></i>Yêu cầu dịch vụ
     </a>
     </c:if>
     <a href="${pageContext.request.contextPath}/manager/hoa-don"
