@@ -84,6 +84,7 @@
   </div>
 
   <div class="dv-quick-filters" id="dvQuickFilters">
+    <div class="dv-chip active" data-all="1">Tất cả</div>
     <div class="dv-chip" data-sport="cầu lông" data-type="CANG_LUOI">Căng lưới cầu lông</div>
     <div class="dv-chip" data-sport="tennis" data-type="CANG_LUOI">Căng lưới tennis</div>
     <div class="dv-chip" data-type="THAY_QUAN_CAN">Thay quấn cán</div>
@@ -95,8 +96,17 @@
 
   <div id="dvGrid" class="dv-grid"></div>
   <div id="dvEmpty" class="dv-empty" style="display:none;">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <p>Không tìm thấy dịch vụ phù hợp. Hãy thử từ khóa hoặc bộ lọc khác.</p>
+    <i id="dvEmptyIcon" class="fa-solid fa-store"></i>
+    <p id="dvEmptyTitle" style="font-weight:800;color:var(--navy);font-size:16px;margin:0 0 6px;">Chưa có dịch vụ phù hợp</p>
+    <p id="dvEmptyMsg" style="margin:0 0 16px;">Các cơ sở đang cập nhật dịch vụ. Hãy thử lại sau hoặc thay đổi bộ lọc tìm kiếm.</p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button type="button" id="dvEmptyClearBtn" class="dv-gps-btn" onclick="clearAllFilters()" style="display:none;">
+        <i class="fa-solid fa-filter-circle-xmark"></i> Xóa bộ lọc
+      </button>
+      <a href="${ctx}/customer/tim-kiem" class="dv-gps-btn" style="text-decoration:none;">
+        <i class="fa-solid fa-compass"></i> Khám phá sân
+      </a>
+    </div>
   </div>
 </main>
 
@@ -237,11 +247,29 @@
       .catch(function(){ renderResults([]); });
   }
 
+  function hasActiveFilter() {
+    return !!(currentFilters.q || currentFilters.serviceType || currentFilters.sportType
+      || currentFilters.acceptingOnly || currentFilters.openOnly
+      || (currentFilters.lat != null && currentFilters.lng != null));
+  }
+
   function renderResults(list) {
     var grid = document.getElementById('dvGrid');
     var empty = document.getElementById('dvEmpty');
     grid.innerHTML = '';
-    if (!list.length) { empty.style.display = 'block'; return; }
+    if (!list.length) {
+      var filtered = hasActiveFilter();
+      document.getElementById('dvEmptyIcon').className = filtered ? 'fa-solid fa-magnifying-glass' : 'fa-solid fa-store';
+      document.getElementById('dvEmptyTitle').textContent = filtered
+        ? 'Không tìm thấy dịch vụ phù hợp'
+        : 'Chưa có dịch vụ phù hợp';
+      document.getElementById('dvEmptyMsg').textContent = filtered
+        ? 'Không có dịch vụ nào khớp với bộ lọc hiện tại. Thử bỏ bớt bộ lọc hoặc từ khóa khác.'
+        : 'Các cơ sở đang cập nhật dịch vụ. Hãy thử lại sau hoặc thay đổi bộ lọc tìm kiếm.';
+      document.getElementById('dvEmptyClearBtn').style.display = filtered ? 'inline-flex' : 'none';
+      empty.style.display = 'block';
+      return;
+    }
     empty.style.display = 'none';
     list.forEach(function(s) {
       var card = document.createElement('div');
@@ -475,10 +503,31 @@
     window._dvSearchDebounce = setTimeout(runSearch, 300);
   });
 
+  function syncAllChip() {
+    // "Tất cả" active khi không có chip chuyên biệt nào được chọn.
+    var allChip = document.querySelector('.dv-chip[data-all]');
+    var anySpecific = false;
+    document.querySelectorAll('.dv-chip:not([data-all])').forEach(function(c){
+      if (c.classList.contains('active')) anySpecific = true;
+    });
+    if (allChip) allChip.classList.toggle('active', !anySpecific);
+  }
+
+  function clearAllFilters() {
+    document.querySelectorAll('.dv-chip').forEach(function(c){ c.classList.remove('active'); });
+    currentFilters.serviceType = '';
+    currentFilters.sportType = '';
+    currentFilters.acceptingOnly = false;
+    currentFilters.openOnly = false;
+    syncAllChip();
+    runSearch();
+  }
+
   document.querySelectorAll('.dv-chip').forEach(function(chip) {
     chip.addEventListener('click', function() {
+      if (chip.dataset.all) { clearAllFilters(); return; }
       var isActive = chip.classList.contains('active');
-      document.querySelectorAll('.dv-chip').forEach(function(c){ c.classList.remove('active'); });
+      document.querySelectorAll('.dv-chip:not([data-all])').forEach(function(c){ c.classList.remove('active'); });
       currentFilters.serviceType = '';
       currentFilters.sportType = '';
       currentFilters.acceptingOnly = false;
@@ -490,6 +539,7 @@
         if (chip.dataset.accepting) currentFilters.acceptingOnly = true;
         if (chip.dataset.open) currentFilters.openOnly = true;
       }
+      syncAllChip();
       runSearch();
     });
   });
