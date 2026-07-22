@@ -26,13 +26,6 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(255, 165, 2, 0.1); color: var(--warning);"><i class="fas fa-futbol"></i></div>
-        <div class="stat-info">
-            <h3>0</h3>
-            <p>Kèo đang tham gia</p>
-        </div>
-    </div>
-    <div class="stat-card">
         <div class="stat-icon" style="background: rgba(255, 71, 87, 0.1); color: var(--danger);"><i class="fas fa-star"></i></div>
         <div class="stat-info">
             <h3>${account.diemUyTin}</h3>
@@ -43,7 +36,7 @@
 
 <div class="section-header">
     <h2>Lịch đặt sân gần nhất</h2>
-    <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=bookings" class="btn btn-outline" style="color: var(--navy); border-color: var(--border);">Xem tất cả <i class="fas fa-arrow-right" style="margin-left: 5px;"></i></a>
+    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="btn btn-outline" style="color: var(--navy); border-color: var(--border);">Xem tất cả <i class="fas fa-arrow-right" style="margin-left: 5px;"></i></a>
 </div>
 
 <div class="booking-list">
@@ -77,7 +70,7 @@
                         </div>
                     </div>
                     <div class="booking-actions" style="display: flex; gap: 10px;">
-                        <a href="${pageContext.request.contextPath}/customer/tai-khoan?tab=bookings" class="btn btn-outline" style="color: var(--navy); border-color: var(--border);">Xem chi tiết</a>
+                        <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="btn btn-outline" style="color: var(--navy); border-color: var(--border);">Xem chi tiết</a>
                     </div>
                 </div>
             </c:forEach>
@@ -109,8 +102,8 @@
         <div class="action-icon"><i class="fas fa-users"></i></div>
         <div class="action-title">Tạo kèo</div>
     </a>
-    <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=tim-doi-thu" class="action-card">
+    <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=kham-pha" class="action-card">
         <div class="action-icon"><i class="fas fa-search"></i></div>
-        <div class="action-title">Tìm đối thủ</div>
+        <div class="action-title">Tìm người chơi</div>
     </a>
 </div>

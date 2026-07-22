@@ -73,7 +73,6 @@
                                 <li><a href="${pageContext.request.contextPath}/customer/ghep-keo" class="<%= vsNavGhepKeo ? "nav-active" : "" %>">Ghép Kèo<span class="hot-badge">HOT</span></a></li>
                                 <li><a href="${pageContext.request.contextPath}/customer/dich-vu" class="<%= vsNavDichVu ? "nav-active" : "" %>">Cửa hàng &amp; Dịch vụ</a></li>
                                 <li><a href="#">Tin tức <i class="fas fa-angle-down"></i></a></li>
-                                <li><a href="#">Thẻ thành viên</a></li>
                             </ul>
                         </nav>
                     </div>

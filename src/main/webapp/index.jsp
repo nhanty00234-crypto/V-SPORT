@@ -16,15 +16,19 @@
             <div class="container">
                 <div class="hero-inner">
                     <div class="hero-content">
-                        <h1>Fresh <span class="highlight">Groceries</span><br> Delivered Daily</h1>
-                        <p>A supermarket is a self-service shop offering a wide variety of food, beverages and household products, organized into sections.</p>
+                        <h1><span class="highlight">Đặt sân</span><br>&amp; Ghép kèo ngay</h1>
+                        <p>Kết nối đam mê thể thao, tìm sân và đối thủ dễ dàng chỉ với vài thao tác.</p>
                         <div class="hero-actions">
-                            <a href="#" class="btn btn-primary">Discover Shop <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></a>
-                            <a href="#" class="btn btn-outline">25% Off Festival</a>
+                            <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn btn-primary">
+                                Đặt sân ngay <i class="fas fa-calendar-alt" style="margin-left: 8px;"></i>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn btn-outline">
+                                Ghép kèo ngay
+                            </a>
                         </div>
                     </div>
                     <div class="hero-image">
-                        <img src="./assets/images/hero/hero-woman.jpg" alt="Woman shopping groceries">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport-hero-booking-match.webp" alt="V-SPORT Booking Match">
                     </div>
                 </div>
             </div>
@@ -36,11 +40,11 @@
                 <div class="benefits">
                     <div class="benefit-item">
                         <div class="benefit-icon">
-                            <i class="fas fa-truck-fast"></i>
+                            <i class="fas fa-calendar-check"></i>
                         </div>
                         <div class="benefit-text">
-                            <h4>Free shipping</h4>
-                            <p>On all orders over $50.00</p>
+                            <h4>Đặt sân nhanh chóng</h4>
+                            <p>Chọn sân và khung giờ phù hợp chỉ trong vài phút.</p>
                         </div>
                     </div>
                     <div class="benefit-item">
@@ -48,17 +52,17 @@
                             <i class="fas fa-rotate-left"></i>
                         </div>
                         <div class="benefit-text">
-                            <h4>Return for free</h4>
-                            <p>Returns are free 3 days</p>
+                            <h4>Linh hoạt thay đổi</h4>
+                            <p>Theo dõi, quản lý và thay đổi lịch theo chính sách của sân.</p>
                         </div>
                     </div>
                     <div class="benefit-item">
                         <div class="benefit-icon">
-                            <i class="fas fa-credit-card"></i>
+                            <i class="fas fa-shield-halved"></i>
                         </div>
                         <div class="benefit-text">
-                            <h4>Secure Payment</h4>
-                            <p>Your payments 100% safe</p>
+                            <h4>Thanh toán an toàn</h4>
+                            <p>Hỗ trợ tiền mặt và thanh toán trực tuyến bảo mật.</p>
                         </div>
                     </div>
                     <div class="benefit-item">
@@ -66,8 +70,8 @@
                             <i class="fas fa-headset"></i>
                         </div>
                         <div class="benefit-text">
-                            <h4>24/7 Support</h4>
-                            <p>Contact us anytime want</p>
+                            <h4>Hỗ trợ tận tâm</h4>
+                            <p>Đội ngũ V-SPORT sẵn sàng hỗ trợ khi bạn cần.</p>
                         </div>
                     </div>
                 </div>
@@ -81,38 +85,38 @@
                     <!-- Banner 1 -->
                     <div class="promo-banner banner-red">
                         <div class="banner-content">
-                            <div class="banner-discount">50% OFF</div>
-                            <h3>Sauces</h3>
-                            <a href="#" class="btn-banner">Shop Now <i class="fas fa-arrow-right"></i></a>
+                            <div class="banner-discount">ƯU ĐÃI 20%</div>
+                            <h3>Đặt sân lần đầu</h3>
+                            <a href="${pageContext.request.contextPath}/customer/dat-san" class="btn-banner">Đặt ngay <i class="fas fa-arrow-right"></i></a>
                         </div>
-                        <img src="./assets/images/banners/banner-sauces.jpg" alt="Sauces" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 70%;">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/courts/court-pickleball.jpg" alt="Đặt sân lần đầu" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 70%;">
                     </div>
                     <!-- Banner 2 -->
                     <div class="promo-banner banner-light">
                         <div class="banner-content">
-                            <div class="banner-discount" style="color: var(--primary);">50% OFF</div>
-                            <h3>All Chips</h3>
-                            <a href="#" class="btn-banner" style="background: var(--primary);">Shop Now <i class="fas fa-arrow-right"></i></a>
+                            <div class="banner-discount" style="color: var(--primary);">COMBO TIẾT KIỆM</div>
+                            <h3>Thuê sân &amp; dụng cụ</h3>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-banner" style="background: var(--primary);">Khám phá <i class="fas fa-arrow-right"></i></a>
                         </div>
-                        <img src="./assets/images/banners/banner-chips.jpg" alt="Chips" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 70%;">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/courts/court-badminton.jpg" alt="Thuê sân và dụng cụ" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 70%;">
                     </div>
                     <!-- Banner 3 -->
                     <div class="promo-banner banner-green">
                         <div class="banner-content">
-                            <div class="banner-discount">50% OFF</div>
-                            <h3>Full Fresh<br>Vegetable</h3>
-                            <a href="#" class="btn-banner">Shop Now <i class="fas fa-arrow-right"></i></a>
+                            <div class="banner-discount">GIẢM ĐẾN 30%</div>
+                            <h3>Đồ thể thao<br>chính hãng</h3>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-banner">Xem sản phẩm <i class="fas fa-arrow-right"></i></a>
                         </div>
-                        <img src="./assets/images/banners/banner-vegetable.jpg" alt="Vegetables" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 80%;">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/players/person-03.jpg" alt="Đồ thể thao chính hãng" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 80%;">
                     </div>
                     <!-- Banner 4 -->
                     <div class="promo-banner banner-navy">
                         <div class="banner-content">
-                            <div class="banner-discount">50% OFF</div>
-                            <h3>Sale 58% Off<br>All Fruit</h3>
-                            <a href="#" class="btn-banner">Shop Now <i class="fas fa-arrow-right"></i></a>
+                            <div class="banner-discount">KẾT NỐI MIỄN PHÍ</div>
+                            <h3>Tìm đồng đội<br>ghép kèo</h3>
+                            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn-banner">Ghép kèo <i class="fas fa-arrow-right"></i></a>
                         </div>
-                        <img src="./assets/images/banners/banner-fruit.jpg" alt="Fruits" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 80%;">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-01.jpg" alt="Tìm đồng đội ghép kèo" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 80%;">
                     </div>
                 </div>
             </div>
@@ -121,42 +125,42 @@
         <!-- Categories Section -->
         <section class="categories">
             <div class="container">
-                <h2 class="section-title">Discover our <span class="highlight">Categories</span></h2>
+                <h2 class="section-title">Khám phá <span class="highlight">môn thể thao</span></h2>
                 <div class="category-grid">
-                    <a href="#" class="category-card">
-                        <div class="category-icon"><i class="fas fa-fish"></i></div>
-                        <h4>Fishes & Raw Meats</h4>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng đá" class="category-card">
+                        <div class="category-icon"><i class="fas fa-futbol"></i></div>
+                        <h4>Bóng đá</h4>
                     </a>
-                    <a href="#" class="category-card">
-                        <div class="category-icon"><i class="fas fa-apple-whole"></i></div>
-                        <h4>Fruits & Vegetables</h4>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Cầu lông" class="category-card">
+                        <div class="category-icon"><i class="fas fa-table-tennis-paddle-ball"></i></div>
+                        <h4>Cầu lông</h4>
                     </a>
-                    <a href="#" class="category-card">
-                        <div class="category-icon"><i class="fas fa-bread-slice"></i></div>
-                        <h4>Breads & Sweats</h4>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Pickleball" class="category-card">
+                        <div class="category-icon"><i class="fas fa-table-tennis-paddle-ball"></i></div>
+                        <h4>Pickleball</h4>
                     </a>
-                    <a href="#" class="category-card">
-                        <div class="category-icon"><i class="fas fa-cheese"></i></div>
-                        <h4>Milks & Proteins</h4>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Tennis" class="category-card">
+                        <div class="category-icon"><i class="fas fa-baseball-bat-ball"></i></div>
+                        <h4>Tennis</h4>
                     </a>
-                    <a href="#" class="category-card">
-                        <div class="category-icon"><i class="fas fa-pump-soap"></i></div>
-                        <h4>Cleaning Materials</h4>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng rổ" class="category-card">
+                        <div class="category-icon"><i class="fas fa-basketball"></i></div>
+                        <h4>Bóng rổ</h4>
                     </a>
-                    <a href="#" class="category-card">
-                        <div class="category-icon"><i class="fas fa-bowl-food"></i></div>
-                        <h4>Ready touse Foods</h4>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Gym" class="category-card">
+                        <div class="category-icon"><i class="fas fa-dumbbell"></i></div>
+                        <h4>Gym &amp; Fitness</h4>
                     </a>
                 </div>
             </div>
         </section>
 
-        <!-- Best Seller Products Section -->
+        <!-- Featured Products & Services Section -->
         <section class="products">
             <div class="container">
                 <div class="products-header">
-                    <h2 class="section-title">Best Seller <span class="highlight">Products</span></h2>
-                    <a href="#" class="btn btn-primary">View all Products</a>
+                    <h2 class="section-title">Sản phẩm &amp; <span class="highlight">dịch vụ nổi bật</span></h2>
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn btn-primary">Xem tất cả</a>
                 </div>
                 
                 <div class="product-grid">
@@ -166,23 +170,23 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-bananas.jpg" alt="Organic Natural Bananas">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/categories/pickleball.jpg" alt="Vợt Pickleball Carbon Pro">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Limited Edition</div>
-                            <h3 class="product-title"><a href="#">Organic Natural Bananas</a></h3>
+                            <div class="product-category">Pickleball</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Pickleball">Vợt Pickleball Carbon Pro</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$79</div>
+                                <div class="product-price">1.290.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Pickleball" class="add-to-cart"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
                     </div>
 
@@ -192,23 +196,23 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-shampoo.jpg" alt="Awake Shower Shampoo Gel">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/categories/badminton.jpg" alt="Giày cầu lông chống trượt">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Cleaning Tools</div>
-                            <h3 class="product-title"><a href="#">Awake Shower Shampoo Gel</a></h3>
+                            <div class="product-category">Cầu lông</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Cầu lông">Giày cầu lông chống trượt</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$87</div>
+                                <div class="product-price">890.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Cầu lông" class="add-to-cart"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
                     </div>
 
@@ -218,23 +222,23 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-water.jpg" alt="Sparkling Mineral Water">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/categories/football.jpg" alt="Bóng đá tiêu chuẩn Size 5">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Supermarket</div>
-                            <h3 class="product-title"><a href="#">The Sparkling Mineral Water</a></h3>
+                            <div class="product-category">Bóng đá</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng đá">Bóng đá tiêu chuẩn Size 5</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$99</div>
+                                <div class="product-price">350.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng đá" class="add-to-cart"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
                     </div>
 
@@ -244,53 +248,49 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-chicken.jpg" alt="Roast Chicken Slices">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/players/person-04.jpg" alt="Áo thể thao V-SPORT Dry Fit">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Fishes & Raw Meats</div>
-                            <h3 class="product-title"><a href="#">Best Roast Chicken Slices</a></h3>
+                            <div class="product-category">Trang phục</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem">Áo thể thao V-SPORT Dry Fit</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$69</div>
+                                <div class="product-price">249.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="add-to-cart"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
                     </div>
 
                     <!-- Product 5 -->
                     <div class="product-card">
                         <div class="product-badges">
-                            <span class="badge-sale">Sale!</span>
-                            <span class="badge-discount">20%</span>
+                            <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-bodywash.jpg" alt="Easy Body Wash Shampoo">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/categories/tennis.jpg" alt="Túi đựng vợt đa năng">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Others</div>
-                            <h3 class="product-title"><a href="#">Easy Body Wash Shampoo</a></h3>
+                            <div class="product-category">Phụ kiện</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Tennis">Túi đựng vợt đa năng</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">
-                                    <span class="price-old">$15</span>
-                                    $12
-                                </div>
+                                <div class="product-price">459.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Tennis" class="add-to-cart"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
                     </div>
 
@@ -300,23 +300,23 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-blueberries.jpg" alt="Organic Natural Blueberries">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/courts/court-pickleball.jpg" alt="Thuê vợt tại cơ sở">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Fruits & Vegetables</div>
-                            <h3 class="product-title"><a href="#">Organic Natural Blueberries</a></h3>
+                            <div class="product-category">Dịch vụ</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem">Thuê vợt tại cơ sở</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$35</div>
+                                <div class="product-price">Từ 30.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="add-to-cart"><i class="fas fa-eye"></i> Xem tại cơ sở</a>
                         </div>
                     </div>
 
@@ -326,23 +326,23 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-spray.jpg" alt="Flash Spray Wipe Done">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/players/person-05.jpg" alt="Huấn luyện viên cá nhân">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Cleaning Tools</div>
-                            <h3 class="product-title"><a href="#">Flash Spray Wipe Done</a></h3>
+                            <div class="product-category">Dịch vụ</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem">Huấn luyện viên cá nhân</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$35</div>
+                                <div class="product-price">Từ 200.000đ/buổi</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="add-to-cart"><i class="fas fa-eye"></i> Xem tại cơ sở</a>
                         </div>
                     </div>
 
@@ -352,23 +352,23 @@
                             <!-- No badge -->
                         </div>
                         <div class="product-actions">
-                            <div class="action-icon" title="Add to Wishlist"><i class="far fa-heart"></i></div>
-                            <div class="action-icon" title="Compare"><i class="fas fa-exchange-alt"></i></div>
-                            <div class="action-icon" title="Quick View"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Thêm vào yêu thích"><i class="far fa-heart"></i></div>
+                            <div class="action-icon" title="Xem chi tiết"><i class="fas fa-search"></i></div>
+                            <div class="action-icon" title="Xem cơ sở cung cấp"><i class="fas fa-arrow-up-right-from-square"></i></div>
                         </div>
                         <div class="product-image">
-                            <img src="./assets/images/products/product-dove.jpg" alt="Dove Colour Care Pro">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/categories/basketball.jpg" alt="Bình nước thể thao 750ml">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Cleaning Tools</div>
-                            <h3 class="product-title"><a href="#">Dove Colour Care Pro</a></h3>
+                            <div class="product-category">Phụ kiện</div>
+                            <h3 class="product-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng rổ">Bình nước thể thao 750ml</a></h3>
                             <div class="product-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                             </div>
                             <div class="product-price-wrapper">
-                                <div class="product-price">$35</div>
+                                <div class="product-price">159.000đ</div>
                             </div>
-                            <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to cart</button>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng rổ" class="add-to-cart"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
                     </div>
                 </div>
@@ -380,27 +380,27 @@
             <div class="container">
                 <div class="mobile-app">
                     <div class="app-content">
-                        <h4>XtraSupermarket</h4>
-                        <h2>Faster on Mobile</h2>
-                        <p>A supermarket is a self-service shop offering a wide variety of food, beverages and household products, organized into sections.</p>
+                        <h4>V-SPORT</h4>
+                        <h2>Thể thao trong tầm tay</h2>
+                        <p>Tìm sân gần bạn, đặt lịch theo khung giờ thuận tiện và kết nối với cộng đồng người chơi cùng đam mê.</p>
                         <div class="app-buttons">
-                            <a href="#" class="app-btn">
-                                <i class="fab fa-apple"></i>
+                            <a href="${pageContext.request.contextPath}/customer/BanDo.jsp" class="app-btn">
+                                <i class="fas fa-location-dot"></i>
                                 <div class="app-btn-text">
-                                    <span>Download on the</span>
-                                    <strong>App Store</strong>
+                                    <span>Bản đồ sân gần bạn</span>
+                                    <strong>Tìm sân gần bạn</strong>
                                 </div>
                             </a>
-                            <a href="#" class="app-btn">
-                                <i class="fab fa-google-play"></i>
+                            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="app-btn">
+                                <i class="fas fa-people-arrows"></i>
                                 <div class="app-btn-text">
-                                    <span>GET IT ON</span>
-                                    <strong>Google Play</strong>
+                                    <span>Kết nối cộng đồng</span>
+                                    <strong>Ghép kèo ngay</strong>
                                 </div>
                             </a>
                         </div>
                     </div>
-                    <img src="./assets/images/mobile-app/app-bg.jpg" alt="Mobile App" class="app-image" style="border-radius: 20px;">
+                    <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-02.jpg" alt="Cộng đồng V-SPORT" class="app-image" style="border-radius: 20px;">
                 </div>
             </div>
         </section>
@@ -409,7 +409,7 @@
         <section class="blog">
             <div class="container">
                 <div class="blog-header">
-                    <h2 class="section-title">Latest <span class="highlight">News & Blog</span></h2>
+                    <h2 class="section-title">Tin tức &amp; <span class="highlight">kinh nghiệm thể thao</span></h2>
                     <div class="blog-nav">
                         <button class="prev-blog"><i class="fas fa-arrow-left"></i></button>
                         <button class="next-blog"><i class="fas fa-arrow-right"></i></button>
@@ -420,48 +420,132 @@
                     <!-- Blog 1 -->
                     <div class="blog-card">
                         <div class="blog-image">
-                            <span class="blog-badge">Tutorial</span>
-                            <img src="./assets/images/blog/blog-1.jpg" alt="March retail sales">
+                            <span class="blog-badge">Kinh nghiệm</span>
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/gallery/gallery-01.jpg" alt="5 lưu ý giúp bạn chọn sân phù hợp">
                         </div>
                         <div class="blog-content">
-                            <span class="blog-date">10 June 2024</span>
-                            <h3 class="blog-title"><a href="#">March retail sales, foot traffic take a dip</a></h3>
+                            <span class="blog-date">10/06/2026</span>
+                            <h3 class="blog-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem">5 lưu ý giúp bạn chọn sân phù hợp</a></h3>
                         </div>
                     </div>
 
                     <!-- Blog 2 -->
                     <div class="blog-card">
                         <div class="blog-image">
-                            <span class="blog-badge">Interview</span>
-                            <img src="./assets/images/blog/blog-2.jpg" alt="Kroger ready">
+                            <span class="blog-badge">Pickleball</span>
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/categories/pickleball.jpg" alt="Cách chọn vợt Pickleball cho người mới">
                         </div>
                         <div class="blog-content">
-                            <span class="blog-date">10 June 2024</span>
-                            <h3 class="blog-title"><a href="#">Kroger ready to expand technology reach</a></h3>
+                            <span class="blog-date">10/06/2026</span>
+                            <h3 class="blog-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Pickleball">Cách chọn vợt Pickleball cho người mới</a></h3>
                         </div>
                     </div>
 
                     <!-- Blog 3 -->
                     <div class="blog-card">
                         <div class="blog-image">
-                            <span class="blog-badge">News</span>
-                            <img src="./assets/images/blog/blog-3.jpg" alt="Coborn's to acquire">
+                            <span class="blog-badge">Sức khỏe</span>
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/experience/experience-playing.jpg" alt="Khởi động đúng cách trước khi thi đấu">
                         </div>
                         <div class="blog-content">
-                            <span class="blog-date">10 June 2024</span>
-                            <h3 class="blog-title"><a href="#">Coborn's to acquire Sullivan's Foods in Illinois</a></h3>
+                            <span class="blog-date">10/06/2026</span>
+                            <h3 class="blog-title"><a href="${pageContext.request.contextPath}/customer/tim-kiem">Khởi động đúng cách trước khi thi đấu</a></h3>
                         </div>
                     </div>
 
                     <!-- Blog 4 -->
                     <div class="blog-card">
                         <div class="blog-image">
-                            <span class="blog-badge">Updates</span>
-                            <img src="./assets/images/blog/blog-4.jpg" alt="Whole Foods">
+                            <span class="blog-badge">Cộng đồng</span>
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-03.jpg" alt="Làm thế nào để tìm đồng đội hợp trình độ?">
                         </div>
                         <div class="blog-content">
-                            <span class="blog-date">10 June 2024</span>
-                            <h3 class="blog-title"><a href="#">Whole Foods announces layoffs, restructuring</a></h3>
+                            <span class="blog-date">10/06/2026</span>
+                            <h3 class="blog-title"><a href="${pageContext.request.contextPath}/customer/ghep-keo">Làm thế nào để tìm đồng đội hợp trình độ?</a></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Customer Reviews -->
+        <section class="reviews">
+            <div class="container">
+                <div class="reviews-header">
+                    <div>
+                        <h2 class="section-title">Khách hàng nói gì về <span class="highlight">V-SPORT</span></h2>
+                        <p class="reviews-subtitle">Những trải nghiệm thực tế từ cộng đồng đặt sân và ghép kèo trên V-SPORT.</p>
+                    </div>
+                    <div class="reviews-nav">
+                        <button class="prev-review"><i class="fas fa-arrow-left"></i></button>
+                        <button class="next-review"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="reviews-grid" id="reviewsSlider">
+                    <!-- Review 1 -->
+                    <div class="review-card">
+                        <div class="review-top">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/reviews/review-01.jpg" alt="Minh Anh" class="review-avatar">
+                            <div class="review-identity">
+                                <h4>Minh Anh</h4>
+                                <span class="review-sport">Pickleball</span>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">Tôi tìm được sân gần nhà rất nhanh, thông tin khung giờ rõ ràng và quá trình đặt sân chỉ mất vài phút.</p>
+                        <div class="review-meta">
+                            <div>
+                                <div class="review-venue">Sân Pickleball Long Điền</div>
+                                <span class="review-date">10/06/2026</span>
+                            </div>
+                            <span class="review-badge"><i class="fas fa-circle-check"></i> Đã đặt sân</span>
+                        </div>
+                    </div>
+
+                    <!-- Review 2 -->
+                    <div class="review-card">
+                        <div class="review-top">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/reviews/review-02.jpg" alt="Hoàng Nam" class="review-avatar">
+                            <div class="review-identity">
+                                <h4>Hoàng Nam</h4>
+                                <span class="review-sport">Cầu lông</span>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">Tính năng ghép kèo giúp tôi tìm được nhóm chơi phù hợp trình độ. Mọi người đều thân thiện và đúng giờ.</p>
+                        <div class="review-meta">
+                            <div>
+                                <div class="review-venue">Trung tâm Cầu lông Vũng Tàu</div>
+                                <span class="review-date">08/06/2026</span>
+                            </div>
+                            <span class="review-badge"><i class="fas fa-circle-check"></i> Đã đặt sân</span>
+                        </div>
+                    </div>
+
+                    <!-- Review 3 -->
+                    <div class="review-card">
+                        <div class="review-top">
+                            <img src="${pageContext.request.contextPath}/assets/images/vsport/reviews/review-03.jpg" alt="Thu Trang" class="review-avatar">
+                            <div class="review-identity">
+                                <h4>Thu Trang</h4>
+                                <span class="review-sport">Bóng đá</span>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="review-text">Sân hiển thị đúng hình ảnh và giá. Tôi cũng có thể thuê thêm bóng và áo bib ngay tại cơ sở.</p>
+                        <div class="review-meta">
+                            <div>
+                                <div class="review-venue">Sân bóng Thành Công</div>
+                                <span class="review-date">02/06/2026</span>
+                            </div>
+                            <span class="review-badge"><i class="fas fa-circle-check"></i> Đã đặt sân</span>
                         </div>
                     </div>
                 </div>
@@ -473,12 +557,12 @@
             <div class="container">
                 <div class="newsletter">
                     <div class="newsletter-content">
-                        <h2>Subscribe to <span style="color: var(--primary);">Newsletter</span></h2>
-                        <p>Get all the latest information on Events, Sales and Offers.</p>
+                        <h2>Nhận ưu đãi từ <span style="color: var(--primary);">V-SPORT</span></h2>
+                        <p>Cập nhật sân mới, chương trình ưu đãi và hoạt động thể thao nổi bật.</p>
                     </div>
-                    <form class="newsletter-form" action="#">
-                        <input type="email" placeholder="Your email address" required>
-                        <button type="submit">Subscribe</button>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Nhập địa chỉ email của bạn" required>
+                        <button type="submit">Đăng ký</button>
                     </form>
                 </div>
             </div>
@@ -645,11 +729,11 @@
             <div class="footer-grid">
                 <!-- Col 1 -->
                 <div class="footer-col">
-                    <a href="#" class="logo" style="margin-bottom: 25px;">
+                    <a href="${pageContext.request.contextPath}/" class="logo" style="margin-bottom: 25px;">
                         <i class="fa-solid fa-basket-shopping"></i>
-                        Xtra<span>Market</span>
+                        V-<span>SPORT</span>
                     </a>
-                    <p>A supermarket is a self-service shop offering a wide variety of food, beverages and household products.</p>
+                    <p>Nền tảng giúp bạn tìm sân, đặt lịch và kết nối với cộng đồng thể thao một cách nhanh chóng, thuận tiện.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -660,55 +744,61 @@
 
                 <!-- Col 2 -->
                 <div class="footer-col">
-                    <h4>Useful Links</h4>
+                    <h4>Liên kết hữu ích</h4>
                     <ul class="footer-links">
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="${pageContext.request.contextPath}/">Về V-SPORT</a></li>
+                        <li><a href="${pageContext.request.contextPath}/customer/tim-kiem">Tìm sân</a></li>
+                        <li><a href="${pageContext.request.contextPath}/customer/ghep-keo">Ghép kèo</a></li>
+                        <li><a href="${pageContext.request.contextPath}/customer/tim-kiem">Tin tức</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chính sách quyền riêng tư</a></li>
+                        <li><a href="#">Chính sách đặt và hủy sân</a></li>
                     </ul>
                 </div>
 
                 <!-- Col 3 -->
                 <div class="footer-col">
-                    <h4>Contact Us</h4>
+                    <h4>Liên hệ</h4>
                     <ul class="contact-info">
                         <li>
                             <i class="fas fa-phone-alt"></i>
                             <div>
-                                <span style="font-size: 13px; display: block;">Call us 24/7</span>
+                                <span style="font-size: 13px; display: block;">Hotline hỗ trợ</span>
                                 <a href="tel:8185556788">818-555 67 88</a>
                             </div>
                         </li>
                         <li>
                             <i class="fas fa-envelope"></i>
                             <div>
-                                <span style="font-size: 13px; display: block;">Email us</span>
-                                <a href="mailto:info@xtramarket.com" style="font-size: 15px; font-weight: 400; font-family: 'Inter', sans-serif;">info@xtramarket.com</a>
+                                <span style="font-size: 13px; display: block;">Email hỗ trợ</span>
+                                <a href="mailto:support@vsport.vn" style="font-size: 15px; font-weight: 400; font-family: 'Inter', sans-serif;">support@vsport.vn</a>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <span style="font-size: 13px; display: block;">Thời gian hỗ trợ</span>
+                                <span style="font-size: 15px; font-weight: 400;">7:00 - 22:00 hằng ngày</span>
                             </div>
                         </li>
                     </ul>
                 </div>
-                
+
                 <!-- Col 4 -->
                 <div class="footer-col">
-                    <h4>Make Money</h4>
-                    <p>Interested in a Great Way Make Money? Become a Seller.</p>
-                    <a href="#" class="btn btn-primary">Become a Seller</a>
+                    <h4>Dành cho đối tác</h4>
+                    <p>Bạn đang sở hữu một cơ sở thể thao? Hãy đưa sân của mình đến gần hơn với cộng đồng người chơi.</p>
+                    <a href="${pageContext.request.contextPath}/owner/register" class="btn btn-primary">Đăng ký cơ sở</a>
                 </div>
             </div>
-            
+
             <div class="footer-bottom">
                 <div class="copyright">
-                    &copy; 2024 XtraMarket. All Rights Reserved.
+                    &copy; 2026 V-SPORT. Bảo lưu mọi quyền.
                 </div>
                 <div class="payments">
-                    <div class="payment-card"><i class="fab fa-cc-visa" style="color: #1434CB; font-size: 24px;"></i></div>
-                    <div class="payment-card"><i class="fab fa-cc-mastercard" style="color: #EB001B; font-size: 24px;"></i></div>
-                    <div class="payment-card"><i class="fab fa-cc-paypal" style="color: #00457C; font-size: 24px;"></i></div>
-                    <div class="payment-card"><i class="fab fa-cc-discover" style="color: #F9A021; font-size: 24px;"></i></div>
+                    <div class="payment-card" title="Tiền mặt"><i class="fas fa-money-bill-wave" style="color: #1a8f4c; font-size: 22px;"></i></div>
+                    <div class="payment-card" title="PayOS / QR ngân hàng"><i class="fas fa-qrcode" style="color: #185A9D; font-size: 22px;"></i></div>
                 </div>
             </div>
         </div>
@@ -905,6 +995,22 @@
                 setTimeout(() => {
                     successToast.classList.remove('active');
                 }, 3000);
+            }
+
+            // Newsletter signup - backend chưa sẵn sàng, chỉ validate và báo đang phát triển
+            const newsletterForm = document.getElementById('newsletterForm');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const emailInput = newsletterForm.querySelector('input[type="email"]');
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailInput || !emailRegex.test(emailInput.value.trim())) {
+                        showToast('Vui lòng nhập một địa chỉ email hợp lệ.');
+                        return;
+                    }
+                    showToast('Chức năng đăng ký nhận ưu đãi đang được phát triển.');
+                    newsletterForm.reset();
+                });
             }
             
             // Validation Helpers

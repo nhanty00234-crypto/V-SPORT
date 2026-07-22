@@ -6,22 +6,59 @@
 <html lang="vi">
 <head>
     <title>Ghép trận - V-SPORT</title>
-    <jsp:include page="/common/head.jsp" />
-    <jsp:include page="/customer/common/vsport-theme.jsp" />
+    <jsp:include page="/common/xtra-head.jsp" />
     <style>
         /* =====================================================================
            V-SPORT · Trang Ghép trận (Customer)
            Mọi rule đều được scope dưới .vs-matchmaking-page để không rò rỉ sang
            các trang khác. Không dùng selector trần (button{}, input{}, .card{}).
-           Màu lấy từ design system --vs-* (customer/common/vsport-theme.jsp);
-           giá trị fallback chỉ dùng khi token chưa tồn tại.
-           Font: kế thừa từ design system (Be Vietnam Pro) — KHÔNG override.
-           ===================================================================== */
+
+           Token --vs-* được định nghĩa cục bộ ngay tại đây (không include
+           customer/common/vsport-theme.jsp nữa) vì file đó rebrand --vs-primary-600/
+           --vs-orange-500/--vs-cyan-*/--primary sang màu ĐỎ trên toàn :root bằng
+           !important — sẽ đè luôn màu xanh lá của header-xtra.jsp dùng chung
+           (nav-active pill). Khai báo lại đúng bộ token theo bảng màu navy + xanh
+           lá của Home/Tìm sân (common/xtra-head.jsp), scope trong .vs-matchmaking-page
+           nên không ảnh hưởng các trang khác vẫn dùng vsport-theme.jsp gốc.
+           Đỏ (--vs-danger) CHỈ dùng cho hành động nguy hiểm (hủy/rời kèo). */
+        .vs-matchmaking-page {
+            --vs-font-sans: 'Outfit', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --vs-primary-950: #0A1B26;
+            --vs-primary-900: var(--navy, #122d40);
+            --vs-primary-800: var(--navy-light, #1a3c54);
+            --vs-primary-700: var(--navy-light, #1a3c54);
+            --vs-primary-600: var(--primary-hover, #01c771);
+            --vs-primary-500: var(--primary, #01e281);
+            --vs-cyan-600: var(--primary-hover, #01c771);
+            --vs-cyan-500: var(--primary, #01e281);
+            --vs-cyan-100: #D7F9EA;
+            --vs-cyan-50: #EFFDF6;
+            --vs-orange-600: var(--primary-hover, #01c771);
+            --vs-orange-500: var(--primary, #01e281);
+            --vs-orange-100: #D7F9EA;
+            --vs-text: #102A43;
+            --vs-text-secondary: #486581;
+            --vs-muted: #829AB1;
+            --vs-surface: #F4F7FB;
+            --vs-surface-soft: #EDF4FA;
+            --vs-card: #FFFFFF;
+            --vs-border: #DCE5EF;
+            --vs-success: #16A36A;
+            --vs-success-bg: #E5F7EF;
+            --vs-warning: #F4B740;
+            --vs-warning-bg: #FFF7DA;
+            --vs-danger: #E5484D;
+            --vs-danger-bg: #FDEBEC;
+            --vs-focus-ring: rgba(1, 226, 129, 0.35);
+            --vs-overlay: rgba(7, 26, 47, 0.68);
+        }
+        /* Nút CTA chính (Đặt sân/Tạo kèo) dùng --vs-orange-500 = xanh lá; chữ trắng
+           đủ tương phản trên xanh lá đậm nhưng để rõ ràng theo yêu cầu "nền xanh lá,
+           chữ trắng" ta giữ nguyên #fff từ rule gốc bên dưới. */
 
         body.vs-matchmaking-page {
             background: var(--vs-surface, #F4F7FB);
             color: var(--vs-text, #102A43);
-            padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
         }
         .vs-matchmaking-page :is(h1, h2, h3, h4) {
             font-family: inherit;
@@ -51,7 +88,7 @@
         .vs-matchmaking-page :is(.match-tab, .match-action, .match-filter-button,
                                  .match-chip, .match-hero-back, .match-hero-mine):focus-visible {
             box-shadow: 0 0 0 3px var(--vs-card, #fff),
-                        0 0 0 6px var(--vs-cyan-500, #18C8E8);
+                        0 0 0 6px var(--vs-cyan-500, #01e281);
         }
         /* Sau :focus-visible để hiệu ứng nhấn thắng khi đang giữ chuột. */
         .vs-matchmaking-page :is(.match-tab, .match-action, .match-filter-button, .match-chip, .match-hero-back, .match-hero-mine):active:not(:disabled) {
@@ -62,10 +99,10 @@
         /* ---- Hero (P5) -------------------------------------------------------- */
         .match-hero {
             background: linear-gradient(135deg,
-                        var(--vs-primary-950, #071A2F) 0%,
-                        var(--vs-primary-900, #0B2545) 38%,
-                        var(--vs-primary-700, #185A9D) 78%,
-                        var(--vs-cyan-600, #08A9CC) 100%);
+                        var(--vs-primary-950, #0A1B26) 0%,
+                        var(--vs-primary-900, #122d40) 38%,
+                        var(--vs-primary-700, #1a3c54) 78%,
+                        var(--vs-cyan-600, #01c771) 100%);
             color: #fff;
             position: relative;
             overflow: hidden;
@@ -102,11 +139,30 @@
             border: 1px solid rgba(255, 255, 255, .22);
         }
         .match-hero-text { min-width: 0; flex: 1; }
+        .match-breadcrumb {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 12.5px; font-weight: 600;
+            color: rgba(255, 255, 255, .68);
+            margin-bottom: 6px;
+        }
+        .match-breadcrumb a { color: rgba(255, 255, 255, .68); text-decoration: none; }
+        .match-breadcrumb a:hover { color: #fff; text-decoration: underline; }
+        .match-breadcrumb [aria-current="page"] { color: #fff; }
         .match-hero-title { font-size: 24px; font-weight: 800; margin: 0; line-height: 1.2; }
         .match-hero-sub {
             font-size: 14px; margin: 5px 0 0;
             color: rgba(255, 255, 255, .82); line-height: 1.45;
         }
+        .match-hero-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .match-hero-cta {
+            display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+            padding: 11px 20px; border-radius: 999px;
+            background: var(--vs-orange-500, #01e281);
+            border: 1px solid var(--vs-orange-500, #01e281);
+            color: #fff; font-size: 14px; font-weight: 700;
+            font-family: inherit; cursor: pointer;
+        }
+        .match-hero-cta:hover { background: var(--vs-orange-600, #01c771); border-color: var(--vs-orange-600, #01c771); }
         .match-hero-mine {
             display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
             padding: 11px 18px; border-radius: 999px;
@@ -119,7 +175,7 @@
         .match-hero-badge {
             display: inline-flex; align-items: center; justify-content: center;
             min-width: 20px; padding: 2px 7px; border-radius: 999px;
-            background: var(--vs-orange-500, #FF8A24); color: #fff;
+            background: var(--vs-orange-500, #01e281); color: var(--vs-primary-900, #122d40);
             font-size: 11px; font-weight: 800;
         }
 
@@ -145,7 +201,7 @@
         }
         .match-facility-icon {
             width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
-            background: var(--vs-cyan-100, #DDF8FC); color: var(--vs-primary-700, #185A9D);
+            background: var(--vs-cyan-100, #D7F9EA); color: var(--vs-primary-700, #1a3c54);
             display: inline-flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 18px;
         }
@@ -170,12 +226,12 @@
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             border: none; background: transparent; border-radius: 11px;
             font-family: inherit; font-size: 14px; font-weight: 700;
-            color: var(--vs-primary-900, #0B2545);
+            color: var(--vs-primary-900, #122d40);
             cursor: pointer; white-space: nowrap; overflow: hidden;
         }
-        .match-tab:hover:not(.is-active) { background: var(--vs-cyan-50, #F0FCFE); }
+        .match-tab:hover:not(.is-active) { background: var(--vs-cyan-50, #EFFDF6); }
         .match-tab.is-active {
-            background: linear-gradient(135deg, var(--vs-primary-600, #1677D2) 0%, var(--vs-cyan-500, #18C8E8) 100%);
+            background: linear-gradient(135deg, var(--vs-primary-600, #01c771) 0%, var(--vs-cyan-500, #01e281) 100%);
             color: #fff;
             box-shadow: 0 4px 12px rgba(22, 119, 210, .28);
         }
@@ -196,7 +252,7 @@
             color: var(--vs-text-secondary, #486581);
             margin-bottom: 7px;
         }
-        .match-field-label svg { color: var(--vs-primary-600, #1677D2); flex-shrink: 0; }
+        .match-field-label svg { color: var(--vs-primary-600, #01c771); flex-shrink: 0; }
         .match-input {
             width: 100%; height: 46px; padding: 0 13px;
             background: #fff; color: var(--vs-text, #102A43);
@@ -206,7 +262,7 @@
         }
         .match-input:focus {
             outline: none;
-            border-color: var(--vs-primary-600, #1677D2);
+            border-color: var(--vs-primary-600, #01c771);
             box-shadow: 0 0 0 3px var(--vs-focus-ring, rgba(24, 200, 232, .35));
         }
         .match-filter-button {
@@ -217,16 +273,16 @@
             cursor: pointer; white-space: nowrap;
         }
         .match-filter-button.is-search {
-            background: var(--vs-primary-600, #1677D2); color: #fff;
+            background: var(--vs-primary-600, #01c771); color: #fff;
         }
-        .match-filter-button.is-search:hover { background: var(--vs-primary-700, #185A9D); }
+        .match-filter-button.is-search:hover { background: var(--vs-primary-700, #1a3c54); }
         .match-filter-button.is-clear {
             background: #fff; color: var(--vs-text-secondary, #486581);
             border-color: var(--vs-border, #DCE5EF);
         }
         .match-filter-button.is-clear:hover {
-            border-color: var(--vs-primary-600, #1677D2);
-            color: var(--vs-primary-600, #1677D2);
+            border-color: var(--vs-primary-600, #01c771);
+            color: var(--vs-primary-600, #01c771);
         }
 
         /* ---- Dải tóm tắt + sắp xếp (P9) --------------------------------------- */
@@ -235,7 +291,7 @@
             gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
         }
         .match-summary-left { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
-        .match-summary-title { font-size: 17px; font-weight: 800; color: var(--vs-primary-900, #0B2545); margin: 0; }
+        .match-summary-title { font-size: 17px; font-weight: 800; color: var(--vs-primary-900, #122d40); margin: 0; }
         .match-summary-count { font-size: 13px; font-weight: 600; color: var(--vs-text-secondary, #486581); }
         .match-summary-right { display: flex; align-items: center; gap: 9px; }
         .match-summary-right label { font-size: 13px; font-weight: 600; color: var(--vs-text-secondary, #486581); }
@@ -246,7 +302,7 @@
             font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
         }
         .match-sort:focus {
-            outline: none; border-color: var(--vs-primary-600, #1677D2);
+            outline: none; border-color: var(--vs-primary-600, #01c771);
             box-shadow: 0 0 0 3px var(--vs-focus-ring, rgba(24, 200, 232, .35));
         }
 
@@ -260,12 +316,12 @@
             font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
         }
         .match-chip:hover:not(.is-active) {
-            border-color: var(--vs-primary-600, #1677D2);
-            color: var(--vs-primary-600, #1677D2);
+            border-color: var(--vs-primary-600, #01c771);
+            color: var(--vs-primary-600, #01c771);
         }
         .match-chip.is-active {
-            background: var(--vs-primary-600, #1677D2);
-            border-color: var(--vs-primary-600, #1677D2);
+            background: var(--vs-primary-600, #01c771);
+            border-color: var(--vs-primary-600, #01c771);
             color: #fff;
         }
 
@@ -290,14 +346,14 @@
         @media (hover: hover) and (min-width: 1024px) {
             .match-item:hover {
                 transform: translateY(-2px);
-                border-color: var(--vs-cyan-500, #18C8E8);
+                border-color: var(--vs-cyan-500, #01e281);
                 box-shadow: 0 8px 22px rgba(11, 37, 69, .10);
             }
         }
         .match-item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .match-item-title {
             font-size: 16px; font-weight: 800; margin: 0;
-            color: var(--vs-primary-900, #0B2545); line-height: 1.35;
+            color: var(--vs-primary-900, #122d40); line-height: 1.35;
         }
         .match-item-addr { font-size: 13px; color: var(--vs-text-secondary, #486581); margin: 2px 0 0; }
         .match-item-meta {
@@ -317,12 +373,12 @@
             padding: 4px 11px; border-radius: 999px;
             font-size: 11.5px; font-weight: 800; white-space: nowrap;
         }
-        .match-badge.is-sport  { background: var(--vs-cyan-100, #DDF8FC); color: var(--vs-primary-700, #185A9D); }
-        .match-badge.is-open   { background: var(--vs-cyan-50, #F0FCFE); color: var(--vs-primary-600, #1677D2); border: 1px solid var(--vs-cyan-100, #DDF8FC); }
+        .match-badge.is-sport  { background: var(--vs-cyan-100, #D7F9EA); color: var(--vs-primary-700, #1a3c54); }
+        .match-badge.is-open   { background: var(--vs-cyan-50, #EFFDF6); color: var(--vs-primary-600, #01c771); border: 1px solid var(--vs-cyan-100, #D7F9EA); }
         .match-badge.is-full   { background: var(--vs-warning-bg, #FFF7DA); color: #8a6116; }
         .match-badge.is-cancel { background: var(--vs-danger-bg, #FDEBEC); color: var(--vs-danger, #E5484D); }
         .match-badge.is-closed { background: #EEF2F6; color: var(--vs-text-secondary, #486581); }
-        .match-badge.is-joined { background: var(--vs-primary-600, #1677D2); color: #fff; }
+        .match-badge.is-joined { background: var(--vs-primary-600, #01c771); color: #fff; }
         .match-badge.is-rep-good  { background: var(--vs-success-bg, #E5F7EF); color: var(--vs-success, #16A36A); }
         .match-badge.is-rep-watch { background: var(--vs-warning-bg, #FFF7DA); color: #8a6116; }
         .match-badge.is-rep-bad   { background: var(--vs-danger-bg, #FDEBEC); color: var(--vs-danger, #E5484D); }
@@ -332,7 +388,7 @@
         .match-slot-bar { height: 8px; border-radius: 999px; background: #EEF2F6; overflow: hidden; }
         .match-slot-fill {
             height: 100%; border-radius: 999px;
-            background: linear-gradient(90deg, var(--vs-primary-600, #1677D2), var(--vs-cyan-500, #18C8E8));
+            background: linear-gradient(90deg, var(--vs-primary-600, #01c771), var(--vs-cyan-500, #01e281));
         }
         .match-slot-text {
             display: flex; justify-content: space-between; gap: 10px;
@@ -351,17 +407,17 @@
             font-family: inherit; font-size: 13.5px; font-weight: 700;
             cursor: pointer; white-space: nowrap; text-decoration: none;
         }
-        .match-action.is-primary { background: var(--vs-orange-500, #FF8A24); color: #fff; }
-        .match-action.is-primary:hover:not(:disabled) { background: var(--vs-orange-600, #F97316); }
-        .match-action.is-blue { background: var(--vs-primary-600, #1677D2); color: #fff; }
-        .match-action.is-blue:hover:not(:disabled) { background: var(--vs-primary-700, #185A9D); }
+        .match-action.is-primary { background: var(--vs-orange-500, #01e281); color: #fff; }
+        .match-action.is-primary:hover:not(:disabled) { background: var(--vs-orange-600, #01c771); }
+        .match-action.is-blue { background: var(--vs-primary-600, #01c771); color: #fff; }
+        .match-action.is-blue:hover:not(:disabled) { background: var(--vs-primary-700, #1a3c54); }
         .match-action.is-ghost {
             background: #fff; color: var(--vs-text, #102A43);
             border-color: var(--vs-border, #DCE5EF);
         }
         .match-action.is-ghost:hover:not(:disabled) {
-            border-color: var(--vs-primary-600, #1677D2);
-            color: var(--vs-primary-600, #1677D2);
+            border-color: var(--vs-primary-600, #01c771);
+            color: var(--vs-primary-600, #01c771);
         }
         .match-action.is-danger {
             background: #fff; color: var(--vs-danger, #E5484D);
@@ -378,7 +434,7 @@
             padding: 40px 32px;
             text-align: center;
             background: var(--vs-card, #fff);
-            border: 1px solid var(--vs-cyan-100, #DDF8FC);
+            border: 1px solid var(--vs-cyan-100, #D7F9EA);
             border-radius: 22px;
             box-shadow: 0 6px 24px rgba(11, 37, 69, .07);
         }
@@ -386,13 +442,13 @@
             width: 104px; height: 104px; margin: 0 auto 20px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--vs-primary-600, #1677D2) 0%, var(--vs-cyan-500, #18C8E8) 100%);
+            background: linear-gradient(135deg, var(--vs-primary-600, #01c771) 0%, var(--vs-cyan-500, #01e281) 100%);
             color: #fff;
             box-shadow: 0 10px 26px rgba(22, 119, 210, .26);
         }
         .match-empty-title {
             font-size: 20px; font-weight: 800; margin: 0 0 9px;
-            color: var(--vs-primary-900, #0B2545);
+            color: var(--vs-primary-900, #122d40);
         }
         .match-empty-text {
             font-size: 14px; line-height: 1.6; margin: 0 auto 22px;
@@ -411,7 +467,7 @@
             display: inline-flex; align-items: center; gap: 7px;
             font-size: 12.5px; font-weight: 600; color: var(--vs-text-secondary, #486581);
         }
-        .match-empty-hints svg { color: var(--vs-cyan-600, #08A9CC); flex-shrink: 0; }
+        .match-empty-hints svg { color: var(--vs-cyan-600, #01c771); flex-shrink: 0; }
 
         /* Empty state phụ (nhỏ hơn) cho "Kèo của tôi" */
         .match-empty-mini {
@@ -472,10 +528,10 @@
         .match-section-num {
             width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px;
             display: inline-flex; align-items: center; justify-content: center;
-            background: var(--vs-cyan-100, #DDF8FC); color: var(--vs-primary-700, #185A9D);
+            background: var(--vs-cyan-100, #D7F9EA); color: var(--vs-primary-700, #1a3c54);
             font-size: 13px; font-weight: 800;
         }
-        .match-section-title { font-size: 16px; font-weight: 800; color: var(--vs-primary-900, #0B2545); margin: 0; }
+        .match-section-title { font-size: 16px; font-weight: 800; color: var(--vs-primary-900, #122d40); margin: 0; }
         .match-form-grid {
             display: grid; gap: 16px;
             grid-template-columns: minmax(0, 1fr);
@@ -489,7 +545,7 @@
             font-family: inherit; font-size: 14px; line-height: 1.55;
         }
         .match-textarea:focus {
-            outline: none; border-color: var(--vs-primary-600, #1677D2);
+            outline: none; border-color: var(--vs-primary-600, #01c771);
             box-shadow: 0 0 0 3px var(--vs-focus-ring, rgba(24, 200, 232, .35));
         }
         .match-help { font-size: 12.5px; color: var(--vs-text-secondary, #486581); margin: 6px 0 0; }
@@ -508,11 +564,11 @@
             font-size: 14px; font-weight: 700; color: var(--vs-text-secondary, #486581);
             cursor: pointer; transition: border-color .12s ease, background-color .12s ease, color .12s ease;
         }
-        .match-radio input { accent-color: var(--vs-primary-600, #1677D2); }
+        .match-radio input { accent-color: var(--vs-primary-600, #01c771); }
         .match-radio.is-selected {
-            border-color: var(--vs-primary-600, #1677D2);
-            background: var(--vs-cyan-50, #F0FCFE);
-            color: var(--vs-primary-700, #185A9D);
+            border-color: var(--vs-primary-600, #01c771);
+            background: var(--vs-cyan-50, #EFFDF6);
+            color: var(--vs-primary-700, #1a3c54);
         }
         .match-submit-row {
             display: flex; gap: 11px; justify-content: flex-end; flex-wrap: wrap;
@@ -521,20 +577,20 @@
         .match-aside { display: flex; flex-direction: column; gap: 16px; }
         @media (min-width: 1100px) { .match-aside { position: sticky; top: 84px; } }
         .match-aside-card { padding: 18px; }
-        .match-aside-title { font-size: 14px; font-weight: 800; color: var(--vs-primary-900, #0B2545); margin: 0 0 12px; }
+        .match-aside-title { font-size: 14px; font-weight: 800; color: var(--vs-primary-900, #122d40); margin: 0 0 12px; }
         .match-preview-empty {
             text-align: center; padding: 26px 8px;
             font-size: 13px; color: var(--vs-text-secondary, #486581);
         }
         .match-steps { display: grid; gap: 11px; }
         .match-step { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--vs-text-secondary, #486581); }
-        .match-step b { color: var(--vs-primary-600, #1677D2); flex-shrink: 0; }
+        .match-step b { color: var(--vs-primary-600, #01c771); flex-shrink: 0; }
 
         /* ---- Panels ----------------------------------------------------------- */
         .match-panel { display: none; }
         .match-panel.is-active { display: block; }
         .match-subhead {
-            font-size: 15px; font-weight: 800; color: var(--vs-primary-900, #0B2545);
+            font-size: 15px; font-weight: 800; color: var(--vs-primary-900, #122d40);
             margin: 0 0 13px;
         }
         .match-subhead-spaced { margin-top: 30px; }
@@ -542,10 +598,10 @@
         /* ---- Toast (P14) ------------------------------------------------------ */
         .match-toast {
             position: fixed; left: 50%; z-index: 1400;
-            bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+            bottom: calc(28px + env(safe-area-inset-bottom, 0px));
             transform: translateX(-50%) translateY(16px);
             max-width: 92vw; padding: 13px 20px; border-radius: 999px;
-            background: var(--vs-primary-900, #0B2545); color: #fff;
+            background: var(--vs-primary-900, #122d40); color: #fff;
             font-size: 14px; font-weight: 700; text-align: center;
             box-shadow: 0 12px 32px rgba(11, 37, 69, .32);
             opacity: 0; visibility: hidden;
@@ -578,14 +634,14 @@
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
             padding: 4px 20px 14px; border-bottom: 1px solid var(--vs-border, #DCE5EF);
         }
-        .match-sheet-title { margin: 0; font-size: 17px; font-weight: 800; color: var(--vs-primary-900, #0B2545); }
+        .match-sheet-title { margin: 0; font-size: 17px; font-weight: 800; color: var(--vs-primary-900, #122d40); }
         .match-sheet-close {
             width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center;
             background: #fff; border: 1px solid var(--vs-border, #DCE5EF);
             color: var(--vs-text, #102A43); cursor: pointer;
         }
-        .match-sheet-close:hover { border-color: var(--vs-primary-600, #1677D2); color: var(--vs-primary-600, #1677D2); }
+        .match-sheet-close:hover { border-color: var(--vs-primary-600, #01c771); color: var(--vs-primary-600, #01c771); }
         .match-sheet-body { flex: 1; overflow-y: auto; padding: 20px; }
         .match-sheet-bar {
             display: flex; gap: 10px; flex-wrap: wrap;
@@ -613,7 +669,7 @@
         .match-avatar {
             width: 38px; height: 38px; flex-shrink: 0; border-radius: 999px;
             display: inline-flex; align-items: center; justify-content: center;
-            background: var(--vs-cyan-100, #DDF8FC); color: var(--vs-primary-700, #185A9D);
+            background: var(--vs-cyan-100, #D7F9EA); color: var(--vs-primary-700, #1a3c54);
             font-size: 13px; font-weight: 800;
         }
         .match-person-name { font-size: 14px; font-weight: 700; color: var(--vs-text, #102A43); }
@@ -646,7 +702,7 @@
             display: flex; align-items: center; justify-content: center;
             background: var(--vs-danger-bg, #FDEBEC); color: var(--vs-danger, #E5484D);
         }
-        .match-confirm-title { font-size: 17px; font-weight: 800; margin: 0 0 8px; color: var(--vs-primary-900, #0B2545); }
+        .match-confirm-title { font-size: 17px; font-weight: 800; margin: 0 0 8px; color: var(--vs-primary-900, #122d40); }
         .match-confirm-text { font-size: 14px; line-height: 1.55; margin: 0 0 22px; color: var(--vs-text-secondary, #486581); }
         .match-confirm-actions { display: flex; gap: 10px; }
         .match-confirm-actions .match-action { flex: 1; }
@@ -663,6 +719,9 @@
             .match-hero-sub { font-size: 13px; }
             .match-hero-mine { padding: 10px 13px; font-size: 13px; }
             .match-hero-mine .match-hero-mine-label { display: none; }
+            .match-hero-cta { padding: 10px 13px; font-size: 13px; }
+            .match-hero-cta-label { display: none; }
+            .match-hero-actions { gap: 8px; }
             .match-container { width: calc(100% - 32px); padding: 18px 0 130px; }
             .match-hero-inner { width: calc(100% - 32px); }
             .match-tabs { height: 54px; }
@@ -696,7 +755,7 @@
 </head>
 <body class="vs-matchmaking-page">
 
-<jsp:include page="/customer/common/vsport-header.jsp" />
+<jsp:include page="/common/header-xtra.jsp" />
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
@@ -710,14 +769,25 @@
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </span>
         <div class="match-hero-text">
-            <h1 class="match-hero-title">Ghép trận</h1>
-            <p class="match-hero-sub">Tìm người chơi hoặc tạo trận phù hợp với lịch của bạn.</p>
+            <nav class="match-breadcrumb" aria-label="Breadcrumb">
+                <a href="${ctx}/">Trang chủ</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">Ghép kèo</span>
+            </nav>
+            <h1 class="match-hero-title">Tìm đồng đội, bắt đầu trận đấu</h1>
+            <p class="match-hero-sub">Khám phá những kèo thể thao phù hợp với lịch trình, khu vực và trình độ của bạn.</p>
         </div>
-        <button type="button" class="match-hero-mine" onclick="gkOpenTab('cua-toi')" aria-label="Xem kèo của tôi">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            <span class="match-hero-mine-label">Kèo của tôi</span>
-            <span class="match-hero-badge" id="gkMineBadge" hidden>0</span>
-        </button>
+        <div class="match-hero-actions">
+            <button type="button" class="match-hero-cta" onclick="gkOpenTab('tao-keo')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                <span class="match-hero-cta-label">Tạo kèo mới</span>
+            </button>
+            <button type="button" class="match-hero-mine" onclick="gkOpenTab('cua-toi')" aria-label="Xem kèo của tôi">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span class="match-hero-mine-label">Kèo của tôi</span>
+                <span class="match-hero-badge" id="gkMineBadge" hidden>0</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1477,7 +1547,7 @@
                 + (m.diemUyTinNguoiTao != null ? (' · ' + m.diemUyTinNguoiTao + '/100') : '')
               + '</span>'
             + '</div>'
-            + '<h3 style="margin:0 0 5px;font-size:17px;font-weight:800;color:var(--vs-primary-900,#0B2545);">'
+            + '<h3 style="margin:0 0 5px;font-size:17px;font-weight:800;color:var(--vs-primary-900,#122d40);">'
               + escapeHtml(m.tenCoSo || '') + ' · ' + escapeHtml(m.tenSan || '') + '</h3>'
             + '<p style="margin:0 0 14px;font-size:13px;color:var(--vs-text-secondary,#486581);">' + escapeHtml(m.diaChiCoSo || '') + '</p>'
             + '<div class="match-detail-block">'
@@ -1489,7 +1559,7 @@
                 + (joined < capacity ? (' · Còn ' + (capacity - joined) + ' chỗ') : ' · Đã đủ') + '</div>'
             + '</div>'
             + (m.actualNote ? '<p style="margin:14px 0 0;font-size:14px;line-height:1.55;color:var(--vs-text,#102A43);"><b>Ghi chú:</b> ' + escapeHtml(m.actualNote) + '</p>' : '')
-            + '<h3 style="margin:20px 0 8px;font-size:14px;font-weight:800;color:var(--vs-primary-900,#0B2545);">Chủ kèo</h3>'
+            + '<h3 style="margin:20px 0 8px;font-size:14px;font-weight:800;color:var(--vs-primary-900,#122d40);">Chủ kèo</h3>'
             + '<div class="match-person">'
               + '<div class="match-avatar" aria-hidden="true">' + escapeHtml(initials(m.tenNguoiTao)) + '</div>'
               + '<div>'
@@ -1497,7 +1567,7 @@
                 + '<div class="match-person-sub">Uy tín: ' + (m.diemUyTinNguoiTao != null ? m.diemUyTinNguoiTao + '/100' : '—') + '</div>'
               + '</div>'
             + '</div>'
-            + '<h3 style="margin:20px 0 8px;font-size:14px;font-weight:800;color:var(--vs-primary-900,#0B2545);">Người tham gia (' + participants.length + ')</h3>'
+            + '<h3 style="margin:20px 0 8px;font-size:14px;font-weight:800;color:var(--vs-primary-900,#122d40);">Người tham gia (' + participants.length + ')</h3>'
             + (participants.length ? '' : '<p class="match-person-sub">Chưa có ai xin tham gia.</p>');
 
         participants.forEach(function (p) {
@@ -1662,7 +1732,7 @@
               + '<span class="match-badge is-sport">' + escapeHtml(b.tenLoaiSan || 'Thể thao') + '</span>'
               + '<span class="match-badge is-open">Đang mở</span>'
             + '</div>'
-            + '<h4 style="margin:0 0 4px;font-size:15px;font-weight:800;color:var(--vs-primary-900,#0B2545);">'
+            + '<h4 style="margin:0 0 4px;font-size:15px;font-weight:800;color:var(--vs-primary-900,#122d40);">'
               + escapeHtml(b.tenCoSo) + ' · ' + escapeHtml(b.tenSan) + '</h4>'
             + '<p style="margin:0;font-size:13px;line-height:1.55;color:var(--vs-text-secondary,#486581);">'
               + fmtDateVi(b.ngayDat) + ' · ' + escapeHtml(b.gioBatDau) + '–' + escapeHtml(b.gioKetThuc)
@@ -1853,6 +1923,5 @@
 })();
 </script>
 
-<jsp:include page="/customer/common/bottom-nav.jsp" />
 </body>
 </html>

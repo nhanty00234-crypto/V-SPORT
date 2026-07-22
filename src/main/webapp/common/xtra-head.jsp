@@ -331,10 +331,22 @@
             padding: 10px 20px;
             border-radius: 50px;
         }
-        
+
         .nav-category i {
             margin-left: 5px;
             font-size: 12px;
+        }
+
+        .main-nav a.nav-active {
+            background: var(--primary);
+            color: var(--navy);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+        }
+
+        .main-nav a.nav-active:hover {
+            color: var(--navy);
         }
 
         .hot-badge {
@@ -351,7 +363,7 @@
         .hero {
             background-color: #e5f6f1;
             position: relative;
-            padding: 80px 0 120px;
+            padding: 50px 0 80px;
             overflow: hidden;
             z-index: 1;
         }
@@ -381,7 +393,7 @@
         }
 
         .hero-content h1 {
-            font-size: 64px;
+            font-size: 52px;
             margin-bottom: 20px;
         }
 
@@ -395,6 +407,10 @@
         .hero-actions {
             display: flex;
             gap: 20px;
+        }
+
+        .hero-actions .btn:hover {
+            transform: translateY(-2px);
         }
 
         .hero-actions .btn-outline {
@@ -415,6 +431,35 @@
         .hero-image img {
             border-radius: var(--radius-large);
             box-shadow: var(--shadow-large);
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .hero-image:hover img {
+            transform: scale(1.02);
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .hero-content {
+                animation: fadeInUp 0.8s ease forwards;
+            }
+            .hero-image {
+                animation: fadeInUp 0.8s ease 0.15s forwards;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Benefits */
@@ -999,6 +1044,156 @@
         
         .blog-title a:hover {
             color: var(--primary);
+        }
+
+        /* Customer Reviews */
+        .reviews {
+            padding: 0 0 var(--section-spacing);
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+
+        .reviews-header h2 {
+            margin: 0 0 8px;
+        }
+
+        .reviews-subtitle {
+            color: var(--body-text);
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .reviews-nav {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .reviews-nav button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--navy);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .reviews-nav button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .review-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-medium);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        .review-card:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .review-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .review-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .review-identity h4 {
+            margin: 0 0 2px;
+            font-size: 16px;
+        }
+
+        .review-sport {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .review-rating {
+            color: var(--warning);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .review-rating span {
+            color: var(--muted-text);
+            font-size: 12px;
+            margin-left: 4px;
+        }
+
+        .review-text {
+            color: var(--body-text);
+            font-size: 14.5px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .review-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .review-venue {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .review-date {
+            font-size: 12px;
+            color: var(--muted-text);
+        }
+
+        .review-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(1, 226, 129, 0.1);
+            color: var(--primary-hover);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        @media (max-width: 991px) {
+            .reviews-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 767px) {
+            .reviews-grid { grid-template-columns: 1fr; }
         }
 
         /* Newsletter */
