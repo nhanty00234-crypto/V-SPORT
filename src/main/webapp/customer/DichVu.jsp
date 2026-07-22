@@ -1,0 +1,327 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<jsp:include page="/common/xtra-head.jsp" />
+<title>Dịch vụ thể thao gần bạn - V-SPORT</title>
+<style>
+  .dv-wrap { max-width: var(--container-width); margin: 0 auto; padding: 32px 24px 80px; }
+  .dv-header h1 { font-size: 28px; font-weight: 800; color: var(--navy); margin: 0 0 6px; }
+  .dv-header p { color: var(--body-text); font-size: 14.5px; margin: 0; }
+  .dv-search { display:flex; gap:10px; margin: 22px 0 14px; flex-wrap: wrap; }
+  .dv-search input[type="text"] {
+    flex: 1; min-width: 240px; padding: 12px 16px; border-radius: var(--radius-medium);
+    border: 1px solid var(--border); font-size: 14px; outline: none;
+  }
+  .dv-search input[type="text"]:focus { border-color: var(--primary); }
+  .dv-gps-btn, .dv-filter-btn {
+    padding: 12px 18px; border-radius: var(--radius-medium); border: 1px solid var(--border);
+    background: var(--surface); font-weight: 700; font-size: 13.5px; color: var(--navy); cursor: pointer;
+    display:flex; align-items:center; gap:6px; white-space: nowrap;
+  }
+  .dv-gps-btn.is-active { border-color: var(--primary); color: var(--primary-hover); background:#eafff5; }
+  .dv-quick-filters { display:flex; gap:8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .dv-chip {
+    padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+    font-size: 12.5px; font-weight: 700; color: var(--body-text); cursor: pointer; user-select:none;
+  }
+  .dv-chip.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .dv-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+  .dv-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-medium);
+    overflow: hidden; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-small);
+  }
+  .dv-card:hover { box-shadow: var(--shadow-medium); transform: translateY(-2px); }
+  .dv-card-img { height: 140px; background: linear-gradient(135deg,#122d40,#1a3c54); position:relative; }
+  .dv-card-img img { width:100%; height:100%; object-fit:cover; }
+  .dv-status-badge {
+    position:absolute; top:10px; left:10px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:800;
+  }
+  .dv-status-open { background:#dcfce7; color:#166534; }
+  .dv-status-paused { background:#f1f5f9; color:#475569; }
+  .dv-card-body { padding: 14px 16px 16px; }
+  .dv-card-body h3 { font-size: 15px; font-weight: 800; color: var(--navy); margin: 0 0 4px; }
+  .dv-card-facility { font-size: 12.5px; color: var(--muted-text); margin: 0 0 8px; display:flex; align-items:center; gap:4px; }
+  .dv-card-meta { display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color: var(--body-text); }
+  .dv-price { font-weight: 800; color: var(--navy); font-size: 14.5px; }
+  .dv-empty { text-align:center; padding: 60px 20px; color: var(--muted-text); }
+  .dv-empty i { font-size: 40px; margin-bottom: 12px; opacity:.4; }
+
+  .dv-drawer-overlay { position:fixed; inset:0; background:rgba(18,45,64,.5); z-index:80; display:none; }
+  .dv-drawer-overlay.open { display:block; }
+  .dv-drawer { position:fixed; top:0; right:0; height:100vh; width:100%; max-width:480px; background:#fff; z-index:81;
+    transform:translateX(100%); transition:transform .25s ease; overflow-y:auto; box-shadow:-10px 0 30px rgba(0,0,0,.15); }
+  .dv-drawer.open { transform:translateX(0); }
+  .dv-drawer-head { display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--border); }
+  .dv-drawer-body { padding: 18px 20px 100px; display:flex; flex-direction:column; gap:14px; }
+  .dv-drawer-row { display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; border-bottom:1px dashed var(--border); }
+  .dv-drawer-row span:first-child { color: var(--muted-text); }
+  .dv-drawer-row span:last-child { font-weight:700; color: var(--navy); text-align:right; }
+  .dv-cta-bar { position:fixed; bottom:0; right:0; width:100%; max-width:480px; background:#fff; border-top:1px solid var(--border);
+    padding: 14px 20px; z-index:82; display:none; }
+  .dv-cta-bar.open { display:block; }
+  .dv-cta-btn { width:100%; padding: 13px; border-radius: var(--radius-medium); background: var(--navy); color:#fff;
+    font-weight:800; font-size:14px; border:none; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<jsp:include page="/common/header-xtra.jsp" />
+
+<main class="dv-wrap">
+  <section class="dv-header">
+    <h1>Dịch vụ thể thao gần bạn</h1>
+    <p>Tìm cơ sở cung cấp dịch vụ căng lưới, sửa chữa và hỗ trợ dụng cụ thể thao phù hợp với nhu cầu của bạn.</p>
+  </section>
+
+  <div class="dv-search">
+    <input type="text" id="dvSearchInput" placeholder="Tìm dịch vụ căng lưới, thay quấn cán, sửa vợt..."/>
+    <button type="button" class="dv-gps-btn" id="dvGpsBtn" onclick="useMyLocation()">
+      <i class="fa-solid fa-location-crosshairs"></i> Gần tôi
+    </button>
+  </div>
+
+  <div class="dv-quick-filters" id="dvQuickFilters">
+    <div class="dv-chip" data-sport="cầu lông" data-type="CANG_LUOI">Căng lưới cầu lông</div>
+    <div class="dv-chip" data-sport="tennis" data-type="CANG_LUOI">Căng lưới tennis</div>
+    <div class="dv-chip" data-type="THAY_QUAN_CAN">Thay quấn cán</div>
+    <div class="dv-chip" data-type="SUA_VOT">Sửa vợt</div>
+    <div class="dv-chip" data-type="HUAN_LUYEN_VIEN">Huấn luyện viên</div>
+    <div class="dv-chip" data-open="1">Đang mở cửa</div>
+    <div class="dv-chip" data-accepting="1">Đang nhận dịch vụ</div>
+  </div>
+
+  <div id="dvGrid" class="dv-grid"></div>
+  <div id="dvEmpty" class="dv-empty" style="display:none;">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <p>Không tìm thấy dịch vụ phù hợp. Hãy thử từ khóa hoặc bộ lọc khác.</p>
+  </div>
+</main>
+
+<div class="dv-drawer-overlay" id="dvOverlay" onclick="closeDetail()"></div>
+<div class="dv-drawer" id="dvDrawer">
+  <div class="dv-drawer-head">
+    <h3 id="dvDetailTitle" style="font-weight:800;font-size:17px;color:var(--navy);margin:0;">Chi tiết dịch vụ</h3>
+    <button type="button" onclick="closeDetail()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted-text);">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <div class="dv-drawer-body" id="dvDetailBody"></div>
+</div>
+<div class="dv-cta-bar" id="dvCtaBar">
+  <button type="button" class="dv-cta-btn" id="dvCtaBtn" onclick="goRequestService()">Gửi yêu cầu dịch vụ</button>
+</div>
+
+<script>
+  var ctxPath = '${ctx}';
+  var currentFilters = { q: '', serviceType: '', sportType: '', acceptingOnly: false, openOnly: false, lat: null, lng: null };
+  var lastResults = [];
+
+  function serviceTypeLabel(t) {
+    switch (t) {
+      case 'CANG_LUOI': return 'Căng lưới vợt';
+      case 'THAY_QUAN_CAN': return 'Thay quấn cán';
+      case 'SUA_VOT': return 'Sửa chữa vợt';
+      case 'BAO_DUONG': return 'Bảo dưỡng dụng cụ';
+      case 'HUAN_LUYEN_VIEN': return 'Huấn luyện viên';
+      default: return 'Dịch vụ khác';
+    }
+  }
+
+  function fmtMoney(v) {
+    return Number(v || 0).toLocaleString('vi-VN') + 'đ';
+  }
+
+  function buildQuery() {
+    var p = new URLSearchParams();
+    if (currentFilters.q) p.set('q', currentFilters.q);
+    if (currentFilters.serviceType) p.set('serviceType', currentFilters.serviceType);
+    if (currentFilters.sportType) p.set('sportType', currentFilters.sportType);
+    if (currentFilters.acceptingOnly) p.set('acceptingOnly', '1');
+    if (currentFilters.lat != null && currentFilters.lng != null) {
+      p.set('lat', currentFilters.lat);
+      p.set('lng', currentFilters.lng);
+      p.set('radiusKm', '20');
+    }
+    return p.toString();
+  }
+
+  function runSearch() {
+    fetch(ctxPath + '/api/customer/dich-vu?' + buildQuery())
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data.success) { renderResults([]); return; }
+        var results = data.services || [];
+        if (currentFilters.openOnly) {
+          results = results.filter(function(s){ return s.openNow; });
+        }
+        lastResults = results;
+        renderResults(results);
+      })
+      .catch(function(){ renderResults([]); });
+  }
+
+  function renderResults(list) {
+    var grid = document.getElementById('dvGrid');
+    var empty = document.getElementById('dvEmpty');
+    grid.innerHTML = '';
+    if (!list.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    list.forEach(function(s) {
+      var card = document.createElement('div');
+      card.className = 'dv-card';
+      card.onclick = function(){ openDetail(s.serviceId); };
+      var img = s.imageUrl ? s.imageUrl : '';
+      var statusHtml = s.acceptingRequests
+        ? '<span class="dv-status-badge dv-status-open">Đang nhận</span>'
+        : '<span class="dv-status-badge dv-status-paused">Tạm dừng</span>';
+      var distanceHtml = (s.distanceKm != null) ? ('<span><i class="fa-solid fa-route"></i> ' + s.distanceKm + ' km</span>') : '';
+      card.innerHTML =
+        '<div class="dv-card-img">' + (img ? '<img src="' + img + '" alt="">' : '') + statusHtml + '</div>' +
+        '<div class="dv-card-body">' +
+          '<h3>' + escapeHtml(s.serviceName) + '</h3>' +
+          '<p class="dv-card-facility"><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(s.coSoName) + '</p>' +
+          '<div class="dv-card-meta">' +
+            '<span>' + serviceTypeLabel(s.serviceType) + (s.sportType ? (' · ' + escapeHtml(s.sportType)) : '') + '</span>' +
+            distanceHtml +
+          '</div>' +
+          '<div class="dv-card-meta" style="margin-top:6px;">' +
+            '<span class="dv-price">Từ ' + fmtMoney(s.basePrice) + '</span>' +
+            '<span>~' + s.estimatedMinutes + ' phút</span>' +
+          '</div>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function openDetail(serviceId) {
+    fetch(ctxPath + '/api/customer/dich-vu?action=detail&serviceId=' + serviceId)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data.success) { alert(data.message || 'Không tải được chi tiết dịch vụ.'); return; }
+        renderDetail(data.service);
+        document.getElementById('dvOverlay').classList.add('open');
+        document.getElementById('dvDrawer').classList.add('open');
+        document.getElementById('dvCtaBar').classList.add('open');
+      });
+  }
+
+  function renderDetail(s) {
+    document.getElementById('dvDetailTitle').textContent = s.serviceName;
+    var rows = '';
+    rows += row('Cơ sở', s.coSoName);
+    rows += row('Địa chỉ', s.coSoAddress);
+    if (s.gioMoCua && s.gioDongCua) rows += row('Giờ mở cửa', s.gioMoCua + ' - ' + s.gioDongCua);
+    rows += row('Môn thể thao', s.sportType || '—');
+    rows += row('Giá cơ bản', fmtMoney(s.basePrice) + (s.unit ? ('/' + s.unit) : ''));
+    rows += row('Thời gian thực hiện', '~' + s.estimatedMinutes + ' phút');
+    rows += row('Trạng thái', s.acceptingRequests ? 'Đang nhận yêu cầu' : 'Tạm dừng nhận yêu cầu');
+    if (s.description) rows += row('Mô tả', s.description);
+    if (s.policy) rows += row('Chính sách', s.policy);
+
+    if (s.racketConfig) {
+      var rc = s.racketConfig;
+      rows += '<div style="font-weight:800;color:var(--navy);margin-top:10px;font-size:13px;">Chi tiết căng lưới</div>';
+      if (rc.racketTypes) rows += row('Loại vợt nhận', rc.racketTypes);
+      rows += row('Giá công căng', fmtMoney(rc.stringingPrice));
+      rows += row('Mức căng hỗ trợ', rc.minTension + ' - ' + rc.maxTension + ' ' + rc.tensionUnit);
+      rows += row('Nhận dây khách mang', rc.allowCustomerString ? 'Có' : 'Không');
+      if (rc.oldRacketPolicy) rows += row('Chính sách vợt cũ/hư hỏng', rc.oldRacketPolicy);
+      if (rc.stringBreakPolicy) rows += row('Chính sách dây đứt', rc.stringBreakPolicy);
+      if (s.materials && s.materials.length) {
+        var names = s.materials.map(function(m){ return m.name + ' (' + fmtMoney(m.price) + ')'; }).join(', ');
+        rows += row('Loại dây có thể chọn', names);
+      }
+    }
+
+    document.getElementById('dvDetailBody').innerHTML = rows;
+
+    var ctaBtn = document.getElementById('dvCtaBtn');
+    if (s.acceptingRequests) {
+      ctaBtn.disabled = false;
+      ctaBtn.textContent = 'Gửi yêu cầu dịch vụ';
+      ctaBtn.dataset.serviceId = s.serviceId;
+    } else {
+      ctaBtn.disabled = true;
+      ctaBtn.textContent = 'Dịch vụ tạm dừng nhận yêu cầu';
+    }
+  }
+
+  function row(label, value) {
+    return '<div class="dv-drawer-row"><span>' + label + '</span><span>' + escapeHtml(String(value)) + '</span></div>';
+  }
+
+  function closeDetail() {
+    document.getElementById('dvOverlay').classList.remove('open');
+    document.getElementById('dvDrawer').classList.remove('open');
+    document.getElementById('dvCtaBar').classList.remove('open');
+  }
+
+  function goRequestService() {
+    var id = document.getElementById('dvCtaBtn').dataset.serviceId;
+    // Form đặt dịch vụ (PHẦN 11) thuộc Task 5, chưa triển khai - điều hướng tạm về
+    // trang chi tiết dịch vụ đã mở, không để nút chết (href="#").
+    alert('Chức năng gửi yêu cầu dịch vụ đang được hoàn thiện. Vui lòng quay lại sau.');
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      alert('Trình duyệt không hỗ trợ định vị GPS.');
+      return;
+    }
+    var btn = document.getElementById('dvGpsBtn');
+    btn.classList.add('is-active');
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        currentFilters.lat = pos.coords.latitude;
+        currentFilters.lng = pos.coords.longitude;
+        runSearch();
+      },
+      function() {
+        btn.classList.remove('is-active');
+        alert('Không thể lấy vị trí của bạn. Vui lòng thử lại hoặc tìm theo từ khóa.');
+      }
+    );
+  }
+
+  document.getElementById('dvSearchInput').addEventListener('input', function(e) {
+    currentFilters.q = e.target.value;
+    clearTimeout(window._dvSearchDebounce);
+    window._dvSearchDebounce = setTimeout(runSearch, 300);
+  });
+
+  document.querySelectorAll('.dv-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var isActive = chip.classList.contains('active');
+      document.querySelectorAll('.dv-chip').forEach(function(c){ c.classList.remove('active'); });
+      currentFilters.serviceType = '';
+      currentFilters.sportType = '';
+      currentFilters.acceptingOnly = false;
+      currentFilters.openOnly = false;
+      if (!isActive) {
+        chip.classList.add('active');
+        if (chip.dataset.type) currentFilters.serviceType = chip.dataset.type;
+        if (chip.dataset.sport) currentFilters.sportType = chip.dataset.sport;
+        if (chip.dataset.accepting) currentFilters.acceptingOnly = true;
+        if (chip.dataset.open) currentFilters.openOnly = true;
+      }
+      runSearch();
+    });
+  });
+
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDetail(); });
+
+  runSearch();
+</script>
+
+</body>
+</html>

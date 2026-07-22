@@ -1,5 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ page import="org.example.model.TaiKhoan" %>
+        <%
+            String vsNavPath = request.getRequestURI().substring(request.getContextPath().length());
+            boolean vsNavBanDo = vsNavPath.startsWith("/customer/BanDo.jsp") || vsNavPath.startsWith("/customer/ban-do");
+            boolean vsNavDatSan = vsNavPath.startsWith("/customer/dat-san") || vsNavPath.startsWith("/customer/tim-kiem");
+            boolean vsNavGhepKeo = vsNavPath.startsWith("/customer/ghep-keo");
+            boolean vsNavDichVu = vsNavPath.startsWith("/customer/dich-vu");
+        %>
         <header class="header">
             <div class="top-header">
                 <div class="container">
@@ -10,8 +17,8 @@
                         </a>
 
                         <div class="search-bar">
-                            <form action="#">
-                                <input type="text" placeholder="What are you looking for?">
+                            <form action="${pageContext.request.contextPath}/customer/tim-kiem" method="GET">
+                                <input type="text" name="q" placeholder="Tìm tên sân, cơ sở, địa chỉ..." value="${not empty query ? query : ''}">
                                 <button type="submit"><i class="fas fa-search"></i></button>
                             </form>
                         </div>
@@ -28,9 +35,9 @@
                             </div>
 
                             <div class="action-icons">
-                                <a href="#" class="icon-btn">
+                                <a href="${pageContext.request.contextPath}/customer/gio-hang" class="icon-btn">
                                     <i class="fas fa-shopping-basket"></i>
-                                    <span class="badge">0</span>
+                                    <span class="badge" id="header-cart-badge" style="opacity: 0; transition: opacity 0.2s;">0</span>
                                 </a>
                                 <a href="#" class="icon-btn">
                                     <i class="far fa-heart"></i>
@@ -61,9 +68,10 @@
                     <div class="nav-inner">
                         <nav class="main-nav">
                             <ul>
-                                <li><a href="#" class="nav-category"><i class="fas fa-bars"></i>Bản đồ</a></li>
-                                <li><a href="#">Đặt sân</a></li>
-                                <li><a href="#">Ghép Kèo<span class="hot-badge">HOT</span></a></li>
+                                <li><a href="${pageContext.request.contextPath}/customer/BanDo.jsp" class="nav-category<%= vsNavBanDo ? " nav-active" : "" %>" style="gap: 8px;"><i class="fas fa-map-marked-alt"></i>Bản đồ</a></li>
+                                <li><a href="${pageContext.request.contextPath}/customer/dat-san" class="<%= vsNavDatSan ? "nav-active" : "" %>">Đặt sân</a></li>
+                                <li><a href="${pageContext.request.contextPath}/customer/ghep-keo" class="<%= vsNavGhepKeo ? "nav-active" : "" %>">Ghép Kèo<span class="hot-badge">HOT</span></a></li>
+                                <li><a href="${pageContext.request.contextPath}/customer/dich-vu" class="<%= vsNavDichVu ? "nav-active" : "" %>">Cửa hàng &amp; Dịch vụ</a></li>
                                 <li><a href="#">Tin tức <i class="fas fa-angle-down"></i></a></li>
                                 <li><a href="#">Thẻ thành viên</a></li>
                             </ul>
@@ -72,3 +80,19 @@
                 </div>
             </div>
         </header>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                fetch('${pageContext.request.contextPath}/customer/api/cart-count')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.count !== undefined) {
+                            const badge = document.getElementById('header-cart-badge');
+                            if (badge) {
+                                badge.textContent = data.count;
+                                badge.style.opacity = '1';
+                            }
+                        }
+                    })
+                    .catch(e => console.error("Error loading cart count", e));
+            });
+        </script>
