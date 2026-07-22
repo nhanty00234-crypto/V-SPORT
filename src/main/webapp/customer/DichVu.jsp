@@ -114,6 +114,80 @@
   <button type="button" class="dv-cta-btn" id="dvCtaBtn" onclick="goRequestService()">Gửi yêu cầu dịch vụ</button>
 </div>
 
+<div class="dv-drawer-overlay" id="dvReqOverlay" onclick="closeRequestForm()"></div>
+<div class="dv-drawer" id="dvReqDrawer">
+  <div class="dv-drawer-head">
+    <h3 style="font-weight:800;font-size:17px;color:var(--navy);margin:0;">Gửi yêu cầu dịch vụ</h3>
+    <button type="button" onclick="closeRequestForm()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted-text);">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <form id="dvReqForm" class="dv-drawer-body" style="padding-bottom:110px;" onsubmit="return submitRequestForm(event)">
+    <div>
+      <label class="dv-field-label">Ngày mang đến *</label>
+      <input type="date" id="rq_appointmentDate" required class="dv-input"/>
+    </div>
+    <div>
+      <label class="dv-field-label">Khung giờ mang đến</label>
+      <input type="text" id="rq_dropOffTime" placeholder="VD: 08:00-10:00" class="dv-input"/>
+    </div>
+
+    <div id="rq_racketBlock" style="display:none; display:flex; flex-direction:column; gap:12px;">
+      <div class="dv-grid-2">
+        <div><label class="dv-field-label">Loại vợt</label><input type="text" id="rq_racketType" class="dv-input"/></div>
+        <div><label class="dv-field-label">Thương hiệu</label><input type="text" id="rq_racketBrand" class="dv-input"/></div>
+      </div>
+      <div>
+        <label class="dv-field-label">Mẫu vợt</label><input type="text" id="rq_racketModel" class="dv-input"/>
+      </div>
+      <div>
+        <label class="dv-field-label" id="rq_tensionLabel">Mức căng *</label>
+        <input type="number" step="0.5" id="rq_tensionValue" class="dv-input"/>
+      </div>
+      <div>
+        <label class="dv-field-label">Màu dây (nếu có)</label><input type="text" id="rq_stringColor" class="dv-input"/>
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700; color:var(--navy);">
+        <input type="checkbox" id="rq_customerBringsString" onchange="toggleMaterialSelect()"/> Tôi tự mang dây
+      </label>
+      <div id="rq_materialBlock">
+        <label class="dv-field-label">Chọn loại dây *</label>
+        <select id="rq_materialId" class="dv-input"></select>
+      </div>
+      <div>
+        <label class="dv-field-label">Số lượng vợt *</label>
+        <input type="number" min="1" id="rq_quantity" value="1" class="dv-input"/>
+      </div>
+      <div>
+        <label class="dv-field-label">Ghi chú kỹ thuật</label>
+        <textarea id="rq_technicalNote" rows="2" class="dv-input"></textarea>
+      </div>
+    </div>
+
+    <div>
+      <label class="dv-field-label">Ghi chú cho cơ sở</label>
+      <textarea id="rq_customerNote" rows="2" class="dv-input"></textarea>
+    </div>
+
+    <div id="rq_priceEstimate" style="background:#f8f9fa; border-radius:var(--radius-medium); padding:12px 14px; font-size:13px; color:var(--body-text);">
+      Giá cuối cùng có thể được cơ sở xác nhận lại sau khi kiểm tra tình trạng vợt/dụng cụ.
+      Hình thức thanh toán: <b>Thanh toán tại cơ sở</b>.
+    </div>
+
+    <div id="rq_error" style="color:#c0392b; font-size:13px; display:none;"></div>
+  </form>
+  <div class="dv-cta-bar open" style="position:absolute; bottom:0;">
+    <button type="submit" form="dvReqForm" class="dv-cta-btn" id="rq_submitBtn">Xác nhận gửi yêu cầu</button>
+  </div>
+</div>
+
+<style>
+  .dv-field-label { font-size:12px; font-weight:700; color:var(--body-text); margin-bottom:4px; display:block; }
+  .dv-input { width:100%; border:1px solid var(--border); border-radius:10px; padding:9px 11px; font-size:13.5px; outline:none; }
+  .dv-input:focus { border-color: var(--primary); }
+  .dv-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+</style>
+
 <script>
   var ctxPath = '${ctx}';
   var currentFilters = { q: '', serviceType: '', sportType: '', acceptingOnly: false, openOnly: false, lat: null, lng: null };
@@ -215,7 +289,10 @@
       });
   }
 
+  var currentDetail = null;
+
   function renderDetail(s) {
+    currentDetail = s;
     document.getElementById('dvDetailTitle').textContent = s.serviceName;
     var rows = '';
     rows += row('Cơ sở', s.coSoName);
@@ -267,10 +344,109 @@
   }
 
   function goRequestService() {
-    var id = document.getElementById('dvCtaBtn').dataset.serviceId;
-    // Form đặt dịch vụ (PHẦN 11) thuộc Task 5, chưa triển khai - điều hướng tạm về
-    // trang chi tiết dịch vụ đã mở, không để nút chết (href="#").
-    alert('Chức năng gửi yêu cầu dịch vụ đang được hoàn thiện. Vui lòng quay lại sau.');
+    if (!currentDetail) return;
+    var form = document.getElementById('dvReqForm');
+    form.reset();
+    document.getElementById('rq_error').style.display = 'none';
+
+    var todayStr = new Date().toISOString().slice(0, 10);
+    document.getElementById('rq_appointmentDate').min = todayStr;
+    document.getElementById('rq_appointmentDate').value = todayStr;
+
+    var isRacket = !!currentDetail.racketConfig;
+    document.getElementById('rq_racketBlock').style.display = isRacket ? 'flex' : 'none';
+
+    if (isRacket) {
+      var rc = currentDetail.racketConfig;
+      document.getElementById('rq_tensionLabel').textContent =
+        'Mức căng * (' + rc.minTension + ' - ' + rc.maxTension + ' ' + rc.tensionUnit + ')';
+      document.getElementById('rq_tensionValue').min = rc.minTension;
+      document.getElementById('rq_tensionValue').max = rc.maxTension;
+      document.getElementById('rq_tensionValue').required = true;
+
+      var sel = document.getElementById('rq_materialId');
+      sel.innerHTML = '';
+      (currentDetail.materials || []).forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m.materialId;
+        opt.textContent = m.name + (m.brand ? (' - ' + m.brand) : '') + ' (' + fmtMoney(m.price + m.extraFee) + ')';
+        sel.appendChild(opt);
+      });
+      document.getElementById('rq_customerBringsString').checked = false;
+      toggleMaterialSelect();
+      if (!rc.allowCustomerString) {
+        document.getElementById('rq_customerBringsString').closest('label').style.display = 'none';
+      }
+    }
+
+    document.getElementById('dvReqOverlay').classList.add('open');
+    document.getElementById('dvReqDrawer').classList.add('open');
+  }
+
+  function toggleMaterialSelect() {
+    var brings = document.getElementById('rq_customerBringsString').checked;
+    document.getElementById('rq_materialBlock').style.display = brings ? 'none' : 'block';
+  }
+
+  function closeRequestForm() {
+    document.getElementById('dvReqOverlay').classList.remove('open');
+    document.getElementById('dvReqDrawer').classList.remove('open');
+  }
+
+  function submitRequestForm(evt) {
+    evt.preventDefault();
+    var errBox = document.getElementById('rq_error');
+    errBox.style.display = 'none';
+
+    var p = new URLSearchParams();
+    p.set('serviceId', currentDetail.serviceId);
+    p.set('appointmentDate', document.getElementById('rq_appointmentDate').value);
+    p.set('dropOffTime', document.getElementById('rq_dropOffTime').value);
+    p.set('customerNote', document.getElementById('rq_customerNote').value);
+
+    if (currentDetail.racketConfig) {
+      p.set('racketType', document.getElementById('rq_racketType').value);
+      p.set('racketBrand', document.getElementById('rq_racketBrand').value);
+      p.set('racketModel', document.getElementById('rq_racketModel').value);
+      p.set('tensionValue', document.getElementById('rq_tensionValue').value);
+      p.set('tensionUnit', currentDetail.racketConfig.tensionUnit);
+      p.set('stringColor', document.getElementById('rq_stringColor').value);
+      p.set('quantity', document.getElementById('rq_quantity').value || '1');
+      p.set('technicalNote', document.getElementById('rq_technicalNote').value);
+      var brings = document.getElementById('rq_customerBringsString').checked;
+      p.set('customerBringsString', brings ? '1' : '0');
+      if (!brings) p.set('materialId', document.getElementById('rq_materialId').value);
+    }
+
+    var btn = document.getElementById('rq_submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Đang gửi...';
+
+    fetch(ctxPath + '/api/customer/dich-vu/dat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: p.toString()
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        btn.disabled = false;
+        btn.textContent = 'Xác nhận gửi yêu cầu';
+        if (data.success) {
+          closeRequestForm();
+          closeDetail();
+          alert('Đã gửi yêu cầu dịch vụ #' + data.orderId + '. Giá dự kiến: ' + fmtMoney(data.estimatedPrice) + '. Bạn có thể theo dõi trạng thái trong "Đơn dịch vụ của tôi".');
+        } else {
+          errBox.textContent = data.message || 'Không thể gửi yêu cầu.';
+          errBox.style.display = 'block';
+        }
+      })
+      .catch(function(){
+        btn.disabled = false;
+        btn.textContent = 'Xác nhận gửi yêu cầu';
+        errBox.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+        errBox.style.display = 'block';
+      });
+    return false;
   }
 
   function useMyLocation() {
@@ -318,7 +494,7 @@
     });
   });
 
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDetail(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeRequestForm(); closeDetail(); } });
 
   runSearch();
 </script>
