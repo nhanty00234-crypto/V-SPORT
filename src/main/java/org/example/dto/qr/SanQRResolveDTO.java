@@ -16,19 +16,31 @@ public final class SanQRResolveDTO {
     private final String tenSan;
     private final String tenMonTheThao;
     private final boolean available;
+    private final Integer sanId;
 
     private SanQRResolveDTO(String resultCode, String message, String tenCoSo,
                              String tenSan, String tenMonTheThao, boolean available) {
+        this(resultCode, message, tenCoSo, tenSan, tenMonTheThao, available, null);
+    }
+
+    private SanQRResolveDTO(String resultCode, String message, String tenCoSo,
+                             String tenSan, String tenMonTheThao, boolean available, Integer sanId) {
         this.resultCode = resultCode;
         this.message = message;
         this.tenCoSo = tenCoSo;
         this.tenSan = tenSan;
         this.tenMonTheThao = tenMonTheThao;
         this.available = available;
+        this.sanId = sanId;
     }
 
     public static SanQRResolveDTO ok(String tenCoSo, String tenSan, String tenMonTheThao) {
         return new SanQRResolveDTO("OK", "Mã hợp lệ.", tenCoSo, tenSan, tenMonTheThao, true);
+    }
+
+    /** Như {@link #ok}, nhưng có thêm sanId cho các use case cần gọi API tiếp theo (VD: QR-03A) - vẫn không lộ CoSoID/token. */
+    public static SanQRResolveDTO okWithSanId(String tenCoSo, String tenSan, String tenMonTheThao, Integer sanId) {
+        return new SanQRResolveDTO("OK", "Mã hợp lệ.", tenCoSo, tenSan, tenMonTheThao, true, sanId);
     }
 
     public static SanQRResolveDTO notFound() {
@@ -53,4 +65,5 @@ public final class SanQRResolveDTO {
     public String getTenSan() { return tenSan; }
     public String getTenMonTheThao() { return tenMonTheThao; }
     public boolean isAvailable() { return available; }
+    public Integer getSanId() { return sanId; }
 }

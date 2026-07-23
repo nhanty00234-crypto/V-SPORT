@@ -427,7 +427,7 @@ public class SanQRService {
         }
 
         return new PublicResolveResult(ResolveOutcome.OK,
-                SanQRResolveDTO.ok(tenCoSo, san.getTenSan(), tenMonTheThao));
+                SanQRResolveDTO.okWithSanId(tenCoSo, san.getTenSan(), tenMonTheThao, san.getSanID()));
     }
 
     /**
