@@ -130,7 +130,6 @@
         <a href="${pageContext.request.contextPath}/customer/dich-vu-cua-toi" class="menu-item active"><i class="fas fa-screwdriver-wrench"></i> Dịch vụ của tôi</a>
         <a href="${pageContext.request.contextPath}/customer/doi-nhom" class="menu-item"><i class="fas fa-users"></i> Nhóm của tôi</a>
         <a href="${pageContext.request.contextPath}/customer/doi-mat-khau" class="menu-item"><i class="fas fa-lock"></i> Đổi mật khẩu</a>
-        <a href="${pageContext.request.contextPath}/customer/notification-settings" class="menu-item"><i class="fas fa-bell"></i> Cài đặt thông báo</a>
         <a href="${pageContext.request.contextPath}/logout" class="menu-item danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
       </div>
     </aside>

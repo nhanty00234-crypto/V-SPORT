@@ -55,7 +55,7 @@
                                     <%-- Nút thông báo ghép kèo --%>
                                     <div class="vs-notif-wrap" id="vsNotifWrap">
                                         <button type="button" class="icon-btn vs-notif-btn" id="vsNotifBtn" aria-label="Thông báo" aria-expanded="false" aria-controls="vsNotifDropdown">
-                                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                                             <span class="vs-notif-badge" id="vsNotifBadge" style="opacity:0;transition:opacity .2s;">0</span>
                                         </button>
                                         <div class="vs-notif-dropdown" id="vsNotifDropdown" role="dialog" aria-label="Thông báo ghép kèo" hidden>
@@ -185,8 +185,9 @@
             .vs-notif-btn:focus { outline: none !important; box-shadow: none !important; }
             .vs-notif-badge {
                 position: absolute !important;
-                top: -4px !important;
-                right: -4px !important;
+                top: -2px !important;
+                right: -2px !important;
+                z-index: 2;
                 min-width: 18px !important;
                 height: 18px !important;
                 padding: 0 5px !important;
@@ -200,6 +201,8 @@
                 justify-content: center;
                 pointer-events: none;
                 line-height: 1;
+                box-shadow: 0 0 0 2px rgba(13,61,36,.9);
+                white-space: nowrap;
             }
             .vs-notif-dropdown {
                 position: absolute;
@@ -413,7 +416,10 @@
                 if (!btn || !dropdown) return; // chỉ chạy khi đã đăng nhập
 
                 var notifications = []; // {id, tenNguoiChoi, tenKeo, keoId, thoiGian, isUnread}
-                var seenIds = JSON.parse(localStorage.getItem('vsNotifSeen') || '[]');
+                // Chỉ lưu ID lớn nhất từng xem (không phải danh sách ID lẻ) — tránh việc lần đầu
+                // mở trên trình duyệt/máy mới bị tính TOÀN BỘ 30 thông báo gần nhất là "chưa đọc"
+                // (kể cả những cái rất cũ), khiến badge hiện số lớn bất thường.
+                var lastSeenId = parseInt(localStorage.getItem('vsNotifLastSeenId') || '0', 10) || 0;
                 var isOpen = false;
 
                 function getInitials(name) {
@@ -490,9 +496,9 @@
                 if (clearBtn) {
                     clearBtn.addEventListener('click', function() {
                         notifications.forEach(function(n){ n.isUnread = false; });
-                        var ids = notifications.map(function(n){return n.id;});
-                        localStorage.setItem('vsNotifSeen', JSON.stringify(ids));
-                        seenIds = ids;
+                        var maxId = notifications.reduce(function(max, n){ return Math.max(max, n.rawId || 0); }, lastSeenId);
+                        localStorage.setItem('vsNotifLastSeenId', String(maxId));
+                        lastSeenId = maxId;
                         updateBadge();
                         renderNotifications();
                     });
@@ -506,16 +512,27 @@
                         .then(function(data) {
                             if (!data.success) return;
                             var items = data.notifications || [];
-                            var refreshedSeenIds = JSON.parse(localStorage.getItem('vsNotifSeen') || '[]');
+                            var refreshedLastSeenId = parseInt(localStorage.getItem('vsNotifLastSeenId') || '0', 10) || 0;
+                            var maxIdInBatch = items.reduce(function(max, n){ return Math.max(max, n.id || 0); }, 0);
+                            // Lần đầu tiên trên trình duyệt này (chưa từng lưu vsNotifLastSeenId): coi toàn bộ
+                            // thông báo hiện có là "đã đọc" ngay, tránh badge nhảy lên một số lớn bất thường
+                            // (ví dụ 20-30) chỉ vì đây là lượt tải đầu tiên. Chỉ những gì phát sinh SAU mốc
+                            // này mới được tính là chưa đọc.
+                            var isFirstLoad = localStorage.getItem('vsNotifLastSeenId') === null;
+                            if (isFirstLoad && maxIdInBatch > 0) {
+                                localStorage.setItem('vsNotifLastSeenId', String(maxIdInBatch));
+                                refreshedLastSeenId = maxIdInBatch;
+                            }
+                            lastSeenId = refreshedLastSeenId;
                             notifications = items.map(function(n) {
-                                var uniqueId = n.id + '_' + n.trangThai;
                                 return {
-                                    id: uniqueId,
+                                    id: n.id + '_' + n.trangThai,
+                                    rawId: n.id,
                                     tenNguoiChoi: n.tenNguoiChoi,
                                     keoId: n.keoId,
                                     trangThai: n.trangThai,
                                     thoiGian: n.thoiGian,
-                                    isUnread: refreshedSeenIds.indexOf(uniqueId) === -1
+                                    isUnread: n.id > refreshedLastSeenId
                                 };
                             });
                             updateBadge();
