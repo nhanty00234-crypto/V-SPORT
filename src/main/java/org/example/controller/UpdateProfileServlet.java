@@ -188,12 +188,10 @@ public class UpdateProfileServlet extends HttpServlet {
                         final String targetName = fullName;
                         new Thread(() -> {
                             try {
-                                EmailUtil.sendEmail(
+                                EmailUtil.sendHtmlEmail(
                                         targetEmail,
-                                        "Xác thực thay đổi email V-SPORT",
-                                        "Chào " + targetName + ",\n\n"
-                                                + "Mã OTP xác thực thay đổi email của bạn là: " + otp + "\n"
-                                                + "Mã có hiệu lực trong 5 phút. Nếu bạn không yêu cầu thao tác này, vui lòng bỏ qua email."
+                                        "V-SPORT — Xác thực thay đổi email",
+                                        org.example.util.EmailTemplates.otpDoiEmail(targetName, otp)
                                 );
                             } catch (Exception e) {
                                 logger.error("Lỗi gửi OTP đổi email đến {}: {}", targetEmail, e.getMessage(), e);

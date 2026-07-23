@@ -217,7 +217,7 @@ public class TeamMatchServlet extends HttpServlet {
     private TaiKhoan requireCustomer(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         TaiKhoan user = session != null ? (TaiKhoan) session.getAttribute("user") : null;
-        if (user == null) { resp.sendRedirect(req.getContextPath() + "/dangnhap"); return null; }
+        if (user == null) { resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : ""))); return null; }
         if (user.getRoleId() != RoleRedirectUtil.ROLE_CUSTOMER) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Trang này chỉ dành cho tài khoản Khách hàng.");
             return null;

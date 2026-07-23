@@ -27,4 +27,18 @@ public class RoleRedirectUtil {
     public static boolean isStaff(int roleId) {
         return roleId == ROLE_LETÂN || roleId == ROLE_BAOVE;
     }
+
+    /**
+     * Đường dẫn "/dangnhap?redirect=..." dùng để đá khách chưa đăng nhập về trang login,
+     * kèm đích quay lại sau khi đăng nhập thành công (đọc lại bởi DangNhapServlet).
+     * requestURIWithQuery nên là req.getRequestURI() + (queryString != null ? "?"+queryString : "").
+     */
+    public static String buildLoginRedirect(String contextPath, String requestUriWithQuery) {
+        String path = requestUriWithQuery;
+        if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
+            path = path.substring(contextPath.length());
+        }
+        String encoded = java.net.URLEncoder.encode(path, java.nio.charset.StandardCharsets.UTF_8);
+        return contextPath + "/dangnhap?redirect=" + encoded;
+    }
 }

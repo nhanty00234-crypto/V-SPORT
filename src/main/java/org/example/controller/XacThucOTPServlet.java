@@ -277,12 +277,8 @@ public class XacThucOTPServlet extends HttpServlet {
                 final String finalPwd = rawPwd != null ? rawPwd : "(đã được thiết lập)";
                 new Thread(() -> {
                     try {
-                        org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT",
-                            "Chào " + finalName + ",\n\n" +
-                            "Tài khoản nhân viên của bạn đã được tạo bởi Quản lý.\n" +
-                            "Tên đăng nhập: " + finalUsername + "\n" +
-                            "Mật khẩu: " + finalPwd + "\n\n" +
-                            "Vui lòng đăng nhập và đổi mật khẩu ngay sau lần đầu tiên.");
+                        org.example.util.EmailUtil.sendHtmlEmail(finalEmail, "V-SPORT — Kích hoạt tài khoản",
+                            org.example.util.EmailTemplates.kichHoatNhanVien(finalName, finalUsername, finalPwd, null));
                     } catch (Exception ignored) {}
                 }).start();
 
@@ -499,11 +495,9 @@ public class XacThucOTPServlet extends HttpServlet {
         // Gửi ĐỒNG BỘ mã mới; chỉ vô hiệu mã cũ khi email đi thành công.
         String newOtp = org.example.service.reset.ResetSecurityUtil.generateOtp();
         try {
-            org.example.util.EmailUtil.sendEmail(challenge.getAccountEmail(),
-                    "V-SPORT — Mã xác thực đặt lại mật khẩu",
-                    "Mã xác thực đặt lại mật khẩu V-SPORT mới của bạn là: " + newOtp + "\n\n"
-                    + "Mã có hiệu lực trong 10 phút và chỉ dùng được một lần.\n"
-                    + "Nếu bạn không yêu cầu, vui lòng bỏ qua email này.");
+            org.example.util.EmailUtil.sendHtmlEmail(challenge.getAccountEmail(),
+                    "V-SPORT — Đặt lại mật khẩu",
+                    org.example.util.EmailTemplates.otpQuenMatKhau(challenge.getAccountEmail(), newOtp));
         } catch (Exception e) {
             org.apache.logging.log4j.LogManager.getLogger(XacThucOTPServlet.class)
                     .error("Lỗi gửi lại email đặt lại mật khẩu: {}", e.getMessage());

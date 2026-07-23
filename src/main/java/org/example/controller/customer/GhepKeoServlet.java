@@ -124,7 +124,7 @@ public class GhepKeoServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         TaiKhoan user = session != null ? (TaiKhoan) session.getAttribute("user") : null;
         if (user == null) {
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
         if (user.getRoleId() != RoleRedirectUtil.ROLE_CUSTOMER) {
@@ -153,9 +153,13 @@ public class GhepKeoServlet extends HttpServlet {
     private void handleCreateForm(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
-        if (user == null) { resp.sendRedirect(req.getContextPath() + "/dangnhap"); return; }
-
         boolean isJson = wantsJson(req);
+        if (user == null) {
+            if (isJson) { writeJson(resp, 401, Map.of("success", false, "error", "Vui lòng đăng nhập.")); return; }
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
+            return;
+        }
+
         GhepKeoService.CreateRequest cr = new GhepKeoService.CreateRequest();
         cr.accountId = user.getAccountId();
         cr.datSanId = parseIntOr(req.getParameter("datSanId"), 0);

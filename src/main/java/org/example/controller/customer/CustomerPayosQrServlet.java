@@ -52,7 +52,7 @@ public class CustomerPayosQrServlet extends HttpServlet {
 
         if (user == null) {
             if (isImage) { resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED); return; }
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
 

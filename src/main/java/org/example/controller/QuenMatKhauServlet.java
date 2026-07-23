@@ -15,6 +15,7 @@ import org.example.service.reset.PasswordResetChallenge;
 import org.example.service.reset.ResetSecurityUtil;
 import org.example.service.reset.SimpleRateLimiter;
 import org.example.util.AuthPortalPolicy;
+import org.example.util.EmailTemplates;
 import org.example.util.EmailUtil;
 import org.example.util.PhoneUtil;
 import org.example.util.ValidationUtil;
@@ -192,12 +193,8 @@ public class QuenMatKhauServlet extends HttpServlet {
 
     /** Gửi OTP qua EmailUtil hiện có — ĐỒNG BỘ, ném exception khi gửi thất bại. */
     private void sendResetEmail(String email, String fullName, String otp) throws Exception {
-        EmailUtil.sendEmail(email, "V-SPORT — Mã xác thực đặt lại mật khẩu",
-                "Chào " + fullName + ",\n\n"
-                + "Mã xác thực đặt lại mật khẩu V-SPORT của bạn là: " + otp + "\n\n"
-                + "Mã có hiệu lực trong 10 phút và chỉ dùng được một lần.\n"
-                + "Không chia sẻ mã này với bất kỳ ai, kể cả nhân viên V-SPORT.\n\n"
-                + "Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.");
+        EmailUtil.sendHtmlEmail(email, "V-SPORT — Đặt lại mật khẩu",
+                EmailTemplates.otpQuenMatKhau(fullName, otp));
     }
 
     private static String trim(String s) {

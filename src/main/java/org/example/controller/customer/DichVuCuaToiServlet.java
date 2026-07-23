@@ -20,7 +20,7 @@ public class DichVuCuaToiServlet extends HttpServlet {
         TaiKhoan sessionUser = session != null ? (TaiKhoan) session.getAttribute("user") : null;
 
         if (sessionUser == null) {
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
         if (sessionUser.getRoleId() != RoleRedirectUtil.ROLE_CUSTOMER) {

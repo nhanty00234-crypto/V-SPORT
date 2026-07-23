@@ -226,7 +226,8 @@
       <c:otherwise>
         <c:forEach var="log" items="${logs}" varStatus="st">
           <c:set var="delay" value="${st.index < 8 ? st.index : 7}"/>
-          <div class="log-card reveal d${delay} p-4 md:p-5 flex flex-col md:flex-row md:items-start gap-4 hover:border-zinc-350">
+          <div class="log-card log-row-anim d${delay} p-4 md:p-5 flex flex-col md:flex-row md:items-start gap-4 hover:border-zinc-350 relative overflow-hidden">
+            <span class="log-border-accent"></span>
             
             <!-- Column 1: Actor Avatar & Info -->
             <div class="flex items-center md:items-start gap-3 w-full md:w-52 shrink-0 border-b md:border-b-0 pb-3 md:pb-0 border-zinc-100">
@@ -327,7 +328,7 @@
 
             <!-- Column 3: Metadata (IP Address) -->
             <div class="shrink-0 flex items-center md:items-start md:flex-col justify-between md:justify-start gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-50">
-              <span class="text-[11px] font-mono text-zinc-400 bg-zinc-100 border border-zinc-200/60 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              <span class="log-ip-badge text-[11px] font-mono text-zinc-400 bg-zinc-100 border border-zinc-200/60 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
                 <i class="ti ti-device-desktop text-sm"></i> IP: <c:out value="${log.ipAddress}"/>
               </span>
             </div>

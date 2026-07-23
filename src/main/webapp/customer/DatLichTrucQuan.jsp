@@ -25,6 +25,9 @@
             --ttv-row-h: 40px;
             --ttv-head-h: 30px;
             --ttv-court-col: 150px;
+            /* Nền tối chủ đạo của trang này: xanh lá đậm (thay cho navy) — tách biệt với
+               --primary (xanh lá sáng, dùng cho ô "Đang chọn"/nút CTA) để không bị trùng màu. */
+            --ttv-header-bg: #0d3d24;
         }
         @media (max-width: 767px) {
             :root { --ttv-court-col: 122px; --ttv-slot-w: 46px; --ttv-row-h: 38px; }
@@ -41,7 +44,7 @@
         }
 
         /* ============ Header navy (compact, 2 tầng, cao ~110px) ============ */
-        .ttv-header { background: var(--navy); color: var(--surface); }
+        .ttv-header { background: var(--ttv-header-bg); color: var(--surface); }
         .ttv-header-top {
             display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
             gap: 10px; padding: 14px 12px 8px; min-height: 64px;
@@ -60,6 +63,9 @@
             font-family: 'Inter', 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 15px; font-weight: 700; margin: 0; line-height: 1.25; text-align: center;
             letter-spacing: 0; text-transform: none; white-space: nowrap;
+            /* xtra-head.jsp có rule "h1,h2,... { color: var(--heading) }" (gần đen) áp trực
+               tiếp lên thẻ h1 này, đè mất màu trắng kế thừa từ .ttv-header — set lại rõ ràng. */
+            color: var(--surface);
         }
         @media (min-width: 768px) { .ttv-title { font-size: 16px; } }
         .ttv-title small { display: block; font-size: 11px; font-weight: 500; color: #c5c9b0; opacity: .72; letter-spacing: 0; text-transform: none; }
@@ -191,7 +197,7 @@
 
         /* ============ Footer cố định: Tổng giờ / Tổng tiền + CTA lớn ============ */
         .ttv-summary {
-            background: var(--navy); color: var(--surface);
+            background: var(--ttv-header-bg); color: var(--surface);
             box-shadow: 0 -8px 24px rgba(7,26,47,.24);
             padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
         }
@@ -227,7 +233,7 @@
         /* ============ Toast ============ */
         .ttv-inline-alert {
             position: fixed; left: 50%; bottom: 118px; transform: translateX(-50%);
-            background: var(--navy); color: var(--surface); padding: 10px 16px; border-radius: 999px;
+            background: var(--ttv-header-bg); color: var(--surface); padding: 10px 16px; border-radius: 999px;
             font-size: 13px; font-weight: 700; box-shadow: 0 12px 30px rgba(0,0,0,.32);
             opacity: 0; visibility: hidden; transition: opacity .18s ease;
             z-index: 60; max-width: 92vw; text-align: center;

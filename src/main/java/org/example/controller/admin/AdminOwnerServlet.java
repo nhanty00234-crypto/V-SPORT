@@ -272,14 +272,9 @@ public class AdminOwnerServlet extends HttpServlet {
         final String name  = account.getFullName();
         new Thread(() -> {
             try {
-                EmailUtil.sendEmail(email,
-                    "Tài khoản đối tác V-SPORT đã được phê duyệt",
-                    "Chào " + name + ",\n\n" +
-                    "Cơ sở thể thao của bạn đã được quản trị viên phê duyệt thành công.\n" +
-                    "Bạn có thể đăng nhập tại: http://localhost:8080/Backend_java\n" +
-                    "  - Email: " + email + "\n" +
-                    "  - Mật khẩu mặc định: 123456\n\n" +
-                    "Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu.\n\nTrân trọng,\nBan quản trị V-SPORT");
+                EmailUtil.sendHtmlEmail(email,
+                    "V-SPORT — Tài khoản đối tác được phê duyệt",
+                    org.example.util.EmailTemplates.pheQuyetDoiTac(name, email, null));
             } catch (Exception e) {
                 logger.error("Lỗi gửi email phê duyệt tới {}", email, e);
             }
@@ -341,12 +336,9 @@ public class AdminOwnerServlet extends HttpServlet {
         final String name = account.getFullName();
         new Thread(() -> {
             try {
-                EmailUtil.sendEmail(email,
-                    "Yêu cầu đăng ký đối tác V-SPORT đã bị từ chối",
-                    "Chào " + name + ",\n\n" +
-                    "Chúng tôi rất tiếc phải thông báo rằng yêu cầu đăng ký cơ sở \"" + coSoName + "\" của bạn đã bị từ chối bởi ban quản trị.\n" +
-                    "Bạn vẫn có thể đăng ký lại cơ sở mới với email này khi sẵn sàng.\n\n" +
-                    "Trân trọng,\nBan quản trị V-SPORT");
+                EmailUtil.sendHtmlEmail(email,
+                    "V-SPORT — Kết quả xét duyệt đối tác",
+                    org.example.util.EmailTemplates.tuChoiDoiTac(name, coSoName));
             } catch (Exception e) {
                 logger.error("Lỗi gửi email từ chối tới {}", email, e);
             }

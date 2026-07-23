@@ -614,12 +614,22 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transition: var(--transition);
             z-index: 1;
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.3s ease;
         }
-        
-        .promo-banner:hover {
-            transform: translateY(-5px);
+
+        /* Curtain: odd banners slide from left, even from right */
+        .promo-banner:nth-child(odd)  { transform: translateX(-80px); }
+        .promo-banner:nth-child(even) { transform: translateX(80px); }
+
+        .promo-banner.visible {
+            opacity: 1;
+            transform: translateX(0) !important;
+        }
+
+        .promo-banner.visible:hover {
+            transform: translateY(-5px) !important;
             box-shadow: var(--shadow-medium);
         }
         
@@ -639,20 +649,27 @@
         .banner-content {
             position: relative;
             z-index: 2;
-            max-width: 60%;
+            max-width: 62%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .banner-discount {
             font-family: 'Outfit', sans-serif;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.9;
         }
 
         .promo-banner h3 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            line-height: 1.1;
+            font-size: 20px;
+            margin-bottom: 18px;
+            line-height: 1.25;
+            font-weight: 700;
         }
 
         .banner-image {
@@ -663,21 +680,25 @@
             z-index: 1;
             transition: var(--transition);
         }
-        
+
         .promo-banner:hover .banner-image {
             transform: scale(1.05);
         }
-        
+
         .btn-banner {
             background: var(--navy);
             color: white;
-            padding: 10px 20px;
+            padding: 9px 18px;
             border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            width: fit-content;
         }
-        
+
         .banner-navy .btn-banner {
             background: var(--primary);
         }
@@ -705,28 +726,56 @@
             align-items: center;
             justify-content: center;
             height: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .category-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.25s, box-shadow 0.25s;
         }
 
         .category-card:hover {
             border-color: var(--primary);
             box-shadow: var(--shadow-medium);
-            transform: translateY(-5px);
+            transform: translateY(-6px) !important;
         }
 
         .category-icon {
-            font-size: 40px;
-            color: var(--primary);
-            margin-bottom: 20px;
-            transition: var(--transition);
-        }
-        
-        .category-card:hover .category-icon {
-            transform: scale(1.1);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 18px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
+        .category-card:hover .category-icon {
+            transform: scale(1.12) rotate(-5deg);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Per-sport icon colors */
+        .cat-football   .category-icon { background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff; }
+        .cat-badminton  .category-icon { background: linear-gradient(135deg,#f59e0b,#d97706); color:#fff; }
+        .cat-pickleball .category-icon { background: linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; }
+        .cat-tennis     .category-icon { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+        .cat-basketball .category-icon { background: linear-gradient(135deg,#f97316,#ea580c); color:#fff; }
+        .cat-gym        .category-icon { background: linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; }
+
         .category-card h4 {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0;
+            font-weight: 600;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         /* Products */
@@ -967,7 +1016,7 @@
 
         .app-content {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             max-width: 500px;
         }
         
@@ -1025,7 +1074,7 @@
             position: absolute;
             right: 50px;
             bottom: -50px;
-            z-index: 2;
+            z-index: 3;
             width: 500px;
         }
 
@@ -1967,5 +2016,219 @@
                 text-align: center;
             }
         }
+        /* ================================================================
+           V-SPORT ANIMATION SYSTEM
+        ================================================================ */
+
+        /* ── Shared easing & keyframes ─────────────────────────────── */
+        :root {
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes fadeSlideUp   { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeScaleIn   { from { opacity:0; transform:scale(0.95); }      to { opacity:1; transform:scale(1); } }
+        @keyframes shimmer       { 0%{left:-100%;} 100%{left:200%;} }
+        @keyframes floatPulse    { 0%,100%{transform:translateY(0); box-shadow:0 6px 18px rgba(0,230,118,.35);} 50%{transform:translateY(-4px); box-shadow:0 12px 28px rgba(0,230,118,.5);} }
+        @keyframes iconBounce    { 0%,100%{transform:scale(1);} 50%{transform:scale(1.18);} }
+        @keyframes badgePulse    { 0%,100%{opacity:1;} 50%{opacity:.7;} }
+
+        /* ── 1. HERO ────────────────────────────────────────────────── */
+        .hero-content h1,
+        .hero-content p,
+        .hero-actions { opacity:0; }
+
+        .hero-content h1 { animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.1s forwards; }
+        .hero-content p  { animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.25s forwards; }
+        .hero-actions     { animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.4s forwards; }
+
+        .hero-image img {
+            animation: fadeScaleIn 1s var(--ease-out-expo) 0.2s both;
+            transition: transform 0.4s ease;
+            border-radius: 20px;
+        }
+        .hero-image:hover img { transform: scale(1.02); }
+
+        /* CTA glow on hover */
+        .hero-actions .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(0,230,118,.32);
+        }
+        .hero-actions .btn-outline:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.1);
+        }
+
+        /* ── Benefit bar stagger ────────────────────────────────────── */
+        .benefit-item {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+        }
+        .benefit-item.visible { opacity:1; transform:translateY(0); }
+        .benefit-item:hover .benefit-icon i {
+            transform: scale(1.12) rotate(6deg);
+            transition: transform 0.3s var(--ease-spring);
+        }
+        .benefit-item:hover { background: rgba(255,255,255,.6); border-radius: 12px; }
+
+        /* ── 2. CATEGORY cards (extend existing) ───────────────────── */
+        .category-card:hover {
+            border-color: #00e676 !important;
+            box-shadow: 0 0 0 2px rgba(0,230,118,.2), var(--shadow-medium) !important;
+        }
+        .category-card:hover .category-icon { animation: iconBounce 0.45s var(--ease-spring); }
+
+        /* ── 3. PRODUCT cards ───────────────────────────────────────── */
+        .product-card {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo),
+                        box-shadow 0.3s ease;
+        }
+        .product-card.visible { opacity:1; transform:translateY(0); }
+        .product-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 15px 32px rgba(0,0,0,.1) !important;
+        }
+        .product-image { overflow: hidden; }
+        .product-image img {
+            transition: transform 0.45s var(--ease-out-expo);
+        }
+        .product-card:hover .product-image img { transform: scale(1.08); }
+
+        /* ── 4. APP / BANNER section ────────────────────────────────── */
+        .mobile-app {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+        }
+        .mobile-app.visible { opacity:1; transform:translateY(0); }
+
+        /* Shimmer sweep on the app banner */
+        .mobile-app::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%; height: 100%;
+            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.12) 50%, transparent 70%);
+            animation: shimmer 3.5s linear infinite;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* App button icon slide on hover */
+        .app-btn i { transition: transform 0.3s var(--ease-spring); }
+        .app-btn:hover i { transform: translateX(4px) scale(1.1); }
+        .app-btn:hover { transform: translateY(-2px); transition: transform 0.3s var(--ease-spring); }
+
+        /* ── Blog cards ─────────────────────────────────────────────── */
+        .blog-card {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+        }
+        .blog-card.visible { opacity:1; transform:translateY(0); }
+        .blog-card:hover { transform: translateY(-4px) !important; box-shadow: 0 12px 28px rgba(0,0,0,.09); }
+
+        .blog-image img { transition: transform 0.45s var(--ease-out-expo); }
+        .blog-card:hover .blog-image img { transform: scale(1.07); }
+
+        .blog-badge { transition: background 0.3s ease, color 0.3s ease; }
+        .blog-card:hover .blog-badge {
+            background: #00e676;
+            color: #003820;
+        }
+
+        /* ── 5. TESTIMONIALS ────────────────────────────────────────── */
+        .review-card {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo),
+                        box-shadow 0.3s ease;
+        }
+        .review-card.visible { opacity:1; transform:translateY(0); }
+        .review-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 14px 30px rgba(0,0,0,.1) !important;
+        }
+
+        /* ── Newsletter ─────────────────────────────────────────────── */
+        .newsletter-form input:focus {
+            outline: none;
+            border-color: #00e676 !important;
+            box-shadow: 0 0 0 3px rgba(0,230,118,.2) !important;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .newsletter-form button:hover {
+            box-shadow: 0 0 0 4px rgba(0,230,118,.3);
+            transform: translateY(-2px);
+            transition: all 0.3s var(--ease-spring);
+        }
+
+        /* ── Scroll-to-top pulse ────────────────────────────────────── */
+        .scroll-top.active {
+            animation: floatPulse 2.4s ease-in-out infinite;
+        }
+        .scroll-top:hover {
+            animation: none;
+            transform: translateY(-4px) !important;
+            box-shadow: 0 12px 28px rgba(0,230,118,.5) !important;
+        }
+
+        /* ── Accessibility ──────────────────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Ripple effect on buttons */
+        .btn, .btn-primary, .btn-outline, .btn-banner, .btn-auth,
+        button:not(.password-toggle):not(.modal-close):not(.prev-blog):not(.next-blog):not(.prev-review):not(.next-review),
+        [class*="btn-"] {
+            position: relative;
+            overflow: hidden;
+        }
+        /* Nút submit trong ô tìm kiếm cần position:absolute để canh giữa theo chiều dọc
+           trong input — ripple rule ở trên set position:relative cho mọi <button>, ghi đè
+           mất absolute này (bug: icon kính lúp rớt xuống dưới thay vì nằm bên trong ô input). */
+        .search-bar button,
+        .mobile-search-form button {
+            position: absolute !important;
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.55s linear;
+            background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+        }
+        @keyframes ripple-effect {
+            to { transform: scale(4); opacity: 0; }
+        }
     </style>
+    <script>
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest(
+                '.btn,.btn-primary,.btn-outline,.btn-banner,.btn-auth,[class*="btn-"],button:not(.password-toggle):not(.modal-close):not(.prev-blog):not(.next-blog):not(.prev-review):not(.next-review)'
+            );
+            if (!btn) return;
+            const circle = document.createElement('span');
+            const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+            const rect = btn.getBoundingClientRect();
+            circle.classList.add('ripple');
+            circle.style.cssText = [
+                'width:' + diameter + 'px',
+                'height:' + diameter + 'px',
+                'left:' + (e.clientX - rect.left - diameter / 2) + 'px',
+                'top:' + (e.clientY - rect.top  - diameter / 2) + 'px'
+            ].join(';');
+            btn.querySelector('.ripple')?.remove();
+            btn.appendChild(circle);
+        });
+    </script>
 </head>

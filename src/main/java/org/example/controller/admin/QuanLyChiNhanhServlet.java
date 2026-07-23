@@ -464,16 +464,10 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
     private void sendApprovalEmail(TaiKhoan account) {
         new Thread(() -> {
             try {
-                EmailUtil.sendEmail(
+                EmailUtil.sendHtmlEmail(
                     account.getEmail(),
-                    "Tài khoản đối tác V-SPORT đã được phê duyệt",
-                    "Chào " + account.getFullName() + ",\n\n" +
-                    "Cơ sở thể thao của bạn đã được quản trị viên phê duyệt thành công.\n" +
-                    "Bạn hiện có thể đăng nhập vào hệ thống quản lý V-SPORT bằng tài khoản sau:\n" +
-                    "- Tên đăng nhập (Email): " + account.getEmail() + "\n" +
-                    "- Mật khẩu mặc định: 123456\n\n" +
-                    "Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu tiên để bảo mật tài khoản.\n\n" +
-                    "Trân trọng,\nBan quản trị V-SPORT"
+                    "V-SPORT — Tài khoản đối tác được phê duyệt",
+                    org.example.util.EmailTemplates.pheQuyetDoiTac(account.getFullName(), account.getEmail(), null)
                 );
             } catch (Exception e) {
                 logger.error("Lỗi gửi email phê duyệt đến {}", account.getEmail(), e);

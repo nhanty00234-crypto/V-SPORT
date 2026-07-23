@@ -262,6 +262,14 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             }
 
             trans.commit();
+            final String welcomeEmail = acc.getEmail();
+            final String welcomeName = acc.getFullName();
+            new Thread(() -> {
+                try {
+                    EmailUtil.sendHtmlEmail(welcomeEmail, "Chào mừng bạn đến với V-SPORT! 🎉",
+                        org.example.util.EmailTemplates.chaoMungDangKy(welcomeName));
+                } catch (Exception ignored) {}
+            }).start();
             return "Đăng ký thành công";
         } catch (Exception e) {
             logger.error("Lỗi đăng ký khách hàng: {}", e.getMessage(), e);
@@ -447,7 +455,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
         String otpString = String.valueOf(otp);
         new Thread(() -> {
             try {
-                EmailUtil.sendEmail(email, "Mã xác thực đăng ký V-SPORT", "Chào " + fullName + ",\n\nMã OTP của bạn là: " + otpString);
+                EmailUtil.sendHtmlEmail(email, "V-SPORT — Mã xác thực đăng ký", org.example.util.EmailTemplates.otpDangKy(fullName, otpString));
             } catch (Exception e) {
                 logger.error("Lỗi gửi email đăng ký OTP đến {}: {}", email, e.getMessage(), e);
             }
@@ -462,7 +470,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
         String otpString = String.valueOf(otp);
         new Thread(() -> {
             try {
-                EmailUtil.sendEmail(email, "Xác thực đặt lại mật khẩu", "Mã OTP của bạn là: " + otpString);
+                EmailUtil.sendHtmlEmail(email, "V-SPORT — Đặt lại mật khẩu", org.example.util.EmailTemplates.otpQuenMatKhau(email, otpString));
             } catch (Exception e) {
                 logger.error("Lỗi gửi email quên mật khẩu OTP đến {}: {}", email, e.getMessage(), e);
             }

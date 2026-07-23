@@ -75,8 +75,21 @@
                                             <%= user.getFullName() %>
                                         </span>
                                     </a>
-                                    <% } else { %>
-                                        <a href="#auth" class="icon-btn" id="authBtn">
+                                    <% } else {
+                                        // Bấm icon tài khoản là hành động CHỦ ĐỘNG của người dùng, không phải bị
+                                        // chặn do thao tác cần đăng nhập — vì vậy dẫn thẳng tới trang chủ mở modal
+                                        // login (auth=login) mà KHÔNG gắn notice=loginRequired, tránh hiện nhầm
+                                        // banner "Vui lòng đăng nhập để tiếp tục thao tác này" trong trường hợp này.
+                                        String currentPath = request.getRequestURI()
+                                                + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+                                        boolean isHomePage = request.getRequestURI().equals(request.getContextPath() + "/index.jsp")
+                                                || request.getRequestURI().equals(request.getContextPath() + "/");
+                                        String authHref = isHomePage
+                                                ? "#auth"
+                                                : request.getContextPath() + "/index.jsp?auth=login&redirect="
+                                                    + java.net.URLEncoder.encode(currentPath, java.nio.charset.StandardCharsets.UTF_8);
+                                    %>
+                                        <a href="<%= authHref %>" class="icon-btn" id="authBtn">
                                             <i class="far fa-user"></i>
                                         </a>
                                         <% } %>

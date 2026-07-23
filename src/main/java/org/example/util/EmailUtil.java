@@ -2,6 +2,8 @@ package org.example.util;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 public class EmailUtil {
@@ -74,6 +76,51 @@ public class EmailUtil {
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress));
         message.setSubject(subject);
         message.setText(body);
+
+        Transport.send(message);
+    }
+
+    public static void sendHtmlEmail(String toAddress, String subject, String htmlBody) throws MessagingException, UnsupportedEncodingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", HOST);
+        props.put("mail.smtp.port", PORT);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.socketFactory.port", PORT);
+        props.put("mail.smtp.socketFactory.class", "jakarta.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+
+        try {
+            Class<?> commandMapClass = Class.forName("jakarta.activation.CommandMap");
+            Class<?> mailcapCommandMapClass = Class.forName("jakarta.activation.MailcapCommandMap");
+            java.lang.reflect.Method getDefaultMethod = commandMapClass.getMethod("getDefaultCommandMap");
+            java.lang.reflect.Method setDefaultMethod = commandMapClass.getMethod("setDefaultCommandMap", commandMapClass);
+            java.lang.reflect.Method addMailcapMethod = mailcapCommandMapClass.getMethod("addMailcap", String.class);
+            Object mc = getDefaultMethod.invoke(null);
+            if (mailcapCommandMapClass.isInstance(mc)) {
+                addMailcapMethod.invoke(mc, "text/html;; x-java-content-handler=org.eclipse.angus.mail.handlers.text_html");
+                addMailcapMethod.invoke(mc, "text/plain;; x-java-content-handler=org.eclipse.angus.mail.handlers.text_plain");
+                addMailcapMethod.invoke(mc, "multipart/*;; x-java-content-handler=org.eclipse.angus.mail.handlers.multipart_mixed");
+                addMailcapMethod.invoke(mc, "message/rfc822;; x-java-content-handler=org.eclipse.angus.mail.handlers.message_rfc822");
+                setDefaultMethod.invoke(null, mc);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to configure MailcapCommandMap: " + e.getMessage());
+        }
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(USERNAME, PASSWORD);
+            }
+        });
+
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(FROM, "V-SPORT", "UTF-8"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress));
+        message.setSubject(subject, "UTF-8");
+        message.setContent(htmlBody, "text/html; charset=UTF-8");
 
         Transport.send(message);
     }

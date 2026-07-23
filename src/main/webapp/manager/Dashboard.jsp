@@ -20,7 +20,7 @@
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
 
   <!-- Welcome banner -->
-  <section class="hero-gradient rounded-2xl border border-purple-150 overflow-hidden relative">
+  <section class="mgr-banner-shimmer rounded-2xl border border-purple-200 overflow-hidden relative">
     <div class="absolute -top-12 -right-12 w-64 h-64 bg-purple-300/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-indigo-300/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="relative p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -63,21 +63,21 @@
 
     <!-- KPI row -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger mb-5">
-      <div class="card card-hover p-5">
+      <div class="card mgr-kpi-hover p-5">
         <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center"><span class="material-symbols-outlined text-[20px] text-purple-700" style="font-variation-settings:'FILL' 1">event</span></div>
+          <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center mgr-kpi-icon"><span class="material-symbols-outlined text-[20px] text-purple-700" style="font-variation-settings:'FILL' 1">event</span></div>
           <span class="flex items-center gap-0.5 text-[11px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md"><span class="material-symbols-outlined text-[12px]">trending_up</span>Hôm nay</span>
         </div>
         <p class="text-xs text-zinc-500 font-medium mb-1">Lịch đặt hôm nay</p>
-        <p class="text-3xl font-black text-purple-950 tracking-tight">${dashboardData.bookingsTodayCount}</p>
+        <p class="text-3xl font-black text-purple-950 tracking-tight" data-mgr-count="${dashboardData.bookingsTodayCount}">${dashboardData.bookingsTodayCount}</p>
         <div class="flex items-center justify-between mt-3 pt-3 border-t border-purple-50">
           <p class="text-[11px] text-zinc-500">Chi nhánh CS${sessionScope.user.coSoId}</p>
           <svg width="50" height="20" viewBox="0 0 50 20" class="text-purple-500"><polyline fill="none" stroke="currentColor" stroke-width="1.5" points="0,15 8,12 16,14 24,8 32,10 40,5 50,8"/><polyline fill="rgba(139,92,246,.1)" stroke="none" points="0,15 8,12 16,14 24,8 32,10 40,5 50,8 50,20 0,20"/></svg>
         </div>
       </div>
-      <div class="card card-hover p-5">
+      <div class="card mgr-kpi-hover p-5">
         <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center"><span class="material-symbols-outlined text-[20px] text-indigo-700" style="font-variation-settings:'FILL' 1">payments</span></div>
+          <div class="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center mgr-kpi-icon"><span class="material-symbols-outlined text-[20px] text-indigo-700" style="font-variation-settings:'FILL' 1">payments</span></div>
           <span class="flex items-center gap-0.5 text-[11px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md"><span class="material-symbols-outlined text-[12px]">trending_up</span>Đã thu</span>
         </div>
         <p class="text-xs text-zinc-500 font-medium mb-1">Doanh thu hôm nay</p>
@@ -89,25 +89,25 @@
           <p class="text-[11px] font-bold text-zinc-700"><fmt:formatNumber value="${dashboardData.totalRevenue}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></p>
         </div>
       </div>
-      <div class="card card-hover p-5">
+      <div class="card mgr-kpi-hover p-5">
         <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-fuchsia-50 flex items-center justify-center"><span class="material-symbols-outlined text-[20px] text-fuchsia-700" style="font-variation-settings:'FILL' 1">stadium</span></div>
+          <div class="w-11 h-11 rounded-xl bg-fuchsia-50 flex items-center justify-center mgr-kpi-icon"><span class="material-symbols-outlined text-[20px] text-fuchsia-700" style="font-variation-settings:'FILL' 1">stadium</span></div>
           <span class="badge badge-purple">Khả dụng</span>
         </div>
         <p class="text-xs text-zinc-500 font-medium mb-1">Sân hoạt động</p>
-        <p class="text-3xl font-black text-purple-950 tracking-tight">${dashboardData.activeFields}<span class="text-lg text-zinc-400">/${dashboardData.totalFields}</span></p>
+        <p class="text-3xl font-black text-purple-950 tracking-tight" data-mgr-count="${dashboardData.activeFields}">${dashboardData.activeFields}<span class="text-lg text-zinc-400">/${dashboardData.totalFields}</span></p>
         <div class="flex items-center justify-between mt-3 pt-3 border-t border-purple-50">
           <p class="text-[11px] text-zinc-500">Tình trạng sẵn sàng</p>
           <div class="flex gap-0.5"><span class="w-1 h-3 rounded-sm bg-purple-400"></span><span class="w-1 h-3 rounded-sm bg-purple-400"></span><span class="w-1 h-3 rounded-sm bg-purple-400"></span><span class="w-1 h-3 rounded-sm bg-purple-400"></span></div>
         </div>
       </div>
-      <div class="card card-hover p-5">
+      <div class="card mgr-kpi-hover p-5">
         <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center"><span class="material-symbols-outlined text-[20px] text-violet-700" style="font-variation-settings:'FILL' 1">groups</span></div>
+          <div class="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center mgr-kpi-icon"><span class="material-symbols-outlined text-[20px] text-violet-700" style="font-variation-settings:'FILL' 1">groups</span></div>
           <span class="badge badge-purple">Nhân sự</span>
         </div>
         <p class="text-xs text-zinc-500 font-medium mb-1">Nhân sự cơ sở</p>
-        <p class="text-3xl font-black text-purple-950 tracking-tight">${dashboardData.totalStaff}</p>
+        <p class="text-3xl font-black text-purple-950 tracking-tight" data-mgr-count="${dashboardData.totalStaff}">${dashboardData.totalStaff}</p>
         <div class="flex items-center justify-between mt-3 pt-3 border-t border-purple-50">
           <p class="text-[11px] text-zinc-500">Hoạt động tại CS${sessionScope.user.coSoId}</p>
           <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block live-dot"></span>
@@ -126,7 +126,7 @@
             </div>
             <a href="${pageContext.request.contextPath}/manager/quan-ly-san" class="text-[11px] font-semibold text-purple-700 hover:underline">Chi tiết sân →</a>
           </div>
-          <div class="divide-y divide-purple-50">
+          <div class="divide-y divide-purple-50 row-stagger">
             <c:if test="${empty dashboardData.todayBookingsList}">
               <div class="p-6 text-center text-zinc-400 text-sm">Chưa có lượt đặt sân nào được đăng ký hôm nay.</div>
             </c:if>
@@ -175,7 +175,7 @@
             <h3 class="text-sm font-bold text-purple-950 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-purple-700">receipt_long</span>Hóa đơn gần đây</h3>
             <span class="badge badge-purple">Mới nhất</span>
           </div>
-          <div class="divide-y divide-purple-50">
+          <div class="divide-y divide-purple-50 row-stagger">
             <c:if test="${empty dashboardData.recentInvoices}">
               <div class="p-6 text-center text-zinc-400 text-sm">Chưa lập hóa đơn nào gần đây.</div>
             </c:if>
@@ -304,7 +304,7 @@
           <h3 class="text-sm font-bold text-purple-950 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-purple-700">stadium</span>Doanh thu theo sân</h3>
           <p class="text-[11px] text-purple-500 mt-0.5">Tháng hiện tại</p>
         </div>
-        <div class="divide-y divide-purple-50">
+        <div class="divide-y divide-purple-50 row-stagger">
           <c:if test="${empty dashboardData.revenueBySan}">
             <div class="p-6 text-center text-zinc-400 text-sm">Chưa có dữ liệu tháng này.</div>
           </c:if>
@@ -387,7 +387,7 @@
           <button onclick="filterReviews('bad')" id="filter-bad" class="review-filter px-3 py-1 text-[11px] font-semibold rounded-md bg-white text-zinc-600 border border-zinc-200 hover:bg-red-50">1-2 sao</button>
         </div>
       </div>
-      <div id="review-list" class="divide-y divide-purple-50">
+      <div id="review-list" class="divide-y divide-purple-50 row-stagger">
         <c:if test="${empty dashboardData.danhGiaList}">
           <div class="p-8 text-center text-zinc-400 text-sm">
             <span class="material-symbols-outlined text-[40px] text-zinc-300 block mb-2">rate_review</span>

@@ -119,7 +119,7 @@ public class DatSanServlet extends HttpServlet {
         // nhưng không thể submit form (nút sẽ chuyển thành "Đăng nhập")
         // Chỉ chặn những trang yêu cầu đăng nhập bắt buộc
         if (user == null && !isBookingPage(path)) {
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
 
@@ -129,7 +129,7 @@ public class DatSanServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/customer/tim-kiem");
         } else if (path.equals("/customer/lich-su-dat-san")) {
             if (user == null) {
-                resp.sendRedirect(req.getContextPath() + "/dangnhap");
+                resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
                 return;
             }
             loadHistoryPage(req, resp, user);
@@ -250,7 +250,7 @@ public class DatSanServlet extends HttpServlet {
 
         // POST luôn yêu cầu đăng nhập
         if (user == null) {
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
 

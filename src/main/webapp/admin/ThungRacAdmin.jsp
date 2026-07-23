@@ -113,31 +113,31 @@
   <c:set var="pendingCount" value="${totalCount - restoredCount}"/>
 
   <section class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-    <div class="summary-tile flex items-center gap-3">
+    <div class="summary-tile trash-tile-anim trash-tile-total flex items-center gap-3">
       <span class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
       </span>
       <div>
         <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Tổng số</p>
-        <p class="text-lg font-black text-purple-950"><c:out value="${totalCount}"/></p>
+        <p class="text-lg font-black text-purple-950" data-count-to="${totalCount}"><c:out value="${totalCount}"/></p>
       </div>
     </div>
-    <div class="summary-tile flex items-center gap-3">
+    <div class="summary-tile trash-tile-anim trash-tile-pending flex items-center gap-3">
       <span class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-[18px]">hourglass_empty</span>
       </span>
       <div>
         <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Chưa thu hồi</p>
-        <p class="text-lg font-black text-amber-600"><c:out value="${pendingCount}"/></p>
+        <p class="text-lg font-black text-amber-600" data-count-to="${pendingCount}"><c:out value="${pendingCount}"/></p>
       </div>
     </div>
-    <div class="summary-tile flex items-center gap-3 col-span-2 sm:col-span-1">
+    <div class="summary-tile trash-tile-anim trash-tile-done flex items-center gap-3 col-span-2 sm:col-span-1">
       <span class="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-[18px]">check_circle</span>
       </span>
       <div>
         <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Đã thu hồi</p>
-        <p class="text-lg font-black text-green-600"><c:out value="${restoredCount}"/></p>
+        <p class="text-lg font-black text-green-600" data-count-to="${restoredCount}"><c:out value="${restoredCount}"/></p>
       </div>
     </div>
   </section>
@@ -212,7 +212,7 @@
             </c:when>
             <c:otherwise>
               <c:forEach var="it" items="${items}">
-                <tr class="border-b border-purple-50 hover:bg-purple-50/30 transition-colors" data-entity-type="${it.entityType}">
+                <tr class="border-b border-purple-50 trash-row-hover" data-entity-type="${it.entityType}">
                   <td class="py-4 pl-5 font-semibold text-purple-950"><c:out value="${it.entityType}"/></td>
                   <td class="py-4 text-zinc-700"><c:out value="${it.displayName}"/></td>
                   <td class="py-4 text-zinc-500"><c:out value="${it.deletedByName}"/></td>
@@ -227,8 +227,8 @@
                     <c:if test="${!it.restored}">
                       <button type="button"
                               onclick="openRestoreModal(${it.trashId}, '${fn:escapeXml(it.displayName)}', '${it.entityType}')"
-                              class="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors ml-auto">
-                        <span class="material-symbols-outlined text-[14px]">settings_backup_restore</span>Thu hồi
+                              class="btn-restore flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold transition-all ml-auto">
+                        <span class="material-symbols-outlined text-[14px] restore-icon">settings_backup_restore</span>Thu hồi
                       </button>
                     </c:if>
                   </td>
