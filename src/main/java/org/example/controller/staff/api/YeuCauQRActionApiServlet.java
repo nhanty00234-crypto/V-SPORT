@@ -37,7 +37,15 @@ public class YeuCauQRActionApiServlet extends HttpServlet {
             return;
         }
         try {
-            int requestId = Integer.parseInt(req.getParameter("requestId"));
+            String requestIdParam = req.getParameter("requestId");
+            if (requestIdParam == null || requestIdParam.isBlank()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.put("success", false);
+                out.put("message", "Dữ liệu không hợp lệ.");
+                resp.getWriter().write(gson.toJson(out));
+                return;
+            }
+            int requestId = Integer.parseInt(requestIdParam);
             String action = req.getParameter("action");
             String newStatus = mapAction(action);
             if (newStatus == null) {
