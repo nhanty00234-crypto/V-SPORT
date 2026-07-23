@@ -61,6 +61,16 @@ function getGuestToken() {
 }
 const GUEST_TOKEN = getGuestToken();
 
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 if (TYPE === 'call') { document.getElementById('composer').style.display='block'; document.getElementById('composer-call').style.display='block'; }
 if (TYPE === 'order') {
     document.getElementById('composer').style.display='block';
@@ -76,8 +86,8 @@ function loadProducts() {
             if (!res.success) return;
             const list = document.getElementById('productList');
             list.innerHTML = res.data.map(p => `
-                <div class="item-row" data-id="${p.sanPhamId}" data-name="${p.tenSanPham}">
-                    <span>${p.tenSanPham} - ${p.donGia.toLocaleString('vi-VN')}đ</span>
+                <div class="item-row" data-id="${p.sanPhamId}" data-name="${escapeHtml(p.tenSanPham)}">
+                    <span>${escapeHtml(p.tenSanPham)} - ${p.donGia.toLocaleString('vi-VN')}đ</span>
                     <span>
                         <button class="qty-btn" onclick="changeQty(${p.sanPhamId}, -1)">-</button>
                         <span id="qty-${p.sanPhamId}" style="margin:0 8px;">0</span>
@@ -165,7 +175,7 @@ function loadRequests() {
                         <strong>${typeLabel(r.requestType)}</strong>
                         <span class="badge ${cls}">${label}</span>
                     </div>
-                    ${r.note ? `<p style="color:#71717a;font-size:13px;">${r.note}</p>` : ''}
+                    ${r.note ? `<p style="color:#71717a;font-size:13px;">${escapeHtml(r.note)}</p>` : ''}
                 </div>`;
             }).join('');
         });
