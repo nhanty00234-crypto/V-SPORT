@@ -303,6 +303,7 @@ public class XacThucOTPServlet extends HttpServlet {
                 session.removeAttribute("tempManagerAccountId");
                 session.removeAttribute("authType");
 
+                session.removeAttribute("error");
                 session.setAttribute("message", "Thêm nhân viên thành công!");
                 if (isAjax) {
                     resp.setContentType("application/json;charset=UTF-8");

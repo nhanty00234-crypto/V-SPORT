@@ -123,10 +123,11 @@ public final class Constants {
             CAPABILITY_HUAN_LUYEN_VIEN, CAPABILITY_LOP_HOC, CAPABILITY_DICH_VU_THE_THAO, CAPABILITY_KHAC
     );
 
-    // Module "Quản lý dịch vụ" (Giai đoạn 1 - căng lưới, thay quấn cán, sửa vợt...) chỉ mở khi
-    // capability này được Admin duyệt - xem FilterQuyenManager.CAPABILITY_GATED_PATHS.
+    // Module "Quản lý dịch vụ" (Giai đoạn 1 - căng lưới, thay quấn cán, sửa vợt..., huấn luyện
+    // viên, lớp học) chỉ mở khi MỘT trong các capability này được Admin duyệt - xem
+    // FilterQuyenManager.CAPABILITY_GATED_PATHS.
     public static final java.util.List<String> SERVICE_MODULE_CAPABILITIES = java.util.List.of(
-            CAPABILITY_DICH_VU_THE_THAO
+            CAPABILITY_DICH_VU_THE_THAO, CAPABILITY_HUAN_LUYEN_VIEN, CAPABILITY_LOP_HOC
     );
 
     // Module "Quản lý cửa hàng" (KhoDichVuManagerServlet / SanPham_DichVu) phục vụ chung

@@ -100,7 +100,7 @@
     </c:if>
 
     <div class="w-full" id="staffGridContainer">
-      <div id="staffGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      <div id="staffGrid" class="flex flex-col divide-y divide-violet-50 bg-white border border-violet-100 rounded-2xl overflow-hidden shadow-sm"></div>
     </div>
   </div>
 
@@ -360,7 +360,7 @@ function renderStaff() {
 
     if (staffList.length === 0) {
         staffGrid.innerHTML = `
-            <div class="col-span-full card py-16 text-center text-violet-400">
+            <div class="py-16 text-center text-violet-400">
                 <span class="material-symbols-outlined text-4xl mb-2 text-violet-200">group_off</span>
                 <p class="text-xs font-medium">Chưa có nhân viên nào tại chi nhánh này</p>
             </div>
@@ -372,16 +372,6 @@ function renderStaff() {
         let badgeClass = s.status === 'Đang làm' ? 'badge-green' : 'badge-red';
         let statusText = s.status;
 
-        // Action buttons
-        const actionsHtml = `
-            <button onclick="toggleLock('\${s.id}', \${s.status == 'Đang làm'})" title="\text{Khóa/Mở khóa}" class="h-8 px-2 rounded-lg border \${s.status == 'Đang làm' ? 'border-amber-200 text-amber-600 hover:bg-amber-50' : 'border-green-200 text-green-650 hover:bg-green-50'} text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
-                <span class="material-symbols-outlined text-[13px]">\${s.status == 'Đang làm' ? 'lock' : 'lock_open'}</span>\${s.status == 'Đang làm' ? 'Khóa' : 'Mở'}
-            </button>
-            <button onclick="deleteStaff('\${s.id}')" title="Xóa nhân viên" class="h-8 px-2 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
-                <span class="material-symbols-outlined text-[13px]">person_remove</span>Xóa
-            </button>
-        `;
-
         let dept = 'Phòng ban';
         if (s.roleId === 4) dept = 'Lễ tân';
         else if (s.roleId === 5) dept = 'Bảo vệ';
@@ -392,51 +382,32 @@ function renderStaff() {
             : `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=7c3aed&color=fff&size=128&bold=true`;
 
         return `
-            <div class="card p-5 border border-violet-100 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div>
-                    <!-- Card Header: Avatar, Name, Status -->
-                    <div class="flex items-start justify-between gap-2.5 mb-4">
-                        <div class="flex items-center gap-3">
-                            <img src="\${avatarUrl}" alt="\${s.name}" class="w-12 h-12 rounded-full border border-violet-100 shadow-sm shrink-0">
-                            <div>
-                                <p class="font-extrabold text-violet-950 text-sm leading-tight">\${s.name}</p>
-                                <p class="text-[11px] text-violet-600 font-semibold mt-0.5">\${s.VaiTro}</p>
-                            </div>
-                        </div>
-                        <span class="badge \${badgeClass}">\${statusText}</span>
-                    </div>
+            <div class="flex items-center gap-3 px-4 py-2.5 hover:bg-violet-50/40 transition-colors">
+                <img src="\${avatarUrl}" alt="\${s.name}" class="w-9 h-9 rounded-full border border-violet-100 shrink-0">
 
-                    <!-- Card Middle: Details (Department / Branch) -->
-                    <div class="grid grid-cols-2 gap-2 text-[10px] text-violet-400 font-bold uppercase tracking-wider mb-4">
-                        <div>
-                            <p class="font-medium text-violet-400">Bộ phận</p>
-                            <p class="text-violet-900 font-extrabold text-xs mt-0.5">\${dept}</p>
-                        </div>
-                        <div>
-                            <p class="font-medium text-violet-400">Nơi làm việc</p>
-                            <p class="text-violet-900 font-extrabold text-xs mt-0.5">Cơ sở CS${sessionScope.user.coSoId}</p>
-                        </div>
-                    </div>
-
-                    <!-- Contact Container -->
-                    <div class="p-3 bg-violet-50/30 border border-violet-50/50 rounded-xl flex flex-col gap-1.5 text-xs text-zinc-650 font-medium">
-                        <div class="flex items-center gap-2 truncate">
-                            <span class="material-symbols-outlined text-[15px] text-violet-400 shrink-0">mail</span>
-                            <span class="truncate" title="\${s.email}">\${s.email}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[15px] text-violet-400 shrink-0">phone_iphone</span>
-                            <span>\${s.phone}</span>
-                        </div>
-                    </div>
+                <div class="min-w-0 w-[180px] shrink-0">
+                    <p class="font-bold text-violet-950 text-sm leading-tight truncate">\${s.name}</p>
+                    <p class="text-[11px] text-violet-500 font-semibold truncate">\${s.VaiTro} · \${dept}</p>
                 </div>
 
-                <!-- Action Row -->
-                <div class="flex items-center gap-2 mt-4 pt-4 border-t border-violet-50 w-full justify-start">
-                    <button onclick="editStaff('\${s.id}')" title="Sửa thông tin" class="h-8 px-2 rounded-lg border border-violet-200 text-violet-700 hover:bg-violet-50 text-[10px] font-bold transition-all flex items-center justify-center gap-0.5">
-                        <span class="material-symbols-outlined text-[13px]">edit</span>Sửa
+                <div class="min-w-0 flex-1 hidden sm:flex items-center gap-4 text-xs text-zinc-500">
+                    <span class="flex items-center gap-1 truncate" title="\${s.email}">
+                        <span class="material-symbols-outlined text-[14px] text-violet-300 shrink-0">mail</span>\${s.email}
+                    </span>
+                    <span class="flex items-center gap-1 shrink-0">
+                        <span class="material-symbols-outlined text-[14px] text-violet-300 shrink-0">phone_iphone</span>\${s.phone}
+                    </span>
+                </div>
+
+                <span class="badge \${badgeClass} shrink-0">\${statusText}</span>
+
+                <div class="flex items-center gap-1 shrink-0">
+                    <button onclick="editStaff('\${s.id}')" title="Sửa thông tin" class="h-7 w-7 rounded-lg border border-violet-200 text-violet-700 hover:bg-violet-50 flex items-center justify-center transition-all">
+                        <span class="material-symbols-outlined text-[15px]">edit</span>
                     </button>
-                    \${actionsHtml}
+                    <button onclick="deleteStaff('\${s.id}')" title="Xóa nhân viên" class="h-7 w-7 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 flex items-center justify-center transition-all">
+                        <span class="material-symbols-outlined text-[15px]">person_remove</span>
+                    </button>
                 </div>
             </div>
         `;
@@ -662,32 +633,6 @@ function deleteStaff(id) {
             console.error('Error deleting staff:', error);
         }
     });
-}
-
-async function toggleLock(id, currentlyActive) {
-    if (!confirm(currentlyActive ? "Khóa nhân viên này?" : "Mở khóa nhân viên?")) return;
-
-    const params = new URLSearchParams();
-    params.append('action', 'update');
-    params.append('accountId', id);
-    params.append('isLocked', currentlyActive ? 'true' : 'false');
-
-    try {
-        const response = await fetch(_ctxPath + '/manager/nhan-su', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: params
-        });
-        if (response.redirected) {
-            window.location.href = response.url;
-        } else {
-            window.location.reload();
-        }
-    } catch (error) {
-        console.error('Error toggling lock:', error);
-    }
 }
 
 // ==================== VIEW MANAGEMENT ====================

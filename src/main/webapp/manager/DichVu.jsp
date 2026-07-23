@@ -110,6 +110,7 @@
                   <c:when test="${s.serviceType == 'SUA_VOT'}">Sửa chữa vợt</c:when>
                   <c:when test="${s.serviceType == 'BAO_DUONG'}">Bảo dưỡng dụng cụ</c:when>
                   <c:when test="${s.serviceType == 'HUAN_LUYEN_VIEN'}">Huấn luyện viên</c:when>
+                  <c:when test="${s.serviceType == 'LOP_HOC'}">Lớp học</c:when>
                   <c:otherwise>Dịch vụ khác</c:otherwise>
                 </c:choose>
                 <c:if test="${not empty s.sportType}"> · ${s.sportType}</c:if>
@@ -195,6 +196,7 @@
             <option value="SUA_VOT">Sửa chữa vợt</option>
             <option value="BAO_DUONG">Bảo dưỡng dụng cụ</option>
             <option value="HUAN_LUYEN_VIEN">Huấn luyện viên</option>
+            <option value="LOP_HOC">Lớp học</option>
             <option value="KHAC">Dịch vụ khác</option>
           </select>
         </div>

@@ -23,8 +23,11 @@ import org.example.service.manager.NhanSuService;
 import org.example.model.Lichdatsan;
 import org.example.model.HoaDon;
 import org.example.model.San;
+import org.example.model.DanhGia;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -124,6 +127,33 @@ public class DashboardServlet extends HttpServlet {
             data.put("totalStaff", totalStaff);
             data.put("recentInvoices", recentInvoices);
             data.put("todayBookingsList", dsLichToday);
+
+            // Doanh thu tháng này và tháng trước
+            BigDecimal revenueThisMonth = getRevenueThisMonth(coSoId);
+            BigDecimal revenueLastMonth = getRevenueLastMonth(coSoId);
+            data.put("revenueThisMonth", revenueThisMonth);
+            data.put("revenueLastMonth", revenueLastMonth);
+
+            // Tăng trưởng doanh thu (%)
+            if (revenueLastMonth != null && revenueLastMonth.compareTo(BigDecimal.ZERO) > 0) {
+                double growth = revenueThisMonth.subtract(revenueLastMonth)
+                    .divide(revenueLastMonth, 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100)).doubleValue();
+                data.put("revenueGrowth", Math.round(growth * 10.0) / 10.0);
+            } else {
+                data.put("revenueGrowth", null);
+            }
+
+            // Doanh thu breakdown theo sân
+            data.put("revenueBySan", getRevenueBySan(coSoId));
+
+            // Doanh thu 6 tháng gần nhất
+            data.put("revenueByMonth", getRevenueByMonth(coSoId));
+
+            // Đánh giá khách hàng
+            data.put("danhGiaList", getRecentDanhGia(coSoId));
+            data.put("avgSoSao", getAvgSoSao(coSoId));
+            data.put("totalDanhGia", getTotalDanhGia(coSoId));
 
             // Thêm dữ liệu cho biểu đồ
             data.put("revenueChart", getRevenueChartData(coSoId));
@@ -273,6 +303,122 @@ public class DashboardServlet extends HttpServlet {
         chartData.put("data", data);
         chartData.put("title", "Phân bổ ca làm việc");
         return chartData;
+    }
+
+    private BigDecimal getRevenueThisMonth(int coSoId) {
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate start = today.withDayOfMonth(1);
+            java.time.LocalDate end = today.withDayOfMonth(today.lengthOfMonth());
+            BigDecimal result = em.createQuery(
+                "SELECT COALESCE(SUM(h.tongThanhToan), 0) FROM HoaDon h JOIN h.datSan d JOIN d.san s " +
+                "WHERE s.coSoID = :coSoId AND h.trangThaiThanhToan = 'Đã thanh toán' " +
+                "AND h.ngayLap BETWEEN :start AND :end", BigDecimal.class)
+                .setParameter("coSoId", coSoId)
+                .setParameter("start", java.sql.Date.valueOf(start))
+                .setParameter("end", java.sql.Date.valueOf(end))
+                .getSingleResult();
+            return result != null ? result : BigDecimal.ZERO;
+        } catch (Exception e) { return BigDecimal.ZERO; } finally { em.close(); }
+    }
+
+    private BigDecimal getRevenueLastMonth(int coSoId) {
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            java.time.LocalDate lastMonth = java.time.LocalDate.now().minusMonths(1);
+            java.time.LocalDate start = lastMonth.withDayOfMonth(1);
+            java.time.LocalDate end = lastMonth.withDayOfMonth(lastMonth.lengthOfMonth());
+            BigDecimal result = em.createQuery(
+                "SELECT COALESCE(SUM(h.tongThanhToan), 0) FROM HoaDon h JOIN h.datSan d JOIN d.san s " +
+                "WHERE s.coSoID = :coSoId AND h.trangThaiThanhToan = 'Đã thanh toán' " +
+                "AND h.ngayLap BETWEEN :start AND :end", BigDecimal.class)
+                .setParameter("coSoId", coSoId)
+                .setParameter("start", java.sql.Date.valueOf(start))
+                .setParameter("end", java.sql.Date.valueOf(end))
+                .getSingleResult();
+            return result != null ? result : BigDecimal.ZERO;
+        } catch (Exception e) { return BigDecimal.ZERO; } finally { em.close(); }
+    }
+
+    private List<Object[]> getRevenueBySan(int coSoId) {
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate start = today.withDayOfMonth(1);
+            java.time.LocalDate end = today.withDayOfMonth(today.lengthOfMonth());
+            return em.createQuery(
+                "SELECT s.tenSan, COALESCE(SUM(h.tongThanhToan), 0) FROM HoaDon h " +
+                "JOIN h.datSan d JOIN d.san s " +
+                "WHERE s.coSoID = :coSoId AND h.trangThaiThanhToan = 'Đã thanh toán' " +
+                "AND h.ngayLap BETWEEN :start AND :end " +
+                "GROUP BY s.sanID, s.tenSan ORDER BY SUM(h.tongThanhToan) DESC", Object[].class)
+                .setParameter("coSoId", coSoId)
+                .setParameter("start", java.sql.Date.valueOf(start))
+                .setParameter("end", java.sql.Date.valueOf(end))
+                .getResultList();
+        } catch (Exception e) { return new ArrayList<>(); } finally { em.close(); }
+    }
+
+    private java.util.LinkedHashMap<String, BigDecimal> getRevenueByMonth(int coSoId) {
+        java.util.LinkedHashMap<String, BigDecimal> map = new java.util.LinkedHashMap<>();
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            for (int i = 5; i >= 0; i--) {
+                java.time.LocalDate m = today.minusMonths(i);
+                java.time.LocalDate start = m.withDayOfMonth(1);
+                java.time.LocalDate end = m.withDayOfMonth(m.lengthOfMonth());
+                String label = "T" + m.getMonthValue() + "/" + m.getYear() % 100;
+                BigDecimal rev = em.createQuery(
+                    "SELECT COALESCE(SUM(h.tongThanhToan), 0) FROM HoaDon h JOIN h.datSan d JOIN d.san s " +
+                    "WHERE s.coSoID = :coSoId AND h.trangThaiThanhToan = 'Đã thanh toán' " +
+                    "AND h.ngayLap BETWEEN :start AND :end", BigDecimal.class)
+                    .setParameter("coSoId", coSoId)
+                    .setParameter("start", java.sql.Date.valueOf(start))
+                    .setParameter("end", java.sql.Date.valueOf(end))
+                    .getSingleResult();
+                map.put(label, rev != null ? rev : BigDecimal.ZERO);
+            }
+        } catch (Exception e) { } finally { em.close(); }
+        return map;
+    }
+
+    private List<DanhGia> getRecentDanhGia(int coSoId) {
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT dg FROM DanhGia dg JOIN Lichdatsan lds ON lds.datSanId = dg.datSanId " +
+                "JOIN lds.san s WHERE s.coSoID = :coSoId " +
+                "ORDER BY dg.ngayDanhGia DESC", DanhGia.class)
+                .setParameter("coSoId", coSoId)
+                .setMaxResults(20)
+                .getResultList();
+        } catch (Exception e) { return new ArrayList<>(); } finally { em.close(); }
+    }
+
+    private Double getAvgSoSao(int coSoId) {
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            Double avg = em.createQuery(
+                "SELECT AVG(dg.soSao) FROM DanhGia dg JOIN Lichdatsan lds ON lds.datSanId = dg.datSanId " +
+                "JOIN lds.san s WHERE s.coSoID = :coSoId", Double.class)
+                .setParameter("coSoId", coSoId)
+                .getSingleResult();
+            return avg != null ? Math.round(avg * 10.0) / 10.0 : null;
+        } catch (Exception e) { return null; } finally { em.close(); }
+    }
+
+    private long getTotalDanhGia(int coSoId) {
+        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
+        try {
+            Long count = em.createQuery(
+                "SELECT COUNT(dg) FROM DanhGia dg JOIN Lichdatsan lds ON lds.datSanId = dg.datSanId " +
+                "JOIN lds.san s WHERE s.coSoID = :coSoId", Long.class)
+                .setParameter("coSoId", coSoId)
+                .getSingleResult();
+            return count != null ? count : 0L;
+        } catch (Exception e) { return 0L; } finally { em.close(); }
     }
 
     @Override

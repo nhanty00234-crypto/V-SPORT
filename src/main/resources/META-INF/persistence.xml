@@ -10,6 +10,7 @@
         <class>org.example.model.CoSoCapability</class>
         <class>org.example.model.SanQR</class>
         <class>org.example.model.SanQRTokenHistory</class>
+        <class>org.example.model.QRRequest</class>
 
         <properties>
             <!-- Database Connection (Overridden dynamically at runtime by JPAUtil using DBUtil environment config) -->

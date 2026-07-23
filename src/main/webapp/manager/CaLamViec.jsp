@@ -62,120 +62,176 @@
       </div>
     </div>
 
+    <!-- Step indicator -->
+    <div id="wizardStepBar" class="flex items-center gap-1.5 mb-6">
+      <c:forEach var="i" begin="1" end="4">
+        <div class="wizard-step flex-1 flex items-center gap-2" data-step-indicator="${i}">
+          <div class="wizard-step-dot w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all">${i}</div>
+          <span class="wizard-step-label text-xs font-semibold hidden sm:block transition-all">
+            <c:choose>
+              <c:when test="${i == 1}">Nhân viên &amp; tuần</c:when>
+              <c:when test="${i == 2}">Ngày làm</c:when>
+              <c:when test="${i == 3}">Ca làm</c:when>
+              <c:otherwise>Xác nhận</c:otherwise>
+            </c:choose>
+          </span>
+          <c:if test="${i != 4}"><div class="wizard-step-line flex-1 h-[2px] bg-zinc-150 rounded-full transition-all"></div></c:if>
+        </div>
+      </c:forEach>
+    </div>
+
     <form id="inlineShiftForm" onsubmit="handleInlineShiftSubmit(event)" class="flex flex-col gap-5">
       <input type="hidden" id="shiftEditId" value="">
       <input type="hidden" id="shiftFacility" value="${sessionScope.user.coSoId}">
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="flex flex-col gap-1.5 md:col-span-2">
-          <label class="text-sm font-semibold text-purple-900">Chọn nhân viên <span class="text-red-500">*</span></label>
-          <select id="shiftStaff" onchange="autoFillRoleFromStaff(); clearConflictPanel(); triggerRealtimeValidation()" required
-                  class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
-          </select>
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Tuần làm việc (Chọn ngày tham chiếu) <span class="text-red-500">*</span></label>
-          <input type="text" id="shiftDate" required placeholder="dd/mm/yyyy"
-                 class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-2 p-4 bg-purple-50/30 border border-purple-100 rounded-xl">
-        <div class="flex items-center justify-between">
-          <label class="text-sm font-bold text-purple-900">Chọn các ngày làm việc trong tuần <span class="text-red-500">*</span></label>
-          <div id="selectAllContainer" class="flex gap-3 text-xs">
-            <button type="button" onclick="selectAllWeekDays(true)" class="text-purple-650 hover:text-purple-900 font-bold hover:underline">Chọn tất cả</button>
-            <span class="text-purple-200">|</span>
-            <button type="button" onclick="selectAllWeekDays(false)" class="text-purple-650 hover:text-purple-900 font-bold hover:underline">Bỏ chọn tất cả</button>
-          </div>
-        </div>
-        <div id="weekDaysCheckboxes" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mt-1">
-          <!-- Populated dynamically via JS -->
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Mẫu ca hệ thống <span class="text-red-500">*</span></label>
-          <select id="shiftTemplate" onchange="applyShiftTemplate()" required 
-                  class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
-            <option value="" disabled selected>-- Chọn mẫu ca --</option>
-            <option value="1" data-start-time="06:00" data-end-time="14:00" data-break-minutes="30">Ca sáng (06:00 - 14:00)</option>
-            <option value="2" data-start-time="14:00" data-end-time="22:00" data-break-minutes="30">Ca chiều (14:00 - 22:00)</option>
-          </select>
-        </div>
-
-        <input type="hidden" id="shiftRole">
-      </div>
-
-      <!-- Read-only Template Information Dashboard (Mẫu ca info) -->
-      <div id="templateInfoBlock" class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl flex flex-col gap-1 text-sm text-purple-950 font-medium">
-          <p class="text-zinc-500 text-xs italic">Vui lòng chọn mẫu ca để xem giờ làm.</p>
-      </div>
-
-      <!-- Custom Time Toggle Checkbox -->
-      <div class="flex items-center gap-2 mt-2">
-          <input type="checkbox" id="isCustomTime" onchange="toggleCustomTime()" class="w-4 h-4 text-purple-650 rounded border-zinc-300 focus:ring-purple-500 cursor-pointer">
-          <label for="isCustomTime" class="text-sm font-bold text-purple-900 cursor-pointer select-none">Tùy chỉnh giờ làm</label>
-      </div>
-
-      <!-- Custom time inputs (hidden by default) -->
-      <div id="customTimeInputsContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-5 p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-xl">
-          <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-semibold text-zinc-700">Giờ bắt đầu <span class="text-red-500">*</span></label>
-              <input type="time" id="shiftStartTime" onchange="triggerRealtimeValidation()"
-                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+      <!-- ===== WIZARD STEP 1: Nhân viên & tuần ===== -->
+      <div class="wizard-pane" data-step="1">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="flex flex-col gap-1.5 md:col-span-2">
+            <label class="text-sm font-semibold text-purple-900">Chọn nhân viên <span class="text-red-500">*</span></label>
+            <select id="shiftStaff" onchange="autoFillRoleFromStaff(); clearConflictPanel(); triggerRealtimeValidation()" required
+                    class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
+            </select>
           </div>
 
           <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-semibold text-zinc-700">Giờ kết thúc <span class="text-red-500">*</span></label>
-              <input type="time" id="shiftEndTime" onchange="triggerRealtimeValidation()"
-                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+            <label class="text-sm font-semibold text-purple-900">Tuần làm việc (Chọn ngày tham chiếu) <span class="text-red-500">*</span></label>
+            <input type="text" id="shiftDate" required placeholder="dd/mm/yyyy"
+                   class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
           </div>
-
-          <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-semibold text-zinc-700">Giờ nghỉ (phút)</label>
-              <input type="number" id="shiftBreakTime" onchange="triggerRealtimeValidation()" min="0" value="0" placeholder="Ví dụ: 30"
-                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
-          </div>
-          
-          <div class="flex flex-col gap-1.5 sm:col-span-3">
-              <label class="text-sm font-semibold text-zinc-700">Lý do tùy chỉnh giờ làm <span class="text-red-500">*</span></label>
-              <input type="text" id="customTimeReason" placeholder="Nhập lý do tùy chỉnh (ví dụ: Hỗ trợ giải đấu, tăng ca đột xuất...)"
-                     class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
-          </div>
-      </div>
-
-      <div id="shiftDurationDisplay" class="hidden"></div>
-      <div id="shiftAlertBox" class="hidden"></div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Trạng thái ca <span class="text-red-500">*</span></label>
-          <select id="shiftStatusOption" required 
-                  class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
-            <option value="Published" selected>Đã gửi (Nhân viên thấy)</option>
-            <option value="Draft">Bản nháp (Ẩn với nhân viên)</option>
-          </select>
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-purple-900">Ghi chú / Phân công</label>
-          <input type="text" id="shiftNotes" placeholder="Ví dụ: Bàn giao lại sân số 2..."
-                 class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-3 border-t border-purple-100">
-        <button type="button" onclick="resetForm()" 
+      <!-- ===== WIZARD STEP 2: Ngày làm ===== -->
+      <div class="wizard-pane hidden" data-step="2">
+        <div class="flex flex-col gap-2 p-4 bg-purple-50/30 border border-purple-100 rounded-xl">
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-bold text-purple-900">Chọn các ngày làm việc trong tuần <span class="text-red-500">*</span></label>
+            <div id="selectAllContainer" class="flex gap-3 text-xs">
+              <button type="button" onclick="selectAllWeekDays(true)" class="text-purple-650 hover:text-purple-900 font-bold hover:underline">Chọn tất cả</button>
+              <span class="text-purple-200">|</span>
+              <button type="button" onclick="selectAllWeekDays(false)" class="text-purple-650 hover:text-purple-900 font-bold hover:underline">Bỏ chọn tất cả</button>
+            </div>
+          </div>
+          <div id="weekDaysCheckboxes" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mt-1">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== WIZARD STEP 3: Ca làm ===== -->
+      <div class="wizard-pane hidden" data-step="3">
+        <div class="flex flex-col gap-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-purple-900">Mẫu ca hệ thống <span class="text-red-500">*</span></label>
+              <select id="shiftTemplate" onchange="applyShiftTemplate()" required
+                      class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
+                <option value="" disabled selected>-- Chọn mẫu ca --</option>
+                <option value="1" data-start-time="06:00" data-end-time="14:00" data-break-minutes="30">Ca sáng (06:00 - 14:00)</option>
+                <option value="2" data-start-time="14:00" data-end-time="22:00" data-break-minutes="30">Ca chiều (14:00 - 22:00)</option>
+              </select>
+            </div>
+
+            <input type="hidden" id="shiftRole">
+          </div>
+
+          <!-- Read-only Template Information Dashboard (Mẫu ca info) -->
+          <div id="templateInfoBlock" class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl flex flex-col gap-1 text-sm text-purple-950 font-medium">
+              <p class="text-zinc-500 text-xs italic">Vui lòng chọn mẫu ca để xem giờ làm.</p>
+          </div>
+
+          <!-- Advanced (collapsed): Custom Time Toggle -->
+          <details class="group">
+            <summary class="text-sm font-bold text-purple-700 cursor-pointer select-none flex items-center gap-1.5 list-none">
+              <span class="material-symbols-outlined text-[16px] transition-transform group-open:rotate-90">chevron_right</span>
+              Nâng cao: tùy chỉnh giờ làm
+            </summary>
+            <div class="mt-3 flex flex-col gap-3">
+              <div class="flex items-center gap-2">
+                  <input type="checkbox" id="isCustomTime" onchange="toggleCustomTime()" class="w-4 h-4 text-purple-650 rounded border-zinc-300 focus:ring-purple-500 cursor-pointer">
+                  <label for="isCustomTime" class="text-sm font-bold text-purple-900 cursor-pointer select-none">Tùy chỉnh giờ làm</label>
+              </div>
+
+              <!-- Custom time inputs (hidden by default) -->
+              <div id="customTimeInputsContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-5 p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-xl">
+                  <div class="flex flex-col gap-1.5">
+                      <label class="text-sm font-semibold text-zinc-700">Giờ bắt đầu <span class="text-red-500">*</span></label>
+                      <input type="time" id="shiftStartTime" onchange="triggerRealtimeValidation()"
+                             class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                      <label class="text-sm font-semibold text-zinc-700">Giờ kết thúc <span class="text-red-500">*</span></label>
+                      <input type="time" id="shiftEndTime" onchange="triggerRealtimeValidation()"
+                             class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                      <label class="text-sm font-semibold text-zinc-700">Giờ nghỉ (phút)</label>
+                      <input type="number" id="shiftBreakTime" onchange="triggerRealtimeValidation()" min="0" value="0" placeholder="Ví dụ: 30"
+                             class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+                  </div>
+
+                  <div class="flex flex-col gap-1.5 sm:col-span-3">
+                      <label class="text-sm font-semibold text-zinc-700">Lý do tùy chỉnh giờ làm <span class="text-red-500">*</span></label>
+                      <input type="text" id="customTimeReason" placeholder="Nhập lý do tùy chỉnh (ví dụ: Hỗ trợ giải đấu, tăng ca đột xuất...)"
+                             class="h-[42px] px-3.5 rounded-xl border border-zinc-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white text-zinc-700">
+                  </div>
+              </div>
+            </div>
+          </details>
+
+          <div id="shiftDurationDisplay" class="hidden"></div>
+          <div id="shiftAlertBox" class="hidden"></div>
+        </div>
+      </div>
+
+      <!-- ===== WIZARD STEP 4: Xác nhận ===== -->
+      <div class="wizard-pane hidden" data-step="4">
+        <div class="flex flex-col gap-5">
+          <div id="wizardSummaryBox" class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <!-- Populated dynamically via JS -->
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-purple-900">Trạng thái ca <span class="text-red-500">*</span></label>
+              <select id="shiftStatusOption" onchange="updateWizardSummary()" required
+                      class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white text-zinc-700 shadow-sm cursor-pointer hover:border-purple-300">
+                <option value="Published" selected>Đã gửi (Nhân viên thấy)</option>
+                <option value="Draft">Bản nháp (Ẩn với nhân viên)</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-purple-900">Ghi chú / Phân công</label>
+              <input type="text" id="shiftNotes" placeholder="Ví dụ: Bàn giao lại sân số 2..."
+                     class="h-[42px] px-3.5 rounded-xl border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-zinc-700 shadow-sm hover:border-purple-300">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-3 border-t border-purple-100">
+        <button type="button" onclick="resetForm()"
                 class="h-[42px] px-6 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors shadow-sm">
           Hủy / Đặt lại
         </button>
-        <button type="submit" id="btnSubmitShift"
-                class="h-[42px] px-8 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 shadow-md shadow-purple-200 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
-          Lưu ca làm việc
-        </button>
+        <div class="flex items-center gap-3">
+          <button type="button" id="btnWizardBack" onclick="wizardGoBack()"
+                  class="hidden h-[42px] px-6 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-purple-700 hover:bg-purple-50 transition-colors shadow-sm">
+            Quay lại
+          </button>
+          <button type="button" id="btnWizardNext" onclick="wizardGoNext()"
+                  class="h-[42px] px-8 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 shadow-md shadow-purple-200 transition-all">
+            Tiếp theo
+          </button>
+          <button type="submit" id="btnSubmitShift"
+                  class="hidden h-[42px] px-8 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 shadow-md shadow-purple-200 transition-all items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+            Lưu ca làm việc
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -288,20 +344,24 @@
       </div>
   </div>
 
-  <!-- =========== SCHEDULING TOOLS PANEL =========== -->
-  <div class="card p-5 bg-white border border-purple-100 shadow-md">
+  <!-- =========== SCHEDULING TOOLS PANEL (collapsible) =========== -->
+  <div class="card bg-white border border-purple-100 shadow-md overflow-hidden">
 
-    <!-- Section header -->
-    <div class="flex items-start gap-2.5 mb-4">
-      <div class="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center shrink-0 mt-0.5">
-        <span class="material-symbols-outlined text-purple-600 text-[18px]">tune</span>
+    <!-- Section header (toggle) -->
+    <button type="button" onclick="toggleToolsPanel()" id="toolsPanelToggle" class="w-full flex items-center justify-between gap-2.5 p-5 text-left hover:bg-purple-50/30 transition-colors">
+      <div class="flex items-start gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center shrink-0 mt-0.5">
+          <span class="material-symbols-outlined text-purple-600 text-[18px]">tune</span>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-purple-900 leading-tight">Công cụ xếp lịch nhanh</h3>
+          <p class="text-xs text-zinc-400 mt-0.5">Sao chép, tự động, hoặc chốt &amp; gửi lịch hàng loạt.</p>
+        </div>
       </div>
-      <div>
-        <h3 class="text-sm font-bold text-purple-900 leading-tight">Công cụ hỗ trợ xếp lịch</h3>
-        <p class="text-xs text-zinc-400 mt-0.5">Tạo lịch nhanh hơn — sao chép, tự động, rồi gửi cho nhân viên.</p>
-      </div>
-    </div>
+      <span id="toolsPanelChevron" class="material-symbols-outlined text-purple-500 text-[22px] transition-transform shrink-0">expand_more</span>
+    </button>
 
+    <div id="toolsPanelBody" class="hidden px-5 pb-5">
     <!-- Guidance box — soft violet info style -->
     <div class="mb-5 p-3 bg-violet-50 border border-violet-100 rounded-xl flex gap-2.5 items-start">
       <div class="w-5 h-5 rounded-full bg-violet-200 flex items-center justify-center shrink-0 mt-0.5">
@@ -453,6 +513,7 @@
         <span class="material-symbols-outlined text-[16px]">warning</span>Lưu ý sau khi thao tác:
       </div>
       <ul id="advancedWarningsList" class="list-disc pl-5 space-y-0.5 text-xs text-amber-700"></ul>
+    </div>
     </div>
   </div>
 
@@ -1219,6 +1280,133 @@ async function runRealtimeValidation() {
     }
 }
 
+// ============================================================
+// SCHEDULING TOOLS PANEL — collapse/expand
+// ============================================================
+function toggleToolsPanel() {
+  const body = document.getElementById('toolsPanelBody');
+  const chevron = document.getElementById('toolsPanelChevron');
+  const isHidden = body.classList.contains('hidden');
+  body.classList.toggle('hidden');
+  chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+// ============================================================
+// SHIFT FORM WIZARD — step navigation
+// ============================================================
+let currentWizardStep = 1;
+const WIZARD_TOTAL_STEPS = 4;
+
+function isWizardEditMode() {
+  return !!document.getElementById('shiftEditId').value;
+}
+
+function validateWizardStep(step) {
+  if (step === 1) {
+    if (!document.getElementById('shiftStaff').value) { alert('Vui lòng chọn nhân viên!'); return false; }
+    if (!document.getElementById('shiftDate').value) { alert('Vui lòng chọn tuần làm việc!'); return false; }
+    return true;
+  }
+  if (step === 2) {
+    if (isWizardEditMode()) return true;
+    const checked = document.querySelectorAll('#weekDaysCheckboxes input[type="checkbox"]:checked');
+    if (checked.length === 0) { alert('Vui lòng chọn ít nhất một ngày làm việc trong tuần!'); return false; }
+    return true;
+  }
+  if (step === 3) {
+    if (!document.getElementById('shiftTemplate').value) { alert('Vui lòng chọn mẫu ca hệ thống!'); return false; }
+    return true;
+  }
+  return true;
+}
+
+function wizardGoNext() {
+  if (!validateWizardStep(currentWizardStep)) return;
+  if (currentWizardStep < WIZARD_TOTAL_STEPS) {
+    goToWizardStep(currentWizardStep + 1);
+  }
+}
+
+function wizardGoBack() {
+  if (currentWizardStep > 1) {
+    goToWizardStep(currentWizardStep - 1);
+  }
+}
+
+function goToWizardStep(step) {
+  currentWizardStep = step;
+
+  document.querySelectorAll('.wizard-pane').forEach(pane => {
+    pane.classList.toggle('hidden', parseInt(pane.getAttribute('data-step')) !== step);
+  });
+
+  document.querySelectorAll('.wizard-step').forEach(el => {
+    const i = parseInt(el.getAttribute('data-step-indicator'));
+    const dot = el.querySelector('.wizard-step-dot');
+    const label = el.querySelector('.wizard-step-label');
+    const line = el.querySelector('.wizard-step-line');
+    if (i < step) {
+      dot.className = 'wizard-step-dot w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all bg-purple-600 text-white';
+      dot.innerHTML = '<span class="material-symbols-outlined text-[15px]">check</span>';
+      label.classList.add('text-purple-700');
+      label.classList.remove('text-zinc-400', 'text-purple-900');
+      if (line) line.classList.replace('bg-zinc-150', 'bg-purple-400');
+    } else if (i === step) {
+      dot.className = 'wizard-step-dot w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all bg-purple-600 text-white ring-4 ring-purple-100';
+      dot.innerText = i;
+      label.classList.add('text-purple-900');
+      label.classList.remove('text-zinc-400', 'text-purple-700');
+      if (line) line.classList.replace('bg-purple-400', 'bg-zinc-150');
+    } else {
+      dot.className = 'wizard-step-dot w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all bg-zinc-100 text-zinc-400';
+      dot.innerText = i;
+      label.classList.add('text-zinc-400');
+      label.classList.remove('text-purple-700', 'text-purple-900');
+      if (line) line.classList.replace('bg-purple-400', 'bg-zinc-150');
+    }
+  });
+
+  document.getElementById('btnWizardBack').classList.toggle('hidden', step === 1);
+  const nextBtn = document.getElementById('btnWizardNext');
+  const submitBtn = document.getElementById('btnSubmitShift');
+  if (step === WIZARD_TOTAL_STEPS) {
+    nextBtn.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+    submitBtn.classList.add('flex');
+    updateWizardSummary();
+  } else {
+    nextBtn.classList.remove('hidden');
+    submitBtn.classList.add('hidden');
+    submitBtn.classList.remove('flex');
+  }
+}
+
+function updateWizardSummary() {
+  const box = document.getElementById('wizardSummaryBox');
+  if (!box) return;
+
+  const staffSelect = document.getElementById('shiftStaff');
+  const staffText = staffSelect.value ? staffSelect.options[staffSelect.selectedIndex].text : '—';
+
+  const checkedDays = Array.from(document.querySelectorAll('#weekDaysCheckboxes input[type="checkbox"]:checked'))
+    .map(cb => formatDate(cb.value));
+  const daysText = checkedDays.length > 0 ? checkedDays.join(', ') : (formatDate(document.getElementById('shiftDate').value) || '—');
+
+  const tplSelect = document.getElementById('shiftTemplate');
+  const tplText = tplSelect.value ? tplSelect.options[tplSelect.selectedIndex].text : '—';
+
+  const startTime = document.getElementById('shiftStartTime').value;
+  const endTime = document.getElementById('shiftEndTime').value;
+  const timeText = (startTime && endTime) ? `\${formatTime(startTime)} - \${formatTime(endTime)}` : '—';
+
+  box.innerHTML = `
+    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Nhân viên</p><p class="font-bold text-purple-950 mt-0.5">\${staffText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Ngày làm</p><p class="font-bold text-purple-950 mt-0.5">\${daysText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Ca làm</p><p class="font-bold text-purple-950 mt-0.5">\${tplText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Giờ làm việc</p><p class="font-bold text-purple-950 mt-0.5">\${timeText}</p></div>
+  `;
+}
+
 function resetForm() {
     document.getElementById('inlineShiftForm').reset();
     document.getElementById('shiftEditId').value = '';
@@ -1253,6 +1441,9 @@ function resetForm() {
     
     populateStaffDropdown(null);
     updateWeekDays();
+
+    document.getElementById('wizardStepBar').classList.remove('hidden');
+    goToWizardStep(1);
 }
 
 function editShift(id, focusStaff) {
@@ -1310,6 +1501,14 @@ function editShift(id, focusStaff) {
 
   // Update weekdays list and check ONLY the current shift's date
   updateWeekDays();
+
+  // Editing an existing shift is a quick correction — show all wizard steps at once instead of stepping through
+  document.getElementById('wizardStepBar').classList.add('hidden');
+  document.querySelectorAll('.wizard-pane').forEach(pane => pane.classList.remove('hidden'));
+  document.getElementById('btnWizardBack').classList.add('hidden');
+  document.getElementById('btnWizardNext').classList.add('hidden');
+  document.getElementById('btnSubmitShift').classList.remove('hidden');
+  document.getElementById('btnSubmitShift').classList.add('flex');
 
   // Scroll to form smoothly
   document.getElementById('inlineShiftForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1844,6 +2043,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   setFpDate('shiftDate', today);
   updateWeekDays();
+
+  // Init multi-step wizard for the shift form
+  goToWizardStep(1);
 
   // Default to Calendar view
   switchScheduleView('calendar');
