@@ -88,9 +88,15 @@
       </p>
     </div>
   </div>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-1.5">
     <span id="liveDot" class="w-2 h-2 rounded-full bg-orange-400 live-dot"></span>
     <span class="text-xs text-orange-550 font-medium">Tự cập nhật</span>
+    <div class="w-px h-6 border-l border-orange-100 mx-2"></div>
+    <div class="text-xs font-semibold px-3 py-1 bg-orange-50 text-orange-700 rounded-lg">
+      Vai trò: Lễ tân trực ca
+    </div>
+    <div class="w-px h-6 border-l border-orange-100 mx-1"></div>
+    <jsp:include page="/manager/common/profile_dropdown.jsp" />
   </div>
 </header>
 
@@ -190,18 +196,18 @@ function cardClass(status) {
 
 function actionButtons(r) {
   if (r.status === 'NEW') {
-    return `<button class="action-btn btn-start" onclick="doAction(${r.requestId},'start')">
+    return `<button class="action-btn btn-start" onclick="doAction(\${r.requestId},'start')">
               <span class="material-symbols-outlined text-[14px] align-middle">play_arrow</span> Bắt đầu xử lý
             </button>
-            <button class="action-btn btn-cancel" onclick="doAction(${r.requestId},'cancel')">
+            <button class="action-btn btn-cancel" onclick="doAction(\${r.requestId},'cancel')">
               <span class="material-symbols-outlined text-[14px] align-middle">close</span> Huỷ
             </button>`;
   }
   if (r.status === 'IN_PROGRESS') {
-    return `<button class="action-btn btn-complete" onclick="doAction(${r.requestId},'complete')">
+    return `<button class="action-btn btn-complete" onclick="doAction(\${r.requestId},'complete')">
               <span class="material-symbols-outlined text-[14px] align-middle">check</span> Hoàn thành
             </button>
-            <button class="action-btn btn-cancel" onclick="doAction(${r.requestId},'cancel')">
+            <button class="action-btn btn-cancel" onclick="doAction(\${r.requestId},'cancel')">
               <span class="material-symbols-outlined text-[14px] align-middle">close</span> Huỷ
             </button>`;
   }
@@ -211,13 +217,13 @@ function actionButtons(r) {
 function renderItems(itemsJson) {
   if (!itemsJson) return '';
   let items;
-  try { items = JSON.parse(itemsJson); } catch { return `<span class="items-chip">${escapeHtml(itemsJson)}</span>`; }
+  try { items = JSON.parse(itemsJson); } catch { return `<span class="items-chip">\${escapeHtml(itemsJson)}</span>`; }
   if (!Array.isArray(items) || !items.length) return '';
   return items.map(it =>
     `<span class="items-chip">
        <span class="material-symbols-outlined text-[12px]">restaurant_menu</span>
-       ${escapeHtml(it.tenSanPham || it.name || '?')}
-       ${it.soLuong ? `<strong>×${it.soLuong}</strong>` : ''}
+       \${escapeHtml(it.tenSanPham || it.name || '?')}
+       \${it.soLuong ? `<strong>×\${it.soLuong}</strong>` : ''}
      </span>`
   ).join(' ');
 }
@@ -244,29 +250,47 @@ function renderCards(data) {
     const acts = actionButtons(r);
     const itemsHtml = renderItems(r.itemsJson);
     return `
-      <div class="req-card ${cardClass(r.status)}">
+      <div class="req-card \${cardClass(r.status)}">
         <div class="flex items-start gap-3">
-          <div class="type-icon ${t.cls}">
-            <span class="material-symbols-outlined">${t.icon}</span>
+          <div class="type-icon \${t.cls}">
+            <span class="material-symbols-outlined">\${t.icon}</span>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div>
-                <p class="font-extrabold text-sm text-zinc-900">${escapeHtml(r.tenSan)}</p>
-                <p class="text-xs text-zinc-500 font-semibold mt-0.5">${t.label}</p>
+                <p class="font-extrabold text-sm text-zinc-900">\${escapeHtml(r.tenSan)}</p>
+                <p class="text-xs text-zinc-500 font-semibold mt-0.5">\${t.label}</p>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
-                ${statusBadge(r.status)}
-                <span class="time-label">${timeAgo(r.createdAt)}</span>
+                \${statusBadge(r.status)}
+                <span class="time-label">\${timeAgo(r.createdAt)}</span>
               </div>
             </div>
-            ${r.note ? `<p class="text-sm text-zinc-600 mt-2 bg-zinc-50 rounded-xl px-3 py-2">"${escapeHtml(r.note)}"</p>` : ''}
-            ${itemsHtml ? `<div class="flex flex-wrap gap-1.5 mt-2">${itemsHtml}</div>` : ''}
-            ${acts ? `<div class="flex gap-2 mt-3 flex-wrap">${acts}</div>` : ''}
+            \${r.note ? `<p class="text-sm text-zinc-600 mt-2 bg-zinc-50 rounded-xl px-3 py-2">"\${escapeHtml(r.note)}"</p>` : ''}
+            \${itemsHtml ? `<div class="flex flex-wrap gap-1.5 mt-2">\${itemsHtml}</div>` : ''}
+            \${acts ? `<div class="flex gap-2 mt-3 flex-wrap">\${acts}</div>` : ''}
           </div>
         </div>
       </div>`;
   }).join('');
+}
+
+function doAction(requestId, action) {
+  const params = new URLSearchParams();
+  params.append('requestId', requestId);
+  params.append('action', action);
+  fetch(`\${CONTEXT}/api/staff/yeu-cau-qr/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString()
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (!res.success) { alert(res.message || 'Không thể cập nhật yêu cầu.'); return; }
+      loadList();
+      loadCounts();
+    })
+    .catch(() => alert('Lỗi kết nối. Vui lòng thử lại.'));
 }
 
 function switchTab(status, btn) {
@@ -278,7 +302,7 @@ function switchTab(status, btn) {
 }
 
 function loadList() {
-  fetch(`${CONTEXT}/api/staff/yeu-cau-qr?status=${currentStatus}`)
+  fetch(`\${CONTEXT}/api/staff/yeu-cau-qr?status=\${currentStatus}`)
     .then(r => r.json())
     .then(res => {
       if (!res.success) return;
@@ -298,7 +322,7 @@ function loadCounts() {
     'CANCELLED': { stat: 'statCancel', cnt: 'cntCancel' }
   };
   statuses.forEach(s => {
-    fetch(`${CONTEXT}/api/staff/yeu-cau-qr?status=${s}`)
+    fetch(`\${CONTEXT}/api/staff/yeu-cau-qr?status=\${s}`)
       .then(r => r.json())
       .then(res => {
         if (!res.success) return;

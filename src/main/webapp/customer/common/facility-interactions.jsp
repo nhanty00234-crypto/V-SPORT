@@ -250,6 +250,10 @@
         transition: background-color .15s ease; min-height: 38px;
     }
     .vsfs-court-cta:hover { background: var(--vs-orange-600, #F97316); border-color: var(--vs-orange-600, #F97316); }
+    .vsfs-court-cta.vsfs-cta-green {
+        color: #fff; border-color: var(--vs-success, #16A36A); background: var(--vs-success, #16A36A);
+    }
+    .vsfs-court-cta.vsfs-cta-green:hover { background: var(--vs-success-dark, #12854F); border-color: var(--vs-success-dark, #12854F); }
     .vsfs-service { display: flex; justify-content: space-between; gap: 12px; padding: 9px 2px; border-bottom: 1px solid #edf4f0; font-size: 13.5px; }
     .vsfs-service b { font-weight: 800; color: var(--vs-primary-700, #185A9D); white-space: nowrap; }
     .vsfs-imggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
@@ -818,7 +822,7 @@
             ov.appendChild(ovMeta);
             const ovHasCoords = typeof data.latitude === 'number' && typeof data.longitude === 'number'
                 && (data.latitude !== 0 || data.longitude !== 0);
-            const mapLink = el('a', 'vsfs-court-cta', 'Xem trên bản đồ');
+            const mapLink = el('a', 'vsfs-court-cta vsfs-cta-green', 'Xem trên bản đồ');
             mapLink.href = ovHasCoords
                 ? CTX + '/customer/ban-do?facilityId=' + encodeURIComponent(fsCurrentId)
                 : CTX + '/customer/ban-do';
