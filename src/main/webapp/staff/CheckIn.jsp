@@ -462,6 +462,9 @@
                             <c:choose>
                                 <c:when test="${san.trangThai == 'Đang sử dụng'}">
                                     <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
+                                    <img src="${pageContext.request.contextPath}/manager/ma-qr-san-anh?sanId=${san.sanID}&mode=preview"
+                                         alt="QR sân" class="absolute top-2.5 left-2.5 w-10 h-10 rounded-lg border border-zinc-200 cursor-pointer"
+                                         onclick="event.stopPropagation(); window.open(this.src, '_blank')" />
                                     <div class="w-12 h-12 rounded-2xl ${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center ${themeIcon} mb-2 shadow-inner">
                                         <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
                                     </div>
@@ -526,6 +529,9 @@
                                 </c:when>
                                 <c:when test="${san.trangThai == 'Sẵn sàng'}">
                                     <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
+                                    <img src="${pageContext.request.contextPath}/manager/ma-qr-san-anh?sanId=${san.sanID}&mode=preview"
+                                         alt="QR sân" class="absolute top-2.5 left-2.5 w-10 h-10 rounded-lg border border-zinc-200 cursor-pointer"
+                                         onclick="event.stopPropagation(); window.open(this.src, '_blank')" />
                                     <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-2">
                                         <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
                                     </div>
@@ -602,6 +608,11 @@
                             <span class="material-symbols-outlined text-[16px]">local_cafe</span>
                             Dịch vụ đặt trước
                             <span id="badge-count-preorders" class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
+                        </button>
+                        <button type="button" onclick="location.href='${pageContext.request.contextPath}/staff/yeu-cau-qr'" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-purple-700 hover:text-purple-900">
+                            <span class="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+                            Yêu cầu QR
+                            <span id="badge-count-qr-request" class="bg-purple-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
                         </button>
                     </div>
                 </div>
@@ -1609,6 +1620,20 @@
 
     // Chạy cập nhật ngay khi tải trang và thiết lập chu kỳ 30 giây
     setInterval(pollUpdates, 30000);
+
+    function pollQRRequestCount() {
+        fetch('${pageContext.request.contextPath}/api/staff/yeu-cau-qr/count')
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    const el = document.getElementById('badge-count-qr-request');
+                    if (el) el.textContent = res.data.count;
+                }
+            })
+            .catch(err => console.error('Lỗi khi lấy số lượng yêu cầu QR:', err));
+    }
+    pollQRRequestCount();
+    setInterval(pollQRRequestCount, 10000);
 
     // Resync ngay khi tab quay lại foreground - tránh đồng hồ đếm ngược lệch nếu máy vào sleep/đổi tab lâu.
     document.addEventListener('visibilitychange', () => {

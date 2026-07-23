@@ -54,7 +54,7 @@ public class SanQRImageServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         TaiKhoan manager = (TaiKhoan) session.getAttribute("user");
-        if (manager == null || manager.getRoleId() != Constants.ROLE_MANAGER || manager.getCoSoId() == null) {
+        if (manager == null || (manager.getRoleId() != Constants.ROLE_MANAGER && manager.getRoleId() != Constants.ROLE_LE_TAN) || manager.getCoSoId() == null) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
