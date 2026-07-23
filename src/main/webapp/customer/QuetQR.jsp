@@ -24,9 +24,9 @@
             <h1>${resolveDto.tenSan}</h1>
             <p class="sub">${resolveDto.tenCoSo}</p>
         </div>
-        <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=call'">📢 Gọi nhân viên</button>
-        <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=order'">🍔 Gọi món</button>
-        <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=service'">🛠️ Yêu cầu dịch vụ</button>
+        <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=call&sanId=${resolveDto.sanId}'">📢 Gọi nhân viên</button>
+        <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=order&sanId=${resolveDto.sanId}'">🍔 Gọi món</button>
+        <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=service&sanId=${resolveDto.sanId}'">🛠️ Yêu cầu dịch vụ</button>
     </c:when>
     <c:otherwise>
         <div class="error-box">${resolveDto.message}</div>
