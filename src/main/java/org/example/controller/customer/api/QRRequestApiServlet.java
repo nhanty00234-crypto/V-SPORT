@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.model.QRRequest;
 import org.example.service.QRRequestService;
 
 import java.io.IOException;
@@ -62,7 +63,8 @@ public class QRRequestApiServlet extends HttpServlet {
     }
 
     private boolean isValidType(String type) {
-        return "CALL_STAFF".equals(type) || "ORDER_ITEM".equals(type) || "SERVICE_REQUEST".equals(type);
+        return QRRequest.TYPE_CALL_STAFF.equals(type) || QRRequest.TYPE_ORDER_ITEM.equals(type)
+            || QRRequest.TYPE_SERVICE_REQUEST.equals(type);
     }
 
     private int statusFor(QRRequestService.ErrorCode code) {

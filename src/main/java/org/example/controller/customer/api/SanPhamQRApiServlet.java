@@ -10,6 +10,8 @@ import org.example.dao.SanPhamDichVuDAO;
 import org.example.dao.impl.SanPhamDichVuDAOImpl;
 import org.example.model.San;
 import org.example.model.SanPham_DichVu;
+import org.example.model.SanQR;
+import org.example.service.manager.SanQRService;
 import org.example.util.Constants;
 import org.example.util.JPAUtil;
 import jakarta.persistence.EntityManager;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class SanPhamQRApiServlet extends HttpServlet {
 
     private final SanPhamDichVuDAO sanPhamDao = new SanPhamDichVuDAOImpl();
+    private final SanQRService sanQRService = new SanQRService();
     private final Gson gson = new Gson();
 
     @Override
@@ -55,6 +58,14 @@ public class SanPhamQRApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             out.put("success", false);
             out.put("message", "Không tìm thấy sân.");
+            resp.getWriter().write(gson.toJson(out));
+            return;
+        }
+        SanQR sanQR = sanQRService.findReadOnlyBySanId(sanId);
+        if (sanQR == null || !sanQR.isActive()) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            out.put("success", false);
+            out.put("message", "Mã QR của sân này không còn hiệu lực.");
             resp.getWriter().write(gson.toJson(out));
             return;
         }
