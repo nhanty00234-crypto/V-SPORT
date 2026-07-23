@@ -55,7 +55,11 @@
       <h2 class="text-2xl font-black tracking-tight text-purple-950">Mã QR sân</h2>
       <p class="text-sm text-zinc-500 mt-1 max-w-xl">Tạo, quản lý và in mã QR để khách hàng gọi nhân viên, yêu cầu dịch vụ hoặc thanh toán tại từng sân.</p>
     </div>
-    <div class="flex items-center gap-2 shrink-0">
+    <div class="flex items-center gap-2 shrink-0 flex-wrap">
+      <a href="${pageContext.request.contextPath}/staff/yeu-cau-qr" class="h-11 px-4 rounded-xl border border-purple-200 bg-white text-purple-700 text-sm font-semibold hover:bg-purple-50 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">inbox</span>Yêu cầu từ QR
+        <span id="badge-qr-req" class="hidden bg-purple-600 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full leading-none"></span>
+      </a>
       <button id="btnBatchPrint" disabled onclick="openBatchPrint()" class="h-11 px-4 rounded-xl border border-purple-200 bg-white text-purple-700 text-sm font-semibold hover:bg-purple-50 disabled:opacity-40 disabled:pointer-events-none">
         In hàng loạt
       </button>
@@ -193,6 +197,22 @@
 <script>
 const CTX = "${pageContext.request.contextPath}";
 let currentSanId = null;
+
+(function pollBadge() {
+  fetch(CTX + '/api/staff/yeu-cau-qr/count')
+    .then(r => r.json())
+    .then(res => {
+      const el = document.getElementById('badge-qr-req');
+      if (el && res.success && res.data.count > 0) {
+        el.textContent = res.data.count;
+        el.classList.remove('hidden');
+      } else if (el) {
+        el.classList.add('hidden');
+      }
+    })
+    .catch(() => {})
+    .finally(() => setTimeout(pollBadge, 15000));
+})();
 let currentRowData = null;
 
 function applyFilters() {

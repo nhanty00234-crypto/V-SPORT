@@ -147,6 +147,9 @@
     <a href="${pageContext.request.contextPath}/staff/dat-san" class="nav-link ${uri.contains('/staff/dat-san') || uri.contains('/QuanLyDatSan.jsp') ? 'active' : ''}">
       <i class="ti ti-calendar-check text-[19px]"></i>Duyệt đặt sân
     </a>
+    <a href="${pageContext.request.contextPath}/staff/yeu-cau-qr" class="nav-link ${uri.contains('/staff/yeu-cau-qr') || uri.contains('/YeuCauQR.jsp') ? 'active' : ''}">
+      <i class="ti ti-qrcode text-[19px]"></i>Yêu cầu từ QR
+    </a>
   </nav>
 
   <div class="px-3 py-3 border-t border-orange-50 shrink-0">
