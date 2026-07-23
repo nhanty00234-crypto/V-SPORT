@@ -57,6 +57,17 @@ public interface GhepKeoDAO {
     }
 
     /**
+     * DTO thông báo: ai đó tham gia vào kèo của chủ kèo.
+     */
+    class NotificationItem {
+        public int id;            // ChiTietKeoID — dùng làm unique key phía client
+        public int keoId;
+        public String tenNguoiChoi;
+        public String thoiGian;  // ISO timestamp dạng String
+        public String trangThai; // "Chờ duyệt" | "Đã tham gia"
+    }
+
+    /**
      * Tạo kèo mới. Gán mặc định TrangThai = "Đang mở" nếu chưa có.
      * @return keoId mới hoặc -1 nếu thất bại.
      */
@@ -111,4 +122,10 @@ public interface GhepKeoDAO {
 
     /** Trả về participant view của accountId cho keoId (null nếu chưa tham gia hoặc đã rời/từ chối). */
     ChiTietGhepKeoView getActiveParticipant(int keoId, int accountId);
+
+    /**
+     * Danh sách thông báo: các lượt xin / được tham gia gần đây vào kèo do ownerAccountId tạo.
+     * Giới hạn 30 bản ghi mới nhất, sắp xếp theo ChiTietKeoID giảm dần.
+     */
+    List<NotificationItem> listJoinNotifications(int ownerAccountId);
 }

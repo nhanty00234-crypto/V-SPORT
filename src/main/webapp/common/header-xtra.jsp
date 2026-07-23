@@ -52,6 +52,22 @@
                                     <span class="badge">0</span>
                                 </a>
                                 <% TaiKhoan user=(TaiKhoan) session.getAttribute("user"); if (user !=null) { %>
+                                    <%-- Nút thông báo ghép kèo --%>
+                                    <div class="vs-notif-wrap" id="vsNotifWrap">
+                                        <button type="button" class="icon-btn vs-notif-btn" id="vsNotifBtn" aria-label="Thông báo" aria-expanded="false" aria-controls="vsNotifDropdown">
+                                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                            <span class="vs-notif-badge" id="vsNotifBadge" style="opacity:0;transition:opacity .2s;">0</span>
+                                        </button>
+                                        <div class="vs-notif-dropdown" id="vsNotifDropdown" role="dialog" aria-label="Thông báo ghép kèo" hidden>
+                                            <div class="vs-notif-head">
+                                                <span class="vs-notif-head-title">Thông báo</span>
+                                                <button type="button" class="vs-notif-clear" id="vsNotifClear" title="Đánh dấu tất cả đã đọc">Đọc tất cả</button>
+                                            </div>
+                                            <ul class="vs-notif-list" id="vsNotifList" role="list">
+                                                <li class="vs-notif-empty" id="vsNotifEmpty">Chưa có thông báo mới</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                     <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="icon-btn"
                                         style="width: auto; padding: 0 15px; gap: 8px; border-radius: 20px;">
                                         <i class="far fa-user"></i>
@@ -125,6 +141,174 @@
             </ul>
         </nav>
 
+        <style>
+            /* ---- Notification bell (header-xtra) ---- */
+            .vs-notif-wrap {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+            }
+            .vs-notif-btn {
+                position: relative;
+                /* Reset browser button defaults */
+                border: none !important;
+                outline: none !important;
+                background: rgba(255, 255, 255, 0.05) !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                /* Inherit icon-btn layout */
+                color: var(--surface, #fff);
+                font-size: 20px;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                transition: background 0.2s;
+            }
+            .vs-notif-btn:hover { background: rgba(255, 255, 255, 0.15) !important; }
+            .vs-notif-btn:focus { outline: none !important; box-shadow: none !important; }
+            .vs-notif-badge {
+                position: absolute !important;
+                top: -4px !important;
+                right: -4px !important;
+                min-width: 18px !important;
+                height: 18px !important;
+                padding: 0 5px !important;
+                border-radius: 999px !important;
+                background: #E5484D !important;
+                color: #fff !important;
+                font-size: 10px !important;
+                font-weight: 800 !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                pointer-events: none;
+                line-height: 1;
+            }
+            .vs-notif-dropdown {
+                position: absolute;
+                top: calc(100% + 10px);
+                right: 0;
+                z-index: 2000;
+                width: 340px;
+                max-width: calc(100vw - 24px);
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 12px 40px rgba(7,26,47,.18), 0 2px 8px rgba(7,26,47,.10);
+                border: 1px solid #DCE5EF;
+                overflow: hidden;
+                animation: vsNotifFadeIn .18s ease;
+            }
+            @keyframes vsNotifFadeIn {
+                from { opacity: 0; transform: translateY(-8px) scale(.97); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            .vs-notif-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 16px 10px;
+                border-bottom: 1px solid #EEF2F6;
+            }
+            .vs-notif-head-title {
+                font-size: 14px;
+                font-weight: 800;
+                color: #122d40;
+            }
+            .vs-notif-clear {
+                background: none;
+                border: none;
+                font-size: 12px;
+                font-weight: 700;
+                color: #01c771;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: background .12s;
+            }
+            .vs-notif-clear:hover { background: #EFFDF6; }
+            .vs-notif-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                max-height: 360px;
+                overflow-y: auto;
+            }
+            .vs-notif-empty {
+                padding: 28px 16px;
+                text-align: center;
+                font-size: 13px;
+                color: #829AB1;
+            }
+            .vs-notif-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 11px;
+                padding: 12px 16px;
+                border-bottom: 1px solid #F1F5F9;
+                cursor: default;
+                transition: background .12s;
+                position: relative;
+            }
+            .vs-notif-item:last-child { border-bottom: none; }
+            .vs-notif-item:hover { background: #F8FAFB; }
+            .vs-notif-item.is-unread { background: #F0FDF8; }
+            .vs-notif-item.is-unread:hover { background: #E4FAF2; }
+            .vs-notif-item.is-unread::before {
+                content: '';
+                position: absolute;
+                left: 0; top: 0; bottom: 0;
+                width: 3px;
+                background: #01e281;
+                border-radius: 0 2px 2px 0;
+            }
+            .vs-notif-avatar {
+                width: 36px; height: 36px; flex-shrink: 0;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #01c771, #01e281);
+                color: #fff;
+                display: inline-flex; align-items: center; justify-content: center;
+                font-size: 12px; font-weight: 800;
+            }
+            .vs-notif-body { min-width: 0; flex: 1; }
+            .vs-notif-text {
+                font-size: 13px;
+                font-weight: 600;
+                color: #102A43;
+                line-height: 1.45;
+                margin: 0 0 3px;
+            }
+            .vs-notif-text strong { color: #01c771; }
+            .vs-notif-time {
+                font-size: 11.5px;
+                color: #829AB1;
+                font-weight: 600;
+            }
+            .vs-notif-view {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11.5px;
+                font-weight: 700;
+                color: #01c771;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 2px 0;
+                text-decoration: none;
+                margin-top: 4px;
+            }
+            .vs-notif-view:hover { text-decoration: underline; }
+            @media (max-width: 480px) {
+                .vs-notif-dropdown {
+                    right: -60px;
+                    width: calc(100vw - 20px);
+                }
+            }
+        </style>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 fetch('${pageContext.request.contextPath}/customer/api/cart-count')
@@ -203,4 +387,135 @@
                     });
                 }
             });
+
+            /* ==================== Notification bell logic ==================== */
+            (function () {
+                var btn = document.getElementById('vsNotifBtn');
+                var dropdown = document.getElementById('vsNotifDropdown');
+                var badge = document.getElementById('vsNotifBadge');
+                var list = document.getElementById('vsNotifList');
+                var clearBtn = document.getElementById('vsNotifClear');
+                var emptyEl = document.getElementById('vsNotifEmpty');
+
+                if (!btn || !dropdown) return; // chỉ chạy khi đã đăng nhập
+
+                var notifications = []; // {id, tenNguoiChoi, tenKeo, keoId, thoiGian, isUnread}
+                var seenIds = JSON.parse(localStorage.getItem('vsNotifSeen') || '[]');
+                var isOpen = false;
+
+                function getInitials(name) {
+                    if (!name) return '?';
+                    return name.trim().split(/\s+/).map(function(p){return p[0];}).slice(-2).join('').toUpperCase();
+                }
+                function relativeTime(isoStr) {
+                    if (!isoStr) return '';
+                    var d = new Date(isoStr);
+                    var diff = Math.floor((Date.now() - d.getTime()) / 1000);
+                    if (diff < 60) return 'Vừa xong';
+                    if (diff < 3600) return Math.floor(diff/60) + ' phút trước';
+                    if (diff < 86400) return Math.floor(diff/3600) + ' giờ trước';
+                    return Math.floor(diff/86400) + ' ngày trước';
+                }
+
+                function renderNotifications() {
+                    list.innerHTML = '';
+                    var unread = notifications.filter(function(n){ return n.isUnread; });
+                    if (!notifications.length) {
+                        emptyEl = document.createElement('li');
+                        emptyEl.className = 'vs-notif-empty';
+                        emptyEl.textContent = 'Chưa có thông báo mới';
+                        list.appendChild(emptyEl);
+                        return;
+                    }
+                    notifications.forEach(function(n) {
+                        var li = document.createElement('li');
+                        li.className = 'vs-notif-item' + (n.isUnread ? ' is-unread' : '');
+                        var actionText = (n.trangThai === 'Đã rời') ? 'đã rời khỏi kèo của bạn' : 'đã tham gia kèo của bạn';
+                        li.innerHTML =
+                            '<div class="vs-notif-avatar">' + getInitials(n.tenNguoiChoi) + '</div>'
+                          + '<div class="vs-notif-body">'
+                          +   '<p class="vs-notif-text"><strong>' + (n.tenNguoiChoi || 'Người dùng') + '</strong> ' + actionText + '</p>'
+                          +   '<span class="vs-notif-time">' + relativeTime(n.thoiGian) + '</span>'
+                          + '</div>';
+                        list.appendChild(li);
+                    });
+                }
+
+                function updateBadge() {
+                    var unreadCount = notifications.filter(function(n){return n.isUnread;}).length;
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                        badge.style.opacity = '1';
+                    } else {
+                        badge.style.opacity = '0';
+                    }
+                }
+
+                function openDropdown() {
+                    isOpen = true;
+                    dropdown.hidden = false;
+                    btn.setAttribute('aria-expanded', 'true');
+                    renderNotifications();
+                }
+                function closeDropdown() {
+                    isOpen = false;
+                    dropdown.hidden = true;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (isOpen) closeDropdown(); else openDropdown();
+                });
+                document.addEventListener('click', function(e) {
+                    if (isOpen && !document.getElementById('vsNotifWrap').contains(e.target)) closeDropdown();
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && isOpen) closeDropdown();
+                });
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function() {
+                        notifications.forEach(function(n){ n.isUnread = false; });
+                        var ids = notifications.map(function(n){return n.id;});
+                        localStorage.setItem('vsNotifSeen', JSON.stringify(ids));
+                        seenIds = ids;
+                        updateBadge();
+                        renderNotifications();
+                    });
+                }
+
+                /* Fetch thông báo từ API (polling) */
+                function fetchNotifications() {
+                    var ctx = '${pageContext.request.contextPath}';
+                    fetch(ctx + '/customer/api/matches/notifications', { headers: { 'Accept': 'application/json' } })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            if (!data.success) return;
+                            var items = data.notifications || [];
+                            var refreshedSeenIds = JSON.parse(localStorage.getItem('vsNotifSeen') || '[]');
+                            notifications = items.map(function(n) {
+                                var uniqueId = n.id + '_' + n.trangThai;
+                                return {
+                                    id: uniqueId,
+                                    tenNguoiChoi: n.tenNguoiChoi,
+                                    keoId: n.keoId,
+                                    trangThai: n.trangThai,
+                                    thoiGian: n.thoiGian,
+                                    isUnread: refreshedSeenIds.indexOf(uniqueId) === -1
+                                };
+                            });
+                            updateBadge();
+                            if (isOpen) renderNotifications();
+                        })
+                        .catch(function() { /* silent */ });
+                }
+
+                /* Khởi động: fetch ngay và poll mỗi 30s */
+                fetchNotifications();
+                setInterval(fetchNotifications, 30000);
+
+                /* Expose để GhepKeo.jsp gọi khi có hành động tham gia */
+                window.vsRefreshNotifications = fetchNotifications;
+            })();
         </script>

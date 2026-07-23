@@ -60,6 +60,7 @@ import java.util.Map;
         "/customer/api/matches/detail",
         "/customer/api/matches/mine",
         "/customer/api/matches/my-bookings",
+        "/customer/api/matches/notifications",
         "/customer/api/matches/join",
         "/customer/api/matches/approve",
         "/customer/api/matches/reject",
@@ -88,11 +89,12 @@ public class GhepKeoServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getServletPath();
         switch (path) {
-            case "/customer/api/matches":              handleListOpen(req, resp);        return;
-            case "/customer/api/matches/detail":       handleDetail(req, resp);          return;
-            case "/customer/api/matches/mine":         handleMine(req, resp);            return;
-            case "/customer/api/matches/my-bookings":  handleMyBookings(req, resp);      return;
-            case "/customer/ghep-keo":                  handlePage(req, resp);            return;
+            case "/customer/api/matches":                   handleListOpen(req, resp);       return;
+            case "/customer/api/matches/detail":            handleDetail(req, resp);         return;
+            case "/customer/api/matches/mine":              handleMine(req, resp);           return;
+            case "/customer/api/matches/my-bookings":       handleMyBookings(req, resp);     return;
+            case "/customer/api/matches/notifications":     handleNotifications(req, resp);  return;
+            case "/customer/ghep-keo":                      handlePage(req, resp);           return;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -295,6 +297,23 @@ public class GhepKeoServlet extends HttpServlet {
             list.add(item);
         }
         writeJson(resp, 200, Map.of("success", true, "count", list.size(), "bookings", list));
+    }
+
+    // ==========================================================================
+    // JSON: notifications — thông báo người tham gia kèo
+    // ==========================================================================
+    private void handleNotifications(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpSession session = req.getSession(false);
+        TaiKhoan user = session != null ? (TaiKhoan) session.getAttribute("user") : null;
+        if (user == null) {
+            writeJson(resp, 401, Map.of("success", false, "error", "Vui lòng đăng nhập."));
+            return;
+        }
+        List<GhepKeoDAO.NotificationItem> items = ghepKeoDAO.listJoinNotifications(user.getAccountId());
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("success", true);
+        data.put("notifications", items);
+        writeJson(resp, 200, data);
     }
 
     // ==========================================================================

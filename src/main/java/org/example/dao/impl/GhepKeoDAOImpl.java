@@ -638,4 +638,49 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
         }
         return null;
     }
+
+    // =========================================================================
+    // Notifications: người tham gia kèo của chủ kèo
+    // =========================================================================
+
+    /**
+     * Trả về tối đa 30 bản ghi ChiTietGhepKeo mới nhất của các kèo do ownerAccountId tạo
+     * (trạng thái "Chờ duyệt" hoặc "Đã tham gia"), dùng để hiển thị thông báo trên header.
+     * Vì bảng ChiTietGhepKeo không có cột timestamp, ta dùng ChiTietKeoID tăng tự nhiên làm proxy thời gian.
+     */
+    @Override
+    public List<NotificationItem> listJoinNotifications(int ownerAccountId) {
+        // Lấy 30 ChiTietGhepKeo mới nhất của các kèo mà ownerAccountId là chủ,
+        // trạng thái Chờ duyệt hoặc Đã tham gia (không lấy rời/từ chối).
+        String sql =
+            "SELECT TOP 30 ct.ChiTietKeoID, ct.KeoID, ct.TrangThaiThamGia, " +
+            "       tk.FullName AS TenNguoiChoi " +
+            "FROM ChiTietGhepKeo ct " +
+            "JOIN GhepKeo g ON ct.KeoID = g.KeoID " +
+            "JOIN Accounts tk ON ct.AccountID_NguoiThamGia = tk.AccountID " +
+            "WHERE g.AccountID_NguoiTao = ? " +
+            "  AND ct.TrangThaiThamGia IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "', N'" + P_STATUS_LEFT + "') " +
+            "ORDER BY ct.ChiTietKeoID DESC";
+        List<NotificationItem> out = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ownerAccountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    NotificationItem item = new NotificationItem();
+                    item.id = rs.getInt("ChiTietKeoID");
+                    item.keoId = rs.getInt("KeoID");
+                    item.tenNguoiChoi = rs.getString("TenNguoiChoi");
+                    item.trangThai = rs.getString("TrangThaiThamGia");
+                    // Dùng ChiTietKeoID để tạo "thời gian giả" — client chỉ cần relative label
+                    // Không có cột ngày giờ nên để null, frontend sẽ hiển thị "Vừa xong" hoặc bỏ qua
+                    item.thoiGian = null;
+                    out.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "listJoinNotifications failed ownerAccountId=" + ownerAccountId, e);
+        }
+        return out;
+    }
 }

@@ -1556,7 +1556,7 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 gkToast(data.message || (data.success ? 'Đã gửi yêu cầu.' : 'Không thể tham gia.'), data.success ? 'success' : 'danger');
-                if (data.success) { gkLoadDiscover(); gkLoadMine(); }
+                if (data.success) { gkLoadDiscover(); gkLoadMine(); if (typeof window.vsRefreshNotifications === 'function') window.vsRefreshNotifications(); }
                 else { btn.disabled = false; btn.innerHTML = original; }
             })
             .catch(function () {
