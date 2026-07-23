@@ -20,7 +20,7 @@
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
 
   <!-- Welcome banner -->
-  <section class="hero-gradient rounded-2xl border border-purple-150 overflow-hidden relative">
+  <section class="mgr-banner-shimmer rounded-2xl border border-purple-200 overflow-hidden relative">
     <div class="absolute -top-12 -right-12 w-64 h-64 bg-purple-300/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-indigo-300/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="relative p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -63,13 +63,13 @@
 
     <!-- KPI row -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger mb-5">
-      <div class="card card-hover p-5">
+      <div class="card mgr-kpi-hover p-5">
         <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center"><span class="material-symbols-outlined text-[20px] text-purple-700" style="font-variation-settings:'FILL' 1">event</span></div>
+          <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center mgr-kpi-icon"><span class="material-symbols-outlined text-[20px] text-purple-700" style="font-variation-settings:'FILL' 1">event</span></div>
           <span class="flex items-center gap-0.5 text-[11px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md"><span class="material-symbols-outlined text-[12px]">trending_up</span>Hôm nay</span>
         </div>
         <p class="text-xs text-zinc-500 font-medium mb-1">Lịch đặt hôm nay</p>
-        <p class="text-3xl font-black text-purple-950 tracking-tight">${dashboardData.bookingsTodayCount}</p>
+        <p class="text-3xl font-black text-purple-950 tracking-tight" data-mgr-count="${dashboardData.bookingsTodayCount}">${dashboardData.bookingsTodayCount}</p>
         <div class="flex items-center justify-between mt-3 pt-3 border-t border-purple-50">
           <p class="text-[11px] text-zinc-500">Chi nhánh CS${sessionScope.user.coSoId}</p>
           <svg width="50" height="20" viewBox="0 0 50 20" class="text-purple-500"><polyline fill="none" stroke="currentColor" stroke-width="1.5" points="0,15 8,12 16,14 24,8 32,10 40,5 50,8"/><polyline fill="rgba(139,92,246,.1)" stroke="none" points="0,15 8,12 16,14 24,8 32,10 40,5 50,8 50,20 0,20"/></svg>

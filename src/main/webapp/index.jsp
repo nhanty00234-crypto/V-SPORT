@@ -104,8 +104,8 @@
                     <div class="promo-banner banner-green">
                         <div class="banner-content">
                             <div class="banner-discount">GIẢM ĐẾN 30%</div>
-                            <h3>Đồ thể thao<br>chính hãng</h3>
-                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-banner">Xem sản phẩm <i class="fas fa-arrow-right"></i></a>
+                            <h3>Đồ thể thao chính hãng</h3>
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="btn-banner">Xem ngay <i class="fas fa-arrow-right"></i></a>
                         </div>
                         <img src="${pageContext.request.contextPath}/assets/images/vsport/players/person-03.jpg" alt="Đồ thể thao chính hãng" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 80%;">
                     </div>
@@ -113,7 +113,7 @@
                     <div class="promo-banner banner-navy">
                         <div class="banner-content">
                             <div class="banner-discount">KẾT NỐI MIỄN PHÍ</div>
-                            <h3>Tìm đồng đội<br>ghép kèo</h3>
+                            <h3>Tìm đồng đội ghép kèo</h3>
                             <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="btn-banner">Ghép kèo <i class="fas fa-arrow-right"></i></a>
                         </div>
                         <img src="${pageContext.request.contextPath}/assets/images/vsport/community/community-01.jpg" alt="Tìm đồng đội ghép kèo" class="banner-image" style="border-radius: 50%; right: -40px; bottom: -40px; width: 80%;">
@@ -127,27 +127,27 @@
             <div class="container">
                 <h2 class="section-title">Khám phá <span class="highlight">môn thể thao</span></h2>
                 <div class="category-grid">
-                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng đá" class="category-card">
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng đá" class="category-card cat-football">
                         <div class="category-icon"><i class="fas fa-futbol"></i></div>
                         <h4>Bóng đá</h4>
                     </a>
-                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Cầu lông" class="category-card">
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Cầu lông" class="category-card cat-badminton">
                         <div class="category-icon"><i class="fas fa-table-tennis-paddle-ball"></i></div>
                         <h4>Cầu lông</h4>
                     </a>
-                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Pickleball" class="category-card">
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Pickleball" class="category-card cat-pickleball">
                         <div class="category-icon"><i class="fas fa-table-tennis-paddle-ball"></i></div>
                         <h4>Pickleball</h4>
                     </a>
-                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Tennis" class="category-card">
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Tennis" class="category-card cat-tennis">
                         <div class="category-icon"><i class="fas fa-baseball-bat-ball"></i></div>
                         <h4>Tennis</h4>
                     </a>
-                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng rổ" class="category-card">
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Bóng rổ" class="category-card cat-basketball">
                         <div class="category-icon"><i class="fas fa-basketball"></i></div>
                         <h4>Bóng rổ</h4>
                     </a>
-                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Gym" class="category-card">
+                    <a href="${pageContext.request.contextPath}/customer/tim-kiem?q=Gym" class="category-card cat-gym">
                         <div class="category-icon"><i class="fas fa-dumbbell"></i></div>
                         <h4>Gym &amp; Fitness</h4>
                     </a>
@@ -864,6 +864,9 @@
             const accountBtn = document.getElementById('authBtn');
             
             // Routing
+            const urlParams = new URLSearchParams(window.location.search);
+            const wantsAuthView = window.location.hash === '#auth' || urlParams.get('auth') === 'login';
+
             function handleRoute() {
                 const hash = window.location.hash;
                 if (hash === '#auth') {
@@ -875,13 +878,27 @@
                 }
                 window.scrollTo({ top: 0, behavior: 'instant' });
             }
-            
+
             window.addEventListener('hashchange', handleRoute);
-            
-            // Initial route check
-            if (window.location.hash === '#auth') {
+
+            // Initial route check — mở luôn cho cả điều hướng qua hash (#auth) lẫn qua
+            // query string (?auth=login, dùng bởi các servlet redirect khi cần đăng nhập).
+            if (wantsAuthView) {
+                window.location.hash = '#auth';
                 handleRoute();
+
+                if (urlParams.get('notice') === 'loginRequired') {
+                    const banner = document.createElement('div');
+                    banner.className = 'auth-login-notice';
+                    banner.style.cssText = 'max-width:520px;margin:0 auto 20px;padding:14px 18px;border-radius:10px;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;font-size:14px;text-align:center;';
+                    banner.textContent = 'Vui lòng đăng nhập để tiếp tục thao tác này.';
+                    const authContainer = document.querySelector('#authView .auth-container');
+                    if (authContainer) authContainer.parentNode.insertBefore(banner, authContainer);
+                }
             }
+
+            // Giữ redirect param (nếu có) để gắn vào form đăng nhập, dùng sau khi login thành công.
+            const pendingRedirect = urlParams.get('redirect');
             
             if (accountBtn) {
                 accountBtn.addEventListener('click', (e) => {
@@ -1077,6 +1094,7 @@
                     formData.append('phone', loginIdentifier);
                     formData.append('password', password.value);
                     formData.append('loginMethod', isPhone ? 'phone' : 'account');
+                    if (pendingRedirect) formData.append('redirect', pendingRedirect);
 
                     fetch('dangnhap', {
                         method: 'POST',
@@ -1165,6 +1183,127 @@
                 });
             }
             
+            // ── Universal scroll-reveal helper ──────────────────────────
+            function makeObserver(selector, staggerMs, threshold) {
+                const els = document.querySelectorAll(selector);
+                if (!els.length) return;
+                const io = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        const items = entry.target.tagName === 'UL' || entry.target.classList.contains('grid-parent')
+                            ? entry.target.children
+                            : [entry.target];
+                        [...items].forEach((el, i) => setTimeout(() => el.classList.add('visible'), i * (staggerMs || 0)));
+                        io.unobserve(entry.target);
+                    });
+                }, { threshold: threshold || 0.12 });
+                els.forEach(el => io.observe(el));
+            }
+
+            // Benefit bar – stagger each item
+            (function() {
+                const grid = document.querySelector('.benefits');
+                if (!grid) return;
+                const io = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (!e.isIntersecting) return;
+                        [...grid.querySelectorAll('.benefit-item')].forEach((el, i) =>
+                            setTimeout(() => el.classList.add('visible'), i * 110));
+                        io.unobserve(e.target);
+                    });
+                }, { threshold: 0.15 });
+                io.observe(grid);
+            })();
+
+            // Product cards – stagger
+            (function() {
+                const grid = document.querySelector('.product-grid');
+                if (!grid) return;
+                const io = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (!e.isIntersecting) return;
+                        [...grid.querySelectorAll('.product-card')].forEach((el, i) =>
+                            setTimeout(() => el.classList.add('visible'), i * 90));
+                        io.unobserve(e.target);
+                    });
+                }, { threshold: 0.08 });
+                io.observe(grid);
+            })();
+
+            // App / mobile-app section
+            makeObserver('.mobile-app', 0, 0.15);
+
+            // Blog cards – stagger
+            (function() {
+                const grid = document.querySelector('.blog-grid');
+                if (!grid) return;
+                const io = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (!e.isIntersecting) return;
+                        [...grid.querySelectorAll('.blog-card')].forEach((el, i) =>
+                            setTimeout(() => el.classList.add('visible'), i * 100));
+                        io.unobserve(e.target);
+                    });
+                }, { threshold: 0.1 });
+                io.observe(grid);
+            })();
+
+            // Review cards – stagger
+            (function() {
+                const grid = document.querySelector('.reviews-grid');
+                if (!grid) return;
+                const io = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (!e.isIntersecting) return;
+                        [...grid.querySelectorAll('.review-card')].forEach((el, i) =>
+                            setTimeout(() => el.classList.add('visible'), i * 110));
+                        io.unobserve(e.target);
+                    });
+                }, { threshold: 0.12 });
+                io.observe(grid);
+            })();
+
+            // Promo banners curtain animation (odd from left, even from right, staggered)
+            const promoBanners = document.querySelectorAll('.promo-banner');
+            if (promoBanners.length > 0 && 'IntersectionObserver' in window) {
+                const bannerObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const grid = entry.target;
+                            const banners = grid.querySelectorAll('.promo-banner');
+                            banners.forEach((b, i) => {
+                                setTimeout(() => b.classList.add('visible'), i * 120);
+                            });
+                            bannerObserver.unobserve(grid);
+                        }
+                    });
+                }, { threshold: 0.1 });
+                const promoGrid = document.querySelector('.promo-banners');
+                if (promoGrid) bannerObserver.observe(promoGrid);
+            } else {
+                promoBanners.forEach(b => b.classList.add('visible'));
+            }
+
+            // Category scroll-in animation (sequential stagger)
+            const categoryCards = document.querySelectorAll('.category-card');
+            if (categoryCards.length > 0 && 'IntersectionObserver' in window) {
+                const catObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const cards = entry.target.querySelectorAll('.category-card');
+                            cards.forEach((card, i) => {
+                                setTimeout(() => card.classList.add('visible'), i * 100);
+                            });
+                            catObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.15 });
+                const categoryGrid = document.querySelector('.category-grid');
+                if (categoryGrid) catObserver.observe(categoryGrid);
+            } else {
+                categoryCards.forEach(c => c.classList.add('visible'));
+            }
+
             // Forgot Form
             const forgotForm = document.getElementById('forgotForm');
             const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');

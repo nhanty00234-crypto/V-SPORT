@@ -47,18 +47,20 @@ body { font-family: 'Inter', sans-serif; }
 
 <main class="lg:ml-[260px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
   <div class="flex items-center justify-between gap-4 mb-2 flex-wrap">
-    <div class="flex gap-1 bg-zinc-100 p-1 rounded-xl">
-      <button id="tabNhanSu" onclick="switchTab('nhansu')" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow transition-all">
-        <span class="material-symbols-outlined text-[16px]">people</span>Nhân sự
-        <span class="text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium" id="staffCountDisplay">0</span>
+    <h2 class="text-lg font-bold text-zinc-800">
+      Danh sách nhân sự
+      <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold ml-1" id="staffCountDisplay">0</span>
+    </h2>
+    <div class="flex items-center gap-2">
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
+        <input type="search" id="adminSearchInput" autocomplete="off" placeholder="Tìm theo tên, email, sđt..."
+               class="h-9 w-64 pl-9 pr-3 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all">
+      </div>
+      <button id="addStaffBtn" onclick="openAddStaff()"
+              class="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
+        <span class="material-symbols-outlined text-[18px]">person_add</span>Thêm nhân sự
       </button>
-    </div>
-
-
-    <div class="relative w-full sm:max-w-xs">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
-      <input type="search" id="adminSearchInput" autocomplete="off" placeholder="Tìm theo tên, email, sđt..." 
-             class="h-9 w-full pl-9 pr-3 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all">
     </div>
   </div>
 
@@ -86,7 +88,7 @@ body { font-family: 'Inter', sans-serif; }
 
   <!-- Grid nhân sự đang làm việc -->
   <div id="sectionNhanSu" class="w-full flex flex-col gap-4">
-    <div id="staffGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    <div id="staffGrid" class="flex flex-col divide-y divide-zinc-100 bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm"></div>
   </div>
 
 
@@ -388,9 +390,9 @@ function renderStaff() {
 
   if (pageList.length === 0) {
     staffGrid.innerHTML = `
-      <div class="col-span-full card py-16 text-center text-zinc-400">
+      <div class="py-14 text-center text-zinc-400">
         <span class="material-symbols-outlined text-4xl mb-2 text-zinc-300">group_off</span>
-        <p class="text-xs font-medium">Không tìm thấy thành viên nào</p>
+        <p class="text-xs font-medium mt-1">Không tìm thấy thành viên nào</p>
       </div>
     `;
     const existing = document.getElementById('sectionNhanSu').querySelector('#staffPagination');
@@ -401,7 +403,7 @@ function renderStaff() {
   staffGrid.innerHTML = pageList.map(s => {
     let badgeClass = s.status === 'Đang làm' ? 'badge-green' : 'badge-red';
     let statusText = s.status;
-    let actionsHtml = '';
+    let deleteBtn = '';
 
     if (s.roleId === 2 && s.coSoStatus === 'Chờ duyệt') {
       badgeClass = 'badge-amber';
@@ -411,80 +413,47 @@ function renderStaff() {
       statusText = 'Từ chối';
     }
 
-    if (s.roleId === 1) {
-      actionsHtml = '';
-    } else if (s.roleId === 2) {
-      // Manager/Owner – chỉ xem, việc duyệt/khóa ở trang Quản lý Owner
-      actionsHtml = `
-        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="flex-1 h-8 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">person_remove</span>Xóa
-        </button>
-      `;
-    } else {
-      actionsHtml = `
-        <button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Chuyển vào thùng rác" class="flex-1 h-8 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">person_remove</span>Xóa
-        </button>
-      `;
+    if (s.roleId !== 1) {
+      deleteBtn = `<button onclick="promptSoftDelete('\${s.id}', '\${s.name}')" title="Xóa" class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">person_remove</span>
+      </button>`;
     }
 
     let dept = 'Khác';
-    if (s.roleId === 2) dept = 'Quản lý';
+    if (s.roleId === 1) dept = 'Admin';
+    else if (s.roleId === 2) dept = 'Quản lý';
     else if (s.roleId === 3) dept = 'Khách hàng';
     else if (s.roleId === 4) dept = 'Lễ tân';
     else if (s.roleId === 5) dept = 'Bảo vệ';
-    
-    let branchText = s.coSoId ? `Cơ sở CS\${s.coSoId}` : 'Trụ sở chính';
+
+    let branchText = s.coSoId ? `CS\${s.coSoId}` : 'Trụ sở';
     let avatarUrl = s.avatarUrl
       ? s.avatarUrl
-      : `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=3b82f6&color=fff&size=128&bold=true`;
+      : `https://ui-avatars.com/api/?name=\${encodeURIComponent(s.name)}&background=3b82f6&color=fff&size=64&bold=true`;
 
     return `
-      <div class="card p-5 border border-slate-200 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-        <div>
-          <!-- Card Header: Avatar, Name, Status -->
-          <div class="flex items-start justify-between gap-2.5 mb-4">
-            <div class="flex items-center gap-3">
-              <img src="\${avatarUrl}" alt="\${s.name}" class="w-12 h-12 rounded-full border border-slate-100 shadow-sm shrink-0">
-              <div>
-                <p class="font-extrabold text-slate-900 text-sm leading-tight">\${s.name}</p>
-                <p class="text-[11px] text-blue-600 font-semibold mt-0.5">\${s.VaiTro}</p>
-              </div>
-            </div>
-            <span class="badge \${badgeClass}">\${statusText}</span>
-          </div>
-
-          <!-- Card Middle: Details (Department / Branch) -->
-          <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-4">
-            <div>
-              <p class="font-medium text-slate-400">Bộ phận</p>
-              <p class="text-slate-800 font-extrabold text-xs mt-0.5">\${dept}</p>
-            </div>
-            <div>
-              <p class="font-medium text-slate-400">Nơi làm việc</p>
-              <p class="text-slate-800 font-extrabold text-xs mt-0.5">\${branchText}</p>
-            </div>
-          </div>
-
-          <!-- Contact Container -->
-          <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-1.5 text-xs text-slate-650 font-medium">
-            <div class="flex items-center gap-2 truncate">
-              <span class="material-symbols-outlined text-[15px] text-slate-400 shrink-0">mail</span>
-              <span class="truncate" title="\${s.email}">\${s.email}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-[15px] text-slate-400 shrink-0">phone_iphone</span>
-              <span>\${s.phone}</span>
-            </div>
-          </div>
+      <div class="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-50 transition-colors">
+        <img src="\${avatarUrl}" alt="\${s.name}" class="w-9 h-9 rounded-full border border-zinc-100 shrink-0 object-cover">
+        <div class="min-w-0 w-[190px] shrink-0">
+          <p class="font-bold text-zinc-900 text-sm leading-tight truncate">\${s.name}</p>
+          <p class="text-[11px] text-blue-500 font-semibold truncate">\${s.VaiTro} · \${dept} · \${branchText}</p>
         </div>
-
-        <!-- Action Row -->
-        <div class="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 w-full justify-between">
-          <button onclick="editStaff('\${s.id}')" title="Sửa thông tin" class="flex-1 h-8 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 text-[11px] font-bold transition-all flex items-center justify-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">edit</span>Sửa
+        <div class="min-w-0 flex-1 hidden sm:flex items-center gap-5 text-xs text-zinc-500">
+          <span class="flex items-center gap-1 truncate" title="\${s.email}">
+            <span class="material-symbols-outlined text-[13px] shrink-0 text-zinc-400">mail</span>
+            <span class="truncate">\${s.email || '—'}</span>
+          </span>
+          <span class="flex items-center gap-1 shrink-0">
+            <span class="material-symbols-outlined text-[13px] shrink-0 text-zinc-400">phone_iphone</span>
+            \${s.phone || '—'}
+          </span>
+        </div>
+        <span class="badge \${badgeClass} shrink-0">\${statusText}</span>
+        <div class="flex items-center gap-0.5 shrink-0">
+          <button onclick="editStaff('\${s.id}')" title="Sửa" class="w-7 h-7 flex items-center justify-center rounded-lg text-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">edit</span>
           </button>
-          \${actionsHtml}
+          \${deleteBtn}
         </div>
       </div>
     `;

@@ -320,11 +320,8 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
 
             new Thread(() -> {
                 try {
-                    org.example.util.EmailUtil.sendEmail(finalEmail, "Kích hoạt tài khoản V-SPORT",
-                        "Chào " + finalName + ",\n\n" +
-                        "Tài khoản nhân viên của bạn đã được khởi tạo bởi Quản trị viên.\n" +
-                        "Mật khẩu của bạn là: " + finalPassword + "\n\n" +
-                        "Mã OTP kích hoạt tài khoản của bạn là: " + otpString);
+                    org.example.util.EmailUtil.sendHtmlEmail(finalEmail, "V-SPORT — Kích hoạt tài khoản",
+                        org.example.util.EmailTemplates.kichHoatNhanVien(finalName, finalEmail, finalPassword, otpString));
                 } catch (Exception e) {
                     logger.error("Lỗi gửi email kích hoạt đến: " + finalEmail, e);
                 }

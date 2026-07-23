@@ -546,7 +546,7 @@ public class DoiNhomServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         TaiKhoan user = session != null ? (TaiKhoan) session.getAttribute("user") : null;
         if (user == null) {
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return null;
         }
         if (user.getRoleId() != RoleRedirectUtil.ROLE_CUSTOMER) {

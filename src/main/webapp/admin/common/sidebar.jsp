@@ -126,6 +126,224 @@
     body.admin-page-exiting main{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}
     .admin-transition-scrim{display:none!important}
   }
+
+  /* ══════════════════════════════════════════
+     ENHANCED ADMIN ANIMATIONS v2
+  ══════════════════════════════════════════ */
+
+  /* ── Sidebar nav: richer hover (blue tint + shift 3px) ── */
+  .nav-link:hover {
+    background: rgba(0,102,255,.07) !important;
+    color: #1d4ed8 !important;
+    transform: translateX(3px) !important;
+    box-shadow: none;
+  }
+  .nav-link .ti, .nav-link .material-symbols-outlined {
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+  }
+  .nav-link:hover .ti,
+  .nav-link:hover .material-symbols-outlined { transform: scale(1.15); }
+
+  /* ── Welcome banner shimmer ── */
+  @keyframes bannerShimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+  .banner-shimmer {
+    background: linear-gradient(135deg,#1e3a8a 0%,#2563eb 40%,#3b82f6 60%,#1d4ed8 80%,#1e3a8a 100%);
+    background-size: 300% 100%;
+    animation: bannerShimmer 5s linear infinite;
+  }
+
+  /* ── KPI card: stronger hover lift + badge pulse ── */
+  .kpi-card-anim {
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s cubic-bezier(.16,1,.3,1);
+  }
+  .kpi-card-anim:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -8px rgba(0,0,0,.10);
+  }
+  .kpi-card-anim:hover .kpi-badge {
+    animation: kpiBadgePulse .6s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes kpiBadgePulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  .kpi-card-anim:hover .kpi-icon {
+    transform: scale(1.08);
+    transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+  }
+  .kpi-icon { transition: transform .22s ease; }
+
+  /* ── Progress bars: animate from 0 to target ── */
+  .progress-fill {
+    width: 0 !important;
+    transition: width .9s cubic-bezier(.16,1,.3,1);
+  }
+  .progress-fill.animated { width: var(--target-w) !important; }
+
+  /* ── Staggered grid cascade ── */
+  .grid-cascade > * {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .38s cubic-bezier(.22,1,.36,1), transform .38s cubic-bezier(.22,1,.36,1);
+  }
+  .grid-cascade > *.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── Active status pulse dot ── */
+  @keyframes pulseDotGreen {
+    0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  }
+  .pulse-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulseDotGreen 1.8s ease-in-out infinite;
+  }
+  .pulse-dot-amber { background: #f59e0b;
+    animation-name: pulseDotAmber;
+  }
+  @keyframes pulseDotAmber {
+    0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(245,158,11,0); }
+  }
+
+  /* ── Action button micro-interactions ── */
+  .btn-edit {
+    transition: background-color .15s ease, color .15s ease, transform .12s ease, box-shadow .15s ease;
+  }
+  .btn-edit:hover {
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+    box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  }
+  .btn-danger {
+    transition: background-color .15s ease, color .15s ease, transform .12s ease, box-shadow .15s ease;
+  }
+  .btn-danger:hover {
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    box-shadow: 0 0 0 2px rgba(239,68,68,.15);
+    animation: dangerPulse .35s ease both;
+  }
+  @keyframes dangerPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .btn-config {
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .12s ease;
+  }
+  .btn-config:hover {
+    background-color: #f0fdf4 !important;
+    color: #15803d !important;
+    box-shadow: 0 0 0 2px rgba(34,197,94,.15);
+  }
+
+  /* ── Ripple effect ── */
+  .ripple-host { position: relative; overflow: hidden; }
+  .ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    background: rgba(255,255,255,.35);
+    animation: rippleOut .55s cubic-bezier(.16,1,.3,1) forwards;
+    pointer-events: none;
+  }
+  @keyframes rippleOut {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* ── Audit log timeline cards: sequential slide-in ── */
+  .log-row-anim {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1),
+                box-shadow .2s ease;
+  }
+  .log-row-anim.visible { opacity: 1; transform: translateY(0); }
+  .log-row-anim:hover { box-shadow: 0 0 0 2px rgba(37,99,235,.1), 0 6px 20px -4px rgba(0,0,0,.07); }
+  .log-row-anim:hover .log-border-accent { width: 4px; box-shadow: 2px 0 8px rgba(37,99,235,.25); }
+  .log-border-accent {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; border-radius: 0 2px 2px 0;
+    background: #2563eb; transition: width .18s ease, box-shadow .18s ease;
+  }
+  .log-row-anim:hover .log-ip-badge {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+  }
+  .log-ip-badge { transition: background .15s ease, color .15s ease; }
+
+  /* ── Trash page: summary tiles fade-in with left border ── */
+  .trash-tile-anim {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1);
+    border-left: 3px solid transparent;
+  }
+  .trash-tile-anim.visible { opacity: 1; transform: translateY(0); }
+  .trash-tile-total   { border-left-color: #7c3aed; }
+  .trash-tile-pending { border-left-color: #f59e0b; }
+  .trash-tile-done    { border-left-color: #22c55e; }
+
+  /* ── Trash table: row hover ── */
+  .trash-row-hover {
+    transition: background-color .15s ease;
+  }
+  .trash-row-hover:hover { background: rgba(248,250,252,.8) !important; }
+
+  /* ── Restore button: green glow + icon bounce ── */
+  .btn-restore {
+    transition: background-color .15s ease, color .15s ease, box-shadow .18s ease, transform .12s ease;
+  }
+  .btn-restore:hover {
+    background-color: #dcfce7 !important;
+    color: #15803d !important;
+    box-shadow: 0 0 12px rgba(34,197,94,.25);
+  }
+  .btn-restore:hover .restore-icon {
+    animation: restoreIconBounce .4s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes restoreIconBounce {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(-20deg) scale(1.2); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+  .restore-icon { display: inline-block; }
+
+  /* ── Restore row: flash green then collapse ── */
+  .trash-row-restoring {
+    animation: trashRowOut .5s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events: none;
+  }
+  @keyframes trashRowOut {
+    0%   { background: #fff; max-height: 80px; opacity: 1; }
+    30%  { background: #f0fdf4; }
+    80%  { opacity: 0; max-height: 80px; }
+    100% { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border: none; overflow: hidden; }
+  }
+
+  /* ── Animated number counter ── */
+  @keyframes numSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .num-counter { animation: numSlideUp .6s cubic-bezier(.22,1,.36,1) both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .banner-shimmer { animation: none !important; background-size: 100% !important; }
+    .kpi-card-anim, .kpi-card-anim:hover { transform: none !important; }
+    .log-row-anim, .trash-tile-anim, .grid-cascade > * {
+      opacity: 1 !important; transform: none !important; transition: none !important;
+    }
+    .pulse-dot, .pulse-dot-amber { animation: none !important; }
+    .ripple-wave { display: none !important; }
+  }
 </style>
 
 <!-- Mobile overlay -->
@@ -291,14 +509,111 @@
     }, true);
   }
 
+  /* ── Animated number counter ── */
+  function initCounters() {
+    document.querySelectorAll('[data-count-to]').forEach(function(el) {
+      var target = parseInt(el.getAttribute('data-count-to'), 10);
+      if (isNaN(target) || target === 0) { el.textContent = '0'; return; }
+      var duration = Math.min(1200, Math.max(500, target * 40));
+      var start = null;
+      el.textContent = '0';
+      el.classList.add('num-counter');
+      function step(ts) {
+        if (!start) start = ts;
+        var progress = Math.min((ts - start) / duration, 1);
+        var ease = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(ease * target).toLocaleString('vi-VN');
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* ── Progress bar fill ── */
+  function initProgressBars() {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (!e.isIntersecting) return;
+        var bar = e.target;
+        var w = bar.getAttribute('data-bar-width') || bar.style.width;
+        bar.style.setProperty('--target-w', w);
+        bar.style.width = '0';
+        requestAnimationFrame(function() {
+          bar.classList.add('progress-fill');
+          requestAnimationFrame(function() { bar.classList.add('animated'); });
+        });
+        io.unobserve(bar);
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.bar-animate').forEach(function(bar) { io.observe(bar); });
+  }
+
+  /* ── Grid cascade entrance ── */
+  function initGridCascade() {
+    document.querySelectorAll('.grid-cascade').forEach(function(grid) {
+      var children = Array.from(grid.children);
+      var io = new IntersectionObserver(function(entries) {
+        if (!entries[0].isIntersecting) return;
+        children.forEach(function(child, i) {
+          setTimeout(function() { child.classList.add('visible'); }, i * 55);
+        });
+        io.unobserve(grid);
+      }, { threshold: 0.05 });
+      io.observe(grid);
+    });
+  }
+
+  /* ── Log row sequential entrance ── */
+  function initLogRows() {
+    var rows = document.querySelectorAll('.log-row-anim');
+    if (!rows.length) return;
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.05 });
+    rows.forEach(function(r, i) {
+      r.style.transitionDelay = (i * 45) + 'ms';
+      io.observe(r);
+    });
+  }
+
+  /* ── Trash tile fade-in ── */
+  function initTrashTiles() {
+    var tiles = document.querySelectorAll('.trash-tile-anim');
+    if (!tiles.length) return;
+    tiles.forEach(function(t, i) {
+      setTimeout(function() { t.classList.add('visible'); }, 60 + i * 70);
+    });
+  }
+
+  /* ── Ripple on all buttons ── */
+  function initRipple() {
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('button, a.ripple-host, [data-ripple]');
+      if (!btn) return;
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height) * 2;
+      var span = document.createElement('span');
+      span.className = 'ripple-wave';
+      span.style.cssText = 'width:' + size + 'px;height:' + size + 'px;'
+        + 'left:' + (e.clientX - rect.left - size/2) + 'px;'
+        + 'top:'  + (e.clientY - rect.top  - size/2) + 'px;';
+      if (getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
+      btn.style.overflow = 'hidden';
+      btn.appendChild(span);
+      span.addEventListener('animationend', function() { span.remove(); });
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { initPageMotion(); initSidebar(); initReveal(); init24hTime(); initSoftDeleteConfirm(); });
+    document.addEventListener('DOMContentLoaded', function () {
+      initPageMotion(); initSidebar(); initReveal(); init24hTime(); initSoftDeleteConfirm();
+      initCounters(); initProgressBars(); initGridCascade(); initLogRows(); initTrashTiles(); initRipple();
+    });
   } else {
-    initPageMotion();
-    initSidebar();
-    initReveal();
-    init24hTime();
-    initSoftDeleteConfirm();
+    initPageMotion(); initSidebar(); initReveal(); init24hTime(); initSoftDeleteConfirm();
+    initCounters(); initProgressBars(); initGridCascade(); initLogRows(); initTrashTiles(); initRipple();
   }
 
   /* ── Force 24h time inputs across all admin pages ── */

@@ -58,7 +58,7 @@ public class CustomerAccountServlet extends HttpServlet {
         TaiKhoan sessionUser = session != null ? (TaiKhoan) session.getAttribute("user") : null;
 
         if (sessionUser == null) {
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
 
@@ -72,7 +72,7 @@ public class CustomerAccountServlet extends HttpServlet {
         TaiKhoan account = taiKhoanDAO.getAccountById(sessionUser.getAccountId());
         if (account == null || account.isDeleted() || account.isLocked()) {
             session.invalidate();
-            resp.sendRedirect(req.getContextPath() + "/dangnhap");
+            resp.sendRedirect(org.example.util.RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "")));
             return;
         }
 

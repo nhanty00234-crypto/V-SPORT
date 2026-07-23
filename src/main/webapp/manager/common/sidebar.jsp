@@ -132,6 +132,217 @@
     body.mgr-page-exiting main { opacity:1!important; transform:none!important; filter:none!important; transition:none!important; }
     .mgr-transition-scrim { display: none !important; }
   }
+
+  /* ══════════════════════════════════════════
+     MANAGER ANIMATION SYSTEM v2 — Purple Theme
+  ══════════════════════════════════════════ */
+
+  /* ── Enhanced nav-link: purple glow + icon pulse ── */
+  .nav-link:hover {
+    background: rgba(124,58,237,.10) !important;
+    color: #6d28d9 !important;
+    transform: translateX(4px) !important;
+  }
+  .nav-link .material-symbols-outlined,
+  .nav-link .ti { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .nav-link:hover .material-symbols-outlined,
+  .nav-link:hover .ti { transform: scale(1.18); }
+
+  /* ── Welcome banner shimmer wave ── */
+  @keyframes mgrBannerShimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+  .mgr-banner-shimmer {
+    background: linear-gradient(135deg,#4c1d95 0%,#6d28d9 35%,#7c3aed 55%,#8b5cf6 75%,#5b21b6 100%);
+    background-size: 300% 100%;
+    animation: mgrBannerShimmer 6s linear infinite;
+  }
+
+  /* ── KPI / Metric cards: lift + purple shadow ── */
+  .mgr-kpi-hover {
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s cubic-bezier(.16,1,.3,1);
+  }
+  .mgr-kpi-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px -8px rgba(124,58,237,.18);
+  }
+  .mgr-kpi-hover:hover .mgr-kpi-icon { transform: scale(1.1); }
+  .mgr-kpi-icon { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+
+  /* ── Live dot ── */
+  @keyframes mgrLivePulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  }
+  .live-dot { animation: mgrLivePulse 1.8s ease-in-out infinite; }
+
+  /* ── Stagger delays (extended) ── */
+  .d6{transition-delay:270ms} .d7{transition-delay:315ms} .d8{transition-delay:360ms}
+
+  /* ── Counter animation ── */
+  @keyframes mgrCountUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .mgr-count { animation: mgrCountUp .5s cubic-bezier(.22,1,.36,1) both; }
+
+  /* ── Row stagger entrance for lists ── */
+  .row-stagger > * {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .35s cubic-bezier(.22,1,.36,1), transform .35s cubic-bezier(.22,1,.36,1);
+  }
+  .row-stagger > *.visible { opacity: 1; transform: none; }
+
+  /* ── Progress bar fill ── */
+  .mgr-bar-fill {
+    width: 0 !important;
+    transition: width .85s cubic-bezier(.16,1,.3,1);
+  }
+  .mgr-bar-fill.animated { width: var(--target-w) !important; }
+
+  /* ── Court / facility cards ── */
+  .court-card {
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s cubic-bezier(.16,1,.3,1);
+  }
+  .court-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px -8px rgba(124,58,237,.15);
+  }
+  .court-card:hover .court-thumb { transform: scale(1.05); }
+  .court-thumb { transition: transform .3s cubic-bezier(.16,1,.3,1); overflow: hidden; }
+
+  /* ── QR code card hover glow ── */
+  .qr-card:hover {
+    box-shadow: 0 0 0 2px rgba(124,58,237,.2), 0 0 18px rgba(124,58,237,.14);
+  }
+  .qr-card { transition: box-shadow .2s ease; }
+
+  /* ── Status badge smooth color blend ── */
+  .status-badge { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+
+  /* ── Low stock warning pulse ── */
+  @keyframes lowStockPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.4); }
+    50%      { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  }
+  .badge-low-stock {
+    animation: lowStockPulse 2s ease-in-out infinite;
+    border: 1.5px solid #f59e0b !important;
+  }
+
+  /* ── Table icon actions ── */
+  .tbl-icon-btn {
+    transition: transform .15s cubic-bezier(.34,1.56,.64,1), color .15s ease, background-color .15s ease;
+    position: relative;
+  }
+  .tbl-icon-btn:hover { transform: scale(1.2); }
+  .tbl-icon-btn[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: #18181b;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 1;
+    animation: tooltipIn .15s ease both;
+  }
+  @keyframes tooltipIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ── Approve button: pulse expand ── */
+  .btn-approve {
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, background-color .15s ease;
+  }
+  .btn-approve:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.2);
+  }
+  /* ── Reject row slide out ── */
+  .row-reject-out {
+    animation: rejectSlideOut .4s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events: none;
+  }
+  @keyframes rejectSlideOut {
+    0%   { opacity:1; transform: translateX(0); max-height:80px; }
+    60%  { opacity:0; transform: translateX(60px); max-height:80px; }
+    100% { opacity:0; transform: translateX(80px); max-height:0; overflow:hidden; padding:0; border:0; }
+  }
+  /* ── Approve row fade to green then collapse ── */
+  .row-approve-out {
+    animation: approveOut .45s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events: none;
+  }
+  @keyframes approveOut {
+    0%   { background:#fff; opacity:1; max-height:80px; }
+    25%  { background:#f0fdf4; }
+    80%  { opacity:0; max-height:80px; }
+    100% { opacity:0; max-height:0; overflow:hidden; padding:0; border:0; }
+  }
+
+  /* ── Status filter tab underline slider ── */
+  .status-tabs { position: relative; }
+  .status-tab {
+    position: relative;
+    transition: color .18s ease;
+    border-bottom: 2px solid transparent;
+    transition: color .18s ease, border-color .18s ease;
+  }
+  .status-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
+
+  /* ── Ripple for purple buttons ── */
+  .mgr-ripple-host { position: relative; overflow: hidden; }
+  .mgr-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    background: rgba(167,139,250,.35);
+    animation: mgrRippleOut .5s cubic-bezier(.16,1,.3,1) forwards;
+    pointer-events: none;
+  }
+  @keyframes mgrRippleOut { to { transform: scale(4); opacity: 0; } }
+
+  /* ── Shift card slide in ── */
+  @keyframes shiftCardIn {
+    from { opacity:0; transform: scale(.92) translateY(-8px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+  }
+  .shift-card-anim { animation: shiftCardIn .3s cubic-bezier(.34,1.56,.64,1) both; }
+
+  /* ── Customer loyalty progress bar ── */
+  .loyalty-bar {
+    width: 0 !important;
+    transition: width .9s cubic-bezier(.16,1,.3,1);
+  }
+  .loyalty-bar.animated { width: var(--target-w) !important; }
+
+  /* ── Crown/badge float ── */
+  @keyframes crownFloat {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+  }
+  .crown-float { animation: crownFloat 2.4s ease-in-out infinite; }
+
+  /* ── Risk warning border pulse ── */
+  @keyframes riskBorderPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.3); }
+    50%      { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  }
+  .risk-alert { animation: riskBorderPulse 2s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot, .badge-low-stock, .crown-float, .risk-alert, .mgr-banner-shimmer { animation: none !important; }
+    .mgr-kpi-hover:hover, .court-card:hover { transform: none !important; box-shadow: none !important; }
+    .row-stagger > *, .mgr-bar-fill.animated, .loyalty-bar.animated { transition: none !important; }
+    .mgr-ripple-wave { display: none !important; }
+  }
 </style>
 
 <!-- ═══ SIDEBAR ═══ -->
@@ -407,19 +618,88 @@
     });
   }
 
+  /* ── Animated number counter ── */
+  function initMgrCounters() {
+    document.querySelectorAll('[data-mgr-count]').forEach(function(el) {
+      var target = parseInt(el.getAttribute('data-mgr-count'), 10);
+      if (isNaN(target) || target === 0) return;
+      var duration = Math.min(1100, Math.max(400, target * 40));
+      var start = null;
+      el.textContent = '0';
+      el.classList.add('mgr-count');
+      function step(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / duration, 1);
+        var ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(ease * target).toLocaleString('vi-VN');
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* ── Progress bar / loyalty bar fill ── */
+  function initMgrBars() {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (!e.isIntersecting) return;
+        var bar = e.target;
+        var w = bar.getAttribute('data-bar-w') || bar.style.width;
+        bar.style.setProperty('--target-w', w);
+        bar.style.width = '0';
+        requestAnimationFrame(function() {
+          bar.classList.add('mgr-bar-fill');
+          requestAnimationFrame(function() { bar.classList.add('animated'); });
+        });
+        io.unobserve(bar);
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.mgr-bar-animate, .loyalty-bar').forEach(function(b) { io.observe(b); });
+  }
+
+  /* ── Row stagger entrance ── */
+  function initRowStagger() {
+    document.querySelectorAll('.row-stagger').forEach(function(container) {
+      var children = Array.from(container.children);
+      var io = new IntersectionObserver(function(entries) {
+        if (!entries[0].isIntersecting) return;
+        children.forEach(function(c, i) {
+          setTimeout(function() { c.classList.add('visible'); }, i * 40);
+        });
+        io.unobserve(container);
+      }, { threshold: 0.05 });
+      io.observe(container);
+    });
+  }
+
+  /* ── Ripple on purple buttons ── */
+  function initMgrRipple() {
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('button, [data-mgr-ripple]');
+      if (!btn) return;
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height) * 2;
+      var span = document.createElement('span');
+      span.className = 'mgr-ripple-wave';
+      span.style.cssText = 'width:'+size+'px;height:'+size+'px;'
+        +'left:'+(e.clientX-rect.left-size/2)+'px;'
+        +'top:'+(e.clientY-rect.top-size/2)+'px;';
+      if (getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
+      btn.style.overflow = 'hidden';
+      btn.appendChild(span);
+      span.addEventListener('animationend', function() { span.remove(); });
+    });
+  }
+
   /* ── Boot ── */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      initPageMotion();
-      initSidebar();
-      initReveal();
-      init24hTime();
+      initPageMotion(); initSidebar(); initReveal(); init24hTime();
+      initMgrCounters(); initMgrBars(); initRowStagger(); initMgrRipple();
     });
   } else {
-    initPageMotion();
-    initSidebar();
-    initReveal();
-    init24hTime();
+    initPageMotion(); initSidebar(); initReveal(); init24hTime();
+    initMgrCounters(); initMgrBars(); initRowStagger(); initMgrRipple();
   }
 })();
 </script>

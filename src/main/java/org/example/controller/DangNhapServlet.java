@@ -69,21 +69,45 @@ public class DangNhapServlet extends HttpServlet {
 
         String portal = resolvePortal(req);
         req.setAttribute("portal", portal);
+        String redirectParam = sanitizeRedirect(req.getParameter("redirect"));
 
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
             TaiKhoan user = (TaiKhoan) session.getAttribute("user");
-            String redirectUrl = req.getContextPath()
-                    + org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
+            String redirectUrl = resolveSuccessRedirect(req, user, redirectParam);
             resp.sendRedirect(redirectUrl);
         } else if ("true".equals(req.getParameter("facilityInactive"))) {
             // ActiveFacilityFilter vừa invalidate session vì cơ sở của tài khoản đã ngừng hoạt động.
             req.setAttribute("loi", "Cơ sở của tài khoản này đã ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
             resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login&error=facilityInactive");
         } else {
-            // Điều hướng sang trang chủ với biến auth để mở modal
-            resp.sendRedirect(req.getContextPath() + "/index.jsp?auth=login");
+            // Điều hướng sang trang chủ với biến auth để mở modal, giữ lại đích quay về sau đăng nhập.
+            // Chỉ hiện banner nhắc nhở khi có redirect (nghĩa là vừa bị chặn một hành động cụ thể) —
+            // bấm icon tài khoản bình thường (không có redirect) thì không cần nhắc.
+            String target = req.getContextPath() + "/index.jsp?auth=login";
+            if (redirectParam != null) {
+                target += "&notice=loginRequired&redirect=" + java.net.URLEncoder.encode(redirectParam, java.nio.charset.StandardCharsets.UTF_8);
+            }
+            resp.sendRedirect(target);
         }
+    }
+
+    /**
+     * Chỉ chấp nhận đường dẫn nội bộ bắt đầu bằng "/" và KHÔNG bắt đầu bằng "//"
+     * (tránh protocol-relative URL) để chặn open-redirect qua tham số redirect.
+     */
+    private String sanitizeRedirect(String redirect) {
+        if (redirect == null || redirect.isBlank()) return null;
+        if (!redirect.startsWith("/") || redirect.startsWith("//")) return null;
+        return redirect;
+    }
+
+    /** Đích điều hướng sau đăng nhập thành công: ưu tiên redirect nội bộ cho khách hàng, mặc định về portal đúng role. */
+    private String resolveSuccessRedirect(HttpServletRequest req, TaiKhoan user, String redirectParam) {
+        if (redirectParam != null && user.getRoleId() == org.example.util.RoleRedirectUtil.ROLE_CUSTOMER) {
+            return req.getContextPath() + redirectParam;
+        }
+        return req.getContextPath() + org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
     }
 
     @Override
@@ -268,8 +292,8 @@ public class DangNhapServlet extends HttpServlet {
             session.setAttribute("fullName", taiKhoan.getFullName() != null ? taiKhoan.getFullName() : "");
             session.setAttribute("email", taiKhoan.getEmail() != null ? taiKhoan.getEmail() : "");
 
-            String redirectUrl = req.getContextPath()
-                    + org.example.util.RoleRedirectUtil.getHomePathByRoleId(taiKhoan.getRoleId());
+            String redirectParam = sanitizeRedirect(req.getParameter("redirect"));
+            String redirectUrl = resolveSuccessRedirect(req, taiKhoan, redirectParam);
 
             LOGGER.info("LOGIN_SUCCESS accountId={} roleId={} portal={} redirect={} ip={} userAgent={}",
                     taiKhoan.getAccountId(), taiKhoan.getRoleId(), portal, redirectUrl,

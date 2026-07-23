@@ -234,12 +234,9 @@ public class PayOSConfigAdminServlet extends HttpServlet {
 
     private void sendOtpEmail(TaiKhoan admin, CoSo coSo, String otp, String subject) throws Exception {
         String coSoName = coSo != null ? coSo.getTenCoSo() : "cơ sở đã chọn";
-        EmailUtil.sendEmail(admin.getEmail(), subject,
-                "Chào " + (admin.getFullName() != null ? admin.getFullName() : admin.getUsername()) + ",\n\n"
-                + "Mã xác thực để cập nhật cấu hình PayOS cho \"" + coSoName + "\" là: " + otp + "\n\n"
-                + "Mã có hiệu lực trong 5 phút và chỉ dùng được một lần.\n"
-                + "Không chia sẻ mã này với bất kỳ ai, kể cả nhân viên V-SPORT.\n\n"
-                + "Nếu bạn không yêu cầu thao tác này, vui lòng bỏ qua email này và kiểm tra lại tài khoản quản trị của bạn.");
+        String adminName = admin.getFullName() != null ? admin.getFullName() : admin.getUsername();
+        EmailUtil.sendHtmlEmail(admin.getEmail(), "V-SPORT — Xác thực cấu hình PayOS",
+                org.example.util.EmailTemplates.otpPayOSConfig(adminName, coSoName, otp));
     }
 
     private JsonObject toJson(PayOSConfigurationStatus status) {

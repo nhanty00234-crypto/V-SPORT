@@ -26,8 +26,7 @@ body{font-family:'Inter',sans-serif}
 <main class="lg:ml-[260px] mt-[64px] px-4 lg:px-8 xl:px-10 pb-10 flex flex-col gap-5 min-h-screen">
 
   <!-- HERO BANNER -->
-  <section class="reveal mt-5 rounded-2xl overflow-hidden relative"
-           style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 60%,#3b82f6 100%)">
+  <section class="reveal mt-5 rounded-2xl overflow-hidden relative banner-shimmer">
     <!-- decorative pattern -->
     <div class="absolute inset-0 opacity-[.07]"
          style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:28px 28px"></div>
@@ -73,15 +72,15 @@ body{font-family:'Inter',sans-serif}
   <!-- KPI GRID -->
   <section class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
 
-    <div class="reveal d0 adm-card adm-card-hover p-4 sm:p-5">
+    <div class="reveal d0 adm-card kpi-card-anim p-4 sm:p-5">
       <div class="flex items-start justify-between mb-4">
-        <div class="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center">
+        <div class="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center kpi-icon">
           <span class="material-symbols-outlined text-[22px] text-blue-600" style="font-variation-settings:'FILL' 1">location_city</span>
         </div>
-        <span class="badge badge-green">${activeBranches} HĐ</span>
+        <span class="badge badge-green kpi-badge">${activeBranches} HĐ</span>
       </div>
       <p class="text-xs text-slate-500 font-medium">Tổng cơ sở</p>
-      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim">${totalBranches}</p>
+      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim" data-count-to="${totalBranches}">${totalBranches}</p>
       <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
         <p class="text-[11px] text-slate-400">${totalBranches - activeBranches} không hoạt động</p>
         <a href="${pageContext.request.contextPath}/admin/chi-nhanh"
@@ -91,15 +90,15 @@ body{font-family:'Inter',sans-serif}
       </div>
     </div>
 
-    <div class="reveal d1 adm-card adm-card-hover p-4 sm:p-5">
+    <div class="reveal d1 adm-card kpi-card-anim p-4 sm:p-5">
       <div class="flex items-start justify-between mb-4">
-        <div class="w-11 h-11 rounded-2xl bg-violet-50 flex items-center justify-center">
+        <div class="w-11 h-11 rounded-2xl bg-violet-50 flex items-center justify-center kpi-icon">
           <span class="material-symbols-outlined text-[22px] text-violet-600" style="font-variation-settings:'FILL' 1">manage_accounts</span>
         </div>
-        <span class="badge badge-purple">${totalOwners} owner</span>
+        <span class="badge badge-purple kpi-badge">${totalOwners} owner</span>
       </div>
       <p class="text-xs text-slate-500 font-medium">Tổng tài khoản</p>
-      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim">${totalAccounts}</p>
+      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim" data-count-to="${totalAccounts}">${totalAccounts}</p>
       <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
         <p class="text-[11px] text-slate-400">${totalManagers} quản lý</p>
         <a href="${pageContext.request.contextPath}/admin/nhan-su"
@@ -109,15 +108,15 @@ body{font-family:'Inter',sans-serif}
       </div>
     </div>
 
-    <div class="reveal d2 adm-card adm-card-hover p-4 sm:p-5">
+    <div class="reveal d2 adm-card kpi-card-anim p-4 sm:p-5">
       <div class="flex items-start justify-between mb-4">
-        <div class="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center">
+        <div class="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center kpi-icon">
           <span class="material-symbols-outlined text-[22px] text-amber-600" style="font-variation-settings:'FILL' 1">badge</span>
         </div>
-        <span class="badge badge-amber">Nhân viên</span>
+        <span class="badge badge-amber kpi-badge">Nhân viên</span>
       </div>
       <p class="text-xs text-slate-500 font-medium">Lễ tân / Bảo vệ</p>
-      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim">${totalStaff}</p>
+      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim" data-count-to="${totalStaff}">${totalStaff}</p>
       <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
         <p class="text-[11px] text-slate-400">Trên toàn hệ thống</p>
         <a href="${pageContext.request.contextPath}/admin/nhan-su"
@@ -127,15 +126,15 @@ body{font-family:'Inter',sans-serif}
       </div>
     </div>
 
-    <div class="reveal d3 adm-card adm-card-hover p-4 sm:p-5">
+    <div class="reveal d3 adm-card kpi-card-anim p-4 sm:p-5">
       <div class="flex items-start justify-between mb-4">
-        <div class="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center kpi-icon">
           <span class="material-symbols-outlined text-[22px] text-emerald-600" style="font-variation-settings:'FILL' 1">groups</span>
         </div>
-        <span class="badge badge-green">Khách hàng</span>
+        <span class="badge badge-green kpi-badge">Khách hàng</span>
       </div>
       <p class="text-xs text-slate-500 font-medium">Người dùng đã đăng ký</p>
-      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim">${totalCustomers}</p>
+      <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim" data-count-to="${totalCustomers}">${totalCustomers}</p>
       <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
         <p class="text-[11px] text-slate-400">Toàn hệ thống</p>
         <a href="${pageContext.request.contextPath}/admin/nhan-su"
@@ -213,8 +212,8 @@ body{font-family:'Inter',sans-serif}
                 <span class="text-xs font-bold text-slate-900">${totalOwners}</span>
               </div>
               <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-500 rounded-full transition-all duration-700"
-                     style="width:${totalOwners * 100 / tot}%"></div>
+                <div class="h-full bg-blue-500 rounded-full bar-animate"
+                     style="width:${totalOwners * 100 / tot}%" data-bar-width="${totalOwners * 100 / tot}%"></div>
               </div>
             </div>
           </div>
@@ -229,8 +228,8 @@ body{font-family:'Inter',sans-serif}
                 <span class="text-xs font-bold text-slate-900">${totalManagers}</span>
               </div>
               <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-violet-500 rounded-full transition-all duration-700"
-                     style="width:${totalManagers * 100 / tot}%"></div>
+                <div class="h-full bg-violet-500 rounded-full bar-animate"
+                     style="width:${totalManagers * 100 / tot}%" data-bar-width="${totalManagers * 100 / tot}%"></div>
               </div>
             </div>
           </div>
@@ -245,8 +244,8 @@ body{font-family:'Inter',sans-serif}
                 <span class="text-xs font-bold text-slate-900">${totalStaff}</span>
               </div>
               <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-amber-500 rounded-full transition-all duration-700"
-                     style="width:${totalStaff * 100 / tot}%"></div>
+                <div class="h-full bg-amber-500 rounded-full bar-animate"
+                     style="width:${totalStaff * 100 / tot}%" data-bar-width="${totalStaff * 100 / tot}%"></div>
               </div>
             </div>
           </div>
@@ -261,8 +260,8 @@ body{font-family:'Inter',sans-serif}
                 <span class="text-xs font-bold text-slate-900">${totalCustomers}</span>
               </div>
               <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-emerald-500 rounded-full transition-all duration-700"
-                     style="width:${totalCustomers * 100 / tot}%"></div>
+                <div class="h-full bg-emerald-500 rounded-full bar-animate"
+                     style="width:${totalCustomers * 100 / tot}%" data-bar-width="${totalCustomers * 100 / tot}%"></div>
               </div>
             </div>
           </div>
