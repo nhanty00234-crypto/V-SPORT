@@ -96,27 +96,44 @@ public class QRRequestService {
     }
 
     public Result updateStatus(int requestId, int staffCoSoId, Integer staffAccountId, String newStatus) {
-        QRRequest req = dao.findById(requestId);
-        if (req == null) {
-            return Result.fail(ErrorCode.NOT_FOUND, "Không tìm thấy yêu cầu.");
-        }
-        if (req.getCoSoId() != staffCoSoId) {
-            return Result.fail(ErrorCode.FORBIDDEN, "Yêu cầu không thuộc cơ sở của bạn.");
-        }
-        if (!isValidTransition(req.getStatus(), newStatus)) {
-            return Result.fail(ErrorCode.INVALID_TRANSITION,
-                "Không thể chuyển từ " + req.getStatus() + " sang " + newStatus + ".");
-        }
-        req.setStatus(newStatus);
-        req.setHandledByStaffId(staffAccountId);
-        QRRequest saved = dao.save(req);
         EntityManager em = JPAUtil.getEntityManager();
-        String tenSan;
+        jakarta.persistence.EntityTransaction tx = em.getTransaction();
+        QRRequest saved;
         try {
-            San san = em.find(San.class, saved.getSanId());
-            tenSan = san != null ? san.getTenSan() : "";
+            tx.begin();
+            QRRequest req = em.find(QRRequest.class, requestId, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            if (req == null) {
+                tx.rollback();
+                return Result.fail(ErrorCode.NOT_FOUND, "Không tìm thấy yêu cầu.");
+            }
+            if (req.getCoSoId() != staffCoSoId) {
+                tx.rollback();
+                return Result.fail(ErrorCode.FORBIDDEN, "Yêu cầu không thuộc cơ sở của bạn.");
+            }
+            if (!isValidTransition(req.getStatus(), newStatus)) {
+                String fromStatus = req.getStatus();
+                tx.rollback();
+                return Result.fail(ErrorCode.INVALID_TRANSITION,
+                    "Không thể chuyển từ " + fromStatus + " sang " + newStatus + ".");
+            }
+            req.setStatus(newStatus);
+            req.setHandledByStaffId(staffAccountId);
+            tx.commit();
+            saved = req;
+        } catch (RuntimeException e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
         } finally {
             em.close();
+        }
+
+        EntityManager readEm = JPAUtil.getEntityManager();
+        String tenSan;
+        try {
+            San san = readEm.find(San.class, saved.getSanId());
+            tenSan = san != null ? san.getTenSan() : "";
+        } finally {
+            readEm.close();
         }
         return Result.ok(toDTO(saved, tenSan));
     }
