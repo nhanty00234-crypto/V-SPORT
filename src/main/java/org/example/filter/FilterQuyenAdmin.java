@@ -29,10 +29,6 @@ public class FilterQuyenAdmin implements Filter {
 
         if (loggedIn) {
             TaiKhoan user = (TaiKhoan) session.getAttribute("user");
-            if (path.contains("/quan-ly-san") || path.contains("/QuanLySan.jsp")) {
-                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Quản trị viên không có quyền quản lý sân (Chức năng này dành riêng cho Quản lý cơ sở).");
-                return;
-            }
             // Chỉ Role 1 (Admin) mới được vào vùng này
             if (user.getRoleId() == 1) {
                 chain.doFilter(request, response);

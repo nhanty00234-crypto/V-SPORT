@@ -58,6 +58,7 @@ public class GioHangServlet extends HttpServlet {
         List<CoSo> dsCoSo = coSoDAO.getAllCoSo();
         
         req.setAttribute("cartItems", cartItems);
+        req.setAttribute("dsLich", allLich != null ? allLich : new ArrayList<>());
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
         

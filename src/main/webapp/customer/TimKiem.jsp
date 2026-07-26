@@ -14,7 +14,8 @@
         body { background-color: var(--background); }
         
         .main-content {
-            padding: 40px 0 80px;
+            padding: 32px 0 48px;
+            flex: 1 0 auto;
         }
 
         /* Chips */
@@ -383,79 +384,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <!-- Col 1 -->
-                <div class="footer-col">
-                    <a href="${ctx}/" class="logo" style="margin-bottom: 25px;">
-                        <i class="fa-solid fa-basket-shopping"></i>
-                        V-<span>SPORT</span>
-                    </a>
-                    <p>Nền tảng đặt sân thể thao trực tuyến, kết nối bạn với hàng trăm cơ sở uy tín trên toàn quốc.</p>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-
-                <!-- Col 2 -->
-                <div class="footer-col">
-                    <h4>Liên kết hữu ích</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Về chúng tôi</a></li>
-                        <li><a href="#">Câu hỏi thường gặp</a></li>
-                        <li><a href="#">Trung tâm hỗ trợ</a></li>
-                        <li><a href="#">Điều khoản dịch vụ</a></li>
-                        <li><a href="#">Chính sách bảo mật</a></li>
-                        <li><a href="#">Chính sách hoàn tiền</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 3 -->
-                <div class="footer-col">
-                    <h4>Liên hệ</h4>
-                    <ul class="contact-info">
-                        <li>
-                            <i class="fas fa-phone-alt"></i>
-                            <div>
-                                <span style="font-size: 13px; display: block;">Gọi cho chúng tôi 24/7</span>
-                                <a href="tel:8185556788">818-555 67 88</a>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="fas fa-envelope"></i>
-                            <div>
-                                <span style="font-size: 13px; display: block;">Email cho chúng tôi</span>
-                                <a href="mailto:info@vsport.com" style="font-size: 15px; font-weight: 400; font-family: 'Inter', sans-serif;">info@vsport.com</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Col 4 -->
-                <div class="footer-col">
-                    <h4>Hợp tác kinh doanh</h4>
-                    <p>Bạn có sân thể thao? Hãy trở thành đối tác của V-SPORT.</p>
-                    <a href="#" class="btn btn-primary">Trở thành đối tác</a>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <div class="copyright">
-                    &copy; 2026 V-SPORT. All Rights Reserved.
-                </div>
-                <div class="payments">
-                    <div class="payment-card"><i class="fab fa-cc-visa" style="color: #1434CB; font-size: 24px;"></i></div>
-                    <div class="payment-card"><i class="fab fa-cc-mastercard" style="color: #EB001B; font-size: 24px;"></i></div>
-                    <div class="payment-card"><i class="fab fa-cc-paypal" style="color: #00457C; font-size: 24px;"></i></div>
-                    <div class="payment-card"><i class="fab fa-cc-discover" style="color: #F9A021; font-size: 24px;"></i></div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <jsp:include page="/common/footer.jsp" />
 
     <!-- Modal -->
     <div class="modal-overlay" id="filterModal">

@@ -52,10 +52,10 @@
     }
     .vsbc-modal-layer .vsbc-modal { pointer-events: auto; }
     .vsbc-modal {
-        width: 750px; max-width: calc(100vw - 32px);
+        width: 580px; max-width: calc(100vw - 32px);
         max-height: calc(100dvh - 32px); overflow-y: auto;
-        background: #fff; border-radius: 22px;
-        padding: 28px 20px 24px;
+        background: #fff; border-radius: 24px;
+        padding: 28px 24px 24px;
         opacity: 0; transform: scale(.96);
         box-shadow: 0 24px 70px rgba(7, 29, 54, 0.28);
         transition: opacity 200ms ease, transform 200ms ease;
@@ -65,42 +65,42 @@
     .vsbc-modal.is-open { opacity: 1; transform: scale(1); }
     @media (max-width: 767px) {
         .vsbc-modal-layer { padding: 12px; }
-        .vsbc-modal { width: calc(100vw - 24px); padding: 18px 14px 16px; border-radius: 18px; }
+        .vsbc-modal { width: calc(100vw - 24px); padding: 22px 16px 18px; border-radius: 20px; }
     }
-    .vsbc-head { margin-bottom: 28px; }
+    .vsbc-head { margin-bottom: 24px; text-align: center; }
     .vsbc-title {
         font-family: 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        font-size: 26px; line-height: 1.25; font-weight: 700; letter-spacing: 0;
+        font-size: 24px; line-height: 1.25; font-weight: 800; letter-spacing: 0;
         color: var(--vs-primary-900, #0B2D52);
-        text-align: center; margin: 0; padding: 0 44px;
+        text-align: center; margin: 0; padding: 0 36px;
     }
-    @media (max-width: 389px) { .vsbc-title { font-size: 21px; } }
+    @media (max-width: 389px) { .vsbc-title { font-size: 20px; } }
     .vsbc-sub {
-        text-align: center; font-size: 13px; color: var(--vsx-muted);
-        margin: 8px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        text-align: center; font-size: 14px; font-weight: 600; color: #64748b;
+        margin: 6px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .vsbc-sub:empty { display: none; }
     .vsbc-x {
-        position: absolute; top: 14px; right: 14px;
-        width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
-        background: transparent; color: var(--vs-primary-900, #0B2D52);
+        position: absolute; top: 18px; right: 18px;
+        width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+        background: #f1f5f9; color: #0f172a;
         display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        transition: background-color .15s ease;
+        transition: all .15s ease; z-index: 10;
     }
-    .vsbc-x .lci { width: 26px; height: 26px; }
-    .vsbc-x:hover { background: rgba(11, 45, 82, 0.08); }
+    .vsbc-x .lci { width: 22px; height: 22px; }
+    .vsbc-x:hover { background: #e2e8f0; color: #000; }
     .vsbc-x:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(24, 200, 232, 0.35)); outline-offset: 2px; }
     .vsbc-option {
         display: flex; flex-direction: column; justify-content: center;
-        width: 100%; min-height: 124px; padding: 18px 76px 18px 16px;
-        border-radius: 16px; border: 1px solid transparent;
+        width: 100%; min-height: 108px; padding: 20px 80px 20px 24px;
+        border-radius: 18px; border: 1.5px solid transparent;
         text-decoration: none; cursor: pointer; text-align: left; user-select: none;
-        position: relative; overflow: hidden;
+        position: relative; overflow: hidden; box-sizing: border-box;
         transform: none;
         transition: border-color 120ms ease, filter 110ms ease,
                     box-shadow 110ms ease, transform 110ms ease;
     }
-    .vsbc-option + .vsbc-option { margin-top: 20px; }
+    .vsbc-option + .vsbc-option { margin-top: 16px; }
     /* Hover: chỉ đổi màu viền — tuyệt đối không chuyển động/scale/shadow animation. */
     .vsbc-option:hover { transform: none; }
     .vsbc-option-direct:hover { border-color: var(--vs-primary-600, #1677D2); }
@@ -108,8 +108,8 @@
     /* Press: card lún nhẹ xuống với inset shadow (giữ hiệu ứng qua class, không chỉ :active). */
     .vsbc-option:active,
     .vsbc-option.is-pressed {
-        transform: translateY(3px) scale(0.985);
-        box-shadow: inset 0 4px 9px rgba(7, 29, 54, 0.20), 0 2px 5px rgba(7, 29, 54, 0.08);
+        transform: translateY(2px) scale(0.985);
+        box-shadow: inset 0 4px 9px rgba(7, 29, 54, 0.15), 0 2px 5px rgba(7, 29, 54, 0.08);
         filter: brightness(0.97);
     }
     @media (prefers-reduced-motion: reduce) {
@@ -141,22 +141,25 @@
     @media (prefers-reduced-motion: reduce) {
         .vsx-loading-ring { animation-duration: 2.4s; }
     }
-    .vsbc-option-direct { background: #E3F4FF; border-color: rgba(22, 119, 210, 0.15); }
+    .vsbc-option-direct { background: #EBF5FF; border-color: rgba(22, 119, 210, 0.2); }
     .vsbc-option-direct .vsbc-opt-title { color: #1677D2; }
-    .vsbc-option-match { background: #FFF0E5; border-color: rgba(240, 120, 32, 0.16); }
+    .vsbc-option-match { background: #FFF2E8; border-color: rgba(240, 120, 32, 0.2); }
     .vsbc-option-match .vsbc-opt-title { color: #F07820; }
-    .vsbc-opt-title { font-size: 22px; font-weight: 700; line-height: 1.25; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .vsbc-opt-desc { font-size: 17px; font-weight: 500; color: #48604f; line-height: 1.4; }
+    .vsbc-opt-title { font-size: 19px; font-weight: 800; line-height: 1.25; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .vsbc-opt-desc { font-size: 14px; font-weight: 500; color: #475569; line-height: 1.45; }
     .vsbc-badge {
-        font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+        font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
         background: var(--vs-orange-500, #F07820); color: #fff; padding: 2px 8px; border-radius: 9999px;
     }
     .vsbc-arrow {
-        width: 74px; height: 42px; border-radius: 16px 0 16px 0;
-        position: absolute; right: 0; bottom: 0;
+        width: 44px; height: 44px; border-radius: 50%;
+        position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
         display: flex; align-items: center; justify-content: center; color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .vsbc-arrow .lci { width: 27px; height: 27px; }
+    .vsbc-arrow .lci { width: 22px; height: 22px; }
+    .vsbc-option:hover .vsbc-arrow { transform: translateY(-50%) translateX(4px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18); }
     .vsbc-option-direct .vsbc-arrow { background: var(--vs-primary-600, #1677D2); }
     .vsbc-option-match .vsbc-arrow { background: var(--vs-orange-500, #F07820); }
     @media (max-width: 389px) {
@@ -335,13 +338,13 @@
 <div id="bookingChoiceBackdrop" class="vsbc-backdrop" hidden></div>
 <div class="vsbc-modal-layer">
 <div id="bookingChoiceModal" class="vsbc-modal" role="dialog" aria-modal="true" aria-labelledby="bookingChoiceTitle" hidden>
+    <button type="button" id="bcCloseBtn" class="vsbc-x" aria-label="Đóng">
+        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
     <div class="vsbc-head">
         <h2 id="bookingChoiceTitle" class="vsbc-title">Chọn hình thức đặt</h2>
-        <button type="button" id="bcCloseBtn" class="vsbc-x" aria-label="Đóng">
-            <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
+        <p id="bcFacilityName" class="vsbc-sub"></p>
     </div>
-    <p id="bcFacilityName" class="vsbc-sub"></p>
 
     <a id="bcOptionDirect" class="vsbc-option vsbc-option-direct" href="#" data-loading-label="Đặt lịch ngay trực quan">
         <span class="vsbc-opt-title">Đặt lịch ngay trực quan</span>

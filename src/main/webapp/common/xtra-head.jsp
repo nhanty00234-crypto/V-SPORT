@@ -1,5 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XtraMarket - Supermarket</title>
@@ -46,12 +45,29 @@
         }
 
         /* Base */
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+        }
         body {
             font-family: 'Inter', sans-serif;
             color: var(--body-text);
             background-color: var(--background);
             line-height: 1.6;
             overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        header, .header {
+            margin-top: 0 !important;
+        }
+
+        main, .main-content, .acc-page-wrapper, .cart-main-wrapper {
+            flex: 1 0 auto;
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -258,6 +274,7 @@
             gap: 15px;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             padding-left: 25px;
+            overflow: visible;
         }
 
         .icon-btn {
@@ -271,6 +288,7 @@
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.05);
+            overflow: visible;
         }
         
         .icon-btn:hover {
@@ -1423,7 +1441,8 @@
         .footer {
             background-color: var(--navy-dark);
             color: rgba(255, 255, 255, 0.7);
-            padding: 150px 0 30px;
+            padding: 60px 0 30px;
+            margin-top: auto;
         }
 
         .footer-grid {
@@ -2231,4 +2250,3 @@
             btn.appendChild(circle);
         });
     </script>
-</head>

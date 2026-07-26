@@ -14,6 +14,11 @@ public interface ThongBaoDAO {
     int insert(ThongBao thongBao);
 
     /**
+     * Thêm thông báo mới với Connection có sẵn
+     */
+    int insert(java.sql.Connection conn, ThongBao thongBao) throws java.sql.SQLException;
+
+    /**
      * Cập nhật thông báo
      */
     boolean update(ThongBao thongBao);
@@ -39,7 +44,42 @@ public interface ThongBaoDAO {
     List<ThongBao> findByAccountID(int accountId);
 
     /**
-     * Đánh dấu thông báo đã đọc
+     * Lấy N thông báo mới nhất của tài khoản (sử dụng SQL TOP limit)
+     */
+    List<ThongBao> findLatestByAccountId(int accountId, int limit);
+
+    /**
+     * Đếm tổng số thông báo chưa bị xóa của một tài khoản (cho phân trang)
+     */
+    int countByAccountId(int accountId);
+
+    /**
+     * Lấy danh sách thông báo theo AccountID có phân trang
+     */
+    List<ThongBao> findByAccountId(int accountId, int page, int pageSize);
+
+    /**
+     * Đếm số thông báo chưa đọc của một tài khoản
+     */
+    int countUnread(int accountId);
+
+    /**
+     * Đánh dấu một thông báo đã đọc — kiểm tra AccountID để chống IDOR
+     */
+    boolean markAsRead(int thongBaoId, int accountId);
+
+    /**
+     * Đánh dấu tất cả thông báo chưa đọc của một tài khoản là đã đọc
+     */
+    int markAllAsRead(int accountId);
+
+    /**
+     * Kiểm tra đã tồn tại thông báo có cùng accountId + loai + maBanGhi chưa (tránh tạo trùng)
+     */
+    boolean existsByAccountIdAndLoaiAndMaBanGhi(int accountId, String loaiThongBao, String maBanGhi);
+
+    /**
+     * Đánh dấu thông báo đã đọc (legacy — không kiểm tra owner, dùng nội bộ)
      */
     boolean markAsRead(int thongBaoId);
 

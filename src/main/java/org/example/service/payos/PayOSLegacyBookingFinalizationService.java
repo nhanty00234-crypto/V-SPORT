@@ -25,7 +25,7 @@ public class PayOSLegacyBookingFinalizationService {
 
     public enum ResultCode { CONFIRMED, ALREADY_CONFIRMED, NOT_FOUND, CANCELLED, AMOUNT_MISMATCH, UNEXPECTED_STATUS, DATABASE_ERROR }
 
-    public record Result(ResultCode code, Integer hoaDonId) {
+    public record Result(ResultCode code, Integer hoaDonId, Integer accountId) {
         public boolean isSuccess() {
             return code == ResultCode.CONFIRMED || code == ResultCode.ALREADY_CONFIRMED;
         }
@@ -54,7 +54,7 @@ public class PayOSLegacyBookingFinalizationService {
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
                             c.rollback();
-                            return new Result(ResultCode.NOT_FOUND, null);
+                            return new Result(ResultCode.NOT_FOUND, null, null);
                         }
                         status = rs.getNString("TrangThai");
                         expected = rs.getBigDecimal("TongTienDuKien");
@@ -67,19 +67,19 @@ public class PayOSLegacyBookingFinalizationService {
                     case ALREADY_CONFIRMED -> {
                         Integer existingId = findMainInvoiceId(c, datSanId);
                         c.commit();
-                        return new Result(ResultCode.ALREADY_CONFIRMED, existingId);
+                        return new Result(ResultCode.ALREADY_CONFIRMED, existingId, khachHangAccountId);
                     }
                     case CANCELLED -> {
                         // Booking đã bị hủy tường minh (khách/staff) - KHÔNG tự xác nhận lại. Tiền
                         // đã nhận cần xử lý hoàn tiền thủ công - race hiếm, log để vận hành theo dõi.
                         c.rollback();
                         logger.warn("PAYOS_LEGACY_CONFIRM_CANCELLED datSanId={} amountPaid={} - booking da bi huy nhung thanh toan van den, can hoan tien thu cong", datSanId, amountPaid);
-                        return new Result(ResultCode.CANCELLED, null);
+                        return new Result(ResultCode.CANCELLED, null, null);
                     }
                     case UNEXPECTED -> {
                         c.rollback();
                         logger.warn("PAYOS_LEGACY_CONFIRM_UNEXPECTED_STATUS datSanId={} status={}", datSanId, status);
-                        return new Result(ResultCode.UNEXPECTED_STATUS, null);
+                        return new Result(ResultCode.UNEXPECTED_STATUS, null, null);
                     }
                     case ELIGIBLE -> { /* "Chờ thanh toán" hoặc "Quá hạn" (race: sweep vừa hết hạn
                                           nhưng thanh toán đến đồng thời) - tiếp tục xác nhận bên dưới,
@@ -88,7 +88,7 @@ public class PayOSLegacyBookingFinalizationService {
                 if (expected == null || amountPaid.compareTo(expected) != 0) {
                     c.rollback();
                     logger.warn("PAYOS_LEGACY_AMOUNT_MISMATCH datSanId={} expected={} actual={}", datSanId, expected, amountPaid);
-                    return new Result(ResultCode.AMOUNT_MISMATCH, null);
+                    return new Result(ResultCode.AMOUNT_MISMATCH, null, null);
                 }
 
                 Integer hoaDonId = findMainInvoiceId(c, datSanId);
@@ -139,17 +139,17 @@ public class PayOSLegacyBookingFinalizationService {
 
                 c.commit();
                 logger.info("PAYOS_LEGACY_CONFIRMED datSanId={} hoaDonId={} amountPaid={}", datSanId, hoaDonId, amountPaid);
-                return new Result(ResultCode.CONFIRMED, hoaDonId);
+                return new Result(ResultCode.CONFIRMED, hoaDonId, khachHangAccountId);
             } catch (Exception e) {
                 c.rollback();
                 logger.error("PAYOS_LEGACY_CONFIRM_FAILED datSanId={}", datSanId, e);
-                return new Result(ResultCode.DATABASE_ERROR, null);
+                return new Result(ResultCode.DATABASE_ERROR, null, null);
             } finally {
                 c.setAutoCommit(true);
             }
         } catch (Exception connEx) {
             logger.error("PAYOS_LEGACY_CONFIRM_FAILED (ket noi DB) datSanId={}", datSanId, connEx);
-            return new Result(ResultCode.DATABASE_ERROR, null);
+            return new Result(ResultCode.DATABASE_ERROR, null, null);
         }
     }
 

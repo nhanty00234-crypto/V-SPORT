@@ -40,6 +40,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,7 @@ public class DatSanServlet extends HttpServlet {
             .create();
 
     private final org.example.dao.SoftHoldDAO softHoldDAO = new org.example.dao.impl.SoftHoldDAOImpl();
+    private final org.example.service.NotificationService notificationService = new org.example.service.NotificationService();
 
     /** Số lần thử lại tối đa khi xảy ra deadlock (SQL Error 1205) */
     private static final int MAX_DEADLOCK_RETRIES = 3;
@@ -230,11 +232,21 @@ public class DatSanServlet extends HttpServlet {
             reputationByDatSanId.putIfAbsent(h.getDatSanId(), h);
         }
 
+        List<Lichdatsan> cartItems = new ArrayList<>();
+        if (dsLich != null) {
+            for (Lichdatsan l : dsLich) {
+                if ("Chờ xác nhận".equals(l.getTrangThai()) || "Chờ thanh toán".equals(l.getTrangThai())) {
+                    cartItems.add(l);
+                }
+            }
+        }
+
         req.setAttribute("dsLich", dsLich);
+        req.setAttribute("cartItems", cartItems);
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
         req.setAttribute("reputationByDatSanId", reputationByDatSanId);
-        req.getRequestDispatcher("/customer/LichSuDatSan.jsp").forward(req, resp);
+        req.getRequestDispatcher("/customer/GioHang.jsp").forward(req, resp);
     }
 
     // =========================================================================
@@ -726,6 +738,16 @@ public class DatSanServlet extends HttpServlet {
                     conn.commit();
                     LOGGER.info(String.format("handleDatSan: commit transaction=%dms", System.currentTimeMillis() - tCommit0));
 
+                    LOGGER.info(String.format("NOTIFICATION_EVENT event=BOOKING_CREATED accountId=%d datSanId=%d status=%s",
+                            user.getAccountId(), newDatSanId, initialStatus));
+
+                    // Gửi thông báo sau commit — không để lỗi notification làm gãy luồng
+                    try {
+                        notificationService.notifyBookingCreated(user.getAccountId(), newDatSanId, isOnlineDeposit);
+                    } catch (Exception _ne) {
+                        LOGGER.warning("notifyBookingCreated failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
+                    }
+
                     LOGGER.info(String.format(
                             "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s, tổng submit=%dms",
                             user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod, System.currentTimeMillis() - tSubmit0));
@@ -854,10 +876,17 @@ public class DatSanServlet extends HttpServlet {
      */
     private void handleHuyDatSan(HttpServletRequest req, HttpServletResponse resp,
             HttpSession session, TaiKhoan user) throws IOException {
+        String idStr = req.getParameter("id");
+        if (idStr == null || idStr.isBlank()) {
+            idStr = req.getParameter("datSanId");
+        }
         LOGGER.info(String.format("[huy-dat-san] request nhận: servletPath=%s, pathInfo=%s, accountId=%d, rawId=%s",
-                req.getServletPath(), req.getPathInfo(), user.getAccountId(), req.getParameter("id")));
+                req.getServletPath(), req.getPathInfo(), user.getAccountId(), idStr));
         try {
-            int id = Integer.parseInt(req.getParameter("id"));
+            if (idStr == null || idStr.isBlank()) {
+                throw new NumberFormatException("Missing booking ID parameter 'id' or 'datSanId'");
+            }
+            int id = Integer.parseInt(idStr.trim());
             String reason = req.getParameter("reason");
 
             org.example.service.booking.BookingCancellationService.CancelResult result =

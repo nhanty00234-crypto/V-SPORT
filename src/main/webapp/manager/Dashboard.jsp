@@ -423,7 +423,7 @@
                   <span class="text-[10px] text-zinc-500 ml-1">${dg.soSao}/5</span>
                 </div>
                 <c:if test="${not empty dg.binhLuan}">
-                  <p class="text-xs text-zinc-600 leading-relaxed">${dg.binhLuan}</p>
+                  <p class="text-xs text-zinc-600 leading-relaxed"><c:out value="${dg.binhLuan}"/></p>
                 </c:if>
                 <c:if test="${empty dg.binhLuan}">
                   <p class="text-xs text-zinc-400 italic">Không có bình luận.</p>

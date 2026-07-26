@@ -1,23 +1,19 @@
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%--
-  Component: Modal "Tìm đối thủ gấp" (demo, chưa có backend ghép kèo thật).
-  Cần include cùng script openUrgentOpponentModal()/closeUrgentOpponentModal() ở dưới.
---%>
-<div id="urgentOpponentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 px-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md scale-95 transition-transform duration-300">
-        <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-2xl px-6 py-4 flex items-center justify-between">
-            <h3 class="text-white font-bold text-sm flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">bolt</span> Tìm đối thủ gấp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%-- Component: Modal "Tìm đối thủ gấp" --%>
+<div id="urgentOpponentModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #fff; width: 100%; max-width: 440px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; color: #fff;">
+            <h3 style="font-size: 15px; font-weight: 800; margin: 0; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-bolt"></i> Tìm đối thủ gấp
             </h3>
-            <button type="button" onclick="closeUrgentOpponentModal()" class="text-white/80 hover:text-white transition-colors p-1">
-                <span class="material-symbols-outlined text-[20px]">close</span>
-            </button>
+            <button type="button" onclick="closeUrgentOpponentModal()" style="background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 18px;"><i class="fas fa-times"></i></button>
         </div>
-        <form id="urgentOpponentForm" onsubmit="return submitUrgentOpponentRequest(event)" class="p-6 space-y-4">
-            <p class="text-xs text-slate-500 leading-relaxed">Dùng khi lịch sắp diễn ra và bạn cần thêm người chơi gấp (ví dụ có người bùng kèo). Yêu cầu này sẽ ưu tiên người chơi có điểm uy tín tốt và ở gần bạn.</p>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Môn thể thao</label>
-                <select class="acc-input" name="monTheThao">
+        <form id="urgentOpponentForm" onsubmit="return submitUrgentOpponentRequest(event)" style="padding: 24px;">
+            <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 16px; line-height: 1.5;">Dùng khi lịch sắp diễn ra và bạn cần thêm người chơi gấp (ví dụ có người bùng kèo). Yêu cầu này sẽ ưu tiên người chơi có điểm uy tín tốt và ở gần bạn.</p>
+            
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Môn thể thao</label>
+                <select name="monTheThao" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; background: #fff; box-sizing: border-box;">
                     <option>Bóng đá</option>
                     <option>Cầu lông</option>
                     <option>Tennis</option>
@@ -25,14 +21,15 @@
                     <option>Pickleball</option>
                 </select>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Số người cần tìm</label>
-                    <input type="number" class="acc-input" name="soNguoi" min="1" max="20" value="2">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Số người cần tìm</label>
+                    <input type="number" name="soNguoi" min="1" max="20" value="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box;">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Trình độ</label>
-                    <select class="acc-input" name="trinhDo">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Trình độ</label>
+                    <select name="trinhDo" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; background: #fff; box-sizing: border-box;">
                         <option>Không yêu cầu</option>
                         <option>Mới chơi</option>
                         <option>Trung bình</option>
@@ -41,18 +38,20 @@
                     </select>
                 </div>
             </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Bán kính tìm kiếm</label>
-                <select class="acc-input" name="banKinh">
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Bán kính tìm kiếm</label>
+                <select name="banKinh" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; background: #fff; box-sizing: border-box;">
                     <option>Trong vòng 2km</option>
                     <option>Trong vòng 5km</option>
                     <option>Trong vòng 10km</option>
                     <option>Toàn thành phố</option>
                 </select>
             </div>
-            <div class="flex items-center justify-end gap-3 pt-2">
-                <button type="button" onclick="closeUrgentOpponentModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm">Đóng</button>
-                <button type="submit" class="px-5 py-2.5 rounded-xl font-bold text-white bg-amber-600 hover:bg-amber-700 transition-colors text-sm">Gửi yêu cầu tìm đối thủ</button>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <button type="button" onclick="closeUrgentOpponentModal()" style="padding: 10px 20px; border-radius: 8px; font-weight: 700; background: #f1f5f9; border: none; color: #475569; cursor: pointer;">Đóng</button>
+                <button type="submit" style="padding: 10px 20px; border-radius: 8px; font-weight: 700; background: #d97706; border: none; color: #fff; cursor: pointer;">Gửi yêu cầu tìm đối thủ</button>
             </div>
         </form>
     </div>
@@ -62,31 +61,17 @@
     function openUrgentOpponentModal() {
         var modal = document.getElementById('urgentOpponentModal');
         if (!modal) return;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        requestAnimationFrame(function () {
-            modal.classList.remove('opacity-0');
-            modal.querySelector('.bg-white').classList.remove('scale-95');
-        });
+        modal.style.display = 'flex';
     }
     function closeUrgentOpponentModal() {
         var modal = document.getElementById('urgentOpponentModal');
         if (!modal) return;
-        modal.classList.add('opacity-0');
-        modal.querySelector('.bg-white').classList.add('scale-95');
-        setTimeout(function () {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }, 300);
+        modal.style.display = 'none';
     }
     function submitUrgentOpponentRequest(evt) {
         evt.preventDefault();
         closeUrgentOpponentModal();
-        if (typeof showToast === 'function') {
-            showToast('Đã gửi yêu cầu', 'Chức năng ghép đối thủ tự động đang được phát triển. Chúng tôi sẽ sớm ra mắt sớm nhất có thể.');
-        } else {
-            alert('Chức năng tìm đối thủ gấp đang được phát triển. Yêu cầu của bạn sẽ được ưu tiên người chơi có điểm uy tín tốt và ở gần bạn.');
-        }
+        alert('Chức năng tìm đối thủ gấp đang được phát triển. Yêu cầu của bạn sẽ được ưu tiên người chơi có điểm uy tín tốt và ở gần bạn.');
         return false;
     }
 </script>

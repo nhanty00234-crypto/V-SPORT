@@ -80,13 +80,11 @@
     <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mb-1.5">Vận hành</p>
     <a href="${pageContext.request.contextPath}/admin/tong-quan" class="nav-link"><span class="material-symbols-outlined text-[19px]">space_dashboard</span>Tổng quan</a>
     <a href="${pageContext.request.contextPath}/admin/lich-dat-san" class="nav-link"><span class="material-symbols-outlined text-[19px]">event</span>Lịch đặt sân<span class="ml-auto text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md">5</span></a>
-    <a href="${pageContext.request.contextPath}/admin/quan-ly-san" class="nav-link"><span class="material-symbols-outlined text-[19px]">stadium</span>Quản lý sân</a>
     <a href="${pageContext.request.contextPath}/admin/kho-dich-vu" class="nav-link"><span class="material-symbols-outlined text-[19px]">inventory_2</span>Kho & Dịch vụ<span class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md">3</span></a>
     <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
     <a href="${pageContext.request.contextPath}/admin/chi-nhanh" class="nav-link"><span class="material-symbols-outlined text-[19px]">location_on</span>Cơ Sở</a>
     <a href="${pageContext.request.contextPath}/admin/nhan-su" class="nav-link"><span class="material-symbols-outlined text-[19px]">groups</span>Nhân sự</a>
     <a href="${pageContext.request.contextPath}/admin/hoa-don" class="nav-link"><span class="material-symbols-outlined text-[19px]">receipt_long</span>Hóa đơn</a>
-    <a href="${pageContext.request.contextPath}/admin/khuyen-mai" class="nav-link"><span class="material-symbols-outlined text-[19px]">loyalty</span>Khuyến mãi</a>
     <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
     <a href="#" class="nav-link active"><span class="material-symbols-outlined text-[19px]">contact_support</span>Hỗ trợ Admin</a>
   </nav>

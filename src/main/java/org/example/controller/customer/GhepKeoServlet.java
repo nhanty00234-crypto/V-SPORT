@@ -189,6 +189,12 @@ public class GhepKeoServlet extends HttpServlet {
     private void handleListOpen(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Integer coSoId = parseIntSafe(req.getParameter("coSoId"));
         Integer sportId = parseIntSafe(req.getParameter("monTheThaoId"));
+        // Fallback: dùng môn yêu thích từ session nếu không có monTheThaoId trong request
+        if (sportId == null) {
+            HttpSession sess = req.getSession(false);
+            org.example.model.TaiKhoan sessionUser = sess != null ? (org.example.model.TaiKhoan) sess.getAttribute("user") : null;
+            if (sessionUser != null) sportId = sessionUser.getMonTheThaoYeuThichId();
+        }
         LocalDate from = parseDateSafe(req.getParameter("from"), null);
         LocalDate to = parseDateSafe(req.getParameter("to"), null);
 

@@ -1,4 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%
+    boolean _marketing = Boolean.TRUE.equals(request.getAttribute("nhanThongBaoMarketing"));
+    String _savedMsg = "1".equals(request.getParameter("saved")) ? "Đã lưu cài đặt." : null;
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -196,59 +201,77 @@
     </header>
 
     <main>
+        <% if (_savedMsg != null) { %>
+        <p class="ns-note" style="color:#22D3EE;font-style:normal;font-weight:600;margin-top:12px;"><%= _savedMsg %></p>
+        <% } %>
+
+        <%-- Section 1: Giao dịch — bắt buộc, không tắt được --%>
+        <div class="ns-divider" style="margin-top:8px;"></div>
+        <h2 class="ns-section-title" style="font-size:14px;color:rgba(255,255,255,0.6);font-weight:500;margin-top:12px;">BẮT BUỘC</h2>
         <div class="ns-row">
-            <span class="ns-row__label">Thông báo từ chủ sân</span>
-            <button type="button" class="notification-switch is-on" id="ownerNotifSwitch"
-                    role="switch" aria-checked="true" aria-label="Thông báo từ chủ sân" onclick="toggleOwnerNotif(this)">
-                <span class="notification-switch__knob"></span>
-            </button>
+            <div>
+                <span class="ns-row__label">Đặt sân &amp; thanh toán</span>
+                <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:2px 0 0;">Xác nhận, từ chối, hủy đơn, thanh toán thành công</p>
+            </div>
+            <div style="width:48px;height:28px;border-radius:999px;background:var(--notification-toggle-on);display:flex;align-items:center;padding:2px;opacity:0.6;cursor:not-allowed;">
+                <span style="display:block;width:24px;height:24px;border-radius:50%;background:#fff;transform:translateX(20px);"></span>
+            </div>
+        </div>
+        <div class="ns-row">
+            <div>
+                <span class="ns-row__label">Hoàn tiền</span>
+                <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:2px 0 0;">Trạng thái yêu cầu hoàn tiền của bạn</p>
+            </div>
+            <div style="width:48px;height:28px;border-radius:999px;background:var(--notification-toggle-on);display:flex;align-items:center;padding:2px;opacity:0.6;cursor:not-allowed;">
+                <span style="display:block;width:24px;height:24px;border-radius:50%;background:#fff;transform:translateX(20px);"></span>
+            </div>
         </div>
 
-        <p class="ns-note">Lưu ý: Các thông báo này chỉ là thông báo khuyến mãi của chủ sân</p>
-
+        <%-- Section 2: Marketing — tắt/bật được --%>
         <div class="ns-divider"></div>
+        <h2 class="ns-section-title" style="font-size:14px;color:rgba(255,255,255,0.6);font-weight:500;margin-top:12px;">TÙY CHỌN</h2>
 
-        <h2 class="ns-section-title">Danh sách các sân tắt thông báo</h2>
-        <p class="ns-note">Lưu ý: Muốn nhận lại thông báo vui lòng xoá chi nhánh cần mở thông báo</p>
-
-        <p class="ns-empty">Không có dữ liệu</p>
+        <form method="post" action="${pageContext.request.contextPath}/customer/notification-settings" id="settingsForm">
+            <div class="ns-row">
+                <div>
+                    <span class="ns-row__label">Ưu đãi từ chủ sân</span>
+                    <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:2px 0 0;">Khuyến mãi, mã giảm giá từ các cơ sở</p>
+                </div>
+                <button type="button" class="notification-switch <%= _marketing ? "is-on" : "" %>" id="ownerNotifSwitch"
+                        role="switch" aria-checked="<%= _marketing ? "true" : "false" %>"
+                        aria-label="Ưu đãi từ chủ sân" onclick="toggleSwitch(this)">
+                    <span class="notification-switch__knob"></span>
+                </button>
+            </div>
+            <input type="hidden" name="nhanThongBaoMarketing" id="marketingInput" value="<%= _marketing ? "on" : "" %>">
+            <div style="display:flex;justify-content:center;padding:16px;">
+                <button type="submit" style="background:var(--notification-toggle-on);color:#0B2D4D;font-weight:700;font-size:14px;border:none;border-radius:10px;padding:10px 32px;cursor:pointer;">
+                    Lưu cài đặt
+                </button>
+            </div>
+        </form>
     </main>
 
     <script>
         var CTX = '${pageContext.request.contextPath}';
-        var STORAGE_KEY = 'vsport_owner_notif';
 
-        // ---- Back: ưu tiên history.back(), fallback về trang Cài đặt ----
         function goBack() {
             var fallback = CTX + '/customer/tai-khoan#caidat';
             if (window.history.length > 1 && document.referrer) {
                 window.history.back();
-                // nếu history.back() không điều hướng (referrer khác origin), fallback sau 400ms
-                setTimeout(function () {
-                    window.location.href = fallback;
-                }, 400);
+                setTimeout(function () { window.location.href = fallback; }, 400);
             } else {
                 window.location.href = fallback;
             }
         }
 
-        // ---- Công tắc "Thông báo từ chủ sân": lưu trên thiết bị (chưa có backend) ----
-        function applySwitchState(el, on) {
+        function toggleSwitch(el) {
+            var on = !el.classList.contains('is-on');
             el.classList.toggle('is-on', on);
             el.setAttribute('aria-checked', on ? 'true' : 'false');
+            document.getElementById('marketingInput').value = on ? 'on' : '';
         }
-        function toggleOwnerNotif(el) {
-            var on = !el.classList.contains('is-on');
-            applySwitchState(el, on);
-            try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch (e) { /* ignore */ }
-        }
-        (function initSwitch() {
-            var el = document.getElementById('ownerNotifSwitch');
-            var saved;
-            try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) { saved = null; }
-            // mặc định bật nếu chưa có lựa chọn lưu trước đó
-            applySwitchState(el, saved !== '0');
-        })();
     </script>
+<jsp:include page="/common/footer.jsp" />
 </body>
 </html>

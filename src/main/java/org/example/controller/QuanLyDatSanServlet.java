@@ -10,6 +10,7 @@ import org.example.dao.LichDatSanDAO;
 import org.example.dao.impl.LichDatSanDAOImpl;
 import org.example.model.Lichdatsan;
 import org.example.model.TaiKhoan;
+import org.example.service.NotificationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +25,7 @@ public class QuanLyDatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(QuanLyDatSanServlet.class.getName());
     private final LichDatSanDAO lichDatSanDAO = new LichDatSanDAOImpl();
+    private final NotificationService notificationService = new NotificationService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -112,9 +114,18 @@ public class QuanLyDatSanServlet extends HttpServlet {
             if ("approve".equals(action)) {
                 boolean confirmPriceChange = "true".equalsIgnoreCase(req.getParameter("confirmPriceChange"));
                 try {
-                    boolean result = lichDatSanDAO.duyetLichDatSan(datSanId, user.getAccountId(), user.getCoSoId(), confirmPriceChange);
-                    if (result) {
+                    org.example.dto.booking.BookingDecisionResult result = lichDatSanDAO.duyetLichDatSanDecision(datSanId, user.getAccountId(), user.getCoSoId(), confirmPriceChange);
+                    if (result.isSuccess()) {
                         session.setAttribute("message", "Đã duyệt đơn đặt sân #" + datSanId + " thành công!");
+                        LOGGER.info(String.format("NOTIFICATION_EVENT event=BOOKING_CONFIRMED accountId=%d datSanId=%d coSoId=%d",
+                                result.getCustomerAccountId(), datSanId, user.getCoSoId()));
+                        if (result.getCustomerAccountId() > 0) {
+                            try {
+                                notificationService.notifyBookingConfirmed(result.getCustomerAccountId(), datSanId);
+                            } catch (Exception _ne) {
+                                LOGGER.warning("notifyBookingConfirmed failed for datSanId=" + datSanId + ": " + _ne.getMessage());
+                            }
+                        }
                     } else {
                         session.setAttribute("error", "Duyệt đơn đặt sân thất bại.");
                     }
@@ -141,9 +152,18 @@ public class QuanLyDatSanServlet extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + path);
                     return;
                 }
-                boolean result = lichDatSanDAO.tuChoiLichDatSan(datSanId, reason.trim(), user.getCoSoId());
-                if (result) {
+                org.example.dto.booking.BookingDecisionResult result = lichDatSanDAO.tuChoiLichDatSanDecision(datSanId, reason.trim(), user.getCoSoId());
+                if (result.isSuccess()) {
                     session.setAttribute("message", "Đã từ chối đơn đặt sân #" + datSanId + ".");
+                    LOGGER.info(String.format("NOTIFICATION_EVENT event=BOOKING_REJECTED accountId=%d datSanId=%d coSoId=%d",
+                            result.getCustomerAccountId(), datSanId, user.getCoSoId()));
+                    if (result.getCustomerAccountId() > 0) {
+                        try {
+                            notificationService.notifyBookingRejected(result.getCustomerAccountId(), datSanId, reason.trim());
+                        } catch (Exception _ne) {
+                            LOGGER.warning("notifyBookingRejected failed for datSanId=" + datSanId + ": " + _ne.getMessage());
+                        }
+                    }
                 } else {
                     session.setAttribute("error", "Từ chối đơn đặt sân thất bại.");
                 }

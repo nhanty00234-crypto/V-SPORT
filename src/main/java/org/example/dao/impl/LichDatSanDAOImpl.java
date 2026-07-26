@@ -445,8 +445,6 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                      "JOIN San s ON l.SanID = s.SanID " +
                      "LEFT JOIN Accounts a ON l.AccountID = a.AccountID " +
                      "WHERE s.CoSoID = ? AND l.IsDeleted = 0 " +
-                     // Sắp xếp theo thời điểm TẠO đơn (CreatedTime), không phải ngày/giờ SÂN được đặt (NgayDat/GioBatDau) —
-                     // hai khái niệm khác nhau: đơn tạo gần đây cho slot tuần sau phải hiện trên đơn tạo hôm qua cho slot hôm nay.
                      "ORDER BY ISNULL(l.CreatedTime, CAST('1900-01-01' AS DATETIME)) DESC, l.DatSanID DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -464,6 +462,18 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean duyetLichDatSan(int datSanId, int approvedByAccountId, int coSoId, boolean confirmPriceChange) throws Exception {
+        org.example.dto.booking.BookingDecisionResult res = duyetLichDatSanDecision(datSanId, approvedByAccountId, coSoId, confirmPriceChange);
+        return res.isSuccess();
+    }
+
+    @Override
+    public boolean tuChoiLichDatSan(int datSanId, String ghiChu, int coSoId) throws Exception {
+        org.example.dto.booking.BookingDecisionResult res = tuChoiLichDatSanDecision(datSanId, ghiChu, coSoId);
+        return res.isSuccess();
+    }
+
+    @Override
+    public org.example.dto.booking.BookingDecisionResult duyetLichDatSanDecision(int datSanId, int approvedByAccountId, int coSoId, boolean confirmPriceChange) throws Exception {
         Connection conn = null;
         PreparedStatement psLockSan = null;
         PreparedStatement psSelect = null;
@@ -625,6 +635,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                                       "AND NOT (l.GioKetThuc <= CAST(? AS time) OR l.GioBatDau >= CAST(? AS time))";
 
             class OverlapNotifInfo {
+                int overlapDatSanId;
                 int accountId;
                 String title;
                 String content;
@@ -650,6 +661,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                         String content = "Đơn đặt sân " + tenSan + " ngày " + oNgayDat + " (" + oStart.toString().substring(0, 5) + " - " + oEnd.toString().substring(0, 5) + ") đã bị tự động hủy do trùng lịch với ca đặt sân #" + datSanId + " đã được phê duyệt.";
 
                         OverlapNotifInfo info = new OverlapNotifInfo();
+                        info.overlapDatSanId = overlapDatSanId;
                         info.accountId = customerId;
                         info.title = title;
                         info.content = content;
@@ -658,7 +670,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 }
             }
 
-            // Tự động từ chối (hủy) các đơn Chờ xác nhận bị trùng lịch chéo (Sử dụng CONCAT và ISNULL an toàn)
+            // Tự động từ chối (hủy) các đơn Chờ xác nhận bị trùng lịch chéo
             String sqlUpdateOverlap = "UPDATE LichDatSan " +
                                       "SET TrangThai = N'Đã hủy', " +
                                       "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Hệ thống tự động hủy do trùng lịch với đơn #', CAST(? AS varchar), N' đã được duyệt]') " +
@@ -673,23 +685,26 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             psUpdateOverlap.setString(6, gioKetThuc.toString());
             psUpdateOverlap.executeUpdate();
 
-            // Gửi thông báo bằng cách chèn trực tiếp vào bảng ThongBao
+            // Gửi thông báo trùng lịch cho các khách hàng bị hủy
             if (!overlapNotifs.isEmpty()) {
-                String insertNotifSql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
-                                        "VALUES (?, ?, ?, ?, 0, GETDATE(), N'DatSan', N'/customer/dat-san?openHistory=true')";
+                String insertNotifSql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan, IsDeleted) " +
+                                        "VALUES (?, ?, ?, ?, 0, GETDATE(), ?, ?, 0)";
                 try (PreparedStatement psInsNotif = conn.prepareStatement(insertNotifSql)) {
                     for (OverlapNotifInfo tb : overlapNotifs) {
                         psInsNotif.setInt(1, tb.accountId);
                         psInsNotif.setNString(2, tb.title);
                         psInsNotif.setNString(3, tb.content);
-                        psInsNotif.setNString(4, "Booking");
+                        psInsNotif.setNString(4, "BOOKING_CANCELLED");
+                        psInsNotif.setString(5, String.valueOf(tb.overlapDatSanId));
+                        psInsNotif.setString(6, "/customer/dat-san?openHistory=true&datSanId=" + tb.overlapDatSanId);
                         psInsNotif.executeUpdate();
                     }
                 }
             }
 
             conn.commit();
-            return true;
+            int finalCustomerId = customerAccountId != null ? customerAccountId : 0;
+            return new org.example.dto.booking.BookingDecisionResult(true, datSanId, finalCustomerId, coSoId, trangThai, "Đã xác nhận", "Duyệt đơn thành công");
         } catch (Exception e) {
             if (conn != null) {
                 conn.rollback();
@@ -714,7 +729,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     }
 
     @Override
-    public boolean tuChoiLichDatSan(int datSanId, String ghiChu, int coSoId) throws Exception {
+    public org.example.dto.booking.BookingDecisionResult tuChoiLichDatSanDecision(int datSanId, String ghiChu, int coSoId) throws Exception {
         Connection conn = null;
         PreparedStatement psSelect = null;
         PreparedStatement psLockSan = null;
@@ -727,7 +742,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             conn.setAutoCommit(false);
 
             // 1. Kiểm tra trạng thái hiện tại
-            String sqlSelect = "SELECT SanID, TrangThai, GhiChu FROM LichDatSan WHERE DatSanID = ?";
+            String sqlSelect = "SELECT SanID, TrangThai, GhiChu, AccountID FROM LichDatSan WHERE DatSanID = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
             rsSelect = psSelect.executeQuery();
@@ -740,6 +755,10 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             String trangThai = rsSelect.getString("TrangThai");
             String oldGhiChu = rsSelect.getString("GhiChu");
             if (oldGhiChu == null) oldGhiChu = "";
+            Integer customerAccountId = rsSelect.getInt("AccountID");
+            if (rsSelect.wasNull()) {
+                customerAccountId = null;
+            }
 
             if (!"Chờ xác nhận".equals(trangThai)) {
                 throw new Exception("Đơn đặt sân đã được xử lý từ trước (Trạng thái hiện tại: " + trangThai + ").");
@@ -766,7 +785,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             psUpdate.setInt(2, datSanId);
             psUpdate.executeUpdate();
 
-            // 4. Kiểm tra và cập nhật hóa đơn liên quan nếu có (Tránh nuốt tiền online của khách)
+            // 4. Kiểm tra và cập nhật hóa đơn liên quan nếu có
             String sqlCheckInvoice = "SELECT HoaDonID, TrangThaiThanhToan, TongThanhToan, AccountID_KhachHang FROM HoaDon WHERE DatSanID = ?";
             try (PreparedStatement psCheckInv = conn.prepareStatement(sqlCheckInvoice)) {
                 psCheckInv.setInt(1, datSanId);
@@ -794,14 +813,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                                 psRefund.setString(5, "Chờ xử lý");
                                 psRefund.executeUpdate();
                             }
-                            // Cập nhật hóa đơn thành "Hoàn tiền"
                             String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Hoàn tiền', NgayLap = GETDATE() WHERE HoaDonID = ?";
                             try (PreparedStatement psUpdateInv = conn.prepareStatement(sqlUpdateInvoice)) {
                                 psUpdateInv.setInt(1, hoaDonId);
                                 psUpdateInv.executeUpdate();
                             }
                         } else {
-                            // Cập nhật hóa đơn thành "Đã hủy"
                             String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã hủy', NgayLap = GETDATE() WHERE HoaDonID = ?";
                             try (PreparedStatement psUpdateInv = conn.prepareStatement(sqlUpdateInvoice)) {
                                 psUpdateInv.setInt(1, hoaDonId);
@@ -813,7 +830,8 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             conn.commit();
-            return true;
+            int finalCustomerId = customerAccountId != null ? customerAccountId : 0;
+            return new org.example.dto.booking.BookingDecisionResult(true, datSanId, finalCustomerId, coSoId, trangThai, "Đã hủy", "Từ chối đơn thành công");
         } catch (Exception e) {
             if (conn != null) {
                 conn.rollback();

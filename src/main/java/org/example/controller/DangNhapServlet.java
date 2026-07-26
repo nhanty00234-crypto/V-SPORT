@@ -11,6 +11,11 @@ import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.service.FacilityAccessService;
 import org.example.service.reset.SimpleRateLimiter;
+import org.example.util.DBUtil;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -285,6 +290,7 @@ public class DangNhapServlet extends HttpServlet {
             if (oldSession != null) {
                 oldSession.invalidate();
             }
+            loadPreferredSportId(taiKhoan);
             HttpSession session = req.getSession(true);
             session.setAttribute("user", taiKhoan);
             session.setAttribute("roleId", taiKhoan.getRoleId());
@@ -372,6 +378,21 @@ public class DangNhapServlet extends HttpServlet {
             current = current.getCause();
         }
         return false;
+    }
+
+    /** Populate monTheThaoYeuThichId from join table at login time (non-critical, errors ignored). */
+    private void loadPreferredSportId(TaiKhoan user) {
+        if (user == null) return;
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT TOP 1 MonTheThaoID FROM MonTheThaoYeuThich WHERE AccountID = ?")) {
+            ps.setInt(1, user.getAccountId());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) user.setMonTheThaoYeuThichId(rs.getInt("MonTheThaoID"));
+            }
+        } catch (Exception e) {
+            LOGGER.warn("loadPreferredSportId accountId={}: {}", user.getAccountId(), e.getMessage());
+        }
     }
 
     private boolean isDatabaseConnectionError(Throwable e) {

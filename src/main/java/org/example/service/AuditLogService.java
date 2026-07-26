@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * - QuanLyCaLamManagerServlet.java
  * - NhanSuManagerServlet.java
  * - KhoDichVuManagerServlet.java
- * - QuanLySanServlet.java
  *
  * Lưu ý:
  * - Không được làm hỏng luồng nghiệp vụ chính của người dùng nếu việc ghi log gặp sự cố.

@@ -32,7 +32,7 @@
         @media (max-width: 767px) {
             :root { --ttv-court-col: 122px; --ttv-slot-w: 46px; --ttv-row-h: 38px; }
         }
-        html, body { background: var(--surface); color: var(--navy); font-family: 'Inter', 'Barlow', system-ui, sans-serif; }
+        html, body { background: var(--surface); color: var(--navy); font-family: 'Poppins', sans-serif; }
         /* Workspace grid: header / lưu ý / TIMELINE (1fr) / footer. Không khoảng trắng thừa. */
         body {
             margin: 0;
@@ -60,7 +60,7 @@
         .ttv-back:hover { background: rgba(255,255,255,.12); }
         .ttv-back:active { transform: translateY(1px) scale(0.99); }
         .ttv-title {
-            font-family: 'Inter', 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 15px; font-weight: 700; margin: 0; line-height: 1.25; text-align: center;
             letter-spacing: 0; text-transform: none; white-space: nowrap;
             /* xtra-head.jsp có rule "h1,h2,... { color: var(--heading) }" (gần đen) áp trực
@@ -82,7 +82,7 @@
         .ttv-date-input {
             padding: 4px 8px; height: 30px; background: var(--surface); border: none; border-radius: 7px;
             font-size: 14px; font-weight: 600; color: var(--navy);
-            font-family: 'Inter', 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
         .ttv-date-input:focus { outline: none; box-shadow: 0 0 0 3px var(--vs-focus-ring, rgba(1,226,129,.35)); }
 
@@ -96,7 +96,7 @@
         @media (min-width: 1024px) { .ttv-header-legend { padding: 6px 20px 12px; } }
         .ttv-legend-item {
             display: inline-flex; align-items: center; gap: 5px; color: #e0e3e5; font-weight: 600;
-            font-family: 'Inter', 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 13px; white-space: nowrap; flex-shrink: 0;
         }
         .ttv-legend-swatch { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(255,255,255,.4); flex-shrink: 0; }

@@ -6,12 +6,15 @@ import org.example.dao.impl.LichDatSanDAOImpl;
 import org.example.model.Lichdatsan;
 import org.example.model.TaiKhoan;
 import org.example.service.AuditLogService;
+import org.example.service.NotificationService;
+import org.example.service.RefundService;
 import org.example.service.reputation.CustomerReputationService;
 import org.example.util.Constants;
 import org.example.util.DBUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -25,13 +28,22 @@ public class BookingCancellationService {
     private static final Logger logger = LogManager.getLogger(BookingCancellationService.class);
 
     private final LichDatSanDAO lichDatSanDAO;
+    private final RefundService refundService;
+    private final NotificationService notificationService;
 
     public BookingCancellationService() {
-        this(new LichDatSanDAOImpl());
+        this(new LichDatSanDAOImpl(), new RefundService(), new NotificationService());
     }
 
     public BookingCancellationService(LichDatSanDAO lichDatSanDAO) {
+        this(lichDatSanDAO, new RefundService(), new NotificationService());
+    }
+
+    public BookingCancellationService(LichDatSanDAO lichDatSanDAO, RefundService refundService,
+                                       NotificationService notificationService) {
         this.lichDatSanDAO = lichDatSanDAO;
+        this.refundService = refundService;
+        this.notificationService = notificationService;
     }
 
     public static class CancelResult {
@@ -81,11 +93,10 @@ public class BookingCancellationService {
                     accountId, datSanId, lich.getAccountId());
             return CancelResult.fail("Bạn không có quyền hủy đơn này.");
         }
-        if (Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(lich.getTrangThai())
+        // Booking đã thanh toán PayOS → cho phép hủy + tạo yêu cầu hoàn tiền tự động
+        final boolean isPaidPayos = Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(lich.getTrangThai())
                 && (Constants.PT_PAYOS.equals(lich.getPaymentMethodConfirmed())
-                    || (lich.getGhiChu() != null && lich.getGhiChu().contains(Constants.PAYOS_PAID_GHI_CHU_MARKER)))) {
-            return CancelResult.fail("Đơn này đã thanh toán PayOS. Vui lòng liên hệ sân để được hỗ trợ hủy/hoàn tiền.");
-        }
+                    || (lich.getGhiChu() != null && lich.getGhiChu().contains(Constants.PAYOS_PAID_GHI_CHU_MARKER)));
         if (!isCancellableStatus(lich.getTrangThai())) {
             return CancelResult.fail("Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận', 'Đã xác nhận' hoặc " +
                     "'Chờ thanh toán'. Đơn của bạn hiện đang ở trạng thái '" + lich.getTrangThai() + "'.");
@@ -106,6 +117,7 @@ public class BookingCancellationService {
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             Integer newScore = null;
+            int createdHoanTienId = 0;
             try {
                 int rows = lichDatSanDAO.cancelByCustomer(conn, datSanId, accountId, cancelType, reason);
                 if (rows == 0) {
@@ -118,6 +130,18 @@ public class BookingCancellationService {
                             "Khách hủy sát giờ (dưới " + Constants.LATE_CANCEL_HOURS + " tiếng trước giờ chơi)",
                             accountId, AuditLogService.getClientIp(req));
                 }
+                if (isPaidPayos) {
+                    // Tìm hóa đơn đã thanh toán (không trust client) và tạo refund trong cùng transaction
+                    int hoaDonId = RefundService.findPaidHoaDonId(datSanId);
+                    if (hoaDonId > 0) {
+                        BigDecimal soTien = RefundService.loadPaidAmount(hoaDonId);
+                        if (soTien != null) {
+                            RefundService.RefundResult rr = refundService.createRefund(conn, hoaDonId, accountId,
+                                    soTien, reason != null ? reason.trim() : "Khách hủy đơn");
+                            if (rr.success) createdHoanTienId = rr.hoanTienId != null ? rr.hoanTienId : 0;
+                        }
+                    }
+                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -129,12 +153,25 @@ public class BookingCancellationService {
             AuditLogService.log(req, actor, AuditLogService.ACTION_CANCEL, AuditLogService.ENTITY_DAT_SAN,
                     String.valueOf(datSanId), "Đơn đặt sân #" + datSanId,
                     (isLate ? "Khách hủy sát giờ (Late Cancel)" : "Khách hủy sớm (Early Cancel)")
-                            + (reason != null && !reason.isBlank() ? " - Lý do: " + reason.trim() : ""));
+                            + (reason != null && !reason.isBlank() ? " - Lý do: " + reason.trim() : "")
+                            + (createdHoanTienId > 0 ? " | HoanTien #" + createdHoanTienId : ""));
 
-            String message = isLate
-                    ? "Bạn đã hủy sát giờ. Hệ thống đã ghi nhận và điểm uy tín của bạn bị trừ "
-                        + Math.abs(Constants.LATE_CANCEL_PENALTY) + " điểm."
-                    : "Đã hủy đơn đặt sân #" + datSanId + " thành công.";
+            // Gửi thông báo sau khi commit
+            notificationService.notifyBookingCancelled(accountId, datSanId);
+            if (createdHoanTienId > 0) {
+                refundService.notifyRefundCreated(accountId, createdHoanTienId);
+            }
+
+            String message;
+            if (isPaidPayos && createdHoanTienId > 0) {
+                message = "Đã hủy đơn #" + datSanId + ". Yêu cầu hoàn tiền #" + createdHoanTienId
+                        + " đã được tạo và đang chờ xử lý.";
+            } else if (isLate) {
+                message = "Bạn đã hủy sát giờ. Hệ thống đã ghi nhận và điểm uy tín của bạn bị trừ "
+                        + Math.abs(Constants.LATE_CANCEL_PENALTY) + " điểm.";
+            } else {
+                message = "Đã hủy đơn đặt sân #" + datSanId + " thành công.";
+            }
             return CancelResult.ok(isLate, message, newScore);
         } catch (SQLException e) {
             logger.error("Loi khi huy booking #{} cho AccountID={}: {}", datSanId, accountId, e.getMessage(), e);

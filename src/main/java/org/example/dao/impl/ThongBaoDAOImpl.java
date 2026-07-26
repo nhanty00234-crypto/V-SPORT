@@ -18,12 +18,27 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public int insert(ThongBao thongBao) {
-        String sql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = org.example.util.DBUtil.getConnection()) {
+            return insert(conn, thongBao);
+        } catch (SQLException e) {
+            int errorCode = e.getErrorCode();
+            if (errorCode == 2601 || errorCode == 2627) {
+                logger.info("NOTIFICATION_INSERT_IDEMPOTENT_SKIPPED accountId={} eventType={} recordId={}",
+                        thongBao.getAccountId(), thongBao.getLoaiThongBao(), thongBao.getMaBanGhi());
+                return -1;
+            }
+            logger.error("NOTIFICATION_INSERT_FAILED sqlState={} errorCode={} message={} accountId={} eventType={} recordId={}",
+                    e.getSQLState(), e.getErrorCode(), e.getMessage(), thongBao.getAccountId(), thongBao.getLoaiThongBao(), thongBao.getMaBanGhi(), e);
+            return 0;
+        }
+    }
 
-        try (Connection conn = org.example.util.DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    @Override
+    public int insert(Connection conn, ThongBao thongBao) throws SQLException {
+        String sql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan, IsDeleted) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, thongBao.getAccountId());
             ps.setNString(2, thongBao.getTieuDe());
             ps.setNString(3, thongBao.getNoiDung());
@@ -43,8 +58,15 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
             }
             return 0;
         } catch (SQLException e) {
-            logger.error("Lỗi khi thêm thông báo mới: {}", e.getMessage(), e);
-            return 0;
+            int errorCode = e.getErrorCode();
+            if (errorCode == 2601 || errorCode == 2627) {
+                logger.info("NOTIFICATION_INSERT_IDEMPOTENT_SKIPPED accountId={} eventType={} recordId={}",
+                        thongBao.getAccountId(), thongBao.getLoaiThongBao(), thongBao.getMaBanGhi());
+                return -1;
+            }
+            logger.error("NOTIFICATION_INSERT_FAILED sqlState={} errorCode={} message={} accountId={} eventType={} recordId={}",
+                    e.getSQLState(), e.getErrorCode(), e.getMessage(), thongBao.getAccountId(), thongBao.getLoaiThongBao(), thongBao.getMaBanGhi(), e);
+            throw e;
         }
     }
 
@@ -142,6 +164,119 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
             logger.error("Lỗi khi lấy thông báo theo account ID {}: {}", accountId, e.getMessage(), e);
         }
         return list;
+    }
+
+    @Override
+    public List<ThongBao> findLatestByAccountId(int accountId, int limit) {
+        List<ThongBao> list = new ArrayList<>();
+        int safeLimit = Math.max(1, limit);
+        String sql = "SELECT TOP (?) * FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0 ORDER BY ThoiGianGui DESC";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, safeLimit);
+            ps.setInt(2, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToThongBao(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findLatestByAccountId accountId={} limit={}: {}", accountId, safeLimit, e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public int countByAccountId(int accountId) {
+        String sql = "SELECT COUNT(*) FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi countByAccountId accountId={}: {}", accountId, e.getMessage(), e);
+        }
+        return 0;
+    }
+
+    @Override
+    public List<ThongBao> findByAccountId(int accountId, int page, int pageSize) {
+        List<ThongBao> list = new ArrayList<>();
+        int offset = (Math.max(page, 1) - 1) * pageSize;
+        String sql = "SELECT * FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0 " +
+                     "ORDER BY ThoiGianGui DESC " +
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setInt(2, offset);
+            ps.setInt(3, pageSize);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToThongBao(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi findByAccountId page={} accountId={}: {}", page, accountId, e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public int countUnread(int accountId) {
+        String sql = "SELECT COUNT(*) FROM ThongBao WHERE AccountID = ? AND DaDoc = 0 AND IsDeleted = 0";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi countUnread accountId={}: {}", accountId, e.getMessage(), e);
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean markAsRead(int thongBaoId, int accountId) {
+        String sql = "UPDATE ThongBao SET DaDoc = 1 WHERE ThongBaoID = ? AND AccountID = ? AND IsDeleted = 0";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, thongBaoId);
+            ps.setInt(2, accountId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Lỗi markAsRead thongBaoId={} accountId={}: {}", thongBaoId, accountId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public int markAllAsRead(int accountId) {
+        String sql = "UPDATE ThongBao SET DaDoc = 1 WHERE AccountID = ? AND DaDoc = 0 AND IsDeleted = 0";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Lỗi markAllAsRead accountId={}: {}", accountId, e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    @Override
+    public boolean existsByAccountIdAndLoaiAndMaBanGhi(int accountId, String loaiThongBao, String maBanGhi) {
+        String sql = "SELECT 1 FROM ThongBao WHERE AccountID = ? AND LoaiThongBao = ? AND MaBanGhi = ? AND IsDeleted = 0";
+        try (Connection conn = org.example.util.DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setNString(2, loaiThongBao);
+            ps.setString(3, maBanGhi);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi existsByAccountIdAndLoaiAndMaBanGhi accountId={}: {}", accountId, e.getMessage(), e);
+            return false;
+        }
     }
 
     @Override

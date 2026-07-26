@@ -37,8 +37,8 @@ public class ThongBao {
         this.loaiThongBao = loaiThongBao;
         this.daDoc = false;
         this.thoiGianGui = new Date();
-        this.maBanGhi = "YEU_CAU_NGHI";
-        this.duongDan = "/quan-ly/yeu-cau-nghi";
+        this.maBanGhi = null;
+        this.duongDan = null;
     }
 
     public int getThongBaoId() {

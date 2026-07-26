@@ -47,8 +47,9 @@
         * { box-sizing: border-box; }
         button { font-family: inherit; }
 
-        /* Ensure global header does not shrink */
+        /* Ensure global header does not shrink and footer is hidden on full-screen map */
         .header { flex-shrink: 0; }
+        footer, .footer { display: none !important; }
 
         .vsm-app {
             position: relative;

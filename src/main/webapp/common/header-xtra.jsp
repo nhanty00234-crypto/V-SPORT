@@ -56,8 +56,8 @@
                                     <div class="vs-notif-wrap" id="vsNotifWrap">
                                         <button type="button" class="icon-btn vs-notif-btn" id="vsNotifBtn" aria-label="Thông báo" aria-expanded="false" aria-controls="vsNotifDropdown">
                                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                                            <span class="vs-notif-badge" id="vsNotifBadge" style="opacity:0;transition:opacity .2s;">0</span>
                                         </button>
+                                        <span class="vs-notif-badge" id="vsNotifBadge" style="opacity:0;transition:opacity .2s;">0</span>
                                         <div class="vs-notif-dropdown" id="vsNotifDropdown" role="dialog" aria-label="Thông báo ghép kèo" hidden>
                                             <div class="vs-notif-head">
                                                 <span class="vs-notif-head-title">Thông báo</span>
@@ -66,6 +66,9 @@
                                             <ul class="vs-notif-list" id="vsNotifList" role="list">
                                                 <li class="vs-notif-empty" id="vsNotifEmpty">Chưa có thông báo mới</li>
                                             </ul>
+                                            <div class="vs-notif-foot">
+                                                <a href="${pageContext.request.contextPath}/customer/thong-bao" class="vs-notif-foot-link">Xem tất cả thông báo</a>
+                                            </div>
                                         </div>
                                     </div>
                                     <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="icon-btn"
@@ -160,6 +163,7 @@
                 position: relative;
                 display: inline-flex;
                 align-items: center;
+                overflow: visible !important;
             }
             .vs-notif-btn {
                 position: relative;
@@ -180,6 +184,7 @@
                 justify-content: center;
                 padding: 0;
                 transition: background 0.2s;
+                overflow: visible !important;
             }
             .vs-notif-btn:hover { background: rgba(255, 255, 255, 0.15) !important; }
             .vs-notif-btn:focus { outline: none !important; box-shadow: none !important; }
@@ -187,7 +192,7 @@
                 position: absolute !important;
                 top: -2px !important;
                 right: -2px !important;
-                z-index: 2;
+                z-index: 10 !important;
                 min-width: 18px !important;
                 height: 18px !important;
                 padding: 0 5px !important;
@@ -197,26 +202,32 @@
                 font-size: 10px !important;
                 font-weight: 800 !important;
                 display: inline-flex !important;
-                align-items: center;
-                justify-content: center;
-                pointer-events: none;
-                line-height: 1;
-                box-shadow: 0 0 0 2px rgba(13,61,36,.9);
-                white-space: nowrap;
+                align-items: center !important;
+                justify-content: center !important;
+                pointer-events: none !important;
+                line-height: 1 !important;
+                box-shadow: 0 0 0 2px #122d40 !important;
+                white-space: nowrap !important;
             }
             .vs-notif-dropdown {
                 position: absolute;
                 top: calc(100% + 10px);
                 right: 0;
                 z-index: 2000;
-                width: 340px;
-                max-width: calc(100vw - 24px);
+                width: 360px;
+                max-width: min(360px, calc(100vw - 24px));
+                max-height: calc(100vh - 100px);
                 background: #fff;
                 border-radius: 16px;
                 box-shadow: 0 12px 40px rgba(7,26,47,.18), 0 2px 8px rgba(7,26,47,.10);
                 border: 1px solid #DCE5EF;
+                display: flex;
+                flex-direction: column;
                 overflow: hidden;
                 animation: vsNotifFadeIn .18s ease;
+            }
+            .vs-notif-dropdown[hidden] {
+                display: none !important;
             }
             @keyframes vsNotifFadeIn {
                 from { opacity: 0; transform: translateY(-8px) scale(.97); }
@@ -228,6 +239,8 @@
                 justify-content: space-between;
                 padding: 14px 16px 10px;
                 border-bottom: 1px solid #EEF2F6;
+                flex-shrink: 0;
+                background: #fff;
             }
             .vs-notif-head-title {
                 font-size: 14px;
@@ -250,9 +263,24 @@
                 list-style: none;
                 margin: 0;
                 padding: 0;
-                max-height: 360px;
+                max-height: 380px;
                 overflow-y: auto;
+                flex: 1;
             }
+            .vs-notif-foot {
+                padding: 10px 16px;
+                border-top: 1px solid #EEF2F6;
+                text-align: center;
+                background: #FAFCFE;
+                flex-shrink: 0;
+            }
+            .vs-notif-foot-link {
+                font-size: 12.5px;
+                font-weight: 700;
+                color: #01c771;
+                text-decoration: none;
+            }
+            .vs-notif-foot-link:hover { text-decoration: underline; }
             .vs-notif-empty {
                 padding: 28px 16px;
                 text-align: center;
@@ -411,14 +439,13 @@
                 var badge = document.getElementById('vsNotifBadge');
                 var list = document.getElementById('vsNotifList');
                 var clearBtn = document.getElementById('vsNotifClear');
-                var emptyEl = document.getElementById('vsNotifEmpty');
+                var ctx = '${pageContext.request.contextPath}';
 
-                if (!btn || !dropdown) return; // chỉ chạy khi đã đăng nhập
+                if (!btn || !dropdown) return;
 
-                var notifications = []; // {id, tenNguoiChoi, tenKeo, keoId, thoiGian, isUnread}
-                // Chỉ lưu ID lớn nhất từng xem (không phải danh sách ID lẻ) — tránh việc lần đầu
-                // mở trên trình duyệt/máy mới bị tính TOÀN BỘ 30 thông báo gần nhất là "chưa đọc"
-                // (kể cả những cái rất cũ), khiến badge hiện số lớn bất thường.
+                var ghepKeoItems = [];   // {rawId, tenNguoiChoi, trangThai, thoiGian (ISO), isUnread}
+                var thongBaoItems = [];  // {id, tieuDe, noiDung, daDoc, duongDan, thoiGian (ms), loai}
+                var serverUnreadCount = 0; // tổng số thông báo chưa đọc từ DB
                 var lastSeenId = parseInt(localStorage.getItem('vsNotifLastSeenId') || '0', 10) || 0;
                 var isOpen = false;
 
@@ -426,47 +453,107 @@
                     if (!name) return '?';
                     return name.trim().split(/\s+/).map(function(p){return p[0];}).slice(-2).join('').toUpperCase();
                 }
-                function relativeTime(isoStr) {
-                    if (!isoStr) return '';
-                    var d = new Date(isoStr);
-                    var diff = Math.floor((Date.now() - d.getTime()) / 1000);
+
+                function relativeTime(input) {
+                    var ms = (typeof input === 'number') ? input : new Date(input).getTime();
+                    if (!ms) return '';
+                    var diff = Math.floor((Date.now() - ms) / 1000);
                     if (diff < 60) return 'Vừa xong';
                     if (diff < 3600) return Math.floor(diff/60) + ' phút trước';
                     if (diff < 86400) return Math.floor(diff/3600) + ' giờ trước';
                     return Math.floor(diff/86400) + ' ngày trước';
                 }
 
+                function iconBgForLoai(loai) {
+                    if (!loai) return 'background:#EEF2F6;color:#64748B';
+                    if (loai.indexOf('HOAN_TIEN') >= 0) return 'background:#FFF0F0;color:#E5484D';
+                    if (loai.indexOf('THANH_TOAN') >= 0) return 'background:#FFFBEB;color:#D97706';
+                    if (loai.indexOf('DAT_SAN') >= 0 || loai.indexOf('GIU_CHO') >= 0) return 'background:#F0FDF8;color:#01c771';
+                    return 'background:#EEF2F6;color:#64748B';
+                }
+
+                function iconForLoai(loai) {
+                    if (!loai) return '🔔';
+                    if (loai.indexOf('HOAN_TIEN') >= 0) return '↩';
+                    if (loai.indexOf('THANH_TOAN') >= 0) return '💳';
+                    if (loai.indexOf('DAT_SAN') >= 0 || loai.indexOf('GIU_CHO') >= 0) return '📅';
+                    return '🔔';
+                }
+
                 function renderNotifications() {
                     list.innerHTML = '';
-                    var unread = notifications.filter(function(n){ return n.isUnread; });
-                    if (!notifications.length) {
-                        emptyEl = document.createElement('li');
-                        emptyEl.className = 'vs-notif-empty';
-                        emptyEl.textContent = 'Chưa có thông báo mới';
-                        list.appendChild(emptyEl);
+                    var all = [];
+
+                    thongBaoItems.forEach(function(n) {
+                        all.push({ sortTime: n.thoiGian, isUnread: !n.daDoc,
+                            render: function() {
+                                var li = document.createElement('li');
+                                li.className = 'vs-notif-item' + (!n.daDoc ? ' is-unread' : '');
+                                li.innerHTML =
+                                    '<div class="vs-notif-avatar" style="font-size:16px;' + iconBgForLoai(n.loai) + '">' + iconForLoai(n.loai) + '</div>'
+                                  + '<div class="vs-notif-body">'
+                                  +   '<p class="vs-notif-text"><strong>' + (n.tieuDe || '') + '</strong>'
+                                  +   (n.noiDung ? '<br><span style="font-weight:500;font-size:12px;color:#486581;">' + n.noiDung + '</span>' : '') + '</p>'
+                                  +   '<span class="vs-notif-time">' + relativeTime(n.thoiGian) + '</span>'
+                                  + '</div>';
+                                if (n.duongDan) {
+                                    li.style.cursor = 'pointer';
+                                    li.addEventListener('click', function() {
+                                        if (!n.daDoc) {
+                                            n.daDoc = true;
+                                            fetch(ctx + '/customer/thong-bao', {
+                                                method: 'POST',
+                                                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                                                body: 'action=markRead&id=' + n.id
+                                            }).catch(function(){});
+                                            updateBadge();
+                                        }
+                                        window.location.href = ctx + n.duongDan;
+                                    });
+                                }
+                                return li;
+                            }
+                        });
+                    });
+
+                    ghepKeoItems.forEach(function(n) {
+                        all.push({ sortTime: new Date(n.thoiGian).getTime(), isUnread: n.isUnread,
+                            render: function() {
+                                var li = document.createElement('li');
+                                li.className = 'vs-notif-item' + (n.isUnread ? ' is-unread' : '');
+                                var actionText = (n.trangThai === 'Đã rời') ? 'đã rời khỏi kèo của bạn' : 'đã tham gia kèo của bạn';
+                                li.innerHTML =
+                                    '<div class="vs-notif-avatar">' + getInitials(n.tenNguoiChoi) + '</div>'
+                                  + '<div class="vs-notif-body">'
+                                  +   '<p class="vs-notif-text"><strong>' + (n.tenNguoiChoi || 'Người dùng') + '</strong> ' + actionText + '</p>'
+                                  +   '<span class="vs-notif-time">' + relativeTime(n.thoiGian) + '</span>'
+                                  + '</div>';
+                                return li;
+                            }
+                        });
+                    });
+
+                    if (!all.length) {
+                        var li = document.createElement('li');
+                        li.className = 'vs-notif-empty';
+                        li.textContent = 'Chưa có thông báo mới';
+                        list.appendChild(li);
                         return;
                     }
-                    notifications.forEach(function(n) {
-                        var li = document.createElement('li');
-                        li.className = 'vs-notif-item' + (n.isUnread ? ' is-unread' : '');
-                        var actionText = (n.trangThai === 'Đã rời') ? 'đã rời khỏi kèo của bạn' : 'đã tham gia kèo của bạn';
-                        li.innerHTML =
-                            '<div class="vs-notif-avatar">' + getInitials(n.tenNguoiChoi) + '</div>'
-                          + '<div class="vs-notif-body">'
-                          +   '<p class="vs-notif-text"><strong>' + (n.tenNguoiChoi || 'Người dùng') + '</strong> ' + actionText + '</p>'
-                          +   '<span class="vs-notif-time">' + relativeTime(n.thoiGian) + '</span>'
-                          + '</div>';
-                        list.appendChild(li);
-                    });
+                    all.sort(function(a, b) { return b.sortTime - a.sortTime; });
+                    all.slice(0, 10).forEach(function(item) { list.appendChild(item.render()); });
                 }
 
                 function updateBadge() {
-                    var unreadCount = notifications.filter(function(n){return n.isUnread;}).length;
-                    if (unreadCount > 0) {
-                        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    var keoUnread = ghepKeoItems.filter(function(n){ return n.isUnread; }).length;
+                    var total = serverUnreadCount + keoUnread;
+                    if (total > 0) {
+                        badge.textContent = total > 99 ? '99+' : total;
                         badge.style.opacity = '1';
+                        badge.style.display = 'inline-flex';
                     } else {
                         badge.style.opacity = '0';
+                        badge.style.display = 'none';
                     }
                 }
 
@@ -487,7 +574,8 @@
                     if (isOpen) closeDropdown(); else openDropdown();
                 });
                 document.addEventListener('click', function(e) {
-                    if (isOpen && !document.getElementById('vsNotifWrap').contains(e.target)) closeDropdown();
+                    var wrap = document.getElementById('vsNotifWrap');
+                    if (isOpen && wrap && !wrap.contains(e.target)) closeDropdown();
                 });
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape' && isOpen) closeDropdown();
@@ -495,57 +583,67 @@
 
                 if (clearBtn) {
                     clearBtn.addEventListener('click', function() {
-                        notifications.forEach(function(n){ n.isUnread = false; });
-                        var maxId = notifications.reduce(function(max, n){ return Math.max(max, n.rawId || 0); }, lastSeenId);
+                        var maxId = ghepKeoItems.reduce(function(max, n){ return Math.max(max, n.rawId || 0); }, lastSeenId);
                         localStorage.setItem('vsNotifLastSeenId', String(maxId));
                         lastSeenId = maxId;
-                        updateBadge();
-                        renderNotifications();
+                        ghepKeoItems.forEach(function(n){ n.isUnread = false; });
+                        serverUnreadCount = 0;
+                        fetch(ctx + '/customer/thong-bao', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                            body: 'action=markAllRead'
+                        }).then(function() {
+                            thongBaoItems.forEach(function(n){ n.daDoc = true; });
+                            updateBadge(); renderNotifications();
+                        }).catch(function() {
+                            thongBaoItems.forEach(function(n){ n.daDoc = true; });
+                            updateBadge(); renderNotifications();
+                        });
                     });
                 }
 
-                /* Fetch thông báo từ API (polling) */
                 function fetchNotifications() {
-                    var ctx = '${pageContext.request.contextPath}';
-                    fetch(ctx + '/customer/api/matches/notifications', { headers: { 'Accept': 'application/json' } })
+                    var p1 = fetch(ctx + '/customer/api/matches/notifications', { headers: { 'Accept': 'application/json' } })
                         .then(function(r) { return r.json(); })
                         .then(function(data) {
                             if (!data.success) return;
                             var items = data.notifications || [];
-                            var refreshedLastSeenId = parseInt(localStorage.getItem('vsNotifLastSeenId') || '0', 10) || 0;
-                            var maxIdInBatch = items.reduce(function(max, n){ return Math.max(max, n.id || 0); }, 0);
-                            // Lần đầu tiên trên trình duyệt này (chưa từng lưu vsNotifLastSeenId): coi toàn bộ
-                            // thông báo hiện có là "đã đọc" ngay, tránh badge nhảy lên một số lớn bất thường
-                            // (ví dụ 20-30) chỉ vì đây là lượt tải đầu tiên. Chỉ những gì phát sinh SAU mốc
-                            // này mới được tính là chưa đọc.
-                            var isFirstLoad = localStorage.getItem('vsNotifLastSeenId') === null;
-                            if (isFirstLoad && maxIdInBatch > 0) {
-                                localStorage.setItem('vsNotifLastSeenId', String(maxIdInBatch));
-                                refreshedLastSeenId = maxIdInBatch;
+                            var seenId = parseInt(localStorage.getItem('vsNotifLastSeenId') || '0', 10) || 0;
+                            var maxId = items.reduce(function(mx, n){ return Math.max(mx, n.id || 0); }, 0);
+                            if (localStorage.getItem('vsNotifLastSeenId') === null && maxId > 0) {
+                                localStorage.setItem('vsNotifLastSeenId', String(maxId));
+                                seenId = maxId;
                             }
-                            lastSeenId = refreshedLastSeenId;
-                            notifications = items.map(function(n) {
-                                return {
-                                    id: n.id + '_' + n.trangThai,
-                                    rawId: n.id,
-                                    tenNguoiChoi: n.tenNguoiChoi,
-                                    keoId: n.keoId,
-                                    trangThai: n.trangThai,
-                                    thoiGian: n.thoiGian,
-                                    isUnread: n.id > refreshedLastSeenId
-                                };
+                            lastSeenId = seenId;
+                            ghepKeoItems = items.map(function(n) {
+                                return { rawId: n.id, tenNguoiChoi: n.tenNguoiChoi,
+                                         keoId: n.keoId, trangThai: n.trangThai,
+                                         thoiGian: n.thoiGian, isUnread: n.id > seenId };
                             });
-                            updateBadge();
-                            if (isOpen) renderNotifications();
                         })
-                        .catch(function() { /* silent */ });
+                        .catch(function(){});
+
+                    var p2 = fetch(ctx + '/customer/thong-bao?format=json&limit=8', { headers: { 'Accept': 'application/json' } })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            serverUnreadCount = data.unread || 0;
+                            thongBaoItems = (data.items || []).map(function(n) {
+                                return { id: n.id, tieuDe: n.tieuDe, noiDung: n.noiDung,
+                                         daDoc: n.daDoc, duongDan: n.duongDan,
+                                         thoiGian: n.thoiGian, loai: n.loai };
+                            });
+                        })
+                        .catch(function(){});
+
+                    Promise.all([p1, p2]).then(function() {
+                        updateBadge();
+                        if (isOpen) renderNotifications();
+                    });
                 }
 
-                /* Khởi động: fetch ngay và poll mỗi 30s */
                 fetchNotifications();
                 setInterval(fetchNotifications, 30000);
 
-                /* Expose để GhepKeo.jsp gọi khi có hành động tham gia */
                 window.vsRefreshNotifications = fetchNotifications;
             })();
         </script>

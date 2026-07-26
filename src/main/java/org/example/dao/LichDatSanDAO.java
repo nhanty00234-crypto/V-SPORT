@@ -23,6 +23,8 @@ public interface LichDatSanDAO {
     List<Lichdatsan> getLichDatSanByCoSo(int coSoId);
     boolean duyetLichDatSan(int datSanId, int approvedByAccountId, int coSoId, boolean confirmPriceChange) throws Exception;
     boolean tuChoiLichDatSan(int datSanId, String ghiChu, int coSoId) throws Exception;
+    org.example.dto.booking.BookingDecisionResult duyetLichDatSanDecision(int datSanId, int approvedByAccountId, int coSoId, boolean confirmPriceChange) throws Exception;
+    org.example.dto.booking.BookingDecisionResult tuChoiLichDatSanDecision(int datSanId, String ghiChu, int coSoId) throws Exception;
     boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities) throws Exception;
     /** Như trên, nhưng bắt buộc DatSanID phải thuộc requiredCoSoId (dùng cho Manager/Staff thao tác qua Check-in). */
     boolean updateDichVuDatSan(int datSanId, int[] productIds, int[] quantities, Integer requiredCoSoId) throws Exception;

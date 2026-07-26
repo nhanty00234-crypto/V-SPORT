@@ -35,6 +35,30 @@ public class Hoantien {
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianHoan;
 
+    // --- Các trường bổ sung quản lý xử lý hoàn tiền ---
+
+    @Column(name = "AccountID_NguoiXuLy")
+    private Integer accountIdNguoiXuLy;
+
+    @Column(name = "GhiChuXuLy", length = 500)
+    private String ghiChuXuLy;
+
+    @Column(name = "MaGiaoDichHoan", length = 100)
+    private String maGiaoDichHoan;
+
+    @Column(name = "ThoiGianXuLy")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date thoiGianXuLy;
+
+    @Column(name = "NganHangNhan", length = 100)
+    private String nganHangNhan;
+
+    @Column(name = "SoTaiKhoanNhan", length = 30)
+    private String soTaiKhoanNhan;
+
+    @Column(name = "ChuTaiKhoanNhan", length = 100)
+    private String chuTaiKhoanNhan;
+
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "HoaDonID", insertable = false, updatable = false)
@@ -137,6 +161,27 @@ public class Hoantien {
     public void setKhachHang(TaiKhoan khachHang) {
         this.khachHang = khachHang;
     }
+
+    public Integer getAccountIdNguoiXuLy() { return accountIdNguoiXuLy; }
+    public void setAccountIdNguoiXuLy(Integer v) { this.accountIdNguoiXuLy = v; }
+
+    public String getGhiChuXuLy() { return ghiChuXuLy; }
+    public void setGhiChuXuLy(String v) { this.ghiChuXuLy = v; }
+
+    public String getMaGiaoDichHoan() { return maGiaoDichHoan; }
+    public void setMaGiaoDichHoan(String v) { this.maGiaoDichHoan = v; }
+
+    public Date getThoiGianXuLy() { return thoiGianXuLy; }
+    public void setThoiGianXuLy(Date v) { this.thoiGianXuLy = v; }
+
+    public String getNganHangNhan() { return nganHangNhan; }
+    public void setNganHangNhan(String v) { this.nganHangNhan = v; }
+
+    public String getSoTaiKhoanNhan() { return soTaiKhoanNhan; }
+    public void setSoTaiKhoanNhan(String v) { this.soTaiKhoanNhan = v; }
+
+    public String getChuTaiKhoanNhan() { return chuTaiKhoanNhan; }
+    public void setChuTaiKhoanNhan(String v) { this.chuTaiKhoanNhan = v; }
 
     @Override
     public String toString() {

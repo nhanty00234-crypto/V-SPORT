@@ -5,11 +5,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.example.dao.CoSoDAO;
 import org.example.dao.LoaiSanDAO;
 import org.example.dao.impl.CoSoDAOImpl;
 import org.example.dao.impl.LoaiSanDAOImpl;
 import org.example.model.CoSo;
+import org.example.model.TaiKhoan;
 import org.example.model.MonTheThao;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +46,13 @@ public class TimKiemServlet extends HttpServlet {
         }
 
         Integer sportId = parsePositiveInt(req.getParameter("sportId"));
+        // Nếu không có sportId trong request, dùng môn yêu thích từ session (nếu đã đăng nhập).
+        // sportId explicit từ request luôn thắng preference.
+        if (sportId == null) {
+            HttpSession sess = req.getSession(false);
+            TaiKhoan sessionUser = sess != null ? (TaiKhoan) sess.getAttribute("user") : null;
+            if (sessionUser != null) sportId = sessionUser.getMonTheThaoYeuThichId();
+        }
         Integer coSoId = parsePositiveInt(req.getParameter("coSoId"));
         boolean openNow = "true".equals(req.getParameter("openNow")) || "1".equals(req.getParameter("openNow"));
 

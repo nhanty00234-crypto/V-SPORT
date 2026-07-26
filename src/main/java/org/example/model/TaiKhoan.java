@@ -102,6 +102,9 @@ public class TaiKhoan {
     @Transient // Not directly in the Accounts table (mapped via many-to-many usually)
     private String monTheThaoYeuThich;
 
+    @Transient // First preferred sport ID, populated at login from MonTheThaoYeuThich table
+    private Integer monTheThaoYeuThichId;
+
     @Column(name = "IsDeleted", columnDefinition = "bit default 0")
     private Boolean isDeleted = false;
 
@@ -145,6 +148,14 @@ public class TaiKhoan {
 
     public void setMonTheThaoYeuThich(String monTheThaoYeuThich) {
         this.monTheThaoYeuThich = monTheThaoYeuThich;
+    }
+
+    public Integer getMonTheThaoYeuThichId() {
+        return monTheThaoYeuThichId;
+    }
+
+    public void setMonTheThaoYeuThichId(Integer monTheThaoYeuThichId) {
+        this.monTheThaoYeuThichId = monTheThaoYeuThichId;
     }
 
     public TaiKhoan() {

@@ -184,5 +184,6 @@ function loadRequests() {
 loadRequests();
 setInterval(loadRequests, 5000);
 </script>
+<jsp:include page="/common/footer.jsp" />
 </body>
 </html>

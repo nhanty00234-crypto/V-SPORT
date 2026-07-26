@@ -10,6 +10,7 @@ import org.example.dao.PayOSPaymentAttemptDAO;
 import org.example.dao.impl.PayOSPaymentAttemptDAOImpl;
 import org.example.dto.payment.PayOSCredentials;
 import org.example.dto.payment.PayOSFinalizeResult;
+import org.example.service.NotificationService;
 import org.example.service.PayOSConfigurationService;
 import org.example.service.payos.PayOSClientFactory;
 import org.example.service.payos.PayOSLegacyBookingFinalizationService;
@@ -52,6 +53,7 @@ public class PayOSWebhookServlet extends HttpServlet {
     private final PayOSPaymentFinalizationService finalizationService = new PayOSPaymentFinalizationService();
     private final PayOSLegacyBookingFinalizationService legacyFinalizationService =
             new PayOSLegacyBookingFinalizationService();
+    private final NotificationService notificationService = new NotificationService();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -221,6 +223,12 @@ public class PayOSWebhookServlet extends HttpServlet {
                 LOGGER.info(String.format(
                         "PayOS webhook: DatSanID=%d da duoc xac nhan (hoaDonId=%s, %s)",
                         datSanId, result.hoaDonId(), result.code()));
+                // Gửi thông báo thanh toán thành công chỉ khi vừa confirmed (không gửi lại khi retry)
+                if (result.code() == PayOSLegacyBookingFinalizationService.ResultCode.CONFIRMED
+                        && result.accountId() != null && result.hoaDonId() != null) {
+                    notificationService.notifyPaymentSuccess(result.accountId(), result.hoaDonId(),
+                            String.valueOf(amount));
+                }
                 respondOk(resp, result.code() == PayOSLegacyBookingFinalizationService.ResultCode.ALREADY_CONFIRMED
                         ? "Already confirmed" : "Confirmed");
             }

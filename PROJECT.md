@@ -86,17 +86,11 @@ DATN/ (Thư mục gốc dự án)
     *   *Backend*: [QuanLyCaLamManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java), [YeuCauNghiManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/YeuCauNghiManagerServlet.java), [StaffCaLamServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/StaffCaLamServlet.java), [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java)
     *   *Thực thể*: `CaLamViec`, `CaLamViecAudit`, `CaLamViecAvailability`, `CaLamViecSwapRequest`, `YeuCauNghi`.
 
-### Phân hệ 3: Ghép kèo cộng đồng & Xếp hạng ELO (Matchmaking)
-*   **Chức năng**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (Ghép kèo - `GhepKeo`). Sau mỗi trận đấu, dựa trên kết quả ghi nhận, hệ thống tính toán điểm số ELO tích lũy (`LichSuElo`) tương tự các bảng xếp hạng eSports để xếp hạng và ghép các cặp đối thủ có trình độ tương đồng, nâng cao tính hấp dẫn.
+### Phân hệ 3: Ghép kèo cộng đồng (Matchmaking)
+*   **Chức năng**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (Ghép kèo - `GhepKeo`). Customer có thể đăng phòng, tìm người chơi cùng và xem danh sách kèo đang mở theo môn thể thao.
 *   **Thành phần chính**:
-    *   *Thực thể*: `GhepKeo`, `ChiTietGhepKeo`, `LichSuElo`.
-
-### Phân hệ 4: Tiện ích vận hành IoT (An ninh & Bãi giữ xe)
-*   **Chức năng**:
-    *   *An ninh*: Tích hợp cơ chế cảnh báo SOS khẩn cấp (`YeuCauSOS`, `NhatKySOSGui`) tại chỗ để nhân viên lập tức nhận biết sân nào đang cần hỗ trợ an ninh/y tế.
-    *   *Nhà xe*: Quản lý thẻ xe (`TheGiuXe`) gắn với mã vạch/RFID, lưu vết giờ vào/ra của các phương tiện (`LichXeRaVao`) nâng cao an toàn tài sản cơ sở.
-*   **Thành phần chính**:
-    *   *Thực thể*: `TheGiuXe`, `LichXeRaVao`, `YeuCauSOS`, `NhatKySOSGui`.
+    *   *Thực thể*: `GhepKeo`, `ChiTietGhepKeo`.
+*   **Lưu ý**: Tính năng **xếp hạng ELO** (`LichSuElo`) và **chat phòng ghép kèo** (`NhatKyChat`) chưa được triển khai — xem mục Định hướng phát triển.
 
 ### Phân hệ 5: Quản lý Kho hàng & Dịch vụ đi kèm (Inventory & Add-on Services)
 *   **Chức năng**: Quản lý danh mục hàng hóa (`DanhMucSanPham`), sản phẩm và dịch vụ cho thuê/bán lẻ tại quầy (`SanPham_DichVu`), quản lý số lượng tồn kho của chi nhánh, theo dõi nhập/xuất kho. Áp dụng cơ chế khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi xuất/nhập kho để tránh race condition và đảm bảo tính toàn vẹn dữ liệu.
@@ -109,7 +103,7 @@ DATN/ (Thư mục gốc dự án)
 *   **Chức năng**: Cấu hình và quản lý danh mục loại sân (`LoaiSan`), các sân bóng, cầu lông, tennis cụ thể (`San`) trực thuộc chi nhánh; theo dõi trực quan trạng thái sân (Sẵn sàng, Đang hoạt động, Bảo trì) theo thời gian thực.
 *   **Thành phần chính**:
     *   *Frontend*: [QuanLySan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp)
-    *   *Backend*: [QuanLySanManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLySanManagerServlet.java), [QuanLySanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLySanServlet.java)
+    *   *Backend*: [QuanLySanManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/QuanLySanManagerServlet.java) (Manager — `/manager/quan-ly-san`)
     *   *Thực thể*: `San`, `LoaiSan`, `CoSo`.
 
 ### Phân hệ 7: Quản lý Khách hàng & Đánh giá dịch vụ (Customer & Feedback Management)
@@ -146,17 +140,17 @@ Hệ thống quản lý thông tin thông qua **32 JPA Entities** chính dưới
 | 18 | **YeuCauNghi** | Quản lý đơn xin nghỉ phép của nhân viên (Ngày nghỉ, lý do, duyệt/từ chối). |
 | 19 | **GhepKeo** | Quản lý các phòng chờ ghép trận đấu thể thao giữa các cá nhân/nhóm chơi. |
 | 20 | **ChiTietGhepKeo** | Danh sách những người tham gia vào một kèo đấu ghép sân cụ thể. |
-| 21 | **LichSuElo** | Nhật ký biến động điểm xếp hạng (ELO) của người chơi sau mỗi trận đấu. |
-| 22 | **TheGiuXe** | Quản lý danh mục thẻ xe thông minh của chi nhánh. |
-| 23 | **LichXeRaVao** | Ghi nhận nhật ký xe vào/ra bãi đỗ xe gắn liền với mã số thẻ xe. |
-| 24 | **YeuCauSOS** | Các nút báo động khẩn cấp được thiết lập tại sân thể thao. |
-| 25 | **NhatKySOSGui** | Lưu nhật ký thời gian và vị trí gửi cảnh báo khẩn cấp cần nhân viên xử lý. |
+| 21 | **LichSuElo** | *(Roadmap)* Nhật ký biến động điểm ELO — chưa triển khai. |
+| 22 | **TheGiuXe** | *(Roadmap)* Thẻ xe RFID/IoT — chưa triển khai. |
+| 23 | **LichXeRaVao** | *(Roadmap)* Nhật ký xe ra vào — chưa triển khai. |
+| 24 | **YeuCauSOS** | *(Roadmap)* Tuyển người chơi nhanh (không phải SOS an ninh) — chưa triển khai. |
+| 25 | **NhatKySOSGui** | *(Roadmap)* Log gửi yêu cầu tuyển — chưa triển khai. |
 | 26 | **DanhGia** | Phản hồi, điểm đánh giá sao của khách hàng đối với dịch vụ cơ sở thể thao. |
 | 27 | **SanPham_DichVu** | Danh mục nước uống, đồ ăn, vật dụng thể thao cho thuê hoặc bán tại quầy. |
 | 28 | **DanhMucSanPham** | Danh mục phân loại sản phẩm/dịch vụ. |
 | 29 | **ThongBao** | Hệ thống gửi thông điệp thông báo cho người dùng (Đã xếp ca, được duyệt nghỉ phép...). |
 | 30 | **MonTheThaoYeuThich** | Lưu trữ sở thích thể thao của khách hàng nhằm gợi ý ghép kèo thích hợp. |
-| 31 | **NhatKyChat** | Ghi nhận tin nhắn trao đổi trong phòng chờ ghép kèo thể thao. |
+| 31 | **NhatKyChat** | *(Roadmap)* Chat phòng ghép kèo — chưa triển khai. |
 | 32 | **MaQR** | Mã QR liên kết phục vụ thanh toán nhanh trực tuyến hoặc check-in. |
 
 ---
@@ -247,7 +241,25 @@ Quy trình phân ca và chấm công được vận hành chặt chẽ để đ�
 
 ---
 
-## 8. Ma trận Validation Hệ thống Đặt Sân (Booking Validation)
+## 8. Định hướng phát triển trong tương lai (Roadmap — chưa triển khai)
+
+Các tính năng sau **chỉ tồn tại ở cấp model dữ liệu** và chưa có DAO, Service, hay UI hoạt động end-to-end. Không được mô tả chúng là chức năng đang hoạt động.
+
+### A. Xếp hạng ELO (`LichSuElo`)
+Tính toán điểm ELO tích lũy sau mỗi trận ghép kèo và hiển thị bảng xếp hạng theo môn thể thao. Model `LichSuElo` đã có, chưa có DAO/Service/UI.
+
+### B. Chat phòng ghép kèo (`NhatKyChat`)
+Kênh chat thời gian thực trong mỗi phòng chờ ghép trận. Model `NhatKyChat` đã có, chưa có WebSocket/polling endpoint hay UI.
+
+### C. Tuyển người chơi nhanh (`YeuCauSOS`, `NhatKySOSGui`)
+Chức năng đăng yêu cầu tuyển thêm người chơi nhanh cho một booking hiện có (ví dụ: cần thêm 2 người đá bóng vào lúc 18h). Model `YeuCauSOS` có các trường `MonTheThaoID`, `SoNguoiCanTuyen`, `ViTriCanTuyen` và trạng thái *Đang tìm / Đã tìm đủ / Hết hạn* — đây là cơ chế tuyển người chơi, **không phải SOS an ninh/y tế khẩn cấp**. Chưa có quy trình tiếp nhận, phản hồi và UI. Dự kiến gộp vào phân hệ Ghép kèo.
+
+### D. Thẻ giữ xe RFID/IoT (`TheGiuXe`, `LichXeRaVao`)
+Quản lý thẻ xe thông minh gắn mã vạch/RFID và nhật ký xe ra vào. Model đã có, chưa có tích hợp thiết bị phần cứng, DAO hay UI. Cần thiết bị IoT và API đọc thẻ.
+
+---
+
+## 9. Ma trận Validation Hệ thống Đặt Sân (Booking Validation)
 
 Tất cả validation đều thực hiện **server-side** (không tin tưởng client). Được chia thành 4 nhóm theo luồng nghiệp vụ.
 

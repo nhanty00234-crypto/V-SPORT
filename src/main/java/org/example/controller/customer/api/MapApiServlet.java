@@ -5,11 +5,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dao.CoSoDAO;
 import org.example.dao.impl.CoSoDAOImpl;
 import org.example.dto.FacilityMapDTO;
+import org.example.model.TaiKhoan;
 
 import java.io.IOException;
 import java.time.LocalTime;
@@ -69,6 +71,12 @@ public class MapApiServlet extends HttpServlet {
             }
             if (sportParam != null && !sportParam.trim().isEmpty()) {
                 sportId = Integer.parseInt(sportParam.trim());
+            }
+            // Fallback: dùng môn yêu thích từ session nếu không có sportId trong request
+            if (sportId == null) {
+                HttpSession sess = req.getSession(false);
+                TaiKhoan sessionUser = sess != null ? (TaiKhoan) sess.getAttribute("user") : null;
+                if (sessionUser != null) sportId = sessionUser.getMonTheThaoYeuThichId();
             }
             if (facilityIdParam != null && !facilityIdParam.trim().isEmpty()) {
                 facilityId = Integer.parseInt(facilityIdParam.trim());
