@@ -54,8 +54,14 @@ public class CoSoDAOImpl implements CoSoDAO {
                 jpql.append(" AND (LOWER(c.TenCoSo) LIKE :kw ESCAPE '\\' OR LOWER(c.DiaChi) LIKE :kw ESCAPE '\\')");
             }
             if (monTheThaoId != null) {
-                jpql.append(" AND EXISTS (SELECT 1 FROM San s JOIN LoaiSan ls ON s.loaiSanID = ls.loaiSanID " +
-                        "WHERE s.coSoID = c.CoSoID AND (s.isDeleted = false OR s.isDeleted IS NULL) " +
+                // Source of truth for sport: San → LoaiSan → MonTheThao (not CoSo.LoaiHinhKinhDoanh).
+                // Only check isDeleted; do NOT filter on s.trangThai here — court status values
+                // are not guaranteed uniform across deployments and would silently hide all results.
+                jpql.append(" AND EXISTS (SELECT 1 FROM San s, LoaiSan ls " +
+                        "WHERE s.coSoID = c.CoSoID " +
+                        "AND s.loaiSanID = ls.loaiSanID " +
+                        "AND (s.isDeleted = false OR s.isDeleted IS NULL) " +
+                        "AND ls.isDeleted = false " +
                         "AND ls.monTheThaoID = :monTheThaoId)");
             }
 

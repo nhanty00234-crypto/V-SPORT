@@ -326,6 +326,53 @@
     }
 </style>
 
+<!-- Modal yêu cầu đăng nhập -->
+<style>
+    .vslr-backdrop {
+        position: fixed; inset: 0; z-index: 1260;
+        background: rgba(3, 19, 36, 0.66);
+        backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+        opacity: 0; transition: opacity 200ms ease;
+        display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .vslr-backdrop.is-open { opacity: 1; }
+    .vslr-modal {
+        background: #fff; border-radius: 20px; padding: 28px 24px 24px;
+        width: 380px; max-width: calc(100vw - 32px);
+        box-shadow: 0 24px 70px rgba(7, 29, 54, 0.28);
+        font-family: var(--vsx-font, 'Be Vietnam Pro', sans-serif);
+        text-align: center; position: relative;
+        transform: scale(.96); transition: transform 200ms ease;
+    }
+    .vslr-backdrop.is-open .vslr-modal { transform: scale(1); }
+    .vslr-icon { font-size: 40px; margin-bottom: 12px; }
+    .vslr-title { font-size: 20px; font-weight: 800; color: var(--navy, #122D40); margin-bottom: 8px; }
+    .vslr-desc { font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 22px; line-height: 1.5; }
+    .vslr-actions { display: flex; gap: 10px; }
+    .vslr-btn {
+        flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+        cursor: pointer; border: none; text-decoration: none; text-align: center;
+        display: inline-flex; align-items: center; justify-content: center;
+        transition: background-color .15s ease;
+    }
+    .vslr-btn-cancel { background: #f1f5f9; color: #475569; }
+    .vslr-btn-cancel:hover { background: #e2e8f0; }
+    .vslr-btn-login { background: var(--primary, #01E281); color: var(--navy, #122D40); }
+    .vslr-btn-login:hover { background: #01C771; }
+    @media (max-width: 400px) { .vslr-actions { flex-direction: column-reverse; } }
+</style>
+<div id="vsLoginRequiredModal" class="vslr-backdrop" hidden>
+    <div class="vslr-modal" role="dialog" aria-modal="true" aria-labelledby="vslrTitle">
+        <div class="vslr-icon">🔒</div>
+        <h2 class="vslr-title" id="vslrTitle">Đăng nhập để đặt lịch</h2>
+        <p class="vslr-desc">Bạn cần đăng nhập để sử dụng tính năng đặt sân. Đăng nhập chỉ mất vài giây!</p>
+        <div class="vslr-actions">
+            <button type="button" class="vslr-btn vslr-btn-cancel" id="vslrCancelBtn">Để sau</button>
+            <a class="vslr-btn vslr-btn-login" href="${ctx}/dangnhap">Đăng nhập ngay</a>
+        </div>
+    </div>
+</div>
+
 <div id="vsBookingLoading" class="vsx-loading" role="status" aria-live="polite">
     <p id="vsBookingLoadingTitle" class="vsx-loading-title"></p>
     <div class="vsx-loading-ring" aria-hidden="true"></div>
@@ -484,9 +531,11 @@
 
 <script>
     window.VSPORT_CONTEXT_PATH = window.VSPORT_CONTEXT_PATH || '${ctx}';
+    window.VSPORT_IS_LOGGED_IN = <% out.print(session.getAttribute("user") != null ? "true" : "false"); %>;
     (function () {
         'use strict';
         const CTX = window.VSPORT_CONTEXT_PATH;
+        const IS_LOGGED_IN = window.VSPORT_IS_LOGGED_IN === true;
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         // ---- Shared toast (exposed globally so host pages can reuse it) ----
@@ -506,6 +555,17 @@
             }, 2000);
         }
         window.showHomeToast = showHomeToast;
+
+        function showLoginRequiredToast() {
+            const modal = document.getElementById('vsLoginRequiredModal');
+            if (modal) {
+                modal.hidden = false;
+                requestAnimationFrame(() => modal.classList.add('is-open'));
+                lockScroll();
+                modal.querySelector('.vslr-btn-login').focus();
+                return;
+            }
+        }
 
         // ---- Shared helpers -------------------------------------------------
         let scrollLocks = 0;
@@ -545,13 +605,18 @@
         let bcReturnFocus = null;
         let bcOpen = false;
 
-        function openBookingChoice(cosoId, facilityName, triggerEl) {
+        function openBookingChoice(cosoId, facilityName, triggerEl, sportId) {
+            if (!IS_LOGGED_IN) {
+                showLoginRequiredToast();
+                return;
+            }
             if (bcOpen) return;
             bcOpen = true;
             bcReturnFocus = triggerEl || document.activeElement;
             // Option 1 hướng người dùng thẳng đến trang "Đặt lịch trực quan" theo đúng cơ sở
             // vừa chọn — timetable court×time thay cho danh sách phẳng cũ.
-            bcDirect.href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(cosoId);
+            bcDirect.href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(cosoId) +
+                (sportId ? '&sportId=' + encodeURIComponent(sportId) : '');
             bcMatch.href = CTX + '/customer/ghep-keo?tab=tao-keo&coSoId=' + encodeURIComponent(cosoId);
             bcName.textContent = facilityName || '';
             bcBackdrop.hidden = false;
@@ -657,7 +722,6 @@
         const fsSkeleton = document.getElementById('fsSkeleton');
         const fsErrorBox = document.getElementById('fsError');
         const fsContent = document.getElementById('fsContent');
-        const detailCache = new Map();
         const shopCache = new Map();
         let fsOpen = false;
         let fsReturnFocus = null;
@@ -665,9 +729,24 @@
         let fsShopAbort = null;
         let fsCurrentId = null;
         let fsCurrentName = '';
+        let fsCurrentSportId = null;
         let fsCardImage = null;
         let fsCurrentPhone = null;
         let fsPushedState = false;
+
+        // Real-time court detail polling for bottom sheet
+        let fsPollTimer = null;
+        function startFsPoll() {
+            stopFsPoll();
+            fsPollTimer = setInterval(function () {
+                if (fsOpen && fsCurrentId && !document.hidden) {
+                    loadFacilityDetail(fsCurrentId, true);
+                }
+            }, 10000);
+        }
+        function stopFsPoll() {
+            if (fsPollTimer) { clearInterval(fsPollTimer); fsPollTimer = null; }
+        }
 
         function openFacilitySheet(card) {
             const cosoId = card.getAttribute('data-coso-id');
@@ -675,6 +754,7 @@
             fsReturnFocus = card;
             fsCurrentId = cosoId;
             fsCurrentName = card.getAttribute('data-facility-name') || '';
+            fsCurrentSportId = card.getAttribute('data-sport-id') || null;
             fsCardImage = card.getAttribute('data-card-image') || null;
             fsOpen = true;
             fsOverlay.hidden = false;
@@ -691,12 +771,14 @@
                 fsPushedState = true;
             } catch (e) { fsPushedState = false; }
             loadFacilityDetail(cosoId);
+            startFsPoll();
         }
         window.openFacilitySheet = openFacilitySheet;
 
         function closeFacilitySheet(fromPopstate) {
             if (!fsOpen) return;
             fsOpen = false;
+            stopFsPoll();
             if (fsAbort) { fsAbort.abort(); fsAbort = null; }
             if (fsShopAbort) { fsShopAbort.abort(); fsShopAbort = null; }
             fsOverlay.classList.remove('is-open');
@@ -722,30 +804,30 @@
             fsContent.hidden = state !== 'content';
         }
 
-        function loadFacilityDetail(cosoId) {
-            showSheetState('loading');
-            if (detailCache.has(cosoId)) {
-                renderFacilityDetail(detailCache.get(cosoId));
-                return;
-            }
+        function loadFacilityDetail(cosoId, isSilent) {
+            if (!isSilent) showSheetState('loading');
+            const sportId = fsCurrentSportId;
             if (fsAbort) fsAbort.abort();
             fsAbort = new AbortController();
-            fetch(CTX + '/api/customer/facilities/detail?coSoId=' + encodeURIComponent(cosoId), { signal: fsAbort.signal })
+            let apiUrl = CTX + '/api/customer/facilities/detail?coSoId=' + encodeURIComponent(cosoId) + '&_t=' + Date.now();
+            if (sportId) apiUrl += '&sportId=' + encodeURIComponent(sportId);
+            fetch(apiUrl, { signal: fsAbort.signal, cache: 'no-store' })
                 .then(r => {
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     return r.json();
                 })
                 .then(data => {
-                    detailCache.set(cosoId, data);
                     if (fsOpen && fsCurrentId === cosoId) renderFacilityDetail(data);
                 })
                 .catch(err => {
                     if (err && err.name === 'AbortError') return;
-                    if (fsOpen && fsCurrentId === cosoId) showSheetState('error');
+                    if (fsOpen && fsCurrentId === cosoId && !isSilent) showSheetState('error');
                 });
         }
         document.getElementById('fsRetryBtn').addEventListener('click', () => {
-            if (fsCurrentId) { detailCache.delete(fsCurrentId); loadFacilityDetail(fsCurrentId); }
+            if (fsCurrentId) {
+                loadFacilityDetail(fsCurrentId);
+            }
         });
 
         // ---- Rendering (textContent only, no innerHTML with server data) ----
@@ -1080,15 +1162,33 @@
         document.getElementById('fsBookBtn').addEventListener('click', function () {
             const cosoId = fsCurrentId;
             const name = fsCurrentName;
+            const sportId = fsCurrentSportId;
             const returnTo = fsReturnFocus;
             closeFacilitySheet(false);
             const wait = reduceMotion ? 0 : 240;
-            setTimeout(() => openBookingChoice(cosoId, name, returnTo), wait);
+            setTimeout(() => openBookingChoice(cosoId, name, returnTo, sportId), wait);
         });
+
+        // ---- Login-required modal ------------------------------------------
+        const vslrModal = document.getElementById('vsLoginRequiredModal');
+        if (vslrModal) {
+            function closeLoginRequired() {
+                vslrModal.classList.remove('is-open');
+                setTimeout(() => { vslrModal.hidden = true; }, 210);
+                unlockScroll();
+            }
+            document.getElementById('vslrCancelBtn').addEventListener('click', closeLoginRequired);
+            vslrModal.addEventListener('click', e => { if (e.target === vslrModal) closeLoginRequired(); });
+            vslrModal.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeLoginRequired();
+                trapTab(vslrModal, e);
+            });
+        }
 
         // ---- Escape closes topmost layer -----------------------------------
         document.addEventListener('keydown', e => {
             if (e.key !== 'Escape') return;
+            if (vslrModal && !vslrModal.hidden) { document.getElementById('vslrCancelBtn').click(); return; }
             if (bcOpen) { closeBookingChoice(); return; }
             if (fsOpen) closeFacilitySheet(false);
         });
@@ -1135,7 +1235,12 @@
                 const bookBtn = e.target.closest('[data-book-trigger]');
                 if (bookBtn) {
                     e.stopPropagation();
-                    openBookingChoice(bookBtn.getAttribute('data-coso-id'), bookBtn.getAttribute('data-facility-name'), bookBtn);
+                    openBookingChoice(
+                        bookBtn.getAttribute('data-coso-id'),
+                        bookBtn.getAttribute('data-facility-name'),
+                        bookBtn,
+                        bookBtn.getAttribute('data-sport-id') || null
+                    );
                     return;
                 }
                 if (e.target.closest('button, a')) return; // favorite/share/other controls

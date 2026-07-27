@@ -16,7 +16,7 @@
                         </button>
 
                         <a href="${pageContext.request.contextPath}/" class="logo">
-                            <i class="fa-solid fa-basket-shopping"></i>
+                            <i class="fa-solid fa-volleyball"></i>
                             V-<span>SPORT</span>
                         </a>
 
@@ -78,6 +78,9 @@
                                             <%= user.getFullName() %>
                                         </span>
                                     </a>
+                                    <a href="${pageContext.request.contextPath}/logout" class="icon-btn" title="Đăng xuất" aria-label="Đăng xuất">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </a>
                                     <% } else {
                                         // Bấm icon tài khoản là hành động CHỦ ĐỘNG của người dùng, không phải bị
                                         // chặn do thao tác cần đăng nhập — vì vậy dẫn thẳng tới trang chủ mở modal
@@ -136,7 +139,7 @@
         <nav class="mobile-nav-drawer" id="vsMobileNavDrawer" aria-label="Menu điều hướng di động" aria-hidden="true">
             <div class="mobile-nav-drawer-head">
                 <a href="${pageContext.request.contextPath}/" class="logo">
-                    <i class="fa-solid fa-basket-shopping"></i>
+                    <i class="fa-solid fa-volleyball"></i>
                     V-<span>SPORT</span>
                 </a>
                 <button type="button" class="mobile-nav-close" id="vsMobileNavClose" aria-label="Đóng menu"><i class="fas fa-times"></i></button>

@@ -693,6 +693,7 @@ public class SanService {
         san.setTrangThai(req.getTrangThai() != null ? req.getTrangThai() : Constants.TRANG_THAI_SAN_SAN_SANG);
         san.setMoTa(req.getMoTa());
         san.setHinhAnh(req.getHinhAnh());
+        san.setDeleted(false);
     }
 
     private void updateSanFromRequest(San san, SanUpdateRequest req) {

@@ -50,13 +50,23 @@ public class FacilityDetailApiServlet extends HttpServlet {
             return;
         }
 
+        Integer sportIdFilter = null;
+        String sportIdParam = req.getParameter("sportId");
+        if (sportIdParam != null && !sportIdParam.trim().isEmpty()) {
+            try {
+                int v = Integer.parseInt(sportIdParam.trim());
+                if (v > 0) sportIdFilter = v;
+            } catch (NumberFormatException ignored) {}
+        }
+
         Map<String, Object> facility = new HashMap<>();
         List<Map<String, Object>> courts = new ArrayList<>();
         List<Map<String, Object>> services = new ArrayList<>();
         Set<String> images = new LinkedHashSet<>();
+        Set<String> sportsSet = new LinkedHashSet<>();
 
         String facilitySql = "SELECT c.CoSoID, c.TenCoSo, c.DiaChi, c.SoDienThoai, c.MoTa, c.ViDo, c.KinhDo, c.HinhAnh, " +
-                "       c.GioMoCua, c.GioDongCua, c.LoaiHinhKinhDoanh, " +
+                "       c.GioMoCua, c.GioDongCua, " +
                 "       (SELECT MIN(ls.GiaKhongDen) FROM LoaiSan ls WHERE ls.CoSoID = c.CoSoID AND (ls.IsDeleted = 0 OR ls.IsDeleted IS NULL)) AS MinPrice, " +
                 "       (SELECT COUNT(*) FROM San s WHERE s.CoSoID = c.CoSoID AND s.TrangThai = N'Sẵn sàng' AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL)) AS ReadyCourtCount " +
                 "FROM CoSo c " +
@@ -65,10 +75,13 @@ public class FacilityDetailApiServlet extends HttpServlet {
         String courtsSql = "SELECT s.SanID, s.TenSan, s.TrangThai, s.HinhAnh, s.MoTa, " +
                 "       ls.TenLoai, ls.GiaKhongDen, ls.GiaCoDen, mt.TenMon " +
                 "FROM San s " +
-                "JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
                 "LEFT JOIN MonTheThao mt ON ls.MonTheThaoID = mt.MonTheThaoID " +
-                "WHERE s.CoSoID = ? AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL) " +
-                "ORDER BY s.TenSan";
+                "WHERE s.CoSoID = ? " +
+                "  AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL) " +
+                "  AND (ls.IsDeleted = 0 OR ls.IsDeleted IS NULL)" +
+                (sportIdFilter != null ? " AND ls.MonTheThaoID = ?" : "") +
+                " ORDER BY s.TenSan";
 
         String servicesSql = "SELECT TOP 30 sp.TenSanPham, sp.DonGia, sp.DonViTinh " +
                 "FROM SanPham_DichVu sp " +
@@ -110,17 +123,6 @@ public class FacilityDetailApiServlet extends HttpServlet {
                     facility.put("imageUrl", hinhAnh != null ? hinhAnh.trim() : "");
                     addImage(images, hinhAnh);
 
-                    List<String> sportsList = new ArrayList<>();
-                    String loaiHinh = rs.getString("LoaiHinhKinhDoanh");
-                    if (loaiHinh != null && !loaiHinh.trim().isEmpty()) {
-                        for (String s : loaiHinh.split(",")) {
-                            if (!s.trim().isEmpty()) {
-                                sportsList.add(s.trim());
-                            }
-                        }
-                    }
-                    facility.put("sports", sportsList);
-
                     // Tab "Cửa hàng" chỉ tồn tại khi capability bán hàng đã được duyệt
                     // (isApprovedAny tự kiểm tra CoSo còn hoạt động/chưa xóa). Danh sách
                     // sản phẩm thật được lazy-load riêng qua FacilityShopApiServlet khi
@@ -131,6 +133,7 @@ public class FacilityDetailApiServlet extends HttpServlet {
 
             try (java.sql.PreparedStatement ps = conn.prepareStatement(courtsSql)) {
                 ps.setInt(1, coSoId);
+                if (sportIdFilter != null) ps.setInt(2, sportIdFilter);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> court = new HashMap<>();
@@ -138,7 +141,9 @@ public class FacilityDetailApiServlet extends HttpServlet {
                         court.put("tenSan", rs.getString("TenSan"));
                         court.put("trangThai", rs.getString("TrangThai"));
                         court.put("loaiSan", rs.getString("TenLoai"));
-                        court.put("monTheThao", emptyToNull(rs.getString("TenMon")));
+                        String tenMon = emptyToNull(rs.getString("TenMon"));
+                        court.put("monTheThao", tenMon);
+                        if (tenMon != null) sportsSet.add(tenMon);
                         court.put("giaKhongDen", rs.getDouble("GiaKhongDen"));
                         court.put("giaCoDen", rs.getDouble("GiaCoDen"));
                         court.put("moTa", emptyToNull(rs.getString("MoTa")));
@@ -147,6 +152,7 @@ public class FacilityDetailApiServlet extends HttpServlet {
                     }
                 }
             }
+            facility.put("sports", new ArrayList<>(sportsSet));
 
             try (java.sql.PreparedStatement ps = conn.prepareStatement(servicesSql)) {
                 ps.setInt(1, coSoId);
@@ -169,6 +175,8 @@ public class FacilityDetailApiServlet extends HttpServlet {
         facility.put("services", services);
         facility.put("images", new ArrayList<>(images));
 
+        resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        resp.setHeader("Pragma", "no-cache");
         resp.setContentType("application/json; charset=UTF-8");
         resp.getWriter().write(new com.google.gson.Gson().toJson(facility));
     }

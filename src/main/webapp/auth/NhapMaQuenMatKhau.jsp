@@ -10,61 +10,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Nhập mã xác thực - V-SPORT</title>
     <%@ include file="common/auth-theme.jsp" %>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet"/>
     <style>
-        .auth-card--otp { width: min(520px, 100%); border-radius: 10px; }
-        .auth-card--otp .auth-card-body { padding: 28px 26px 26px; }
+        .auth-card--otp {
+            width: min(500px, 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(7, 26, 47, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-card--otp::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--vs-green-600) 0%, var(--vs-green-500) 50%, var(--vs-orange-500) 100%);
+        }
+        .auth-card--otp .auth-card-body { padding: 32px 30px 28px; }
+
+        .otp-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .otp-badge .material-symbols-outlined { font-size: 15px; }
 
         .otp-title {
-            margin: 0 0 8px;
-            font-size: 21px;
-            font-weight: 700;
+            margin: 0 0 6px;
+            font-size: 23px;
+            font-weight: 800;
             color: var(--vs-ink);
-            letter-spacing: -.01em;
+            letter-spacing: -.02em;
         }
         .otp-desc {
-            margin: 0 0 22px;
-            font-size: 14.5px;
-            line-height: 1.5;
+            margin: 0 0 24px;
+            font-size: 14px;
+            line-height: 1.55;
             color: var(--vs-ink-soft);
         }
-        .otp-desc b { color: var(--vs-ink); font-weight: 600; }
+        .otp-desc b { color: var(--vs-ink); font-weight: 700; }
 
         .otp-single {
             width: 100%;
-            height: 58px;
-            border: 1.5px solid var(--vs-line);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 24px;
-            font-weight: 700;
+            height: 64px;
+            border: 2px solid var(--vs-line);
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 26px;
+            font-weight: 800;
             text-align: center;
             letter-spacing: .45em;
+            padding-left: .45em;
             color: var(--vs-ink);
+            background: #f8fafc;
             outline: none;
-            transition: border-color .15s ease, box-shadow .15s ease;
+            transition: all .2s ease;
         }
-        .otp-single::placeholder { color: #c2ccc6; letter-spacing: .45em; font-weight: 500; }
+        .otp-single::placeholder { color: #cbd5e1; letter-spacing: .45em; font-weight: 500; }
         .otp-single:focus {
+            background: #ffffff;
             border-color: var(--vs-green-600);
-            box-shadow: 0 0 0 3px rgba(13, 138, 95, .14);
+            box-shadow: 0 0 0 4px rgba(22, 119, 210, 0.16);
         }
-        .otp-single.is-invalid { border-color: var(--vs-danger); }
+        .otp-single.is-invalid { border-color: var(--vs-danger); background: #fef2f2; }
 
         .otp-resend {
-            margin: 14px 0 0;
+            margin: 16px 0 0;
             font-size: 13.5px;
             color: var(--vs-ink-soft);
             text-align: center;
+            font-weight: 500;
         }
         .otp-resend a {
-            color: var(--vs-green-800);
+            color: var(--vs-green-600);
             font-weight: 700;
             text-decoration: underline;
             text-underline-offset: 3px;
         }
-        .otp-resend a:hover { color: var(--vs-green-900); }
+        .otp-resend a:hover { color: var(--vs-green-800); }
 
-        .otp-verify-btn { margin-top: 22px; position: relative; }
+        .otp-timer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .otp-verify-btn {
+            margin-top: 24px;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            background: linear-gradient(135deg, var(--vs-orange-500) 0%, var(--vs-orange-600) 100%);
+            box-shadow: 0 6px 18px rgba(249, 115, 22, 0.28);
+            position: relative;
+        }
         .btn-spinner { display: none; }
         .otp-verify-btn.is-loading .btn-label { visibility: hidden; }
         .otp-verify-btn.is-loading .btn-spinner {
@@ -86,7 +146,7 @@
         @keyframes vs-rotate { to { transform: rotate(360deg); } }
 
         .otp-change {
-            margin: 18px 0 0;
+            margin: 20px 0 0;
             text-align: center;
             font-size: 13.5px;
         }
@@ -99,10 +159,8 @@
         .otp-change a:hover { color: var(--vs-ink); }
 
         @media (max-width: 640px) {
-            .auth-card--otp .auth-card-body { padding: 22px 16px 22px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .btn-spinner::after { animation-duration: 2.4s; }
+            .auth-card--otp .auth-card-body { padding: 24px 20px 22px; }
+            .otp-single { height: 56px; font-size: 22px; }
         }
     </style>
 </head>
@@ -119,8 +177,12 @@
     <main class="auth-main">
         <div class="auth-card auth-card--otp">
             <div class="auth-card-body">
-                <h2 class="otp-title">Nhập mã xác thực</h2>
-                <p class="otp-desc">Mã gồm 6 số đã được gửi đến <b><c:out value="${email}"/></b>.</p>
+                <div class="otp-badge">
+                    <span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>
+                    <span>Xác thực đặt lại mật khẩu</span>
+                </div>
+                <h2 class="otp-title">Nhập mã OTP</h2>
+                <p class="otp-desc">Mã gồm 6 chữ số đã được gửi đến email <b><c:out value="${email}"/></b>.</p>
 
                 <c:if test="${not empty loi}">
                     <div class="auth-alert auth-alert-error" role="alert" aria-live="assertive">
@@ -144,7 +206,7 @@
                     <p class="auth-field-error" id="otp-error"></p>
 
                     <p class="otp-resend" aria-live="polite">
-                        <span id="resend-countdown" hidden>Gửi lại mã sau <span id="resend-timer">01:00</span></span>
+                        <span id="resend-countdown" hidden>Gửi lại mã sau <span id="resend-timer" class="otp-timer-badge">01:00</span></span>
                         <a id="resend-link" href="${ctx}/resend-otp">Gửi lại mã</a>
                     </p>
 
@@ -156,7 +218,7 @@
                 </form>
 
                 <p class="otp-change">
-                    <a href="${forgotUrl}">Đổi email</a>
+                    <a href="${forgotUrl}">Đổi email khác</a>
                 </p>
             </div>
         </div>
@@ -171,7 +233,6 @@
             var errorEl = document.getElementById('otp-error');
             var btn = document.getElementById('otp-verify-btn');
 
-            // Chỉ nhận số, tối đa 6 ký tự (kể cả khi paste)
             input.addEventListener('input', function () {
                 var digits = input.value.replace(/\D/g, '').slice(0, 6);
                 if (input.value !== digits) input.value = digits;
@@ -202,12 +263,10 @@
                 setLoading(true);
             });
 
-            // Back/Forward/BFCache: nút luôn trở về trạng thái thường
             window.addEventListener('pageshow', function () {
                 setLoading(false);
             });
 
-            // Countdown gửi lại mã (hiển thị; server vẫn enforce cooldown 60s)
             var countdownWrap = document.getElementById('resend-countdown');
             var timerEl = document.getElementById('resend-timer');
             var resendLink = document.getElementById('resend-link');
@@ -233,7 +292,6 @@
             countdownWrap.hidden = false;
             tick();
 
-            // Lỗi server render lại trang → focus vào ô mã cho nhập lại nhanh
             <c:if test="${not empty loi}">
             input.focus();
             </c:if>

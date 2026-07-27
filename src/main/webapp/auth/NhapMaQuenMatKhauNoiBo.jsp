@@ -8,86 +8,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Nhập mã xác thực Cổng vận hành - V-SPORT</title>
     <%@ include file="common/auth-theme.jsp" %>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet"/>
     <style>
         body.auth-body--internal {
             background-color: #052e20;
             background-image:
-                linear-gradient(170deg, rgba(6, 52, 36, .90) 0%, rgba(4, 38, 26, .88) 55%, rgba(3, 26, 18, .93) 100%),
+                linear-gradient(170deg, rgba(6, 52, 36, .92) 0%, rgba(4, 38, 26, .90) 55%, rgba(3, 26, 18, .95) 100%),
                 url('${ctx}/resources/background-hero.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
-        .auth-main--internal { padding-top: clamp(28px, 13vh, 158px); }
-        .auth-card--otp { width: min(520px, 100%); border-radius: 12px; }
-        .auth-card--otp .auth-card-body { padding: 30px 28px 26px; }
+        .auth-main--internal { padding-top: clamp(32px, 14vh, 160px); }
+        .auth-card--otp {
+            width: min(500px, 100%);
+            border-radius: 20px;
+            box-shadow: 0 24px 56px rgba(2, 20, 14, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-card--otp::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #10b981 0%, #059669 50%, #3b82f6 100%);
+        }
+        .auth-card--otp .auth-card-body { padding: 34px 30px 28px; }
 
         .internal-badge {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 999px;
-            background: #edf6f0;
-            border: 1px solid #cbe4d6;
-            color: var(--vs-green-800);
-            font-size: 12.5px;
-            font-weight: 700;
-            letter-spacing: .04em;
-            margin-bottom: 14px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            margin-bottom: 16px;
         }
         .internal-badge .material-symbols-outlined { font-size: 16px; }
 
         .otp-title {
-            margin: 0 0 8px;
-            font-size: 21px;
-            font-weight: 700;
+            margin: 0 0 6px;
+            font-size: 23px;
+            font-weight: 800;
             color: var(--vs-ink);
-            letter-spacing: -.01em;
+            letter-spacing: -.02em;
         }
         .otp-desc {
-            margin: 0 0 22px;
-            font-size: 14.5px;
-            line-height: 1.5;
+            margin: 0 0 24px;
+            font-size: 14px;
+            line-height: 1.55;
             color: var(--vs-ink-soft);
         }
-        .otp-desc b { color: var(--vs-ink); font-weight: 600; }
+        .otp-desc b { color: var(--vs-ink); font-weight: 700; }
 
         .otp-single {
             width: 100%;
-            height: 58px;
-            border: 1.5px solid var(--vs-line);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 24px;
-            font-weight: 700;
+            height: 64px;
+            border: 2px solid var(--vs-line);
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 26px;
+            font-weight: 800;
             text-align: center;
             letter-spacing: .45em;
+            padding-left: .45em;
             color: var(--vs-ink);
+            background: #f8fafc;
             outline: none;
-            transition: border-color .15s ease, box-shadow .15s ease;
+            transition: all .2s ease;
         }
-        .otp-single::placeholder { color: #c2ccc6; letter-spacing: .45em; font-weight: 500; }
+        .otp-single::placeholder { color: #cbd5e1; letter-spacing: .45em; font-weight: 500; }
         .otp-single:focus {
-            border-color: var(--vs-green-600);
-            box-shadow: 0 0 0 3px rgba(13, 138, 95, .14);
+            background: #ffffff;
+            border-color: #059669;
+            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.16);
         }
-        .otp-single.is-invalid { border-color: var(--vs-danger); }
+        .otp-single.is-invalid { border-color: var(--vs-danger); background: #fef2f2; }
 
         .otp-resend {
-            margin: 14px 0 0;
+            margin: 16px 0 0;
             font-size: 13.5px;
             color: var(--vs-ink-soft);
             text-align: center;
+            font-weight: 500;
         }
         .otp-resend a {
-            color: var(--vs-green-800);
+            color: #059669;
             font-weight: 700;
             text-decoration: underline;
             text-underline-offset: 3px;
         }
+        .otp-resend a:hover { color: #047857; }
 
-        .otp-verify-btn { margin-top: 22px; position: relative; }
+        .otp-timer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .otp-verify-btn {
+            margin-top: 24px;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 18px rgba(5, 150, 105, 0.32);
+            position: relative;
+        }
         .btn-spinner { display: none; }
         .otp-verify-btn.is-loading .btn-label { visibility: hidden; }
         .otp-verify-btn.is-loading .btn-spinner {
@@ -109,7 +151,7 @@
         @keyframes vs-rotate { to { transform: rotate(360deg); } }
 
         .otp-links {
-            margin: 18px 0 0;
+            margin: 20px 0 0;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -125,10 +167,8 @@
         .otp-links a:hover { color: var(--vs-ink); }
 
         @media (max-width: 640px) {
-            .auth-card--otp .auth-card-body { padding: 22px 16px 22px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .btn-spinner::after { animation-duration: 2.4s; }
+            .auth-card--otp .auth-card-body { padding: 24px 20px 22px; }
+            .otp-single { height: 56px; font-size: 22px; }
         }
     </style>
 </head>
@@ -146,10 +186,10 @@
             <div class="auth-card-body">
                 <span class="internal-badge">
                     <span class="material-symbols-outlined" aria-hidden="true">shield_person</span>
-                    OPERATIONS PORTAL
+                    CỔNG VẬN HÀNH OPERATIONS
                 </span>
                 <h2 class="otp-title">Nhập mã xác thực</h2>
-                <p class="otp-desc">Mã gồm 6 số đã được gửi đến <b><c:out value="${email}"/></b>.</p>
+                <p class="otp-desc">Mã gồm 6 chữ số đã được gửi đến email <b><c:out value="${email}"/></b>.</p>
 
                 <c:if test="${not empty loi}">
                     <div class="auth-alert auth-alert-error" role="alert" aria-live="assertive">
@@ -173,7 +213,7 @@
                     <p class="auth-field-error" id="otp-error"></p>
 
                     <p class="otp-resend" aria-live="polite">
-                        <span id="resend-countdown" hidden>Gửi lại mã sau <span id="resend-timer">01:00</span></span>
+                        <span id="resend-countdown" hidden>Gửi lại mã sau <span id="resend-timer" class="otp-timer-badge">01:00</span></span>
                         <a id="resend-link" href="${ctx}/resend-otp">Gửi lại mã</a>
                     </p>
 
@@ -185,7 +225,7 @@
                 </form>
 
                 <div class="otp-links">
-                    <a href="${ctx}/he-thong/quen-mat-khau">Đổi email</a>
+                    <a href="${ctx}/he-thong/quen-mat-khau">Đổi email khác</a>
                     <a href="${ctx}/he-thong/dang-nhap">Quay lại Cổng vận hành</a>
                 </div>
             </div>
@@ -235,7 +275,6 @@
                 setLoading(false);
             });
 
-            // Countdown gửi lại mã (hiển thị; server enforce cooldown 60s)
             var countdownWrap = document.getElementById('resend-countdown');
             var timerEl = document.getElementById('resend-timer');
             var resendLink = document.getElementById('resend-link');

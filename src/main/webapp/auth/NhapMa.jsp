@@ -12,25 +12,32 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Xác minh OTP - V-SPORT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .otp-input {
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .otp-font { font-family: 'JetBrains Mono', monospace; }
+        .otp-input-field {
             text-align: center;
-            font-size: 1.5rem;
-            letter-spacing: 0.35em;
-            font-weight: 700;
+            font-size: 1.75rem;
+            letter-spacing: 0.45em;
+            font-weight: 800;
+            padding-left: 0.45em;
         }
         .live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
         @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4);} 50%{box-shadow:0 0 0 6px rgba(220,38,38,0);} }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
     </style>
 </head>
 <c:set var="isDashboardFlow" value="${sessionScope.authType eq 'ADMIN_ADD' or sessionScope.authType eq 'ADMIN_EDIT' or sessionScope.authType eq 'MANAGER_EDIT'}" />
 <c:set var="isAdminFlow" value="${sessionScope.authType eq 'ADMIN_ADD' or sessionScope.authType eq 'ADMIN_EDIT'}" />
 <c:set var="isManagerFlow" value="${sessionScope.authType eq 'MANAGER_EDIT'}" />
 
-<body class="${isDashboardFlow ? (isAdminFlow ? 'bg-zinc-50 text-zinc-900 min-h-screen' : 'bg-violet-50/20 text-zinc-900 min-h-screen') : 'min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900/60 backdrop-blur-sm'}">
+<body class="${isDashboardFlow ? (isAdminFlow ? 'bg-zinc-50 text-zinc-900 min-h-screen' : 'bg-violet-50/20 text-zinc-900 min-h-screen') : 'min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950'}">
 
     <c:choose>
         <c:when test="${isDashboardFlow}">
@@ -83,36 +90,39 @@
 
             <!-- Centered OTP Card within main workspace -->
             <main class="lg:ml-[248px] mt-[64px] p-6 min-h-[calc(100vh-64px)] flex items-center justify-center">
-                <div class="bg-white rounded-3xl w-full max-w-[460px] p-8 shadow-xl border border-zinc-200/80 flex flex-col relative">
+                <div class="bg-white rounded-3xl w-full max-w-[460px] p-8 shadow-2xl border border-slate-200/80 flex flex-col relative overflow-hidden">
+                    <!-- Top Gradient Line -->
+                    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-orange-500"></div>
+
                     <!-- Close Button -->
-                    <a href="${pageContext.request.contextPath}/${isAdminFlow ? 'admin/nhan-su' : 'manager/nhan-su'}" class="absolute top-5 right-5 text-slate-400 hover:text-slate-650 transition-colors z-[130] w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100">
+                    <a href="${pageContext.request.contextPath}/${isAdminFlow ? 'admin/nhan-su' : 'manager/nhan-su'}" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors z-[130] w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200">
                         <span class="material-symbols-outlined text-[20px]">close</span>
                     </a>
 
                     <!-- Header -->
-                    <div class="mb-6">
-                        <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                            <div class="w-1.5 h-1.5 rounded-full bg-[#1677D2] animate-pulse"></div>
-                            <span>Xác minh danh tính</span>
+                    <div class="mb-6 pt-2">
+                        <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-full py-1 px-3.5 text-[11px] font-extrabold w-fit shadow-xs mb-3.5">
+                            <span class="material-symbols-outlined text-[14px]">verified</span>
+                            <span class="tracking-wider uppercase">Xác minh bảo mật</span>
                         </div>
-                        <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Xác thực OTP</h2>
-                        <p class="text-[13px] text-slate-400 font-medium leading-relaxed">
-                            Vui lòng kiểm tra email và nhập mã xác thực OTP 6 chữ số gửi tới <b class="text-slate-800">${email}</b>.
+                        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 mb-1.5">Nhập mã xác thực OTP</h2>
+                        <p class="text-[13px] text-slate-500 font-medium leading-relaxed">
+                            Mã xác nhận 6 chữ số vừa được gửi tới email <b class="text-slate-900 font-semibold">${email}</b>.
                         </p>
                     </div>
 
                     <!-- Error Banner -->
                     <c:if test="${not empty loi}">
-                        <div id="error-banner" class="mb-5 p-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                            <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                        <div id="error-banner" class="mb-5 p-4 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl text-xs font-semibold flex items-center gap-3 shadow-xs">
+                            <span class="material-symbols-outlined text-[20px] text-rose-500 shrink-0">error</span>
                             <span>${loi}</span>
                         </div>
                     </c:if>
 
                     <!-- Success Banner -->
                     <c:if test="${not empty thongbao}">
-                        <div id="success-banner" class="mb-5 p-4 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                            <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+                        <div id="success-banner" class="mb-5 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl text-xs font-semibold flex items-center gap-3 shadow-xs">
+                            <span class="material-symbols-outlined text-[20px] text-emerald-500 shrink-0">check_circle</span>
                             <span>${thongbao}</span>
                         </div>
                     </c:if>
@@ -120,31 +130,30 @@
                     <!-- Form -->
                     <form id="otp-form-dashboard" action="${pageContext.request.contextPath}/nhapma" method="POST" class="flex flex-col" autocomplete="off">
                         <input type="hidden" name="email" value="${email}">
-                        <div class="mb-5">
-                            <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Nhập mã OTP 6 chữ số</label>
+                        <div class="mb-6">
+                            <label class="text-[12px] font-bold text-slate-700 mb-2 block uppercase tracking-wider">Mã OTP 6 chữ số</label>
                             <div class="relative">
                                 <input type="text" name="otp" required maxlength="6" placeholder="••••••" 
-                                       class="w-full h-14 border border-slate-300 rounded-xl otp-input focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" 
-                                       style="border-width: 1.5px;">
+                                       class="w-full h-16 border-2 border-slate-200 rounded-2xl otp-font otp-input-field text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all outline-none">
                             </div>
                         </div>
-                        <button type="submit" id="submit-btn-dashboard" class="w-full h-12 bg-[#FF8A24] hover:bg-[#F97316] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-orange-100">
-                            <span class="btn-text flex items-center gap-1.5">
-                                Xác minh OTP
-                                <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                        <button type="submit" id="submit-btn-dashboard" class="w-full h-13 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-lg shadow-blue-500/25 active:scale-[0.99]">
+                            <span class="btn-text flex items-center gap-2">
+                                Xác minh ngay
+                                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                             </span>
-                            <div class="loading-spinner hidden absolute inset-0 bg-[#F97316] flex items-center justify-center">
-                                <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            <div class="loading-spinner hidden absolute inset-0 bg-blue-700 flex items-center justify-center">
+                                <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                             </div>
                         </button>
                     </form>
 
                     <!-- Footer -->
                     <div class="mt-6 text-center border-t border-slate-100 pt-4">
-                        <p class="text-[12px] text-slate-500 font-medium">
-                            Không nhận được mã? 
-                            <a href="${pageContext.request.contextPath}/resend-otp" class="font-bold text-[#378b76] hover:underline ml-1">
-                                Gửi lại ngay
+                        <p class="text-[13px] text-slate-500 font-medium">
+                            Chưa nhận được mã? 
+                            <a href="${pageContext.request.contextPath}/resend-otp" class="font-bold text-blue-600 hover:text-blue-700 hover:underline ml-1">
+                                Gửi lại mã ngay
                             </a>
                         </p>
                     </div>
@@ -153,65 +162,67 @@
         </c:when>
         
         <c:otherwise>
-            <!-- Show Original Guest Overlay Layout -->
-            <div class="absolute inset-0 bg-cover bg-center opacity-25 blur-[8px] scale-105 pointer-events-none z-0" 
+            <!-- Show Guest Overlay Layout with Ambient Modern Backdrop -->
+            <div class="absolute inset-0 bg-cover bg-center opacity-20 blur-[10px] scale-105 pointer-events-none z-0" 
                  style="background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=2000&auto=format&fit=crop');"></div>
             
-            <div class="bg-white rounded-3xl w-full max-w-[460px] p-8 shadow-2xl relative border border-slate-100 flex flex-col z-10">
-                <a href="javascript:history.back()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-650 transition-colors z-[130] w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100">
+            <div class="glass-card rounded-3xl w-full max-w-[460px] p-8 shadow-2xl relative border border-white/50 flex flex-col z-10 overflow-hidden">
+                <!-- Top Accent Bar -->
+                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-orange-500"></div>
+
+                <a href="javascript:history.back()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors z-[130] w-9 h-9 rounded-full flex items-center justify-center bg-slate-100/80 hover:bg-slate-200">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </a>
 
-                <div class="mb-6">
-                    <div class="inline-flex items-center gap-2 bg-white border border-[#378b76]/30 text-[#378b76] rounded-full py-1 px-3.5 text-[11px] font-bold w-fit shadow-sm mb-3">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#1677D2] animate-pulse"></div>
-                        <span>Xác minh danh tính</span>
+                <div class="mb-6 pt-2">
+                    <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-full py-1 px-3.5 text-[11px] font-extrabold w-fit shadow-xs mb-3.5">
+                        <span class="material-symbols-outlined text-[14px]">shield_lock</span>
+                        <span class="tracking-wider uppercase">Xác minh OTP</span>
                     </div>
-                    <h2 class="text-xl font-bold tracking-tight text-slate-900 mb-1">Xác thực OTP</h2>
-                    <p class="text-[13px] text-slate-400 font-medium leading-relaxed">
-                        Vui lòng kiểm tra email và nhập mã xác thực OTP 6 chữ số gửi tới <b class="text-slate-800">${email}</b>.
+                    <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 mb-1.5">Nhập mã xác thực</h2>
+                    <p class="text-[13px] text-slate-500 font-medium leading-relaxed">
+                        Mã xác nhận 6 chữ số đã được gửi tới email <b class="text-slate-900 font-semibold">${email}</b>.
                     </p>
                 </div>
 
                 <c:if test="${not empty loi}">
-                    <div id="error-banner" class="mb-5 p-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                        <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
+                    <div id="error-banner" class="mb-5 p-4 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl text-xs font-semibold flex items-center gap-3 shadow-xs">
+                        <span class="material-symbols-outlined text-[20px] text-rose-500 shrink-0">error</span>
                         <span>${loi}</span>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty thongbao}">
-                    <div id="success-banner" class="mb-5 p-4 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-semibold flex items-center gap-3 shadow-sm">
-                        <span class="material-symbols-outlined text-[18px] shrink-0">check_circle</span>
+                    <div id="success-banner" class="mb-5 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl text-xs font-semibold flex items-center gap-3 shadow-xs">
+                        <span class="material-symbols-outlined text-[20px] text-emerald-500 shrink-0">check_circle</span>
                         <span>${thongbao}</span>
                     </div>
                 </c:if>
 
                 <form id="otp-form" action="${pageContext.request.contextPath}/nhapma" method="POST" class="flex flex-col" autocomplete="off">
                     <input type="hidden" name="email" value="${email}">
-                    <div class="mb-5">
-                        <label class="text-[12px] font-bold text-slate-700 mb-1.5 block">Nhập mã OTP 6 chữ số</label>
+                    <div class="mb-6">
+                        <label class="text-[12px] font-bold text-slate-700 mb-2 block uppercase tracking-wider">Mã xác thực 6 chữ số</label>
                         <div class="relative">
                             <input type="text" name="otp" required maxlength="6" placeholder="••••••" 
-                                   class="w-full h-14 border border-slate-300 rounded-xl otp-input focus:border-[#378b76] focus:ring-4 focus:ring-[#378b76]/10 transition-all outline-none" 
-                                   style="border-width: 1.5px;">
+                                   class="w-full h-16 border-2 border-slate-200 rounded-2xl otp-font otp-input-field text-slate-900 bg-white/80 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all outline-none">
                         </div>
                     </div>
-                    <button type="submit" id="submit-btn" class="w-full h-12 bg-[#FF8A24] hover:bg-[#F97316] text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-md shadow-orange-100">
-                        <span class="btn-text flex items-center gap-1.5">
-                            Xác minh OTP
-                            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                    <button type="submit" id="submit-btn" class="w-full h-13 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all relative overflow-hidden shadow-lg shadow-blue-500/25 active:scale-[0.99]">
+                        <span class="btn-text flex items-center gap-2">
+                            Xác minh ngay
+                            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                         </span>
-                        <div class="loading-spinner hidden absolute inset-0 bg-[#F97316] flex items-center justify-center">
-                            <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        <div class="loading-spinner hidden absolute inset-0 bg-blue-700 flex items-center justify-center">
+                            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         </div>
                     </button>
                 </form>
 
                 <div class="mt-6 text-center border-t border-slate-100 pt-4">
-                    <p class="text-[12px] text-slate-500 font-medium">
+                    <p class="text-[13px] text-slate-500 font-medium">
                         Không nhận được mã? 
-                        <a href="${pageContext.request.contextPath}/resend-otp" class="font-bold text-[#378b76] hover:underline ml-1">
+                        <a href="${pageContext.request.contextPath}/resend-otp" class="font-bold text-blue-600 hover:text-blue-700 hover:underline ml-1">
                             Gửi lại ngay
                         </a>
                     </p>

@@ -6,266 +6,518 @@
 <head>
     <title>${team.teamName} - Đội nhóm - V-SPORT</title>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
-    <jsp:include page="/customer/common/vsport-theme.jsp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <jsp:include page="/common/xtra-head.jsp" />
     <style>
-        html, body { margin: 0; padding-bottom: 0 !important; background: var(--vs-background); font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--vs-text); }
-        * { box-sizing: border-box; }
-        button { font-family: inherit; }
-        a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-            outline: 2.5px solid var(--vs-cyan-500) !important; outline-offset: 2px;
+        .acc-page-wrapper {
+            background-color: var(--background);
+            padding-bottom: 60px;
+            animation: accFadeIn 0.25s ease-out;
+        }
+        @keyframes accFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .dc-appbar { position: sticky; top: 0; z-index: 50; height: 52px; display: flex; align-items: center; justify-content: center; background: var(--vs-primary-900); color: #fff; padding: 0 52px; }
-        .dc-back, .dc-edit { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
-        .dc-back { left: 8px; } .dc-edit { right: 8px; }
-        .dc-back:hover, .dc-edit:hover { background: rgba(255,255,255,.12); }
-        .dc-appbar h1 { font-size: 15px; font-weight: 700; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Hero Banner Header */
+        .acc-hero {
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, #163e5c 100%);
+            color: #fff;
+            padding: 36px 0 32px 0;
+            margin-bottom: 32px;
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
+        }
+        .acc-hero-inner {
+            max-width: var(--container-width, 1320px);
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .acc-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .acc-avatar-circle {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 0 0 4px rgba(1, 226, 129, 0.25);
+            flex-shrink: 0;
+        }
+        .acc-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .acc-user-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .acc-user-meta {
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.75);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .acc-user-meta i {
+            color: var(--primary);
+        }
+        .acc-rep-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(1, 226, 129, 0.15);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(1, 226, 129, 0.3);
+        }
 
-        .dc-wrap { max-width: 760px; margin: 0 auto; padding: 0 0 calc(var(--vs-bottomnav-h) + 40px); }
-        @media (min-width: 1024px) { .dc-wrap { padding-bottom: calc(var(--vs-bottomnav-h-desktop) + 40px); } }
+        .acc-hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .acc-hero-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .acc-btn-primary {
+            background: var(--primary);
+            color: var(--navy);
+            box-shadow: 0 4px 12px rgba(1, 226, 129, 0.25);
+        }
+        .acc-btn-primary:hover {
+            background: var(--primary-hover);
+            color: var(--navy);
+            transform: translateY(-1px);
+        }
+        .acc-btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .acc-btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
 
-        .dc-cover { height: 150px; background: linear-gradient(135deg, var(--vs-primary-800), var(--vs-primary-600)); background-size: cover; background-position: center; position: relative; }
-        .dc-header { padding: 0 16px; margin-top: -34px; position: relative; }
-        .dc-avatar { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; background: var(--vs-cyan-100); box-shadow: 0 2px 8px rgba(15,23,42,.18); }
-        .dc-name { font-size: 19px; font-weight: 800; margin: 10px 0 4px; }
-        .dc-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--vs-text-secondary); }
-        .dc-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11.5px; font-weight: 700; background: var(--vs-cyan-100); color: var(--vs-primary-700); }
-        .dc-desc { font-size: 13.5px; color: var(--vs-text-secondary); line-height: 1.55; margin: 12px 0 0; }
+        /* Container Grid */
+        .acc-main-container {
+            max-width: var(--container-width, 1320px);
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 28px;
+        }
+        @media (max-width: 768px) {
+            .acc-main-container { grid-template-columns: 1fr; }
+        }
 
-        .dc-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; }
+        /* Main Content Card */
+        .acc-content-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow-small);
+        }
+
+        /* Page Header inside Card */
+        .dn-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .dn-header-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .dn-header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(1, 226, 129, 0.15);
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .dn-header-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--navy);
+            font-family: 'Outfit', sans-serif;
+            margin: 0 0 4px 0;
+        }
+        .dn-header-desc {
+            font-size: 13.5px;
+            color: var(--muted-text);
+            margin: 0;
+        }
+        .dn-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: var(--navy);
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border);
+        }
+        .dn-back-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        .dn-edit-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: var(--navy);
+            font-size: 13.5px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(1, 226, 129, 0.25);
+            transition: all 0.2s ease;
+        }
+        .dn-edit-btn:hover {
+            background: var(--primary-hover);
+            color: var(--navy);
+            transform: translateY(-1px);
+        }
+
+        /* Detail Banner & Info */
+        .dc-cover {
+            height: 180px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .dc-header { padding: 0 8px; position: relative; margin-top: -46px; margin-bottom: 24px; }
+        .dc-avatar { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; background: rgba(1, 226, 129, 0.15); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+        .dc-name { font-size: 22px; font-weight: 800; color: var(--navy); margin: 12px 0 6px; font-family: 'Outfit', sans-serif; }
+        .dc-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13.5px; color: var(--muted-text); }
+        .dc-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; background: rgba(1, 226, 129, 0.15); color: var(--navy); border: 1px solid rgba(1, 226, 129, 0.3); }
+        .dc-desc { font-size: 14px; color: var(--body-text); line-height: 1.6; margin: 14px 0 0; background: #f8fafc; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border); }
+
+        .dc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
         .dc-btn {
-            padding: 10px 16px; border-radius: var(--vs-r-btn); font-size: 13.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--vs-border);
-            background: #fff; color: var(--vs-text); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--border);
+            background: #fff; color: var(--navy); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s ease;
         }
-        .dc-btn:hover { border-color: var(--vs-cyan-500); color: var(--vs-primary-700); }
-        .dc-btn.primary { background: var(--vs-orange-500); border-color: var(--vs-orange-500); color: #fff; }
-        .dc-btn.primary:hover { background: var(--vs-orange-600); border-color: var(--vs-orange-600); color: #fff; }
-        .dc-btn.secondary { background: var(--vs-primary-600); border-color: var(--vs-primary-600); color: #fff; }
-        .dc-btn.secondary:hover { background: var(--vs-primary-700); border-color: var(--vs-primary-700); color: #fff; }
-        .dc-btn.danger { color: var(--vs-danger); border-color: var(--vs-danger-bg); }
-        .dc-btn.danger:hover { background: var(--vs-danger-bg); border-color: var(--vs-danger); }
-        .dc-btn:disabled { opacity: .55; cursor: not-allowed; }
+        .dc-btn:hover { border-color: var(--navy); background: #f8fafc; }
+        .dc-btn.primary { background: var(--primary); border-color: var(--primary); color: var(--navy); font-weight: 800; box-shadow: 0 4px 12px rgba(1, 226, 129, 0.2); }
+        .dc-btn.primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .dc-btn.danger { color: #dc2626; border-color: #fecaca; background: #fff5f5; }
+        .dc-btn.danger:hover { background: #fee2e2; border-color: #dc2626; }
+        .dc-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
-        .dc-section { padding: 4px 16px 20px; }
-        .dc-section h2 { font-size: 14.5px; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; justify-content: space-between; }
-        .dc-section h2 .count { font-weight: 600; color: var(--vs-text-secondary); font-size: 12.5px; }
+        .dc-section { margin-bottom: 28px; }
+        .dc-section h2 { font-size: 16px; font-weight: 800; color: var(--navy); margin: 0 0 14px; display: flex; align-items: center; justify-content: space-between; font-family: 'Outfit', sans-serif; }
+        .dc-section h2 .count { font-weight: 600; color: var(--muted-text); font-size: 13px; }
 
-        .dc-member-row { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--vs-border); border-radius: var(--vs-r-btn); background: #fff; }
+        .dc-member-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; transition: background-color 0.15s ease; }
         .dc-member-row + .dc-member-row { margin-top: 8px; }
-        .dc-member-row img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--vs-cyan-100); flex-shrink: 0; }
+        .dc-member-row:hover { background: #f8fafc; }
+        .dc-member-row img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: rgba(1, 226, 129, 0.15); flex-shrink: 0; }
         .dc-member-info { flex: 1; min-width: 0; }
-        .dc-member-name { font-size: 13.5px; font-weight: 700; }
-        .dc-member-role { font-size: 11.5px; color: var(--vs-text-secondary); }
-        .dc-member-actions { display: flex; gap: 6px; flex-shrink: 0; }
-        .dc-mini-btn { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--vs-border); background: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; }
-        .dc-mini-btn:hover { border-color: var(--vs-cyan-500); }
-        .dc-mini-btn.danger { color: var(--vs-danger); }
-        .dc-mini-btn.danger:hover { border-color: var(--vs-danger); background: var(--vs-danger-bg); }
+        .dc-member-name { font-size: 14px; font-weight: 700; color: var(--navy); }
+        .dc-member-role { font-size: 12px; color: var(--muted-text); }
+        .dc-member-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .dc-mini-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
+        .dc-mini-btn:hover { border-color: var(--navy); background: #f8fafc; }
+        .dc-mini-btn.danger { color: #dc2626; border-color: #fecaca; }
+        .dc-mini-btn.danger:hover { border-color: #dc2626; background: #fee2e2; }
 
-        .dc-request-card { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--vs-border); border-radius: var(--vs-r-btn); background: #fff; }
+        .dc-request-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
         .dc-request-card + .dc-request-card { margin-top: 8px; }
-        .dc-request-card img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--vs-cyan-100); flex-shrink: 0; }
+        .dc-request-card img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: rgba(1, 226, 129, 0.15); flex-shrink: 0; }
 
-        .dc-match-panel { background: #fff; border: 1px solid var(--vs-border); border-radius: var(--vs-r-card); padding: 16px; display: none; margin-bottom: 14px; }
+        .dc-match-panel { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: none; margin-bottom: 18px; }
         .dc-match-panel.is-open { display: block; }
         .dc-match-panel .dt-field { margin-bottom: 14px; }
-        .dc-match-panel label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; }
+        .dc-match-panel label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
         .dc-match-panel select, .dc-match-panel textarea, .dc-match-panel input {
-            width: 100%; padding: 9px 11px; border-radius: var(--vs-r-btn); border: 1px solid var(--vs-border); font-size: 13.5px; font-family: inherit;
+            width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 13.5px; font-family: inherit; box-sizing: border-box; background: #fff;
         }
-        .dc-match-card { border: 1px solid var(--vs-border); border-radius: var(--vs-r-btn); padding: 12px; background: #fff; }
-        .dc-match-card + .dc-match-card { margin-top: 8px; }
-        .dc-match-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-        .dc-match-title { font-size: 13.5px; font-weight: 700; }
-        .dc-match-sub { font-size: 12px; color: var(--vs-text-secondary); margin-top: 2px; }
-        .dc-status-pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 9999px; white-space: nowrap; }
-        .dc-status-pill.open { background: var(--vs-cyan-100); color: var(--vs-primary-700); }
-        .dc-status-pill.full { background: var(--vs-success-bg); color: var(--vs-success); }
-        .dc-status-pill.cancelled { background: var(--vs-danger-bg); color: var(--vs-danger); }
-        .dc-challenge-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--vs-surface-soft); margin-top: 8px; }
-        .dc-challenge-row img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--vs-cyan-100); }
-        .dc-challenge-row .name { flex: 1; font-size: 12.5px; font-weight: 600; }
+        .dc-match-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; }
+        .dc-match-card + .dc-match-card { margin-top: 10px; }
+        .dc-match-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .dc-match-title { font-size: 14.5px; font-weight: 700; color: var(--navy); }
+        .dc-match-sub { font-size: 12.5px; color: var(--muted-text); margin-top: 4px; }
+        .dc-status-pill { font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; white-space: nowrap; }
+        .dc-status-pill.open { background: rgba(1, 226, 129, 0.15); color: var(--navy); border: 1px solid rgba(1, 226, 129, 0.3); }
+        .dc-status-pill.full { background: #ecfdf5; color: #059669; }
+        .dc-status-pill.cancelled { background: #fef2f2; color: #dc2626; }
+        .dc-challenge-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border); margin-top: 10px; }
+        .dc-challenge-row img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: rgba(1, 226, 129, 0.15); }
+        .dc-challenge-row .name { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); }
 
-        .dc-empty-inline { font-size: 12.5px; color: var(--vs-text-secondary); padding: 10px 0; }
+        .dc-empty-inline { font-size: 13px; color: var(--muted-text); padding: 12px 0; }
 
-        .dc-toast {
-            position: fixed; left: 50%; bottom: calc(var(--vs-bottomnav-h, 70px) + 18px);
+        /* Dialog & Toast */
+        .dn-toast {
+            position: fixed; left: 50%; bottom: 30px;
             transform: translateX(-50%) translateY(12px); z-index: 1300;
-            background: var(--vs-primary-900); color: #fff; padding: 10px 18px; border-radius: 9999px;
-            font-size: 13px; font-weight: 600; opacity: 0; visibility: hidden;
-            transition: opacity .2s ease, transform .2s ease; box-shadow: 0 8px 22px rgba(7,29,56,.3);
+            background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 999px;
+            font-size: 13.5px; font-weight: 700; opacity: 0; visibility: hidden;
+            transition: opacity .2s ease, transform .2s ease; box-shadow: 0 8px 22px rgba(0,0,0,.2);
             max-width: 88vw; text-align: center;
         }
-        .dc-toast.is-open { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-        .dc-toast.is-danger { background: var(--vs-danger); }
-        .dc-toast.is-success { background: var(--vs-success); }
+        .dn-toast.is-open { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .dn-toast.is-danger { background: #dc2626; }
+        .dn-toast.is-success { background: #059669; }
 
-        /* Confirm dialog (giải tán / rời đội) */
-        .dc-confirm-backdrop { position: fixed; inset: 0; z-index: 1100; background: var(--vs-overlay); opacity: 0; visibility: hidden; transition: opacity .18s ease; }
+        .dc-confirm-backdrop { position: fixed; inset: 0; z-index: 1100; background: rgba(7, 29, 56, 0.5); opacity: 0; visibility: hidden; transition: opacity .18s ease; backdrop-filter: blur(2px); }
         .dc-confirm-backdrop.is-open { opacity: 1; visibility: visible; }
-        .dc-confirm { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 1200; width: min(360px, calc(100vw - 40px)); background: #fff; border-radius: var(--vs-r-card); padding: 20px; text-align: center; }
-        .dc-confirm p { font-size: 13.5px; color: var(--vs-text-secondary); margin: 8px 0 18px; }
-        .dc-confirm .row { display: flex; gap: 10px; }
-        .dc-confirm .row button { flex: 1; padding: 10px; border-radius: var(--vs-r-btn); font-size: 13.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--vs-border); background: #fff; }
-        .dc-confirm .row button.confirm { background: var(--vs-danger); border-color: var(--vs-danger); color: #fff; }
+        .dc-confirm { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 1200; width: min(400px, calc(100vw - 40px)); background: #fff; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .dc-confirm p { font-size: 14px; color: var(--muted-text); margin: 8px 0 20px; }
+        .dc-confirm .row { display: flex; gap: 12px; }
+        .dc-confirm .row button { flex: 1; padding: 11px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--navy); }
+        .dc-confirm .row button.confirm { background: #dc2626; border-color: #dc2626; color: #fff; }
     </style>
 </head>
 <body>
+
+<jsp:include page="/common/header-xtra.jsp" />
+
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <c:set var="fallbackAvatar" value="${ctx}/assets/images/vsport-fallback.svg" />
 
-<header class="dc-appbar">
-    <button type="button" class="dc-back" onclick="history.length > 1 ? history.back() : (window.location.href='${ctx}/customer/doi-nhom')" aria-label="Quay lại">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-    </button>
-    <h1><c:out value="${team.teamName}"/></h1>
-    <c:if test="${team.captain}">
-        <a class="dc-edit" href="${ctx}/customer/doi-nhom/chinh-sua?id=${team.teamId}" aria-label="Chỉnh sửa đội">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        </a>
-    </c:if>
-</header>
+<div class="acc-page-wrapper">
+    <jsp:include page="/customer/common/account-profile-banner.jsp" />
 
-<div class="dc-wrap">
-    <div class="dc-cover" style="<c:if test='${not empty team.coverImagePath}'>background-image:url('${team.coverImagePath}');</c:if>"></div>
-    <div class="dc-header">
-        <img class="dc-avatar" src="${not empty team.avatarPath ? team.avatarPath : fallbackAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackAvatar}';"/>
-        <p class="dc-name"><c:out value="${team.teamName}"/></p>
-        <div class="dc-meta">
-            <span class="dc-badge"><c:out value="${team.sportName}"/></span>
-            <c:if test="${not empty team.locationText}"><span>&middot; <c:out value="${team.locationText}"/></span></c:if>
-            <span>&middot; ${team.memberCount}/${team.maxMembers} thành viên</span>
-            <span>&middot; Đội trưởng: <c:out value="${team.captainName}"/></span>
-        </div>
-        <c:if test="${not empty team.description}"><p class="dc-desc"><c:out value="${team.description}"/></p></c:if>
-    </div>
+    <div class="acc-main-container">
+        <c:set var="activePage" value="teams" scope="request" />
+        <jsp:include page="/customer/common/account-sidebar.jsp" />
 
-    <div class="dc-actions" id="dcActions">
-        <c:choose>
-            <c:when test="${team.captain}">
-                <button type="button" class="dc-btn" id="dcInviteBtn">Mời thành viên</button>
-                <button type="button" class="dc-btn primary" id="dcOpenMatchPanel">Tạo kèo đội</button>
-                <button type="button" class="dc-btn danger" id="dcDisbandBtn">Giải tán đội</button>
-            </c:when>
-            <c:when test="${team.coCaptain}">
-                <button type="button" class="dc-btn" id="dcInviteBtn">Mời thành viên</button>
-                <button type="button" class="dc-btn primary" id="dcOpenMatchPanel">Tạo kèo đội</button>
-                <button type="button" class="dc-btn danger" id="dcLeaveBtn">Rời đội</button>
-            </c:when>
-            <c:when test="${not empty team.myRole}">
-                <button type="button" class="dc-btn danger" id="dcLeaveBtn">Rời đội</button>
-            </c:when>
-            <c:otherwise>
-                <button type="button" class="dc-btn primary" id="dcJoinBtn" data-team-id="${team.teamId}">
-                    ${team.memberCount >= team.maxMembers ? 'Đã đủ người' : 'Xin tham gia'}
-                </button>
-            </c:otherwise>
-        </c:choose>
-    </div>
-
-    <div class="dc-section">
-        <h2>Thành viên <span class="count">${team.memberCount}/${team.maxMembers}</span></h2>
-        <c:forEach var="m" items="${team.members}">
-            <div class="dc-member-row" data-account-id="${m.accountId}">
-                <img src="${not empty m.avatarUrl ? m.avatarUrl : fallbackAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackAvatar}';"/>
-                <div class="dc-member-info">
-                    <div class="dc-member-name"><c:out value="${m.fullName}"/></div>
-                    <div class="dc-member-role">
-                        <c:choose><c:when test="${m.memberRole == 'CAPTAIN'}">Đội trưởng</c:when><c:when test="${m.memberRole == 'CO_CAPTAIN'}">Đội phó</c:when><c:otherwise>Thành viên</c:otherwise></c:choose>
+        <main class="acc-main-panel">
+            <div class="acc-content-card">
+                <!-- Header Section -->
+                <div class="dn-header-row">
+                    <div class="dn-header-title-wrap">
+                        <div class="dn-header-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div>
+                            <h2 class="dn-header-title"><c:out value="${team.teamName}"/></h2>
+                            <p class="dn-header-desc">Chi tiết thông tin đội nhóm và thành viên.</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <a class="dn-back-btn" href="${ctx}/customer/doi-nhom">
+                            <i class="fas fa-arrow-left"></i> Quay lại Nhóm của tôi
+                        </a>
+                        <c:if test="${team.captain}">
+                            <a class="dn-edit-btn" href="${ctx}/customer/doi-nhom/chinh-sua?id=${team.teamId}">
+                                <i class="fas fa-edit"></i> Chỉnh sửa đội
+                            </a>
+                        </c:if>
                     </div>
                 </div>
-                <c:if test="${(team.captain || team.coCaptain) && m.memberRole != 'CAPTAIN'}">
-                    <div class="dc-member-actions">
-                        <c:if test="${team.captain}">
-                            <button type="button" class="dc-mini-btn" data-transfer-captain="${m.accountId}">Chuyển đội trưởng</button>
-                        </c:if>
-                        <button type="button" class="dc-mini-btn danger" data-remove-member="${m.accountId}">Xóa</button>
-                    </div>
-                </c:if>
-            </div>
-        </c:forEach>
-    </div>
 
-    <c:if test="${team.captain || team.coCaptain}">
-        <div class="dc-section">
-            <h2>Yêu cầu tham gia đang chờ <span class="count">${fn:length(joinRequests)}</span></h2>
-            <c:choose>
-                <c:when test="${empty joinRequests}"><p class="dc-empty-inline">Không có yêu cầu nào đang chờ.</p></c:when>
-                <c:otherwise>
-                    <c:forEach var="jr" items="${joinRequests}">
-                        <div class="dc-request-card">
-                            <img src="${not empty jr.requesterAvatarUrl ? jr.requesterAvatarUrl : fallbackAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackAvatar}';"/>
+                <!-- Team Detail Banner & Header -->
+                <div class="dc-cover" style="<c:if test='${not empty team.coverImagePath}'>background-image:url('${team.coverImagePath}');</c:if>"></div>
+                <div class="dc-header">
+                    <img class="dc-avatar" src="${not empty team.avatarPath ? team.avatarPath : fallbackAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackAvatar}';"/>
+                    <p class="dc-name"><c:out value="${team.teamName}"/></p>
+                    <div class="dc-meta">
+                        <span class="dc-badge"><i class="fas fa-running"></i> <c:out value="${team.sportName}"/></span>
+                        <c:if test="${not empty team.locationText}"><span>&middot; <i class="fas fa-map-marker-alt"></i> <c:out value="${team.locationText}"/></span></c:if>
+                        <span>&middot; <i class="fas fa-user-friends"></i> ${team.memberCount}/${team.maxMembers} thành viên</span>
+                        <span>&middot; Đội trưởng: <strong><c:out value="${team.captainName}"/></strong></span>
+                    </div>
+                    <c:if test="${not empty team.description}"><p class="dc-desc"><c:out value="${team.description}"/></p></c:if>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="dc-actions" id="dcActions">
+                    <c:choose>
+                        <c:when test="${team.captain}">
+                            <button type="button" class="dc-btn" id="dcInviteBtn"><i class="fas fa-user-plus"></i> Mời thành viên</button>
+                            <button type="button" class="dc-btn primary" id="dcOpenMatchPanel"><i class="fas fa-swords"></i> Tạo kèo đội</button>
+                            <button type="button" class="dc-btn danger" id="dcDisbandBtn"><i class="fas fa-trash-alt"></i> Giải tán đội</button>
+                        </c:when>
+                        <c:when test="${team.coCaptain}">
+                            <button type="button" class="dc-btn" id="dcInviteBtn"><i class="fas fa-user-plus"></i> Mời thành viên</button>
+                            <button type="button" class="dc-btn primary" id="dcOpenMatchPanel"><i class="fas fa-swords"></i> Tạo kèo đội</button>
+                            <button type="button" class="dc-btn danger" id="dcLeaveBtn"><i class="fas fa-sign-out-alt"></i> Rời đội</button>
+                        </c:when>
+                        <c:when test="${not empty team.myRole}">
+                            <button type="button" class="dc-btn danger" id="dcLeaveBtn"><i class="fas fa-sign-out-alt"></i> Rời đội</button>
+                        </c:when>
+                        <c:otherwise>
+                            <button type="button" class="dc-btn primary" id="dcJoinBtn" data-team-id="${team.teamId}">
+                                <i class="fas fa-paper-plane"></i> ${team.memberCount >= team.maxMembers ? 'Đã đủ người' : 'Xin tham gia'}
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <!-- Members List Section -->
+                <div class="dc-section">
+                    <h2>
+                        <span>Danh sách thành viên</span>
+                        <span class="count">${team.memberCount}/${team.maxMembers}</span>
+                    </h2>
+                    <c:forEach var="m" items="${team.members}">
+                        <div class="dc-member-row" data-account-id="${m.accountId}">
+                            <img src="${not empty m.avatarUrl ? m.avatarUrl : fallbackAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackAvatar}';"/>
                             <div class="dc-member-info">
-                                <div class="dc-member-name"><c:out value="${jr.requesterName}"/></div>
-                                <c:if test="${not empty jr.message}"><div class="dc-member-role"><c:out value="${jr.message}"/></div></c:if>
+                                <div class="dc-member-name"><c:out value="${m.fullName}"/></div>
+                                <div class="dc-member-role">
+                                    <c:choose><c:when test="${m.memberRole == 'CAPTAIN'}">Đội trưởng</c:when><c:when test="${m.memberRole == 'CO_CAPTAIN'}">Đội phó</c:when><c:otherwise>Thành viên</c:otherwise></c:choose>
+                                </div>
                             </div>
-                            <div class="dc-member-actions">
-                                <button type="button" class="dc-mini-btn" style="border-color:var(--vs-success);color:var(--vs-success);" data-approve-jr="${jr.joinRequestId}">Duyệt</button>
-                                <button type="button" class="dc-mini-btn danger" data-reject-jr="${jr.joinRequestId}">Từ chối</button>
-                            </div>
+                            <c:if test="${(team.captain || team.coCaptain) && m.memberRole != 'CAPTAIN'}">
+                                <div class="dc-member-actions">
+                                    <c:if test="${team.captain}">
+                                        <button type="button" class="dc-mini-btn" data-transfer-captain="${m.accountId}">Chuyển đội trưởng</button>
+                                    </c:if>
+                                    <button type="button" class="dc-mini-btn danger" data-remove-member="${m.accountId}">Xóa</button>
+                                </div>
+                            </c:if>
                         </div>
                     </c:forEach>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </c:if>
+                </div>
 
-    <div class="dc-section" id="tao-keo">
-        <h2>Kèo đội</h2>
+                <!-- Join Requests Section -->
+                <c:if test="${team.captain || team.coCaptain}">
+                    <div class="dc-section">
+                        <h2>
+                            <span>Yêu cầu tham gia đang chờ</span>
+                            <span class="count">${fn:length(joinRequests)}</span>
+                        </h2>
+                        <c:choose>
+                            <c:when test="${empty joinRequests}"><p class="dc-empty-inline">Không có yêu cầu nào đang chờ.</p></c:when>
+                            <c:otherwise>
+                                <c:forEach var="jr" items="${joinRequests}">
+                                    <div class="dc-request-card">
+                                        <img src="${not empty jr.requesterAvatarUrl ? jr.requesterAvatarUrl : fallbackAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackAvatar}';"/>
+                                        <div class="dc-member-info">
+                                            <div class="dc-member-name"><c:out value="${jr.requesterName}"/></div>
+                                            <c:if test="${not empty jr.message}"><div class="dc-member-role"><c:out value="${jr.message}"/></div></c:if>
+                                        </div>
+                                        <div class="dc-member-actions">
+                                            <button type="button" class="dc-mini-btn" style="border-color:#059669;color:#059669;" data-approve-jr="${jr.joinRequestId}">Duyệt</button>
+                                            <button type="button" class="dc-mini-btn danger" data-reject-jr="${jr.joinRequestId}">Từ chối</button>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </c:if>
 
-        <c:if test="${team.captain || team.coCaptain}">
-            <div class="dc-match-panel" id="dcMatchPanel">
-                <div class="dt-field">
-                    <label for="dcBookingSelect">Ca đặt sân của bạn</label>
-                    <select id="dcBookingSelect"><option value="">Đang tải...</option></select>
+                <!-- Match Panel Section -->
+                <div class="dc-section" id="tao-keo">
+                    <h2>Kèo đội</h2>
+
+                    <c:if test="${team.captain || team.coCaptain}">
+                        <div class="dc-match-panel" id="dcMatchPanel">
+                            <div class="dt-field" style="margin-bottom: 14px;">
+                                <label for="dcBookingSelect">Ca đặt sân của bạn</label>
+                                <select id="dcBookingSelect"><option value="">Đang tải...</option></select>
+                            </div>
+                            <div class="dt-field" style="margin-bottom: 14px;">
+                                <label for="dcTrinhDo">Trình độ mong muốn</label>
+                                <select id="dcTrinhDo">
+                                    <option value="">Không yêu cầu</option>
+                                    <option value="Mới chơi">Mới chơi</option>
+                                    <option value="Cơ bản">Cơ bản</option>
+                                    <option value="Trung bình">Trung bình</option>
+                                    <option value="Khá">Khá</option>
+                                    <option value="Nâng cao">Nâng cao</option>
+                                </select>
+                            </div>
+                            <div class="dt-field" style="margin-bottom: 14px;">
+                                <label for="dcNote">Ghi chú</label>
+                                <textarea id="dcNote" maxlength="240" rows="2" placeholder="Ghi chú cho đối thủ (tùy chọn)"></textarea>
+                            </div>
+                            <button type="button" class="dc-btn primary" id="dcSubmitMatch" style="width:100%;justify-content:center;">Tạo kèo</button>
+                        </div>
+                        <p id="dcMyMatchesEmpty" class="dc-empty-inline" style="display:none;">Đội bạn chưa tạo kèo nào.</p>
+                        <div id="dcMyMatches"></div>
+                    </c:if>
+
+                    <h2 style="margin-top:22px;">Kèo đội đang mở (đội khác)</h2>
+                    <p id="dcOpenMatchesEmpty" class="dc-empty-inline" style="display:none;">Hiện chưa có kèo đội nào đang mở.</p>
+                    <div id="dcOpenMatches"></div>
                 </div>
-                <div class="dt-field">
-                    <label for="dcTrinhDo">Trình độ mong muốn</label>
-                    <select id="dcTrinhDo">
-                        <option value="">Không yêu cầu</option>
-                        <option value="Mới chơi">Mới chơi</option>
-                        <option value="Cơ bản">Cơ bản</option>
-                        <option value="Trung bình">Trung bình</option>
-                        <option value="Khá">Khá</option>
-                        <option value="Nâng cao">Nâng cao</option>
-                    </select>
-                </div>
-                <div class="dt-field">
-                    <label for="dcNote">Ghi chú</label>
-                    <textarea id="dcNote" maxlength="240" rows="2" placeholder="Ghi chú cho đối thủ (tùy chọn)"></textarea>
-                </div>
-                <button type="button" class="dc-btn primary" id="dcSubmitMatch" style="width:100%;justify-content:center;">Tạo kèo</button>
             </div>
-            <p id="dcMyMatchesEmpty" class="dc-empty-inline" style="display:none;">Đội bạn chưa tạo kèo nào.</p>
-            <div id="dcMyMatches"></div>
-        </c:if>
-
-        <h2 style="margin-top:18px;">Kèo đội đang mở (đội khác)</h2>
-        <p id="dcOpenMatchesEmpty" class="dc-empty-inline" style="display:none;">Hiện chưa có kèo đội nào đang mở.</p>
-        <div id="dcOpenMatches"></div>
+        </main>
     </div>
 </div>
 
-<!-- Invite member -->
+<!-- Invite member modal -->
 <div class="dc-confirm-backdrop" id="dcInviteBackdrop"></div>
 <div class="dc-confirm" id="dcInviteDialog" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dcInviteTitle">
-    <p id="dcInviteTitle" style="font-weight:700;font-size:14.5px;margin:0 0 4px;">Mời thành viên</p>
-    <div class="dt-field" style="text-align:left;">
-        <label style="display:block;font-size:12.5px;font-weight:700;margin:10px 0 6px;">Email</label>
-        <input type="email" id="dcInviteUsername" class="dt-input" placeholder="name@example.com" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--vs-border);"/>
+    <p id="dcInviteTitle" style="font-weight:800;font-size:16px;margin:0 0 6px;color:var(--navy);font-family:'Outfit',sans-serif;">Mời thành viên</p>
+    <div style="text-align:left; margin-top: 14px;">
+        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--navy);">Email người dùng</label>
+        <input type="email" id="dcInviteUsername" class="dt-input" placeholder="nhap.email@example.com" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);box-sizing:border-box;"/>
     </div>
-    <div class="row" style="margin-top:14px;">
+    <div class="row" style="margin-top:20px;">
         <button type="button" id="dcInviteCancel">Hủy</button>
-        <button type="button" id="dcInviteSend" class="confirm" style="background:var(--vs-orange-500);border-color:var(--vs-orange-500);">Gửi lời mời</button>
+        <button type="button" id="dcInviteSend" class="confirm" style="background:var(--primary);border-color:var(--primary);color:var(--navy);font-weight:800;">Gửi lời mời</button>
     </div>
 </div>
 
-<!-- Generic confirm (disband / leave / remove) -->
+<!-- Generic confirm modal -->
 <div class="dc-confirm-backdrop" id="dcConfirmBackdrop"></div>
 <div class="dc-confirm" id="dcConfirmDialog" style="display:none;" role="dialog" aria-modal="true">
-    <p id="dcConfirmTitle" style="font-weight:700;font-size:14.5px;margin:0;">Xác nhận</p>
+    <p id="dcConfirmTitle" style="font-weight:800;font-size:16px;margin:0;color:var(--navy);font-family:'Outfit',sans-serif;">Xác nhận</p>
     <p id="dcConfirmMsg">Bạn có chắc chắn?</p>
     <div class="row">
         <button type="button" id="dcConfirmCancel">Hủy</button>
@@ -273,9 +525,7 @@
     </div>
 </div>
 
-<div id="dcToast" class="dc-toast" role="status" aria-live="polite"></div>
-
-<jsp:include page="/customer/common/bottom-nav.jsp" />
+<div id="dcToast" class="dn-toast" role="status" aria-live="polite"></div>
 
 <script>
 (function () {
@@ -290,7 +540,7 @@
     var toastTimer = null;
     function toast(msg, kind) {
         var el = document.getElementById('dcToast');
-        el.className = 'dc-toast is-open' + (kind === 'danger' ? ' is-danger' : kind === 'success' ? ' is-success' : '');
+        el.className = 'dn-toast is-open' + (kind === 'danger' ? ' is-danger' : kind === 'success' ? ' is-success' : '');
         el.textContent = msg;
         clearTimeout(toastTimer);
         toastTimer = setTimeout(function () { el.classList.remove('is-open'); }, 3200);
@@ -508,7 +758,7 @@
                         row.className = 'dc-challenge-row';
                         row.innerHTML = '<img src="' + esc(avatarSrc(c.challengerTeamAvatarPath)) + '" alt="" onerror="this.onerror=null;this.src=\'' + FALLBACK_AVATAR + '\';"/>' +
                             '<span class="name">' + esc(c.challengerTeamName) + '</span>' +
-                            '<button type="button" class="dc-mini-btn" style="border-color:var(--vs-success);color:var(--vs-success);" data-accept-ch="' + c.chiTietKeoId + '" data-keo="' + m.keoId + '">Chấp nhận</button>' +
+                            '<button type="button" class="dc-mini-btn" style="border-color:#059669;color:#059669;" data-accept-ch="' + c.chiTietKeoId + '" data-keo="' + m.keoId + '">Chấp nhận</button>' +
                             '<button type="button" class="dc-mini-btn danger" data-reject-ch="' + c.chiTietKeoId + '" data-keo="' + m.keoId + '">Từ chối</button>';
                         challengesWrap.appendChild(row);
                     });

@@ -4,6 +4,7 @@
 <%@ page import="org.example.model.CoSo" %>
 <%@ page import="org.example.model.MonTheThao" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="vi">
@@ -329,13 +330,29 @@
                     <%
                         @SuppressWarnings("unchecked")
                         List<CoSo> tkResults = (List<CoSo>) request.getAttribute("results");
+                        @SuppressWarnings("unchecked")
+                        Map<Integer, String> facilityFirstSport = (Map<Integer, String>) request.getAttribute("facilityFirstSport");
                         String ctx2 = request.getContextPath();
+                        // Resolve active sport name from dsMon (source of truth: San→LoaiSan→MonTheThao).
+                        Integer activeSportId = (Integer) request.getAttribute("sportId");
+                        String activeSportName = "";
+                        if (activeSportId != null) {
+                            @SuppressWarnings("unchecked")
+                            List<MonTheThao> monList = (List<MonTheThao>) request.getAttribute("dsMon");
+                            if (monList != null) {
+                                for (MonTheThao m : monList) {
+                                    if (m.getMonTheThaoID() == activeSportId) {
+                                        activeSportName = m.getTenMon() != null ? m.getTenMon() : "";
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         if (tkResults != null) {
                             for (CoSo cs : tkResults) {
                                 String csImg = cs.getHinhAnh() != null ? cs.getHinhAnh().trim() : "";
                                 String csOpen = cs.getGioMoCua() != null ? cs.getGioMoCua().toString().substring(0,5) : "06:00";
                                 String csClose = cs.getGioDongCua() != null ? cs.getGioDongCua().toString().substring(0,5) : "23:00";
-                                String businessType = cs.getLoaiHinhKinhDoanh() != null ? cs.getLoaiHinhKinhDoanh() : "";
                                 String csName = cs.getTenCoSo() != null ? cs.getTenCoSo() : "";
                                 String csNameSafe = csName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
                                 String csAddr = cs.getDiaChi() != null ? cs.getDiaChi() : "Chưa cập nhật địa chỉ";
@@ -350,17 +367,27 @@
                                     cardImgUrl = ctx2 + rel;
                                 }
 
-                                String firstSport = businessType.contains(",") ? businessType.substring(0, businessType.indexOf(',')).trim() : businessType.trim();
-                                String firstSportSafe = firstSport.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+                                // Badge: source of truth is actual courts (San→LoaiSan→MonTheThao).
+                                // When filtering by sport, activeSportName is already resolved above.
+                                // Otherwise, use the batch-queried first sport from courts (never LoaiHinhKinhDoanh).
+                                String badgeSport;
+                                if (activeSportId != null && !activeSportName.isEmpty()) {
+                                    badgeSport = activeSportName;
+                                } else {
+                                    String fromCourts = facilityFirstSport != null ? facilityFirstSport.get(cs.getCoSoID()) : null;
+                                    badgeSport = fromCourts != null ? fromCourts : "";
+                                }
+                                String firstSportSafe = badgeSport.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
                     %>
                     <div class="facility-card" tabindex="0" role="button"
                          aria-label="Xem chi tiết <%= csNameSafe %>"
                          data-coso-id="<%= cs.getCoSoID() %>"
                          data-facility-name="<%= csNameSafe %>"
-                         data-card-image="<%= cardImgUrl %>">
+                         data-card-image="<%= cardImgUrl %>"
+                         data-sport-id="<%= activeSportId != null ? activeSportId : "" %>">
                         <div class="fc-image">
                             <img src="<%= cardImgUrl %>" onerror="this.onerror=null;this.src='<%= fbImgUrl %>';" alt="<%= csNameSafe %>">
-                            <% if (!firstSport.isEmpty()) { %>
+                            <% if (!badgeSport.isEmpty()) { %>
                                 <div class="fc-badge"><i class="fa-solid fa-medal"></i> <%= firstSportSafe %></div>
                             <% } %>
                         </div>
@@ -373,7 +400,8 @@
                                 <button type="button" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;"
                                         data-book-trigger
                                         data-coso-id="<%= cs.getCoSoID() %>"
-                                        data-facility-name="<%= csNameSafe %>">Đặt lịch</button>
+                                        data-facility-name="<%= csNameSafe %>"
+                                        data-sport-id="<%= activeSportId != null ? activeSportId : "" %>">Đặt lịch</button>
                             </div>
                         </div>
                     </div>
@@ -459,13 +487,39 @@
         // push/pop stays consistent). Silently no-ops if the id isn't on this page.
         (function () {
             var coSoId = new URLSearchParams(window.location.search).get('coSoId');
-            if (!coSoId) return;
-            var grid = document.getElementById('facilityGrid');
-            if (!grid) return;
-            var card = grid.querySelector('.facility-card[data-coso-id="' + CSS.escape(coSoId) + '"]');
-            if (card && typeof window.openFacilitySheet === 'function') {
-                window.openFacilitySheet(card);
+            if (coSoId) {
+                var grid = document.getElementById('facilityGrid');
+                if (grid) {
+                    var card = grid.querySelector('.facility-card[data-coso-id="' + CSS.escape(coSoId) + '"]');
+                    if (card && typeof window.openFacilitySheet === 'function') {
+                        window.openFacilitySheet(card);
+                    }
+                }
             }
+
+            // Real-time polling to check if new courts/facilities were created
+            var lastCount = -1;
+            function checkRealtimeUpdates() {
+                if (document.hidden) return;
+                fetch('${ctx}/api/customer/facilities/map?_t=' + Date.now(), { cache: 'no-store' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (Array.isArray(data)) {
+                            if (lastCount !== -1 && data.length !== lastCount) {
+                                // Facility/court count changed - submit search form to reload updated court grid
+                                document.getElementById('tkSearchForm').submit();
+                            } else {
+                                lastCount = data.length;
+                            }
+                        }
+                    })
+                    .catch(function() {});
+            }
+
+            setInterval(checkRealtimeUpdates, 15000);
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) checkRealtimeUpdates();
+            });
         })();
     </script>
 </body>

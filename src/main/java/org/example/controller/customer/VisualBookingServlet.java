@@ -350,6 +350,9 @@ public class VisualBookingServlet extends HttpServlet {
     // giá tham chiếu theo loại sân.
     // =====================================================================
     private void handleAvailabilityApi(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        resp.setHeader("Pragma", "no-cache");
+        resp.setHeader("Expires", "0");
         resp.setContentType("application/json;charset=UTF-8");
 
         Integer coSoId = parseIntSafe(req.getParameter("coSoId"));

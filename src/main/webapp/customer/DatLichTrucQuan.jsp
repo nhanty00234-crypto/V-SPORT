@@ -101,7 +101,7 @@
         }
         .ttv-legend-swatch { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(255,255,255,.4); flex-shrink: 0; }
         .ttv-legend-swatch.is-avail  { background: var(--surface); }
-        .ttv-legend-swatch.is-select { background: var(--primary); border-color: var(--primary); }
+        .ttv-legend-swatch.is-select { background: rgba(1,226,129,.4); border-color: var(--primary); }
         .ttv-legend-swatch.is-booked { background: #94a3b8; border-color: #94a3b8; }
         .ttv-legend-swatch.is-hold   { background: #fcd34d; border-color: #fcd34d; }
         .ttv-legend-swatch.is-locked { background: #e2e8f0; border-color: #e2e8f0; }
@@ -158,9 +158,18 @@
         .ttv-slot:hover:not(.is-blocked):not(.is-selected) { background: var(--background); }
         /* Press: lún nhẹ. */
         .ttv-slot:active:not(.is-blocked) { transform: translateY(1px) scale(0.99); }
-        .ttv-slot.is-selected { background: var(--primary); border-color: var(--primary-hover); color: var(--surface); }
+        .ttv-slot.is-selected { background: rgba(1,226,129,.4); border-color: var(--primary); color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--primary); }
         .ttv-slot.is-selected.is-selected-start { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
         .ttv-slot.is-selected.is-selected-end   { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+        /* Vạch chia rõ từng ô 30 phút bên trong vùng đã chọn, tránh nhầm cả khối là 1 ô. */
+        .ttv-slot.is-selected:not(.is-selected-end) { border-right: 1px dashed rgba(18,45,64,.3); }
+        /* Nhãn "giờ bắt đầu–giờ kết thúc" đè lên trên toàn vùng đã chọn, không phụ thuộc số ô 30 phút. */
+        .ttv-sel-label {
+            position: absolute; left: 0; top: 0; bottom: 0; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800; color: var(--navy);
+            white-space: nowrap; pointer-events: none;
+        }
         .ttv-slot.is-hover { background: rgba(1,226,129,.14); }
         .ttv-slot.is-blocked { cursor: not-allowed; }
         .ttv-slot.is-past   { background: #EDF0F3; color: #9aa4b0; }
@@ -510,17 +519,19 @@
     }
 
     // ---- Availability ----
-    function loadAvailability() {
+    function loadAvailability(isSilent) {
         if (state.abortCtrl) state.abortCtrl.abort();
         state.abortCtrl = new AbortController();
-        document.getElementById('ttvLoading').hidden = false;
-        document.getElementById('ttvErrorState').hidden = true;
-        document.getElementById('ttvEmpty').hidden = true;
-        document.getElementById('ttvTable').hidden = true;
-        document.getElementById('ttvTableScroll').setAttribute('aria-busy', 'true');
+        if (!isSilent) {
+            document.getElementById('ttvLoading').hidden = false;
+            document.getElementById('ttvErrorState').hidden = true;
+            document.getElementById('ttvEmpty').hidden = true;
+            document.getElementById('ttvTable').hidden = true;
+            document.getElementById('ttvTableScroll').setAttribute('aria-busy', 'true');
+        }
 
         fetch(CTX + '/customer/api/timetable-availability?coSoId=' + encodeURIComponent(COSO_ID) + '&date=' + encodeURIComponent(state.date),
-              { signal: state.abortCtrl.signal, headers: { 'Accept': 'application/json' } })
+              { signal: state.abortCtrl.signal, headers: { 'Accept': 'application/json' }, cache: 'no-store' })
             .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function (data) {
                 if (!data.success) throw new Error(data.error || 'load-failed');
@@ -537,15 +548,23 @@
                     document.getElementById('ttvTable').hidden = false;
                     if (state.selectedSanId && !state.courts.find(function (c) { return c.sanId == state.selectedSanId; })) {
                         state.selectedSanId = null;
+                        state.selectedStart = null;
+                        state.selectedEnd = null;
+                    } else if (state.selectedSanId && state.selectedStart != null && state.selectedEnd != null) {
+                        if (!isSelectionValid(state.selectedSanId, state.selectedStart, state.selectedEnd)) {
+                            clearSelection();
+                        }
                     }
                     refreshSelectionVisual();
                 }
             })
             .catch(function (err) {
                 if (err && err.name === 'AbortError') return;
-                document.getElementById('ttvLoading').hidden = true;
-                document.getElementById('ttvTableScroll').removeAttribute('aria-busy');
-                document.getElementById('ttvErrorState').hidden = false;
+                if (!isSilent) {
+                    document.getElementById('ttvLoading').hidden = true;
+                    document.getElementById('ttvTableScroll').removeAttribute('aria-busy');
+                    document.getElementById('ttvErrorState').hidden = false;
+                }
             });
     }
 
@@ -804,15 +823,28 @@
         document.querySelectorAll('.ttv-slot').forEach(function (cell) {
             cell.classList.remove('is-selected', 'is-selected-start', 'is-selected-end', 'is-hover');
         });
+        document.querySelectorAll('.ttv-sel-label').forEach(function (lbl) { lbl.remove(); });
         if (!state.selectedSanId || state.selectedStart == null) return;
+        let selectedCount = 0;
+        let startCell = null;
         document.querySelectorAll('.ttv-slot[data-san-id="' + state.selectedSanId + '"]').forEach(function (cell) {
             const m = parseInt(cell.dataset.startMinute, 10);
             if (m >= state.selectedStart && m < state.selectedEnd) {
                 cell.classList.add('is-selected');
-                if (m === state.selectedStart) cell.classList.add('is-selected-start');
+                selectedCount++;
+                if (m === state.selectedStart) { cell.classList.add('is-selected-start'); startCell = cell; }
                 if (m + SLOT_MIN === state.selectedEnd) cell.classList.add('is-selected-end');
             }
         });
+        // Nhãn tổng quát "gio bat dau–gio ket thuc" đè lên trên toàn bộ vùng đã chọn,
+        // tránh nhầm lẫn số ô 30 phút nhìn thấy với khoảng giờ thực tế đã chọn.
+        if (startCell && selectedCount > 0) {
+            const label = document.createElement('span');
+            label.className = 'ttv-sel-label';
+            label.textContent = minToHhmm(state.selectedStart) + '–' + minToHhmm(state.selectedEnd);
+            label.style.width = (selectedCount * 100) + '%';
+            startCell.appendChild(label);
+        }
     }
 
     // ---- Price preview (server-side pricing) ----
@@ -937,8 +969,30 @@
         alertTimer = setTimeout(function () { el.classList.remove('is-open'); }, 3200);
     };
 
+    // ---- Real-time Auto Polling ----
+    let pollTimer = null;
+    function startAutoPoll() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(function () {
+            if (!document.hidden && !state.pendingSubmit) {
+                loadAvailability(true);
+            }
+        }, 8000);
+    }
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && !state.pendingSubmit) {
+            loadAvailability(true);
+        }
+    });
+    window.addEventListener('focus', function () {
+        if (!state.pendingSubmit) {
+            loadAvailability(true);
+        }
+    });
+
     // Init
     loadAvailability();
+    startAutoPoll();
 })();
 </script>
 

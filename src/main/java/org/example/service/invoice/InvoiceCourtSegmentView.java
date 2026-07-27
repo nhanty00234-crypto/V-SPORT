@@ -3,7 +3,7 @@ package org.example.service.invoice;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** Một khung giờ tính tiền sân (có đèn/không đèn) đã CHỐT trên hóa đơn, dùng chung cho bill in và modal thanh toán. */
+/** Một khung giờ tính tiền sân (có đèn/không đèn) đã CHỐT trên hóa  đơn, dùng chung cho bill in và modal thanh toán. */
 public class InvoiceCourtSegmentView {
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;

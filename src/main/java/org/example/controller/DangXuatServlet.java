@@ -47,7 +47,7 @@ public class DangXuatServlet extends HttpServlet {
 
         String target = redirectToInternalLogin
                 ? req.getContextPath() + "/he-thong/dang-nhap"
-                : req.getContextPath() + "/index.jsp";
+                : req.getContextPath() + "/dangnhap";
         resp.sendRedirect(target);
     }
 

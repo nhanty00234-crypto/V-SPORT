@@ -27,6 +27,8 @@ import org.example.dto.payment.PayosQrData;
 import org.example.dto.payment.PayOSCredentials;
 import org.example.service.PayOSConfigurationService;
 import org.example.service.payos.PayOSClientFactory;
+import org.example.service.pricing.CourtPriceResult;
+import org.example.service.pricing.CourtPricingService;
 import vn.payos.PayOS;
 import vn.payos.exception.APIException;
 import vn.payos.exception.ConnectionException;
@@ -104,6 +106,7 @@ public class DatSanServlet extends HttpServlet {
     private final org.example.dao.CoSoDAO coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
     private final org.example.dao.LichDatSanDichVuDAO lichDatSanDichVuDAO = new org.example.dao.impl.LichDatSanDichVuDAOImpl();
     private final CustomerReputationHistoryDAO reputationHistoryDAO = new CustomerReputationHistoryDAOImpl();
+    private final CourtPricingService pricingService = new CourtPricingService();
     private final org.example.service.booking.BookingCancellationService bookingCancellationService =
             new org.example.service.booking.BookingCancellationService();
 
@@ -599,40 +602,45 @@ public class DatSanServlet extends HttpServlet {
                         return;
                     }
 
-                    // ── 3e. Tính giá theo loại sân và giờ đèn ──
-                    double hourlyPrice = 100_000; // Fallback mặc định
+                    // ── 3e. Tính giá theo loại sân và giờ đèn (chia theo từng khung giờ thực tế) ──
                     boolean applyLights = false;
+                    double tongTien;
 
-                    String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen FROM LoaiSan WHERE LoaiSanID = "
-                            +
-                            "(SELECT LoaiSanID FROM San WHERE SanID = ?)";
+                    String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen, GioKetThucLenDen " +
+                            "FROM LoaiSan WHERE LoaiSanID = (SELECT LoaiSanID FROM San WHERE SanID = ?)";
+                    BigDecimal giaKhongDenBd = null;
+                    BigDecimal giaCoDenBd = null;
+                    LocalTime gioBatDauLenDen = null;
+                    LocalTime gioKetThucLenDen = null;
                     try (java.sql.PreparedStatement loaiPs = conn.prepareStatement(loaiSanSql)) {
                         loaiPs.setInt(1, sanId);
                         try (java.sql.ResultSet rsLoai = loaiPs.executeQuery()) {
                             if (rsLoai.next()) {
-                                double giaKhongDen = rsLoai.getDouble("GiaKhongDen");
-                                double giaCoDen = rsLoai.getDouble("GiaCoDen");
-                                LocalTime gioLenDen = LocalTime.of(17, 30); // Mặc định 17:30
+                                giaKhongDenBd = BigDecimal.valueOf(rsLoai.getDouble("GiaKhongDen"));
+                                giaCoDenBd = BigDecimal.valueOf(rsLoai.getDouble("GiaCoDen"));
 
-                                java.sql.Time sqlLenDen = rsLoai.getTime("GioBatDauLenDen");
-                                if (sqlLenDen != null)
-                                    gioLenDen = sqlLenDen.toLocalTime();
+                                java.sql.Time sqlBatDauLenDen = rsLoai.getTime("GioBatDauLenDen");
+                                if (sqlBatDauLenDen != null) gioBatDauLenDen = sqlBatDauLenDen.toLocalTime();
 
-                                // Áp dụng giá đèn nếu giờ bắt đầu >= giờ bật đèn
-                                if (!gioBatDau.isBefore(gioLenDen)) {
-                                    hourlyPrice = giaCoDen;
-                                    applyLights = (giaCoDen != giaKhongDen); // Chỉ ghi nhận nếu giá thực sự khác nhau
-                                } else {
-                                    hourlyPrice = giaKhongDen;
-                                }
+                                java.sql.Time sqlKetThucLenDen = rsLoai.getTime("GioKetThucLenDen");
+                                if (sqlKetThucLenDen != null) gioKetThucLenDen = sqlKetThucLenDen.toLocalTime();
                             }
                         }
                     }
+                    if (giaKhongDenBd == null) {
+                        giaKhongDenBd = BigDecimal.valueOf(100_000); // Fallback mặc định
+                        giaCoDenBd = giaKhongDenBd;
+                    }
 
-                    // Tính tổng tiền dự kiến
-                    durationMinutes = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
-                    double durationHours = durationMinutes / 60.0;
-                    double tongTien = durationHours * hourlyPrice;
+                    // Nếu qua nửa đêm (giờ kết thúc <= giờ bắt đầu) thì tính sang ngày hôm sau
+                    LocalDate ngayKetThuc = !gioKetThuc.isAfter(gioBatDau) ? ngayDat.plusDays(1) : ngayDat;
+                    CourtPriceResult priceResult = pricingService.calculate(
+                            LocalDateTime.of(ngayDat, gioBatDau), LocalDateTime.of(ngayKetThuc, gioKetThuc),
+                            gioBatDauLenDen, gioKetThucLenDen, giaKhongDenBd, giaCoDenBd);
+
+                    durationMinutes = priceResult.totalMinutes();
+                    tongTien = priceResult.totalCourtAmount().doubleValue();
+                    applyLights = priceResult.minutesWithLight() > 0;
 
                     // ── 3f. INSERT lịch đặt sân trong cùng transaction ──
                     boolean isOnlineDeposit = "payos".equalsIgnoreCase(paymentMethod);

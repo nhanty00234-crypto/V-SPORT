@@ -73,6 +73,36 @@ public class TimKiemServlet extends HttpServlet {
             results = new ArrayList<>();
         }
 
+        // Batch-query first sport per facility from actual courts (source of truth: San→LoaiSan→MonTheThao).
+        // A single GROUP BY query for all result IDs avoids N+1. IDs are ints — no injection risk.
+        java.util.Map<Integer, String> facilityFirstSport = new java.util.HashMap<>();
+        if (results != null && !results.isEmpty()) {
+            StringBuilder ids = new StringBuilder();
+            for (CoSo c : results) {
+                if (ids.length() > 0) ids.append(',');
+                ids.append(c.getCoSoID());
+            }
+            String sportBatchSql =
+                "SELECT s.CoSoID, MIN(mt.TenMon) AS TenMon " +
+                "FROM San s " +
+                "JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                "JOIN MonTheThao mt ON ls.MonTheThaoID = mt.MonTheThaoID " +
+                "WHERE s.CoSoID IN (" + ids + ") " +
+                "  AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL) " +
+                "  AND (ls.IsDeleted = 0 OR ls.IsDeleted IS NULL) " +
+                "GROUP BY s.CoSoID";
+            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+                 java.sql.Statement st = conn.createStatement();
+                 java.sql.ResultSet rs = st.executeQuery(sportBatchSql)) {
+                while (rs.next()) {
+                    facilityFirstSport.put(rs.getInt("CoSoID"), rs.getString("TenMon"));
+                }
+            } catch (Exception e) {
+                LOGGER.warn("TIM_KIEM_SPORT_BATCH_WARN", e);
+            }
+        }
+        req.setAttribute("facilityFirstSport", facilityFirstSport);
+
         // coSoId (đến từ nút "Lọc chi tiết" mở từ một cơ sở cụ thể, hoặc share-link)
         // thu hẹp thêm kết quả về đúng cơ sở đó, không cần DAO riêng.
         if (coSoId != null && results != null) {
