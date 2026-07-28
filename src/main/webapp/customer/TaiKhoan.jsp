@@ -211,6 +211,9 @@
         }
 
         /* Main Panel */
+        .acc-main-panel {
+            min-width: 0;
+        }
         .acc-content-card {
             background: #ffffff;
             border: 1px solid var(--border);

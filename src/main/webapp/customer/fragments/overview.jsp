@@ -147,6 +147,7 @@
             <div class="acc-stat-num">${totalBookings}</div>
             <div class="acc-stat-lbl">Tổng số lần đặt</div>
         </div>
+    </div>
     <div class="acc-stat-box">
         <div class="acc-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #059669;">
             <i class="fas fa-check-circle"></i>

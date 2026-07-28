@@ -8,8 +8,12 @@
     <!-- Header -->
     <jsp:include page="/common/header-xtra.jsp" />
 
+<%
+    String authParam = request.getParameter("auth");
+    boolean isAuthTab = authParam != null && !authParam.isEmpty();
+%>
     <main>
-        <div id="homeView" class="page-view active">
+        <div id="homeView" class="page-view <%= isAuthTab ? "" : "active" %>">
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-pattern"></div>
@@ -570,7 +574,7 @@
         </div> <!-- End of homeView -->
 
         <!-- Auth View -->
-        <div id="authView" class="page-view">
+        <div id="authView" class="page-view <%= isAuthTab ? "active" : "" %>">
             <!-- Auth Header -->
             <div class="auth-header">
                 <div class="container">
@@ -787,11 +791,13 @@
             
             // Routing
             const urlParams = new URLSearchParams(window.location.search);
-            const wantsAuthView = window.location.hash === '#auth' || urlParams.get('auth') === 'login';
+            const wantsAuthView = window.location.hash === '#auth' || urlParams.has('auth');
 
             function handleRoute() {
                 const hash = window.location.hash;
-                if (hash === '#auth') {
+                const params = new URLSearchParams(window.location.search);
+                const isAuth = hash === '#auth' || params.has('auth');
+                if (isAuth) {
                     homeView.classList.remove('active');
                     authView.classList.add('active');
                 } else {
@@ -806,7 +812,6 @@
             // Initial route check — mở luôn cho cả điều hướng qua hash (#auth) lẫn qua
             // query string (?auth=login, dùng bởi các servlet redirect khi cần đăng nhập).
             if (wantsAuthView) {
-                window.location.hash = '#auth';
                 handleRoute();
 
                 if (urlParams.get('notice') === 'loginRequired') {
