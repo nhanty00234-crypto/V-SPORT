@@ -110,9 +110,15 @@ public class BookingCancellationService {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime bookingStart = LocalDateTime.of(lich.getNgayDat(), lich.getGioBatDau());
-        boolean isLate = CancelDecision.decide(now, bookingStart, Constants.LATE_CANCEL_HOURS)
-                == CancelDecision.CancelType.LATE_CANCEL;
-        String cancelType = isLate ? Constants.CANCEL_TYPE_LATE : Constants.CANCEL_TYPE_EARLY;
+        CancelDecision.CancelType decision = CancelDecision.decide(now, bookingStart, Constants.LATE_CANCEL_HOURS, Constants.MID_CANCEL_HOURS);
+        String cancelType;
+        if (decision == CancelDecision.CancelType.LATE_CANCEL) {
+            cancelType = Constants.CANCEL_TYPE_LATE;
+        } else if (decision == CancelDecision.CancelType.MID_CANCEL) {
+            cancelType = Constants.CANCEL_TYPE_MID;
+        } else {
+            cancelType = Constants.CANCEL_TYPE_EARLY;
+        }
 
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -124,10 +130,15 @@ public class BookingCancellationService {
                     conn.rollback();
                     return CancelResult.alreadyDone("Booking đã được hủy trước đó hoặc không còn ở trạng thái có thể hủy.");
                 }
-                if (isLate) {
+                if (decision == CancelDecision.CancelType.LATE_CANCEL) {
                     newScore = CustomerReputationService.applyDelta(conn, accountId, datSanId,
-                            Constants.REPUTATION_ACTION_LATE_CANCEL, Constants.LATE_CANCEL_PENALTY,
+                            Constants.REPUTATION_ACTION_LATE_CANCEL, Constants.CANCEL_PENALTY_UNDER_6H,
                             "Khách hủy sát giờ (dưới " + Constants.LATE_CANCEL_HOURS + " tiếng trước giờ chơi)",
+                            accountId, AuditLogService.getClientIp(req));
+                } else if (decision == CancelDecision.CancelType.MID_CANCEL) {
+                    newScore = CustomerReputationService.applyDelta(conn, accountId, datSanId,
+                            Constants.REPUTATION_ACTION_CANCEL_6_TO_24, Constants.CANCEL_PENALTY_6H_TO_24H,
+                            "Khách hủy từ 6 đến dưới 24 giờ trước giờ chơi",
                             accountId, AuditLogService.getClientIp(req));
                 }
                 if (isPaidPayos) {
@@ -150,8 +161,10 @@ public class BookingCancellationService {
                 conn.setAutoCommit(true);
             }
 
+            boolean isPenalized = (decision != CancelDecision.CancelType.EARLY_CANCEL);
             AuditLogService.log(req, actor, AuditLogService.ACTION_CANCEL, AuditLogService.ENTITY_DAT_SAN,
                     String.valueOf(datSanId), "Đơn đặt sân #" + datSanId,
+<<<<<<< HEAD
                     (isLate ? "Khách hủy sát giờ (Late Cancel)" : "Khách hủy sớm (Early Cancel)")
                             + (reason != null && !reason.isBlank() ? " - Lý do: " + reason.trim() : "")
                             + (createdHoanTienId > 0 ? " | HoanTien #" + createdHoanTienId : ""));
@@ -173,6 +186,22 @@ public class BookingCancellationService {
                 message = "Đã hủy đơn đặt sân #" + datSanId + " thành công.";
             }
             return CancelResult.ok(isLate, message, newScore);
+=======
+                    "Khách hủy sân (" + cancelType + ")"
+                            + (reason != null && !reason.isBlank() ? " - Lý do: " + reason.trim() : ""));
+
+            String message;
+            if (decision == CancelDecision.CancelType.LATE_CANCEL) {
+                message = "Bạn đã hủy sát giờ (dưới 6 tiếng). Điểm uy tín của bạn bị trừ "
+                        + Math.abs(Constants.CANCEL_PENALTY_UNDER_6H) + " điểm.";
+            } else if (decision == CancelDecision.CancelType.MID_CANCEL) {
+                message = "Bạn đã hủy trước 6h đến 24h. Điểm uy tín của bạn bị trừ "
+                        + Math.abs(Constants.CANCEL_PENALTY_6H_TO_24H) + " điểm.";
+            } else {
+                message = "Đã hủy đơn đặt sân #" + datSanId + " thành công.";
+            }
+            return CancelResult.ok(isPenalized, message, newScore);
+>>>>>>> fix/teacher-review-remediation
         } catch (SQLException e) {
             logger.error("Loi khi huy booking #{} cho AccountID={}: {}", datSanId, accountId, e.getMessage(), e);
             return CancelResult.fail("Hệ thống gặp lỗi khi hủy đơn. Vui lòng thử lại.");

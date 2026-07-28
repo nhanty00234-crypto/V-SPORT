@@ -85,6 +85,14 @@ public class GhepKeoService {
             return Result.fail("Ca đặt sân đã diễn ra, không thể tạo kèo mới.");
         }
 
+        // Enforcement: Chặn tạo kèo nếu điểm uy tín < 60
+        TaiKhoan creator = taiKhoanDAO.getAccountById(req.accountId);
+        int creatorRep = (creator != null) ? creator.getDiemUyTin() : 0;
+        if (creatorRep < org.example.util.Constants.REPUTATION_MATCHMAKING_THRESHOLD) {
+            return Result.fail("Điểm uy tín của bạn hiện tại là " + creatorRep + "/100 (dưới ngưỡng tối thiểu " +
+                    org.example.util.Constants.REPUTATION_MATCHMAKING_THRESHOLD + " điểm). Bạn không đủ điều kiện tạo kèo ghép.");
+        }
+
         GhepKeo keo = new GhepKeo();
         keo.setDatSanId(req.datSanId);
         keo.setAccountIdNguoiTao(req.accountId);
@@ -121,13 +129,17 @@ public class GhepKeoService {
             return Result.fail("Ca đặt sân của kèo này đã bị hủy, kèo không còn hợp lệ.");
         }
 
-        // Kiểm tra điểm uy tín tối thiểu
-        if (view.minReputation > 0) {
-            TaiKhoan player = taiKhoanDAO.getAccountById(accountId);
-            int playerRep = (player != null) ? player.getDiemUyTin() : 0;
-            if (playerRep < view.minReputation) {
-                return Result.fail("Bạn cần có ít nhất " + view.minReputation + " điểm uy tín để tham gia kèo này (hiện tại bạn có " + playerRep + " điểm).");
-            }
+        // Enforcement: Chặn tham gia kèo nếu điểm uy tín cá nhân < 60
+        TaiKhoan player = taiKhoanDAO.getAccountById(accountId);
+        int playerRep = (player != null) ? player.getDiemUyTin() : 0;
+        if (playerRep < org.example.util.Constants.REPUTATION_MATCHMAKING_THRESHOLD) {
+            return Result.fail("Điểm uy tín của bạn hiện tại là " + playerRep + "/100 (dưới ngưỡng tối thiểu " +
+                    org.example.util.Constants.REPUTATION_MATCHMAKING_THRESHOLD + " điểm). Bạn không đủ điều kiện tham gia các kèo ghép.");
+        }
+
+        // Kiểm tra điểm uy tín tối thiểu của kèo (nếu chủ kèo yêu cầu cao hơn 60)
+        if (view.minReputation > 0 && playerRep < view.minReputation) {
+            return Result.fail("Bạn cần có ít nhất " + view.minReputation + " điểm uy tín để tham gia kèo này (hiện tại bạn có " + playerRep + " điểm).");
         }
 
         String desiredStatus = "manual".equalsIgnoreCase(view.hinhThucDuyet)

@@ -602,20 +602,31 @@ public class DatSanServlet extends HttpServlet {
                         return;
                     }
 
+<<<<<<< HEAD
                     // ── 3e. Tính giá theo loại sân và giờ đèn (chia theo từng khung giờ thực tế) ──
+=======
+                    // ── 3e. Tính giá theo loại sân và giờ đèn bằng CourtPricingService ──
+                    double tongTien = 0.0;
+>>>>>>> fix/teacher-review-remediation
                     boolean applyLights = false;
                     double tongTien;
 
+<<<<<<< HEAD
                     String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen, GioKetThucLenDen " +
                             "FROM LoaiSan WHERE LoaiSanID = (SELECT LoaiSanID FROM San WHERE SanID = ?)";
                     BigDecimal giaKhongDenBd = null;
                     BigDecimal giaCoDenBd = null;
                     LocalTime gioBatDauLenDen = null;
                     LocalTime gioKetThucLenDen = null;
+=======
+                    String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen, GioKetThucLenDen FROM LoaiSan WHERE LoaiSanID = "
+                            + "(SELECT LoaiSanID FROM San WHERE SanID = ?)";
+>>>>>>> fix/teacher-review-remediation
                     try (java.sql.PreparedStatement loaiPs = conn.prepareStatement(loaiSanSql)) {
                         loaiPs.setInt(1, sanId);
                         try (java.sql.ResultSet rsLoai = loaiPs.executeQuery()) {
                             if (rsLoai.next()) {
+<<<<<<< HEAD
                                 giaKhongDenBd = BigDecimal.valueOf(rsLoai.getDouble("GiaKhongDen"));
                                 giaCoDenBd = BigDecimal.valueOf(rsLoai.getDouble("GiaCoDen"));
 
@@ -624,6 +635,23 @@ public class DatSanServlet extends HttpServlet {
 
                                 java.sql.Time sqlKetThucLenDen = rsLoai.getTime("GioKetThucLenDen");
                                 if (sqlKetThucLenDen != null) gioKetThucLenDen = sqlKetThucLenDen.toLocalTime();
+=======
+                                BigDecimal giaKhongDen = rsLoai.getBigDecimal("GiaKhongDen");
+                                BigDecimal giaCoDen = rsLoai.getBigDecimal("GiaCoDen");
+                                LocalTime gioLenDen = rsLoai.getTime("GioBatDauLenDen") != null ? rsLoai.getTime("GioBatDauLenDen").toLocalTime() : LocalTime.of(17, 30);
+                                LocalTime gioTatDen = rsLoai.getTime("GioKetThucLenDen") != null ? rsLoai.getTime("GioKetThucLenDen").toLocalTime() : LocalTime.of(23, 0);
+
+                                org.example.service.pricing.CourtPricingService pricingService = new org.example.service.pricing.CourtPricingService();
+                                org.example.service.pricing.CourtPriceResult priceResult = pricingService.calculate(
+                                        LocalDateTime.of(ngayDat, gioBatDau),
+                                        LocalDateTime.of(ngayDat, gioKetThuc),
+                                        gioLenDen, gioTatDen,
+                                        giaKhongDen != null ? giaKhongDen : BigDecimal.valueOf(100000),
+                                        giaCoDen != null ? giaCoDen : BigDecimal.valueOf(100000)
+                                );
+                                tongTien = priceResult.totalCourtAmount().doubleValue();
+                                applyLights = priceResult.minutesWithLight() > 0;
+>>>>>>> fix/teacher-review-remediation
                             }
                         }
                     }
@@ -632,6 +660,7 @@ public class DatSanServlet extends HttpServlet {
                         giaCoDenBd = giaKhongDenBd;
                     }
 
+<<<<<<< HEAD
                     // Nếu qua nửa đêm (giờ kết thúc <= giờ bắt đầu) thì tính sang ngày hôm sau
                     LocalDate ngayKetThuc = !gioKetThuc.isAfter(gioBatDau) ? ngayDat.plusDays(1) : ngayDat;
                     CourtPriceResult priceResult = pricingService.calculate(
@@ -642,6 +671,8 @@ public class DatSanServlet extends HttpServlet {
                     tongTien = priceResult.totalCourtAmount().doubleValue();
                     applyLights = priceResult.minutesWithLight() > 0;
 
+=======
+>>>>>>> fix/teacher-review-remediation
                     // ── 3f. INSERT lịch đặt sân trong cùng transaction ──
                     boolean isOnlineDeposit = "payos".equalsIgnoreCase(paymentMethod);
                     String initialStatus = isOnlineDeposit

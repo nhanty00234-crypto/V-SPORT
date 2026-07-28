@@ -24,16 +24,26 @@ class ReputationLabelTest {
 
     @Test
     void scoreAtWatchThresholdIsWatch() {
-        assertEquals(Constants.REPUTATION_LABEL_WATCH, ReputationLabel.of(50));
+        assertEquals(Constants.REPUTATION_LABEL_WATCH, ReputationLabel.of(60));
     }
 
     @Test
     void scoreJustBelowWatchThresholdIsRisk() {
-        assertEquals(Constants.REPUTATION_LABEL_RISK, ReputationLabel.of(49));
+        assertEquals(Constants.REPUTATION_LABEL_RISK, ReputationLabel.of(59));
     }
 
     @Test
-    void score0IsRisk() {
-        assertEquals(Constants.REPUTATION_LABEL_RISK, ReputationLabel.of(0));
+    void scoreAtRiskThresholdIsRisk() {
+        assertEquals(Constants.REPUTATION_LABEL_RISK, ReputationLabel.of(30));
+    }
+
+    @Test
+    void scoreBelowRiskThresholdIsVeryHighRisk() {
+        assertEquals(Constants.REPUTATION_LABEL_VERY_HIGH_RISK, ReputationLabel.of(29));
+    }
+
+    @Test
+    void score0IsVeryHighRisk() {
+        assertEquals(Constants.REPUTATION_LABEL_VERY_HIGH_RISK, ReputationLabel.of(0));
     }
 }

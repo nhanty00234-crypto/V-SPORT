@@ -148,6 +148,7 @@
             <div class="acc-stat-lbl">Tổng số lần đặt</div>
         </div>
     </div>
+<<<<<<< HEAD
     <div class="acc-stat-box">
         <div class="acc-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #059669;">
             <i class="fas fa-check-circle"></i>
@@ -164,8 +165,15 @@
         <div>
             <div class="acc-stat-num">${account.diemUyTin != null ? account.diemUyTin : 80}</div>
             <div class="acc-stat-lbl">Điểm uy tín</div>
+=======
+    <a href="${pageContext.request.contextPath}/customer/lich-su-diem-uy-tin" class="stat-card stat-card-link">
+        <div class="stat-icon" style="background: rgba(255, 71, 87, 0.1); color: var(--danger);"><i class="fas fa-star"></i></div>
+        <div class="stat-info">
+            <h3>${account.diemUyTin}</h3>
+            <p>Điểm uy tín</p>
+>>>>>>> fix/teacher-review-remediation
         </div>
-    </div>
+    </a>
 </div>
 
 <div class="acc-sec-title">

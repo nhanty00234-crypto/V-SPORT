@@ -70,7 +70,7 @@ DATN/ (Thư mục gốc dự án)
 ## 3. Các phân hệ chức năng chính (Core Functional Modules)
 
 ### Phân hệ 1: Quản lý đặt sân & Hóa đơn (Booking & POS)
-*   **Chức năng**: Khách hàng tra cứu danh sách sân trống theo thời gian thực, đặt sân theo khung giờ mong muốn, áp dụng mã khuyến mãi (`KhuyenMai`), nhận hóa đơn thanh toán trực tiếp qua mã QR tĩnh/động (`MaQR`), chia hóa đơn cho nhóm chơi (`ChiaHoaDon`), và yêu cầu hoàn tiền nếu hủy lịch hợp lệ (`Hoantien`).
+*   **Chức năng**: Khách hàng tra cứu danh sách sân trống theo thời gian thực, đặt sân theo khung giờ mong muốn, áp dụng mã khuyến mãi (`KhuyenMai`), nhận hóa đơn thanh toán trực tiếp qua mã QR tĩnh/động (`MaQR`), tách hóa đơn dịch vụ cho nhóm chơi (`ChiaHoaDon`), và yêu cầu hoàn tiền nếu hủy lịch hợp lệ (`Hoantien`).
 *   **Thành phần chính**:
     *   *Frontend*: `webapp/customer/dat-san.jsp`, `webapp/customer/history.jsp`
     *   *Backend*: [DatSanServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/DatSanServlet.java)
@@ -86,11 +86,25 @@ DATN/ (Thư mục gốc dự án)
     *   *Backend*: [QuanLyCaLamManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java), [YeuCauNghiManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/YeuCauNghiManagerServlet.java), [StaffCaLamServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/StaffCaLamServlet.java), [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java)
     *   *Thực thể*: `CaLamViec`, `CaLamViecAudit`, `CaLamViecAvailability`, `CaLamViecSwapRequest`, `YeuCauNghi`.
 
+<<<<<<< HEAD
 ### Phân hệ 3: Ghép kèo cộng đồng (Matchmaking)
 *   **Chức năng**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (Ghép kèo - `GhepKeo`). Customer có thể đăng phòng, tìm người chơi cùng và xem danh sách kèo đang mở theo môn thể thao.
 *   **Thành phần chính**:
     *   *Thực thể*: `GhepKeo`, `ChiTietGhepKeo`.
 *   **Lưu ý**: Tính năng **xếp hạng ELO** (`LichSuElo`) và **chat phòng ghép kèo** (`NhatKyChat`) chưa được triển khai — xem mục Định hướng phát triển.
+=======
+### Phân hệ 3: [Roadmap - Phase 8+] Ghép kèo cộng đồng & Xếp hạng ELO (Matchmaking & Chat)
+*   **Trạng thái**: Đã chuyển sang Roadmap phát triển tương lai.
+*   **Chức năng dự kiến**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (`GhepKeo`), trao đổi qua chat phòng chờ (`NhatKyChat`). Sau mỗi trận đấu, tính toán điểm số ELO tích lũy (`LichSuElo`) để xếp hạng và ghép các cặp đối thủ.
+*   **Thực thể dự kiến**: `GhepKeo`, `ChiTietGhepKeo`, `LichSuElo`, `NhatKyChat`.
+
+### Phân hệ 4: [Roadmap - Phase 8+] Tiện ích vận hành IoT (An ninh & Bãi giữ xe)
+*   **Trạng thái**: Đã chuyển sang Roadmap phát triển tương lai.
+*   **Chức năng dự kiến**:
+    *   *An ninh*: Tích hợp cơ chế cảnh báo SOS khẩn cấp (`YeuCauSOS`, `NhatKySOSGui`) tại chỗ.
+    *   *Nhà xe*: Quản lý thẻ xe (`TheGiuXe`) gắn với mã vạch/RFID, lưu vết giờ vào/ra của các phương tiện (`LichXeRaVao`).
+*   **Thực thể dự kiến**: `TheGiuXe`, `LichXeRaVao`, `YeuCauSOS`, `NhatKySOSGui`.
+>>>>>>> fix/teacher-review-remediation
 
 ### Phân hệ 5: Quản lý Kho hàng & Dịch vụ đi kèm (Inventory & Add-on Services)
 *   **Chức năng**: Quản lý danh mục hàng hóa (`DanhMucSanPham`), sản phẩm và dịch vụ cho thuê/bán lẻ tại quầy (`SanPham_DichVu`), quản lý số lượng tồn kho của chi nhánh, theo dõi nhập/xuất kho. Áp dụng cơ chế khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi xuất/nhập kho để tránh race condition và đảm bảo tính toàn vẹn dữ liệu.
@@ -103,7 +117,11 @@ DATN/ (Thư mục gốc dự án)
 *   **Chức năng**: Cấu hình và quản lý danh mục loại sân (`LoaiSan`), các sân bóng, cầu lông, tennis cụ thể (`San`) trực thuộc chi nhánh; theo dõi trực quan trạng thái sân (Sẵn sàng, Đang hoạt động, Bảo trì) theo thời gian thực.
 *   **Thành phần chính**:
     *   *Frontend*: [QuanLySan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp)
+<<<<<<< HEAD
     *   *Backend*: [QuanLySanManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/QuanLySanManagerServlet.java) (Manager — `/manager/quan-ly-san`)
+=======
+    *   *Backend*: `QuanLySanManagerServlet.java` (`/manager/quan-ly-san`)
+>>>>>>> fix/teacher-review-remediation
     *   *Thực thể*: `San`, `LoaiSan`, `CoSo`.
 
 ### Phân hệ 7: Quản lý Khách hàng & Đánh giá dịch vụ (Customer & Feedback Management)
@@ -130,7 +148,7 @@ Hệ thống quản lý thông tin thông qua **32 JPA Entities** chính dưới
 | 8 | **Lichdatsan** | Lịch chi tiết đã được giữ chỗ theo khung giờ cụ thể để tránh đặt trùng. |
 | 9 | **HoaDon** | Lưu trữ thông tin hóa đơn thanh toán cho mỗi giao dịch đặt sân hoặc dịch vụ đi kèm. |
 | 10 | **ChiTietHoaDon** | Lưu trữ chi tiết các sản phẩm/dịch vụ mua thêm (Nước uống, thuê giày, bóng...). |
-| 11 | **ChiaHoaDon** | Hỗ trợ tính năng chia nhỏ hóa đơn để nhóm người chơi thanh toán chung. |
+| 11 | **ChiaHoaDon** | Hỗ trợ tính năng tách hóa đơn dịch vụ để nhóm người chơi thanh toán các khoảng dịch vụ mua thêm riêng. |
 | 12 | **Hoantien** | Quản lý quy trình xử lý yêu cầu hoàn tiền khi khách hàng hủy lịch hợp lệ. |
 | 13 | **KhuyenMai** | Thông tin mã giảm giá, chương trình ưu đãi áp dụng vào hóa đơn đặt sân. |
 | 14 | **CaLamViec** | Quản lý lịch phân ca làm việc của từng nhân viên theo ngày, giờ. |

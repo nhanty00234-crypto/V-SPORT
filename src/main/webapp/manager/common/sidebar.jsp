@@ -412,6 +412,10 @@
       class="nav-link ${uri.contains('/manager/hoa-don') || uri.contains('/QuanLyHoaDon.jsp') ? 'active' : ''}">
       <i class="ti ti-receipt text-[19px]"></i>Quản lý hóa đơn
     </a>
+    <a href="${pageContext.request.contextPath}/manager/khuyen-mai"
+      class="nav-link ${uri.contains('/manager/khuyen-mai') ? 'active' : ''}">
+      <i class="ti ti-discount-2 text-[19px]"></i>Mã khuyến mãi
+    </a>
 
     <!-- Nhân sự -->
     <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Quản lý nhân sự</p>
@@ -429,6 +433,10 @@
     <a href="${pageContext.request.contextPath}/manager/khach-hang"
       class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
       <i class="ti ti-user text-[19px]"></i>Quản lý khách hàng
+    </a>
+    <a href="${pageContext.request.contextPath}/manager/danh-gia"
+      class="nav-link ${uri.contains('/manager/danh-gia') || uri.contains('/DanhGia.jsp') ? 'active' : ''}">
+      <i class="ti ti-star text-[19px]"></i>Đánh giá &amp; Phản hồi
     </a>
 
     <!-- Hệ thống -->

@@ -41,6 +41,12 @@ public class KhuyenMai {
     @Column(name = "TrangThai", length = 20)
     private String TrangThai;
 
+    @Column(name = "GiaTriToiThieu")
+    private java.math.BigDecimal GiaTriToiThieu;
+
+    @Column(name = "GiamToiDa")
+    private java.math.BigDecimal GiamToiDa;
+
     public KhuyenMai() {
     }
 
@@ -144,6 +150,22 @@ public class KhuyenMai {
 
     public void setTrangThai(String trangThai) {
         TrangThai = trangThai;
+    }
+
+    public java.math.BigDecimal getGiaTriToiThieu() {
+        return GiaTriToiThieu;
+    }
+
+    public void setGiaTriToiThieu(java.math.BigDecimal giaTriToiThieu) {
+        GiaTriToiThieu = giaTriToiThieu;
+    }
+
+    public java.math.BigDecimal getGiamToiDa() {
+        return GiamToiDa;
+    }
+
+    public void setGiamToiDa(java.math.BigDecimal giamToiDa) {
+        GiamToiDa = giamToiDa;
     }
 
     @Override
