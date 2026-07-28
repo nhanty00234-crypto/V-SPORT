@@ -81,3 +81,5 @@
         </div>
     </div>
 </footer>
+
+<jsp:include page="/common/booking-reminder-widget.jsp" />

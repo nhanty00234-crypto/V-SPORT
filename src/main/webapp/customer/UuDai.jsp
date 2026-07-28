@@ -167,6 +167,8 @@
         .ud-page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-hover); }
         .ud-page-btn.is-active { background: var(--navy); color: #fff; border-color: var(--navy); }
         .ud-page-btn:disabled { opacity: .4; cursor: not-allowed; }
+        
+        [hidden] { display: none !important; }
     </style>
 </head>
 <body>
@@ -201,7 +203,11 @@
             <span class="ud-count" id="udCountLabel"></span>
         </div>
 
-        <div id="udSkeleton" class="ud-grid">
+        <%-- Ẩn sẵn theo mặc định (hidden) - JS bật lên đúng lúc gọi loadData(), tắt lại ngay khi
+             có kết quả (content/empty/error). Nếu JS lỗi bất ngờ trước khi chạy tới đó, skeleton
+             không bao giờ tự hiện ra và mắc kẹt - tối đa chỉ là trang trống, không phải 6 card giả
+             chiếm diện tích. --%>
+        <div id="udSkeleton" class="ud-grid" hidden>
             <% for (int i = 0; i < 6; i++) { %>
             <div class="ud-skel-card">
                 <div class="ud-skel-media"></div>
@@ -256,6 +262,7 @@
         function resolveImg(v) {
             if (!v) return null;
             if (v.startsWith('http://') || v.startsWith('https://')) return v;
+            if (CTX && v.startsWith(CTX + '/')) return v;
             return CTX + (v.startsWith('/') ? v : '/' + v);
         }
 
@@ -338,11 +345,14 @@
                 facilities.forEach(function (f) {
                     (Array.isArray(f.sports) ? f.sports : []).forEach(function (s) { sportSet[s] = true; });
                 });
+                var keepSport = sportSelect.value;
+                while (sportSelect.options.length > 1) sportSelect.remove(1);
                 Object.keys(sportSet).sort().forEach(function (s) {
                     var opt = document.createElement('option');
                     opt.value = s; opt.textContent = s;
                     sportSelect.appendChild(opt);
                 });
+                sportSelect.value = keepSport;
 
                 if (!promoData || !promoData.success) throw new Error('promotions API failed');
                 allPromotions = Array.isArray(promoData.promotions) ? promoData.promotions : [];

@@ -89,6 +89,8 @@ public class VisualBookingServlet extends HttpServlet {
             handleAvailabilityApi(req, resp);
         } else if ("/customer/api/timetable-price".equals(path)) {
             handlePriceApi(req, resp);
+        } else if ("/customer/dat-lich-truc-quan/xac-nhan".equals(path)) {
+            handleConfirmStep(req, resp);
         } else {
             handleVisualPage(req, resp);
         }
@@ -101,9 +103,25 @@ public class VisualBookingServlet extends HttpServlet {
         if ("/customer/api/timetable-price".equals(path)) {
             handlePriceApi(req, resp);
         } else if ("/customer/dat-lich-truc-quan/xac-nhan".equals(path)) {
-            handleConfirmStep(req, resp);
+            StringBuilder sb = new StringBuilder();
+            sb.append(req.getContextPath()).append("/customer/dat-lich-truc-quan/xac-nhan?");
+            appendUrlParam(sb, "coSoId", req.getParameter("coSoId"));
+            appendUrlParam(sb, "sanId", req.getParameter("sanId"));
+            appendUrlParam(sb, "ngayDat", req.getParameter("ngayDat"));
+            appendUrlParam(sb, "gioBatDau", req.getParameter("gioBatDau"));
+            appendUrlParam(sb, "gioKetThuc", req.getParameter("gioKetThuc"));
+            resp.sendRedirect(sb.toString());
         } else {
             resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        }
+    }
+
+    private static void appendUrlParam(StringBuilder sb, String key, String val) {
+        if (val != null && !val.isBlank()) {
+            if (sb.charAt(sb.length() - 1) != '?') {
+                sb.append('&');
+            }
+            sb.append(key).append('=').append(java.net.URLEncoder.encode(val, java.nio.charset.StandardCharsets.UTF_8));
         }
     }
 
@@ -196,6 +214,17 @@ public class VisualBookingServlet extends HttpServlet {
         try {
             for (BookingSlot b : loadBlockingBookings(coSo.getCoSoID(), ngayDat)) {
                 if (b.sanId == sanId && overlaps(gioBatDau, gioKetThuc, b.start, b.end)) {
+                    if (user != null && b.accountId != null && b.accountId.equals(user.getAccountId())) {
+                        if (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(b.trangThai)) {
+                            resp.sendRedirect(req.getContextPath() + "/customer/thanh-toan-qr?datSanId=" + b.datSanId);
+                            return;
+                        } else if (Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN.equals(b.trangThai)
+                                || Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(b.trangThai)) {
+                            session.setAttribute("message", "Đơn đặt sân cho khung giờ này đã được tạo.");
+                            resp.sendRedirect(req.getContextPath() + "/customer/lich-su-dat-san");
+                            return;
+                        }
+                    }
                     session.setAttribute("error", "Khung giờ vừa được người khác đặt. Vui lòng chọn lại.");
                     resp.sendRedirect(backUrl);
                     return;

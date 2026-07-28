@@ -418,7 +418,7 @@
       </div>
       <p class="hint -mt-2">Tải tối đa 5 ảnh cho mỗi chương trình. Mỗi ảnh không vượt quá 5&nbsp;MB. Hỗ trợ JPG, PNG và WEBP. Khuyến nghị tỉ lệ 16:9.</p>
 
-      <input type="file" id="f_images" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" tabindex="-1"/>
+      <input type="file" name="images" id="f_images" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" tabindex="-1"/>
 
       <div class="km-dropzone" id="kmDropzone" tabindex="0" role="button" aria-label="Chọn hoặc kéo thả hình ảnh chương trình">
         <div class="km-dz-icon"><span class="material-symbols-outlined text-[20px]">cloud_upload</span></div>

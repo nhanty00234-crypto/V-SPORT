@@ -349,6 +349,12 @@
             margin-bottom: 24px;
             font-size: 15px;
         }
+        .highlight-target-booking {
+            outline: 3px solid #10b981 !important;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5) !important;
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -433,7 +439,7 @@
                             </c:if>
                         </c:forEach>
 
-                        <div class="cart-item">
+                        <div class="cart-item" id="booking-item-${item.datSanId}" data-datsan-id="${item.datSanId}">
                             <div class="cart-item-info">
                                 <div class="cart-item-title">
                                     ${fn:escapeXml(tenSan)} - ${fn:escapeXml(tenCoSo)}
@@ -515,7 +521,7 @@
                     <c:if test="${lich.trangThai == 'Đã hoàn thành'}"><c:set var="hsStatusGroup" value="completed" /></c:if>
                     <c:if test="${lich.trangThai == 'Đã hủy' || lich.trangThai == 'Không đến'}"><c:set var="hsStatusGroup" value="cancelled" /></c:if>
 
-                    <div class="cart-item history-row" data-status-group="${hsStatusGroup}">
+                    <div class="cart-item history-row" id="booking-item-${lich.datSanId}" data-datsan-id="${lich.datSanId}" data-status-group="${hsStatusGroup}">
                         <div class="cart-item-info">
                             <div class="cart-item-title">
                                 ${fn:escapeXml(tenSanHienThi)}
@@ -840,6 +846,34 @@
         });
 
         applyFilters(true);
+
+        // Tự động chuyển tab, cuộn trang & highlight đúng đơn đặt sân khi từ thông báo nhấp qua
+        const urlParams = new URLSearchParams(window.location.search);
+        const highlightId = urlParams.get('highlightDatSanId');
+        if (highlightId) {
+            const targetInCart = document.querySelector('#panel-cart #booking-item-' + highlightId);
+            if (targetInCart) {
+                switchBookingTab('cart');
+            } else {
+                switchBookingTab('history');
+            }
+
+            const targetRow = document.getElementById('booking-item-' + highlightId);
+            if (targetRow) {
+                const matchIndex = rows.indexOf(targetRow);
+                if (matchIndex !== -1) {
+                    currentPage = Math.floor(matchIndex / pageSize) + 1;
+                    applyFilters(false);
+                }
+                setTimeout(() => {
+                    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetRow.classList.add('highlight-target-booking');
+                    setTimeout(() => {
+                        targetRow.classList.remove('highlight-target-booking');
+                    }, 4000);
+                }, 350);
+            }
+        }
     });
 
     window.addEventListener('popstate', () => {

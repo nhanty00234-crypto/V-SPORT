@@ -359,7 +359,7 @@
 </div>
 
 <%-- ============ Footer cố định + CTA lớn ============ --%>
-<form id="ttvBookingForm" action="${ctx}/customer/dat-lich-truc-quan/xac-nhan" method="post" class="ttv-summary" novalidate>
+<form id="ttvBookingForm" action="${ctx}/customer/dat-lich-truc-quan/xac-nhan" method="get" class="ttv-summary" novalidate>
     <input type="hidden" name="coSoId" value="${coSo.coSoID}" />
     <input type="hidden" name="sanId" id="ttvInputSanId" />
     <input type="hidden" name="ngayDat" id="ttvInputNgayDat" />
