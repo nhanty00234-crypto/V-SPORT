@@ -33,7 +33,7 @@
     gap: 11px;
     padding: 10px 14px;
     border-radius: 10px;
-    color: #6b7280;
+    color: #334155;
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;
@@ -42,26 +42,26 @@
     position: relative;
     cursor: pointer;
   }
-  .nav-link:hover { background: #f5f3ff; color: #6d28d9; transform: translateX(2px); }
+  .nav-link:hover { background: #f0fdf4 !important; color: #065f46 !important; transform: translateX(2px) !important; }
   .nav-link.active {
-    background: #ede9fe;
-    color: #6d28d9;
-    font-weight: 600;
+    background: #e6f9f0 !important;
+    color: #065f46 !important;
+    font-weight: 700 !important;
   }
   .nav-link.is-navigating {
-    background: linear-gradient(90deg, #ddd6fe, #ede9fe);
-    color: #6d28d9;
-    box-shadow: inset 0 0 0 1px rgba(124,58,237,.1);
+    background: linear-gradient(90deg, #dcfce7, #e6f9f0);
+    color: #065f46;
+    box-shadow: inset 0 0 0 1px rgba(1,226,129,.2);
   }
   .nav-link.active::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 8px;
-    bottom: 8px;
-    width: 3px;
-    background: #7c3aed;
-    border-radius: 0 3px 3px 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3.5px;
+    background: #01e281;
+    border-radius: 0 4px 4px 0;
   }
 
   /* ── Scroll reveal ── */
@@ -69,7 +69,6 @@
   .reveal-left  { opacity:0; transform:translateX(-14px);  transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1); }
   .reveal-scale { opacity:0; transform:scale(.98);         transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1); }
   .reveal.visible, .reveal-left.visible, .reveal-scale.visible { opacity:1; transform:none; }
-  /* stagger delays */
   .d0{transition-delay:0ms}   .d1{transition-delay:45ms}  .d2{transition-delay:90ms}
   .d3{transition-delay:135ms} .d4{transition-delay:180ms} .d5{transition-delay:225ms}
 
@@ -78,7 +77,7 @@
     opacity: 0;
     transform: translateY(10px) scale(.995);
     filter: blur(1px);
-    animation: none !important;         /* suppress manager_head.jsp contentZoomIn */
+    animation: none !important;
   }
   body.mgr-motion.mgr-page-ready main {
     opacity: 1;
@@ -101,7 +100,7 @@
     inset: 0;
     z-index: 60;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(250,245,255,.72), rgba(243,232,255,.88));
+    background: linear-gradient(180deg, rgba(248,250,252,.72), rgba(230,249,240,.88));
     opacity: 0;
     backdrop-filter: blur(0);
     transition: opacity .2s ease, backdrop-filter .2s ease;
@@ -110,13 +109,12 @@
     opacity: 1;
     backdrop-filter: blur(3px);
   }
-  /* Progress line animation on exit */
   .mgr-transition-scrim::after {
     content: '';
     position: absolute;
     left: 248px; right: 0; top: 64px;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #7c3aed, #a78bfa, transparent);
+    background: linear-gradient(90deg, transparent, #01e281, #059669, transparent);
     transform: scaleX(0);
     transform-origin: left;
   }
@@ -134,57 +132,45 @@
   }
 
   /* ══════════════════════════════════════════
-     MANAGER ANIMATION SYSTEM v2 — Purple Theme
+     MANAGER ANIMATION SYSTEM v2 — V-SPORT Theme
   ══════════════════════════════════════════ */
 
-  /* ── Enhanced nav-link: purple glow + icon pulse ── */
-  .nav-link:hover {
-    background: rgba(124,58,237,.10) !important;
-    color: #6d28d9 !important;
-    transform: translateX(4px) !important;
-  }
   .nav-link .material-symbols-outlined,
   .nav-link .ti { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
   .nav-link:hover .material-symbols-outlined,
-  .nav-link:hover .ti { transform: scale(1.18); }
+  .nav-link:hover .ti { transform: scale(1.15); color: #059669; }
 
-  /* ── Welcome banner shimmer wave ── */
   @keyframes mgrBannerShimmer {
     0%   { background-position: 200% center; }
     100% { background-position: -200% center; }
   }
   .mgr-banner-shimmer {
-    background: linear-gradient(135deg,#4c1d95 0%,#6d28d9 35%,#7c3aed 55%,#8b5cf6 75%,#5b21b6 100%);
+    background: linear-gradient(135deg,#0d2130 0%,#122d40 35%,#1a3c54 55%,#059669 75%,#0d2130 100%);
     background-size: 300% 100%;
     animation: mgrBannerShimmer 6s linear infinite;
   }
 
-  /* ── KPI / Metric cards: lift + purple shadow ── */
   .mgr-kpi-hover {
     transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s cubic-bezier(.16,1,.3,1);
   }
   .mgr-kpi-hover:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 28px -8px rgba(124,58,237,.18);
+    box-shadow: 0 10px 28px -8px rgba(1,226,129,.18);
   }
   .mgr-kpi-hover:hover .mgr-kpi-icon { transform: scale(1.1); }
   .mgr-kpi-icon { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
 
-  /* ── Live dot ── */
   @keyframes mgrLivePulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
-    50%      { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(1,226,129,.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(1,226,129,0); }
   }
   .live-dot { animation: mgrLivePulse 1.8s ease-in-out infinite; }
 
-  /* ── Stagger delays (extended) ── */
   .d6{transition-delay:270ms} .d7{transition-delay:315ms} .d8{transition-delay:360ms}
 
-  /* ── Counter animation ── */
   @keyframes mgrCountUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
   .mgr-count { animation: mgrCountUp .5s cubic-bezier(.22,1,.36,1) both; }
 
-  /* ── Row stagger entrance for lists ── */
   .row-stagger > * {
     opacity: 0;
     transform: translateY(12px);
@@ -192,34 +178,29 @@
   }
   .row-stagger > *.visible { opacity: 1; transform: none; }
 
-  /* ── Progress bar fill ── */
   .mgr-bar-fill {
     width: 0 !important;
     transition: width .85s cubic-bezier(.16,1,.3,1);
   }
   .mgr-bar-fill.animated { width: var(--target-w) !important; }
 
-  /* ── Court / facility cards ── */
   .court-card {
     transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s cubic-bezier(.16,1,.3,1);
   }
   .court-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px -8px rgba(124,58,237,.15);
+    box-shadow: 0 12px 30px -8px rgba(18,45,64,.15);
   }
   .court-card:hover .court-thumb { transform: scale(1.05); }
   .court-thumb { transition: transform .3s cubic-bezier(.16,1,.3,1); overflow: hidden; }
 
-  /* ── QR code card hover glow ── */
   .qr-card:hover {
-    box-shadow: 0 0 0 2px rgba(124,58,237,.2), 0 0 18px rgba(124,58,237,.14);
+    box-shadow: 0 0 0 2px rgba(1,226,129,.3), 0 0 18px rgba(1,226,129,.14);
   }
   .qr-card { transition: box-shadow .2s ease; }
 
-  /* ── Status badge smooth color blend ── */
   .status-badge { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
 
-  /* ── Low stock warning pulse ── */
   @keyframes lowStockPulse {
     0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.4); }
     50%      { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
@@ -229,7 +210,6 @@
     border: 1.5px solid #f59e0b !important;
   }
 
-  /* ── Table icon actions ── */
   .tbl-icon-btn {
     transition: transform .15s cubic-bezier(.34,1.56,.64,1), color .15s ease, background-color .15s ease;
     position: relative;
@@ -257,7 +237,6 @@
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
 
-  /* ── Approve button: pulse expand ── */
   .btn-approve {
     transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, background-color .15s ease;
   }
@@ -265,7 +244,6 @@
     transform: scale(1.04);
     box-shadow: 0 0 0 3px rgba(34,197,94,.2);
   }
-  /* ── Reject row slide out ── */
   .row-reject-out {
     animation: rejectSlideOut .4s cubic-bezier(.4,0,.2,1) forwards;
     pointer-events: none;
@@ -275,7 +253,6 @@
     60%  { opacity:0; transform: translateX(60px); max-height:80px; }
     100% { opacity:0; transform: translateX(80px); max-height:0; overflow:hidden; padding:0; border:0; }
   }
-  /* ── Approve row fade to green then collapse ── */
   .row-approve-out {
     animation: approveOut .45s cubic-bezier(.4,0,.2,1) forwards;
     pointer-events: none;
@@ -287,7 +264,6 @@
     100% { opacity:0; max-height:0; overflow:hidden; padding:0; border:0; }
   }
 
-  /* ── Status filter tab underline slider ── */
   .status-tabs { position: relative; }
   .status-tab {
     position: relative;
@@ -295,42 +271,37 @@
     border-bottom: 2px solid transparent;
     transition: color .18s ease, border-color .18s ease;
   }
-  .status-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
+  .status-tab.active { color: #01e281; border-bottom-color: #01e281; }
 
-  /* ── Ripple for purple buttons ── */
   .mgr-ripple-host { position: relative; overflow: hidden; }
   .mgr-ripple-wave {
     position: absolute;
     border-radius: 50%;
     transform: scale(0);
-    background: rgba(167,139,250,.35);
+    background: rgba(1,226,129,.35);
     animation: mgrRippleOut .5s cubic-bezier(.16,1,.3,1) forwards;
     pointer-events: none;
   }
   @keyframes mgrRippleOut { to { transform: scale(4); opacity: 0; } }
 
-  /* ── Shift card slide in ── */
   @keyframes shiftCardIn {
     from { opacity:0; transform: scale(.92) translateY(-8px); }
     to   { opacity:1; transform: scale(1) translateY(0); }
   }
   .shift-card-anim { animation: shiftCardIn .3s cubic-bezier(.34,1.56,.64,1) both; }
 
-  /* ── Customer loyalty progress bar ── */
   .loyalty-bar {
     width: 0 !important;
     transition: width .9s cubic-bezier(.16,1,.3,1);
   }
   .loyalty-bar.animated { width: var(--target-w) !important; }
 
-  /* ── Crown/badge float ── */
   @keyframes crownFloat {
     0%,100% { transform: translateY(0); }
     50%      { transform: translateY(-3px); }
   }
   .crown-float { animation: crownFloat 2.4s ease-in-out infinite; }
 
-  /* ── Risk warning border pulse ── */
   @keyframes riskBorderPulse {
     0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.3); }
     50%      { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
@@ -347,16 +318,16 @@
 
 <!-- ═══ SIDEBAR ═══ -->
 <aside id="sidebar"
-  class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-purple-100 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+  class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-slate-200 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
 
   <!-- Logo -->
-  <div class="px-5 py-4 border-b border-purple-50 flex items-center gap-3">
-    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center shrink-0 shadow-md shadow-purple-200">
-      <i class="ti ti-ball-tennis text-white text-[18px]"></i>
+  <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-[#122d40] flex items-center justify-center shrink-0 shadow-sm">
+      <i class="ti ti-ball-tennis text-[#01e281] text-[20px]"></i>
     </div>
     <div>
-      <p class="text-sm font-bold text-purple-900 leading-tight tracking-tight">V-SPORT</p>
-      <p class="text-[10px] text-purple-500 font-semibold uppercase tracking-wider">Manager Portal</p>
+      <p class="text-sm font-extrabold text-[#122d40] leading-tight tracking-tight">V-SPORT</p>
+      <p class="text-[10px] text-[#059669] font-bold uppercase tracking-wider">Manager Portal</p>
     </div>
   </div>
 
@@ -365,14 +336,14 @@
     <c:set var="uri" value="${pageContext.request.requestURI}" />
 
     <!-- Tổng quan -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mb-1.5">Tổng quan</p>
+    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mb-1.5 opacity-80">Tổng quan</p>
     <a href="${pageContext.request.contextPath}/manager/dashboard"
       class="nav-link ${uri.contains('/manager/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
 
     <!-- Vận hành sân bãi -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Vận hành sân bãi</p>
+    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Vận hành sân bãi</p>
     <a href="${pageContext.request.contextPath}/manager/quan-ly-san"
       class="nav-link ${uri.contains('/manager/quan-ly-san') || uri.contains('/QuanLySan.jsp') ? 'active' : ''}">
       <i class="ti ti-building-stadium text-[19px]"></i>Quản lý sân
@@ -391,7 +362,7 @@
     </a>
 
     <!-- Kinh doanh & Dịch vụ -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Kinh doanh &amp; Dịch vụ</p>
+    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Kinh doanh &amp; Dịch vụ</p>
     <c:if test="${shopModuleApproved}">
     <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
       class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
@@ -418,7 +389,7 @@
     </a>
 
     <!-- Nhân sự -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Quản lý nhân sự</p>
+    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Quản lý nhân sự</p>
     <a href="${pageContext.request.contextPath}/manager/nhan-su"
       class="nav-link ${uri.contains('/manager/nhan-su') || uri.contains('/NhanSu.jsp') ? 'active' : ''}">
       <i class="ti ti-users-group text-[19px]"></i>Nhân sự
@@ -429,7 +400,7 @@
     </a>
 
     <!-- Khách hàng -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Khách hàng</p>
+    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Khách hàng</p>
     <a href="${pageContext.request.contextPath}/manager/khach-hang"
       class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
       <i class="ti ti-user text-[19px]"></i>Quản lý khách hàng
@@ -440,7 +411,7 @@
     </a>
 
     <!-- Hệ thống -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Hệ thống</p>
+    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Hệ thống</p>
     <a href="${pageContext.request.contextPath}/manager/thung-rac"
       class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac.jsp') ? 'active' : ''}">
       <i class="ti ti-trash text-[19px]"></i>Thùng rác
@@ -452,10 +423,10 @@
   </nav>
 
   <!-- Logout -->
-  <div class="px-3 py-3 border-t border-purple-50 shrink-0">
+  <div class="px-3 py-3 border-t border-slate-100 shrink-0">
     <a href="${pageContext.request.contextPath}/logout"
-      class="nav-link text-red-500 hover:bg-red-50 hover:text-red-600 text-xs font-semibold">
-      <i class="ti ti-logout text-[16px] text-red-500"></i>Đăng xuất
+      class="nav-link text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-bold">
+      <i class="ti ti-logout text-[16px] text-rose-600"></i>Đăng xuất
     </a>
   </div>
 </aside>
@@ -715,19 +686,19 @@
 <!-- ═══ CUSTOM CONFIRM / TOAST (shared across all manager pages) ═══ -->
 <div id="customConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300" onclick="closeCustomConfirm()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 text-center transform scale-95 transition-all duration-300 border border-purple-100">
-    <div class="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
-      <i class="ti ti-trash text-[28px] text-purple-600"></i>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 text-center transform scale-95 transition-all duration-300 border border-slate-200">
+    <div class="w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4">
+      <i class="ti ti-trash text-[28px] text-rose-600"></i>
     </div>
-    <h3 class="text-base font-bold text-zinc-900 mb-2">Xác nhận xóa</h3>
-    <p class="text-xs text-zinc-500 mb-6 leading-relaxed px-2" id="customConfirmMessage">Bạn có chắc chắn muốn xóa mục này?</p>
+    <h3 class="text-base font-extrabold text-[#122d40] mb-2">Xác nhận xóa</h3>
+    <p class="text-xs text-slate-600 mb-6 leading-relaxed px-2" id="customConfirmMessage">Bạn có chắc chắn muốn xóa mục này?</p>
     <div class="flex gap-3 justify-center">
       <button onclick="closeCustomConfirm()"
-              class="flex-1 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold transition-all">
+              class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
         Hủy bỏ
       </button>
       <button id="customConfirmSubmitBtn"
-              class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold transition-all shadow-md shadow-purple-200">
+              class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-rose-100">
         Xác nhận xóa
       </button>
     </div>
@@ -765,17 +736,17 @@
       document.body.appendChild(container);
     }
     var toast = document.createElement('div');
-    var bg = 'bg-purple-50 border border-purple-150 text-purple-900';
+    var bg = 'bg-emerald-50 border border-emerald-200 text-emerald-900';
     var icon = 'check_circle';
-    var iconColor = 'text-purple-600';
+    var iconColor = 'text-emerald-600';
     if (type === 'error') {
       bg = 'bg-red-50 border border-red-200 text-red-900';
       icon = 'error';
       iconColor = 'text-red-600';
     } else if (type === 'info') {
-      bg = 'bg-blue-50 border border-blue-200 text-blue-900';
+      bg = 'bg-sky-50 border border-sky-200 text-sky-900';
       icon = 'info';
-      iconColor = 'text-blue-600';
+      iconColor = 'text-sky-600';
     }
     toast.className = 'p-4 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-3 transition-all duration-300 transform translate-y-2 opacity-0 ' + bg;
     toast.innerHTML = '<span class="material-symbols-outlined ' + iconColor + ' text-[20px] shrink-0" style="font-variation-settings:\'FILL\' 1">' + icon + '</span>'

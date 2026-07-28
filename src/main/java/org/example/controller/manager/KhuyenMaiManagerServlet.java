@@ -45,6 +45,10 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
             return;
         }
 
+        if (user.getCoSoId() == null || user.getCoSoId() <= 0) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Tài khoản Manager chưa được gán cơ sở.");
+            return;
+        }
         int coSoId = user.getCoSoId();
         List<KhuyenMai> all = khuyenMaiDAO.findByCoSoId(coSoId);
 
@@ -126,6 +130,10 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
             return;
         }
 
+        if (user.getCoSoId() == null || user.getCoSoId() <= 0) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Tài khoản Manager chưa được gán cơ sở.");
+            return;
+        }
         int coSoId = user.getCoSoId();
         String action = req.getParameter("action");
 

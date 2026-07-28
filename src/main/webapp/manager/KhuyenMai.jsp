@@ -8,42 +8,53 @@
 <title>${pageTitle}</title>
 <jsp:include page="/manager/common/manager_head.jsp" />
 <style>
-  body { background-color: #f8fafc !important; }
-  .km-stat { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 18px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
-  .km-stat .num { font-size:22px; font-weight:800; color:#0f172a; }
-  .km-stat .lbl { font-size:12px; color:#64748b; font-weight:600; margin-top:2px; }
-  .badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
-  .badge-green { background:#dcfce7; color:#166534; }
-  .badge-blue { background:#dbeafe; color:#1e40af; }
-  .badge-amber { background:#fef3c7; color:#92400e; }
-  .badge-zinc { background:#f1f5f9; color:#475569; }
-  .badge-rose { background:#fee2e2; color:#991b1b; }
-  .filter-chip { padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:700; color:#475569; background:#fff; border:1px solid #e2e8f0; white-space:nowrap; cursor:pointer; }
-  .filter-chip.active { background:#0f172a; color:#fff; border-color:#0f172a; }
+  body { background-color: #f8fafc !important; color: #0f172a; }
+  .km-stat { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:18px 20px; box-shadow:0 1px 3px rgba(18,45,64,.04); transition: transform .2s ease, box-shadow .2s ease; }
+  .km-stat:hover { transform: translateY(-2px); box-shadow:0 6px 16px rgba(18,45,64,.08); }
+  .km-stat .num { font-size:24px; font-weight:800; color:#122d40; font-family:'Outfit', 'Plus Jakarta Sans', sans-serif; }
+  .km-stat .lbl { font-size:12.5px; color:#475569; font-weight:600; margin-top:3px; }
+  
+  .badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:3.5px 10px; border-radius:999px; white-space:nowrap; }
+  .badge-green { background:#dcfce7; color:#166534; border: 1px solid rgba(22,101,52,0.15); }
+  .badge-blue { background:#e0f2fe; color:#0369a1; border: 1px solid rgba(3,105,161,0.15); }
+  .badge-amber { background:#fef3c7; color:#92400e; border: 1px solid rgba(146,64,14,0.15); }
+  .badge-zinc { background:#f1f5f9; color:#475569; border: 1px solid rgba(71,85,105,0.15); }
+  .badge-rose { background:#fee2e2; color:#991b1b; border: 1px solid rgba(153,27,27,0.15); }
+
+  .filter-chip { padding:7px 16px; border-radius:999px; font-size:13px; font-weight:600; color:#334155; background:#fff; border:1px solid #cbd5e1; white-space:nowrap; cursor:pointer; transition: all .15s ease; }
+  .filter-chip:hover { background:#e6f9f0; color:#065f46; border-color:#01e281; }
+  .filter-chip.active { background:#122d40; color:#ffffff; border-color:#122d40; font-weight:700; box-shadow:0 2px 6px rgba(18,45,64,.2); }
+
   .km-table { width:100%; border-collapse:separate; border-spacing:0; }
-  .km-table th { text-align:left; font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.04em; padding:10px 12px; border-bottom:1px solid #e2e8f0; white-space:nowrap; }
-  .km-table td { padding:12px; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b; vertical-align:top; }
+  .km-table th { text-align:left; font-size:11px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:.05em; padding:12px 14px; border-bottom:1px solid #e2e8f0; background:#f8fafc; white-space:nowrap; }
+  .km-table td { padding:14px; border-bottom:1px solid #f1f5f9; font-size:13.5px; color:#0f172a; vertical-align:middle; }
   .km-table tr:hover td { background:#f8fafc; }
-  .km-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
-  .drawer-overlay { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:60; display:none; }
+
+  .km-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:16px 18px; box-shadow:0 1px 3px rgba(18,45,64,.04); }
+  
+  .drawer-overlay { position:fixed; inset:0; background:rgba(18,45,64,.45); backdrop-filter:blur(3px); z-index:60; display:none; }
   .drawer-panel { position:fixed; top:0; right:0; height:100vh; width:100%; max-width:560px; background:#fff; z-index:61;
-    box-shadow:-10px 0 30px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .25s ease; overflow-y:auto; }
+    box-shadow:-10px 0 30px rgba(18,45,64,.15); transform:translateX(100%); transition:transform .25s cubic-bezier(.16,1,.3,1); overflow-y:auto; }
   .drawer-panel.open, .drawer-overlay.open { display:block; }
   .drawer-panel.open { transform:translateX(0); }
-  .field label { font-size:12px; font-weight:700; color:#475569; margin-bottom:4px; display:block; }
-  .field .hint { font-size:11px; color:#94a3b8; margin-top:3px; }
+
+  .field label { font-size:12px; font-weight:700; color:#334155; margin-bottom:5px; display:block; }
+  .field .hint { font-size:11.5px; color:#64748b; margin-top:4px; }
   .field .err { font-size:11.5px; color:#b91c1c; font-weight:700; margin-top:4px; display:none; }
   .field input, .field select, .field textarea {
-    width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:8px 10px; font-size:13.5px; outline:none;
+    width:100%; border:1px solid #cbd5e1; border-radius:12px; padding:9px 12px; font-size:13.5px; outline:none; color:#0f172a; transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color:#0f766e; }
-  .discount-mode-btn { flex:1; padding:9px 10px; border-radius:10px; border:1.5px solid #e2e8f0; font-size:13px; font-weight:700; color:#475569; cursor:pointer; text-align:center; background:#fff; }
-  .discount-mode-btn.active { border-color:#0f766e; background:#f0fdfa; color:#0f766e; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color:#01e281; box-shadow: 0 0 0 3px rgba(1,226,129,0.15); }
+  
+  .discount-mode-btn { flex:1; padding:10px 12px; border-radius:12px; border:1.5px solid #cbd5e1; font-size:13px; font-weight:600; color:#334155; cursor:pointer; text-align:center; background:#fff; transition: all .15s ease; }
+  .discount-mode-btn:hover { background:#f8fafc; border-color:#94a3b8; }
+  .discount-mode-btn.active { border-color:#059669; background:#e6f9f0; color:#065f46; font-weight:700; box-shadow: 0 1px 3px rgba(5,150,105,0.1); }
+
   @media (max-width: 1024px) { .km-table-wrap { display:none; } }
   @media (min-width: 1025px) { .km-card-list { display:none; } }
 </style>
 </head>
-<body class="text-zinc-900 min-h-screen">
+<body class="text-slate-900 min-h-screen">
 
 <jsp:include page="/manager/common/sidebar.jsp" />
 
@@ -53,229 +64,47 @@
 <jsp:include page="/manager/common/header.jsp" />
 
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
-  <%-- Flash --%>
+  <%-- Flash Alerts --%>
   <c:if test="${not empty sessionScope.flashSuccess}">
-    <div class="rounded-xl px-4 py-3 bg-green-50 border border-green-200 text-green-800 text-sm font-medium">${sessionScope.flashSuccess}</div>
+    <div class="rounded-xl px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm font-semibold">${sessionScope.flashSuccess}</div>
     <% session.removeAttribute("flashSuccess"); %>
   </c:if>
   <c:if test="${not empty sessionScope.flashError}">
-    <div class="rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-800 text-sm font-medium">${sessionScope.flashError}</div>
+    <div class="rounded-xl px-4 py-3 bg-rose-50 border border-rose-200 text-rose-900 text-sm font-semibold">${sessionScope.flashError}</div>
     <% session.removeAttribute("flashError"); %>
   </c:if>
   <c:if test="${not empty errors}">
-    <div class="rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-800 text-sm">
-      <ul class="list-disc pl-4 space-y-1">
+    <div class="rounded-xl px-4 py-3 bg-rose-50 border border-rose-200 text-rose-900 text-sm">
+      <ul class="list-disc pl-4 space-y-1 font-medium">
         <c:forEach var="err" items="${errors}"><li><c:out value="${err}"/></li></c:forEach>
       </ul>
     </div>
   </c:if>
 
-  <%-- ===== FORM (create / update) ===== --%>
-  <% if (isForm) { %>
-  <div class="bg-white border border-zinc-200 rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-lg font-bold">${formAction eq 'create' ? 'Tạo mã khuyến mãi' : 'Cập nhật mã khuyến mãi'}</h2>
-      <a href="<%= ctx %>/manager/khuyen-mai" class="text-sm text-zinc-500 hover:text-zinc-900">← Quay lại</a>
-    </div>
-
-    <form method="post" action="<%= ctx %>/manager/khuyen-mai?action=${formAction}" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <c:if test="${not empty km.khuyenMaiID and km.khuyenMaiID > 0}">
-        <input type="hidden" name="khuyenMaiId" value="${km.khuyenMaiID}">
-      </c:if>
-
-      <div class="form-field">
-        <label>Mã code <span class="text-red-500">*</span></label>
-        <input type="text" name="maCode" value="<c:out value='${km.maCode}'/>"
-               placeholder="VD: SUMMER2025" maxlength="50" required
-               style="text-transform:uppercase">
-        <p class="text-xs text-zinc-400 mt-1">Tự động chuyển chữ hoa. Tối đa 50 ký tự.</p>
-      </div>
-
-      <div class="form-field">
-        <label>Mô tả</label>
-        <input type="text" name="moTa" value="<c:out value='${km.moTa}'/>" maxlength="255" placeholder="Giảm 20% dịp hè">
-      </div>
-
-      <div class="form-field">
-        <label>Loại giảm <span class="text-red-500">*</span></label>
-        <select name="loaiGiam" required>
-          <option value="">-- Chọn loại --</option>
-          <option value="PhanTram" ${km.loaiGiam eq 'PhanTram' ? 'selected' : ''}>Phần trăm (%)</option>
-          <option value="SoTien"   ${km.loaiGiam eq 'SoTien'   ? 'selected' : ''}>Số tiền (VND)</option>
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label>Giá trị giảm <span class="text-red-500">*</span></label>
-        <input type="number" name="giaTriGiam" value="${km.giaTriGiam}"
-               step="0.01" min="0" placeholder="20" required>
-      </div>
-
-      <div class="form-field">
-        <label>Ngày bắt đầu <span class="text-red-500">*</span></label>
-        <input type="date" name="ngayBatDau"
-               value="${km.ngayBatDau}" required>
-      </div>
-
-      <div class="form-field">
-        <label>Ngày kết thúc <span class="text-red-500">*</span></label>
-        <input type="date" name="ngayKetThuc"
-               value="${km.ngayKetThuc}" required>
-      </div>
-
-      <div class="form-field">
-        <label>Số lần tối đa</label>
-        <input type="number" name="soLanToiDa" value="${km.soLanToiDa}"
-               min="0" placeholder="Để trống = không giới hạn">
-      </div>
-
-      <c:if test="${formAction eq 'update'}">
-      <div class="form-field">
-        <label>Trạng thái</label>
-        <select name="trangThai">
-          <option value="Hoạt động" ${km.trangThai eq 'Hoạt động' ? 'selected' : ''}>Hoạt động</option>
-          <option value="Ngừng hoạt động" ${km.trangThai eq 'Ngừng hoạt động' ? 'selected' : ''}>Ngừng hoạt động</option>
-        </select>
-      </div>
-      </c:if>
-
-      <div class="md:col-span-2 flex gap-3 pt-2">
-        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">
-          ${formAction eq 'create' ? 'Tạo mới' : 'Lưu thay đổi'}
-        </button>
-        <a href="<%= ctx %>/manager/khuyen-mai" class="px-5 py-2.5 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition">Hủy</a>
-      </div>
-    </form>
-  </div>
-  <% } else { %>
-
-  <%-- ===== LIST ===== --%>
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-bold">Khuyến mãi</h1>
-      <p class="text-sm text-zinc-500 mt-0.5">Tổng ${totalCount} mã</p>
-    </div>
-    <a href="<%= ctx %>/manager/khuyen-mai?action=form"
-       class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">
-      + Tạo mã mới
-    </a>
-  </div>
-
-  <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
-    <c:choose>
-      <c:when test="${empty khuyenMaiList}">
-        <div class="text-center py-16 text-zinc-400">
-          <span class="material-symbols-outlined text-4xl">local_offer</span>
-          <p class="mt-2 text-sm">Chưa có mã khuyến mãi nào.</p>
-        </div>
-      </c:when>
-      <c:otherwise>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-zinc-50 border-b border-zinc-100 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-              <tr>
-                <th class="px-5 py-3 text-left">Mã code</th>
-                <th class="px-5 py-3 text-left">Mô tả</th>
-                <th class="px-5 py-3 text-left">Loại giảm</th>
-                <th class="px-5 py-3 text-right">Giá trị</th>
-                <th class="px-5 py-3 text-left">Hiệu lực</th>
-                <th class="px-5 py-3 text-right">Đã dùng</th>
-                <th class="px-5 py-3 text-left">Trạng thái</th>
-                <th class="px-5 py-3 text-center">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-100">
-              <c:forEach var="km" items="${khuyenMaiList}">
-                <tr class="tbl-row">
-                  <td class="px-5 py-3 font-mono font-semibold text-blue-700"><c:out value="${km.maCode}"/></td>
-                  <td class="px-5 py-3 text-zinc-600 max-w-[180px] truncate"><c:out value="${km.moTa != null ? km.moTa : '—'}"/></td>
-                  <td class="px-5 py-3">
-                    <c:choose>
-                      <c:when test="${km.loaiGiam eq 'PhanTram'}">
-                        <span class="badge badge-blue">%</span>
-                      </c:when>
-                      <c:otherwise>
-                        <span class="badge badge-amber">VND</span>
-                      </c:otherwise>
-                    </c:choose>
-                  </td>
-                  <td class="px-5 py-3 text-right font-medium">
-                    <c:choose>
-                      <c:when test="${km.loaiGiam eq 'PhanTram'}"><fmt:formatNumber value="${km.giaTriGiam}" maxFractionDigits="1"/>%</c:when>
-                      <c:otherwise><fmt:formatNumber value="${km.giaTriGiam}" type="number" maxFractionDigits="0"/> đ</c:otherwise>
-                    </c:choose>
-                  </td>
-                  <td class="px-5 py-3 text-zinc-500 whitespace-nowrap">${km.ngayBatDau} → ${km.ngayKetThuc}</td>
-                  <td class="px-5 py-3 text-right">
-                    ${km.soLanDaDung}<c:if test="${km.soLanToiDa != null}">/${km.soLanToiDa}</c:if>
-                  </td>
-                  <td class="px-5 py-3">
-                    <c:choose>
-                      <c:when test="${km.trangThai eq 'Hoạt động'}"><span class="badge badge-green">Hoạt động</span></c:when>
-                      <c:otherwise><span class="badge badge-gray"><c:out value="${km.trangThai}"/></span></c:otherwise>
-                    </c:choose>
-                  </td>
-                  <td class="px-5 py-3 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <a href="<%= ctx %>/manager/khuyen-mai?action=form&id=${km.khuyenMaiID}"
-                         class="text-xs text-blue-600 font-medium hover:underline">Sửa</a>
-                      <c:if test="${km.soLanDaDung == 0}">
-                        <form method="post" action="<%= ctx %>/manager/khuyen-mai?action=delete"
-                              onsubmit="return confirm('Xóa mã ${km.maCode}?')" style="display:inline">
-                          <input type="hidden" name="khuyenMaiId" value="${km.khuyenMaiID}">
-                          <button type="submit" class="text-xs text-red-500 font-medium hover:underline">Xóa</button>
-                        </form>
-                      </c:if>
-                    </div>
-                  </td>
-                </tr>
-              </c:forEach>
-            </tbody>
-          </table>
-        </div>
-
-        <%-- Pagination --%>
-        <c:if test="${currentPage > 1 or hasMore}">
-          <div class="flex gap-2 p-4 justify-end border-t border-zinc-100">
-            <c:if test="${currentPage > 1}">
-              <a href="<%= ctx %>/manager/khuyen-mai?page=${currentPage - 1}"
-                 class="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 hover:bg-zinc-50">← Trước</a>
-            </c:if>
-            <span class="px-3 py-1.5 text-xs text-zinc-500">Trang ${currentPage}</span>
-            <c:if test="${hasMore}">
-              <a href="<%= ctx %>/manager/khuyen-mai?page=${currentPage + 1}"
-                 class="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 hover:bg-zinc-50">Tiếp →</a>
-            </c:if>
-          </div>
-        </c:if>
-      </c:otherwise>
-    </c:choose>
-  </div>
-  <div id="kmToast" aria-live="polite" style="display:none;" class="fixed top-20 right-6 z-[80] max-w-sm"></div>
   <c:if test="${not empty successMsg}">
-    <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl shadow-sm" data-flash="success" data-flash-msg="${fn:escapeXml(successMsg)}">
+    <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl shadow-sm" data-flash="success" data-flash-msg="${fn:escapeXml(successMsg)}">
       <span class="material-symbols-outlined text-emerald-600 text-[20px]">check_circle</span>
-      <p class="text-sm font-semibold">${successMsg}</p>
+      <p class="text-sm font-bold">${successMsg}</p>
     </div>
   </c:if>
   <c:if test="${not empty errorMsg}">
-    <div class="flex items-center gap-3 p-4 bg-rose-50 border border-rose-100 text-rose-800 rounded-2xl shadow-sm" data-flash="error" data-flash-msg="${fn:escapeXml(errorMsg)}">
+    <div class="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-2xl shadow-sm" data-flash="error" data-flash-msg="${fn:escapeXml(errorMsg)}">
       <span class="material-symbols-outlined text-rose-600 text-[20px]">error</span>
-      <p class="text-sm font-semibold">${errorMsg}</p>
+      <p class="text-sm font-bold">${errorMsg}</p>
     </div>
   </c:if>
 
   <section class="flex items-center justify-between gap-4 flex-wrap">
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Quản lý mã khuyến mãi</h1>
-      <p class="text-[13.5px] text-slate-500 mt-1">Tạo và theo dõi các chương trình ưu đãi tại cơ sở của bạn.</p>
+      <h1 class="text-2xl font-extrabold text-[#122d40] tracking-tight">Quản lý mã khuyến mãi</h1>
+      <p class="text-[13.5px] text-slate-600 font-medium mt-1">Tạo và theo dõi các chương trình ưu đãi tại cơ sở của bạn.</p>
     </div>
-    <button onclick="openKmDrawer()" class="px-4 py-2.5 rounded-xl bg-teal-700 text-white text-sm font-bold hover:bg-teal-800 flex items-center gap-2">
+    <button onclick="openKmDrawer()" class="px-4.5 py-2.5 rounded-xl bg-[#01e281] hover:bg-[#01c771] text-[#0d2130] text-sm font-extrabold flex items-center gap-2 shadow-sm transition active:scale-95">
       <span class="material-symbols-outlined text-[18px]">add</span>Tạo mã khuyến mãi
     </button>
   </section>
 
-  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
     <div class="km-stat"><div class="num">${countActive}</div><div class="lbl">Đang hoạt động</div></div>
     <div class="km-stat"><div class="num">${countUpcoming}</div><div class="lbl">Sắp diễn ra</div></div>
     <div class="km-stat"><div class="num">${countExpired}</div><div class="lbl">Đã hết hạn</div></div>
@@ -287,10 +116,10 @@
       <div class="relative flex-1 min-w-[220px]">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
         <input type="text" name="q" value="${fn:escapeXml(keyword)}" placeholder="Tìm theo mã hoặc tên chương trình..."
-               class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-600" />
+               class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#01e281] focus:ring-1 focus:ring-[#01e281]" />
       </div>
       <input type="hidden" name="status" id="statusHiddenInput" value="${statusFilter}" />
-      <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold">Tìm</button>
+      <button type="submit" class="px-4.5 py-2.5 rounded-xl bg-[#122d40] hover:bg-[#0d2130] text-white text-sm font-bold transition shadow-sm">Tìm</button>
     </form>
     <div class="flex items-center gap-2 overflow-x-auto pb-1">
       <a href="?status=ALL&q=${fn:escapeXml(keyword)}" class="filter-chip ${statusFilter == 'ALL' ? 'active' : ''}">Tất cả</a>
@@ -304,11 +133,15 @@
 
   <c:choose>
     <c:when test="${empty promotions}">
-      <div class="km-card text-center py-10 text-slate-400 text-sm">Chưa có mã khuyến mãi nào phù hợp.</div>
+      <div class="km-card text-center py-12 px-4 flex flex-col items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-slate-400 text-5xl">loyalty</span>
+        <p class="text-slate-700 font-bold text-sm">Chưa có mã khuyến mãi nào phù hợp.</p>
+        <p class="text-slate-500 text-xs font-medium">Thử thay đổi bộ lọc tìm kiếm hoặc tạo chương trình ưu đãi mới.</p>
+      </div>
     </c:when>
     <c:otherwise>
       <%-- Desktop table --%>
-      <section class="km-table-wrap bg-white border border-slate-200 rounded-2xl overflow-x-auto">
+      <section class="km-table-wrap bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
         <table class="km-table">
           <thead>
             <tr>
@@ -319,20 +152,20 @@
           <tbody>
             <c:forEach var="km" items="${promotions}">
               <tr>
-                <td class="font-extrabold text-slate-900">${fn:escapeXml(km.maCode)}</td>
-                <td class="max-w-[220px]"><div class="truncate">${fn:escapeXml(km.moTa)}</div></td>
-                <td>${km.loaiGiam == 'PERCENT' ? 'Phần trăm' : 'Số tiền cố định'}</td>
-                <td>
+                <td class="font-extrabold text-[#122d40] font-mono text-sm">${fn:escapeXml(km.maCode)}</td>
+                <td class="max-w-[220px]"><div class="truncate font-semibold text-slate-800">${fn:escapeXml(km.moTa)}</div></td>
+                <td class="font-medium text-slate-700">${km.loaiGiam == 'PERCENT' ? 'Phần trăm' : 'Cố định'}</td>
+                <td class="font-bold text-[#122d40]">
                   <c:choose>
                     <c:when test="${km.loaiGiam == 'PERCENT'}"><fmt:formatNumber value="${km.giaTriGiam}" pattern="#,##0.#"/>%</c:when>
                     <c:otherwise><fmt:formatNumber value="${km.giaTriGiam}" pattern="#,##0"/>đ</c:otherwise>
                   </c:choose>
                 </td>
-                <td><c:choose><c:when test="${not empty km.giaTriToiThieu and km.giaTriToiThieu gt 0}"><fmt:formatNumber value="${km.giaTriToiThieu}" pattern="#,##0"/>đ</c:when><c:otherwise>—</c:otherwise></c:choose></td>
-                <td><c:choose><c:when test="${not empty km.giamToiDa and km.giamToiDa gt 0}"><fmt:formatNumber value="${km.giamToiDa}" pattern="#,##0"/>đ</c:when><c:otherwise>—</c:otherwise></c:choose></td>
-                <td>${fn:substring(km.ngayBatDau, 8, 10)}/${fn:substring(km.ngayBatDau, 5, 7)}/${fn:substring(km.ngayBatDau, 0, 4)}</td>
-                <td>${fn:substring(km.ngayKetThuc, 8, 10)}/${fn:substring(km.ngayKetThuc, 5, 7)}/${fn:substring(km.ngayKetThuc, 0, 4)}</td>
-                <td>${km.soLanDaDung} / <c:choose><c:when test="${not empty km.soLanToiDa}">${km.soLanToiDa}</c:when><c:otherwise>&infin;</c:otherwise></c:choose></td>
+                <td class="font-medium text-slate-700"><c:choose><c:when test="${not empty km.giaTriToiThieu and km.giaTriToiThieu gt 0}"><fmt:formatNumber value="${km.giaTriToiThieu}" pattern="#,##0"/>đ</c:when><c:otherwise>—</c:otherwise></c:choose></td>
+                <td class="font-medium text-slate-700"><c:choose><c:when test="${not empty km.giamToiDa and km.giamToiDa gt 0}"><fmt:formatNumber value="${km.giamToiDa}" pattern="#,##0"/>đ</c:when><c:otherwise>—</c:otherwise></c:choose></td>
+                <td class="font-medium text-slate-600">${fn:substring(km.ngayBatDau, 8, 10)}/${fn:substring(km.ngayBatDau, 5, 7)}/${fn:substring(km.ngayBatDau, 0, 4)}</td>
+                <td class="font-medium text-slate-600">${fn:substring(km.ngayKetThuc, 8, 10)}/${fn:substring(km.ngayKetThuc, 5, 7)}/${fn:substring(km.ngayKetThuc, 0, 4)}</td>
+                <td class="font-semibold text-slate-800">${km.soLanDaDung} / <c:choose><c:when test="${not empty km.soLanToiDa}">${km.soLanToiDa}</c:when><c:otherwise>&infin;</c:otherwise></c:choose></td>
                 <td>
                   <c:set var="st" value="${kmDisplayStatus[km.khuyenMaiID]}" />
                   <c:choose>
@@ -345,15 +178,15 @@
                 </td>
                 <td>
                   <div class="flex items-center gap-1.5">
-                    <button type="button" title="Xem / sửa" onclick="openKmDrawer('${km.khuyenMaiID}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center" aria-label="Sửa mã ${fn:escapeXml(km.maCode)}">
-                      <span class="material-symbols-outlined text-slate-500 text-[18px]">edit</span>
+                    <button type="button" title="Xem / sửa" onclick="openKmDrawer('${km.khuyenMaiID}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition" aria-label="Sửa mã ${fn:escapeXml(km.maCode)}">
+                      <span class="material-symbols-outlined text-slate-600 text-[18px]">edit</span>
                     </button>
                     <form method="post" action="${pageContext.request.contextPath}/manager/khuyen-mai" onsubmit="return disableSubmit(this)">
                       <input type="hidden" name="action" value="toggle"/>
                       <input type="hidden" name="khuyenMaiId" value="${km.khuyenMaiID}"/>
                       <input type="hidden" name="value" value="${km.trangThai == 'Hoạt động' ? 0 : 1}"/>
-                      <button type="submit" title="${km.trangThai == 'Hoạt động' ? 'Tạm khóa' : 'Bật lại'}" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center" aria-label="${km.trangThai == 'Hoạt động' ? 'Tạm khóa mã' : 'Bật lại mã'} ${fn:escapeXml(km.maCode)}">
-                        <span class="material-symbols-outlined text-slate-500 text-[18px]">${km.trangThai == 'Hoạt động' ? 'toggle_on' : 'toggle_off'}</span>
+                      <button type="submit" title="${km.trangThai == 'Hoạt động' ? 'Tạm khóa' : 'Bật lại'}" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition" aria-label="${km.trangThai == 'Hoạt động' ? 'Tạm khóa mã' : 'Bật lại mã'} ${fn:escapeXml(km.maCode)}">
+                        <span class="material-symbols-outlined text-slate-600 text-[18px]">${km.trangThai == 'Hoạt động' ? 'toggle_on' : 'toggle_off'}</span>
                       </button>
                     </form>
                   </div>
@@ -369,7 +202,7 @@
         <c:forEach var="km" items="${promotions}">
           <div class="km-card">
             <div class="flex items-center justify-between gap-2">
-              <p class="font-extrabold text-slate-900">${fn:escapeXml(km.maCode)}</p>
+              <p class="font-extrabold text-[#122d40] font-mono text-base">${fn:escapeXml(km.maCode)}</p>
               <c:set var="st" value="${kmDisplayStatus[km.khuyenMaiID]}" />
               <c:choose>
                 <c:when test="${st == 'Đang hoạt động'}"><span class="badge badge-green">Đang hoạt động</span></c:when>
@@ -379,25 +212,25 @@
                 <c:otherwise><span class="badge badge-rose">Tạm khóa</span></c:otherwise>
               </c:choose>
             </div>
-            <p class="text-[12.5px] text-slate-500 mt-1 truncate">${fn:escapeXml(km.moTa)}</p>
-            <p class="text-[12.5px] text-slate-600 mt-2">
+            <p class="text-[13px] text-slate-700 font-medium mt-1 truncate">${fn:escapeXml(km.moTa)}</p>
+            <p class="text-[13px] text-[#122d40] font-bold mt-2">
               <c:choose>
                 <c:when test="${km.loaiGiam == 'PERCENT'}">Giảm <fmt:formatNumber value="${km.giaTriGiam}" pattern="#,##0.#"/>%</c:when>
                 <c:otherwise>Giảm <fmt:formatNumber value="${km.giaTriGiam}" pattern="#,##0"/>đ</c:otherwise>
               </c:choose>
-              · Dùng ${km.soLanDaDung}/<c:choose><c:when test="${not empty km.soLanToiDa}">${km.soLanToiDa}</c:when><c:otherwise>&infin;</c:otherwise></c:choose>
+              <span class="font-normal text-slate-500">· Dùng ${km.soLanDaDung}/<c:choose><c:when test="${not empty km.soLanToiDa}">${km.soLanToiDa}</c:when><c:otherwise>&infin;</c:otherwise></c:choose></span>
             </p>
-            <p class="text-[12px] text-slate-400 mt-1">
+            <p class="text-[12px] text-slate-500 font-medium mt-1">
               ${fn:substring(km.ngayBatDau, 8, 10)}/${fn:substring(km.ngayBatDau, 5, 7)}/${fn:substring(km.ngayBatDau, 0, 4)}
               – ${fn:substring(km.ngayKetThuc, 8, 10)}/${fn:substring(km.ngayKetThuc, 5, 7)}/${fn:substring(km.ngayKetThuc, 0, 4)}
             </p>
             <div class="flex items-center gap-2 mt-3">
-              <button type="button" onclick="openKmDrawer('${km.khuyenMaiID}')" class="flex-1 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700">Sửa</button>
+              <button type="button" onclick="openKmDrawer('${km.khuyenMaiID}')" class="flex-1 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 hover:bg-slate-50">Sửa</button>
               <form method="post" action="${pageContext.request.contextPath}/manager/khuyen-mai" onsubmit="return disableSubmit(this)" class="flex-1">
                 <input type="hidden" name="action" value="toggle"/>
                 <input type="hidden" name="khuyenMaiId" value="${km.khuyenMaiID}"/>
                 <input type="hidden" name="value" value="${km.trangThai == 'Hoạt động' ? 0 : 1}"/>
-                <button type="submit" class="w-full py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700">${km.trangThai == 'Hoạt động' ? 'Tạm khóa' : 'Bật lại'}</button>
+                <button type="submit" class="w-full py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 hover:bg-slate-50">${km.trangThai == 'Hoạt động' ? 'Tạm khóa' : 'Bật lại'}</button>
               </form>
             </div>
           </div>
@@ -413,15 +246,15 @@
   <form method="post" action="${pageContext.request.contextPath}/manager/khuyen-mai" class="flex flex-col h-full" id="kmForm" onsubmit="return validateKmForm(this)">
     <input type="hidden" name="action" id="kmFormAction" value="create"/>
     <input type="hidden" name="khuyenMaiId" id="kmIdInput" value=""/>
-    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-      <h3 class="font-extrabold text-lg" id="kmDrawerTitle">Tạo mã khuyến mãi</h3>
-      <button type="button" onclick="closeKmDrawer()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center" aria-label="Đóng">
-        <span class="material-symbols-outlined">close</span>
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+      <h3 class="font-extrabold text-lg text-[#122d40]" id="kmDrawerTitle">Tạo mã khuyến mãi</h3>
+      <button type="button" onclick="closeKmDrawer()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-600 flex items-center justify-center" aria-label="Đóng">
+        <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </div>
-    <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3.5">
+    <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
 
-      <p class="text-xs font-bold text-teal-700 uppercase tracking-wide">Thông tin chung</p>
+      <p class="text-xs font-extrabold text-[#059669] uppercase tracking-wider">Thông tin chung</p>
       <div class="field">
         <label for="f_maCode">Mã khuyến mãi *</label>
         <input type="text" name="maCode" id="f_maCode" maxlength="50" required placeholder="Ví dụ: VSPORT20" oninput="this.value = this.value.toUpperCase().trim();"/>
@@ -430,11 +263,11 @@
       </div>
       <div class="field">
         <label for="f_moTa">Tên chương trình / Mô tả</label>
-        <textarea name="moTa" id="f_moTa" rows="2" maxlength="255"></textarea>
+        <textarea name="moTa" id="f_moTa" rows="2" maxlength="255" placeholder="Mô tả chương trình khuyến mãi..."></textarea>
       </div>
 
-      <p class="text-xs font-bold text-teal-700 uppercase tracking-wide mt-1">Hình thức giảm</p>
-      <div class="flex gap-2">
+      <p class="text-xs font-extrabold text-[#059669] uppercase tracking-wider mt-1">Hình thức giảm</p>
+      <div class="flex gap-2.5">
         <button type="button" class="discount-mode-btn active" id="modeBtnPercent" onclick="setDiscountMode('PERCENT')">Giảm theo phần trăm</button>
         <button type="button" class="discount-mode-btn" id="modeBtnFixed" onclick="setDiscountMode('FIXED')">Giảm số tiền cố định</button>
       </div>
@@ -443,26 +276,26 @@
       <div id="percentFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="field">
           <label for="f_giaTriGiamPercent">Phần trăm giảm (%) *</label>
-          <input type="number" min="0.01" max="100" step="0.1" id="f_giaTriGiamPercent"/>
+          <input type="number" min="0.01" max="100" step="0.1" id="f_giaTriGiamPercent" placeholder="10"/>
           <p class="err" id="err_giaTriGiamPercent">Phần trăm giảm phải lớn hơn 0 và không vượt quá 100.</p>
         </div>
         <div class="field">
           <label for="f_giamToiDaPercent">Mức giảm tối đa (đ)</label>
-          <input type="number" min="0" step="1000" id="f_giamToiDaPercent"/>
+          <input type="number" min="0" step="1000" id="f_giamToiDaPercent" placeholder="100.000"/>
         </div>
       </div>
       <div id="fixedFields" class="field" style="display:none;">
         <label for="f_giaTriGiamFixed">Số tiền giảm (đ) *</label>
-        <input type="number" min="0" step="1000" id="f_giaTriGiamFixed"/>
+        <input type="number" min="0" step="1000" id="f_giaTriGiamFixed" placeholder="50.000"/>
         <p class="err" id="err_giaTriGiamFixed">Vui lòng nhập số tiền giảm hợp lệ.</p>
       </div>
       <input type="hidden" name="giaTriGiam" id="f_giaTriGiam"/>
       <input type="hidden" name="giamToiDa" id="f_giamToiDa"/>
 
-      <p class="text-xs font-bold text-teal-700 uppercase tracking-wide mt-1">Điều kiện áp dụng</p>
+      <p class="text-xs font-extrabold text-[#059669] uppercase tracking-wider mt-1">Điều kiện áp dụng</p>
       <div class="field">
         <label for="f_giaTriToiThieu">Giá trị đơn tối thiểu (đ)</label>
-        <input type="number" min="0" step="1000" name="giaTriToiThieu" id="f_giaTriToiThieu"/>
+        <input type="number" min="0" step="1000" name="giaTriToiThieu" id="f_giaTriToiThieu" placeholder="200.000"/>
         <p class="err" id="err_giaTriToiThieu">Giá trị đơn tối thiểu không được âm.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -478,15 +311,16 @@
       </div>
       <div class="field">
         <label for="f_soLanToiDa">Tổng lượt sử dụng (để trống nếu không giới hạn)</label>
-        <input type="number" min="1" step="1" name="soLanToiDa" id="f_soLanToiDa"/>
+        <input type="number" min="1" step="1" name="soLanToiDa" id="f_soLanToiDa" placeholder="100"/>
         <p class="err" id="err_soLanToiDa">Tổng lượt sử dụng phải lớn hơn 0.</p>
       </div>
-      <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
-        <input type="checkbox" name="trangThaiHoatDong" id="f_trangThaiHoatDong" checked/> Đang hoạt động
+      <label class="flex items-center gap-2.5 text-sm font-bold text-slate-800 cursor-pointer pt-1">
+        <input type="checkbox" name="trangThaiHoatDong" id="f_trangThaiHoatDong" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"/> Đang hoạt động
       </label>
     </div>
-    <div class="px-5 py-4 border-t border-slate-100 flex gap-2">
-      <button type="submit" id="kmSubmitBtn" class="flex-1 py-2.5 rounded-xl bg-teal-700 text-white text-sm font-bold hover:bg-teal-800">Lưu mã khuyến mãi</button>
+    <div class="px-6 py-4 border-t border-slate-200 flex gap-3 bg-slate-50">
+      <button type="button" onclick="closeKmDrawer()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-100 transition">Hủy</button>
+      <button type="submit" id="kmSubmitBtn" class="flex-1 py-2.5 rounded-xl bg-[#01e281] hover:bg-[#01c771] text-[#0d2130] text-sm font-extrabold transition shadow-sm">Lưu mã khuyến mãi</button>
     </div>
   </form>
 </div>
