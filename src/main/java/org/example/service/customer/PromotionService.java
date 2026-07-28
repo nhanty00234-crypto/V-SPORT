@@ -1,15 +1,21 @@
 package org.example.service.customer;
 
-import jakarta.persistence.EntityManager;
 import org.example.model.KhuyenMai;
-import org.example.util.JPAUtil;
+import org.example.util.DBUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
 
 public class PromotionService {
+
+    private static final Logger logger = LogManager.getLogger(PromotionService.class);
 
     public static class PromotionResult {
         private final boolean valid;
@@ -34,9 +40,10 @@ public class PromotionService {
     }
 
     /**
-     * Calc promo discount pure logic (without DB dependency for easy unit testing)
+     * Pure calculation logic for unit testing & validation
      */
-    public PromotionResult calculateDiscount(KhuyenMai km, BigDecimal originalAmount, Integer coSoId, LocalDate bookingDate) {
+    public PromotionResult calculateDiscount(KhuyenMai km, BigDecimal originalAmount, Integer coSoId, LocalDate bookingDate,
+                                              BigDecimal giaTriToiThieu, BigDecimal giamToiDa, int userUsageCount, int maxUsagePerUser) {
         if (km == null) {
             return new PromotionResult(false, "Mã khuyến mãi không tồn tại.", BigDecimal.ZERO, originalAmount, null);
         }
@@ -55,7 +62,13 @@ public class PromotionService {
             return new PromotionResult(false, "Mã khuyến mãi không áp dụng cho cơ sở này.", BigDecimal.ZERO, originalAmount, km);
         }
         if (km.getSoLanToiDa() != null && km.getSoLanDaDung() >= km.getSoLanToiDa()) {
-            return new PromotionResult(false, "Mã khuyến mãi đã hết lượt sử dụng.", BigDecimal.ZERO, originalAmount, km);
+            return new PromotionResult(false, "Mã khuyến mãi đã hết tổng lượt sử dụng trên hệ thống.", BigDecimal.ZERO, originalAmount, km);
+        }
+        if (giaTriToiThieu != null && originalAmount.compareTo(giaTriToiThieu) < 0) {
+            return new PromotionResult(false, "Đơn hàng phải từ " + String.format("%,.0f", giaTriToiThieu) + " VNĐ mới được áp dụng mã này.", BigDecimal.ZERO, originalAmount, km);
+        }
+        if (maxUsagePerUser > 0 && userUsageCount >= maxUsagePerUser) {
+            return new PromotionResult(false, "Bạn đã sử dụng hết số lần cho phép của mã khuyến mãi này.", BigDecimal.ZERO, originalAmount, km);
         }
 
         BigDecimal discount = BigDecimal.ZERO;
@@ -68,33 +81,75 @@ public class PromotionService {
             discount = BigDecimal.valueOf(km.getGiaTriGiam()).setScale(0, RoundingMode.HALF_UP);
         }
 
+        if (giamToiDa != null && giamToiDa.compareTo(BigDecimal.ZERO) > 0 && discount.compareTo(giamToiDa) > 0) {
+            discount = giamToiDa;
+        }
+
         if (discount.compareTo(originalAmount) > 0) {
             discount = originalAmount;
         }
 
         BigDecimal finalAmount = originalAmount.subtract(discount);
-        return new PromotionResult(true, "Áp dụng mã khuyến mãi thành công!", discount, finalAmount, km);
+        return new PromotionResult(true, "Áp dụng mã khuyến mãi thành công! Bạn được giảm " + String.format("%,.0f", discount) + " VNĐ.", discount, finalAmount, km);
+    }
+
+    public PromotionResult calculateDiscount(KhuyenMai km, BigDecimal originalAmount, Integer coSoId, LocalDate bookingDate) {
+        return calculateDiscount(km, originalAmount, coSoId, bookingDate, null, null, 0, 0);
+    }
+
+    public PromotionResult validateAndCalculate(String maCode, BigDecimal originalAmount, Integer coSoId, LocalDate bookingDate, Integer accountId) {
+        if (maCode == null || maCode.trim().isEmpty()) {
+            return new PromotionResult(false, "Mã khuyến mãi không được để rỗng.", BigDecimal.ZERO, originalAmount, null);
+        }
+
+        String cleanCode = maCode.trim().toUpperCase();
+        String sqlKM = "SELECT KhuyenMaiID, MaCode, MoTa, LoaiGiam, GiaTriGiam, NgayBatDau, NgayKetThuc, SoLanToiDa, SoLanDaDung, CoSoID, TrangThai FROM KhuyenMai WHERE UPPER(MaCode) = ?";
+        String sqlUserCount = "SELECT COUNT(*) FROM LichSuKhuyenMai WHERE AccountID = ? AND KhuyenMaiID = ?";
+
+        try (Connection conn = DBUtil.getConnection()) {
+            KhuyenMai km = null;
+            try (PreparedStatement ps = conn.prepareStatement(sqlKM)) {
+                ps.setString(1, cleanCode);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        return new PromotionResult(false, "Mã khuyến mãi '" + cleanCode + "' không tồn tại.", BigDecimal.ZERO, originalAmount, null);
+                    }
+                    km = new KhuyenMai();
+                    km.setKhuyenMaiID(rs.getInt("KhuyenMaiID"));
+                    km.setMaCode(rs.getString("MaCode"));
+                    km.setMoTa(rs.getString("MoTa"));
+                    km.setLoaiGiam(rs.getString("LoaiGiam"));
+                    km.setGiaTriGiam(rs.getDouble("GiaTriGiam"));
+                    if (rs.getDate("NgayBatDau") != null) km.setNgayBatDau(rs.getDate("NgayBatDau").toLocalDate());
+                    if (rs.getDate("NgayKetThuc") != null) km.setNgayKetThuc(rs.getDate("NgayKetThuc").toLocalDate());
+                    int maxCount = rs.getInt("SoLanToiDa");
+                    if (!rs.wasNull()) km.setSoLanToiDa(maxCount);
+                    km.setSoLanDaDung(rs.getInt("SoLanDaDung"));
+                    int csId = rs.getInt("CoSoID");
+                    if (!rs.wasNull()) km.setCoSoID(csId);
+                    km.setTrangThai(rs.getString("TrangThai"));
+                }
+            }
+
+            int userUsageCount = 0;
+            if (accountId != null && accountId > 0 && km != null) {
+                try (PreparedStatement ps = conn.prepareStatement(sqlUserCount)) {
+                    ps.setInt(1, accountId);
+                    ps.setInt(2, km.getKhuyenMaiID());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) userUsageCount = rs.getInt(1);
+                    }
+                }
+            }
+
+            return calculateDiscount(km, originalAmount, coSoId, bookingDate, null, null, userUsageCount, 1);
+        } catch (SQLException e) {
+            logger.error("Error validating promotion code {}: {}", cleanCode, e.getMessage(), e);
+            return new PromotionResult(false, "Lỗi kiểm tra mã khuyến mãi.", BigDecimal.ZERO, originalAmount, null);
+        }
     }
 
     public PromotionResult validateAndCalculate(String maCode, BigDecimal originalAmount, Integer coSoId, LocalDate bookingDate) {
-        if (maCode == null || maCode.trim().isEmpty()) {
-            return new PromotionResult(false, "Mã khuyến mãi rỗng.", BigDecimal.ZERO, originalAmount, null);
-        }
-
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            List<KhuyenMai> list = em.createQuery("SELECT k FROM KhuyenMai k WHERE LOWER(k.MaCode) = :code", KhuyenMai.class)
-                    .setParameter("code", maCode.trim().toLowerCase())
-                    .getResultList();
-
-            if (list.isEmpty()) {
-                return new PromotionResult(false, "Mã khuyến mãi không hợp lệ.", BigDecimal.ZERO, originalAmount, null);
-            }
-
-            KhuyenMai km = list.get(0);
-            return calculateDiscount(km, originalAmount, coSoId, bookingDate);
-        } finally {
-            em.close();
-        }
+        return validateAndCalculate(maCode, originalAmount, coSoId, bookingDate, null);
     }
 }

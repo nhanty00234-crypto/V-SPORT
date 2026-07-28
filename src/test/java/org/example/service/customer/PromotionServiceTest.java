@@ -1,7 +1,7 @@
 package org.example.service.customer;
 
 import org.example.model.KhuyenMai;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -10,86 +10,120 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PromotionServiceTest {
-    private final PromotionService service = new PromotionService();
 
-    @Test
-    @DisplayName("1. Percentage discount calculation (20% off 200,000 = 40,000 discount, 160,000 final)")
-    void testPercentageDiscount() {
-        KhuyenMai km = new KhuyenMai();
-        km.setMaCode("SALE20");
-        km.setTrangThai("Hoạt động");
-        km.setLoaiGiam("PHAN_TRAM");
-        km.setGiaTriGiam(20.0);
-        km.setNgayBatDau(LocalDate.now().minusDays(5));
-        km.setNgayKetThuc(LocalDate.now().plusDays(5));
+    private PromotionService promotionService;
+    private KhuyenMai activePercentKM;
+    private KhuyenMai activeFixedKM;
 
-        var res = service.calculateDiscount(km, new BigDecimal("200000"), 1, LocalDate.now());
-        assertTrue(res.isValid());
-        assertEquals(new BigDecimal("40000"), res.getDiscountAmount());
-        assertEquals(new BigDecimal("160000"), res.getFinalAmount());
+    @BeforeEach
+    void setUp() {
+        promotionService = new PromotionService();
+
+        activePercentKM = new KhuyenMai();
+        activePercentKM.setKhuyenMaiID(10);
+        activePercentKM.setMaCode("SUMMER20");
+        activePercentKM.setLoaiGiam("PERCENT");
+        activePercentKM.setGiaTriGiam(20.0); // 20%
+        activePercentKM.setNgayBatDau(LocalDate.of(2026, 1, 1));
+        activePercentKM.setNgayKetThuc(LocalDate.of(2026, 12, 31));
+        activePercentKM.setSoLanToiDa(100);
+        activePercentKM.setSoLanDaDung(10);
+        activePercentKM.setTrangThai("Hoạt động");
+        activePercentKM.setCoSoID(1);
+
+        activeFixedKM = new KhuyenMai();
+        activeFixedKM.setKhuyenMaiID(20);
+        activeFixedKM.setMaCode("GIAM50K");
+        activeFixedKM.setLoaiGiam("FIXED");
+        activeFixedKM.setGiaTriGiam(50000.0); // 50,000 VND
+        activeFixedKM.setNgayBatDau(LocalDate.of(2026, 1, 1));
+        activeFixedKM.setNgayKetThuc(LocalDate.of(2026, 12, 31));
+        activeFixedKM.setSoLanToiDa(50);
+        activeFixedKM.setSoLanDaDung(5);
+        activeFixedKM.setTrangThai("Hoạt động");
     }
 
     @Test
-    @DisplayName("2. Fixed amount discount calculation (50,000 off 200,000 = 50,000 discount, 150,000 final)")
-    void testFixedDiscount() {
-        KhuyenMai km = new KhuyenMai();
-        km.setMaCode("FIXED50");
-        km.setTrangThai("Hoạt động");
-        km.setLoaiGiam("CO_DINH");
-        km.setGiaTriGiam(50000.0);
-        km.setNgayBatDau(LocalDate.now().minusDays(5));
-        km.setNgayKetThuc(LocalDate.now().plusDays(5));
+    void testCalculateDiscountPercentageSuccess() {
+        BigDecimal original = new BigDecimal("200000");
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activePercentKM, original, 1, LocalDate.of(2026, 7, 28)
+        );
 
-        var res = service.calculateDiscount(km, new BigDecimal("200000"), 1, LocalDate.now());
-        assertTrue(res.isValid());
-        assertEquals(new BigDecimal("50000"), res.getDiscountAmount());
-        assertEquals(new BigDecimal("150000"), res.getFinalAmount());
+        assertTrue(result.isValid());
+        assertEquals(new BigDecimal("40000"), result.getDiscountAmount()); // 20% of 200,000 = 40,000
+        assertEquals(new BigDecimal("160000"), result.getFinalAmount());
     }
 
     @Test
-    @DisplayName("3. Expired code is rejected")
-    void testExpiredCode() {
-        KhuyenMai km = new KhuyenMai();
-        km.setMaCode("EXPIRED");
-        km.setTrangThai("Hoạt động");
-        km.setLoaiGiam("PHAN_TRAM");
-        km.setGiaTriGiam(10.0);
-        km.setNgayBatDau(LocalDate.now().minusDays(10));
-        km.setNgayKetThuc(LocalDate.now().minusDays(1));
+    void testCalculateDiscountFixedSuccess() {
+        BigDecimal original = new BigDecimal("150000");
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activeFixedKM, original, null, LocalDate.of(2026, 7, 28)
+        );
 
-        var res = service.calculateDiscount(km, new BigDecimal("100000"), 1, LocalDate.now());
-        assertFalse(res.isValid());
-        assertEquals("Mã khuyến mãi đã hết hạn sử dụng.", res.getMessage());
+        assertTrue(result.isValid());
+        assertEquals(new BigDecimal("50000"), result.getDiscountAmount());
+        assertEquals(new BigDecimal("100000"), result.getFinalAmount());
     }
 
     @Test
-    @DisplayName("4. Code exceeding max usage limit is rejected")
-    void testMaxUsageExceeded() {
-        KhuyenMai km = new KhuyenMai();
-        km.setMaCode("LIMITED");
-        km.setTrangThai("Hoạt động");
-        km.setLoaiGiam("PHAN_TRAM");
-        km.setGiaTriGiam(10.0);
-        km.setSoLanToiDa(5);
-        km.setSoLanDaDung(5);
+    void testExpiredPromotionFails() {
+        activePercentKM.setNgayKetThuc(LocalDate.of(2026, 5, 1));
+        BigDecimal original = new BigDecimal("200000");
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activePercentKM, original, 1, LocalDate.of(2026, 7, 28)
+        );
 
-        var res = service.calculateDiscount(km, new BigDecimal("100000"), 1, LocalDate.now());
-        assertFalse(res.isValid());
-        assertEquals("Mã khuyến mãi đã hết lượt sử dụng.", res.getMessage());
+        assertFalse(result.isValid());
+        assertTrue(result.getMessage().contains("hết hạn"));
+        assertEquals(BigDecimal.ZERO, result.getDiscountAmount());
     }
 
     @Test
-    @DisplayName("5. Facility mismatch is rejected")
-    void testFacilityMismatch() {
-        KhuyenMai km = new KhuyenMai();
-        km.setMaCode("BRANCH1ONLY");
-        km.setTrangThai("Hoạt động");
-        km.setLoaiGiam("PHAN_TRAM");
-        km.setGiaTriGiam(10.0);
-        km.setCoSoID(1);
+    void testFacilityMismatchFails() {
+        BigDecimal original = new BigDecimal("200000");
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activePercentKM, original, 2, LocalDate.of(2026, 7, 28) // CoSoID 2 != 1
+        );
 
-        var res = service.calculateDiscount(km, new BigDecimal("100000"), 2, LocalDate.now());
-        assertFalse(res.isValid());
-        assertEquals("Mã khuyến mãi không áp dụng cho cơ sở này.", res.getMessage());
+        assertFalse(result.isValid());
+        assertTrue(result.getMessage().contains("cơ sở"));
+    }
+
+    @Test
+    void testMinimumOrderAmountNotMet() {
+        BigDecimal original = new BigDecimal("50000");
+        BigDecimal minOrder = new BigDecimal("100000");
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activePercentKM, original, 1, LocalDate.of(2026, 7, 28), minOrder, null, 0, 1
+        );
+
+        assertFalse(result.isValid());
+        assertTrue(result.getMessage().contains("100,000"));
+    }
+
+    @Test
+    void testDiscountCapGiamToiDaApplied() {
+        BigDecimal original = new BigDecimal("1000000"); // 20% of 1,000,000 is 200,000
+        BigDecimal maxDiscount = new BigDecimal("100000"); // Cap at 100,000
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activePercentKM, original, 1, LocalDate.of(2026, 7, 28), null, maxDiscount, 0, 1
+        );
+
+        assertTrue(result.isValid());
+        assertEquals(new BigDecimal("100000"), result.getDiscountAmount());
+        assertEquals(new BigDecimal("900000"), result.getFinalAmount());
+    }
+
+    @Test
+    void testUserUsageLimitExceeded() {
+        BigDecimal original = new BigDecimal("200000");
+        PromotionService.PromotionResult result = promotionService.calculateDiscount(
+                activePercentKM, original, 1, LocalDate.of(2026, 7, 28), null, null, 1, 1 // User has used 1, max is 1
+        );
+
+        assertFalse(result.isValid());
+        assertTrue(result.getMessage().contains("hết số lần"));
     }
 }
