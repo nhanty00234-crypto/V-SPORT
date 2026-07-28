@@ -47,6 +47,12 @@ public class KhuyenMai {
     @Column(name = "GiamToiDa")
     private java.math.BigDecimal GiamToiDa;
 
+    // Cờ cho phép Customer nhìn thấy khuyến mãi này (ảnh + thông tin) ở các trang công khai.
+    // Độc lập với TrangThai: TrangThai điều khiển việc mã có áp dụng được không, còn cờ này chỉ
+    // điều khiển hiển thị. Mặc định true (xem sql/migration_khuyenmai_hinhanh.sql).
+    @Column(name = "HienThiCongKhai")
+    private boolean HienThiCongKhai = true;
+
     public KhuyenMai() {
     }
 
@@ -166,6 +172,14 @@ public class KhuyenMai {
 
     public void setGiamToiDa(java.math.BigDecimal giamToiDa) {
         GiamToiDa = giamToiDa;
+    }
+
+    public boolean isHienThiCongKhai() {
+        return HienThiCongKhai;
+    }
+
+    public void setHienThiCongKhai(boolean hienThiCongKhai) {
+        HienThiCongKhai = hienThiCongKhai;
     }
 
     @Override

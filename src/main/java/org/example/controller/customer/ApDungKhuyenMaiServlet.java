@@ -7,19 +7,25 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.dao.KhuyenMaiHinhAnhDAO;
+import org.example.dao.impl.KhuyenMaiHinhAnhDAOImpl;
+import org.example.model.KhuyenMaiHinhAnh;
 import org.example.model.TaiKhoan;
+import org.example.service.customer.PromotionImagePresenter;
 import org.example.service.customer.PromotionService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @WebServlet("/api/promotion/apply")
 public class ApDungKhuyenMaiServlet extends HttpServlet {
 
     private final PromotionService promotionService = new PromotionService();
+    private final KhuyenMaiHinhAnhDAO khuyenMaiHinhAnhDAO = new KhuyenMaiHinhAnhDAOImpl();
     private final Gson gson = new Gson();
 
     @Override
@@ -58,8 +64,13 @@ public class ApDungKhuyenMaiServlet extends HttpServlet {
             result.put("discountAmount", promoResult.getDiscountAmount());
             result.put("finalAmount", promoResult.getFinalAmount());
             if (promoResult.getKhuyenMai() != null) {
-                result.put("khuyenMaiId", promoResult.getKhuyenMai().getKhuyenMaiID());
+                int khuyenMaiId = promoResult.getKhuyenMai().getKhuyenMaiID();
+                result.put("khuyenMaiId", khuyenMaiId);
                 result.put("code", promoResult.getKhuyenMai().getMaCode());
+                List<KhuyenMaiHinhAnh> images = khuyenMaiHinhAnhDAO.findByKhuyenMaiId(khuyenMaiId);
+                result.put("coverImageUrl", images.isEmpty() ? null
+                        : PromotionImagePresenter.coverImageUrl(req.getContextPath(), images));
+                result.put("images", PromotionImagePresenter.imageDtoList(req.getContextPath(), images));
             }
 
             resp.getWriter().write(gson.toJson(result));

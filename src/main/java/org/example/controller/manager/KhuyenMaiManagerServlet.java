@@ -1,23 +1,30 @@
 package org.example.controller.manager;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.dao.KhuyenMaiDAO;
 import org.example.dao.impl.KhuyenMaiDAOImpl;
 import org.example.model.KhuyenMai;
 import org.example.model.TaiKhoan;
 import org.example.service.AuditLogService;
 import org.example.service.customer.PromotionStatusHelper;
+import org.example.service.manager.PromotionImageService;
 import org.example.util.Constants;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +35,17 @@ import java.util.Map;
  * (logic tính giảm giá khi khách áp mã vẫn chỉ có một nơi duy nhất).
  */
 @WebServlet("/manager/khuyen-mai")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize = PromotionImageService.MAX_FILE_BYTES,
+        maxRequestSize = PromotionImageService.MAX_TOTAL_BYTES + 1024 * 1024
+)
 public class KhuyenMaiManagerServlet extends HttpServlet {
 
+    private static final Logger logger = LogManager.getLogger(KhuyenMaiManagerServlet.class);
+
     private final KhuyenMaiDAO khuyenMaiDAO = new KhuyenMaiDAOImpl();
+    private final PromotionImageService promotionImageService = new PromotionImageService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -249,11 +264,48 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
         km.setCoSoID(coSoId);
         int newId = khuyenMaiDAO.insert(km);
         if (newId > 0) {
-            session.setAttribute("successMsg", "Đã tạo mã khuyến mãi '" + km.getMaCode() + "'.");
+            String imageWarning = tryAttachUploadedImages(req, newId);
+            String msg = "Đã tạo mã khuyến mãi '" + km.getMaCode() + "'.";
+            session.setAttribute("successMsg", imageWarning == null ? msg : msg + " " + imageWarning);
             AuditLogService.log(req, user, AuditLogService.ACTION_CREATE, "KhuyenMai",
                     String.valueOf(newId), km.getMaCode(), "Manager tạo mã khuyến mãi");
         } else {
             session.setAttribute("errorMsg", "Không thể tạo mã khuyến mãi. Vui lòng thử lại.");
+        }
+    }
+
+    /**
+     * Đọc các Part file có name="images" (multipart, có thể nhiều file cùng field name) và
+     * lưu qua PromotionImageService. Chỉ áp dụng khi request thực sự multipart/form-data -
+     * JSP hiện tại vẫn có thể post dạng thường (không kèm ảnh) và luồng tạo mã vẫn hoạt động
+     * bình thường. Lỗi ảnh (sai định dạng, quá cỡ...) KHÔNG làm hỏng khuyến mãi vừa tạo - chỉ
+     * trả về một cảnh báo để hiển thị kèm thông báo thành công.
+     */
+    private String tryAttachUploadedImages(HttpServletRequest req, int khuyenMaiId) {
+        List<PromotionImageService.UploadedImageFile> files = new ArrayList<>();
+        try {
+            Collection<Part> parts = req.getParts();
+            for (Part part : parts) {
+                if (!"images".equals(part.getName())) continue;
+                String submittedName = part.getSubmittedFileName();
+                if (submittedName == null || submittedName.isBlank() || part.getSize() <= 0) continue;
+                byte[] bytes;
+                try (InputStream is = part.getInputStream()) {
+                    bytes = is.readAllBytes();
+                }
+                files.add(new PromotionImageService.UploadedImageFile(bytes, submittedName));
+            }
+        } catch (Exception e) {
+            // Request không phải multipart/form-data (form không kèm ảnh) - bỏ qua, không phải lỗi.
+            return null;
+        }
+        if (files.isEmpty()) return null;
+        try {
+            promotionImageService.addImages(khuyenMaiId, files);
+            return null;
+        } catch (PromotionImageService.PromotionImageException e) {
+            logger.warn("Tải ảnh khuyến mãi khuyenMaiId={} thất bại: {}", khuyenMaiId, e.getMessage());
+            return "(Lưu ý: " + e.getMessage() + ")";
         }
     }
 
@@ -274,7 +326,11 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
         km.setCoSoID(coSoId);
         boolean ok = khuyenMaiDAO.update(km);
         if (ok) {
-            session.setAttribute("successMsg", "Đã cập nhật mã khuyến mãi '" + km.getMaCode() + "'.");
+            // Ảnh cũ được giữ nguyên (không đụng tới) - chỉ thêm ảnh mới nếu form kèm file "images".
+            // Xóa/đổi ảnh bìa/sắp xếp lại thứ tự dùng các endpoint riêng ở KhuyenMaiHinhAnhManagerServlet.
+            String imageWarning = tryAttachUploadedImages(req, id);
+            String msg = "Đã cập nhật mã khuyến mãi '" + km.getMaCode() + "'.";
+            session.setAttribute("successMsg", imageWarning == null ? msg : msg + " " + imageWarning);
             AuditLogService.log(req, user, AuditLogService.ACTION_UPDATE, "KhuyenMai",
                     String.valueOf(id), km.getMaCode(), "Manager cập nhật mã khuyến mãi");
         } else {

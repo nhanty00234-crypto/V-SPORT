@@ -6,10 +6,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.dao.CoSoCapabilityDAO;
+import org.example.dao.KhuyenMaiDAO;
+import org.example.dao.KhuyenMaiHinhAnhDAO;
 import org.example.dao.impl.CoSoCapabilityDAOImpl;
+import org.example.dao.impl.KhuyenMaiDAOImpl;
+import org.example.dao.impl.KhuyenMaiHinhAnhDAOImpl;
+import org.example.model.KhuyenMai;
+import org.example.model.KhuyenMaiHinhAnh;
+import org.example.service.customer.PromotionImagePresenter;
 import org.example.util.Constants;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,6 +38,8 @@ import java.util.Set;
 public class FacilityDetailApiServlet extends HttpServlet {
 
     private final CoSoCapabilityDAO capabilityDAO = new CoSoCapabilityDAOImpl();
+    private final KhuyenMaiDAO khuyenMaiDAO = new KhuyenMaiDAOImpl();
+    private final KhuyenMaiHinhAnhDAO khuyenMaiHinhAnhDAO = new KhuyenMaiHinhAnhDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -174,11 +184,31 @@ public class FacilityDetailApiServlet extends HttpServlet {
         facility.put("courts", courts);
         facility.put("services", services);
         facility.put("images", new ArrayList<>(images));
+        facility.put("activePromotions", buildActivePromotions(req, coSoId));
 
         resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
         resp.setHeader("Pragma", "no-cache");
         resp.setContentType("application/json; charset=UTF-8");
         resp.getWriter().write(new com.google.gson.Gson().toJson(facility));
+    }
+
+    /** Chỉ trả khuyến mãi đang hoạt động/còn hiệu lực/còn lượt/công khai (KhuyenMaiDAO.findPublicActiveByCoSoId). */
+    private List<Map<String, Object>> buildActivePromotions(HttpServletRequest req, int coSoId) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        try {
+            List<KhuyenMai> promos = khuyenMaiDAO.findPublicActiveByCoSoId(coSoId, LocalDate.now());
+            if (promos.isEmpty()) return result;
+            List<Integer> ids = new ArrayList<>();
+            for (KhuyenMai km : promos) ids.add(km.getKhuyenMaiID());
+            Map<Integer, List<KhuyenMaiHinhAnh>> imagesByPromo = khuyenMaiHinhAnhDAO.findByKhuyenMaiIds(ids);
+            for (KhuyenMai km : promos) {
+                List<KhuyenMaiHinhAnh> images = imagesByPromo.getOrDefault(km.getKhuyenMaiID(), List.of());
+                result.add(PromotionImagePresenter.toCustomerJson(req.getContextPath(), km, images));
+            }
+        } catch (Exception e) {
+            // Không để lỗi truy vấn khuyến mãi làm hỏng toàn bộ response chi tiết cơ sở.
+        }
+        return result;
     }
 
     private static String emptyToNull(String s) {

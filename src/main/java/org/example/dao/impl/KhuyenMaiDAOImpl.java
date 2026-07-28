@@ -9,6 +9,7 @@ import org.example.util.DBUtil;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
@@ -129,7 +130,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     @Override
     public int insert(KhuyenMai km) {
         String sql = "INSERT INTO KhuyenMai (MaCode, MoTa, LoaiGiam, GiaTriGiam, NgayBatDau, NgayKetThuc, " +
-                     "SoLanToiDa, SoLanDaDung, CoSoID, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)";
+                     "SoLanToiDa, SoLanDaDung, CoSoID, TrangThai, HienThiCongKhai) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, km.getMaCode());
@@ -143,6 +144,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
             if (km.getCoSoID() != null) ps.setInt(8, km.getCoSoID());
             else ps.setNull(8, Types.INTEGER);
             ps.setNString(9, km.getTrangThai() != null ? km.getTrangThai() : "Hoạt động");
+            ps.setBoolean(10, km.isHienThiCongKhai());
             int rows = ps.executeUpdate();
             if (rows > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -262,6 +264,87 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
         return null;
     }
 
+    @Override
+    public List<KhuyenMai> findPublicActiveByCoSoId(int coSoId, LocalDate today) {
+        List<KhuyenMai> list = new ArrayList<>();
+        String sql = "SELECT km.* FROM KhuyenMai km " +
+                "JOIN CoSo c ON km.CoSoID = c.CoSoID " +
+                "WHERE km.CoSoID = ? " +
+                "  AND km.TrangThai = N'Hoạt động' " +
+                "  AND km.HienThiCongKhai = 1 " +
+                "  AND km.NgayBatDau <= ? AND km.NgayKetThuc >= ? " +
+                "  AND (km.SoLanToiDa IS NULL OR km.SoLanDaDung < km.SoLanToiDa) " +
+                "  AND c.TrangThai = N'Đang hoạt động' AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
+                "ORDER BY km.NgayBatDau DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coSoId);
+            ps.setDate(2, Date.valueOf(today));
+            ps.setDate(3, Date.valueOf(today));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("findPublicActiveByCoSoId coSoId={}: {}", coSoId, e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<KhuyenMai> findPublicActiveByCoSoIds(Collection<Integer> coSoIds, LocalDate today) {
+        List<KhuyenMai> list = new ArrayList<>();
+        if (coSoIds == null || coSoIds.isEmpty()) return list;
+        List<Integer> ids = new ArrayList<>(new java.util.LinkedHashSet<>(coSoIds));
+        String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT km.* FROM KhuyenMai km " +
+                "JOIN CoSo c ON km.CoSoID = c.CoSoID " +
+                "WHERE km.CoSoID IN (" + placeholders + ") " +
+                "  AND km.TrangThai = N'Hoạt động' " +
+                "  AND km.HienThiCongKhai = 1 " +
+                "  AND km.NgayBatDau <= ? AND km.NgayKetThuc >= ? " +
+                "  AND (km.SoLanToiDa IS NULL OR km.SoLanDaDung < km.SoLanToiDa) " +
+                "  AND c.TrangThai = N'Đang hoạt động' AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
+                "ORDER BY km.CoSoID ASC, km.NgayBatDau DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            for (Integer id : ids) ps.setInt(idx++, id);
+            ps.setDate(idx++, Date.valueOf(today));
+            ps.setDate(idx, Date.valueOf(today));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("findPublicActiveByCoSoIds: {}", e.getMessage(), e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<KhuyenMai> findPublicActiveAll(LocalDate today, int limit) {
+        List<KhuyenMai> list = new ArrayList<>();
+        String sql = "SELECT TOP (?) km.* FROM KhuyenMai km " +
+                "JOIN CoSo c ON km.CoSoID = c.CoSoID " +
+                "WHERE km.TrangThai = N'Hoạt động' " +
+                "  AND km.HienThiCongKhai = 1 " +
+                "  AND km.NgayBatDau <= ? AND km.NgayKetThuc >= ? " +
+                "  AND (km.SoLanToiDa IS NULL OR km.SoLanDaDung < km.SoLanToiDa) " +
+                "  AND c.TrangThai = N'Đang hoạt động' AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
+                "ORDER BY km.NgayBatDau DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, Math.max(1, limit));
+            ps.setDate(2, Date.valueOf(today));
+            ps.setDate(3, Date.valueOf(today));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("findPublicActiveAll: {}", e.getMessage(), e);
+        }
+        return list;
+    }
+
     private KhuyenMai map(ResultSet rs) throws SQLException {
         KhuyenMai km = new KhuyenMai();
         km.setKhuyenMaiID(rs.getInt("KhuyenMaiID"));
@@ -284,6 +367,11 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
             km.setGiamToiDa(rs.getBigDecimal("GiamToiDa"));
         } catch (SQLException ignored) {
             // Cột có thể không tồn tại trên một số môi trường DB chưa chạy migration bổ sung.
+        }
+        try {
+            km.setHienThiCongKhai(rs.getBoolean("HienThiCongKhai"));
+        } catch (SQLException ignored) {
+            // Môi trường chưa chạy migration_khuyenmai_hinhanh.sql - mặc định true (đã set ở model).
         }
         return km;
     }

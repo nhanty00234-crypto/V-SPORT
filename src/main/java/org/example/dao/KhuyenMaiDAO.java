@@ -4,6 +4,7 @@ import org.example.model.KhuyenMai;
 
 import java.sql.Connection;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 public interface KhuyenMaiDAO {
@@ -49,4 +50,19 @@ public interface KhuyenMaiDAO {
      * Trả về null nếu không hợp lệ.
      */
     KhuyenMai findApplicable(String maCode, int coSoId, LocalDate today);
+
+    /**
+     * Khuyến mãi Customer được phép nhìn thấy tại một cơ sở cụ thể: đang hoạt động, còn hiệu
+     * lực theo ngày, còn lượt sử dụng, HienThiCongKhai=1 và cơ sở đang hoạt động (chưa xóa).
+     */
+    List<KhuyenMai> findPublicActiveByCoSoId(int coSoId, LocalDate today);
+
+    /** Như findPublicActiveByCoSoId nhưng cho nhiều cơ sở cùng lúc (tránh N+1 ở trang tìm sân). */
+    List<KhuyenMai> findPublicActiveByCoSoIds(Collection<Integer> coSoIds, LocalDate today);
+
+    /**
+     * Khuyến mãi công khai trên toàn hệ thống (dùng cho Home "featuredPromotions" và
+     * /customer/uu-dai), cùng điều kiện như findPublicActiveByCoSoId nhưng không giới hạn CoSoID.
+     */
+    List<KhuyenMai> findPublicActiveAll(LocalDate today, int limit);
 }

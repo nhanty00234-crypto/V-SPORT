@@ -33,26 +33,155 @@
 
   .km-card { background:#fff; border:1px solid #e9d5ff; border-radius:16px; padding:16px 18px; box-shadow:0 1px 3px rgba(124,58,237,.04); }
   
-  .drawer-overlay { position:fixed; inset:0; background:rgba(76,29,149,.35); backdrop-filter:blur(3px); z-index:60; display:none; }
-  .drawer-panel { position:fixed; top:0; right:0; height:100vh; width:100%; max-width:560px; background:#fff; z-index:61;
-    box-shadow:-10px 0 30px rgba(76,29,149,.15); transform:translateX(100%); transition:transform .25s cubic-bezier(.16,1,.3,1); overflow-y:auto; }
-  .drawer-panel.open, .drawer-overlay.open { display:block; }
+  /* ═══ KM DRAWER — V-SPORT purple brand palette (matches --vs-primary family) ═══ */
+  :root {
+    --km-navy: #6d28d9;
+    --km-navy-soft: #7c3aed;
+    --km-green: #7c3aed;
+    --km-green-hover: #6d28d9;
+    --km-green-soft: #f3e8ff;
+    --km-green-text: #6d28d9;
+    --km-red: #dc2626;
+    --km-red-hover: #b91c1c;
+    --km-red-soft: #fee2e2;
+    --km-border: #e9d5ff;
+    --km-border-soft: #f3e8ff;
+    --km-surface: #ffffff;
+    --km-surface-muted: #faf5ff;
+    --km-text: #1e1b4b;
+    --km-text-muted: #64748b;
+  }
+
+  .drawer-overlay { position:fixed; inset:0; background:transparent; z-index:60; display:none; opacity:0; transition:opacity .3s ease; }
+  .drawer-overlay.open { display:block; opacity:1; }
+
+  .drawer-panel {
+    position:fixed; top:0; right:0; height:100dvh;
+    width:100vw;
+    background:var(--km-surface); z-index:61;
+    box-shadow:-20px 0 50px rgba(76,29,149,.18);
+    transform:translateX(100%); transition:transform .38s cubic-bezier(.16,1,.3,1);
+    display:flex; flex-direction:column; overflow:hidden;
+    border-left:1px solid var(--km-border);
+  }
+  @media (min-width: 640px) {
+    .drawer-panel { width:90vw; border-radius: 20px 0 0 20px; }
+  }
+  @media (min-width: 1024px) {
+    .drawer-panel { width:clamp(720px, 68vw, 850px); }
+  }
+  @media (min-width: 1440px) {
+    .drawer-panel { width:clamp(780px, 58vw, 980px); }
+  }
   .drawer-panel.open { transform:translateX(0); }
+
+  .drawer-head { flex:0 0 auto; position:sticky; top:0; z-index:2; background:var(--km-surface); border-bottom:1px solid var(--km-border); }
+  .drawer-body { flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; }
+  .drawer-foot { flex:0 0 auto; position:sticky; bottom:0; z-index:2; background:var(--km-surface); border-top:1px solid var(--km-border); box-shadow:0 -8px 24px -12px rgba(76,29,149,.12); }
+  body.km-drawer-lock { overflow:hidden; }
+
+  /* Nội dung form fade/slide-in nhẹ ngay sau khi panel trượt vào, tạo cảm giác mượt hơn là transform tĩnh */
+  .drawer-panel .drawer-head,
+  .drawer-panel .drawer-body > *,
+  .drawer-panel .drawer-foot {
+    opacity:0; transform:translateY(10px);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .drawer-panel.open .drawer-head,
+  .drawer-panel.open .drawer-body > *,
+  .drawer-panel.open .drawer-foot {
+    opacity:1; transform:translateY(0);
+  }
+  .drawer-panel.open .drawer-head { transition-delay:.08s; }
+  .drawer-panel.open .drawer-body > *:nth-child(1) { transition-delay:.1s; }
+  .drawer-panel.open .drawer-body > *:nth-child(2) { transition-delay:.13s; }
+  .drawer-panel.open .drawer-body > *:nth-child(3) { transition-delay:.16s; }
+  .drawer-panel.open .drawer-body > *:nth-child(4) { transition-delay:.19s; }
+  .drawer-panel.open .drawer-body > *:nth-child(5) { transition-delay:.22s; }
+  .drawer-panel.open .drawer-body > *:nth-child(n+6) { transition-delay:.24s; }
+  .drawer-panel.open .drawer-foot { transition-delay:.3s; }
+  @media (prefers-reduced-motion: reduce) {
+    .drawer-panel .drawer-head, .drawer-panel .drawer-body > *, .drawer-panel .drawer-foot { opacity:1 !important; transform:none !important; transition:none !important; }
+  }
 
   .field label { font-size:12px; font-weight:700; color:#334155; margin-bottom:5px; display:block; }
   .field .hint { font-size:11.5px; color:#64748b; margin-top:4px; }
-  .field .err { font-size:11.5px; color:#b91c1c; font-weight:700; margin-top:4px; display:none; }
+  .field .err { font-size:11.5px; color:var(--km-red-hover); font-weight:700; margin-top:4px; display:none; }
   .field input, .field select, .field textarea {
     width:100%; border:1px solid #cbd5e1; border-radius:12px; padding:9px 12px; font-size:13.5px; outline:none; color:#0f172a; transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color:#7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
-  
-  .discount-mode-btn { flex:1; padding:10px 12px; border-radius:12px; border:1.5px solid #e9d5ff; font-size:13px; font-weight:600; color:#475569; cursor:pointer; text-align:center; background:#fff; transition: all .15s ease; }
-  .discount-mode-btn:hover { background:#faf5ff; border-color:#c084fc; }
-  .discount-mode-btn.active { border-color:#7c3aed; background:#f3e8ff; color:#6d28d9; font-weight:700; box-shadow: 0 1px 4px rgba(124,58,237,0.15); }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--km-navy-soft); box-shadow: 0 0 0 3px rgba(30,41,59,0.12); }
+
+  .km-form-grid { display:grid; grid-template-columns:1fr; gap:14px; }
+  @media (min-width: 1024px) {
+    .km-form-grid.cols-2 { grid-template-columns:1fr 1fr; }
+    .km-form-grid .span-2 { grid-column:1 / -1; }
+  }
+
+  .discount-mode-btn { flex:1; padding:10px 12px; border-radius:12px; border:1.5px solid var(--km-border); font-size:13px; font-weight:600; color:#475569; cursor:pointer; text-align:center; background:#fff; transition: all .15s ease; }
+  .discount-mode-btn:hover { background:var(--km-surface-muted); border-color:#94a3b8; }
+  .discount-mode-btn.active { border-color:var(--km-navy-soft); background:var(--km-navy); color:#fff; font-weight:700; box-shadow: 0 1px 4px rgba(15,23,42,0.2); }
 
   @media (max-width: 1024px) { .km-table-wrap { display:none; } }
   @media (min-width: 1025px) { .km-card-list { display:none; } }
+
+  /* ── Upload manager ── */
+  .km-upl-count { font-size:12px; font-weight:800; color:var(--km-navy); background:var(--km-surface-muted); border:1px solid var(--km-border); padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .km-upl-count.is-full { color:var(--km-green-text); background:var(--km-green-soft); border-color:#bbf7d0; }
+
+  .km-dropzone {
+    border:1.5px dashed #cbd5e1; border-radius:14px; background:var(--km-surface-muted);
+    padding:22px 16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    text-align:center; cursor:pointer; transition: border-color .15s ease, background .15s ease;
+  }
+  .km-dropzone:hover, .km-dropzone:focus-visible { border-color:var(--km-navy-soft); background:#f1f5f9; }
+  .km-dropzone.is-dragover { border-color:var(--km-green); background:var(--km-green-soft); }
+  .km-dropzone.is-disabled { cursor:not-allowed; opacity:.6; background:var(--km-surface-muted); border-color:#cbd5e1; }
+  .km-dropzone .km-dz-icon { width:40px; height:40px; border-radius:50%; background:#fff; border:1px solid var(--km-border); display:flex; align-items:center; justify-content:center; color:var(--km-navy); }
+  .km-dropzone .km-dz-title { font-size:13.5px; font-weight:700; color:var(--km-text); }
+  .km-dropzone .km-dz-sub { font-size:11.5px; color:var(--km-text-muted); font-weight:500; }
+  .km-dz-browse-btn {
+    margin-top:2px; padding:7px 16px; border-radius:9px; border:1px solid var(--km-navy); background:var(--km-navy); color:#fff;
+    font-size:12.5px; font-weight:700; cursor:pointer; transition:background .15s ease;
+  }
+  .km-dz-browse-btn:hover { background:var(--km-navy-soft); }
+  .km-dz-browse-btn:disabled { background:#94a3b8; border-color:#94a3b8; cursor:not-allowed; }
+
+  .km-img-grid { display:grid; grid-template-columns:repeat(1, 1fr); gap:10px; }
+  @media (min-width: 480px) { .km-img-grid { grid-template-columns:repeat(2, 1fr); } }
+  @media (min-width: 1440px) { .km-img-grid { grid-template-columns:repeat(3, 1fr); } }
+
+  .km-img-card { position:relative; border-radius:12px; overflow:hidden; border:1.5px solid var(--km-border); background:#fff; display:flex; flex-direction:column; }
+  .km-img-card.is-cover { border-color:var(--km-green); box-shadow:0 0 0 2px rgba(22,163,74,.18); }
+  .km-img-card .km-img-thumb-wrap { position:relative; aspect-ratio:16/9; background:var(--km-surface-muted); overflow:hidden; }
+  .km-img-card img { width:100%; height:100%; object-fit:cover; display:block; }
+  .km-img-card .km-img-skeleton { position:absolute; inset:0; background:linear-gradient(100deg, #eef2f7 30%, #f8fafc 50%, #eef2f7 70%); background-size:200% 100%; animation:km-shimmer 1.3s ease-in-out infinite; }
+  @keyframes km-shimmer { 0% { background-position:150% 0; } 100% { background-position:-50% 0; } }
+  .km-img-card .km-img-fallback { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#94a3b8; background:var(--km-surface-muted); font-size:11px; font-weight:600; }
+
+  .km-img-order-tag { position:absolute; top:6px; left:6px; width:22px; height:22px; border-radius:50%; background:rgba(15,23,42,.78); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .km-img-cover-tag { position:absolute; top:6px; left:34px; background:var(--km-green); color:#fff; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px; letter-spacing:.02em; }
+
+  .km-img-del-btn {
+    position:absolute; top:6px; right:6px; width:28px; height:28px; border-radius:50%; border:none;
+    background:rgba(255,255,255,.95); color:var(--km-red); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition: background .15s ease, transform .12s ease; box-shadow:0 1px 4px rgba(15,23,42,.18);
+  }
+  .km-img-del-btn:hover { background:var(--km-red); color:#fff; }
+  .km-img-del-btn:active { transform:scale(.94); }
+  @media (max-width: 640px) { .km-img-del-btn { width:32px; height:32px; } }
+
+  .km-img-meta { padding:8px 10px 10px; display:flex; flex-direction:column; gap:6px; }
+  .km-img-meta .km-img-name { font-size:11.5px; font-weight:700; color:var(--km-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .km-img-meta .km-img-size { font-size:10.5px; color:var(--km-text-muted); font-weight:600; }
+  .km-img-cover-btn {
+    font-size:11px; font-weight:700; color:var(--km-navy); background:#fff; border:1px solid var(--km-border);
+    border-radius:8px; padding:5px 8px; cursor:pointer; transition: all .15s ease; text-align:center;
+  }
+  .km-img-cover-btn:hover { background:var(--km-surface-muted); border-color:#94a3b8; }
+  .km-img-cover-btn:disabled { color:var(--km-green-text); background:var(--km-green-soft); border-color:#bbf7d0; cursor:default; }
+
+  .km-img-empty { font-size:12px; color:#94a3b8; font-weight:600; padding:14px 0; text-align:center; grid-column:1/-1; }
 </style>
 </head>
 <body class="text-slate-900 min-h-screen">
@@ -246,47 +375,70 @@
 <%-- ═══ DRAWER: TẠO / SỬA MÃ KHUYẾN MÃI ═══ --%>
 <div class="drawer-overlay" id="kmOverlay" onclick="closeKmDrawer()"></div>
 <div class="drawer-panel" id="kmDrawer" role="dialog" aria-modal="true" aria-labelledby="kmDrawerTitle">
-  <form method="post" action="${pageContext.request.contextPath}/manager/khuyen-mai" class="flex flex-col h-full" id="kmForm" onsubmit="return validateKmForm(this)">
+  <form method="post" action="${pageContext.request.contextPath}/manager/khuyen-mai" enctype="multipart/form-data" class="flex flex-col h-full" id="kmForm" onsubmit="return validateKmForm(this)">
     <input type="hidden" name="action" id="kmFormAction" value="create"/>
     <input type="hidden" name="khuyenMaiId" id="kmIdInput" value=""/>
-    <div class="flex items-center justify-between px-6 py-4 border-b border-purple-100">
-      <h3 class="font-extrabold text-lg text-purple-950" id="kmDrawerTitle">Tạo mã khuyến mãi</h3>
-      <button type="button" onclick="closeKmDrawer()" class="w-8 h-8 rounded-lg hover:bg-purple-50 text-purple-600 flex items-center justify-center" aria-label="Đóng">
-        <span class="material-symbols-outlined text-[20px]">close</span>
+
+    <div class="drawer-head flex items-center justify-between px-6 py-4">
+      <h3 class="font-extrabold text-lg" style="color:var(--km-navy);" id="kmDrawerTitle">Tạo mã khuyến mãi</h3>
+      <button type="button" id="kmCloseBtn" onclick="closeKmDrawer()" class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center transition" style="color:var(--km-navy);" aria-label="Đóng">
+        <span class="material-symbols-outlined text-[22px]">close</span>
       </button>
     </div>
-    <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
 
-      <p class="text-xs font-extrabold text-purple-700 uppercase tracking-wider">Thông tin chung</p>
-      <div class="field">
-        <div class="flex items-center justify-between gap-2 mb-1.5">
-          <label for="f_maCode" class="!mb-0">Mã khuyến mãi *</label>
-          <button type="button" onclick="generateRandomMaCode()" class="text-xs font-extrabold text-purple-700 hover:text-purple-900 flex items-center gap-1 hover:underline cursor-pointer bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200 transition">
-            <span class="material-symbols-outlined text-[14px]">casino</span> Ngẫu nhiên
-          </button>
+    <div class="drawer-body px-6 py-5 flex flex-col gap-4">
+
+      <p class="text-xs font-extrabold uppercase tracking-wider" style="color:var(--km-navy);">Thông tin chung</p>
+      <div class="km-form-grid cols-2">
+        <div class="field span-2">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <label for="f_maCode" class="!mb-0">Mã khuyến mãi *</label>
+            <button type="button" onclick="generateRandomMaCode()" class="text-xs font-extrabold flex items-center gap-1 hover:underline cursor-pointer bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-md border border-slate-200 transition" style="color:var(--km-navy);">
+              <span class="material-symbols-outlined text-[14px]">casino</span> Ngẫu nhiên
+            </button>
+          </div>
+          <div class="relative">
+            <input type="text" name="maCode" id="f_maCode" maxlength="50" required placeholder="Ví dụ: VSPORT20" oninput="this.value = this.value.toUpperCase().trim();" class="pr-10"/>
+            <button type="button" onclick="generateRandomMaCode()" title="Tạo mã ngẫu nhiên" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center transition" style="color:var(--km-navy);" aria-label="Tạo mã ngẫu nhiên">
+              <span class="material-symbols-outlined text-[16px]">shuffle</span>
+            </button>
+          </div>
+          <p class="hint">Chỉ gồm chữ in hoa, số, gạch nối (ví dụ: VSPORT20). Không thể trùng mã đã có.</p>
+          <p class="err" id="err_maCode">Vui lòng nhập mã khuyến mãi hợp lệ.</p>
         </div>
-        <div class="relative">
-          <input type="text" name="maCode" id="f_maCode" maxlength="50" required placeholder="Ví dụ: VSPORT20" oninput="this.value = this.value.toUpperCase().trim();" class="pr-10"/>
-          <button type="button" onclick="generateRandomMaCode()" title="Tạo mã ngẫu nhiên" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg hover:bg-purple-100 text-purple-600 flex items-center justify-center transition" aria-label="Tạo mã ngẫu nhiên">
-            <span class="material-symbols-outlined text-[16px]">shuffle</span>
-          </button>
+        <div class="field span-2">
+          <label for="f_moTa">Tên chương trình / Mô tả</label>
+          <textarea name="moTa" id="f_moTa" rows="2" maxlength="255" placeholder="Mô tả chương trình khuyến mãi..."></textarea>
         </div>
-        <p class="hint">Chỉ gồm chữ in hoa, số, gạch nối (ví dụ: VSPORT20). Không thể trùng mã đã có.</p>
-        <p class="err" id="err_maCode">Vui lòng nhập mã khuyến mãi hợp lệ.</p>
-      </div>
-      <div class="field">
-        <label for="f_moTa">Tên chương trình / Mô tả</label>
-        <textarea name="moTa" id="f_moTa" rows="2" maxlength="255" placeholder="Mô tả chương trình khuyến mãi..."></textarea>
       </div>
 
-      <p class="text-xs font-extrabold text-purple-700 uppercase tracking-wider mt-1">Hình thức giảm</p>
+      <div class="flex items-center justify-between gap-2 mt-1">
+        <p class="text-xs font-extrabold uppercase tracking-wider" style="color:var(--km-navy);">Hình ảnh chương trình</p>
+        <span class="km-upl-count" id="kmImgCount">0/5 ảnh</span>
+      </div>
+      <p class="hint -mt-2">Tải tối đa 5 ảnh cho mỗi chương trình. Mỗi ảnh không vượt quá 5&nbsp;MB. Hỗ trợ JPG, PNG và WEBP. Khuyến nghị tỉ lệ 16:9.</p>
+
+      <input type="file" id="f_images" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" tabindex="-1"/>
+
+      <div class="km-dropzone" id="kmDropzone" tabindex="0" role="button" aria-label="Chọn hoặc kéo thả hình ảnh chương trình">
+        <div class="km-dz-icon"><span class="material-symbols-outlined text-[20px]">cloud_upload</span></div>
+        <div class="km-dz-title" id="kmDzTitle">Kéo và thả ảnh vào đây</div>
+        <div class="km-dz-sub">hoặc nhấn nút bên dưới · JPG, PNG, WEBP · tối đa 5MB/ảnh</div>
+        <button type="button" class="km-dz-browse-btn" id="kmDzBrowseBtn">Chọn hình ảnh</button>
+      </div>
+      <p class="err" id="err_images"></p>
+
+      <div class="km-img-grid" id="kmImageGrid"></div>
+      <p class="hint">Ảnh đầu tiên (hoặc ảnh được đánh dấu) sẽ là ảnh bìa. Bấm "Đặt làm ảnh bìa" để đổi. Xóa ảnh có hiệu lực ngay, không cần bấm Lưu.</p>
+
+      <p class="text-xs font-extrabold uppercase tracking-wider mt-1" style="color:var(--km-navy);">Hình thức giảm</p>
       <div class="flex gap-2.5">
         <button type="button" class="discount-mode-btn active" id="modeBtnPercent" onclick="setDiscountMode('PERCENT')">Giảm theo phần trăm</button>
         <button type="button" class="discount-mode-btn" id="modeBtnFixed" onclick="setDiscountMode('FIXED')">Giảm số tiền cố định</button>
       </div>
       <input type="hidden" name="loaiGiam" id="f_loaiGiam" value="PERCENT"/>
 
-      <div id="percentFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div id="percentFields" class="km-form-grid cols-2">
         <div class="field">
           <label for="f_giaTriGiamPercent">Phần trăm giảm (%) *</label>
           <input type="number" min="0.01" max="100" step="0.1" id="f_giaTriGiamPercent" placeholder="10"/>
@@ -305,13 +457,13 @@
       <input type="hidden" name="giaTriGiam" id="f_giaTriGiam"/>
       <input type="hidden" name="giamToiDa" id="f_giamToiDa"/>
 
-      <p class="text-xs font-extrabold text-purple-700 uppercase tracking-wider mt-1">Điều kiện áp dụng</p>
-      <div class="field">
-        <label for="f_giaTriToiThieu">Giá trị đơn tối thiểu (đ)</label>
-        <input type="number" min="0" step="1000" name="giaTriToiThieu" id="f_giaTriToiThieu" placeholder="200.000"/>
-        <p class="err" id="err_giaTriToiThieu">Giá trị đơn tối thiểu không được âm.</p>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <p class="text-xs font-extrabold uppercase tracking-wider mt-1" style="color:var(--km-navy);">Điều kiện áp dụng</p>
+      <div class="km-form-grid cols-2">
+        <div class="field span-2">
+          <label for="f_giaTriToiThieu">Giá trị đơn tối thiểu (đ)</label>
+          <input type="number" min="0" step="1000" name="giaTriToiThieu" id="f_giaTriToiThieu" placeholder="200.000"/>
+          <p class="err" id="err_giaTriToiThieu">Giá trị đơn tối thiểu không được âm.</p>
+        </div>
         <div class="field">
           <label for="f_ngayBatDau">Ngày bắt đầu *</label>
           <input type="date" name="ngayBatDau" id="f_ngayBatDau" required/>
@@ -321,24 +473,40 @@
           <input type="date" name="ngayKetThuc" id="f_ngayKetThuc" required/>
           <p class="err" id="err_ngayKetThuc">Ngày kết thúc phải sau ngày bắt đầu.</p>
         </div>
-      </div>
-      <div class="field">
-        <label for="f_soLanToiDa">Tổng lượt sử dụng (để trống nếu không giới hạn)</label>
-        <input type="number" min="1" step="1" name="soLanToiDa" id="f_soLanToiDa" placeholder="100"/>
-        <p class="err" id="err_soLanToiDa">Tổng lượt sử dụng phải lớn hơn 0.</p>
+        <div class="field span-2">
+          <label for="f_soLanToiDa">Tổng lượt sử dụng (để trống nếu không giới hạn)</label>
+          <input type="number" min="1" step="1" name="soLanToiDa" id="f_soLanToiDa" placeholder="100"/>
+          <p class="err" id="err_soLanToiDa">Tổng lượt sử dụng phải lớn hơn 0.</p>
+        </div>
       </div>
       <label class="flex items-center gap-2.5 text-sm font-bold text-slate-800 cursor-pointer pt-1">
-        <input type="checkbox" name="trangThaiHoatDong" id="f_trangThaiHoatDong" checked class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 border-slate-300"/> Đang hoạt động
+        <input type="checkbox" name="trangThaiHoatDong" id="f_trangThaiHoatDong" checked class="w-4 h-4 rounded border-slate-300" style="accent-color:var(--km-navy);"/> Đang hoạt động
       </label>
     </div>
-    <div class="px-6 py-4 border-t border-purple-100 flex gap-3 bg-purple-50/50">
-      <button type="button" onclick="closeKmDrawer()" class="px-5 py-2.5 rounded-xl border border-purple-200 text-purple-900 text-sm font-bold hover:bg-purple-100 transition">Hủy</button>
-      <button type="submit" id="kmSubmitBtn" class="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-extrabold transition shadow-md shadow-purple-200">Lưu mã khuyến mãi</button>
+
+    <div class="drawer-foot px-6 py-4 flex gap-3">
+      <button type="button" id="kmCancelBtn" onclick="closeKmDrawer()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold hover:bg-slate-100 transition" style="color:var(--km-navy);">Hủy</button>
+      <button type="submit" id="kmSubmitBtn" class="flex-1 py-2.5 rounded-xl text-white text-sm font-extrabold transition shadow-md" style="background:var(--km-green); box-shadow:0 4px 14px rgba(22,163,74,.25);" onmouseover="this.style.background='var(--km-green-hover)'" onmouseout="this.style.background='var(--km-green)'">Lưu mã khuyến mãi</button>
     </div>
   </form>
 </div>
 
 <script>
+var KM_CONTEXT_PATH = '${pageContext.request.contextPath}';
+var KM_IMAGE_API = KM_CONTEXT_PATH + '/manager/khuyen-mai/hinh-anh';
+var KM_MAX_IMAGES = 5;
+var KM_MAX_FILE_MB = 5;
+
+/* ── Image manager state ──
+   existingImages: ảnh đã lưu ở backend (khi sửa mã) - mỗi phần tử { hinhAnhId, publicUrl, tenFileGoc, dungLuong, laAnhBia, ... }
+   pendingFiles:   ảnh mới vừa chọn, chưa submit - mỗi phần tử { file: File, localId, coverCandidate }
+   pendingCoverLocalId: localId của pendingFiles được chọn làm ảnh bìa (chỉ có ý nghĩa khi existingImages rỗng) */
+var kmExistingImages = [];
+var kmPendingFiles = [];
+var kmPendingCoverLocalId = null;
+var kmLocalIdSeq = 0;
+var kmCurrentKhuyenMaiId = null;
+
 var KM_DATA = {};
 <c:forEach var="km" items="${promotions}">
 KM_DATA['${km.khuyenMaiID}'] = {
@@ -377,6 +545,363 @@ function generateRandomMaCode() {
     clearKmErrors();
   }
 }
+
+/* ═══════════════════ IMAGE MANAGER ═══════════════════ */
+
+function kmFormatBytes(bytes) {
+  if (bytes == null || isNaN(bytes)) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function kmTruncateName(name, max) {
+  if (!name) return '';
+  max = max || 22;
+  if (name.length <= max) return name;
+  var dot = name.lastIndexOf('.');
+  var ext = dot > -1 ? name.slice(dot) : '';
+  var base = dot > -1 ? name.slice(0, dot) : name;
+  var keep = Math.max(4, max - ext.length - 1);
+  return base.slice(0, keep) + '…' + ext;
+}
+
+function kmTotalImageCount() {
+  return kmExistingImages.length + kmPendingFiles.length;
+}
+
+function kmRemainingSlots() {
+  return Math.max(0, KM_MAX_IMAGES - kmTotalImageCount());
+}
+
+function kmShowImageError(message) {
+  var err = document.getElementById('err_images');
+  err.textContent = message;
+  err.style.display = 'block';
+}
+
+function kmClearImageError() {
+  var err = document.getElementById('err_images');
+  err.style.display = 'none';
+  err.textContent = '';
+}
+
+function kmIsDuplicateFile(file, list) {
+  return list.some(function (p) {
+    return p.file.name === file.name && p.file.size === file.size && p.file.lastModified === file.lastModified;
+  });
+}
+
+/* Input.files là readonly - khi submit multipart trực tiếp, dựng lại FileList từ toàn bộ
+   pendingFiles còn được giữ (sau khi đã loại ảnh bị xóa) bằng DataTransfer. */
+function kmSyncFileInput() {
+  var dt = new DataTransfer();
+  kmPendingFiles.forEach(function (p) { dt.items.add(p.file); });
+  document.getElementById('f_images').files = dt.files;
+}
+
+/* Nhận một FileList/Array mới chọn (từ input hoặc drop) và APPEND vào pendingFiles hiện có -
+   không bao giờ gán đè mảng, để ảnh đã chọn trước đó không biến mất. */
+function kmAddFiles(fileList) {
+  var files = Array.prototype.slice.call(fileList || []);
+  if (!files.length) return;
+  kmClearImageError();
+
+  var accepted = ['image/jpeg', 'image/png', 'image/webp'];
+  var maxBytes = KM_MAX_FILE_MB * 1024 * 1024;
+  var toAdd = [];
+  var rejectedMsg = null;
+
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    if (accepted.indexOf(file.type) === -1) {
+      rejectedMsg = 'Định dạng tệp "' + file.name + '" không được hỗ trợ.';
+      continue;
+    }
+    if (file.size > maxBytes) {
+      rejectedMsg = 'Ảnh "' + file.name + '" vượt quá dung lượng ' + KM_MAX_FILE_MB + ' MB.';
+      continue;
+    }
+    if (kmIsDuplicateFile(file, kmPendingFiles) || kmIsDuplicateFile(file, toAdd)) {
+      continue;
+    }
+    toAdd.push({ file: file, localId: 'p' + (++kmLocalIdSeq) });
+  }
+
+  var remaining = kmRemainingSlots();
+  if (toAdd.length > remaining) {
+    if (remaining <= 0) {
+      kmShowImageError('Bạn đã tải đủ ' + KM_MAX_IMAGES + '/' + KM_MAX_IMAGES + ' ảnh.');
+      return;
+    }
+    rejectedMsg = 'Mỗi chương trình chỉ được tải tối đa ' + KM_MAX_IMAGES + ' ảnh.';
+    toAdd = toAdd.slice(0, remaining);
+  }
+
+  if (!toAdd.length) {
+    if (rejectedMsg) kmShowImageError(rejectedMsg);
+    return;
+  }
+
+  kmPendingFiles = kmPendingFiles.concat(toAdd);
+  if (kmPendingCoverLocalId === null && kmExistingImages.length === 0 && kmPendingFiles.length === toAdd.length) {
+    kmPendingCoverLocalId = kmPendingFiles[0].localId;
+  }
+
+  kmSyncFileInput();
+  if (rejectedMsg) kmShowImageError(rejectedMsg);
+  kmRenderImages();
+}
+
+function kmRemovePendingFile(localId) {
+  kmPendingFiles = kmPendingFiles.filter(function (p) { return p.localId !== localId; });
+  if (kmPendingCoverLocalId === localId) {
+    kmPendingCoverLocalId = kmPendingFiles.length ? kmPendingFiles[0].localId : null;
+  }
+  kmSyncFileInput();
+  kmClearImageError();
+  kmRenderImages();
+}
+
+function kmSetPendingCover(localId) {
+  kmPendingCoverLocalId = localId;
+  kmRenderImages();
+}
+
+/* Ảnh hiện có (đã lưu server) dùng endpoint AJAX riêng - có hiệu lực ngay, không cần bấm Lưu. */
+function kmLoadExistingImages(khuyenMaiId) {
+  kmCurrentKhuyenMaiId = khuyenMaiId || null;
+  if (!khuyenMaiId) {
+    kmExistingImages = [];
+    kmRenderImages();
+    return;
+  }
+  fetch(KM_IMAGE_API + '?khuyenMaiId=' + encodeURIComponent(khuyenMaiId), { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      kmExistingImages = (data && data.success && data.images) ? data.images : [];
+      kmRenderImages();
+    })
+    .catch(function () { kmExistingImages = []; kmRenderImages(); });
+}
+
+function kmImagePost(params) {
+  var body = new URLSearchParams(params);
+  return fetch(KM_IMAGE_API, { method: 'POST', credentials: 'same-origin', body: body })
+    .then(function (r) { return r.json(); });
+}
+
+function kmSetCoverExisting(hinhAnhId) {
+  if (!kmCurrentKhuyenMaiId) return;
+  kmImagePost({ action: 'set-cover', khuyenMaiId: kmCurrentKhuyenMaiId, hinhAnhId: hinhAnhId })
+    .then(function (res) {
+      if (!res.success) { kmShowImageError(res.message || 'Không thể đặt ảnh bìa.'); return; }
+      kmLoadExistingImages(kmCurrentKhuyenMaiId);
+    });
+}
+
+function kmDeleteExistingImage(hinhAnhId) {
+  if (!kmCurrentKhuyenMaiId) return;
+  kmImagePost({ action: 'delete', khuyenMaiId: kmCurrentKhuyenMaiId, hinhAnhId: hinhAnhId })
+    .then(function (res) {
+      if (!res.success) { kmShowImageError(res.message || 'Không thể xóa ảnh.'); return; }
+      kmLoadExistingImages(kmCurrentKhuyenMaiId);
+    });
+}
+
+function kmUpdateCounter() {
+  var total = kmTotalImageCount();
+  var el = document.getElementById('kmImgCount');
+  el.textContent = total + '/' + KM_MAX_IMAGES + ' ảnh';
+  el.classList.toggle('is-full', total >= KM_MAX_IMAGES);
+
+  var full = total >= KM_MAX_IMAGES;
+  var dz = document.getElementById('kmDropzone');
+  var browseBtn = document.getElementById('kmDzBrowseBtn');
+  var title = document.getElementById('kmDzTitle');
+  dz.classList.toggle('is-disabled', full);
+  browseBtn.disabled = full;
+  title.textContent = full ? 'Bạn đã tải đủ ' + KM_MAX_IMAGES + '/' + KM_MAX_IMAGES + ' ảnh.' : 'Kéo và thả ảnh vào đây';
+}
+
+function kmBuildImageCard(opts) {
+  /* opts: { key, thumbSrc, name, sizeLabel, order, isCover, onSetCover, canSetCover, onDelete, deleteLabel } */
+  var card = document.createElement('div');
+  card.className = 'km-img-card' + (opts.isCover ? ' is-cover' : '');
+
+  var thumbWrap = document.createElement('div');
+  thumbWrap.className = 'km-img-thumb-wrap';
+
+  var skeleton = document.createElement('div');
+  skeleton.className = 'km-img-skeleton';
+  thumbWrap.appendChild(skeleton);
+
+  var img = document.createElement('img');
+  img.alt = opts.name || 'Ảnh chương trình khuyến mãi';
+  img.style.display = 'none';
+  img.onload = function () { skeleton.remove(); img.style.display = 'block'; };
+  img.onerror = function () {
+    skeleton.remove();
+    img.remove();
+    var fallback = document.createElement('div');
+    fallback.className = 'km-img-fallback';
+    fallback.innerHTML = '<span class="material-symbols-outlined" style="font-size:22px;">broken_image</span><span>Không tải được ảnh</span>';
+    thumbWrap.appendChild(fallback);
+  };
+  img.src = opts.thumbSrc;
+  thumbWrap.appendChild(img);
+
+  var orderTag = document.createElement('span');
+  orderTag.className = 'km-img-order-tag';
+  orderTag.textContent = String(opts.order);
+  thumbWrap.appendChild(orderTag);
+
+  if (opts.isCover) {
+    var coverTag = document.createElement('span');
+    coverTag.className = 'km-img-cover-tag';
+    coverTag.textContent = 'Ảnh bìa';
+    thumbWrap.appendChild(coverTag);
+  }
+
+  var delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.className = 'km-img-del-btn';
+  delBtn.setAttribute('aria-label', opts.deleteLabel || 'Xóa ảnh');
+  delBtn.title = 'Xóa ảnh';
+  delBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">delete</span>';
+  delBtn.onclick = opts.onDelete;
+  thumbWrap.appendChild(delBtn);
+
+  card.appendChild(thumbWrap);
+
+  var meta = document.createElement('div');
+  meta.className = 'km-img-meta';
+
+  var nameEl = document.createElement('div');
+  nameEl.className = 'km-img-name';
+  nameEl.title = opts.name || '';
+  nameEl.textContent = kmTruncateName(opts.name || '');
+  meta.appendChild(nameEl);
+
+  var sizeEl = document.createElement('div');
+  sizeEl.className = 'km-img-size';
+  sizeEl.textContent = opts.sizeLabel || '';
+  meta.appendChild(sizeEl);
+
+  var coverBtn = document.createElement('button');
+  coverBtn.type = 'button';
+  coverBtn.className = 'km-img-cover-btn';
+  coverBtn.textContent = opts.isCover ? 'Ảnh bìa hiện tại' : 'Đặt làm ảnh bìa';
+  coverBtn.disabled = opts.isCover || !opts.canSetCover;
+  coverBtn.onclick = opts.onSetCover;
+  meta.appendChild(coverBtn);
+
+  card.appendChild(meta);
+  return card;
+}
+
+/* Vẽ lại TOÀN BỘ preview: existingImages trước, pendingFiles sau - luôn hiển thị đủ, không
+   bao giờ chỉ hiển thị ảnh vừa chọn gần nhất. */
+function kmRenderImages() {
+  var grid = document.getElementById('kmImageGrid');
+  grid.innerHTML = '';
+  kmUpdateCounter();
+
+  var total = kmTotalImageCount();
+  if (total === 0) {
+    var empty = document.createElement('div');
+    empty.className = 'km-img-empty';
+    empty.textContent = 'Chưa có ảnh nào được chọn.';
+    grid.appendChild(empty);
+    return;
+  }
+
+  var order = 0;
+  var hasExistingCover = kmExistingImages.some(function (img) { return img.laAnhBia; });
+
+  /* Không còn ảnh cũ nào làm bìa (vừa xóa ảnh bìa cũ) - tự chọn ảnh mới đầu tiên làm bìa tạm
+     thời để trạng thái ảnh bìa không bao giờ rỗng khi vẫn còn ít nhất 1 ảnh. */
+  if (!hasExistingCover && kmExistingImages.length === 0 && kmPendingFiles.length &&
+      (kmPendingCoverLocalId === null || !kmPendingFiles.some(function (p) { return p.localId === kmPendingCoverLocalId; }))) {
+    kmPendingCoverLocalId = kmPendingFiles[0].localId;
+  }
+
+  kmExistingImages.forEach(function (img) {
+    order++;
+    grid.appendChild(kmBuildImageCard({
+      key: 'existing-' + img.hinhAnhId,
+      thumbSrc: img.publicUrl,
+      name: img.tenFileGoc,
+      sizeLabel: kmFormatBytes(img.dungLuong),
+      order: order,
+      isCover: !!img.laAnhBia,
+      canSetCover: true,
+      onSetCover: function () { kmSetCoverExisting(img.hinhAnhId); },
+      onDelete: function () { kmDeleteExistingImage(img.hinhAnhId); },
+      deleteLabel: 'Xóa ảnh ' + (img.tenFileGoc || '')
+    }));
+  });
+
+  kmPendingFiles.forEach(function (p) {
+    order++;
+    var isCover = !hasExistingCover && kmPendingCoverLocalId === p.localId;
+    grid.appendChild(kmBuildImageCard({
+      key: 'pending-' + p.localId,
+      thumbSrc: URL.createObjectURL(p.file),
+      name: p.file.name,
+      sizeLabel: kmFormatBytes(p.file.size) + ' · Chưa lưu',
+      order: order,
+      isCover: isCover,
+      canSetCover: !hasExistingCover,
+      onSetCover: function () { kmSetPendingCover(p.localId); },
+      onDelete: function () { kmRemovePendingFile(p.localId); },
+      deleteLabel: 'Xóa ảnh mới ' + p.file.name
+    }));
+  });
+}
+
+function kmInitDropzone() {
+  var dz = document.getElementById('kmDropzone');
+  var input = document.getElementById('f_images');
+  var browseBtn = document.getElementById('kmDzBrowseBtn');
+
+  function openPicker() {
+    if (kmRemainingSlots() <= 0) return;
+    input.click();
+  }
+
+  browseBtn.addEventListener('click', function (e) { e.stopPropagation(); openPicker(); });
+  dz.addEventListener('click', openPicker);
+  dz.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
+  });
+
+  input.addEventListener('change', function () {
+    kmAddFiles(input.files);
+    input.value = '';
+  });
+
+  ['dragenter', 'dragover'].forEach(function (evt) {
+    dz.addEventListener(evt, function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (kmRemainingSlots() > 0) dz.classList.add('is-dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (evt) {
+    dz.addEventListener(evt, function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dz.classList.remove('is-dragover');
+    });
+  });
+  dz.addEventListener('drop', function (e) {
+    if (!e.dataTransfer || !e.dataTransfer.files) return;
+    kmAddFiles(e.dataTransfer.files);
+  });
+}
+
+/* ═══════════════════ VALIDATION / SUBMIT ═══════════════════ */
 
 function clearKmErrors() {
   document.querySelectorAll('#kmForm .err').forEach(function (e) { e.style.display = 'none'; });
@@ -430,28 +955,50 @@ function validateKmForm(form) {
   var maxUsage = document.getElementById('f_soLanToiDa');
   if (maxUsage.value !== '' && parseInt(maxUsage.value, 10) <= 0) { showKmError('soLanToiDa', maxUsage); return false; }
 
+  if (kmTotalImageCount() > KM_MAX_IMAGES) {
+    kmShowImageError('Tổng số ảnh vượt quá ' + KM_MAX_IMAGES + '. Vui lòng bớt ảnh mới chọn hoặc xóa bớt ảnh hiện có.');
+    document.getElementById('err_images').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return false;
+  }
+
+  /* Đảm bảo input.files khớp đúng pendingFiles còn được giữ trước khi submit multipart thật. */
+  kmSyncFileInput();
+
   return disableSubmit(form);
 }
 
 function disableSubmit(form) {
-  var btn = form.querySelector('button[type="submit"]');
-  if (btn) {
-    if (btn.dataset.submitting === '1') return false;
-    btn.dataset.submitting = '1';
-    btn.disabled = true;
-    btn.textContent = 'Đang lưu...';
+  var submitBtn = form.querySelector('button[type="submit"]');
+  var cancelBtn = document.getElementById('kmCancelBtn');
+  if (submitBtn) {
+    if (submitBtn.dataset.submitting === '1') return false;
+    submitBtn.dataset.submitting = '1';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang lưu...';
   }
+  if (cancelBtn) cancelBtn.disabled = true;
   return true;
 }
 
+/* Nếu backend redirect kèm errorMsg (validation phía server thất bại), form vẫn còn nguyên
+   trên trang mới sau reload - browser back/refresh không áp dụng ở đây vì đây là submit
+   POST-redirect-GET chuẩn của servlet; không cần khôi phục thủ công. */
+
 function openKmDrawer(id) {
   clearKmErrors();
+  kmClearImageError();
   var form = document.getElementById('kmForm');
   form.reset();
   document.getElementById('f_giaTriGiamPercent').value = '';
   document.getElementById('f_giamToiDaPercent').value = '';
   document.getElementById('f_giaTriGiamFixed').value = '';
+
+  kmPendingFiles = [];
+  kmPendingCoverLocalId = null;
+  kmSyncFileInput();
+
   setDiscountMode('PERCENT');
+  kmLoadExistingImages(id || null);
 
   if (id && KM_DATA[id]) {
     var d = KM_DATA[id];
@@ -479,19 +1026,38 @@ function openKmDrawer(id) {
     document.getElementById('kmIdInput').value = '';
   }
 
-  document.getElementById('kmOverlay').classList.add('open');
-  document.getElementById('kmDrawer').classList.add('open');
-  setTimeout(function () { document.getElementById('f_maCode').focus(); }, 50);
+  var submitBtn = document.getElementById('kmSubmitBtn');
+  submitBtn.disabled = false;
+  submitBtn.dataset.submitting = '0';
+  submitBtn.textContent = 'Lưu mã khuyến mãi';
+  document.getElementById('kmCancelBtn').disabled = false;
+
+  var overlayEl = document.getElementById('kmOverlay');
+  var drawerEl = document.getElementById('kmDrawer');
+  overlayEl.classList.add('open');
+  drawerEl.classList.remove('open');
+  document.body.classList.add('km-drawer-lock');
+  /* Cần force reflow + 2 frame trước khi thêm .open để transform/opacity thật sự animate
+     (nếu thêm ngay lúc display vừa chuyển sang block, trình duyệt bỏ qua transition). */
+  void drawerEl.offsetWidth;
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { drawerEl.classList.add('open'); });
+  });
+  setTimeout(function () { document.getElementById('f_maCode').focus(); }, 350);
 }
 
 function closeKmDrawer() {
   document.getElementById('kmOverlay').classList.remove('open');
   document.getElementById('kmDrawer').classList.remove('open');
+  document.body.classList.remove('km-drawer-lock');
 }
 
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') closeKmDrawer();
 });
+
+kmInitDropzone();
+kmRenderImages();
 
 <c:if test="${not empty editing}">
 window.addEventListener('DOMContentLoaded', function () { openKmDrawer('${editing.khuyenMaiID}'); });
