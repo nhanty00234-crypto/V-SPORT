@@ -18,6 +18,9 @@ public final class ReputationLabel {
         if (score >= Constants.REPUTATION_WATCH_THRESHOLD) {
             return Constants.REPUTATION_LABEL_WATCH;
         }
-        return Constants.REPUTATION_LABEL_RISK;
+        if (score >= Constants.REPUTATION_RISK_THRESHOLD) {
+            return Constants.REPUTATION_LABEL_RISK;
+        }
+        return Constants.REPUTATION_LABEL_VERY_HIGH_RISK;
     }
 }

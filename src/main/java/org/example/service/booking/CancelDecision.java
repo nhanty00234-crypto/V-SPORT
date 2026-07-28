@@ -3,8 +3,10 @@ package org.example.service.booking;
 import java.time.LocalDateTime;
 
 /**
- * Phân loại hủy sớm/hủy sát giờ (mục 2 spec). Logic thuần, không đụng DB —
- * BookingCancellationService gọi lớp này rồi mới ghi DB.
+ * Phân loại hủy booking theo 3 mốc thời gian:
+ * - Hủy trước >= 24h: EARLY_CANCEL (Trừ 0 điểm)
+ * - Hủy từ 6h đến < 24h: MID_CANCEL (Trừ 5 điểm)
+ * - Hủy dưới < 6h: LATE_CANCEL (Trừ 10 điểm)
  */
 public final class CancelDecision {
 
@@ -13,14 +15,25 @@ public final class CancelDecision {
 
     public enum CancelType {
         EARLY_CANCEL,
+        MID_CANCEL,
         LATE_CANCEL
     }
 
-    /**
-     * "Còn dưới hoặc bằng lateCancelHours tiếng" => LATE_CANCEL (biên đúng bằng ngưỡng tính là hủy sát giờ).
-     */
+    public static CancelType decide(LocalDateTime now, LocalDateTime bookingStart, int lateCancelHours, int midCancelHours) {
+        if (!now.plusHours(lateCancelHours).isBefore(bookingStart)) {
+            return CancelType.LATE_CANCEL;
+        } else if (!now.plusHours(midCancelHours).isBefore(bookingStart)) {
+            return CancelType.MID_CANCEL;
+        } else {
+            return CancelType.EARLY_CANCEL;
+        }
+    }
+
     public static CancelType decide(LocalDateTime now, LocalDateTime bookingStart, int lateCancelHours) {
-        boolean isLate = !now.plusHours(lateCancelHours).isBefore(bookingStart);
-        return isLate ? CancelType.LATE_CANCEL : CancelType.EARLY_CANCEL;
+        return decide(now, bookingStart, lateCancelHours, 24);
+    }
+
+    public static CancelType decide(LocalDateTime now, LocalDateTime bookingStart) {
+        return decide(now, bookingStart, 6, 24);
     }
 }

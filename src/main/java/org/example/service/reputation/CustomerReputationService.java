@@ -93,6 +93,31 @@ public final class CustomerReputationService {
             }
             insert.setString(9, ipAddress);
             insert.executeUpdate();
+        } catch (SQLException e) {
+            // Chống trừ trùng lặp do Unique Filtered Index UQ_ReputationHistory_Account_DatSan_Action
+            if (e.getErrorCode() == 2601 || e.getErrorCode() == 2627 || (e.getMessage() != null && e.getMessage().contains("UQ_ReputationHistory"))) {
+                logger.warn("Reputation change already logged for AccountID={}, DatSanID={}, action={}. Skipping duplicate delta.",
+                        accountId, datSanId, actionType);
+                return scoreBefore;
+            }
+            throw e;
+        }
+
+        // Tự động tạo ThongBao khi bị trừ điểm uy tín (A4 spec requirement)
+        if (scoreDelta < 0) {
+            try (PreparedStatement insertTb = conn.prepareStatement(
+                    "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
+                    "VALUES (?, N'Cập nhật điểm uy tín', ?, N'HE_THONG', 0, GETDATE(), ?, ?)")) {
+                insertTb.setInt(1, accountId);
+                String reasonStr = reason != null ? reason.trim() : "vi phạm quy định";
+                String noiDung = "Bạn bị trừ " + Math.abs(scoreDelta) + " điểm uy tín vì " + reasonStr.toLowerCase() + ". Điểm hiện tại: " + scoreAfter + "/100.";
+                insertTb.setNString(2, noiDung);
+                insertTb.setString(3, datSanId != null ? "BOOKING_" + datSanId : "REP_HIST");
+                insertTb.setString(4, "/customer/lich-su-diem-uy-tin");
+                insertTb.executeUpdate();
+            } catch (Exception ex) {
+                logger.warn("Could not insert ThongBao notification for reputation deduction: {}", ex.getMessage());
+            }
         }
 
         logger.info("Reputation adjust: AccountID={}, action={}, delta={}, before={}, after={}",
@@ -101,7 +126,7 @@ public final class CustomerReputationService {
     }
 
     private static String counterColumnFor(String actionType) {
-        if (Constants.REPUTATION_ACTION_LATE_CANCEL.equals(actionType)) {
+        if (Constants.REPUTATION_ACTION_LATE_CANCEL.equals(actionType) || Constants.REPUTATION_ACTION_CANCEL_6_TO_24.equals(actionType)) {
             return "LateCancelCount";
         }
         if (Constants.REPUTATION_ACTION_NO_SHOW.equals(actionType)) {
