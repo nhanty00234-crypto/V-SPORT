@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @WebFilter("/*")
-public class FilterMaHoa implements Filter {
+public class EncodingAndCacheControlFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {}
 
