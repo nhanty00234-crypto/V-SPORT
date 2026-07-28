@@ -314,10 +314,19 @@
                 </div>
                 <div class="customer-profile-perso-row">
                     <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                    <span class="customer-profile-perso-label">Môn thể thao và trình độ</span>
+                    <span class="customer-profile-perso-label">Môn thể thao &amp; Trình độ</span>
                     <span id="chpSportLevelValue" class="customer-profile-perso-value">
                         <c:choose>
-                            <c:when test="${not empty profileExtra.favoriteSportName}">${fn:escapeXml(profileExtra.favoriteSportName)}<c:if test="${not empty profileExtra.skillLevel}"> - ${fn:escapeXml(profileExtra.skillLevel)}</c:if></c:when>
+                            <c:when test="${not empty profileExtra.favoriteSportName}">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+                                    <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                                    ${fn:escapeXml(profileExtra.favoriteSportName)}
+                                    <c:if test="${not empty profileExtra.skillLevel}">
+                                        <span class="text-emerald-400 font-normal">|</span>
+                                        <span class="text-emerald-800 font-semibold">${fn:escapeXml(profileExtra.skillLevel)}</span>
+                                    </c:if>
+                                </span>
+                            </c:when>
                             <c:otherwise>-</c:otherwise>
                         </c:choose>
                     </span>
