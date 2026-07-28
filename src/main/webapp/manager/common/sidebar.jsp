@@ -430,6 +430,10 @@
       class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
       <i class="ti ti-user text-[19px]"></i>Quản lý khách hàng
     </a>
+    <a href="${pageContext.request.contextPath}/manager/danh-gia"
+      class="nav-link ${uri.contains('/manager/danh-gia') || uri.contains('/DanhGia.jsp') ? 'active' : ''}">
+      <i class="ti ti-star text-[19px]"></i>Đánh giá &amp; Phản hồi
+    </a>
 
     <!-- Hệ thống -->
     <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-3 mt-4 mb-1.5">Hệ thống</p>
