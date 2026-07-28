@@ -94,11 +94,11 @@
                 </div>
             </section>
 
-            <!-- Main Content — info first on mobile, booking widget second -->
+            <!-- Main Content — info + booking widget (server pricing via CourtPricingService API) -->
             <div class="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
-                <!-- INFO COLUMN — full width sau khi xóa booking widget -->
-                <div class="w-full flex flex-col gap-8 lg:gap-10">
+                <!-- INFO COLUMN -->
+                <div class="w-full lg:w-[58%] flex flex-col gap-8 lg:gap-10">
 
                     <!-- Header Info -->
                     <div>
@@ -189,6 +189,82 @@
                     </div>
 
                 </div>
+
+                <!-- BOOKING COLUMN -->
+                <aside class="w-full lg:w-[42%] lg:sticky lg:top-24 self-start">
+                    <form id="booking-form" method="post"
+                          action="${pageContext.request.contextPath}/customer/dat-lich-truc-quan/xac-nhan"
+                          class="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm p-4 sm:p-5 space-y-4">
+                        <h2 class="text-base font-bold text-[#191c1e] flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[20px] text-[#1677D2]">calendar_month</span>
+                            Chọn khung giờ
+                        </h2>
+
+                        <input type="hidden" name="sanId" value="${san.sanID}" />
+                        <input type="hidden" name="ngayDat" id="ngayDat" />
+                        <input type="hidden" name="gioBatDau" id="gioBatDau" />
+                        <input type="hidden" name="gioKetThuc" id="gioKetThuc" />
+
+                        <div class="flex items-center justify-between gap-2">
+                            <button type="button" id="prev-day-btn" onclick="prevDay()"
+                                    class="h-9 w-9 rounded-lg border border-[#e0e3e5] text-[#3d4a3d] hover:bg-[#f0f4f8] disabled:opacity-40">
+                                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                            </button>
+                            <div id="date-display" class="text-sm font-semibold text-[#191c1e]"></div>
+                            <button type="button" onclick="nextDay()"
+                                    class="h-9 w-9 rounded-lg border border-[#e0e3e5] text-[#3d4a3d] hover:bg-[#f0f4f8]">
+                                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                            </button>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between text-xs text-[#6d7b6c] mb-1.5">
+                                <span>Kéo tay cầm để chọn giờ</span>
+                                <span id="selection-label" class="font-semibold text-[#1677D2] hidden"></span>
+                            </div>
+                            <div id="tl-bar" aria-label="Thanh chọn giờ"></div>
+                            <div id="tl-labels" class="flex justify-between text-[10px] text-[#6d7b6c] mt-1.5"></div>
+                        </div>
+
+                        <div id="overlap-warning" class="hidden rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs px-3 py-2">
+                            Khung giờ này trùng lịch đã đặt. Vui lòng chọn khoảng khác.
+                        </div>
+                        <div id="price-error" class="hidden rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2"></div>
+
+                        <div id="price-breakdown" class="hidden flex-col gap-1.5 rounded-xl bg-[#f7f9fb] border border-[#e0e3e5] p-3 text-sm">
+                            <div class="flex justify-between gap-2 text-[#3d4a3d]">
+                                <span id="price-line-nolight-desc">Không đèn</span>
+                                <span id="price-line-nolight-amount" class="font-semibold">0 đ</span>
+                            </div>
+                            <div class="flex justify-between gap-2 text-[#3d4a3d]">
+                                <span id="price-line-light-desc">Có đèn</span>
+                                <span id="price-line-light-amount" class="font-semibold">0 đ</span>
+                            </div>
+                            <div class="flex justify-between gap-2 border-t border-[#e6e8ea] pt-2 mt-1">
+                                <span class="font-bold text-[#191c1e]">Tổng cộng</span>
+                                <span id="price-total" class="font-bold text-[#1677D2]">0 đ</span>
+                            </div>
+                            <p id="price-loading" class="hidden text-[11px] text-[#6d7b6c]">Đang tính giá từ máy chủ…</p>
+                        </div>
+
+                        <div class="text-[11px] text-[#6d7b6c] space-y-0.5">
+                            <div>Giá không đèn: <fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ/giờ</div>
+                            <div>Giá có đèn: <fmt:formatNumber value="${loai.giaCoDen}" pattern="#,##0"/> đ/giờ
+                                <c:if test="${not empty loai.gioBatDauLenDen}">
+                                    (từ ${loai.gioBatDauLenDen}<c:if test="${not empty loai.gioKetThucLenDen}">–${loai.gioKetThucLenDen}</c:if>)
+                                </c:if>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-submit-booking" disabled
+                                class="w-full h-11 rounded-xl bg-[#FF8A24] text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F97316] transition-colors">
+                            Tiếp tục xác nhận
+                        </button>
+                        <p class="text-[10px] text-center text-[#6d7b6c]">
+                            Giá hiển thị do máy chủ tính theo giờ có/không đèn — không dùng công thức trình duyệt.
+                        </p>
+                    </form>
+                </aside>
 
             </div><!-- end main content -->
 
