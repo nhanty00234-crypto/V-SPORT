@@ -201,6 +201,7 @@
     <!-- Login Form -->
     <div class="authdd-panel active" id="panel-login">
         <form action="${pageContext.request.contextPath}/dangnhap" method="post">
+            <input type="hidden" name="redirect" class="authdd-redirect-input" value="">
             <div class="authdd-field">
                 <label class="authdd-label">Email hoặc số điện thoại</label>
                 <input type="text" name="username" class="authdd-input" required placeholder="Nhập email hoặc số điện thoại">
@@ -322,7 +323,15 @@
         }
     });
 
+    function updateAuthddRedirect() {
+        const inputs = document.querySelectorAll('.authdd-redirect-input');
+        const curr = window.location.pathname + window.location.search + window.location.hash;
+        inputs.forEach(i => { if (curr && !i.value) i.value = curr; });
+    }
+    updateAuthddRedirect();
+
     window.openAuthModal = function(tab) {
+        updateAuthddRedirect();
         const wrapper = document.getElementById('authDropdownWrapper');
         if(wrapper) {
             dropdown.classList.add('is-open');

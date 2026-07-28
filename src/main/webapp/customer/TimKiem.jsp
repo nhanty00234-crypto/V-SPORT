@@ -6,6 +6,12 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
+<%--
+    "Có khuyến mãi" là view-only filter: TimKiemServlet chưa có tham số này, nên nó được
+    tính và áp dụng hoàn toàn ở JSP dựa trên "facilityPromotions" (đã có sẵn từ servlet)
+    thay vì sửa Servlet/DAO. Chỉ ẩn khỏi kết quả render, không đổi truy vấn DB.
+--%>
+<c:set var="hasPromotion" value="${param.hasPromotion == 'true' || param.hasPromotion == '1'}" scope="page" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -122,6 +128,66 @@
             border-radius: 20px;
             box-shadow: var(--shadow-small);
         }
+
+        /* Promotion badge: sits top-right so it never collides with the sport badge (top-left) */
+        .fc-promo-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #fff7d6;
+            color: #7a5b00;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 5px 11px 5px 9px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-small);
+            max-width: calc(100% - 100px);
+        }
+        .fc-promo-badge i {
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .fc-promo-badge span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .fc-promo-badge i { animation: fcPromoBounce 2.6s ease-in-out .4s 1; }
+            .facility-card:hover .fc-promo-badge i { animation: fcPromoSpin 0.5s ease; }
+        }
+        @keyframes fcPromoBounce {
+            0%, 100% { transform: scale(1); }
+            10% { transform: scale(1.28); }
+            22% { transform: scale(0.94); }
+            34% { transform: scale(1.1); }
+            46% { transform: scale(1); }
+        }
+        @keyframes fcPromoSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(14deg); }
+        }
+
+        .fc-promo-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #8a6d00;
+            background: #fffbea;
+            border: 1px solid #ffedb3;
+            border-radius: 8px;
+            padding: 5px 9px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .fc-promo-line i { flex-shrink: 0; color: #c9960a; }
         .fc-content {
             padding: 20px;
             flex: 1;
@@ -270,7 +336,7 @@
         
         <form id="tkSearchForm" action="${ctx}/customer/tim-kiem" method="GET">
             <input type="hidden" name="q" value="<c:out value='${query}'/>">
-            
+
             <div class="filter-chips">
                 <button type="button" class="chip <c:if test='${empty sportId}'>active</c:if>" onclick="selectSport('')">
                     Tất cả
@@ -280,9 +346,12 @@
                         <c:out value="${m.tenMon}"/>
                     </button>
                 </c:forEach>
+                <button type="button" class="chip chip-promo <c:if test='${hasPromotion}'>active</c:if>" onclick="toggleHasPromotion()">
+                    <i class="fa-solid fa-tag" style="margin-right:6px;"></i>Có khuyến mãi
+                </button>
             </div>
 
-            <c:if test="${not empty sportId or openNow}">
+            <c:if test="${not empty sportId or openNow or hasPromotion}">
                 <div class="active-filters">
                     <c:if test="${not empty sportId}">
                         <c:forEach var="m" items="${dsMon}">
@@ -300,14 +369,42 @@
                             <a href="javascript:void(0)" onclick="removeOpenNowFilter()"><i class="fa-solid fa-xmark"></i></a>
                         </div>
                     </c:if>
+                    <c:if test="${hasPromotion}">
+                        <div class="active-chip">
+                            Có khuyến mãi
+                            <a href="javascript:void(0)" onclick="removeHasPromotionFilter()"><i class="fa-solid fa-xmark"></i></a>
+                        </div>
+                    </c:if>
                     <a href="javascript:void(0)" class="clear-filters" onclick="clearAllFilters()">Xóa bộ lọc</a>
                 </div>
             </c:if>
 
             <input type="hidden" name="sportId" id="tkSportIdInput" value="<c:out value='${sportId}'/>"/>
             <input type="hidden" name="openNow" id="tkOpenNowInput" value="<c:if test='${openNow}'>true</c:if>"/>
+            <input type="hidden" name="hasPromotion" id="tkHasPromotionInput" value="<c:if test='${hasPromotion}'>true</c:if>"/>
         </form>
 
+        <%
+            // "Có khuyến mãi" view-only filter (xem ghi chú ở đầu file): áp dụng trước
+            // c:choose để cả empty-state lẫn vòng lặp render đều dùng đúng danh sách đã lọc.
+            @SuppressWarnings("unchecked")
+            List<CoSo> tkAllResults = (List<CoSo>) request.getAttribute("results");
+            @SuppressWarnings("unchecked")
+            Map<Integer, Map<String, Object>> facilityPromotionsPre =
+                    (Map<Integer, Map<String, Object>>) request.getAttribute("facilityPromotions");
+            boolean hasPromotionFilterPre = "true".equals(request.getParameter("hasPromotion"))
+                    || "1".equals(request.getParameter("hasPromotion"));
+            List<CoSo> tkVisibleResults = tkAllResults;
+            if (hasPromotionFilterPre && tkAllResults != null) {
+                tkVisibleResults = new java.util.ArrayList<CoSo>();
+                for (CoSo c : tkAllResults) {
+                    if (facilityPromotionsPre != null && facilityPromotionsPre.containsKey(c.getCoSoID())) {
+                        tkVisibleResults.add(c);
+                    }
+                }
+            }
+            request.setAttribute("tkVisibleResults", tkVisibleResults);
+        %>
         <c:choose>
             <c:when test="${searchError}">
                 <div class="empty-state">
@@ -317,21 +414,26 @@
                     <a href="${ctx}/customer/tim-kiem" class="btn btn-primary">Tải lại trang</a>
                 </div>
             </c:when>
-            <c:when test="${empty results}">
+            <c:when test="${empty tkVisibleResults}">
                 <div class="empty-state">
                     <i class="fa-solid fa-magnifying-glass-minus"></i>
                     <h3>Không tìm thấy kết quả</h3>
-                    <p>Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
+                    <p>
+                        <c:choose>
+                            <c:when test="${hasPromotion}">Chưa có cơ sở nào đang có khuyến mãi phù hợp với bộ lọc hiện tại.</c:when>
+                            <c:otherwise>Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.</c:otherwise>
+                        </c:choose>
+                    </p>
                     <a href="${ctx}/customer/tim-kiem" class="btn btn-primary">Xóa bộ lọc</a>
                 </div>
             </c:when>
             <c:otherwise>
                 <div class="product-grid" id="facilityGrid">
                     <%
-                        @SuppressWarnings("unchecked")
-                        List<CoSo> tkResults = (List<CoSo>) request.getAttribute("results");
+                        List<CoSo> tkResults = tkVisibleResults;
                         @SuppressWarnings("unchecked")
                         Map<Integer, String> facilityFirstSport = (Map<Integer, String>) request.getAttribute("facilityFirstSport");
+                        Map<Integer, Map<String, Object>> facilityPromotions = facilityPromotionsPre;
                         String ctx2 = request.getContextPath();
                         // Resolve active sport name from dsMon (source of truth: San→LoaiSan→MonTheThao).
                         Integer activeSportId = (Integer) request.getAttribute("sportId");
@@ -350,6 +452,8 @@
                         }
                         if (tkResults != null) {
                             for (CoSo cs : tkResults) {
+                                Map<String, Object> promo = facilityPromotions != null ? facilityPromotions.get(cs.getCoSoID()) : null;
+
                                 String csImg = cs.getHinhAnh() != null ? cs.getHinhAnh().trim() : "";
                                 String csOpen = cs.getGioMoCua() != null ? cs.getGioMoCua().toString().substring(0,5) : "06:00";
                                 String csClose = cs.getGioDongCua() != null ? cs.getGioDongCua().toString().substring(0,5) : "23:00";
@@ -378,9 +482,22 @@
                                     badgeSport = fromCourts != null ? fromCourts : "";
                                 }
                                 String firstSportSafe = badgeSport.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+
+                                String promoCodeSafe = null;
+                                String promoLabelSafe = null;
+                                if (promo != null) {
+                                    Object codeObj = promo.get("maCode");
+                                    Object moTaObj = promo.get("moTa");
+                                    if (codeObj != null) {
+                                        promoCodeSafe = codeObj.toString().replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+                                    }
+                                    if (moTaObj != null && !moTaObj.toString().trim().isEmpty()) {
+                                        promoLabelSafe = moTaObj.toString().replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+                                    }
+                                }
                     %>
                     <div class="facility-card" tabindex="0" role="button"
-                         aria-label="Xem chi tiết <%= csNameSafe %>"
+                         aria-label="Xem chi tiết <%= csNameSafe %><%= promo != null ? " (đang có khuyến mãi)" : "" %>"
                          data-coso-id="<%= cs.getCoSoID() %>"
                          data-facility-name="<%= csNameSafe %>"
                          data-card-image="<%= cardImgUrl %>"
@@ -390,10 +507,19 @@
                             <% if (!badgeSport.isEmpty()) { %>
                                 <div class="fc-badge"><i class="fa-solid fa-medal"></i> <%= firstSportSafe %></div>
                             <% } %>
+                            <% if (promo != null) { %>
+                                <div class="fc-promo-badge" title="<%= promoCodeSafe != null ? promoCodeSafe : "Có ưu đãi" %>">
+                                    <i class="fa-solid fa-tag"></i>
+                                    <span><%= promoCodeSafe != null ? promoCodeSafe : "Có ưu đãi" %></span>
+                                </div>
+                            <% } %>
                         </div>
                         <div class="fc-content">
                             <h3 class="fc-title"><%= csNameSafe %></h3>
                             <p class="fc-address"><i class="fa-solid fa-location-dot"></i> <span><%= csAddrSafe %></span></p>
+                            <% if (promo != null && promoLabelSafe != null) { %>
+                                <div class="fc-promo-line"><i class="fa-solid fa-gift"></i><span><%= promoLabelSafe %></span></div>
+                            <% } %>
 
                             <div class="fc-footer">
                                 <div class="fc-time"><i class="fa-solid fa-clock"></i> <%= csOpen %> - <%= csClose %></div>
@@ -452,6 +578,7 @@
         const searchForm = document.getElementById('tkSearchForm');
         const sportIdInput = document.getElementById('tkSportIdInput');
         const openNowInput = document.getElementById('tkOpenNowInput');
+        const hasPromotionInput = document.getElementById('tkHasPromotionInput');
         const filterModal = document.getElementById('filterModal');
 
         function selectSport(id) {
@@ -460,7 +587,17 @@
         }
         function removeSportFilter() { sportIdInput.value = ''; searchForm.submit(); }
         function removeOpenNowFilter() { openNowInput.value = ''; searchForm.submit(); }
-        function clearAllFilters() { sportIdInput.value = ''; openNowInput.value = ''; searchForm.submit(); }
+        function removeHasPromotionFilter() { hasPromotionInput.value = ''; searchForm.submit(); }
+        function toggleHasPromotion() {
+            hasPromotionInput.value = hasPromotionInput.value === 'true' ? '' : 'true';
+            searchForm.submit();
+        }
+        function clearAllFilters() {
+            sportIdInput.value = '';
+            openNowInput.value = '';
+            hasPromotionInput.value = '';
+            searchForm.submit();
+        }
 
         function openFilterModal() { filterModal.classList.add('is-open'); document.body.style.overflow = 'hidden'; }
         function closeFilterModal() { filterModal.classList.remove('is-open'); document.body.style.overflow = ''; }

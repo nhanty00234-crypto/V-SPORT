@@ -491,6 +491,19 @@
             setError(null);
             resetToIdle();
         });
+
+        // Prefill từ "Dùng mã này" ở modal chi tiết cơ sở (frontend contract, xem
+        // facility-interactions.jsp#usePromoCode). Chỉ điền sẵn ô nhập - Customer vẫn phải
+        // tự bấm "Áp dụng" (không tự động apply, không tự tính discount ở đây).
+        try {
+            var pendingCode = sessionStorage.getItem('vsPendingPromoCode');
+            var pendingCoSoId = sessionStorage.getItem('vsPendingPromoCoSoId');
+            if (pendingCode && pendingCoSoId && Number(pendingCoSoId) === CO_SO_ID) {
+                input.value = pendingCode;
+            }
+            sessionStorage.removeItem('vsPendingPromoCode');
+            sessionStorage.removeItem('vsPendingPromoCoSoId');
+        } catch (e) { /* sessionStorage không khả dụng - bỏ qua, Customer tự nhập tay */ }
     })();
 
     form.addEventListener('submit', function (e) {

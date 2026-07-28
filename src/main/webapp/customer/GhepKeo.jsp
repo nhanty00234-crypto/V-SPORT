@@ -1702,7 +1702,8 @@
             }
         } else if (!data.isLoggedIn) {
             var a = document.createElement('a');
-            a.href = CTX + '/dangnhap';
+            var currUrl = window.location.pathname + window.location.search + window.location.hash;
+            a.href = CTX + '/dangnhap?redirect=' + encodeURIComponent(currUrl);
             a.className = 'match-action is-primary is-block';
             a.textContent = 'Đăng nhập để tham gia';
             bar.appendChild(a);

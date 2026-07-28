@@ -821,7 +821,8 @@
                     if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', userDropdown.classList.contains('show') ? 'true' : 'false');
                 }
             } else {
-                window.location.href = "${pageContext.request.contextPath}/dangnhap";
+                const currentUrl = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+                window.location.href = "${pageContext.request.contextPath}/dangnhap?redirect=" + currentUrl;
             }
         };
 
@@ -942,7 +943,7 @@
                 <c:otherwise>
                     <div class="drawer-guest-info">
                         <p class="guest-msg">Đăng nhập để xem lịch sử đặt sân và quản lý hồ sơ của bạn.</p>
-                        <button class="btn-drawer-login" onclick="closeSideDrawer(); window.location.href = '${pageContext.request.contextPath}/dangnhap'">Đăng Nhập Ngay</button>
+                        <button class="btn-drawer-login" onclick="closeSideDrawer(); const curr = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash); window.location.href = '${pageContext.request.contextPath}/dangnhap?redirect=' + curr;">Đăng Nhập Ngay</button>
                     </div>
                 </c:otherwise>
             </c:choose>

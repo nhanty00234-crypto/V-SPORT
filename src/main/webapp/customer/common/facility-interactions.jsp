@@ -284,6 +284,68 @@
         border: 1px solid var(--vs-cyan-100, #DDF8FC);
     }
     a.vsfs-product-contact:hover { background: var(--vs-cyan-100, #DDF8FC); }
+
+    /* ---- Tab Ưu đãi ---- */
+    .vsfs-promo-empty { text-align: center; padding: 28px 12px; color: var(--vsx-muted); font-size: 13.5px; font-weight: 600; }
+    .vsfs-promo-list { display: flex; flex-direction: column; gap: 14px; }
+    .vsfs-promo-card { border: 1px solid var(--vsx-border); border-radius: 14px; overflow: hidden; background: #fff; }
+    .vsfs-promo-media { position: relative; aspect-ratio: 16 / 9; background: var(--vs-mint-50); overflow: hidden; }
+    .vsfs-promo-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .vsfs-promo-media .vsfs-promo-fallback {
+        position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 6px; color: var(--vsx-muted); font-size: 12px; font-weight: 600;
+    }
+    .vsfs-promo-media .vsfs-promo-fallback .lci { width: 26px; height: 26px; }
+    .vsfs-promo-nav {
+        position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%;
+        border: none; background: rgba(15, 23, 42, .55); color: #fff; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; transition: background-color .15s ease;
+    }
+    .vsfs-promo-nav:hover { background: rgba(15, 23, 42, .78); }
+    .vsfs-promo-nav.prev { left: 8px; }
+    .vsfs-promo-nav.next { right: 8px; }
+    .vsfs-promo-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+    .vsfs-promo-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.55); border: none; padding: 0; cursor: pointer; }
+    .vsfs-promo-dot.is-active { background: #fff; }
+    .vsfs-promo-badge {
+        position: absolute; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 5px;
+        background: var(--vs-green-500, #01E281); color: var(--vs-navy, #122D40);
+        font-size: 12.5px; font-weight: 800; padding: 5px 11px; border-radius: 9999px;
+    }
+    .vsfs-promo-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 8px; }
+    .vsfs-promo-title { font-size: 15px; font-weight: 800; color: var(--vsx-text); line-height: 1.3; }
+    .vsfs-promo-code-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .vsfs-promo-code {
+        font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 13.5px; font-weight: 800;
+        letter-spacing: .03em; color: var(--vs-primary-700, #185A9D); background: var(--vs-mint-50);
+        border: 1px dashed var(--vs-cyan-100, #DDF8FC); border-radius: 8px; padding: 4px 10px;
+    }
+    .vsfs-promo-copy {
+        border: none; background: transparent; color: var(--vsx-muted); cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700;
+        padding: 4px 6px; border-radius: 6px; transition: background-color .15s ease, color .15s ease;
+    }
+    .vsfs-promo-copy:hover { background: var(--vs-mint-50); color: var(--vs-primary-700, #185A9D); }
+    .vsfs-promo-copy .lci { width: 14px; height: 14px; }
+    .vsfs-promo-condlist { font-size: 12.5px; color: var(--vsx-muted); line-height: 1.7; }
+    .vsfs-promo-condlist span + span::before { content: ' · '; }
+    .vsfs-promo-status {
+        display: inline-flex; align-self: flex-start; font-size: 11px; font-weight: 700;
+        padding: 3px 9px; border-radius: 9999px; background: var(--vs-success-bg, #E5F7EF); color: var(--vs-success, #16A36A);
+    }
+    .vsfs-promo-status.is-ending { background: #fff7e6; color: #b45309; }
+    .vsfs-promo-actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+    .vsfs-promo-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        flex: 1; min-width: 120px; min-height: 40px; padding: 0 14px; border-radius: 9px;
+        font-size: 13px; font-weight: 800; cursor: pointer; text-decoration: none;
+        border: 1.5px solid transparent; transition: background-color .15s ease, border-color .15s ease;
+    }
+    .vsfs-promo-btn-use { background: var(--vs-green-500, #01E281); color: var(--vs-navy, #122D40); }
+    .vsfs-promo-btn-use:hover { background: var(--vs-green-600, #01C771); }
+    .vsfs-promo-btn-book { background: #fff; color: var(--vs-navy, #122D40); border-color: var(--vs-navy, #122D40); }
+    .vsfs-promo-btn-book:hover { background: var(--vs-mint-50); }
+
     .vsfs-policy-item { display: flex; gap: 9px; align-items: flex-start; }
     .vsfs-policy-item + .vsfs-policy-item { margin-top: 9px; }
     .vsfs-policy-item .lci { width: 17px; height: 17px; color: var(--vs-primary-600, #1677D2); margin-top: 2px; }
@@ -467,6 +529,7 @@
                 <div class="vsfs-tabs" role="tablist" aria-label="Thông tin chi tiết cơ sở" id="fsTablist">
                     <button type="button" class="vsfs-tab" role="tab" id="fsTab-overview" aria-controls="fsPanel-overview" aria-selected="true" data-fstab="overview">Tổng quan</button>
                     <button type="button" class="vsfs-tab" role="tab" id="fsTab-courts" aria-controls="fsPanel-courts" aria-selected="false" data-fstab="courts">Sân &amp; bảng giá</button>
+                    <button type="button" class="vsfs-tab" role="tab" id="fsTab-promotions" aria-controls="fsPanel-promotions" aria-selected="false" data-fstab="promotions">Ưu đãi</button>
                     <button type="button" class="vsfs-tab" role="tab" id="fsTab-services" aria-controls="fsPanel-services" aria-selected="false" data-fstab="services">Dịch vụ</button>
                     <button type="button" class="vsfs-tab" role="tab" id="fsTab-shop" aria-controls="fsPanel-shop" aria-selected="false" data-fstab="shop" hidden>Cửa hàng</button>
                     <button type="button" class="vsfs-tab" role="tab" id="fsTab-images" aria-controls="fsPanel-images" aria-selected="false" data-fstab="images">Hình ảnh</button>
@@ -474,6 +537,7 @@
                 </div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-overview" aria-labelledby="fsTab-overview" tabindex="0"></div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-courts" aria-labelledby="fsTab-courts" tabindex="0" hidden></div>
+                <div class="vsfs-panel" role="tabpanel" id="fsPanel-promotions" aria-labelledby="fsTab-promotions" tabindex="0" hidden></div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-services" aria-labelledby="fsTab-services" tabindex="0" hidden></div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-shop" aria-labelledby="fsTab-shop" tabindex="0" hidden>
                     <div id="fsShopLoading" class="vsfs-shop-grid">
@@ -559,6 +623,11 @@
         function showLoginRequiredToast() {
             const modal = document.getElementById('vsLoginRequiredModal');
             if (modal) {
+                const loginBtn = modal.querySelector('.vslr-btn-login');
+                if (loginBtn) {
+                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    loginBtn.href = CTX + '/dangnhap?redirect=' + encodeURIComponent(currentUrl);
+                }
                 modal.hidden = false;
                 requestAnimationFrame(() => modal.classList.add('is-open'));
                 lockScroll();
@@ -968,6 +1037,8 @@
                 svPanel.appendChild(row);
             });
 
+            renderPromotions(Array.isArray(data.activePromotions) ? data.activePromotions : []);
+
             const images = (Array.isArray(data.images) ? data.images : []).map(resolveImg).filter(Boolean);
             const imgTab = document.getElementById('fsTab-images');
             const imgPanel = document.getElementById('fsPanel-images');
@@ -1098,6 +1169,253 @@
                 grid.appendChild(card);
             });
             showShopState('content');
+        }
+
+        // ---- Tab Ưu đãi -------------------------------------------------
+        const IC_TICKET = 'M20 12v10H4V12|M2 7h20v5H2z|M12 22V7|M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z|M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z';
+        const IC_COPY = 'M9 2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M9 2H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-2';
+        const IC_CHEVRON_L = 'm15 18-6-6 6-6';
+        const IC_CHEVRON_R = 'm9 18 6-6-6-6';
+        const IC_IMG_OFF = 'M10.41 10.41a2 2 0 1 1-2.83-2.83|M4 4v16h16|M22 6.5 18.5 10l-4-4|M18.5 3 22 6.5';
+
+        function svgIcon(pathData, extraAttrs) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'lci');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '2');
+            svg.setAttribute('stroke-linecap', 'round');
+            svg.setAttribute('stroke-linejoin', 'round');
+            svg.setAttribute('aria-hidden', 'true');
+            if (extraAttrs) Object.keys(extraAttrs).forEach(k => svg.setAttribute(k, extraAttrs[k]));
+            pathData.split('|').forEach(d => {
+                const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                p.setAttribute('d', d);
+                svg.appendChild(p);
+            });
+            return svg;
+        }
+
+        function isPercentDiscount(loaiGiam) {
+            if (!loaiGiam) return false;
+            const v = String(loaiGiam).toUpperCase();
+            return v.indexOf('PERCENT') >= 0 || v.indexOf('PHAN_TRAM') >= 0 || v.indexOf('PHANTRAM') >= 0 || v.indexOf('%') >= 0;
+        }
+
+        function discountLabel(promo) {
+            const value = Number(promo.giaTriGiam);
+            if (!isFinite(value) || value <= 0) return '';
+            if (isPercentDiscount(promo.loaiGiam)) {
+                const capped = fmtVnd(Number(promo.giamToiDa));
+                return 'Giảm ' + value.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%' + (capped ? ', tối đa ' + capped : '');
+            }
+            return 'Giảm ' + fmtVnd(value);
+        }
+
+        function fmtDateVn(iso) {
+            if (!iso) return null;
+            const parts = String(iso).split('-');
+            if (parts.length !== 3) return null;
+            return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+
+        function promoConditions(promo) {
+            const parts = [];
+            const minOrder = fmtVnd(Number(promo.giaTriToiThieu));
+            if (minOrder) parts.push('Đơn tối thiểu ' + minOrder);
+            const endDate = fmtDateVn(promo.ngayKetThuc);
+            if (endDate) parts.push('Hết hạn ' + endDate);
+            return parts;
+        }
+
+        function copyPromoCode(code, btn) {
+            const done = () => showHomeToast('Đã sao chép mã ' + code);
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(done).catch(done);
+            } else {
+                done();
+            }
+        }
+
+        // "Dùng mã này": lưu tạm mã (gắn đúng CoSoID) để bước Xác nhận đặt sân tự điền vào ô
+        // khuyến mãi. Customer vẫn phải bấm "Áp dụng" ở bước đó (XacNhanDatSan.jsp đọc lại
+        // ?promoCode= qua query string khi mở link đặt sân) - không tự tăng lượt dùng, không
+        // tự tính discount, không đánh dấu USED ở đây.
+        function usePromoCode(promo) {
+            try {
+                sessionStorage.setItem('vsPendingPromoCode', promo.maCode || '');
+                sessionStorage.setItem('vsPendingPromoCoSoId', String(promo.coSoId || fsCurrentId || ''));
+            } catch (e) { /* storage unavailable - vẫn tiếp tục, chỉ mất tiện ích prefill */ }
+            showHomeToast('Đã chọn mã ' + (promo.maCode || '') + '. Mã sẽ được áp dụng ở bước xác nhận đặt sân.');
+        }
+
+        function renderPromotions(promotions) {
+            const tab = document.getElementById('fsTab-promotions');
+            const panel = document.getElementById('fsPanel-promotions');
+            panel.textContent = '';
+            tab.hidden = false; // luôn hiện tab, dùng empty-state rõ ràng khi rỗng thay vì ẩn tab
+
+            if (!promotions.length) {
+                panel.appendChild(el('p', 'vsfs-promo-empty', 'Cơ sở hiện chưa có chương trình ưu đãi.'));
+                return;
+            }
+
+            const list = el('div', 'vsfs-promo-list');
+            promotions.forEach(promo => renderOnePromotionCard(list, promo));
+            panel.appendChild(list);
+        }
+
+        function renderOnePromotionCard(container, promo) {
+            const card = el('div', 'vsfs-promo-card');
+
+            const images = (Array.isArray(promo.images) ? promo.images : [])
+                .slice(0, 5)
+                .map(im => ({ url: resolveImg(im.url), isCover: !!im.isCover }))
+                .filter(im => im.url);
+            // Ảnh bìa luôn đứng đầu carousel.
+            images.sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0));
+            if (!images.length && promo.coverImageUrl) {
+                const cover = resolveImg(promo.coverImageUrl);
+                if (cover) images.push({ url: cover, isCover: true });
+            }
+
+            const media = el('div', 'vsfs-promo-media');
+            let slideIdx = 0;
+            let autoTimer = null;
+
+            function paintSlide() {
+                media.querySelectorAll('img, .vsfs-promo-fallback').forEach(n => n.remove());
+                if (!images.length) {
+                    const fb = el('div', 'vsfs-promo-fallback');
+                    fb.appendChild(svgIcon(IC_IMG_OFF));
+                    fb.appendChild(el('span', null, 'Chưa có ảnh chương trình'));
+                    media.insertBefore(fb, media.firstChild);
+                    return;
+                }
+                const img = document.createElement('img');
+                img.loading = 'lazy';
+                img.alt = promo.moTa || 'Ảnh khuyến mãi';
+                img.onerror = function () {
+                    this.remove();
+                    const fb = el('div', 'vsfs-promo-fallback');
+                    fb.appendChild(svgIcon(IC_IMG_OFF));
+                    fb.appendChild(el('span', null, 'Không tải được ảnh'));
+                    media.insertBefore(fb, media.firstChild);
+                };
+                img.src = images[slideIdx].url;
+                media.insertBefore(img, media.firstChild);
+                const dots = media.querySelectorAll('.vsfs-promo-dot');
+                dots.forEach((d, i) => d.classList.toggle('is-active', i === slideIdx));
+            }
+
+            function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
+            function goTo(idx) {
+                slideIdx = (idx + images.length) % images.length;
+                paintSlide();
+            }
+
+            if (images.length > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'vsfs-promo-nav prev';
+                prevBtn.setAttribute('aria-label', 'Ảnh trước');
+                prevBtn.appendChild(svgIcon(IC_CHEVRON_L));
+                prevBtn.addEventListener('click', () => { stopAuto(); goTo(slideIdx - 1); });
+
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'vsfs-promo-nav next';
+                nextBtn.setAttribute('aria-label', 'Ảnh tiếp theo');
+                nextBtn.appendChild(svgIcon(IC_CHEVRON_R));
+                nextBtn.addEventListener('click', () => { stopAuto(); goTo(slideIdx + 1); });
+
+                media.appendChild(prevBtn);
+                media.appendChild(nextBtn);
+
+                const dotsWrap = el('div', 'vsfs-promo-dots');
+                images.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'vsfs-promo-dot' + (i === 0 ? ' is-active' : '');
+                    dot.setAttribute('aria-label', 'Ảnh ' + (i + 1));
+                    dot.addEventListener('click', () => { stopAuto(); goTo(i); });
+                    dotsWrap.appendChild(dot);
+                });
+                media.appendChild(dotsWrap);
+
+                // Swipe (mobile) - pause autoplay khi người dùng tương tác.
+                let touchStartX = null;
+                media.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopAuto(); }, { passive: true });
+                media.addEventListener('touchend', e => {
+                    if (touchStartX == null) return;
+                    const dx = e.changedTouches[0].clientX - touchStartX;
+                    if (Math.abs(dx) > 40) goTo(dx > 0 ? slideIdx - 1 : slideIdx + 1);
+                    touchStartX = null;
+                }, { passive: true });
+
+                // Autoplay chậm, dừng khi tương tác - không autoplay quá nhanh.
+                autoTimer = setInterval(() => goTo(slideIdx + 1), 5000);
+            }
+
+            const discount = discountLabel(promo);
+            if (discount) {
+                const badge = el('span', 'vsfs-promo-badge', discount);
+                media.insertBefore(badge, media.firstChild);
+            }
+            paintSlide();
+            card.appendChild(media);
+
+            const body = el('div', 'vsfs-promo-body');
+            body.appendChild(el('div', 'vsfs-promo-title', promo.moTa || 'Chương trình ưu đãi'));
+
+            const codeRow = el('div', 'vsfs-promo-code-row');
+            if (promo.maCode) {
+                codeRow.appendChild(el('span', 'vsfs-promo-code', promo.maCode));
+                const copyBtn = document.createElement('button');
+                copyBtn.type = 'button';
+                copyBtn.className = 'vsfs-promo-copy';
+                copyBtn.appendChild(svgIcon(IC_COPY));
+                copyBtn.appendChild(document.createTextNode('Sao chép'));
+                copyBtn.addEventListener('click', () => copyPromoCode(promo.maCode, copyBtn));
+                codeRow.appendChild(copyBtn);
+            }
+            if (codeRow.childNodes.length) body.appendChild(codeRow);
+
+            const conds = promoConditions(promo);
+            if (conds.length) {
+                const condEl = el('div', 'vsfs-promo-condlist');
+                conds.forEach(c => condEl.appendChild(el('span', null, c)));
+                body.appendChild(condEl);
+            }
+
+            const endDate = fmtDateVn(promo.ngayKetThuc);
+            if (endDate) {
+                const daysLeft = Math.ceil((new Date(promo.ngayKetThuc) - new Date()) / 86400000);
+                const status = el('span', 'vsfs-promo-status' + (daysLeft >= 0 && daysLeft <= 3 ? ' is-ending' : ''),
+                    daysLeft >= 0 ? 'Còn hiệu lực' : 'Sắp hết hạn');
+                body.appendChild(status);
+            }
+
+            const actions = el('div', 'vsfs-promo-actions');
+            if (promo.maCode) {
+                const useBtn = document.createElement('button');
+                useBtn.type = 'button';
+                useBtn.className = 'vsfs-promo-btn vsfs-promo-btn-use';
+                useBtn.textContent = 'Dùng mã này';
+                useBtn.addEventListener('click', () => usePromoCode(promo));
+                actions.appendChild(useBtn);
+            }
+            const bookLink = document.createElement('a');
+            bookLink.className = 'vsfs-promo-btn vsfs-promo-btn-book';
+            bookLink.textContent = 'Đặt sân';
+            bookLink.href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(promo.coSoId || fsCurrentId || '');
+            bookLink.addEventListener('click', () => usePromoCode(promo));
+            actions.appendChild(bookLink);
+            body.appendChild(actions);
+
+            card.appendChild(body);
+            container.appendChild(card);
         }
 
         function bagIcon() {

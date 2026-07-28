@@ -110,7 +110,16 @@ public class DangNhapServlet extends HttpServlet {
     /** Đích điều hướng sau đăng nhập thành công: ưu tiên redirect nội bộ cho khách hàng, mặc định về portal đúng role. */
     private String resolveSuccessRedirect(HttpServletRequest req, TaiKhoan user, String redirectParam) {
         if (redirectParam != null && user.getRoleId() == org.example.util.RoleRedirectUtil.ROLE_CUSTOMER) {
-            return req.getContextPath() + redirectParam;
+            String ctx = req.getContextPath();
+            if (ctx != null && !ctx.isEmpty()) {
+                if (redirectParam.startsWith(ctx + "/")) {
+                    return redirectParam;
+                }
+                if (redirectParam.equals(ctx)) {
+                    return ctx + "/";
+                }
+            }
+            return (ctx != null ? ctx : "") + redirectParam;
         }
         return req.getContextPath() + org.example.util.RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
     }

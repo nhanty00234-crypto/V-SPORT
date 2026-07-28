@@ -4,6 +4,7 @@
             String vsNavPath = request.getRequestURI().substring(request.getContextPath().length());
             boolean vsNavBanDo = vsNavPath.startsWith("/customer/BanDo.jsp") || vsNavPath.startsWith("/customer/ban-do");
             boolean vsNavDatSan = vsNavPath.startsWith("/customer/dat-san") || vsNavPath.startsWith("/customer/tim-kiem");
+            boolean vsNavUuDai = vsNavPath.startsWith("/customer/uu-dai");
             boolean vsNavGhepKeo = vsNavPath.startsWith("/customer/ghep-keo");
             boolean vsNavDichVu = vsNavPath.startsWith("/customer/dich-vu");
         %>
@@ -113,6 +114,7 @@
                             <ul>
                                 <li><a href="${pageContext.request.contextPath}/customer/BanDo.jsp" class="nav-category<%= vsNavBanDo ? " nav-active" : "" %>" style="gap: 8px;"><i class="fas fa-map-marked-alt"></i>Bản đồ</a></li>
                                 <li><a href="${pageContext.request.contextPath}/customer/dat-san" class="<%= vsNavDatSan ? "nav-active" : "" %>">Đặt sân</a></li>
+                                <li><a href="${pageContext.request.contextPath}/customer/uu-dai" class="<%= vsNavUuDai ? "nav-active" : "" %>"><i class="fas fa-ticket" style="font-size:13px;"></i>Ưu đãi</a></li>
                                 <li><a href="${pageContext.request.contextPath}/customer/ghep-keo" class="<%= vsNavGhepKeo ? "nav-active" : "" %>">Ghép Kèo<span class="hot-badge">HOT</span></a></li>
                                 <li><a href="${pageContext.request.contextPath}/customer/dich-vu" class="<%= vsNavDichVu ? "nav-active" : "" %>">Cửa hàng &amp; Dịch vụ</a></li>
                                 <li><a href="#">Tin tức <i class="fas fa-angle-down"></i></a></li>
@@ -148,6 +150,7 @@
                 <li><a href="${pageContext.request.contextPath}/"><i class="fas fa-home"></i>Trang chủ</a></li>
                 <li><a href="${pageContext.request.contextPath}/customer/BanDo.jsp" class="<%= vsNavBanDo ? "is-active" : "" %>"><i class="fas fa-map-marked-alt"></i>Bản đồ</a></li>
                 <li><a href="${pageContext.request.contextPath}/customer/dat-san" class="<%= vsNavDatSan ? "is-active" : "" %>"><i class="fas fa-calendar-check"></i>Đặt sân</a></li>
+                <li><a href="${pageContext.request.contextPath}/customer/uu-dai" class="<%= vsNavUuDai ? "is-active" : "" %>"><i class="fas fa-ticket"></i>Ưu đãi</a></li>
                 <li><a href="${pageContext.request.contextPath}/customer/ghep-keo" class="<%= vsNavGhepKeo ? "is-active" : "" %>"><i class="fas fa-users"></i>Ghép Kèo<span class="hot-badge">HOT</span></a></li>
                 <li><a href="${pageContext.request.contextPath}/customer/dich-vu" class="<%= vsNavDichVu ? "is-active" : "" %>"><i class="fas fa-store"></i>Cửa hàng &amp; Dịch vụ</a></li>
                 <li><a href="#"><i class="fas fa-newspaper"></i>Tin tức</a></li>

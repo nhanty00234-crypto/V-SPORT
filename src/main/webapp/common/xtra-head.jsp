@@ -320,30 +320,64 @@
         .nav-inner {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             padding: 15px 0;
         }
 
         .main-nav ul {
             display: flex;
             align-items: center;
-            gap: 20px;
+            justify-content: flex-start;
+            gap: 28px;
         }
 
         .main-nav a {
+            position: relative;
             color: var(--surface);
             font-family: 'Outfit', sans-serif;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 15px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            padding: 10px 4px;
+            white-space: nowrap;
         }
-        
+
+        /* Underline reveal: hidden by default, grows left-to-right on hover/focus,
+           full width when the route is active. Doesn't affect layout height/position. */
+        .main-nav a:not(.nav-category)::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 2px;
+            width: 100%;
+            height: 2px;
+            border-radius: 2px;
+            background-color: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 220ms var(--ease-out-expo, ease);
+            pointer-events: none;
+        }
+        .main-nav a:not(.nav-category):hover::after,
+        .main-nav a:not(.nav-category):focus-visible::after {
+            transform: scaleX(1);
+        }
+        .main-nav a.nav-active:not(.nav-category)::after {
+            transform: scaleX(1);
+        }
+
         .main-nav a:hover {
             color: var(--primary);
         }
-        
+
+        .main-nav a:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
         .nav-category {
             background: rgba(255,255,255,0.1);
             padding: 10px 20px;
@@ -375,6 +409,10 @@
             border-radius: 4px;
             font-weight: 700;
             margin-left: 5px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .main-nav a::after { transition: none; }
         }
 
         /* ---- Mobile header controls (hidden on desktop, shown < 992px) ---- */
@@ -2228,6 +2266,51 @@
         }
         @keyframes ripple-effect {
             to { transform: scale(4); opacity: 0; }
+        }
+
+        /* ================================================================
+           CURL TOP-RIGHT — page-corner peel on hover for every site button.
+           A small triangular "flap" appears at the top-right corner and
+           unfolds slightly, like a page corner lifting. Works on pill
+           buttons too since it's clipped to a small fixed-size corner
+           regardless of the button's own border-radius.
+        ================================================================ */
+        .app-btn,
+        button:not(.password-toggle):not(.modal-close):not(.prev-blog):not(.next-blog):not(.prev-review):not(.next-review):not(.icon-btn):not(.mobile-menu-btn):not(.mobile-search-btn):not(.mobile-nav-close):not(.mobile-search-close):not(.vs-notif-btn):not(.scroll-top):not([class*="vsfs-iconbtn"]) {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before, .btn-primary::before, .btn-outline::before, .btn-banner::before, .btn-auth::before, .app-btn::before,
+        [class*="btn-"]::before,
+        button:not(.password-toggle):not(.modal-close):not(.prev-blog):not(.next-blog):not(.prev-review):not(.next-review):not(.icon-btn):not(.mobile-menu-btn):not(.mobile-search-btn):not(.mobile-nav-close):not(.mobile-search-close):not(.vs-notif-btn):not(.scroll-top):not([class*="vsfs-iconbtn"])::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 16px; height: 16px;
+            background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.55) 50%);
+            clip-path: polygon(100% 0, 100% 100%, 0 0);
+            transform-origin: top right;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 220ms var(--ease-out-expo, ease), opacity 220ms ease;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .btn:hover::before, .btn-primary:hover::before, .btn-outline:hover::before, .btn-banner:hover::before, .btn-auth:hover::before, .app-btn:hover::before,
+        [class*="btn-"]:hover::before,
+        button:hover:not(.password-toggle):not(.modal-close):not(.prev-blog):not(.next-blog):not(.prev-review):not(.next-review):not(.icon-btn):not(.mobile-menu-btn):not(.mobile-search-btn):not(.mobile-nav-close):not(.mobile-search-close):not(.vs-notif-btn):not(.scroll-top):not([class*="vsfs-iconbtn"])::before {
+            transform: scale(1) translate(1px, -1px) rotate(-6deg);
+            opacity: 1;
+        }
+        /* Dark-surface buttons (navy/outline-on-dark) need a darker flap tint to stay visible. */
+        .btn-outline::before, .btn-banner::before {
+            background: linear-gradient(135deg, transparent 50%, rgba(18,45,64,0.35) 50%);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .btn::before, .btn-primary::before, .btn-outline::before, .btn-banner::before, .btn-auth::before, .app-btn::before,
+            [class*="btn-"]::before, button::before {
+                transition: none;
+            }
         }
     </style>
     <script>
