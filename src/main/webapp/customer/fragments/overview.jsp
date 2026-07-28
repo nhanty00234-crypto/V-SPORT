@@ -25,13 +25,13 @@
             <p>Tổng số lần đặt</p>
         </div>
     </div>
-    <div class="stat-card">
+    <a href="${pageContext.request.contextPath}/customer/lich-su-diem-uy-tin" class="stat-card stat-card-link">
         <div class="stat-icon" style="background: rgba(255, 71, 87, 0.1); color: var(--danger);"><i class="fas fa-star"></i></div>
         <div class="stat-info">
             <h3>${account.diemUyTin}</h3>
             <p>Điểm uy tín</p>
         </div>
-    </div>
+    </a>
 </div>
 
 <div class="section-header">

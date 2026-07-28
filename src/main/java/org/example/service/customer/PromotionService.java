@@ -103,11 +103,13 @@ public class PromotionService {
         }
 
         String cleanCode = maCode.trim().toUpperCase();
-        String sqlKM = "SELECT KhuyenMaiID, MaCode, MoTa, LoaiGiam, GiaTriGiam, NgayBatDau, NgayKetThuc, SoLanToiDa, SoLanDaDung, CoSoID, TrangThai FROM KhuyenMai WHERE UPPER(MaCode) = ?";
+        String sqlKM = "SELECT KhuyenMaiID, MaCode, MoTa, LoaiGiam, GiaTriGiam, NgayBatDau, NgayKetThuc, SoLanToiDa, SoLanDaDung, CoSoID, TrangThai, GiaTriToiThieu, GiamToiDa FROM KhuyenMai WHERE UPPER(MaCode) = ?";
         String sqlUserCount = "SELECT COUNT(*) FROM LichSuKhuyenMai WHERE AccountID = ? AND KhuyenMaiID = ?";
 
         try (Connection conn = DBUtil.getConnection()) {
             KhuyenMai km = null;
+            BigDecimal giaTriToiThieu = null;
+            BigDecimal giamToiDa = null;
             try (PreparedStatement ps = conn.prepareStatement(sqlKM)) {
                 ps.setString(1, cleanCode);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -128,6 +130,8 @@ public class PromotionService {
                     int csId = rs.getInt("CoSoID");
                     if (!rs.wasNull()) km.setCoSoID(csId);
                     km.setTrangThai(rs.getString("TrangThai"));
+                    giaTriToiThieu = rs.getBigDecimal("GiaTriToiThieu");
+                    giamToiDa = rs.getBigDecimal("GiamToiDa");
                 }
             }
 
@@ -142,7 +146,7 @@ public class PromotionService {
                 }
             }
 
-            return calculateDiscount(km, originalAmount, coSoId, bookingDate, null, null, userUsageCount, 1);
+            return calculateDiscount(km, originalAmount, coSoId, bookingDate, giaTriToiThieu, giamToiDa, userUsageCount, 1);
         } catch (SQLException e) {
             logger.error("Error validating promotion code {}: {}", cleanCode, e.getMessage(), e);
             return new PromotionResult(false, "Lỗi kiểm tra mã khuyến mãi.", BigDecimal.ZERO, originalAmount, null);

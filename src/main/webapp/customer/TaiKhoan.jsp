@@ -66,7 +66,11 @@
     font-size: 13px;
     font-weight: 600;
     margin-bottom: 20px;
+    text-decoration: none;
 }
+.profile-rep:hover { text-decoration: underline; }
+.stat-card.stat-card-link { cursor: pointer; text-decoration: none; transition: var(--transition); }
+.stat-card.stat-card-link:hover { border-color: var(--primary); transform: translateY(-2px); }
 .menu-card {
     background: var(--surface);
     border-radius: var(--radius-medium);
@@ -308,9 +312,9 @@
                 <c:if test="${not empty account.phoneNumber}">
                     <div class="profile-email" style="margin-top: -10px;">${fn:escapeXml(account.phoneNumber)}</div>
                 </c:if>
-                <div class="profile-rep">
+                <a href="${pageContext.request.contextPath}/customer/lich-su-diem-uy-tin" class="profile-rep">
                     <i class="fas fa-star" style="margin-right: 5px;"></i> Uy tín: ${account.diemUyTin}/100
-                </div>
+                </a>
                 <div>
                     <a href="${pageContext.request.contextPath}/customer/ho-so" class="btn btn-outline" style="color: var(--navy); border-color: var(--border); width: 100%; margin-bottom: 10px;">Chỉnh sửa hồ sơ</a>
                 </div>
@@ -320,6 +324,9 @@
             <div class="menu-card">
                 <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-item active">
                     <i class="fas fa-home"></i> Tổng quan
+                </a>
+                <a href="${pageContext.request.contextPath}/customer/lich-su-diem-uy-tin" class="menu-item">
+                    <i class="fas fa-star"></i> Điểm uy tín
                 </a>
                 <a href="${pageContext.request.contextPath}/customer/ghep-keo?tab=cua-toi" class="menu-item">
                     <i class="fas fa-futbol"></i> Kèo của tôi

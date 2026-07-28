@@ -202,16 +202,48 @@
                 <span class="v"><fmt:formatNumber value="${seg.amount}" pattern="#,##0"/> đ</span>
             </div>
         </c:forEach>
-        <div class="xn-row total"><span class="k">Tổng tiền</span><span class="v"><fmt:formatNumber value="${totalAmount}" pattern="#,##0"/> đ</span></div>
+        <div class="xn-row" id="xnPromoRow" hidden>
+            <span class="k" id="xnPromoRowLabel">Khuyến mãi</span>
+            <span class="v" style="color: var(--primary-hover);" id="xnPromoRowValue">-0 đ</span>
+        </div>
+        <div class="xn-row total"><span class="k">Tổng thanh toán</span><span class="v" id="xnTotalValue"><fmt:formatNumber value="${totalAmount}" pattern="#,##0"/> đ</span></div>
     </div>
 
-    <%-- C. Ưu đãi (hệ thống chưa có luồng áp mã cho booking này) --%>
+    <%-- C. Mã khuyến mãi --%>
     <div class="xn-card">
         <h2>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-            Ưu đãi
+            Mã khuyến mãi
         </h2>
-        <p class="xn-promo-empty">Chưa áp dụng ưu đãi</p>
+
+        <div id="xnPromoIdleState">
+            <label class="xn-label" for="xnPromoInput">Nhập mã khuyến mãi</label>
+            <div style="display:flex; gap:8px;">
+                <input class="xn-input" id="xnPromoInput" type="text" placeholder="Nhập mã khuyến mãi"
+                       autocomplete="off" style="flex:1; text-transform:uppercase;" aria-describedby="xnPromoError" />
+                <button type="button" id="xnPromoApplyBtn"
+                        style="flex-shrink:0; padding:0 18px; border-radius:10px; border:1.5px solid var(--border); background:#fff; color:var(--navy); font-weight:800; font-size:13px; cursor:pointer; white-space:nowrap;">
+                    Áp dụng
+                </button>
+            </div>
+        </div>
+
+        <div id="xnPromoAppliedState" hidden style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; background: rgba(1,226,129,0.07); border: 1px solid rgba(1,226,129,0.35); border-radius: 10px; padding: 12px 14px;">
+            <div>
+                <p style="font-size:13.5px; font-weight:800; color: var(--navy);"><span id="xnPromoAppliedCode"></span> đã được áp dụng</p>
+                <p style="font-size:12px; color: var(--muted-text); margin-top:2px;" id="xnPromoAppliedDesc"></p>
+            </div>
+            <button type="button" id="xnPromoRemoveBtn"
+                    style="flex-shrink:0; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:#fff; color:var(--danger); font-weight:700; font-size:12px; cursor:pointer;">
+                Bỏ mã
+            </button>
+        </div>
+
+        <p id="xnPromoLoading" hidden aria-live="polite" style="font-size:12.5px; color: var(--muted-text); font-weight:600; margin-top:8px; display:flex; align-items:center; gap:6px;">
+            <span class="spinner" style="width:13px;height:13px;border-width:2px;border-color:var(--border);border-top-color:var(--primary);display:inline-block;border-radius:50%;border-style:solid;animation:xnSpin .8s linear infinite;"></span>
+            Đang kiểm tra mã...
+        </p>
+        <p id="xnPromoError" role="alert" aria-live="polite" hidden style="font-size:12.5px; color:#b91c1c; font-weight:700; margin-top:8px;"></p>
     </div>
 
     <%-- D. Thông tin người đặt --%>
@@ -221,6 +253,8 @@
         <input type="hidden" name="gioBatDau" value="${gioBatDau}" />
         <input type="hidden" name="gioKetThuc" value="${gioKetThuc}" />
         <input type="hidden" name="paymentMethod" id="xnPaymentMethod" value="sau" />
+        <input type="hidden" name="promoCode" id="xnPromoCodeHidden" value="" />
+        <input type="hidden" name="khuyenMaiId" id="xnKhuyenMaiIdHidden" value="" />
 
         <div class="xn-card">
             <h2>
@@ -332,6 +366,132 @@
             syncMethod();
         }
     });
+
+    // ── Mã khuyến mãi ──────────────────────────────────────────────
+    (function () {
+        var ORIGINAL_AMOUNT = ${totalAmount};
+        var CO_SO_ID = ${coSo.coSoID};
+        var BOOKING_DATE = '${ngayDat}';
+
+        var idleState = document.getElementById('xnPromoIdleState');
+        var appliedState = document.getElementById('xnPromoAppliedState');
+        var input = document.getElementById('xnPromoInput');
+        var applyBtn = document.getElementById('xnPromoApplyBtn');
+        var removeBtn = document.getElementById('xnPromoRemoveBtn');
+        var loadingEl = document.getElementById('xnPromoLoading');
+        var errorEl = document.getElementById('xnPromoError');
+        var appliedCodeEl = document.getElementById('xnPromoAppliedCode');
+        var appliedDescEl = document.getElementById('xnPromoAppliedDesc');
+        var promoRow = document.getElementById('xnPromoRow');
+        var promoRowLabel = document.getElementById('xnPromoRowLabel');
+        var promoRowValue = document.getElementById('xnPromoRowValue');
+        var totalValueEl = document.getElementById('xnTotalValue');
+        var promoCodeHidden = document.getElementById('xnPromoCodeHidden');
+        var khuyenMaiIdHidden = document.getElementById('xnKhuyenMaiIdHidden');
+
+        var requestSeq = 0;
+
+        function formatVnd(n) {
+            return Math.round(n).toLocaleString('vi-VN') + ' đ';
+        }
+
+        function setError(msg) {
+            if (msg) {
+                errorEl.textContent = msg;
+                errorEl.hidden = false;
+                input.setAttribute('aria-invalid', 'true');
+            } else {
+                errorEl.hidden = true;
+                errorEl.textContent = '';
+                input.removeAttribute('aria-invalid');
+            }
+        }
+
+        function resetToIdle() {
+            idleState.hidden = false;
+            appliedState.hidden = true;
+            promoRow.hidden = true;
+            totalValueEl.textContent = formatVnd(ORIGINAL_AMOUNT);
+            promoCodeHidden.value = '';
+            khuyenMaiIdHidden.value = '';
+        }
+
+        function applyPromo() {
+            var rawCode = (input.value || '').trim();
+            if (!rawCode) {
+                setError('Vui lòng nhập mã khuyến mãi.');
+                input.focus();
+                return;
+            }
+            setError(null);
+            var mySeq = ++requestSeq;
+            applyBtn.disabled = true;
+            loadingEl.hidden = false;
+
+            var body = new URLSearchParams();
+            body.set('code', rawCode);
+            body.set('originalAmount', String(ORIGINAL_AMOUNT));
+            body.set('coSoId', String(CO_SO_ID));
+            body.set('bookingDate', BOOKING_DATE);
+
+            fetch('${ctx}/api/promotion/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            }).then(function (res) {
+                if (res.status === 401 || res.status === 403) {
+                    throw { friendly: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.' };
+                }
+                return res.json().catch(function () {
+                    throw { friendly: 'Không thể tính lại giá. Vui lòng thử lại.' };
+                });
+            }).then(function (data) {
+                if (mySeq !== requestSeq) return; // một request mới hơn đã được gửi, bỏ qua kết quả cũ
+                loadingEl.hidden = true;
+                applyBtn.disabled = false;
+
+                if (!data || !data.valid) {
+                    setError((data && data.message) || 'Mã khuyến mãi không hợp lệ.');
+                    return;
+                }
+
+                var discount = Number(data.discountAmount || 0);
+                var finalAmount = Number(data.finalAmount != null ? data.finalAmount : (ORIGINAL_AMOUNT - discount));
+                var code = data.code || rawCode.toUpperCase();
+
+                promoCodeHidden.value = code;
+                khuyenMaiIdHidden.value = data.khuyenMaiId != null ? String(data.khuyenMaiId) : '';
+
+                appliedCodeEl.textContent = code;
+                appliedDescEl.textContent = data.message || ('Giảm ' + formatVnd(discount));
+                idleState.hidden = true;
+                appliedState.hidden = false;
+
+                promoRowLabel.textContent = 'Khuyến mãi ' + code;
+                promoRowValue.textContent = '-' + formatVnd(discount);
+                promoRow.hidden = false;
+                totalValueEl.textContent = formatVnd(finalAmount);
+            }).catch(function (err) {
+                if (mySeq !== requestSeq) return;
+                loadingEl.hidden = true;
+                applyBtn.disabled = false;
+                setError((err && err.friendly) || 'Có lỗi khi kết nối máy chủ. Vui lòng thử lại.');
+            });
+        }
+
+        applyBtn.addEventListener('click', applyPromo);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); applyPromo(); }
+        });
+        input.addEventListener('input', function () { setError(null); });
+
+        removeBtn.addEventListener('click', function () {
+            requestSeq++; // vô hiệu hoá mọi request đang chạy dở
+            input.value = '';
+            setError(null);
+            resetToIdle();
+        });
+    })();
 
     form.addEventListener('submit', function (e) {
         if (submitting) { e.preventDefault(); return; }
