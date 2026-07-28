@@ -446,12 +446,12 @@
         </div>
         <div class="field">
           <label for="f_giamToiDaPercent">Mức giảm tối đa (đ)</label>
-          <input type="number" min="0" step="1000" id="f_giamToiDaPercent" placeholder="100.000"/>
+          <input type="text" inputmode="numeric" class="km-money-input" id="f_giamToiDaPercent" placeholder="100.000"/>
         </div>
       </div>
       <div id="fixedFields" class="field" style="display:none;">
         <label for="f_giaTriGiamFixed">Số tiền giảm (đ) *</label>
-        <input type="number" min="0" step="1000" id="f_giaTriGiamFixed" placeholder="50.000"/>
+        <input type="text" inputmode="numeric" class="km-money-input" id="f_giaTriGiamFixed" placeholder="50.000"/>
         <p class="err" id="err_giaTriGiamFixed">Vui lòng nhập số tiền giảm hợp lệ.</p>
       </div>
       <input type="hidden" name="giaTriGiam" id="f_giaTriGiam"/>
@@ -461,7 +461,8 @@
       <div class="km-form-grid cols-2">
         <div class="field span-2">
           <label for="f_giaTriToiThieu">Giá trị đơn tối thiểu (đ)</label>
-          <input type="number" min="0" step="1000" name="giaTriToiThieu" id="f_giaTriToiThieu" placeholder="200.000"/>
+          <input type="text" inputmode="numeric" class="km-money-input" id="f_giaTriToiThieu" placeholder="200.000"/>
+          <input type="hidden" name="giaTriToiThieu" id="f_giaTriToiThieuRaw"/>
           <p class="err" id="err_giaTriToiThieu">Giá trị đơn tối thiểu không được âm.</p>
         </div>
         <div class="field">
@@ -522,6 +523,28 @@ KM_DATA['${km.khuyenMaiID}'] = {
   trangThaiHoatDong: ${km.trangThai == 'Hoạt động'}
 };
 </c:forEach>
+
+/* ── Money inputs: hiển thị dấu chấm phân cách nghìn khi gõ, giữ input là text
+   (không phải number) để trình duyệt không tự xoá dấu chấm; giá trị số thật lấy qua
+   kmParseMoney() khi validate/submit. ── */
+function kmFormatMoney(value) {
+  var digits = String(value == null ? '' : value).replace(/[^\d]/g, '');
+  if (!digits) return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function kmParseMoney(display) {
+  var digits = String(display == null ? '' : display).replace(/[^\d]/g, '');
+  if (!digits) return null;
+  return parseInt(digits, 10);
+}
+document.addEventListener('input', function (e) {
+  if (!e.target.classList || !e.target.classList.contains('km-money-input')) return;
+  var input = e.target;
+  var caretFromEnd = input.value.length - input.selectionStart;
+  input.value = kmFormatMoney(input.value);
+  var newPos = input.value.length - caretFromEnd;
+  input.setSelectionRange(newPos, newPos);
+});
 
 function setDiscountMode(mode) {
   document.getElementById('f_loaiGiam').value = mode;
@@ -928,18 +951,21 @@ function validateKmForm(form) {
     var pct = parseFloat(pctInput.value);
     if (isNaN(pct) || pct <= 0 || pct > 100) { showKmError('giaTriGiamPercent', pctInput); return false; }
     giaTriGiamVal = pct;
-    giamToiDaVal = document.getElementById('f_giamToiDaPercent').value || '';
+    giamToiDaVal = kmParseMoney(document.getElementById('f_giamToiDaPercent').value);
+    giamToiDaVal = giamToiDaVal == null ? '' : giamToiDaVal;
   } else {
     var fixedInput = document.getElementById('f_giaTriGiamFixed');
-    var fixedVal = parseFloat(fixedInput.value);
-    if (isNaN(fixedVal) || fixedVal <= 0) { showKmError('giaTriGiamFixed', fixedInput); return false; }
+    var fixedVal = kmParseMoney(fixedInput.value);
+    if (fixedVal == null || fixedVal <= 0) { showKmError('giaTriGiamFixed', fixedInput); return false; }
     giaTriGiamVal = fixedVal;
   }
   document.getElementById('f_giaTriGiam').value = giaTriGiamVal;
   document.getElementById('f_giamToiDa').value = giamToiDaVal;
 
   var minOrder = document.getElementById('f_giaTriToiThieu');
-  if (minOrder.value !== '' && parseFloat(minOrder.value) < 0) { showKmError('giaTriToiThieu', minOrder); return false; }
+  var minOrderVal = kmParseMoney(minOrder.value);
+  if (minOrderVal != null && minOrderVal < 0) { showKmError('giaTriToiThieu', minOrder); return false; }
+  document.getElementById('f_giaTriToiThieuRaw').value = minOrderVal == null ? '' : minOrderVal;
 
   var startInput = document.getElementById('f_ngayBatDau');
   var endInput = document.getElementById('f_ngayKetThuc');
@@ -1007,7 +1033,8 @@ function openKmDrawer(id) {
     document.getElementById('kmIdInput').value = id;
     document.getElementById('f_maCode').value = d.maCode;
     document.getElementById('f_moTa').value = d.moTa;
-    document.getElementById('f_giaTriToiThieu').value = d.giaTriToiThieu > 0 ? d.giaTriToiThieu : '';
+    document.getElementById('f_giaTriToiThieu').value = d.giaTriToiThieu > 0 ? kmFormatMoney(d.giaTriToiThieu) : '';
+    document.getElementById('f_giaTriToiThieuRaw').value = d.giaTriToiThieu > 0 ? d.giaTriToiThieu : '';
     document.getElementById('f_ngayBatDau').value = d.ngayBatDau;
     document.getElementById('f_ngayKetThuc').value = d.ngayKetThuc;
     document.getElementById('f_soLanToiDa').value = d.soLanToiDa != null ? d.soLanToiDa : '';
@@ -1015,10 +1042,10 @@ function openKmDrawer(id) {
     if (d.loaiGiam === 'PERCENT') {
       setDiscountMode('PERCENT');
       document.getElementById('f_giaTriGiamPercent').value = d.giaTriGiam;
-      document.getElementById('f_giamToiDaPercent').value = d.giamToiDa > 0 ? d.giamToiDa : '';
+      document.getElementById('f_giamToiDaPercent').value = d.giamToiDa > 0 ? kmFormatMoney(d.giamToiDa) : '';
     } else {
       setDiscountMode('FIXED');
-      document.getElementById('f_giaTriGiamFixed').value = d.giaTriGiam;
+      document.getElementById('f_giaTriGiamFixed').value = kmFormatMoney(d.giaTriGiam);
     }
   } else {
     document.getElementById('kmDrawerTitle').textContent = 'Tạo mã khuyến mãi';
