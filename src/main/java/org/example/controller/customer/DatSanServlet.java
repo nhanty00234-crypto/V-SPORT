@@ -587,40 +587,34 @@ public class DatSanServlet extends HttpServlet {
                         return;
                     }
 
-                    // ── 3e. Tính giá theo loại sân và giờ đèn ──
-                    double hourlyPrice = 100_000; // Fallback mặc định
+                    // ── 3e. Tính giá theo loại sân và giờ đèn bằng CourtPricingService ──
+                    double tongTien = 0.0;
                     boolean applyLights = false;
 
-                    String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen FROM LoaiSan WHERE LoaiSanID = "
-                            +
-                            "(SELECT LoaiSanID FROM San WHERE SanID = ?)";
+                    String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen, GioKetThucLenDen FROM LoaiSan WHERE LoaiSanID = "
+                            + "(SELECT LoaiSanID FROM San WHERE SanID = ?)";
                     try (java.sql.PreparedStatement loaiPs = conn.prepareStatement(loaiSanSql)) {
                         loaiPs.setInt(1, sanId);
                         try (java.sql.ResultSet rsLoai = loaiPs.executeQuery()) {
                             if (rsLoai.next()) {
-                                double giaKhongDen = rsLoai.getDouble("GiaKhongDen");
-                                double giaCoDen = rsLoai.getDouble("GiaCoDen");
-                                LocalTime gioLenDen = LocalTime.of(17, 30); // Mặc định 17:30
+                                BigDecimal giaKhongDen = rsLoai.getBigDecimal("GiaKhongDen");
+                                BigDecimal giaCoDen = rsLoai.getBigDecimal("GiaCoDen");
+                                LocalTime gioLenDen = rsLoai.getTime("GioBatDauLenDen") != null ? rsLoai.getTime("GioBatDauLenDen").toLocalTime() : LocalTime.of(17, 30);
+                                LocalTime gioTatDen = rsLoai.getTime("GioKetThucLenDen") != null ? rsLoai.getTime("GioKetThucLenDen").toLocalTime() : LocalTime.of(23, 0);
 
-                                java.sql.Time sqlLenDen = rsLoai.getTime("GioBatDauLenDen");
-                                if (sqlLenDen != null)
-                                    gioLenDen = sqlLenDen.toLocalTime();
-
-                                // Áp dụng giá đèn nếu giờ bắt đầu >= giờ bật đèn
-                                if (!gioBatDau.isBefore(gioLenDen)) {
-                                    hourlyPrice = giaCoDen;
-                                    applyLights = (giaCoDen != giaKhongDen); // Chỉ ghi nhận nếu giá thực sự khác nhau
-                                } else {
-                                    hourlyPrice = giaKhongDen;
-                                }
+                                org.example.service.pricing.CourtPricingService pricingService = new org.example.service.pricing.CourtPricingService();
+                                org.example.service.pricing.CourtPriceResult priceResult = pricingService.calculate(
+                                        LocalDateTime.of(ngayDat, gioBatDau),
+                                        LocalDateTime.of(ngayDat, gioKetThuc),
+                                        gioLenDen, gioTatDen,
+                                        giaKhongDen != null ? giaKhongDen : BigDecimal.valueOf(100000),
+                                        giaCoDen != null ? giaCoDen : BigDecimal.valueOf(100000)
+                                );
+                                tongTien = priceResult.totalCourtAmount().doubleValue();
+                                applyLights = priceResult.minutesWithLight() > 0;
                             }
                         }
                     }
-
-                    // Tính tổng tiền dự kiến
-                    durationMinutes = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
-                    double durationHours = durationMinutes / 60.0;
-                    double tongTien = durationHours * hourlyPrice;
 
                     // ── 3f. INSERT lịch đặt sân trong cùng transaction ──
                     boolean isOnlineDeposit = "payos".equalsIgnoreCase(paymentMethod);

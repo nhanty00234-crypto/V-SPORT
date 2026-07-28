@@ -94,11 +94,11 @@
                 </div>
             </section>
 
-            <!-- Main Content — info first on mobile, booking widget second -->
-            <div class="flex flex-col lg:flex-row gap-6 lg:gap-12">
+            <!-- Main Content — info column 2/3 + booking sidebar 1/3 -->
+            <div class="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
 
-                <!-- INFO COLUMN — full width sau khi xóa booking widget -->
-                <div class="w-full flex flex-col gap-8 lg:gap-10">
+                <!-- INFO COLUMN (2/3) -->
+                <div class="w-full lg:w-2/3 flex flex-col gap-8 lg:gap-10">
 
                     <!-- Header Info -->
                     <div>
@@ -188,6 +188,85 @@
                         </div>
                     </div>
 
+                </div>
+
+                <!-- BOOKING COLUMN / WIDGET (1/3) -->
+                <div class="w-full lg:w-1/3">
+                    <div class="sticky top-[100px] bg-white rounded-2xl border border-[#e0e3e5] shadow-lg p-5 sm:p-6 flex flex-col gap-5">
+                        <div class="flex items-center justify-between border-b border-[#e6e8ea] pb-4">
+                            <div>
+                                <span class="text-xs text-[#6d7b6c] block mb-0.5">Đơn giá ban ngày</span>
+                                <span class="text-xl font-bold text-[#1677D2]"><fmt:formatNumber value="${loai.giaKhongDen}" pattern="#,##0"/> đ<span class="text-xs font-normal text-[#6d7b6c]">/h</span></span>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${san.trangThai == 'Sẵn sàng' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                ${san.trangThai == 'Sẵn sàng' ? 'Sẵn sàng' : san.trangThai}
+                            </span>
+                        </div>
+
+                        <form id="bookingForm" action="${pageContext.request.contextPath}/customer/dat-lich-truc-quan/xac-nhan" method="POST" class="flex flex-col gap-4">
+                            <input type="hidden" name="sanId" value="${san.sanID}" />
+                            <input type="hidden" name="coSoId" value="${san.coSoID}" />
+                            <input type="hidden" id="ngayDat" name="ngayDat" value="" />
+                            <input type="hidden" id="gioBatDau" name="gioBatDau" value="" />
+                            <input type="hidden" id="gioKetThuc" name="gioKetThuc" value="" />
+
+                            <!-- Date Selector -->
+                            <div>
+                                <label class="block text-xs font-bold text-[#191c1e] mb-1.5 uppercase tracking-wider">Ngày đặt sân</label>
+                                <div class="flex items-center justify-between bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl p-1.5">
+                                    <button type="button" id="prev-day-btn" onclick="prevDay()" class="p-1.5 text-[#3d4a3d] hover:bg-white hover:shadow-sm rounded-lg transition-all disabled:opacity-30 disabled:pointer-events-none">
+                                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                                    </button>
+                                    <span id="date-display" class="font-bold text-sm text-[#191c1e]">---</span>
+                                    <button type="button" id="next-day-btn" onclick="nextDay()" class="p-1.5 text-[#3d4a3d] hover:bg-white hover:shadow-sm rounded-lg transition-all">
+                                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Timeline Bar -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-bold text-[#191c1e] uppercase tracking-wider">Khung giờ đặt</label>
+                                    <span id="tl-hint" class="text-[11px] text-[#6d7b6c] italic">Nhấn vào thanh để chọn</span>
+                                </div>
+                                <div id="tl-bar" class="w-full"></div>
+                                <div id="tl-labels" class="flex justify-between text-[10px] text-[#6d7b6c] mt-1 px-1"></div>
+                                <div id="tl-selection-display" class="hidden mt-2 p-2 bg-[#1677D2]/10 border border-[#1677D2]/20 rounded-lg text-center text-xs font-bold text-[#1677D2]">
+                                    <span id="tl-sel-text"></span>
+                                </div>
+                            </div>
+
+                            <!-- Overlap Warning -->
+                            <div id="overlap-warning" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">error</span>
+                                <span>Khung giờ bị trùng lịch hoặc không khả dụng.</span>
+                            </div>
+
+                            <!-- Price Breakdown Container -->
+                            <div id="price-breakdown" class="hidden flex-col gap-2 p-3.5 bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl text-xs">
+                                <div class="font-bold text-[#191c1e] border-b border-[#e6e8ea] pb-1.5 flex justify-between items-center">
+                                    <span>Chi tiết giá</span>
+                                    <span id="price-loading-badge" class="hidden text-[10px] text-amber-600 font-semibold animate-pulse">Đang tính giá...</span>
+                                </div>
+                                <div id="price-error-box" class="hidden text-red-600 font-medium text-[11px] p-2 bg-red-50 border border-red-200 rounded-lg"></div>
+                                <div id="price-details-list" class="flex flex-col gap-1.5 text-[#3d4a3d]">
+                                    <!-- JS renders breakdown lines here -->
+                                </div>
+                                <div class="border-t border-[#e6e8ea] pt-2 mt-1 flex justify-between items-center font-bold text-sm text-[#191c1e]">
+                                    <span>Tổng cộng:</span>
+                                    <span id="price-total" class="text-[#1677D2] text-base">0 đ</span>
+                                </div>
+                            </div>
+
+                            <!-- Submit CTA Button -->
+                            <button type="submit" id="btn-submit-booking" disabled
+                                    class="w-full py-3 bg-[#1677D2] text-white font-bold text-sm rounded-xl hover:bg-[#185A9D] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">event_available</span>
+                                Tiếp tục đặt sân
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
             </div><!-- end main content -->
@@ -592,26 +671,116 @@
         }
         window.addEventListener("resize", renderTlLabels);
 
-        // ── Price breakdown ────────────────────────────────────────────
-        function updatePriceBreakdown() {
-            const breakdown = document.getElementById("price-breakdown");
-            if (selectedStartMin === null || selectedEndMin === null || !pricePerHour) {
-                breakdown.classList.add("hidden");
-                breakdown.classList.remove("flex");
-                return;
-            }
-            const hours = (selectedEndMin - selectedStartMin) / 60;
-            const total = Math.round(pricePerHour * hours);
-            document.getElementById("price-line-desc").textContent =
-                pricePerHour.toLocaleString("vi-VN") + " đ × " +
-                (hours % 1 === 0 ? hours : hours.toFixed(1)) + " giờ";
-            document.getElementById("price-line-amount").textContent = total.toLocaleString("vi-VN") + " đ";
-            document.getElementById("price-total").textContent       = total.toLocaleString("vi-VN") + " đ";
-            breakdown.classList.remove("hidden");
-            breakdown.classList.add("flex");
+        // ── Server-side Price Breakdown API with AbortController & Debounce ────
+        let priceAbortController = null;
+        let priceDebounceTimer   = null;
+        let isPriceApiValid      = false;
+
+        function formatMoney(v) {
+            return Number(v || 0).toLocaleString("vi-VN") + " đ";
         }
 
-        // ── Overlap validation ─────────────────────────────────────────
+        function updatePriceBreakdown() {
+            const breakdown      = document.getElementById("price-breakdown");
+            const loadingBadge   = document.getElementById("price-loading-badge");
+            const errorBox       = document.getElementById("price-error-box");
+            const detailsList    = document.getElementById("price-details-list");
+            const totalEl        = document.getElementById("price-total");
+            const btnSubmit      = document.getElementById("btn-submit-booking");
+
+            // Cancel any pending request & debounce timer
+            if (priceDebounceTimer) clearTimeout(priceDebounceTimer);
+            if (priceAbortController) {
+                priceAbortController.abort();
+                priceAbortController = null;
+            }
+
+            isPriceApiValid = false;
+
+            if (selectedStartMin === null || selectedEndMin === null) {
+                breakdown.classList.add("hidden");
+                breakdown.classList.remove("flex");
+                if (btnSubmit) btnSubmit.disabled = true;
+                return;
+            }
+
+            // Show breakdown panel with loading state
+            breakdown.classList.remove("hidden");
+            breakdown.classList.add("flex");
+            loadingBadge.classList.remove("hidden");
+            errorBox.classList.add("hidden");
+            errorBox.textContent = "";
+            if (btnSubmit) btnSubmit.disabled = true;
+
+            // Debounce 150ms to prevent spamming server during drag
+            priceDebounceTimer = setTimeout(function() {
+                const dateStr  = fmtDateStr(currentDate);
+                const startStr = minToStr(selectedStartMin);
+                const endStr   = minToStr(selectedEndMin);
+
+                priceAbortController = new AbortController();
+                const signal = priceAbortController.signal;
+
+                const url = "${pageContext.request.contextPath}/customer/api/timetable-price" +
+                    "?sanId=${san.sanID}" +
+                    "&date=" + encodeURIComponent(dateStr) +
+                    "&start=" + encodeURIComponent(startStr) +
+                    "&end=" + encodeURIComponent(endStr);
+
+                fetch(url, { signal: signal, headers: { 'Accept': 'application/json' } })
+                    .then(function(resp) {
+                        if (!resp.ok) {
+                            return resp.json().then(function(errJson) {
+                                throw new Error(errJson.error || ("Lỗi server (" + resp.status + ")"));
+                            }).catch(function() {
+                                throw new Error("Không thể kết nối máy tính giá (" + resp.status + ").");
+                            });
+                        }
+                        return resp.json();
+                    })
+                    .then(function(data) {
+                        loadingBadge.classList.add("hidden");
+                        if (!data || !data.success) {
+                            throw new Error((data && data.error) ? data.error : "Tính giá thất bại.");
+                        }
+
+                        // Build breakdown rows
+                        detailsList.innerHTML = "";
+
+                        if (data.minutesWithoutLight > 0) {
+                            const row = document.createElement("div");
+                            row.className = "flex justify-between items-center";
+                            row.innerHTML = "<span>Không đèn (" + data.minutesWithoutLight + " phút × " + formatMoney(data.rateWithoutLight) + "/h):</span>" +
+                                            "<span class='font-semibold text-[#191c1e]'>" + formatMoney(data.amountWithoutLight) + "</span>";
+                            detailsList.appendChild(row);
+                        }
+
+                        if (data.minutesWithLight > 0) {
+                            const row = document.createElement("div");
+                            row.className = "flex justify-between items-center text-amber-700";
+                            row.innerHTML = "<span class='flex items-center gap-1'><span class='material-symbols-outlined text-[14px]'>lightbulb</span>Có đèn (" + data.minutesWithLight + " phút × " + formatMoney(data.rateWithLight) + "/h):</span>" +
+                                            "<span class='font-semibold'>" + formatMoney(data.amountWithLight) + "</span>";
+                            detailsList.appendChild(row);
+                        }
+
+                        totalEl.textContent = formatMoney(data.totalAmount);
+                        isPriceApiValid = true;
+                        checkSchedule();
+                    })
+                    .catch(function(err) {
+                        if (err.name === 'AbortError') return; // Cancelled request, ignore
+                        loadingBadge.classList.add("hidden");
+                        errorBox.textContent = err.message || "Lỗi khi tính giá sân.";
+                        errorBox.classList.remove("hidden");
+                        detailsList.innerHTML = "";
+                        totalEl.textContent = "0 đ";
+                        isPriceApiValid = false;
+                        if (btnSubmit) btnSubmit.disabled = true;
+                    });
+            }, 150);
+        }
+
+        // ── Overlap & Submit validation ────────────────────────────────
         function checkSchedule() {
             const btnSubmit  = document.getElementById("btn-submit-booking");
             const warningBox = document.getElementById("overlap-warning");
@@ -627,7 +796,7 @@
                 if (btnSubmit) btnSubmit.disabled = true;
             } else {
                 warningBox.classList.add("hidden");
-                if (btnSubmit) btnSubmit.disabled = false;
+                if (btnSubmit) btnSubmit.disabled = !isPriceApiValid;
             }
         }
 
