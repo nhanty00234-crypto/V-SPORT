@@ -147,8 +147,6 @@
             <div class="acc-stat-num">${totalBookings}</div>
             <div class="acc-stat-lbl">Tổng số lần đặt</div>
         </div>
-    </div>
-<<<<<<< HEAD
     <div class="acc-stat-box">
         <div class="acc-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #059669;">
             <i class="fas fa-check-circle"></i>
@@ -158,20 +156,13 @@
             <div class="acc-stat-lbl">Đã hoàn thành</div>
         </div>
     </div>
-    <div class="acc-stat-box">
+    <a href="${pageContext.request.contextPath}/customer/lich-su-diem-uy-tin" class="acc-stat-box" style="text-decoration: none;">
         <div class="acc-stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">
             <i class="fas fa-star"></i>
         </div>
         <div>
             <div class="acc-stat-num">${account.diemUyTin != null ? account.diemUyTin : 80}</div>
             <div class="acc-stat-lbl">Điểm uy tín</div>
-=======
-    <a href="${pageContext.request.contextPath}/customer/lich-su-diem-uy-tin" class="stat-card stat-card-link">
-        <div class="stat-icon" style="background: rgba(255, 71, 87, 0.1); color: var(--danger);"><i class="fas fa-star"></i></div>
-        <div class="stat-info">
-            <h3>${account.diemUyTin}</h3>
-            <p>Điểm uy tín</p>
->>>>>>> fix/teacher-review-remediation
         </div>
     </a>
 </div>

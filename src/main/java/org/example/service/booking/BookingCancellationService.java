@@ -164,8 +164,7 @@ public class BookingCancellationService {
             boolean isPenalized = (decision != CancelDecision.CancelType.EARLY_CANCEL);
             AuditLogService.log(req, actor, AuditLogService.ACTION_CANCEL, AuditLogService.ENTITY_DAT_SAN,
                     String.valueOf(datSanId), "Đơn đặt sân #" + datSanId,
-<<<<<<< HEAD
-                    (isLate ? "Khách hủy sát giờ (Late Cancel)" : "Khách hủy sớm (Early Cancel)")
+                    "Khách hủy sân (" + cancelType + ")"
                             + (reason != null && !reason.isBlank() ? " - Lý do: " + reason.trim() : "")
                             + (createdHoanTienId > 0 ? " | HoanTien #" + createdHoanTienId : ""));
 
@@ -179,19 +178,7 @@ public class BookingCancellationService {
             if (isPaidPayos && createdHoanTienId > 0) {
                 message = "Đã hủy đơn #" + datSanId + ". Yêu cầu hoàn tiền #" + createdHoanTienId
                         + " đã được tạo và đang chờ xử lý.";
-            } else if (isLate) {
-                message = "Bạn đã hủy sát giờ. Hệ thống đã ghi nhận và điểm uy tín của bạn bị trừ "
-                        + Math.abs(Constants.LATE_CANCEL_PENALTY) + " điểm.";
-            } else {
-                message = "Đã hủy đơn đặt sân #" + datSanId + " thành công.";
-            }
-            return CancelResult.ok(isLate, message, newScore);
-=======
-                    "Khách hủy sân (" + cancelType + ")"
-                            + (reason != null && !reason.isBlank() ? " - Lý do: " + reason.trim() : ""));
-
-            String message;
-            if (decision == CancelDecision.CancelType.LATE_CANCEL) {
+            } else if (decision == CancelDecision.CancelType.LATE_CANCEL) {
                 message = "Bạn đã hủy sát giờ (dưới 6 tiếng). Điểm uy tín của bạn bị trừ "
                         + Math.abs(Constants.CANCEL_PENALTY_UNDER_6H) + " điểm.";
             } else if (decision == CancelDecision.CancelType.MID_CANCEL) {
@@ -201,7 +188,6 @@ public class BookingCancellationService {
                 message = "Đã hủy đơn đặt sân #" + datSanId + " thành công.";
             }
             return CancelResult.ok(isPenalized, message, newScore);
->>>>>>> fix/teacher-review-remediation
         } catch (SQLException e) {
             logger.error("Loi khi huy booking #{} cho AccountID={}: {}", datSanId, accountId, e.getMessage(), e);
             return CancelResult.fail("Hệ thống gặp lỗi khi hủy đơn. Vui lòng thử lại.");

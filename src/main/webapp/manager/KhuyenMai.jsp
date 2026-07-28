@@ -1,34 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<<<<<<< HEAD
-<%
-    String ctx = request.getContextPath();
-    String formAction = (String) request.getAttribute("formAction");
-    boolean isForm = formAction != null;
-%>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<title>Khuyến mãi — Manager</title>
-<jsp:include page="/manager/common/manager_head.jsp" />
-<style>
-body { background-color: #f8fafc !important; }
-.badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600; }
-.badge-green { background:#dcfce7;color:#15803d; }
-.badge-amber { background:#fef3c7;color:#b45309; }
-.badge-gray  { background:#f4f4f5;color:#52525b; }
-.tbl-row { transition:background .12s; }
-.tbl-row:hover { background:#faf5ff; }
-.form-field label { display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px; }
-.form-field input, .form-field select, .form-field textarea {
-    width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;
-    font-size:14px;color:#111827;outline:none;transition:border-color .15s;
-}
-.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
-    border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);
-}
-=======
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -69,27 +41,18 @@ body { background-color: #f8fafc !important; }
   .discount-mode-btn.active { border-color:#0f766e; background:#f0fdfa; color:#0f766e; }
   @media (max-width: 1024px) { .km-table-wrap { display:none; } }
   @media (min-width: 1025px) { .km-card-list { display:none; } }
->>>>>>> fix/teacher-review-remediation
 </style>
 </head>
 <body class="text-zinc-900 min-h-screen">
 
 <jsp:include page="/manager/common/sidebar.jsp" />
 
-<<<<<<< HEAD
-<c:set var="headerTitle"    value="Khuyến mãi" scope="page" />
-<c:set var="headerSubtitle" value="Quản lý mã giảm giá của cơ sở" scope="page" />
-<c:set var="headerIcon"     value="local_offer" scope="page" />
-=======
 <c:set var="headerTitle" value="Quản lý mã khuyến mãi" scope="page" />
 <c:set var="headerSubtitle" value="Chi nhánh CS${sessionScope.user.coSoId}" scope="page" />
 <c:set var="headerIcon" value="sell" scope="page" />
->>>>>>> fix/teacher-review-remediation
 <jsp:include page="/manager/common/header.jsp" />
 
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
-
-<<<<<<< HEAD
   <%-- Flash --%>
   <c:if test="${not empty sessionScope.flashSuccess}">
     <div class="rounded-xl px-4 py-3 bg-green-50 border border-green-200 text-green-800 text-sm font-medium">${sessionScope.flashSuccess}</div>
@@ -288,10 +251,6 @@ body { background-color: #f8fafc !important; }
       </c:otherwise>
     </c:choose>
   </div>
-  <% } %>
-
-</main>
-=======
   <div id="kmToast" aria-live="polite" style="display:none;" class="fixed top-20 right-6 z-[80] max-w-sm"></div>
   <c:if test="${not empty successMsg}">
     <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl shadow-sm" data-flash="success" data-flash-msg="${fn:escapeXml(successMsg)}">
@@ -677,6 +636,5 @@ window.addEventListener('DOMContentLoaded', function () { openKmDrawer('${editin
 </c:if>
 </script>
 
->>>>>>> fix/teacher-review-remediation
 </body>
 </html>

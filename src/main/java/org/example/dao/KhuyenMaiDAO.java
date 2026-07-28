@@ -2,7 +2,6 @@ package org.example.dao;
 
 import org.example.model.KhuyenMai;
 
-<<<<<<< HEAD
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.List;
@@ -12,7 +11,11 @@ public interface KhuyenMaiDAO {
     /** Lấy danh sách khuyến mãi của cơ sở, phân trang. */
     List<KhuyenMai> findByCoSoId(int coSoId, int page, int pageSize);
 
+    List<KhuyenMai> findByCoSoId(int coSoId);
+
     KhuyenMai findById(int khuyenMaiId);
+
+    KhuyenMai findByIdAndCoSoId(int khuyenMaiId, int coSoId);
 
     /** Tìm theo mã code, trong phạm vi cơ sở. */
     KhuyenMai findByCodeAndCoSoId(String maCode, int coSoId);
@@ -26,6 +29,8 @@ public interface KhuyenMaiDAO {
     int insert(KhuyenMai km);
 
     boolean update(KhuyenMai km);
+
+    boolean updateTrangThai(int khuyenMaiId, int coSoId, String trangThai);
 
     boolean delete(int khuyenMaiId, int coSoId);
 
@@ -44,26 +49,4 @@ public interface KhuyenMaiDAO {
      * Trả về null nếu không hợp lệ.
      */
     KhuyenMai findApplicable(String maCode, int coSoId, LocalDate today);
-=======
-import java.util.List;
-
-/**
- * DAO thuần CRUD cho bảng KhuyenMai, phục vụ giao diện Manager quản lý mã khuyến mãi.
- * Không chứa logic tính giảm giá — việc validate/tính toán khi áp mã vẫn thuộc
- * org.example.service.customer.PromotionService (không tạo service tính giá thứ hai ở đây).
- */
-public interface KhuyenMaiDAO {
-
-    List<KhuyenMai> findByCoSoId(int coSoId);
-
-    KhuyenMai findByIdAndCoSoId(int khuyenMaiId, int coSoId);
-
-    boolean existsByCode(String maCode, Integer excludeKhuyenMaiId);
-
-    int insert(KhuyenMai km);
-
-    boolean update(KhuyenMai km, int coSoId);
-
-    boolean updateTrangThai(int khuyenMaiId, int coSoId, String trangThai);
->>>>>>> fix/teacher-review-remediation
 }

@@ -86,17 +86,11 @@ DATN/ (Thư mục gốc dự án)
     *   *Backend*: [QuanLyCaLamManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java), [YeuCauNghiManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/YeuCauNghiManagerServlet.java), [StaffCaLamServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/StaffCaLamServlet.java), [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java)
     *   *Thực thể*: `CaLamViec`, `CaLamViecAudit`, `CaLamViecAvailability`, `CaLamViecSwapRequest`, `YeuCauNghi`.
 
-<<<<<<< HEAD
 ### Phân hệ 3: Ghép kèo cộng đồng (Matchmaking)
 *   **Chức năng**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (Ghép kèo - `GhepKeo`). Customer có thể đăng phòng, tìm người chơi cùng và xem danh sách kèo đang mở theo môn thể thao.
 *   **Thành phần chính**:
     *   *Thực thể*: `GhepKeo`, `ChiTietGhepKeo`.
 *   **Lưu ý**: Tính năng **xếp hạng ELO** (`LichSuElo`) và **chat phòng ghép kèo** (`NhatKyChat`) chưa được triển khai — xem mục Định hướng phát triển.
-=======
-### Phân hệ 3: [Roadmap - Phase 8+] Ghép kèo cộng đồng & Xếp hạng ELO (Matchmaking & Chat)
-*   **Trạng thái**: Đã chuyển sang Roadmap phát triển tương lai.
-*   **Chức năng dự kiến**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (`GhepKeo`), trao đổi qua chat phòng chờ (`NhatKyChat`). Sau mỗi trận đấu, tính toán điểm số ELO tích lũy (`LichSuElo`) để xếp hạng và ghép các cặp đối thủ.
-*   **Thực thể dự kiến**: `GhepKeo`, `ChiTietGhepKeo`, `LichSuElo`, `NhatKyChat`.
 
 ### Phân hệ 4: [Roadmap - Phase 8+] Tiện ích vận hành IoT (An ninh & Bãi giữ xe)
 *   **Trạng thái**: Đã chuyển sang Roadmap phát triển tương lai.
@@ -104,7 +98,6 @@ DATN/ (Thư mục gốc dự án)
     *   *An ninh*: Tích hợp cơ chế cảnh báo SOS khẩn cấp (`YeuCauSOS`, `NhatKySOSGui`) tại chỗ.
     *   *Nhà xe*: Quản lý thẻ xe (`TheGiuXe`) gắn với mã vạch/RFID, lưu vết giờ vào/ra của các phương tiện (`LichXeRaVao`).
 *   **Thực thể dự kiến**: `TheGiuXe`, `LichXeRaVao`, `YeuCauSOS`, `NhatKySOSGui`.
->>>>>>> fix/teacher-review-remediation
 
 ### Phân hệ 5: Quản lý Kho hàng & Dịch vụ đi kèm (Inventory & Add-on Services)
 *   **Chức năng**: Quản lý danh mục hàng hóa (`DanhMucSanPham`), sản phẩm và dịch vụ cho thuê/bán lẻ tại quầy (`SanPham_DichVu`), quản lý số lượng tồn kho của chi nhánh, theo dõi nhập/xuất kho. Áp dụng cơ chế khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi xuất/nhập kho để tránh race condition và đảm bảo tính toàn vẹn dữ liệu.
@@ -117,11 +110,7 @@ DATN/ (Thư mục gốc dự án)
 *   **Chức năng**: Cấu hình và quản lý danh mục loại sân (`LoaiSan`), các sân bóng, cầu lông, tennis cụ thể (`San`) trực thuộc chi nhánh; theo dõi trực quan trạng thái sân (Sẵn sàng, Đang hoạt động, Bảo trì) theo thời gian thực.
 *   **Thành phần chính**:
     *   *Frontend*: [QuanLySan.jsp](file:///d:/New%20folder/V-SPORT/src/main/webapp/manager/QuanLySan.jsp)
-<<<<<<< HEAD
     *   *Backend*: [QuanLySanManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/manager/QuanLySanManagerServlet.java) (Manager — `/manager/quan-ly-san`)
-=======
-    *   *Backend*: `QuanLySanManagerServlet.java` (`/manager/quan-ly-san`)
->>>>>>> fix/teacher-review-remediation
     *   *Thực thể*: `San`, `LoaiSan`, `CoSo`.
 
 ### Phân hệ 7: Quản lý Khách hàng & Đánh giá dịch vụ (Customer & Feedback Management)

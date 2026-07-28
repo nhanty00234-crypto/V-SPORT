@@ -397,7 +397,6 @@
 
                 <div id="pfAlert" class="pf-alert" role="alert"></div>
 
-<<<<<<< HEAD
                 <form id="profileForm">
                     <!-- Group 1: Thông tin cá nhân -->
                     <div class="pf-group-title"><i class="fas fa-user"></i> Thông tin cá nhân</div>
@@ -413,73 +412,8 @@
                         <div class="pf-field">
                             <label class="pf-label">Số điện thoại</label>
                             <input type="text" id="pfPhone" name="phone" class="pf-input" value="${fn:escapeXml(account.phoneNumber)}" placeholder="Nhập số điện thoại liên hệ" />
-=======
-            <div class="customer-profile-section">
-                <div class="customer-profile-section-header">
-                    <span class="customer-profile-section-title">Cá nhân hoá</span>
-                    <button type="button" class="customer-profile-section-edit" aria-label="Chỉnh sửa cá nhân hóa" onclick="openModal('chpPersoModal')">
-                        <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
-                    </button>
-                </div>
-                <hr class="customer-profile-divider">
-                <div class="customer-profile-perso-row">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-                    <span class="customer-profile-perso-label">Vị trí yêu thích</span>
-                    <span id="chpLocationValue" class="customer-profile-perso-value">${not empty profileExtra.preferredLocation ? fn:escapeXml(profileExtra.preferredLocation) : '-'}</span>
-                </div>
-                <div class="customer-profile-perso-row">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                    <span class="customer-profile-perso-label">Môn thể thao &amp; Trình độ</span>
-                    <span id="chpSportLevelValue" class="customer-profile-perso-value">
-                        <c:choose>
-                            <c:when test="${not empty profileExtra.favoriteSportName}">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-                                    <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
-                                    ${fn:escapeXml(profileExtra.favoriteSportName)}
-                                    <c:if test="${not empty profileExtra.skillLevel}">
-                                        <span class="text-emerald-400 font-normal">|</span>
-                                        <span class="text-emerald-800 font-semibold">${fn:escapeXml(profileExtra.skillLevel)}</span>
-                                    </c:if>
-                                </span>
-                            </c:when>
-                            <c:otherwise>-</c:otherwise>
-                        </c:choose>
-                    </span>
-                </div>
-                <div class="customer-profile-perso-row">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                    <span class="customer-profile-perso-label">Mục tiêu</span>
-                    <span id="chpGoalValue" class="customer-profile-perso-value">${not empty profileExtra.goal ? fn:escapeXml(profileExtra.goal) : '-'}</span>
-                </div>
-                <div class="customer-profile-perso-row">
-                    <svg class="lci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
-                    <span class="customer-profile-perso-label">Tần suất chơi</span>
-                    <span id="chpFrequencyValue" class="customer-profile-perso-value">${not empty profileExtra.playFrequency ? fn:escapeXml(profileExtra.playFrequency) : '-'}</span>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div id="chpTabLinks" class="customer-profile-tab-panel hidden">
-        <div class="customer-profile-section-wrap">
-            <c:choose>
-                <c:when test="${not empty myTeams}">
-                    <c:forEach var="team" items="${myTeams}">
-                        <div class="customer-profile-team-item">
-                            <c:choose>
-                                <c:when test="${not empty team.avatarPath}">
-                                    <img class="customer-profile-team-avatar" src="${pageContext.request.contextPath}${team.avatarPath}" alt="${fn:escapeXml(team.teamName)}">
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="customer-profile-team-avatar">${fn:escapeXml(fn:substring(team.teamName, 0, 1))}</span>
-                                </c:otherwise>
-                            </c:choose>
-                            <div>
-                                <div class="customer-profile-team-name">${fn:escapeXml(team.teamName)}</div>
-                                <div class="customer-profile-team-meta">${fn:escapeXml(team.myRole)} &middot; ${team.memberCount}/${team.maxMembers} thành viên</div>
-                            </div>
->>>>>>> fix/teacher-review-remediation
+                        </div>
+                    </div>
                         </div>
                     </div>
 
