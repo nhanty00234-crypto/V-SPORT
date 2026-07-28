@@ -89,6 +89,8 @@ public final class Constants {
     public static final String TRANG_THAI_HOA_DON_HOAN_TIEN = "Hoàn tiền";
     public static final String TRANG_THAI_HOA_DON_GHI_NO = "Ghi nợ";
     public static final String TRANG_THAI_HOA_DON_DA_COC = "Đã cọc";
+    /** Thêm cho Chia tiền nhóm (mục 9 spec) — một phần share đã PAID nhưng chưa đủ tổng hóa đơn. */
+    public static final String TRANG_THAI_HOA_DON_MOT_PHAN = "Thanh toán một phần";
 
     // ========== PAYMENT METHODS ==========
     public static final String PT_TIEN_MAT = "Tiền mặt";

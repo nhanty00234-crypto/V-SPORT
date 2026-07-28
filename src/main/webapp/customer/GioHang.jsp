@@ -470,7 +470,7 @@
                                             <i class="fas fa-credit-card"></i> Thanh toán
                                         </a>
                                     </c:if>
-                                    <button type="button" onclick="openCancelBookingModal(${item.datSanId}, '${item.ngayDat}', '${item.gioBatDau}')" class="btn-cart-action btn-cancel">
+                                    <button type="button" data-action="cancel-booking" data-dat-san-id="${item.datSanId}" class="btn-cart-action btn-cancel">
                                         <i class="fas fa-times"></i> Hủy sân
                                     </button>
                                     <c:if test="${item.trangThai == 'Chờ xác nhận' || item.trangThai == 'Đã xác nhận'}">
@@ -544,7 +544,37 @@
                                         <span class="cart-item-status status-completed"><i class="fas fa-flag-checkered" style="margin-right:5px;"></i> Hoàn thành</span>
                                     </c:when>
                                     <c:when test="${lich.trangThai == 'Đã hủy'}">
-                                        <span class="cart-item-status status-cancel"><i class="fas fa-times-circle" style="margin-right:5px;"></i> Đã hủy</span>
+                                        <c:set var="htItem" value="${mapHoanTien[lich.datSanId]}" />
+                                        <c:choose>
+                                            <c:when test="${not empty htItem}">
+                                                <c:choose>
+                                                    <c:when test="${htItem.trangThai == 'CHO_BO_SUNG_THONG_TIN'}">
+                                                        <span class="cart-item-status" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a;"><i class="fas fa-edit"></i> Chờ bổ sung STK</span>
+                                                    </c:when>
+                                                    <c:when test="${htItem.trangThai == 'CHO_XU_LY'}">
+                                                        <span class="cart-item-status" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;"><i class="fas fa-clock"></i> Chờ duyệt hoàn tiền</span>
+                                                    </c:when>
+                                                    <c:when test="${htItem.trangThai == 'DA_DUYET'}">
+                                                        <span class="cart-item-status" style="background:#f3e8ff; color:#6b21a8; border:1px solid #e9d5ff;"><i class="fas fa-check"></i> Đã duyệt hoàn tiền</span>
+                                                    </c:when>
+                                                    <c:when test="${htItem.trangThai == 'DANG_HOAN_TIEN'}">
+                                                        <span class="cart-item-status" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;"><i class="fas fa-spinner fa-spin"></i> Đang chuyển khoản</span>
+                                                    </c:when>
+                                                    <c:when test="${htItem.trangThai == 'DA_HOAN_TIEN'}">
+                                                        <span class="cart-item-status" style="background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;"><i class="fas fa-check-circle"></i> Đã hoàn tiền</span>
+                                                    </c:when>
+                                                    <c:when test="${htItem.trangThai == 'TU_CHOI'}">
+                                                        <span class="cart-item-status" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;"><i class="fas fa-times-circle"></i> Từ chối hoàn tiền</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="cart-item-status status-cancel"><i class="fas fa-times-circle"></i> Đã hủy</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="cart-item-status status-cancel"><i class="fas fa-times-circle"></i> Đã hủy</span>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:when>
                                     <c:when test="${lich.trangThai == 'Không đến'}">
                                         <span class="cart-item-status status-cancel"><i class="fas fa-user-slash" style="margin-right:5px;"></i> Không đến</span>
@@ -572,6 +602,26 @@
                         <div class="cart-actions">
                             <div class="cart-item-price"><fmt:formatNumber value="${lich.tongTienDuKien}" pattern="#,##0"/> đ</div>
 
+                            <c:if test="${lich.trangThai == 'Đã hủy'}">
+                                <c:set var="htItem" value="${mapHoanTien[lich.datSanId]}" />
+                                <c:if test="${not empty htItem}">
+                                    <div style="display: flex; gap: 8px; margin-top: 6px; justify-content: flex-end;">
+                                        <c:choose>
+                                            <c:when test="${htItem.trangThai == 'CHO_BO_SUNG_THONG_TIN'}">
+                                                <a href="${pageContext.request.contextPath}/customer/hoan-tien?id=${htItem.hoanTienId}" class="btn-cart-action" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:700;">
+                                                    <i class="fas fa-edit"></i> Bổ sung thông tin STK
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="${pageContext.request.contextPath}/customer/hoan-tien?id=${htItem.hoanTienId}" class="btn-cart-action" style="background:#f1f5f9; color:#0f172a; font-weight:700;">
+                                                    <i class="fas fa-eye"></i> Theo dõi hoàn tiền
+                                                </a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </c:if>
+                            </c:if>
+
                             <c:if test="${lich.trangThai == 'Chờ thanh toán'}">
                                 <div style="display: flex; gap: 8px;">
                                     <a href="${pageContext.request.contextPath}/customer/thanh-toan-qr?datSanId=${lich.datSanId}" class="btn-cart-action btn-pay">
@@ -586,7 +636,7 @@
                             <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận' || lich.trangThai == 'Đang sử dụng'}">
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
                                     <c:if test="${lich.trangThai == 'Chờ xác nhận' || lich.trangThai == 'Đã xác nhận'}">
-                                        <button type="button" onclick="openCancelBookingModal(${lich.datSanId}, '${lich.ngayDat}', '${lich.gioBatDau}')" class="btn-cart-action btn-cancel">
+                                        <button type="button" data-action="cancel-booking" data-dat-san-id="${lich.datSanId}" class="btn-cart-action btn-cancel">
                                             <i class="fas fa-times"></i> Hủy sân
                                         </button>
                                     </c:if>
@@ -666,26 +716,83 @@
 
 <!-- CANCEL BOOKING MODAL -->
 <div id="cancelBookingModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #fff; width: 100%; max-width: 440px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden;">
-        <div style="background: #dc2626; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; color: #fff;">
-            <h3 style="font-size: 16px; font-weight: 800; margin: 0; font-family: 'Poppins', sans-serif;"><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> Xác nhận hủy đặt sân</h3>
+    <div style="background: #fff; width: 100%; max-width: 480px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden;">
+        <div style="background: #0f172a; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; color: #fff;">
+            <h3 id="cancelModalTitle" style="font-size: 16px; font-weight: 800; margin: 0; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Xác nhận hủy đặt sân
+            </h3>
             <button onclick="closeCancelBookingModal()" style="background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 18px;"><i class="fas fa-times"></i></button>
         </div>
+
         <form id="cancelBookingForm" action="${pageContext.request.contextPath}/customer/huy-dat-san" method="post">
             <input type="hidden" name="id" id="cancelBookingDatSanId" value="">
-            <div style="padding: 24px;">
-                <p style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: var(--body-text);">Bạn có chắc chắn muốn hủy đơn đặt sân này không?</p>
-                <div id="cancelBookingLateWarning" style="display: none; background: #fffbeb; border: 1px solid #fde68a; padding: 12px; border-radius: 10px; font-size: 12px; color: #b45309; margin-bottom: 12px;">
-                    <i class="fas fa-exclamation-circle"></i> Hủy sát giờ (dưới 6 tiếng) có thể làm giảm điểm uy tín của bạn.
+            <input type="hidden" name="datSanId" id="cancelBookingDatSanIdParam" value="">
+            <input type="hidden" name="source" value="gio-hang">
+
+            <!-- Loading Spinner -->
+            <div id="cancelModalLoading" style="text-align: center; padding: 40px 24px;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color: #059669;"></i>
+                <p style="margin-top: 12px; font-size: 13px; color: #64748b; font-weight: 600;">Đang kiểm tra thông tin thanh toán & chính sách hoàn tiền...</p>
+            </div>
+
+            <!-- Modal Content -->
+            <div id="cancelModalContent" style="display: none; padding: 20px 24px;">
+                <!-- Error Notice -->
+                <div id="cancelModalError" style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 600;">
+                    <i class="fas fa-times-circle"></i> <span id="cancelModalErrorText"></span>
                 </div>
-                <div>
-                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted-text); margin-bottom: 6px;">Lý do hủy (không bắt buộc)</label>
-                    <textarea name="reason" rows="2" maxlength="255" placeholder="Nhập lý do bận việc..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; outline: none; box-sizing: border-box;"></textarea>
+
+                <div id="cancelModalMainBody">
+                    <!-- Payment Status & Financial Breakdown Card -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1;">
+                            <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Trạng thái thanh toán</span>
+                            <span id="modalPaymentBadge">CHƯA THANH TOÁN</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span style="color: #64748b;">Số tiền đã trả:</span>
+                            <span id="modalAmountPaid" style="font-weight: 700; color: #0f172a;">0 đ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span style="color: #64748b;">Phí giữ lại / Hủy:</span>
+                            <span id="modalCancellationFee" style="font-weight: 700; color: #dc2626;">0 đ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">
+                            <span style="font-weight: 700; color: #0f172a;">Số tiền dự kiến hoàn:</span>
+                            <span id="modalRefundableAmount" style="font-weight: 800; color: #059669; font-size: 16px;">0 đ</span>
+                        </div>
+                    </div>
+
+                    <!-- Policy Message & Reputation Penalty Warning -->
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 12px; border-radius: 12px; font-size: 12px; color: #b45309; margin-bottom: 16px;">
+                        <div style="font-weight: 700; margin-bottom: 4px;" id="modalPolicyText"></div>
+                        <div id="modalReputationWarning" style="display: none; margin-top: 4px; font-weight: 700; color: #dc2626;">
+                            <i class="fas fa-exclamation-triangle"></i> Điểm uy tín của bạn sẽ bị trừ <span id="modalReputationPenaltyScore"></span> điểm do hủy sát giờ.
+                        </div>
+                    </div>
+
+                    <!-- Option Selection (If eligible) -->
+                    <div id="cancelModalRefundOptions" style="display: none; margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Phương thức tiếp nhận hoàn tiền</label>
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #166534;">
+                            <input type="radio" checked disabled style="accent-color: #059669;">
+                            <span>Nhập thông tin ngân hàng & nhận hoàn tiền trực tiếp</span>
+                        </div>
+                    </div>
+
+                    <!-- Reason Textarea -->
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Lý do hủy sân (không bắt buộc)</label>
+                        <textarea name="reason" rows="2" maxlength="255" placeholder="Ví dụ: Bận việc đột xuất, đổi sân..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; font-family: inherit;"></textarea>
+                    </div>
                 </div>
             </div>
-            <div style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeCancelBookingModal()" style="padding: 10px 20px; border-radius: 8px; font-weight: 700; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Đóng</button>
-                <button type="submit" style="padding: 10px 24px; border-radius: 8px; font-weight: 700; background: #dc2626; border: none; color: #fff; cursor: pointer;">Xác nhận hủy</button>
+
+            <div style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeCancelBookingModal()" style="padding: 10px 18px; border-radius: 8px; font-weight: 700; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Hủy bỏ</button>
+                <button type="submit" id="cancelModalSubmitBtn" style="padding: 10px 22px; border-radius: 8px; font-weight: 800; background: #dc2626; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    Xác nhận hủy
+                </button>
             </div>
         </form>
     </div>
@@ -967,21 +1074,197 @@
         document.getElementById("customerServiceModal").style.display = "none";
     }
 
-    function openCancelBookingModal(datSanId, ngayDatStr, gioBatDauStr) {
-        document.getElementById("cancelBookingDatSanId").value = datSanId;
-        var warningEl = document.getElementById("cancelBookingLateWarning");
-        try {
-            var bookingStart = new Date(ngayDatStr + "T" + gioBatDauStr);
-            var hoursUntilStart = (bookingStart.getTime() - Date.now()) / (1000 * 60 * 60);
-            warningEl.style.display = (hoursUntilStart <= 6) ? "block" : "none";
-        } catch (e) {
-            warningEl.style.display = "none";
+    let currentCancellationDatSanId = null;
+
+    document.addEventListener('click', function (event) {
+        const trigger = event.target.closest('[data-action="cancel-booking"]');
+        if (!trigger) return;
+
+        event.preventDefault();
+        const rawDatSanId = trigger.dataset.datSanId;
+        const datSanId = Number.parseInt(rawDatSanId, 10);
+
+        if (!Number.isInteger(datSanId) || datSanId <= 0) {
+            alert('Không xác định được mã đặt sân. Vui lòng tải lại trang.');
+            return;
         }
-        document.getElementById("cancelBookingModal").style.display = "flex";
+
+        openCancellationPreview(datSanId);
+    });
+
+    async function requestCancellationPreview(datSanId) {
+        const params = new URLSearchParams({
+            action: 'preview',
+            datSanId: String(datSanId)
+        });
+
+        const contextPath = '${pageContext.request.contextPath}';
+        const response = await fetch(`${contextPath}/customer/huy-dat-san?${params.toString()}`, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+        const rawBody = await response.text();
+
+        if (response.redirected) {
+            throw new Error('Phiên đăng nhập đã hết hạn hoặc request bị chuyển hướng. Vui lòng đăng nhập lại.');
+        }
+
+        let data = null;
+        try {
+            data = JSON.parse(rawBody);
+        } catch (error) {
+            console.error('[cancellation-preview] Non-JSON response', {
+                status: response.status,
+                contentType: contentType,
+                responseUrl: response.url,
+                bodyPreview: rawBody.slice(0, 300),
+                error: error
+            });
+
+            if (response.status === 401) {
+                throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            }
+            if (response.status === 403) {
+                throw new Error('Bạn không có quyền truy cập thông tin hủy sân này.');
+            }
+            if (response.status === 404) {
+                throw new Error('Không tìm thấy thông tin đơn đặt sân.');
+            }
+            throw new Error('Không thể đọc dữ liệu chính sách hủy sân. Vui lòng tải lại trang.');
+        }
+
+        if (data && data.success === false) {
+            throw new Error(data.message || 'Không thể kiểm tra điều kiện hủy sân.');
+        }
+
+        return data;
+    }
+
+    async function openCancellationPreview(datSanId) {
+        const id = Number.parseInt(datSanId, 10);
+        const modal = document.getElementById("cancelBookingModal");
+        const loading = document.getElementById("cancelModalLoading");
+        const content = document.getElementById("cancelModalContent");
+        const submitBtn = document.getElementById("cancelModalSubmitBtn");
+
+        if (!modal || !loading || !content) return;
+
+        modal.style.display = "flex";
+        loading.style.display = "block";
+        content.style.display = "none";
+        if (submitBtn) submitBtn.disabled = true;
+
+        if (!Number.isInteger(id) || id <= 0) {
+            loading.style.display = "none";
+            content.style.display = "block";
+            document.getElementById("cancelModalTitle").innerHTML = '<i class="fas fa-times-circle" style="color:#ef4444;"></i> Không thể hủy sân';
+            document.getElementById("cancelModalError").style.display = "block";
+            document.getElementById("cancelModalErrorText").innerText = "Không xác định được mã đặt sân datSanId hợp lệ.";
+            document.getElementById("cancelModalMainBody").style.display = "none";
+            if (submitBtn) submitBtn.style.display = "none";
+            return;
+        }
+
+        currentCancellationDatSanId = id;
+        const hiddenIdField = document.getElementById("cancelBookingDatSanId");
+        if (hiddenIdField) hiddenIdField.value = String(id);
+        const hiddenParamField = document.getElementById("cancelBookingDatSanIdParam");
+        if (hiddenParamField) hiddenParamField.value = String(id);
+
+        try {
+            const preview = await requestCancellationPreview(id);
+
+            loading.style.display = "none";
+            content.style.display = "block";
+
+            if (!preview.cancellationAllowed) {
+                document.getElementById("cancelModalTitle").innerHTML = '<i class="fas fa-times-circle" style="color:#ef4444;"></i> Không thể hủy sân';
+                document.getElementById("cancelModalError").style.display = "block";
+                document.getElementById("cancelModalErrorText").innerText = preview.message || "Đơn không đủ điều kiện hủy.";
+                document.getElementById("cancelModalMainBody").style.display = "none";
+                if (submitBtn) submitBtn.style.display = "none";
+                return;
+            }
+
+            document.getElementById("cancelModalError").style.display = "none";
+            document.getElementById("cancelModalMainBody").style.display = "block";
+            if (submitBtn) {
+                submitBtn.style.display = "inline-flex";
+                submitBtn.disabled = false;
+            }
+
+            const paidText = preview.paid ? ("ĐÃ THANH TOÁN (" + (preview.paymentMethod || "PayOS") + ")") : "CHƯA THANH TOÁN";
+            const paidBadgeClass = preview.paid ? "background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;" : "background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0;";
+            const badgeEl = document.getElementById("modalPaymentBadge");
+            if (badgeEl) {
+                badgeEl.style.cssText = "font-size:11px; font-weight:800; padding:4px 10px; border-radius:50px; " + paidBadgeClass;
+                badgeEl.innerText = paidText;
+            }
+
+            document.getElementById("modalAmountPaid").innerText = (preview.amountPaid || 0).toLocaleString('vi-VN') + " đ";
+            document.getElementById("modalCancellationFee").innerText = (preview.cancellationFee || 0).toLocaleString('vi-VN') + " đ";
+            document.getElementById("modalRefundableAmount").innerText = (preview.refundableAmount || 0).toLocaleString('vi-VN') + " đ";
+
+            document.getElementById("modalPolicyText").innerText = preview.policyMessage || "";
+            if (preview.reputationPenalty > 0) {
+                document.getElementById("modalReputationWarning").style.display = "block";
+                document.getElementById("modalReputationPenaltyScore").innerText = preview.reputationPenalty;
+            } else {
+                document.getElementById("modalReputationWarning").style.display = "none";
+            }
+
+            const optionsGroup = document.getElementById("cancelModalRefundOptions");
+            if (preview.paid && preview.refundEligible) {
+                document.getElementById("cancelModalTitle").innerHTML = '<i class="fas fa-hand-holding-usd" style="color:#34d399;"></i> Hủy sân & Yêu cầu hoàn tiền';
+                if (optionsGroup) optionsGroup.style.display = "block";
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Hủy sân & Gửi yêu cầu hoàn tiền';
+                    submitBtn.style.background = "#059669";
+                }
+            } else if (preview.paid && !preview.refundEligible) {
+                document.getElementById("cancelModalTitle").innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i> Hủy sân (Không hoàn tiền)';
+                if (optionsGroup) optionsGroup.style.display = "none";
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-times-circle"></i> Xác nhận hủy (Không hoàn tiền)';
+                    submitBtn.style.background = "#dc2626";
+                }
+            } else {
+                document.getElementById("cancelModalTitle").innerHTML = '<i class="fas fa-times-circle" style="color:#ef4444;"></i> Xác nhận hủy đặt sân';
+                if (optionsGroup) optionsGroup.style.display = "none";
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-times-circle"></i> Xác nhận hủy sân';
+                    submitBtn.style.background = "#dc2626";
+                }
+            }
+        } catch (err) {
+            loading.style.display = "none";
+            content.style.display = "block";
+            document.getElementById("cancelModalError").style.display = "block";
+            document.getElementById("cancelModalErrorText").innerText = err.message || "Không thể tải thông tin hủy sân. Vui lòng thử lại.";
+            document.getElementById("cancelModalMainBody").style.display = "none";
+            if (submitBtn) submitBtn.style.display = "none";
+        }
+    }
+
+    function openCancelBookingModal(datSanId) {
+        openCancellationPreview(datSanId);
     }
 
     function closeCancelBookingModal() {
-        document.getElementById("cancelBookingModal").style.display = "none";
+        const modal = document.getElementById("cancelBookingModal");
+        if (modal) modal.style.display = "none";
+        currentCancellationDatSanId = null;
+        const hiddenIdField = document.getElementById("cancelBookingDatSanId");
+        if (hiddenIdField) hiddenIdField.value = "";
+        const hiddenParamField = document.getElementById("cancelBookingDatSanIdParam");
+        if (hiddenParamField) hiddenParamField.value = "";
+        const reasonInput = document.getElementById("cancelBookingReason");
+        if (reasonInput) reasonInput.value = "";
     }
 </script>
 </body>

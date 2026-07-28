@@ -39,6 +39,17 @@ public class FilterCustomerArea implements Filter {
         if (session != null) {
             TaiKhoan user = (TaiKhoan) session.getAttribute("user");
             if (user != null && user.getRoleId() != Constants.ROLE_KHACH_HANG) {
+                String accept = req.getHeader("Accept");
+                boolean isApi = req.getRequestURI().contains("/api/")
+                        || "XMLHttpRequest".equals(req.getHeader("X-Requested-With"))
+                        || (accept != null && accept.contains("application/json"));
+                if (isApi) {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    resp.setCharacterEncoding("UTF-8");
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\":false,\"code\":\"FORBIDDEN\",\"message\":\"Bạn không có quyền truy cập khu vực này.\"}");
+                    return;
+                }
                 // Staff/Manager/Admin đang cố vào khu vực customer → đá về portal đúng role
                 String home = RoleRedirectUtil.getHomePathByRoleId(user.getRoleId());
                 resp.sendRedirect(req.getContextPath() + home);

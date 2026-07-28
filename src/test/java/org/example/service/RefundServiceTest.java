@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.dao.HoanTienDAO;
 import org.example.model.Hoantien;
+import org.example.util.RefundStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,8 +34,8 @@ class RefundServiceTest {
     // --- createRefund: idempotent — second call with same hoaDonId is a no-op ---
     @Test
     void createRefund_idempotentWhenAlreadyExists() throws SQLException {
-        when(hoanTienDAO.existsByHoaDonId(5)).thenReturn(true);
-        var r = refundService.createRefund(conn, 5, 1, BigDecimal.valueOf(100_000), "Hủy sân");
+        when(hoanTienDAO.existsActiveByHoaDonId(5)).thenReturn(true);
+        var r = refundService.createRefund(conn, 5, 100, 1, 1, BigDecimal.valueOf(100_000), "Hủy sân");
         assertTrue(r.success);
         verify(hoanTienDAO, never()).insert(any(Connection.class), any(Hoantien.class));
     }
@@ -42,24 +43,24 @@ class RefundServiceTest {
     // --- createRefund: inserts when no prior refund for invoice ---
     @Test
     void createRefund_insertsWhenNoneExists() throws SQLException {
-        when(hoanTienDAO.existsByHoaDonId(10)).thenReturn(false);
+        when(hoanTienDAO.existsActiveByHoaDonId(10)).thenReturn(false);
         when(hoanTienDAO.insert(any(Connection.class), any(Hoantien.class))).thenReturn(42);
-        var r = refundService.createRefund(conn, 10, 1, BigDecimal.valueOf(200_000), "Hủy sân");
+        var r = refundService.createRefund(conn, 10, 100, 1, 1, BigDecimal.valueOf(200_000), "Hủy sân");
         assertTrue(r.success);
         assertEquals(42, r.hoanTienId);
     }
 
-    // --- createRefund: sets trạng thái = "Chờ xử lý" ---
+    // --- createRefund: sets trạng thái khởi tạo = CHO_BO_SUNG_THONG_TIN (chưa có ngân hàng lúc hủy tự động) ---
     @Test
     void createRefund_setsInitialStatus() throws SQLException {
-        when(hoanTienDAO.existsByHoaDonId(20)).thenReturn(false);
+        when(hoanTienDAO.existsActiveByHoaDonId(20)).thenReturn(false);
         when(hoanTienDAO.insert(any(Connection.class), any(Hoantien.class))).thenReturn(1);
 
-        refundService.createRefund(conn, 20, 3, BigDecimal.valueOf(50_000), "Lý do");
+        refundService.createRefund(conn, 20, 100, 1, 3, BigDecimal.valueOf(50_000), "Lý do");
 
         ArgumentCaptor<Hoantien> cap = ArgumentCaptor.forClass(Hoantien.class);
         verify(hoanTienDAO).insert(any(Connection.class), cap.capture());
-        assertEquals(RefundService.TRANG_THAI_CHO_XU_LY, cap.getValue().getTrangThai());
+        assertEquals(RefundStatus.CHO_BO_SUNG_THONG_TIN, cap.getValue().getTrangThai());
     }
 
     // --- approve: sends notification when state transition succeeds ---
@@ -69,12 +70,14 @@ class RefundServiceTest {
         ht.setHoanTienId(1);
         ht.setAccountId(55);
         ht.setSoTienHoan(BigDecimal.valueOf(100_000));
-        when(hoanTienDAO.findById(1)).thenReturn(ht);
-        when(hoanTienDAO.updateTrangThai(eq(1), eq(RefundService.TRANG_THAI_DA_DUYET),
-                anyInt(), any(), any())).thenReturn(true);
+        ht.setSoTienDaThanhToan(BigDecimal.valueOf(100_000));
+        ht.setTrangThai(RefundStatus.CHO_XU_LY);
+        when(hoanTienDAO.findByIdAndCoSoId(1, 10)).thenReturn(ht);
+        when(hoanTienDAO.updateTrangThai(eq(1), eq(RefundStatus.CHO_XU_LY), eq(RefundStatus.DA_DUYET),
+                anyInt(), any(), any(), any(), any())).thenReturn(true);
 
         // approve needs HttpServletRequest for AuditLog — pass null; AuditLogService should handle it
-        refundService.approve(1, 10, "OK", null);
+        refundService.approve(1, 10, 99, BigDecimal.valueOf(100_000), "OK", null);
 
         verify(notificationService).notifyRefundApproved(eq(55), eq(1), any());
     }
@@ -86,11 +89,12 @@ class RefundServiceTest {
         ht.setHoanTienId(2);
         ht.setAccountId(66);
         ht.setSoTienHoan(BigDecimal.valueOf(80_000));
-        when(hoanTienDAO.findById(2)).thenReturn(ht);
-        when(hoanTienDAO.updateTrangThai(eq(2), eq(RefundService.TRANG_THAI_TU_CHOI),
-                anyInt(), any(), any())).thenReturn(true);
+        ht.setTrangThai(RefundStatus.CHO_XU_LY);
+        when(hoanTienDAO.findByIdAndCoSoId(2, 10)).thenReturn(ht);
+        when(hoanTienDAO.updateTrangThai(eq(2), eq(RefundStatus.CHO_XU_LY), eq(RefundStatus.TU_CHOI),
+                anyInt(), any(), any(), any(), any())).thenReturn(true);
 
-        refundService.reject(2, 10, "Sai thông tin", null);
+        refundService.reject(2, 10, 99, "Sai thông tin", null);
 
         verify(notificationService).notifyRefundRejected(eq(66), eq(2), eq("Sai thông tin"));
     }
@@ -102,19 +106,20 @@ class RefundServiceTest {
         ht.setHoanTienId(3);
         ht.setAccountId(77);
         ht.setSoTienHoan(BigDecimal.valueOf(50_000));
-        when(hoanTienDAO.findById(3)).thenReturn(ht);
-        when(hoanTienDAO.updateTrangThai(anyInt(), anyString(), anyInt(), any(), any())).thenReturn(false);
+        ht.setSoTienDaThanhToan(BigDecimal.valueOf(50_000));
+        ht.setTrangThai(RefundStatus.DA_DUYET); // đã được duyệt trước đó -> không thể approve lại (chặn double submit)
+        when(hoanTienDAO.findByIdAndCoSoId(3, 10)).thenReturn(ht);
 
-        var r = refundService.approve(3, 10, "OK", null);
+        var r = refundService.approve(3, 10, 99, BigDecimal.valueOf(50_000), "OK", null);
         assertFalse(r.success);
         verify(notificationService, never()).notifyRefundApproved(anyInt(), anyInt(), any());
     }
 
-    // --- approve/reject: fails when hoanTienId not found ---
+    // --- approve/reject: fails when hoanTienId not found (or not owned by this CoSoID) ---
     @Test
     void approve_failsWhenNotFound() {
-        when(hoanTienDAO.findById(999)).thenReturn(null);
-        var r = refundService.approve(999, 10, "x", null);
+        when(hoanTienDAO.findByIdAndCoSoId(999, 10)).thenReturn(null);
+        var r = refundService.approve(999, 10, 99, BigDecimal.valueOf(1_000), "x", null);
         assertFalse(r.success);
     }
 

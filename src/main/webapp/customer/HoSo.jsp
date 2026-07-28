@@ -412,9 +412,6 @@
                         <div class="pf-field">
                             <label class="pf-label">Số điện thoại</label>
                             <input type="text" id="pfPhone" name="phone" class="pf-input" value="${fn:escapeXml(account.phoneNumber)}" placeholder="Nhập số điện thoại liên hệ" />
-                        </div>
-                    </div>
-                        </div>
                     </div>
 
                     <!-- Group 2: Sở thích thể thao -->

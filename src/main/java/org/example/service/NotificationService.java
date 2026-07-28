@@ -212,4 +212,54 @@ public class NotificationService {
                 String.valueOf(hoanTienId),
                 "/customer/dat-san?openHistory=true");
     }
+
+    public void notifyRefundNeedMoreInfo(int accountId, int hoanTienId, String ghiChu) {
+        sendNotification(accountId,
+                "Cần bổ sung thông tin hoàn tiền",
+                "Yêu cầu hoàn tiền #" + hoanTienId + " cần bạn bổ sung thông tin ngân hàng"
+                        + (ghiChu != null && !ghiChu.trim().isEmpty() ? ": " + ghiChu.trim() : "."),
+                "REFUND_NEED_MORE_INFO",
+                String.valueOf(hoanTienId),
+                "/customer/hoan-tien");
+    }
+
+    public void notifyRefundProcessing(int accountId, int hoanTienId) {
+        sendNotification(accountId,
+                "Đang xử lý hoàn tiền",
+                "Yêu cầu hoàn tiền #" + hoanTienId + " của bạn đang được chuyển khoản.",
+                "REFUND_PROCESSING",
+                String.valueOf(hoanTienId),
+                "/customer/hoan-tien");
+    }
+
+    // -----------------------------------------------------------------------
+    // Chia tiền nhóm (BillSplit)
+    // -----------------------------------------------------------------------
+
+    public void notifyBillSplitCreated(int accountId, int billSplitId) {
+        sendNotification(accountId,
+                "Đã tạo chia tiền nhóm",
+                "Yêu cầu chia tiền nhóm #" + billSplitId + " đã được tạo. Hãy gửi link/QR cho từng người.",
+                "BILL_SPLIT_CREATED",
+                String.valueOf(billSplitId),
+                "/customer/chia-tien-nhom?id=" + billSplitId);
+    }
+
+    public void notifyBillSplitSharePaid(int accountId, int billSplitId, String displayName, String soTien) {
+        sendNotification(accountId,
+                "Có người đã thanh toán phần chia tiền",
+                displayName + " đã thanh toán " + soTien + " VND cho nhóm chia tiền #" + billSplitId + ".",
+                "BILL_SPLIT_SHARE_PAID",
+                String.valueOf(billSplitId) + "_" + displayName.hashCode(),
+                "/customer/chia-tien-nhom?id=" + billSplitId);
+    }
+
+    public void notifyBillSplitCompleted(int accountId, int billSplitId) {
+        sendNotification(accountId,
+                "Chia tiền nhóm đã hoàn tất",
+                "Tất cả thành viên đã thanh toán xong cho nhóm chia tiền #" + billSplitId + ".",
+                "BILL_SPLIT_COMPLETED",
+                String.valueOf(billSplitId),
+                "/customer/chia-tien-nhom?id=" + billSplitId);
+    }
 }

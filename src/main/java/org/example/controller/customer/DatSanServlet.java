@@ -71,7 +71,7 @@ import java.util.logging.Logger;
  * @author DatN (Senior refactor)
  * @version 2.0
  */
-@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel", "/customer/payos-status", "/customer/payos-retry", "/customer/payos-pay-counter" })
+@WebServlet(urlPatterns = { "/customer/dat-san", "/customer/dat_san", "/customer/lich-su-dat-san", "/customer/huy-dat-san", "/customer/dat-dich-vu", "/customer/chi-tiet-san", "/customer/payos-return", "/customer/payos-cancel", "/customer/payos-status", "/customer/payos-retry", "/customer/payos-pay-counter", "/customer/api/booking-cancellation-preview", "/customer/booking-cancellation-preview" })
 public class DatSanServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(DatSanServlet.class.getName());
@@ -109,6 +109,9 @@ public class DatSanServlet extends HttpServlet {
     private final CourtPricingService pricingService = new CourtPricingService();
     private final org.example.service.booking.BookingCancellationService bookingCancellationService =
             new org.example.service.booking.BookingCancellationService();
+    /** Finalizer DÙNG CHUNG với PayOSWebhookServlet cho luồng đặt sân trực tiếp (orderCode=DatSanID). */
+    private final org.example.service.payos.PayOSLegacyBookingFinalizationService legacyFinalizationService =
+            new org.example.service.payos.PayOSLegacyBookingFinalizationService();
 
     // =========================================================================
     // PHẦN 1: XỬ LÝ GET - Hiển thị trang
@@ -119,6 +122,11 @@ public class DatSanServlet extends HttpServlet {
         String path = req.getServletPath();
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+
+        if (path.contains("booking-cancellation-preview") || ("preview".equals(req.getParameter("action")) && path.equals("/customer/huy-dat-san"))) {
+            handleCancellationPreview(req, resp, user);
+            return;
+        }
 
         // Khách chưa đăng nhập vẫn được xem trang đặt sân để khám phá,
         // nhưng không thể submit form (nút sẽ chuyển thành "Đăng nhập")
@@ -244,11 +252,15 @@ public class DatSanServlet extends HttpServlet {
             }
         }
 
+        org.example.dao.HoanTienDAO hoanTienDAO = new org.example.dao.impl.HoanTienDAOImpl();
+        Map<Integer, org.example.model.Hoantien> mapHoanTien = hoanTienDAO.findActiveMapByAccountId(user.getAccountId());
+
         req.setAttribute("dsLich", dsLich);
         req.setAttribute("cartItems", cartItems);
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
         req.setAttribute("reputationByDatSanId", reputationByDatSanId);
+        req.setAttribute("mapHoanTien", mapHoanTien);
         req.getRequestDispatcher("/customer/GioHang.jsp").forward(req, resp);
     }
 
@@ -877,10 +889,80 @@ public class DatSanServlet extends HttpServlet {
     // PHẦN 4: LOGIC HỦY ĐẶT SÂN
     // =========================================================================
 
+    private void handleCancellationPreview(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user) throws IOException {
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
+        resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+
+        if (user == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("success", false);
+            payload.put("code", "UNAUTHENTICATED");
+            payload.put("message", "Phiên đăng nhập đã hết hạn.");
+            gson.toJson(payload, resp.getWriter());
+            return;
+        }
+
+        String datSanIdStr = req.getParameter("datSanId");
+        if (datSanIdStr == null || datSanIdStr.isBlank()) {
+            datSanIdStr = req.getParameter("id");
+        }
+
+        if (datSanIdStr == null || datSanIdStr.isBlank()) {
+            LOGGER.warning(String.format("[cancellation-preview] Missing datSanId parameter for accountId=%d, uri=%s",
+                    user.getAccountId(), req.getRequestURI()));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("success", false);
+            payload.put("code", "MISSING_DAT_SAN_ID");
+            payload.put("message", "Thiếu mã đặt sân datSanId.");
+            gson.toJson(payload, resp.getWriter());
+            return;
+        }
+
+        try {
+            int datSanId = Integer.parseInt(datSanIdStr.trim());
+            LOGGER.info(String.format("[cancellation-preview] request accountId=%d, datSanId=%d, uri=%s",
+                    user.getAccountId(), datSanId, req.getRequestURI()));
+
+            org.example.service.booking.BookingCancellationService.CancellationPreview preview =
+                    bookingCancellationService.calculatePreview(datSanId, user.getAccountId());
+
+            // Always return HTTP 200 OK for API logic responses to prevent Tomcat ErrorReportValve
+            // from intercepting 4xx/5xx status codes and generating HTML error pages.
+            resp.setStatus(HttpServletResponse.SC_OK);
+
+            if (preview.success) {
+                LOGGER.info(String.format("[cancellation-preview] success accountId=%d, datSanId=%d, paid=%b, refundEligible=%b",
+                        user.getAccountId(), datSanId, preview.paid, preview.refundEligible));
+            }
+
+            gson.toJson(preview, resp.getWriter());
+            resp.getWriter().flush();
+        } catch (NumberFormatException e) {
+            LOGGER.warning(String.format("[cancellation-preview] Invalid datSanId '%s' for accountId=%d",
+                    datSanIdStr, user.getAccountId()));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("success", false);
+            payload.put("code", "INVALID_DAT_SAN_ID");
+            payload.put("message", "Mã đặt sân không hợp lệ.");
+            gson.toJson(payload, resp.getWriter());
+        } catch (Exception e) {
+            LOGGER.log(java.util.logging.Level.SEVERE, String.format("[cancellation-preview] failed accountId=%d, datSanId=%s",
+                    user.getAccountId(), datSanIdStr), e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("success", false);
+            payload.put("code", "CANCELLATION_PREVIEW_ERROR");
+            payload.put("message", "Không thể kiểm tra điều kiện hủy sân: " + e.getMessage());
+            gson.toJson(payload, resp.getWriter());
+        }
+    }
+
     /**
      * Xử lý hủy lịch đặt sân.
-     * Chỉ cho phép hủy đơn đang ở trạng thái 'Chờ xác nhận' và phải là đơn của
-     * chính người dùng.
      */
     private void handleHuyDatSan(HttpServletRequest req, HttpServletResponse resp,
             HttpSession session, TaiKhoan user) throws IOException {
@@ -890,6 +972,8 @@ public class DatSanServlet extends HttpServlet {
         }
         LOGGER.info(String.format("[huy-dat-san] request nhận: servletPath=%s, pathInfo=%s, accountId=%d, rawId=%s",
                 req.getServletPath(), req.getPathInfo(), user.getAccountId(), idStr));
+
+        org.example.service.booking.BookingCancellationService.CancelResult result = null;
         try {
             if (idStr == null || idStr.isBlank()) {
                 throw new NumberFormatException("Missing booking ID parameter 'id' or 'datSanId'");
@@ -897,99 +981,235 @@ public class DatSanServlet extends HttpServlet {
             int id = Integer.parseInt(idStr.trim());
             String reason = req.getParameter("reason");
 
-            org.example.service.booking.BookingCancellationService.CancelResult result =
-                    bookingCancellationService.cancelByCustomer(id, user.getAccountId(), reason, req, user);
-
-            if (result.success) {
-                session.setAttribute("message", result.message);
-                LOGGER.info(String.format("[huy-dat-san] THANH CONG: AccountID=%d, DatSanID=%d, lateCancel=%s",
-                        user.getAccountId(), id, result.lateCancel));
-            } else {
-                session.setAttribute("error", result.message);
-                LOGGER.info(String.format("[huy-dat-san] THAT BAI: AccountID=%d, DatSanID=%d, message=%s",
-                        user.getAccountId(), id, result.message));
-            }
+            result = bookingCancellationService.cancelByCustomer(id, user.getAccountId(), reason, req, user);
         } catch (NumberFormatException e) {
-            session.setAttribute("error", "Yêu cầu không hợp lệ.");
+            result = org.example.service.booking.BookingCancellationService.CancelResult.fail("Yêu cầu không hợp lệ.");
         }
 
-        String source = req.getParameter("source");
-        if ("gio-hang".equals(source)) {
-            resp.sendRedirect(req.getContextPath() + "/customer/gio-hang");
-        } else {
-        resp.sendRedirect(req.getContextPath() + "/customer/gio-hang");
+        boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(req.getHeader("X-Requested-With"))
+                || (req.getHeader("Accept") != null && req.getHeader("Accept").contains("application/json"))
+                || "true".equalsIgnoreCase(req.getParameter("ajax"));
+
+        if (isAjax) {
+            resp.setContentType("application/json; charset=UTF-8");
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            json.addProperty("success", result.success);
+            json.addProperty("message", result.message);
+            json.addProperty("createdHoanTienId", result.createdHoanTienId != null ? result.createdHoanTienId : 0);
+            if (result.createdHoanTienId != null && result.createdHoanTienId > 0) {
+                json.addProperty("redirectUrl", req.getContextPath() + "/customer/hoan-tien?id=" + result.createdHoanTienId);
+            } else {
+                json.addProperty("redirectUrl", req.getContextPath() + "/customer/gio-hang");
+            }
+            resp.getWriter().write(json.toString());
+            return;
         }
+
+        if (result.success) {
+            session.setAttribute("message", result.message);
+            if (result.createdHoanTienId != null && result.createdHoanTienId > 0) {
+                resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?id=" + result.createdHoanTienId);
+                return;
+            }
+        } else {
+            session.setAttribute("error", result.message);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/customer/gio-hang");
     }
 
     // =========================================================================
     // PHẦN 5: PAYOS RETURN / CANCEL
     // =========================================================================
 
+    /**
+     * Kiểm tra trạng thái thanh toán PayOS cho một booking (luồng legacy: orderCode = DatSanID).
+     *
+     * Webhook PayOS KHÔNG thể tới được môi trường localhost (không có public URL đăng ký với
+     * PayOS) — nếu chỉ đọc LichDatSan.TrangThai từ DB, trạng thái sẽ mãi mãi "Chờ thanh toán"
+     * dù Customer đã chuyển khoản thật, vì không có gì cập nhật DB cả (root cause đã xác nhận
+     * qua log: 88 lượt gọi endpoint này cho cùng DatSanID đều trả "pending" giống hệt nhau,
+     * 0 request nào tới /payos/webhook trong log truy cập).
+     *
+     * Vì vậy endpoint này PHẢI tự query PayOS server-to-server bằng orderCode khi DB còn pending,
+     * rồi gọi CHUNG một finalizer với webhook (PayOSLegacyBookingFinalizationService) — không tạo
+     * finalizer thứ hai, không tự đánh dấu PAID chỉ vì Customer bấm nút.
+     */
     private void handlePayOSStatus(HttpServletRequest req, HttpServletResponse resp,
             TaiKhoan user) throws IOException {
         resp.setContentType("application/json; charset=UTF-8");
         if (user == null) {
-            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Chưa đăng nhập\"}");
+            resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Chưa đăng nhập\"}");
             return;
         }
         String paramId = req.getParameter("datSanId");
         if (paramId == null || paramId.isBlank()) {
-            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
+            resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
             return;
         }
         int datSanId;
         try {
             datSanId = Integer.parseInt(paramId.trim());
         } catch (NumberFormatException e) {
-            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
+            resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
             return;
         }
+        // Chống IDOR: booking phải thuộc đúng Customer đang đăng nhập.
         org.example.model.Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
         if (lich == null || lich.getAccountId() == null || !lich.getAccountId().equals(user.getAccountId())) {
-            resp.getWriter().write("{\"status\":\"error\",\"error\":\"Không tìm thấy đơn\"}");
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Không tìm thấy đơn\"}");
             return;
         }
+
         String trangThai = lich.getTrangThai();
+        // Nếu DB đã xác nhận (do webhook hoặc lần kiểm tra trước đã finalize) -> trả ngay, không
+        // gọi PayOS dư thừa (mục 5.4 spec).
+        if (Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(trangThai)) {
+            writePayOSStatusJson(resp, true, "paid", trangThai, 0,
+                    req.getContextPath() + "/customer/gio-hang", null);
+            return;
+        }
+        if (Constants.TRANG_THAI_DAT_SAN_DA_HUY.equals(trangThai)) {
+            writePayOSStatusJson(resp, true, "cancelled", trangThai, 0, null, null);
+            return;
+        }
+
         LocalDateTime holdExpiresAt = lich.getHoldExpiresAt();
         // HoldExpiresAt lưu UTC → so sánh bằng Instant UTC (TimeUtil), không dùng giờ JVM/VN.
         boolean holdExpired = org.example.util.TimeUtil.isPastUtc(holdExpiresAt);
+        boolean isExpiredStatus = Constants.TRANG_THAI_DAT_SAN_QUA_HAN.equals(trangThai)
+                || (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai) && holdExpired);
 
-        // status: giá trị gọn để frontend polling quyết định dừng (paid/cancelled/expired/pending).
-        String status;
-        String ctx = req.getContextPath();
-        String redirectUrl = null;
-        if (Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(trangThai)) {
-            status = "paid";
-            redirectUrl = ctx + "/customer/gio-hang";
-        } else if (Constants.TRANG_THAI_DAT_SAN_DA_HUY.equals(trangThai)) {
-            status = "cancelled";
-        } else if (Constants.TRANG_THAI_DAT_SAN_QUA_HAN.equals(trangThai)
-                || (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai) && holdExpired)) {
-            status = "expired";
-        } else if (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai)) {
-            status = "pending";
-        } else {
-            // "Chờ xác nhận" (trả tại quầy) hoặc trạng thái khác -> coi như đã xử lý xong với luồng QR.
-            status = "settled";
+        if (!Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai) && !isExpiredStatus) {
+            // "Chờ xác nhận" (trả tại quầy) hoặc trạng thái khác -> không áp dụng luồng QR PayOS.
+            writePayOSStatusJson(resp, true, "settled", trangThai, 0, null, null);
+            return;
+        }
+        if (isExpiredStatus) {
+            // Hết hạn giữ chỗ theo policy nội bộ (không phụ thuộc PayOS) -> không cần query PayOS.
+            writePayOSStatusJson(resp, true, "expired", trangThai, 0, null, null);
+            return;
         }
 
-        long remainingSeconds = 0L;
-        if ("pending".equals(status)) {
-            remainingSeconds = org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt);
+        // Còn "Chờ thanh toán" và chưa hết hạn giữ chỗ -> query PayOS server-to-server bằng orderCode.
+        Integer coSoId = findCoSoIdByDatSanId(datSanId);
+        if (coSoId == null) {
+            LOGGER.warning("PAYOS_STATUS_CHECK: không tìm thấy CoSoID cho DatSanID=" + datSanId);
+            writePayOSStatusJson(resp, true, "pending", trangThai,
+                    org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
+                    "Chưa nhận được thanh toán.");
+            return;
+        }
+        org.example.dto.payment.PayOSCredentials credentials =
+                new PayOSConfigurationService().getCredentialsForPayment(coSoId);
+        if (credentials == null) {
+            LOGGER.warning("PAYOS_STATUS_CHECK: CoSoID=" + coSoId + " chưa cấu hình PayOS, DatSanID=" + datSanId);
+            writePayOSStatusJson(resp, true, "pending", trangThai,
+                    org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
+                    "Chưa nhận được thanh toán.");
+            return;
         }
 
+        vn.payos.model.v2.paymentRequests.PaymentLink link;
+        PayOS client = PayOSClientFactory.create(credentials);
+        try {
+            link = client.paymentRequests().get((long) datSanId);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "PAYOS_STATUS_CHECK_FAILED datSanId=" + datSanId + " coSoId=" + coSoId
+                    + " loại lỗi=" + e.getClass().getSimpleName(), e);
+            writePayOSStatusJson(resp, true, "pending", trangThai,
+                    org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
+                    "Không thể kiểm tra trạng thái lúc này. Vui lòng thử lại.");
+            return;
+        } finally {
+            client.close();
+        }
+
+        LOGGER.info(String.format(
+                "PAYOS_STATUS_CHECK datSanId=%d coSoId=%d payosStatus=%s amountPaid=%d",
+                datSanId, coSoId, link.getStatus(), link.getAmountPaid()));
+
+        if (link.getStatus() == vn.payos.model.v2.paymentRequests.PaymentLinkStatus.PAID) {
+            String reference = (link.getTransactions() != null && !link.getTransactions().isEmpty())
+                    ? link.getTransactions().get(0).getReference() : null;
+            // Finalizer DÙNG CHUNG với PayOSWebhookServlet (PayOSLegacyBookingFinalizationService) -
+            // idempotent, chạy trong transaction có khóa, không tạo bộ logic cập nhật thứ hai.
+            org.example.service.payos.PayOSLegacyBookingFinalizationService.Result result =
+                    legacyFinalizationService.confirmPaid(datSanId, BigDecimal.valueOf(link.getAmountPaid()), reference);
+
+            LOGGER.info("PAYOS_STATUS_CHECK_FINALIZE_RESULT datSanId=" + datSanId + " result=" + result.code());
+
+            switch (result.code()) {
+                case CONFIRMED, ALREADY_CONFIRMED -> {
+                    if (result.code() == org.example.service.payos.PayOSLegacyBookingFinalizationService.ResultCode.CONFIRMED
+                            && result.accountId() != null && result.hoaDonId() != null) {
+                        notificationService.notifyPaymentSuccess(result.accountId(), result.hoaDonId(),
+                                String.valueOf(link.getAmountPaid()));
+                    }
+                    writePayOSStatusJson(resp, true, "paid",
+                            Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN, 0,
+                            req.getContextPath() + "/customer/gio-hang", null);
+                }
+                case AMOUNT_MISMATCH -> {
+                    // Không finalize khi số tiền không khớp — không lộ raw exception, chỉ log đủ chi tiết.
+                    writePayOSStatusJson(resp, true, "pending", trangThai,
+                            org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
+                            "Số tiền chuyển khoản chưa khớp. Vui lòng kiểm tra lại nội dung và số tiền.");
+                }
+                case CANCELLED -> writePayOSStatusJson(resp, true, "cancelled",
+                        Constants.TRANG_THAI_DAT_SAN_DA_HUY, 0, null, null);
+                case NOT_FOUND, UNEXPECTED_STATUS, DATABASE_ERROR -> writePayOSStatusJson(resp, true, "pending",
+                        trangThai, org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
+                        "Không thể xác nhận thanh toán lúc này. Vui lòng thử lại.");
+            }
+            return;
+        }
+
+        // PayOS chưa ghi nhận thanh toán (PENDING/PROCESSING/UNDERPAID/...) -> vẫn đang chờ thật sự.
+        writePayOSStatusJson(resp, true, "pending", trangThai,
+                org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
+                "Chưa nhận được thanh toán.");
+    }
+
+    /** CoSoID của một DatSanID — dùng để lấy đúng credentials PayOS theo cơ sở (không tin client). */
+    private Integer findCoSoIdByDatSanId(int datSanId) {
+        String sql = "SELECT s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+        try (java.sql.Connection c = DBUtil.getConnection();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, datSanId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("CoSoID") : null;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "findCoSoIdByDatSanId lỗi datSanId=" + datSanId, e);
+            return null;
+        }
+    }
+
+    private void writePayOSStatusJson(HttpServletResponse resp, boolean success, String status,
+            String bookingStatus, long remainingSeconds, String redirectUrl, String message) throws IOException {
+        boolean paid = "paid".equals(status);
         StringBuilder json = new StringBuilder();
-        json.append("{\"success\":true")
+        json.append("{\"success\":").append(success)
+            .append(",\"paid\":").append(paid)
             .append(",\"status\":\"").append(status).append("\"")
-            .append(",\"bookingStatus\":\"").append(jsonEscape(trangThai != null ? trangThai : "")).append("\"")
+            .append(",\"bookingStatus\":\"").append(jsonEscape(bookingStatus != null ? bookingStatus : "")).append("\"")
             .append(",\"remainingSeconds\":").append(remainingSeconds);
-        if (redirectUrl != null) {
-            json.append(",\"redirectUrl\":\"").append(jsonEscape(redirectUrl)).append("\"");
-        } else {
-            json.append(",\"redirectUrl\":null");
-        }
+        json.append(",\"redirectUrl\":").append(redirectUrl != null ? "\"" + jsonEscape(redirectUrl) + "\"" : "null");
+        json.append(",\"message\":\"").append(jsonEscape(message != null ? message : defaultMessageFor(status))).append("\"");
         json.append("}");
         resp.getWriter().write(json.toString());
+    }
+
+    private String defaultMessageFor(String status) {
+        return switch (status) {
+            case "paid" -> "Thanh toán đã được xác nhận.";
+            case "cancelled" -> "Đơn đã được hủy.";
+            case "expired" -> "Mã thanh toán đã hết hạn.";
+            case "settled" -> "Đơn đã được xử lý.";
+            default -> "Chưa nhận được thanh toán.";
+        };
     }
 
     private void handlePayOSReturn(HttpServletRequest req, HttpServletResponse resp,

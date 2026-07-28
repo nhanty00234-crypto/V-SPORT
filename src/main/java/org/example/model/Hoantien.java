@@ -59,6 +59,44 @@ public class Hoantien {
     @Column(name = "ChuTaiKhoanNhan", length = 100)
     private String chuTaiKhoanNhan;
 
+    // --- Mở rộng cho luồng Hoàn tiền Customer self-service ---
+
+    @Column(name = "DatSanID")
+    private Integer datSanId;
+
+    @Column(name = "CoSoID")
+    private Integer coSoId;
+
+    @Column(name = "SoTienDaThanhToan")
+    private BigDecimal soTienDaThanhToan;
+
+    @Column(name = "SoTienDeNghiHoan")
+    private BigDecimal soTienDeNghiHoan;
+
+    @Column(name = "SoTienDuocDuyet")
+    private BigDecimal soTienDuocDuyet;
+
+    @Column(name = "QrNhanTienPath", length = 300)
+    private String qrNhanTienPath;
+
+    @Column(name = "GhiChuKhachHang", length = 500)
+    private String ghiChuKhachHang;
+
+    @Column(name = "LyDoTuChoi", length = 500)
+    private String lyDoTuChoi;
+
+    @Column(name = "ApprovedAt")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date approvedAt;
+
+    @Column(name = "CompletedAt")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date completedAt;
+
+    @Column(name = "UpdatedAt")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "HoaDonID", insertable = false, updatable = false)
@@ -182,6 +220,39 @@ public class Hoantien {
 
     public String getChuTaiKhoanNhan() { return chuTaiKhoanNhan; }
     public void setChuTaiKhoanNhan(String v) { this.chuTaiKhoanNhan = v; }
+
+    public Integer getDatSanId() { return datSanId; }
+    public void setDatSanId(Integer v) { this.datSanId = v; }
+
+    public Integer getCoSoId() { return coSoId; }
+    public void setCoSoId(Integer v) { this.coSoId = v; }
+
+    public BigDecimal getSoTienDaThanhToan() { return soTienDaThanhToan; }
+    public void setSoTienDaThanhToan(BigDecimal v) { this.soTienDaThanhToan = v; }
+
+    public BigDecimal getSoTienDeNghiHoan() { return soTienDeNghiHoan; }
+    public void setSoTienDeNghiHoan(BigDecimal v) { this.soTienDeNghiHoan = v; }
+
+    public BigDecimal getSoTienDuocDuyet() { return soTienDuocDuyet; }
+    public void setSoTienDuocDuyet(BigDecimal v) { this.soTienDuocDuyet = v; }
+
+    public String getQrNhanTienPath() { return qrNhanTienPath; }
+    public void setQrNhanTienPath(String v) { this.qrNhanTienPath = v; }
+
+    public String getGhiChuKhachHang() { return ghiChuKhachHang; }
+    public void setGhiChuKhachHang(String v) { this.ghiChuKhachHang = v; }
+
+    public String getLyDoTuChoi() { return lyDoTuChoi; }
+    public void setLyDoTuChoi(String v) { this.lyDoTuChoi = v; }
+
+    public Date getApprovedAt() { return approvedAt; }
+    public void setApprovedAt(Date v) { this.approvedAt = v; }
+
+    public Date getCompletedAt() { return completedAt; }
+    public void setCompletedAt(Date v) { this.completedAt = v; }
+
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date v) { this.updatedAt = v; }
 
     @Override
     public String toString() {

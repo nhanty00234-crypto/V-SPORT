@@ -37,9 +37,15 @@ public class HoanTienManagerServlet extends HttpServlet {
         if (coSoId <= 0) { resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Chưa chọn cơ sở."); return; }
 
         int page = Math.max(1, parseIntSafe(req.getParameter("page"), 1));
-        req.setAttribute("danhSachHoanTien", refundService.getByCoSo(coSoId, page));
+        String trangThaiFilter = sanitize(req.getParameter("trangThai"));
+        boolean validFilter = trangThaiFilter != null && org.example.util.RefundStatus.isValid(trangThaiFilter);
+
+        req.setAttribute("danhSachHoanTien", validFilter
+                ? refundService.getByCoSoAndTrangThai(coSoId, trangThaiFilter, page)
+                : refundService.getByCoSo(coSoId, page));
         req.setAttribute("page", page);
         req.setAttribute("coSoId", coSoId);
+        req.setAttribute("trangThaiFilter", validFilter ? trangThaiFilter : "");
         req.getRequestDispatcher("/manager/HoanTien.jsp").forward(req, resp);
     }
 
@@ -57,31 +63,38 @@ public class HoanTienManagerServlet extends HttpServlet {
             return;
         }
 
-        // Verify ownership: refund must belong to this facility
-        org.example.model.Hoantien ht = refundService.findById(hoanTienId);
-        if (ht == null) {
-            resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?error=notfound");
-            return;
-        }
-        // findByCoSoId scopes by CoSoID; if not in list, manager cannot act on it
-        // We verify by calling getByCoSo in a simple check below (or just trust service)
-
+        // Ownership: mọi action bên dưới đều tự kiểm tra findByIdAndCoSoId — không thao tác
+        // được lên refund không thuộc CoSoID của Manager (chống IDOR ở tầng SQL, không chỉ JSP).
         RefundService.RefundResult result;
         switch (action != null ? action : "") {
+            case "request-more-info": {
+                String ghiChu = sanitize(req.getParameter("ghiChu"));
+                result = refundService.requestMoreInfo(hoanTienId, coSoId, manager.getAccountId(), ghiChu, req);
+                break;
+            }
             case "approve": {
                 String ghiChu = sanitize(req.getParameter("ghiChu"));
-                result = refundService.approve(hoanTienId, manager.getAccountId(), ghiChu, req);
+                java.math.BigDecimal soTienDuyet = parseAmountSafe(req.getParameter("soTienDuocDuyet"));
+                if (soTienDuyet == null) {
+                    resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?error=invalid_amount");
+                    return;
+                }
+                result = refundService.approve(hoanTienId, coSoId, manager.getAccountId(), soTienDuyet, ghiChu, req);
                 break;
             }
             case "reject": {
                 String lyDo = sanitize(req.getParameter("lyDo"));
-                result = refundService.reject(hoanTienId, manager.getAccountId(), lyDo, req);
+                result = refundService.reject(hoanTienId, coSoId, manager.getAccountId(), lyDo, req);
+                break;
+            }
+            case "start-processing": {
+                result = refundService.startProcessing(hoanTienId, coSoId, manager.getAccountId(), req);
                 break;
             }
             case "complete": {
                 String maGiaoDich = sanitize(req.getParameter("maGiaoDich"));
                 String ghiChu = sanitize(req.getParameter("ghiChu"));
-                result = refundService.confirmCompleted(hoanTienId, manager.getAccountId(),
+                result = refundService.confirmCompleted(hoanTienId, coSoId, manager.getAccountId(),
                         maGiaoDich, ghiChu, req);
                 break;
             }
@@ -130,6 +143,16 @@ public class HoanTienManagerServlet extends HttpServlet {
     private static int parseIntSafe(String s, int def) {
         if (s == null || s.isBlank()) return def;
         try { return Integer.parseInt(s.trim()); } catch (NumberFormatException e) { return def; }
+    }
+
+    private static java.math.BigDecimal parseAmountSafe(String s) {
+        if (s == null || s.isBlank()) return null;
+        try {
+            java.math.BigDecimal v = new java.math.BigDecimal(s.trim());
+            return v.signum() > 0 ? v : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String sanitize(String s) {
