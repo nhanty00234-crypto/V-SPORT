@@ -22,7 +22,7 @@ if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 4)) {
 }
 ```
 
-Điều kiện này **đã đúng từ trước** — cho phép RoleID 2 và 4. Không có filter nào khác chặn `/staff/*` (rà toàn bộ `web.xml` + 6 filter trong `org.example.filter`: chỉ `FilterMaHoa` áp dụng cho `/*` và chỉ set header cache, không có auth check).
+Điều kiện này **đã đúng từ trước** — cho phép RoleID 2 và 4. Không có filter nào khác chặn `/staff/*` (rà toàn bộ `web.xml` + filter trong `org.example.filter`: chỉ `EncodingAndCacheControlFilter` áp dụng cho `/*` và chỉ set UTF-8 + header cache, không có auth check).
 
 ## 3. Root cause chính xác — chuỗi bằng chứng
 

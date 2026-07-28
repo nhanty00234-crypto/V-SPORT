@@ -66,7 +66,7 @@ DeletedBy INT NULL  -- AccountID người xóa
 
 ## 6. Phía Admin
 
-- `QuanLySanServlet` (admin xóa San) chuyển sang `IsDeleted`.
+- `QuanLySanManagerServlet` (Manager xóa San tại `/manager/quan-ly-san`) chuyển sang `IsDeleted`. Admin `QuanLySanServlet` đã bị gỡ — không còn route `/admin/quan-ly-san`.
 - Trang quản lý cơ sở của Admin: thêm filter "Đã xóa" + nút Khôi phục cho CoSo.
 - Trang người dùng Admin: giữ nguyên restore/permanentDelete hiện có, đồng bộ thêm `DeletedAt/DeletedBy`.
 

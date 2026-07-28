@@ -32,7 +32,7 @@ CoSoID=15 IsDeleted=NULL  TrangThai=Đang hoạt động  Account=0  San=2  Book
 **Không phải lỗi dữ liệu.** Root cause là **thiếu hoàn toàn cơ chế enforcement** — nếu Admin xóa mềm một cơ sở đúng cách (qua `FacilityTrashService.softDeleteFacility`, vốn đã đúng chuẩn `IsDeleted=1/DeletedAt/DeletedBy` transactional), **không có bất kỳ lớp nào trong ứng dụng kiểm tra lại trạng thái CoSo** sau đó:
 
 1. **Login** (`TaiKhoanDAOImpl.dangNhapKhachHang`) chỉ kiểm tra `Account.isLocked`/`Account.isDeleted`, **không JOIN/kiểm tra `CoSo.IsDeleted`**. Một tài khoản Staff/Manager/Bảo vệ của cơ sở đã xóa vẫn đăng nhập được bình thường.
-2. **Không có filter nào** áp dụng cho `/staff/*` (chỉ có `FilterMaHoa` set header cache, không auth). `FilterQuyenManager` (`/manager/*`) chỉ kiểm tra `roleId==2`, không kiểm tra CoSo.
+2. **Không có filter nào** áp dụng cho `/staff/*` (chỉ có `EncodingAndCacheControlFilter` set UTF-8 + header cache, không auth). `FilterQuyenManager` (`/manager/*`) chỉ kiểm tra `roleId==2`, không kiểm tra CoSo.
 3. **Không service nào** gọi kiểm tra trạng thái cơ sở trước khi thực hiện check-in, thanh toán, duyệt đặt sân, v.v.
 
 → Kết luận: `CoSoID=6` hiện tại không bị xóa nên hoạt động đúng là **bình thường**, nhưng nếu Admin xóa nó (hoặc bất kỳ cơ sở nào khác) **trước khi có bản vá này**, mọi tài khoản của cơ sở đó — kể cả phiên đã đăng nhập — sẽ tiếp tục hoạt động vô thời hạn. Đây chính là lỗ hổng "nghiêm trọng" được mô tả, dù ảnh chụp cụ thể chưa phản ánh đúng trạng thái DB tại thời điểm audit.

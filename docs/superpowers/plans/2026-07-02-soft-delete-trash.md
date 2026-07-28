@@ -380,7 +380,7 @@ Method delete cascade cũ đổi tên `hardDeleteCascade(int id)`, giữ nguyên
 - Modify: `src/main/java/org/example/service/manager/CaLamService.java` (deleteShift → softDelete, giữ validation + audit + notification)
 - Modify: `src/main/java/org/example/service/manager/NhanSuService.java` (deleteStaff truyền actorId)
 - Modify: `src/main/java/org/example/controller/QuanLySanManagerServlet.java` (handleDeleteSan/handleDeleteLoaiSan message mới; truyền actorId = manager.getAccountId())
-- Modify: `src/main/java/org/example/controller/QuanLySanServlet.java` (admin: xóa San → sanDAO.softDelete)
+- Modify: `src/main/java/org/example/controller/manager/QuanLySanManagerServlet.java` (Manager: soft-delete San — admin `QuanLySanServlet` đã bị xóa; chỉ còn `/manager/quan-ly-san`)
 - Modify: `src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java`
 - Modify: `src/main/java/org/example/controller/manager/KhoDichVuManagerServlet.java` (bỏ nhánh conditional hard delete — luôn softDelete)
 - Modify: `src/main/java/org/example/controller/QuanLyNguoiDungServlet.java`, `controller/manager/NhanSuManagerServlet.java` (truyền actorId)

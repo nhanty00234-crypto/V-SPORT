@@ -163,17 +163,18 @@ Hệ thống quản lý chặt chẽ theo 5 vai trò tài khoản cốt lõi:
     *   Quản lý toàn bộ cơ sở dữ liệu hệ thống chuỗi.
     *   Thêm mới, sửa thông tin chi nhánh cơ sở (`MonTheThao`, `LoaiSan`, `CoSo`).
     *   Cấu hình phân hạng ELO và xem báo cáo tổng doanh thu toàn chuỗi.
-*   **2. Manager (Quản lý chi nhánh cơ sở)**:
-    *   Quản lý trực tiếp các sân (`San`) và phân bổ ca làm việc (`CaLamViec`) cho nhân viên thuộc chi nhánh.
-    *   Phê duyệt đơn xin nghỉ phép (`YeuCauNghi`), yêu cầu đổi ca (`CaLamViecSwapRequest`).
+*   **2. Manager (Quản lý chi nhánh / quản lý sân)**:
+    *   Role quản lý sân và vận hành cơ sở được gán: cấu hình loại sân/giá, CRUD sân tại `/manager/quan-ly-san` (`QuanLySanManagerServlet` — **không** còn servlet admin trùng).
+    *   Phân bổ ca làm việc (`CaLamViec`) cho nhân viên thuộc chi nhánh.
+    *   Phê duyệt đơn xin nghỉ phép (`YeuCauNghi`), yêu cầu đổi ca (`CaLamViecSwapRequest`), duyệt hoàn tiền và xem đánh giá cơ sở mình.
     *   Xem biểu đồ thống kê doanh thu, tần suất sử dụng sân, dịch vụ kho hàng của chi nhánh.
-*   **3. Staff (Nhân viên trực ca: Lễ tân, Bảo vệ)**:
-    *   *Lễ tân*: Bán dịch vụ tại quầy, kích hoạt QR hóa đơn, tiếp nhận yêu cầu SOS khẩn cấp.
-    *   *Bảo vệ*: Check-in/check-out xe ra vào bãi đỗ thông qua thẻ xe thông minh.
+*   **3. Staff (Nhân viên trực ca: Lễ tân)**:
+    *   Check-in/check-out booking, bán dịch vụ tại quầy, tách hóa đơn dịch vụ (không phải chia tiền nhóm), kích hoạt QR hóa đơn.
     *   Xem ca làm cá nhân, báo cáo nguyện vọng rảnh, gửi đơn nghỉ phép.
+    *   *(Roadmap)* SOS tuyển người chơi và thẻ giữ xe RFID — chưa triển khai; không có UI giả.
 *   **4. Customer (Khách hàng sử dụng dịch vụ)**:
-    *   Tìm kiếm sân trống, đặt lịch chơi, thanh toán trực tuyến qua cổng QR (PayOS).
-    *   Tham gia ghép kèo ELO, chat nhóm, gửi đánh giá phản hồi.
+    *   Tìm kiếm sân trống, đặt lịch chơi, thanh toán trực tuyến qua cổng QR (PayOS), áp dụng mã khuyến mãi, đánh giá sân, theo dõi hoàn tiền và thông báo.
+    *   Tham gia ghép kèo cộng đồng (không gồm ELO/chat — xem Định hướng phát triển).
 *   **5. Owner (Chủ thương hiệu)**:
     *   Đăng ký tạo thương hiệu chuỗi thể thao mới trên nền tảng.
 

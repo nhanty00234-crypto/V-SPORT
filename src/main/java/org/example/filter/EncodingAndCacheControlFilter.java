@@ -7,8 +7,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Sets UTF-8 character encoding on request/response and disables caching
+ * for dynamic (non-static) responses. This is NOT encryption or security
+ * obfuscation — formerly misnamed FilterMaHoa.
+ */
 @WebFilter("/*")
-public class FilterMaHoa implements Filter {
+public class EncodingAndCacheControlFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {}
 
@@ -22,7 +27,7 @@ public class FilterMaHoa implements Filter {
         HttpServletResponse httpResp = (HttpServletResponse) response;
 
         String uri = httpReq.getRequestURI();
-        // Static assets (CSS/JS/images) không cần no-cache
+        // Static assets (CSS/JS/images) do not need no-cache
         boolean isStatic = uri.endsWith(".css") || uri.endsWith(".js")
                 || uri.endsWith(".png") || uri.endsWith(".jpg")
                 || uri.endsWith(".jpeg") || uri.endsWith(".gif")
