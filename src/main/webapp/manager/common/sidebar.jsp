@@ -33,7 +33,7 @@
     gap: 11px;
     padding: 10px 14px;
     border-radius: 10px;
-    color: #334155;
+    color: #475569;
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;
@@ -42,16 +42,16 @@
     position: relative;
     cursor: pointer;
   }
-  .nav-link:hover { background: #f0fdf4 !important; color: #065f46 !important; transform: translateX(2px) !important; }
+  .nav-link:hover { background: #f3e8ff !important; color: #6d28d9 !important; transform: translateX(2px) !important; }
   .nav-link.active {
-    background: #e6f9f0 !important;
-    color: #065f46 !important;
+    background: #f3e8ff !important;
+    color: #6d28d9 !important;
     font-weight: 700 !important;
   }
   .nav-link.is-navigating {
-    background: linear-gradient(90deg, #dcfce7, #e6f9f0);
-    color: #065f46;
-    box-shadow: inset 0 0 0 1px rgba(1,226,129,.2);
+    background: linear-gradient(90deg, #e9d5ff, #f3e8ff);
+    color: #6d28d9;
+    box-shadow: inset 0 0 0 1px rgba(124,58,237,.2);
   }
   .nav-link.active::before {
     content: '';
@@ -60,7 +60,7 @@
     top: 6px;
     bottom: 6px;
     width: 3.5px;
-    background: #01e281;
+    background: #7c3aed;
     border-radius: 0 4px 4px 0;
   }
 
@@ -100,7 +100,7 @@
     inset: 0;
     z-index: 60;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(248,250,252,.72), rgba(230,249,240,.88));
+    background: linear-gradient(180deg, rgba(250,245,255,.72), rgba(243,232,255,.88));
     opacity: 0;
     backdrop-filter: blur(0);
     transition: opacity .2s ease, backdrop-filter .2s ease;
@@ -114,7 +114,7 @@
     position: absolute;
     left: 248px; right: 0; top: 64px;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #01e281, #059669, transparent);
+    background: linear-gradient(90deg, transparent, #7c3aed, #a78bfa, transparent);
     transform: scaleX(0);
     transform-origin: left;
   }
@@ -132,20 +132,20 @@
   }
 
   /* ══════════════════════════════════════════
-     MANAGER ANIMATION SYSTEM v2 — V-SPORT Theme
+     MANAGER ANIMATION SYSTEM v2 — Purple Theme
   ══════════════════════════════════════════ */
 
   .nav-link .material-symbols-outlined,
   .nav-link .ti { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
   .nav-link:hover .material-symbols-outlined,
-  .nav-link:hover .ti { transform: scale(1.15); color: #059669; }
+  .nav-link:hover .ti { transform: scale(1.15); color: #7c3aed; }
 
   @keyframes mgrBannerShimmer {
     0%   { background-position: 200% center; }
     100% { background-position: -200% center; }
   }
   .mgr-banner-shimmer {
-    background: linear-gradient(135deg,#0d2130 0%,#122d40 35%,#1a3c54 55%,#059669 75%,#0d2130 100%);
+    background: linear-gradient(135deg,#4c1d95 0%,#6d28d9 35%,#7c3aed 55%,#8b5cf6 75%,#5b21b6 100%);
     background-size: 300% 100%;
     animation: mgrBannerShimmer 6s linear infinite;
   }
@@ -155,14 +155,14 @@
   }
   .mgr-kpi-hover:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 28px -8px rgba(1,226,129,.18);
+    box-shadow: 0 10px 28px -8px rgba(124,58,237,.18);
   }
   .mgr-kpi-hover:hover .mgr-kpi-icon { transform: scale(1.1); }
   .mgr-kpi-icon { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
 
   @keyframes mgrLivePulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(1,226,129,.5); }
-    50%      { box-shadow: 0 0 0 5px rgba(1,226,129,0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(124,58,237,.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(124,58,237,0); }
   }
   .live-dot { animation: mgrLivePulse 1.8s ease-in-out infinite; }
 
@@ -189,13 +189,13 @@
   }
   .court-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px -8px rgba(18,45,64,.15);
+    box-shadow: 0 12px 30px -8px rgba(124,58,237,.15);
   }
   .court-card:hover .court-thumb { transform: scale(1.05); }
   .court-thumb { transition: transform .3s cubic-bezier(.16,1,.3,1); overflow: hidden; }
 
   .qr-card:hover {
-    box-shadow: 0 0 0 2px rgba(1,226,129,.3), 0 0 18px rgba(1,226,129,.14);
+    box-shadow: 0 0 0 2px rgba(124,58,237,.3), 0 0 18px rgba(124,58,237,.14);
   }
   .qr-card { transition: box-shadow .2s ease; }
 
@@ -271,14 +271,14 @@
     border-bottom: 2px solid transparent;
     transition: color .18s ease, border-color .18s ease;
   }
-  .status-tab.active { color: #01e281; border-bottom-color: #01e281; }
+  .status-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
 
   .mgr-ripple-host { position: relative; overflow: hidden; }
   .mgr-ripple-wave {
     position: absolute;
     border-radius: 50%;
     transform: scale(0);
-    background: rgba(1,226,129,.35);
+    background: rgba(124,58,237,.35);
     animation: mgrRippleOut .5s cubic-bezier(.16,1,.3,1) forwards;
     pointer-events: none;
   }
@@ -318,16 +318,16 @@
 
 <!-- ═══ SIDEBAR ═══ -->
 <aside id="sidebar"
-  class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-slate-200 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+  class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-purple-100 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
 
   <!-- Logo -->
-  <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-    <div class="w-9 h-9 rounded-xl bg-[#122d40] flex items-center justify-center shrink-0 shadow-sm">
-      <i class="ti ti-ball-tennis text-[#01e281] text-[20px]"></i>
+  <div class="px-5 py-4 border-b border-purple-100 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center shrink-0 shadow-md shadow-purple-200">
+      <i class="ti ti-ball-tennis text-white text-[18px]"></i>
     </div>
     <div>
-      <p class="text-sm font-extrabold text-[#122d40] leading-tight tracking-tight">V-SPORT</p>
-      <p class="text-[10px] text-[#059669] font-bold uppercase tracking-wider">Manager Portal</p>
+      <p class="text-sm font-extrabold text-purple-950 leading-tight tracking-tight">V-SPORT</p>
+      <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Manager Portal</p>
     </div>
   </div>
 
@@ -336,14 +336,14 @@
     <c:set var="uri" value="${pageContext.request.requestURI}" />
 
     <!-- Tổng quan -->
-    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mb-1.5 opacity-80">Tổng quan</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mb-1.5">Tổng quan</p>
     <a href="${pageContext.request.contextPath}/manager/dashboard"
       class="nav-link ${uri.contains('/manager/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
 
     <!-- Vận hành sân bãi -->
-    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Vận hành sân bãi</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Vận hành sân bãi</p>
     <a href="${pageContext.request.contextPath}/manager/quan-ly-san"
       class="nav-link ${uri.contains('/manager/quan-ly-san') || uri.contains('/QuanLySan.jsp') ? 'active' : ''}">
       <i class="ti ti-building-stadium text-[19px]"></i>Quản lý sân
@@ -362,7 +362,7 @@
     </a>
 
     <!-- Kinh doanh & Dịch vụ -->
-    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Kinh doanh &amp; Dịch vụ</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Kinh doanh &amp; Dịch vụ</p>
     <c:if test="${shopModuleApproved}">
     <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
       class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
@@ -389,7 +389,7 @@
     </a>
 
     <!-- Nhân sự -->
-    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Quản lý nhân sự</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Quản lý nhân sự</p>
     <a href="${pageContext.request.contextPath}/manager/nhan-su"
       class="nav-link ${uri.contains('/manager/nhan-su') || uri.contains('/NhanSu.jsp') ? 'active' : ''}">
       <i class="ti ti-users-group text-[19px]"></i>Nhân sự
@@ -400,7 +400,7 @@
     </a>
 
     <!-- Khách hàng -->
-    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Khách hàng</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Khách hàng</p>
     <a href="${pageContext.request.contextPath}/manager/khach-hang"
       class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
       <i class="ti ti-user text-[19px]"></i>Quản lý khách hàng
@@ -411,7 +411,7 @@
     </a>
 
     <!-- Hệ thống -->
-    <p class="text-[11px] font-bold uppercase tracking-wider text-[#122d40] px-3 mt-4 mb-1.5 opacity-80">Hệ thống</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Hệ thống</p>
     <a href="${pageContext.request.contextPath}/manager/thung-rac"
       class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac.jsp') ? 'active' : ''}">
       <i class="ti ti-trash text-[19px]"></i>Thùng rác
@@ -423,7 +423,7 @@
   </nav>
 
   <!-- Logout -->
-  <div class="px-3 py-3 border-t border-slate-100 shrink-0">
+  <div class="px-3 py-3 border-t border-purple-100 shrink-0">
     <a href="${pageContext.request.contextPath}/logout"
       class="nav-link text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-bold">
       <i class="ti ti-logout text-[16px] text-rose-600"></i>Đăng xuất
