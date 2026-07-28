@@ -86,17 +86,17 @@ DATN/ (Thư mục gốc dự án)
     *   *Backend*: [QuanLyCaLamManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/QuanLyCaLamManagerServlet.java), [YeuCauNghiManagerServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/YeuCauNghiManagerServlet.java), [StaffCaLamServlet.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/controller/StaffCaLamServlet.java), [CaLamService.java](file:///d:/New%20folder/V-SPORT/src/main/java/org/example/service/manager/CaLamService.java)
     *   *Thực thể*: `CaLamViec`, `CaLamViecAudit`, `CaLamViecAvailability`, `CaLamViecSwapRequest`, `YeuCauNghi`.
 
-### Phân hệ 3: Ghép kèo cộng đồng & Xếp hạng ELO (Matchmaking)
-*   **Chức năng**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (Ghép kèo - `GhepKeo`). Sau mỗi trận đấu, dựa trên kết quả ghi nhận, hệ thống tính toán điểm số ELO tích lũy (`LichSuElo`) tương tự các bảng xếp hạng eSports để xếp hạng và ghép các cặp đối thủ có trình độ tương đồng, nâng cao tính hấp dẫn.
-*   **Thành phần chính**:
-    *   *Thực thể*: `GhepKeo`, `ChiTietGhepKeo`, `LichSuElo`.
+### Phân hệ 3: [Roadmap - Phase 8+] Ghép kèo cộng đồng & Xếp hạng ELO (Matchmaking & Chat)
+*   **Trạng thái**: Đã chuyển sang Roadmap phát triển tương lai.
+*   **Chức năng dự kiến**: Cho phép người chơi đơn lẻ hoặc đội nhóm tạo/tìm kiếm các trận đấu giao lưu (`GhepKeo`), trao đổi qua chat phòng chờ (`NhatKyChat`). Sau mỗi trận đấu, tính toán điểm số ELO tích lũy (`LichSuElo`) để xếp hạng và ghép các cặp đối thủ.
+*   **Thực thể dự kiến**: `GhepKeo`, `ChiTietGhepKeo`, `LichSuElo`, `NhatKyChat`.
 
-### Phân hệ 4: Tiện ích vận hành IoT (An ninh & Bãi giữ xe)
-*   **Chức năng**:
-    *   *An ninh*: Tích hợp cơ chế cảnh báo SOS khẩn cấp (`YeuCauSOS`, `NhatKySOSGui`) tại chỗ để nhân viên lập tức nhận biết sân nào đang cần hỗ trợ an ninh/y tế.
-    *   *Nhà xe*: Quản lý thẻ xe (`TheGiuXe`) gắn với mã vạch/RFID, lưu vết giờ vào/ra của các phương tiện (`LichXeRaVao`) nâng cao an toàn tài sản cơ sở.
-*   **Thành phần chính**:
-    *   *Thực thể*: `TheGiuXe`, `LichXeRaVao`, `YeuCauSOS`, `NhatKySOSGui`.
+### Phân hệ 4: [Roadmap - Phase 8+] Tiện ích vận hành IoT (An ninh & Bãi giữ xe)
+*   **Trạng thái**: Đã chuyển sang Roadmap phát triển tương lai.
+*   **Chức năng dự kiến**:
+    *   *An ninh*: Tích hợp cơ chế cảnh báo SOS khẩn cấp (`YeuCauSOS`, `NhatKySOSGui`) tại chỗ.
+    *   *Nhà xe*: Quản lý thẻ xe (`TheGiuXe`) gắn với mã vạch/RFID, lưu vết giờ vào/ra của các phương tiện (`LichXeRaVao`).
+*   **Thực thể dự kiến**: `TheGiuXe`, `LichXeRaVao`, `YeuCauSOS`, `NhatKySOSGui`.
 
 ### Phân hệ 5: Quản lý Kho hàng & Dịch vụ đi kèm (Inventory & Add-on Services)
 *   **Chức năng**: Quản lý danh mục hàng hóa (`DanhMucSanPham`), sản phẩm và dịch vụ cho thuê/bán lẻ tại quầy (`SanPham_DichVu`), quản lý số lượng tồn kho của chi nhánh, theo dõi nhập/xuất kho. Áp dụng cơ chế khóa bi quan (`LockModeType.PESSIMISTIC_WRITE`) khi xuất/nhập kho để tránh race condition và đảm bảo tính toàn vẹn dữ liệu.
