@@ -72,16 +72,21 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="icon-btn"
-                                        style="width: auto; padding: 0 15px; gap: 8px; border-radius: 20px;">
-                                        <i class="far fa-user"></i>
-                                        <span style="font-size: 14px; font-weight: 600;">
-                                            <%= user.getFullName() %>
-                                        </span>
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/logout" class="icon-btn" title="Đăng xuất" aria-label="Đăng xuất">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                    </a>
+                                    <div class="vs-user-wrap" id="vsUserWrap">
+                                        <button type="button" class="icon-btn vs-user-btn" id="vsUserBtn"
+                                            aria-haspopup="true" aria-expanded="false" aria-controls="vsUserDropdown">
+                                            <span class="vs-user-avatar"><i class="fas fa-user"></i></span>
+                                            <span class="vs-user-name"><%= user.getFullName() %></span>
+                                            <i class="fas fa-chevron-down vs-user-chevron"></i>
+                                        </button>
+                                        <div class="vs-user-dropdown" id="vsUserDropdown" role="menu" hidden>
+                                            <a href="${pageContext.request.contextPath}/customer/tai-khoan" role="menuitem"><i class="fas fa-user"></i>Tài khoản</a>
+                                            <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" role="menuitem"><i class="fas fa-history"></i>Lịch sử đặt sân</a>
+                                            <a href="${pageContext.request.contextPath}/customer/gio-hang?tab=refund" role="menuitem"><i class="fas fa-hand-holding-usd"></i>Yêu cầu hoàn tiền</a>
+                                            <div class="vs-user-dropdown-divider"></div>
+                                            <a href="${pageContext.request.contextPath}/logout" role="menuitem"><i class="fas fa-sign-out-alt"></i>Đăng xuất</a>
+                                        </div>
+                                    </div>
                                     <% } else {
                                         // Bấm icon tài khoản là hành động CHỦ ĐỘNG của người dùng, không phải bị
                                         // chặn do thao tác cần đăng nhập — vì vậy dẫn thẳng tới trang chủ mở modal
@@ -287,6 +292,106 @@
                 text-decoration: none;
             }
             .vs-notif-foot-link:hover { text-decoration: underline; }
+
+            .vs-user-wrap {
+                position: relative;
+            }
+            .vs-user-btn {
+                cursor: pointer;
+                border: none !important;
+                outline: none !important;
+                font-family: inherit;
+                appearance: none;
+                -webkit-appearance: none;
+                width: auto !important;
+                height: auto !important;
+                border-radius: 999px !important;
+                padding: 5px 14px 5px 5px !important;
+                gap: 9px;
+                background: rgba(255, 255, 255, 0.06) !important;
+                transition: background .15s;
+            }
+            .vs-user-btn:hover {
+                background: rgba(255, 255, 255, 0.14) !important;
+            }
+            .vs-user-btn[aria-expanded="true"] {
+                background: rgba(255, 255, 255, 0.16) !important;
+            }
+            .vs-user-btn:focus-visible {
+                box-shadow: 0 0 0 2px rgba(255,255,255,0.4);
+            }
+            .vs-user-avatar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: var(--primary);
+                color: var(--navy);
+                font-size: 13px;
+                flex-shrink: 0;
+            }
+            .vs-user-name {
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--surface);
+                max-width: 140px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .vs-user-chevron {
+                font-size: 10px;
+                color: rgba(255,255,255,0.6);
+                transition: transform .15s;
+            }
+            .vs-user-btn[aria-expanded="true"] .vs-user-chevron {
+                transform: rotate(180deg);
+            }
+            .vs-user-dropdown {
+                position: absolute;
+                top: calc(100% + 10px);
+                right: 0;
+                z-index: 2000;
+                width: 220px;
+                background: #fff;
+                border-radius: 14px;
+                box-shadow: 0 12px 40px rgba(7,26,47,.18), 0 2px 8px rgba(7,26,47,.10);
+                border: 1px solid #DCE5EF;
+                padding: 8px;
+                display: flex;
+                flex-direction: column;
+                animation: vsNotifFadeIn .18s ease;
+            }
+            .vs-user-dropdown[hidden] {
+                display: none !important;
+            }
+            .vs-user-dropdown a {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                font-size: 13.5px;
+                font-weight: 600;
+                color: #122d40;
+                text-decoration: none;
+                transition: background .12s;
+            }
+            .vs-user-dropdown a:hover {
+                background: #F1F5F9;
+            }
+            .vs-user-dropdown a i {
+                width: 16px;
+                color: #01c771;
+                font-size: 13px;
+            }
+            .vs-user-dropdown-divider {
+                height: 1px;
+                background: #EEF2F6;
+                margin: 6px 4px;
+            }
             .vs-notif-empty {
                 padding: 28px 16px;
                 text-align: center;
@@ -651,5 +756,41 @@
                 setInterval(fetchNotifications, 30000);
 
                 window.vsRefreshNotifications = fetchNotifications;
+            })();
+
+            /* ==================== User account dropdown ==================== */
+            (function () {
+                var btn = document.getElementById('vsUserBtn');
+                var dropdown = document.getElementById('vsUserDropdown');
+                if (!btn || !dropdown) return;
+
+                function closeDropdown() {
+                    dropdown.hidden = true;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+
+                function openDropdown() {
+                    dropdown.hidden = false;
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (dropdown.hidden) {
+                        openDropdown();
+                    } else {
+                        closeDropdown();
+                    }
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!dropdown.hidden && !dropdown.contains(e.target) && e.target !== btn) {
+                        closeDropdown();
+                    }
+                });
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') closeDropdown();
+                });
             })();
         </script>

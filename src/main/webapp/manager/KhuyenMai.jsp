@@ -26,9 +26,9 @@
   .filter-chip:hover { background:#f3e8ff; color:#6d28d9; border-color:#7c3aed; }
   .filter-chip.active { background:#4c1d95; color:#ffffff; border-color:#4c1d95; font-weight:700; box-shadow:0 2px 8px rgba(76,29,149,.25); }
 
-  .km-table { width:100%; border-collapse:separate; border-spacing:0; }
-  .km-table th { text-align:left; font-size:11px; font-weight:800; color:#5b21b6; text-transform:uppercase; letter-spacing:.05em; padding:12px 14px; border-bottom:1px solid #e9d5ff; background:#faf5ff; white-space:nowrap; }
-  .km-table td { padding:14px; border-bottom:1px solid #f3e8ff; font-size:13.5px; color:#0f172a; vertical-align:middle; }
+  .km-table { width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; }
+  .km-table th { text-align:left; font-size:10.5px; font-weight:800; color:#5b21b6; text-transform:uppercase; letter-spacing:.03em; padding:10px 8px; border-bottom:1px solid #e9d5ff; background:#faf5ff; white-space:normal; word-break:break-word; }
+  .km-table td { padding:10px 8px; border-bottom:1px solid #f3e8ff; font-size:12.5px; color:#0f172a; vertical-align:middle; word-break:break-word; }
   .km-table tr:hover td { background:#faf5ff; }
 
   .km-card { background:#fff; border:1px solid #e9d5ff; border-radius:16px; padding:16px 18px; box-shadow:0 1px 3px rgba(124,58,237,.04); }
@@ -121,9 +121,6 @@
   .discount-mode-btn { flex:1; padding:10px 12px; border-radius:12px; border:1.5px solid var(--km-border); font-size:13px; font-weight:600; color:#475569; cursor:pointer; text-align:center; background:#fff; transition: all .15s ease; }
   .discount-mode-btn:hover { background:var(--km-surface-muted); border-color:#94a3b8; }
   .discount-mode-btn.active { border-color:var(--km-navy-soft); background:var(--km-navy); color:#fff; font-weight:700; box-shadow: 0 1px 4px rgba(15,23,42,0.2); }
-
-  @media (max-width: 1024px) { .km-table-wrap { display:none; } }
-  @media (min-width: 1025px) { .km-card-list { display:none; } }
 
   /* ── Upload manager ── */
   .km-upl-count { font-size:12px; font-weight:800; color:var(--km-navy); background:var(--km-surface-muted); border:1px solid var(--km-border); padding:3px 10px; border-radius:999px; white-space:nowrap; }
@@ -275,17 +272,21 @@
       <%-- Desktop table --%>
       <section class="km-table-wrap bg-white border border-purple-100 rounded-2xl overflow-x-auto shadow-sm">
         <table class="km-table">
+          <colgroup>
+            <col style="width:10%"><col style="width:18%"><col style="width:8%"><col style="width:8%"><col style="width:9%">
+            <col style="width:9%"><col style="width:11%"><col style="width:8%"><col style="width:10%"><col style="width:9%">
+          </colgroup>
           <thead>
             <tr>
               <th>Mã</th><th>Tên / Mô tả</th><th>Loại giảm</th><th>Giá trị</th><th>Đơn tối thiểu</th>
-              <th>Giảm tối đa</th><th>Bắt đầu</th><th>Kết thúc</th><th>Lượt dùng</th><th>Trạng thái</th><th>Thao tác</th>
+              <th>Giảm tối đa</th><th>Thời gian</th><th>Lượt dùng</th><th>Trạng thái</th><th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach var="km" items="${promotions}">
               <tr>
                 <td class="font-extrabold text-purple-900 font-mono text-sm">${fn:escapeXml(km.maCode)}</td>
-                <td class="max-w-[220px]"><div class="truncate font-semibold text-slate-800">${fn:escapeXml(km.moTa)}</div></td>
+                <td><div class="truncate font-semibold text-slate-800">${fn:escapeXml(km.moTa)}</div></td>
                 <td class="font-medium text-slate-700">${km.loaiGiam == 'PERCENT' ? 'Phần trăm' : 'Cố định'}</td>
                 <td class="font-bold text-purple-900">
                   <c:choose>
@@ -295,8 +296,10 @@
                 </td>
                 <td class="font-medium text-slate-700"><c:choose><c:when test="${not empty km.giaTriToiThieu and km.giaTriToiThieu gt 0}"><fmt:formatNumber value="${km.giaTriToiThieu}" pattern="#,##0"/>đ</c:when><c:otherwise>—</c:otherwise></c:choose></td>
                 <td class="font-medium text-slate-700"><c:choose><c:when test="${not empty km.giamToiDa and km.giamToiDa gt 0}"><fmt:formatNumber value="${km.giamToiDa}" pattern="#,##0"/>đ</c:when><c:otherwise>—</c:otherwise></c:choose></td>
-                <td class="font-medium text-slate-600">${fn:substring(km.ngayBatDau, 8, 10)}/${fn:substring(km.ngayBatDau, 5, 7)}/${fn:substring(km.ngayBatDau, 0, 4)}</td>
-                <td class="font-medium text-slate-600">${fn:substring(km.ngayKetThuc, 8, 10)}/${fn:substring(km.ngayKetThuc, 5, 7)}/${fn:substring(km.ngayKetThuc, 0, 4)}</td>
+                <td class="font-medium text-slate-600" style="font-size:11.5px; line-height:1.5;">
+                  ${fn:substring(km.ngayBatDau, 8, 10)}/${fn:substring(km.ngayBatDau, 5, 7)}/${fn:substring(km.ngayBatDau, 0, 4)}
+                  <br>– ${fn:substring(km.ngayKetThuc, 8, 10)}/${fn:substring(km.ngayKetThuc, 5, 7)}/${fn:substring(km.ngayKetThuc, 0, 4)}
+                </td>
                 <td class="font-semibold text-slate-800">${km.soLanDaDung} / <c:choose><c:when test="${not empty km.soLanToiDa}">${km.soLanToiDa}</c:when><c:otherwise>&infin;</c:otherwise></c:choose></td>
                 <td>
                   <c:set var="st" value="${kmDisplayStatus[km.khuyenMaiID]}" />
@@ -327,46 +330,6 @@
             </c:forEach>
           </tbody>
         </table>
-      </section>
-
-      <%-- Mobile card list --%>
-      <section class="km-card-list flex flex-col gap-3">
-        <c:forEach var="km" items="${promotions}">
-          <div class="km-card">
-            <div class="flex items-center justify-between gap-2">
-              <p class="font-extrabold text-purple-900 font-mono text-base">${fn:escapeXml(km.maCode)}</p>
-              <c:set var="st" value="${kmDisplayStatus[km.khuyenMaiID]}" />
-              <c:choose>
-                <c:when test="${st == 'Đang hoạt động'}"><span class="badge badge-green">Đang hoạt động</span></c:when>
-                <c:when test="${st == 'Sắp diễn ra'}"><span class="badge badge-blue">Sắp diễn ra</span></c:when>
-                <c:when test="${st == 'Đã hết hạn'}"><span class="badge badge-zinc">Đã hết hạn</span></c:when>
-                <c:when test="${st == 'Hết lượt'}"><span class="badge badge-amber">Hết lượt</span></c:when>
-                <c:otherwise><span class="badge badge-rose">Tạm khóa</span></c:otherwise>
-              </c:choose>
-            </div>
-            <p class="text-[13px] text-slate-700 font-medium mt-1 truncate">${fn:escapeXml(km.moTa)}</p>
-            <p class="text-[13px] text-purple-950 font-bold mt-2">
-              <c:choose>
-                <c:when test="${km.loaiGiam == 'PERCENT'}">Giảm <fmt:formatNumber value="${km.giaTriGiam}" pattern="#,##0.#"/>%</c:when>
-                <c:otherwise>Giảm <fmt:formatNumber value="${km.giaTriGiam}" pattern="#,##0"/>đ</c:otherwise>
-              </c:choose>
-              <span class="font-normal text-slate-500">· Dùng ${km.soLanDaDung}/<c:choose><c:when test="${not empty km.soLanToiDa}">${km.soLanToiDa}</c:when><c:otherwise>&infin;</c:otherwise></c:choose></span>
-            </p>
-            <p class="text-[12px] text-slate-500 font-medium mt-1">
-              ${fn:substring(km.ngayBatDau, 8, 10)}/${fn:substring(km.ngayBatDau, 5, 7)}/${fn:substring(km.ngayBatDau, 0, 4)}
-              – ${fn:substring(km.ngayKetThuc, 8, 10)}/${fn:substring(km.ngayKetThuc, 5, 7)}/${fn:substring(km.ngayKetThuc, 0, 4)}
-            </p>
-            <div class="flex items-center gap-2 mt-3">
-              <button type="button" onclick="openKmDrawer('${km.khuyenMaiID}')" class="flex-1 py-2 rounded-xl border border-purple-200 text-sm font-bold text-purple-900 hover:bg-purple-50">Sửa</button>
-              <form method="post" action="${pageContext.request.contextPath}/manager/khuyen-mai" onsubmit="return disableSubmit(this)" class="flex-1">
-                <input type="hidden" name="action" value="toggle"/>
-                <input type="hidden" name="khuyenMaiId" value="${km.khuyenMaiID}"/>
-                <input type="hidden" name="value" value="${km.trangThai == 'Hoạt động' ? 0 : 1}"/>
-                <button type="submit" class="w-full py-2 rounded-xl border border-purple-200 text-sm font-bold text-purple-900 hover:bg-purple-50">${km.trangThai == 'Hoạt động' ? 'Tạm khóa' : 'Bật lại'}</button>
-              </form>
-            </div>
-          </div>
-        </c:forEach>
       </section>
     </c:otherwise>
   </c:choose>

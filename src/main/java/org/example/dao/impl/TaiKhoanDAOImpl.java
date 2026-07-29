@@ -453,13 +453,12 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
         Random random = new Random();
         int otp = random.nextInt(900000) + 100000; // Đảm bảo luôn 6 chữ số
         String otpString = String.valueOf(otp);
-        new Thread(() -> {
-            try {
-                EmailUtil.sendHtmlEmail(email, "V-SPORT — Mã xác thực đăng ký", org.example.util.EmailTemplates.otpDangKy(fullName, otpString));
-            } catch (Exception e) {
-                logger.error("Lỗi gửi email đăng ký OTP đến {}: {}", email, e.getMessage(), e);
-            }
-        }).start();
+        try {
+            EmailUtil.sendHtmlEmail(email, "V-SPORT — Mã xác thực đăng ký", org.example.util.EmailTemplates.otpDangKy(fullName, otpString));
+        } catch (Exception e) {
+            logger.error("Lỗi gửi email đăng ký OTP đến {}: {}", email, e.getMessage(), e);
+            throw new IllegalArgumentException("Không thể gửi email OTP đến " + email + ". Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau.", e);
+        }
         return otpString;
     }
 
@@ -468,13 +467,12 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
         Random random = new Random();
         int otp = random.nextInt(900000) + 100000;
         String otpString = String.valueOf(otp);
-        new Thread(() -> {
-            try {
-                EmailUtil.sendHtmlEmail(email, "V-SPORT — Đặt lại mật khẩu", org.example.util.EmailTemplates.otpQuenMatKhau(email, otpString));
-            } catch (Exception e) {
-                logger.error("Lỗi gửi email quên mật khẩu OTP đến {}: {}", email, e.getMessage(), e);
-            }
-        }).start();
+        try {
+            EmailUtil.sendHtmlEmail(email, "V-SPORT — Đặt lại mật khẩu", org.example.util.EmailTemplates.otpQuenMatKhau(email, otpString));
+        } catch (Exception e) {
+            logger.error("Lỗi gửi email quên mật khẩu OTP đến {}: {}", email, e.getMessage(), e);
+            throw new IllegalArgumentException("Không thể gửi email OTP đến " + email + ". Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau.", e);
+        }
         return otpString;
     }
 

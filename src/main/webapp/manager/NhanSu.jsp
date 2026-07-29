@@ -480,9 +480,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const boxes = document.querySelectorAll('.otp-box');
     boxes.forEach((box, idx, arr) => {
         box.addEventListener('input', (e) => {
-            const v = e.target.value.replace(/\D/g, '');
-            e.target.value = v ? v[0] : '';
-            if (v && idx < arr.length - 1) {
+            const digits = e.target.value.replace(/\D/g, '');
+
+            if (digits.length > 1) {
+                // Browser autofill (SMS/one-time-code) or fast typing delivered
+                // multiple characters in a single input event — distribute them
+                // across this box and the following ones instead of dropping them.
+                for (let i = 0; i < digits.length && idx + i < arr.length; i++) {
+                    arr[idx + i].value = digits[i];
+                }
+                const lastFilledIdx = Math.min(idx + digits.length, arr.length) - 1;
+                arr[Math.max(0, Math.min(lastFilledIdx + 1, arr.length - 1))].focus();
+                return;
+            }
+
+            e.target.value = digits;
+            if (digits && idx < arr.length - 1) {
                 arr[idx + 1].focus();
             }
         });

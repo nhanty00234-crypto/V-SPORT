@@ -383,6 +383,10 @@
       class="nav-link ${uri.contains('/manager/hoa-don') || uri.contains('/QuanLyHoaDon.jsp') ? 'active' : ''}">
       <i class="ti ti-receipt text-[19px]"></i>Quản lý hóa đơn
     </a>
+    <a href="${pageContext.request.contextPath}/manager/hoan-tien"
+      class="nav-link ${uri.contains('/manager/hoan-tien') ? 'active' : ''}">
+      <i class="ti ti-receipt-refund text-[19px]"></i>Yêu cầu hoàn tiền
+    </a>
     <a href="${pageContext.request.contextPath}/manager/khuyen-mai"
       class="nav-link ${uri.contains('/manager/khuyen-mai') ? 'active' : ''}">
       <i class="ti ti-discount-2 text-[19px]"></i>Mã khuyến mãi

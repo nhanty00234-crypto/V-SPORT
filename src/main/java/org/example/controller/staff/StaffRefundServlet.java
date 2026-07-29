@@ -1,4 +1,4 @@
-package org.example.controller.manager;
+package org.example.controller.staff;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -6,33 +6,28 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.example.model.TaiKhoan;
 import org.example.service.RefundService;
-import org.example.util.RoleRedirectUtil;
 
 import java.io.IOException;
 
 /**
- * GET  /manager/hoan-tien        — danh sách yêu cầu hoàn tiền của cơ sở
- * POST /manager/hoan-tien?action= — approve | reject | complete
+ * GET  /staff/hoan-tien        — danh sách yêu cầu hoàn tiền của cơ sở (Lễ tân/Bảo vệ)
+ * POST /staff/hoan-tien?action= — approve | reject | start-processing | complete | request-more-info
  *
- * CoSoID luôn lấy từ session Manager, không tin request parameter.
- * State machine: Chờ xử lý → Đã duyệt → Đã hoàn tiền / Từ chối
+ * CoSoID luôn lấy từ TaiKhoan đã đăng nhập (giống StaffDashboardServlet), không tin request parameter.
+ * State machine: CHO_XU_LY → DA_DUYET → DANG_HOAN_TIEN → DA_HOAN_TIEN / TU_CHOI
  */
-@WebServlet("/manager/hoan-tien")
-public class HoanTienManagerServlet extends HttpServlet {
-
-    private static final Logger logger = LogManager.getLogger(HoanTienManagerServlet.class);
+@WebServlet("/staff/hoan-tien")
+public class StaffRefundServlet extends HttpServlet {
 
     private final RefundService refundService = new RefundService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        TaiKhoan manager = requireManager(req, resp);
-        if (manager == null) return;
-        int coSoId = getCoSoId(manager);
+        TaiKhoan staff = requireStaff(req, resp);
+        if (staff == null) return;
+        int coSoId = getCoSoId(staff);
         if (coSoId <= 0) { resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tài khoản chưa được gán cơ sở."); return; }
 
         int page = Math.max(1, parseIntSafe(req.getParameter("page"), 1));
@@ -45,89 +40,90 @@ public class HoanTienManagerServlet extends HttpServlet {
         req.setAttribute("page", page);
         req.setAttribute("coSoId", coSoId);
         req.setAttribute("trangThaiFilter", validFilter ? trangThaiFilter : "");
-        req.getRequestDispatcher("/manager/HoanTien.jsp").forward(req, resp);
+        req.getRequestDispatcher("/staff/HoanTien.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        TaiKhoan manager = requireManager(req, resp);
-        if (manager == null) return;
-        int coSoId = getCoSoId(manager);
+        TaiKhoan staff = requireStaff(req, resp);
+        if (staff == null) return;
+        int coSoId = getCoSoId(staff);
         if (coSoId <= 0) { resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tài khoản chưa được gán cơ sở."); return; }
 
         String action = req.getParameter("action");
         int hoanTienId = parseIntSafe(req.getParameter("hoanTienId"), 0);
         if (hoanTienId <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?error=invalid");
+            resp.sendRedirect(req.getContextPath() + "/staff/hoan-tien?error=invalid");
             return;
         }
 
         // Ownership: mọi action bên dưới đều tự kiểm tra findByIdAndCoSoId — không thao tác
-        // được lên refund không thuộc CoSoID của Manager (chống IDOR ở tầng SQL, không chỉ JSP).
+        // được lên refund không thuộc CoSoID của Staff (chống IDOR ở tầng SQL, không chỉ JSP).
         RefundService.RefundResult result;
         switch (action != null ? action : "") {
             case "request-more-info": {
                 String ghiChu = sanitize(req.getParameter("ghiChu"));
-                result = refundService.requestMoreInfo(hoanTienId, coSoId, manager.getAccountId(), ghiChu, req);
+                result = refundService.requestMoreInfo(hoanTienId, coSoId, staff.getAccountId(), ghiChu, req);
                 break;
             }
             case "approve": {
                 String ghiChu = sanitize(req.getParameter("ghiChu"));
                 java.math.BigDecimal soTienDuyet = parseAmountSafe(req.getParameter("soTienDuocDuyet"));
                 if (soTienDuyet == null) {
-                    resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?error=invalid_amount");
+                    resp.sendRedirect(req.getContextPath() + "/staff/hoan-tien?error=invalid_amount");
                     return;
                 }
-                result = refundService.approve(hoanTienId, coSoId, manager.getAccountId(), soTienDuyet, ghiChu, req);
+                result = refundService.approve(hoanTienId, coSoId, staff.getAccountId(), soTienDuyet, ghiChu, req);
                 break;
             }
             case "reject": {
                 String lyDo = sanitize(req.getParameter("lyDo"));
-                result = refundService.reject(hoanTienId, coSoId, manager.getAccountId(), lyDo, req);
+                result = refundService.reject(hoanTienId, coSoId, staff.getAccountId(), lyDo, req);
                 break;
             }
             case "start-processing": {
-                result = refundService.startProcessing(hoanTienId, coSoId, manager.getAccountId(), req);
+                result = refundService.startProcessing(hoanTienId, coSoId, staff.getAccountId(), req);
                 break;
             }
             case "complete": {
                 String maGiaoDich = sanitize(req.getParameter("maGiaoDich"));
                 String ghiChu = sanitize(req.getParameter("ghiChu"));
-                result = refundService.confirmCompleted(hoanTienId, coSoId, manager.getAccountId(),
+                result = refundService.confirmCompleted(hoanTienId, coSoId, staff.getAccountId(),
                         maGiaoDich, ghiChu, req);
                 break;
             }
             default:
-                resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?error=unknown_action");
+                resp.sendRedirect(req.getContextPath() + "/staff/hoan-tien?error=unknown_action");
                 return;
         }
 
         if (result.success) {
-            resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?success=" + hoanTienId);
+            resp.sendRedirect(req.getContextPath() + "/staff/hoan-tien?success=" + hoanTienId);
         } else {
-            resp.sendRedirect(req.getContextPath() + "/manager/hoan-tien?error=" + encodeParam(result.message));
+            resp.sendRedirect(req.getContextPath() + "/staff/hoan-tien?error=" + encodeParam(result.message));
         }
     }
 
     // ---------------------------------------------------------------------------
 
-    private TaiKhoan requireManager(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private TaiKhoan requireStaff(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         TaiKhoan user = session != null ? (TaiKhoan) session.getAttribute("user") : null;
         if (user == null) {
-            resp.sendRedirect(RoleRedirectUtil.buildLoginRedirect(req.getContextPath(), req.getRequestURI()));
+            resp.sendRedirect(req.getContextPath() + "/he-thong/dang-nhap");
             return null;
         }
-        if (user.getRoleId() != RoleRedirectUtil.ROLE_MANAGER) {
-            try { resp.sendError(HttpServletResponse.SC_FORBIDDEN); } catch (Exception ignored) {}
+        // Quyền Lễ tân (4) hoặc Bảo vệ (5)
+        if (user.getRoleId() != 4 && user.getRoleId() != 5) {
+            try { resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này."); } catch (Exception ignored) {}
             return null;
         }
         return user;
     }
 
-    /** CoSoID luôn từ tài khoản Manager đã đăng nhập (TaiKhoan.CoSoID), không tin request parameter. */
-    private int getCoSoId(TaiKhoan manager) {
-        Integer coSoId = manager.getCoSoId();
+    /** CoSoID luôn từ tài khoản Staff đã đăng nhập (TaiKhoan.CoSoID), không tin request parameter. */
+    private int getCoSoId(TaiKhoan staff) {
+        Integer coSoId = staff.getCoSoId();
         return coSoId != null ? coSoId : 0;
     }
 

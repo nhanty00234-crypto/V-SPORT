@@ -45,7 +45,7 @@ public class GioHangServlet extends HttpServlet {
 
         List<Lichdatsan> allLich = lichDatSanDAO.getLichByAccountId(user.getAccountId());
         List<Lichdatsan> cartItems = new ArrayList<>();
-        
+
         if (allLich != null) {
             for (Lichdatsan l : allLich) {
                 if ("Chờ xác nhận".equals(l.getTrangThai()) || "Chờ thanh toán".equals(l.getTrangThai())) {
@@ -53,15 +53,36 @@ public class GioHangServlet extends HttpServlet {
                 }
             }
         }
-        
+
         List<San> dsSan = sanDAO.getAllSan();
         List<CoSo> dsCoSo = coSoDAO.getAllCoSo();
-        
+
+        java.util.Map<Integer, org.example.model.CustomerReputationHistory> reputationByDatSanId = new java.util.HashMap<>();
+        org.example.dao.CustomerReputationHistoryDAO reputationHistoryDAO = new org.example.dao.impl.CustomerReputationHistoryDAOImpl();
+        for (org.example.model.CustomerReputationHistory h : reputationHistoryDAO.getByAccountId(user.getAccountId())) {
+            if (h.getDatSanId() == null) continue;
+            if (!org.example.util.Constants.REPUTATION_ACTION_LATE_CANCEL.equals(h.getActionType())
+                    && !org.example.util.Constants.REPUTATION_ACTION_NO_SHOW.equals(h.getActionType())
+                    && !org.example.util.Constants.REPUTATION_ACTION_EARLY_CANCEL.equals(h.getActionType())) {
+                continue;
+            }
+            reputationByDatSanId.putIfAbsent(h.getDatSanId(), h);
+        }
+
+        org.example.dao.HoanTienDAO hoanTienDAO = new org.example.dao.impl.HoanTienDAOImpl();
+        java.util.Map<Integer, org.example.model.Hoantien> mapHoanTien = hoanTienDAO.findActiveMapByAccountId(user.getAccountId());
+
+        org.example.service.RefundService refundService = new org.example.service.RefundService();
+        List<org.example.model.Hoantien> danhSachHoanTien = refundService.getByCustomer(user.getAccountId(), 1);
+
         req.setAttribute("cartItems", cartItems);
         req.setAttribute("dsLich", allLich != null ? allLich : new ArrayList<>());
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
-        
+        req.setAttribute("reputationByDatSanId", reputationByDatSanId);
+        req.setAttribute("mapHoanTien", mapHoanTien);
+        req.setAttribute("danhSachHoanTien", danhSachHoanTien);
+
         req.getRequestDispatcher("/customer/GioHang.jsp").forward(req, resp);
     }
 

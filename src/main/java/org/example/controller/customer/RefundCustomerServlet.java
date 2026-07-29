@@ -59,10 +59,8 @@ public class RefundCustomerServlet extends HttpServlet {
             return;
         }
 
-        int page = Math.max(1, parseIntSafe(req.getParameter("page"), 1));
-        req.setAttribute("danhSachHoanTien", refundService.getByCustomer(user.getAccountId(), page));
-        req.setAttribute("page", page);
-        req.getRequestDispatcher("/customer/HoanTien.jsp").forward(req, resp);
+        // Danh sách hoàn tiền đã gộp thành tab trong /customer/gio-hang — không còn trang riêng.
+        resp.sendRedirect(req.getContextPath() + "/customer/gio-hang?tab=refund");
     }
 
     @Override
@@ -70,6 +68,7 @@ public class RefundCustomerServlet extends HttpServlet {
         TaiKhoan user = requireCustomer(req, resp);
         if (user == null) return;
 
+        HttpSession session = req.getSession();
         String action = req.getParameter("action");
         RefundService.RefundResult result;
 
@@ -77,7 +76,8 @@ public class RefundCustomerServlet extends HttpServlet {
             case "request": {
                 int datSanId = parseIntSafe(req.getParameter("datSanId"), 0);
                 if (datSanId <= 0) {
-                    resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?error=invalid");
+                    session.setAttribute("error", "Mã đặt sân không hợp lệ.");
+                    resp.sendRedirect(req.getContextPath() + "/customer/gio-hang?tab=refund");
                     return;
                 }
                 String lyDo = sanitize(req.getParameter("lyDo"));
@@ -108,7 +108,8 @@ public class RefundCustomerServlet extends HttpServlet {
             case "upload-qr": {
                 int hoanTienId = parseIntSafe(req.getParameter("hoanTienId"), 0);
                 if (hoanTienId <= 0) {
-                    resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?error=invalid");
+                    session.setAttribute("error", "Thiếu mã yêu cầu hoàn tiền.");
+                    resp.sendRedirect(req.getContextPath() + "/customer/gio-hang?tab=refund");
                     return;
                 }
                 String path = tryUploadQr(req, hoanTienId, user.getAccountId());
@@ -123,15 +124,23 @@ public class RefundCustomerServlet extends HttpServlet {
                 break;
             }
             default:
-                resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?error=unknown_action");
+                session.setAttribute("error", "Hành động không hợp lệ.");
+                resp.sendRedirect(req.getContextPath() + "/customer/gio-hang?tab=refund");
                 return;
         }
 
+        boolean backToList = "update-bank".equals(action) || "cancel".equals(action);
+
         if (result.success) {
-            resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?success=1"
-                    + (result.hoanTienId != null && result.hoanTienId > 0 ? "&id=" + result.hoanTienId : ""));
+            session.setAttribute("message", result.message != null ? result.message : "Thao tác thành công.");
+            if (!backToList && result.hoanTienId != null && result.hoanTienId > 0) {
+                resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?id=" + result.hoanTienId);
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/customer/gio-hang?tab=refund");
+            }
         } else {
-            resp.sendRedirect(req.getContextPath() + "/customer/hoan-tien?error=" + encodeParam(result.message));
+            session.setAttribute("error", result.message);
+            resp.sendRedirect(req.getContextPath() + "/customer/gio-hang?tab=refund");
         }
     }
 

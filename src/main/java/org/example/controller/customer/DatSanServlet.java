@@ -146,13 +146,13 @@ public class DatSanServlet extends HttpServlet {
             req.getParameter("datSanId"),
             req.getQueryString()));
 
-        // ── Cancellation preview – xử lý trước tất cả, return ngay ──
-        if (path.contains("booking-cancellation-preview")
-                || ("preview".equals(action) && "/customer/huy-dat-san".equals(path))) {
-            LOGGER.info("[DatSanServlet] → handleCancellationPreview");
-            handleCancellationPreview(req, resp, user);
-            return;
-        }
+        // ── Cancellation preview – xử lý trước tất cả, return ngay (ĐÃ VÔ HIỆU HÓA) ──
+        // if (path.contains("booking-cancellation-preview")
+        //         || ("preview".equals(action) && "/customer/huy-dat-san".equals(path))) {
+        //     LOGGER.info("[DatSanServlet] → handleCancellationPreview (Disabled)");
+        //     // handleCancellationPreview(req, resp, user);
+        //     // return;
+        // }
 
         // Khách chưa đăng nhập vẫn được xem trang đặt sân để khám phá,
         // nhưng không thể submit form (nút sẽ chuyển thành "Đăng nhập")
@@ -281,12 +281,16 @@ public class DatSanServlet extends HttpServlet {
         org.example.dao.HoanTienDAO hoanTienDAO = new org.example.dao.impl.HoanTienDAOImpl();
         Map<Integer, org.example.model.Hoantien> mapHoanTien = hoanTienDAO.findActiveMapByAccountId(user.getAccountId());
 
+        org.example.service.RefundService refundService = new org.example.service.RefundService();
+        java.util.List<org.example.model.Hoantien> danhSachHoanTien = refundService.getByCustomer(user.getAccountId(), 1);
+
         req.setAttribute("dsLich", dsLich);
         req.setAttribute("cartItems", cartItems);
         req.setAttribute("dsSan", dsSan);
         req.setAttribute("dsCoSo", dsCoSo);
         req.setAttribute("reputationByDatSanId", reputationByDatSanId);
         req.setAttribute("mapHoanTien", mapHoanTien);
+        req.setAttribute("danhSachHoanTien", danhSachHoanTien);
         req.getRequestDispatcher("/customer/GioHang.jsp").forward(req, resp);
     }
 
@@ -310,7 +314,9 @@ public class DatSanServlet extends HttpServlet {
         if (path.equals("/customer/dat-san")) {
             handleDatSan(req, resp, session, user);
         } else if (path.equals("/customer/huy-dat-san")) {
-            handleHuyDatSan(req, resp, session, user);
+            // Đã chuyển sang luồng RefundCancelServlet
+            // handleHuyDatSan(req, resp, session, user);
+            resp.sendError(HttpServletResponse.SC_GONE, "This endpoint is deprecated.");
         } else if (path.equals("/customer/dat-dich-vu")) {
             handlePostDatDichVu(req, resp, session, user);
         } else if (path.equals("/customer/payos-retry")) {
