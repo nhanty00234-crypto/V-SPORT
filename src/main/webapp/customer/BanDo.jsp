@@ -299,69 +299,87 @@
             border-radius: 22px 22px 0 0;
             box-shadow: 0 -12px 40px rgba(11, 46, 89, 0.24);
             transform: translateY(100%);
-            transition: transform .26s cubic-bezier(.22,1,.36,1);
+            visibility: hidden;
+            transition: transform .26s cubic-bezier(.22,1,.36,1), visibility 0s linear .26s;
             max-height: 72dvh;
             display: flex; flex-direction: column;
+            overflow: hidden;
         }
-        .vsm-sheet.is-open { transform: translateY(0); }
+        .vsm-sheet.is-open { transform: translateY(0); visibility: visible; transition-delay: 0s; }
         @media (min-width: 1024px) {
             .vsm-sheet {
-                left: 20px; right: auto;
+                left: auto; right: 20px;
                 bottom: 20px;
-                width: min(480px, calc(100vw - 40px));
-                border-radius: 20px;
+                width: min(320px, calc(100vw - 40px));
+                border-radius: 16px;
                 max-height: calc(100dvh - 120px);
+                overflow: hidden;
+                transform-origin: bottom right;
+                transform: scale(.4) translateY(24px);
+                opacity: 0;
+                pointer-events: none;
+                transition: transform .32s cubic-bezier(.2,1.1,.4,1), opacity .22s ease, visibility 0s linear .22s;
+            }
+            .vsm-sheet.is-open {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+                visibility: visible;
+                transition-delay: 0s;
             }
         }
         .vsm-sheet-handle-wrap { padding: 10px 0 4px; display: flex; justify-content: center; flex-shrink: 0; cursor: grab; touch-action: none; }
         @media (min-width: 1024px) { .vsm-sheet-handle-wrap { display: none; } }
         .vsm-sheet-handle { width: 42px; height: 5px; border-radius: 9999px; background: #D8E0EA; }
         .vsm-sheet-close {
-            position: absolute; top: 12px; right: 12px; z-index: 2;
-            width: 36px; height: 36px; border-radius: 50%; border: none;
-            background: rgba(255,255,255,.92); color: var(--vsm-navy); cursor: pointer;
+            position: absolute; top: 8px; right: 8px; z-index: 3;
+            width: 24px; height: 24px; border-radius: 50%; border: none;
+            background: transparent; box-shadow: none;
+            color: var(--vsm-navy); cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(11,46,89,.16);
+            transition: background-color .15s ease;
         }
-        .vsm-sheet-close svg { width: 18px; height: 18px; }
+        .vsm-sheet-close:hover { background: rgba(11,46,89,.1); }
+        .vsm-sheet-close svg { width: 15px; height: 15px; }
         .vsm-sheet-scroll { overflow-y: auto; min-height: 0; flex: 1; }
-        .vsm-sheet-hero { position: relative; width: 100%; aspect-ratio: 16/9; background: var(--vsm-cyan-light); overflow: hidden; }
+        .vsm-sheet-hero { position: relative; width: 100%; height: 84px; background: var(--vsm-cyan-light); overflow: hidden; }
         .vsm-sheet-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .vsm-sheet-hero img[src$=".svg"] { object-fit: contain; padding: 14px; box-sizing: border-box; }
         .vsm-sheet-status {
-            position: absolute; left: 14px; bottom: 12px;
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 5px 11px; border-radius: 9999px; font-size: 11.5px; font-weight: 700;
+            position: absolute; left: 10px; bottom: 8px;
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px; border-radius: 9999px; font-size: 10px; font-weight: 700;
             background: rgba(255,255,255,.95); color: var(--vsm-success);
         }
-        .vsm-sheet-status .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .vsm-sheet-status .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
         .vsm-sheet-status.is-closed { color: var(--vsm-text-secondary); }
-        .vsm-sheet-body { padding: 16px 20px 20px; }
-        .vsm-sheet-title { font-size: 19px; font-weight: 800; color: var(--vsm-text); margin: 0 0 6px; line-height: 1.25; }
-        .vsm-sheet-meta-row { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; color: var(--vsm-text-secondary); margin-top: 7px; line-height: 1.45; }
-        .vsm-sheet-meta-row svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--vsm-navy); }
-        .vsm-sheet-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-        .vsm-sheet-chip { font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; background: var(--vsm-cyan-light); color: var(--vsm-navy); }
-        .vsm-sheet-divider { height: 1px; background: #EEF2F7; margin: 16px 0; }
+        .vsm-sheet-body { padding: 12px 14px 14px; }
+        .vsm-sheet-title { font-size: 15px; font-weight: 800; color: var(--vsm-text); margin: 0 0 4px; line-height: 1.25; }
+        .vsm-sheet-meta-row { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--vsm-text-secondary); margin-top: 5px; line-height: 1.4; }
+        .vsm-sheet-meta-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; color: var(--vsm-navy); }
+        .vsm-sheet-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+        .vsm-sheet-chip { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; background: var(--vsm-cyan-light); color: var(--vsm-navy); }
+        .vsm-sheet-divider { height: 1px; background: #EEF2F7; margin: 10px 0; }
         .vsm-sheet-stats { display: flex; align-items: center; justify-content: space-between; }
-        .vsm-sheet-price-label { font-size: 11px; font-weight: 700; color: var(--vsm-text-secondary); text-transform: uppercase; letter-spacing: .04em; }
-        .vsm-sheet-price { font-size: 17px; font-weight: 800; color: var(--vsm-navy); margin-top: 2px; }
-        .vsm-sheet-courts { font-size: 12px; font-weight: 700; color: var(--vsm-success); background: #E5F7EF; padding: 4px 10px; border-radius: 9999px; }
-        .vsm-sheet-ctas { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+        .vsm-sheet-price-label { font-size: 9.5px; font-weight: 700; color: var(--vsm-text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+        .vsm-sheet-price { font-size: 14px; font-weight: 800; color: var(--vsm-navy); margin-top: 1px; }
+        .vsm-sheet-courts { font-size: 10.5px; font-weight: 700; color: var(--vsm-success); background: #E5F7EF; padding: 3px 8px; border-radius: 9999px; }
+        .vsm-sheet-ctas { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
         .vsm-cta-primary {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 13px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none;
-            background: var(--vsm-orange); color: #fff; font-size: 14.5px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px; border-radius: 10px; border: none; cursor: pointer; text-decoration: none;
+            background: var(--vsm-orange); color: #fff; font-size: 12.5px; font-weight: 800;
         }
         .vsm-cta-primary:hover { background: #E67512; }
-        .vsm-cta-primary svg { width: 17px; height: 17px; }
-        .vsm-cta-row { display: flex; gap: 8px; }
+        .vsm-cta-primary svg { width: 15px; height: 15px; }
+        .vsm-cta-row { display: flex; gap: 6px; }
         .vsm-cta-secondary {
-            flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
-            padding: 12px; border-radius: 12px; border: 1px solid var(--vsm-border); cursor: pointer; text-decoration: none;
-            background: #fff; color: var(--vsm-text); font-size: 13.5px; font-weight: 700;
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+            padding: 9px; border-radius: 10px; border: 1px solid var(--vsm-border); cursor: pointer; text-decoration: none;
+            background: #fff; color: var(--vsm-text); font-size: 11.5px; font-weight: 700;
         }
         .vsm-cta-secondary:hover { border-color: var(--vsm-navy); color: var(--vsm-navy); }
-        .vsm-cta-secondary svg { width: 16px; height: 16px; }
+        .vsm-cta-secondary svg { width: 14px; height: 14px; }
         .vsm-cta-secondary:disabled { opacity: .5; cursor: not-allowed; }
 
         /* ===================== List sheet ===================== */
@@ -370,10 +388,11 @@
             bottom: 0;
             background: var(--vsm-surface); border-radius: 22px 22px 0 0;
             box-shadow: 0 -12px 40px rgba(11, 46, 89, 0.24);
-            transform: translateY(100%); transition: transform .26s cubic-bezier(.22,1,.36,1);
-            max-height: 76dvh; display: flex; flex-direction: column;
+            transform: translateY(100%); visibility: hidden;
+            transition: transform .26s cubic-bezier(.22,1,.36,1), visibility 0s linear .26s;
+            max-height: 76dvh; display: flex; flex-direction: column; overflow: hidden;
         }
-        .vsm-list-sheet.is-open { transform: translateY(0); }
+        .vsm-list-sheet.is-open { transform: translateY(0); visibility: visible; transition-delay: 0s; }
         @media (min-width: 1024px) {
             .vsm-list-sheet {
                 left: auto; right: 20px;

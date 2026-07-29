@@ -64,6 +64,9 @@
 
         header, .header {
             margin-top: 0 !important;
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(7, 23, 38, 0.18);
         }
 
         main, .main-content, .acc-page-wrapper, .cart-main-wrapper {
@@ -379,9 +382,20 @@
         }
 
         .nav-category {
-            background: rgba(255,255,255,0.1);
+            background: var(--primary);
+            color: var(--navy);
             padding: 10px 20px;
             border-radius: 50px;
+            font-weight: 700;
+        }
+
+        .nav-category:hover {
+            color: var(--navy);
+            background: var(--primary-hover, var(--primary));
+        }
+
+        .nav-category.nav-active {
+            box-shadow: inset 0 0 0 2px var(--navy);
         }
 
         .nav-category i {
