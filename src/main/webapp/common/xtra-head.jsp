@@ -394,10 +394,6 @@
             background: var(--primary-hover, var(--primary));
         }
 
-        .nav-category.nav-active {
-            box-shadow: inset 0 0 0 2px var(--navy);
-        }
-
         .nav-category i {
             margin-left: 5px;
             font-size: 12px;

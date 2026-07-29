@@ -186,7 +186,7 @@
 </head>
 <body>
 <%-- Header --%>
-<jsp:include page="/customer/common/vsport-header.jsp" />
+<jsp:include page="/common/header-xtra.jsp" />
 
 <div class="page-wrapper">
     <div class="page-header">
