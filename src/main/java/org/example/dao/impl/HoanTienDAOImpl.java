@@ -142,7 +142,7 @@ public class HoanTienDAOImpl implements HoanTienDAO {
         int offset = (Math.max(page, 1) - 1) * pageSize;
         String sql =
             "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
+            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
             "WHERE ht.CoSoID = ? " +
             "ORDER BY ht.ThoiGianYeuCau DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -166,7 +166,7 @@ public class HoanTienDAOImpl implements HoanTienDAO {
         int offset = (Math.max(page, 1) - 1) * pageSize;
         String sql =
             "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
+            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
             "WHERE ht.CoSoID = ? AND ht.TrangThai = ? " +
             "ORDER BY ht.ThoiGianYeuCau DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";

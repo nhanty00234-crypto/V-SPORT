@@ -40,6 +40,53 @@
     font-size: 18px;
   }
 
+  /* ==================== Cute animated toast (manager/violet theme) ==================== */
+  @keyframes vsToastIn {
+    0%   { opacity: 0; transform: translateY(-14px) scale(.92); }
+    60%  { opacity: 1; transform: translateY(3px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes vsToastOut {
+    0%   { opacity: 1; transform: translateY(0) scale(1); max-height: 120px; margin-bottom: 8px; }
+    100% { opacity: 0; transform: translateY(-10px) scale(.95); max-height: 0; margin-bottom: 0; }
+  }
+  @keyframes vsToastPop {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+  }
+  @keyframes vsShake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
+  .vs-toast {
+    animation: vsToastIn .38s cubic-bezier(.34,1.56,.64,1) both;
+    overflow: hidden;
+  }
+  .vs-toast.vs-toast-leaving {
+    animation: vsToastOut .28s ease forwards;
+  }
+  .vs-toast .vs-toast-icon {
+    animation: vsToastPop .5s cubic-bezier(.34,1.56,.64,1) .1s both;
+  }
+  .vs-shake {
+    animation: vsShake .45s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  .vs-field-error {
+    border-color: #fb7185 !important;
+    box-shadow: 0 0 0 3px rgba(244,63,94,.12) !important;
+  }
+  .vs-field-error-msg {
+    color: #e11d48;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    animation: vsToastIn .3s ease both;
+  }
 </style>
 </head>
 <body class="text-zinc-900 min-h-screen">
@@ -192,8 +239,8 @@
 
 <!-- Staff Modal -->
 <div id="staffModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeStaffModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px]">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="nudgeStaffModal()"></div>
+  <div id="staffModalBox" class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px]">
     <div class="flex items-center justify-between px-6 py-4 border-b border-violet-50">
       <h2 id="staffModalTitle" class="text-base font-semibold text-violet-950">Thêm nhân viên</h2>
       <button onclick="closeStaffModal()" class="p-1.5 rounded-lg hover:bg-violet-50"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
@@ -349,6 +396,97 @@ function showNotification(type, message) {
     }, 4000);
 }
 
+// Cute, animated toast in the manager (violet) brand color — replaces native alert().
+function showVsToast(message, type) {
+    type = type || 'info';
+    let container = document.getElementById('vs-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'vs-toast-container';
+        container.className = 'fixed top-5 right-5 z-[300] flex flex-col gap-2 max-w-sm w-full pointer-events-none';
+        document.body.appendChild(container);
+    }
+
+    const presets = {
+        success: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-900', icon: 'text-emerald-600', emoji: 'check_circle', title: 'Tuyệt vời!' },
+        error:   { bg: 'bg-rose-50',    border: 'border-rose-200',    text: 'text-rose-900',    icon: 'text-rose-600',    emoji: 'sentiment_dissatisfied', title: 'Ối, có lỗi rồi' },
+        info:    { bg: 'bg-violet-50',  border: 'border-violet-200',  text: 'text-violet-900',  icon: 'text-violet-600',  emoji: 'mark_email_read', title: 'Thông báo' }
+    };
+    const p = presets[type] || presets.info;
+
+    const toast = document.createElement('div');
+    toast.className = `vs-toast pointer-events-auto p-4 rounded-2xl shadow-lg border text-sm flex items-start gap-3 ${p.bg} ${p.border} ${p.text}`;
+    toast.innerHTML = `
+        <span class="vs-toast-icon material-symbols-outlined ${p.icon} shrink-0" style="font-variation-settings:'FILL' 1">${p.emoji}</span>
+        <div class="flex-1 min-w-0">
+            <span class="font-bold block">${p.title}</span>
+            <span class="leading-normal block mt-0.5 break-words">${message}</span>
+        </div>
+        <button type="button" class="text-current opacity-40 hover:opacity-80 shrink-0" onclick="dismissVsToast(this.parentElement)"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    `;
+    container.appendChild(toast);
+
+    const timer = setTimeout(() => dismissVsToast(toast), 4200);
+    toast._vsTimer = timer;
+}
+
+function dismissVsToast(toast) {
+    if (!toast || toast._vsLeaving) return;
+    toast._vsLeaving = true;
+    if (toast._vsTimer) clearTimeout(toast._vsTimer);
+    toast.classList.add('vs-toast-leaving');
+    setTimeout(() => toast.remove(), 300);
+}
+
+// Gently nudges (shakes) the modal instead of closing it when the user clicks
+// the backdrop — prevents accidental loss of in-progress form data.
+function nudgeStaffModal() {
+    const box = document.getElementById('staffModalBox');
+    if (!box) return;
+    box.classList.remove('vs-shake');
+    void box.offsetWidth; // restart animation
+    box.classList.add('vs-shake');
+    setTimeout(() => box.classList.remove('vs-shake'), 500);
+}
+
+function shakeOtpBoxes() {
+    const box = document.getElementById('otpBoxesContainer');
+    if (!box) return;
+    box.classList.remove('vs-shake');
+    void box.offsetWidth;
+    box.classList.add('vs-shake');
+    setTimeout(() => box.classList.remove('vs-shake'), 500);
+}
+
+// Highlights an invalid field with a red ring + inline message + shake, in the manager brand color scheme.
+function markFieldInvalid(fieldId, msg) {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    el.classList.add('vs-field-error');
+    let hint = el.parentElement.querySelector('.vs-field-error-msg');
+    if (!hint) {
+        hint = document.createElement('span');
+        hint.className = 'vs-field-error-msg';
+        hint.innerHTML = '<span class="material-symbols-outlined text-[13px]">error</span><span></span>';
+        el.insertAdjacentElement('afterend', hint);
+    }
+    hint.querySelector('span:last-child').textContent = msg;
+    el.classList.add('vs-shake');
+    setTimeout(() => el.classList.remove('vs-shake'), 500);
+    el.focus();
+    const clear = () => {
+        el.classList.remove('vs-field-error');
+        if (hint) hint.remove();
+        el.removeEventListener('input', clear);
+    };
+    el.addEventListener('input', clear);
+}
+
+function clearFieldErrors() {
+    document.querySelectorAll('.vs-field-error-msg').forEach(h => h.remove());
+    document.querySelectorAll('.vs-field-error').forEach(f => f.classList.remove('vs-field-error'));
+}
+
 let staffList = [];
 
 // Load staff list on page load
@@ -436,13 +574,14 @@ function openAddStaff() {
     document.getElementById('staffModalTitle').innerText = 'Thêm nhân viên mới';
     document.getElementById('staffEditId').value = '';
     document.getElementById('staffPassword').required = true;
-    
+    clearFieldErrors();
+
     // Reset OTP containers
     document.getElementById('staffFieldsContainer').classList.remove('hidden');
     document.getElementById('otpVerificationSection').classList.add('hidden');
     document.querySelectorAll('.otp-box').forEach(b => b.value = '');
     document.getElementById('otpErrorBanner').classList.add('hidden');
-    
+
     document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -454,13 +593,14 @@ function editStaff(id) {
     document.getElementById('staffName').value = s.name;
     document.getElementById('staffEmail').value = s.email;
     document.getElementById('staffPhone').value = s.phone;
-    
+    clearFieldErrors();
+
     // Reset OTP containers
     document.getElementById('staffFieldsContainer').classList.remove('hidden');
     document.getElementById('otpVerificationSection').classList.add('hidden');
     document.querySelectorAll('.otp-box').forEach(b => b.value = '');
     document.getElementById('otpErrorBanner').classList.add('hidden');
-    
+
     document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -604,8 +744,46 @@ function cancelOtpVerification() {
     document.getElementById('otpNoticeBanner').classList.add('hidden');
 }
 
+// Maps a server field name (as returned in "field: message" validation errors) to its input id.
+const staffFieldMap = {
+    fullName: 'staffName',
+    email: 'staffEmail',
+    phoneNumber: 'staffPhone',
+    roleId: 'staffRole',
+    password: 'staffPassword'
+};
+
+// Parses "field: message; field2: message2" errors from the server and highlights the
+// matching inputs inline; falls back to a toast for anything it can't map to a field.
+function handleStaffError(rawMsg) {
+    if (!rawMsg) {
+        showVsToast('Đã xảy ra lỗi khi lưu thông tin.', 'error');
+        return;
+    }
+    clearFieldErrors();
+    const parts = rawMsg.split(';').map(s => s.trim()).filter(Boolean);
+    let matched = false;
+    parts.forEach(part => {
+        const idx = part.indexOf(':');
+        if (idx > -1) {
+            const key = part.substring(0, idx).trim();
+            const msg = part.substring(idx + 1).trim();
+            if (staffFieldMap[key]) {
+                markFieldInvalid(staffFieldMap[key], msg);
+                matched = true;
+                return;
+            }
+        }
+        showVsToast(part, 'error');
+    });
+    if (matched) {
+        showVsToast('Vui lòng kiểm tra lại các trường được tô đỏ nhé.', 'error');
+    }
+}
+
 async function handleStaffSubmit(e) {
     e.preventDefault();
+    clearFieldErrors();
     const editId = document.getElementById('staffEditId').value;
     const params = new URLSearchParams();
     params.append('action', editId ? 'update' : 'add');
@@ -635,13 +813,13 @@ async function handleStaffSubmit(e) {
 
         if (!response.ok) {
             const text = await response.text();
-            alert(text || 'Đã xảy ra lỗi khi cập nhật thông tin.');
+            handleStaffError(text);
             return;
         }
 
         const data = await response.json();
         if (data.loi) {
-            alert(data.loi);
+            handleStaffError(data.loi);
             return;
         }
         if (data.requiresOtp) {
@@ -655,12 +833,12 @@ async function handleStaffSubmit(e) {
             pendingStaffParams = params;
         } else {
             // Success directly
-            alert(data.message || 'Cập nhật tài khoản thành công!');
-            window.location.reload();
+            showVsToast(data.message || 'Cập nhật tài khoản thành công!', 'success');
+            setTimeout(() => window.location.reload(), 900);
         }
     } catch (error) {
         console.error('Error submitting staff:', error);
-        alert('Lỗi kết nối máy chủ.');
+        showVsToast('Lỗi kết nối máy chủ. Vui lòng thử lại.', 'error');
     }
 }
 
@@ -671,6 +849,7 @@ async function submitOtpVerification() {
     if (otp.length !== 6 || !/^\d+$/.test(otp)) {
         document.getElementById('otpErrorMsgText').innerText = 'Vui lòng nhập đầy đủ mã OTP 6 chữ số.';
         document.getElementById('otpErrorBanner').classList.remove('hidden');
+        shakeOtpBoxes();
         return;
     }
 
@@ -694,16 +873,17 @@ async function submitOtpVerification() {
         });
         const data = await response.json();
         if (data.success) {
-            alert(data.message || 'Thay đổi Email và thông tin thành công!');
-            window.location.reload();
+            showVsToast(data.message || 'Thay đổi Email và thông tin thành công!', 'success');
+            setTimeout(() => window.location.reload(), 900);
         } else {
             if (data.lockedOut) {
-                alert(data.loi);
-                window.location.reload();
+                showVsToast(data.loi, 'error');
+                setTimeout(() => window.location.reload(), 1400);
                 return;
             }
             document.getElementById('otpErrorMsgText').innerText = data.loi || 'Mã OTP không đúng. Vui lòng nhập lại.';
             document.getElementById('otpErrorBanner').classList.remove('hidden');
+            shakeOtpBoxes();
             boxes.forEach(b => b.value = '');
             boxes[0].focus();
         }
@@ -711,6 +891,7 @@ async function submitOtpVerification() {
         console.error(err);
         document.getElementById('otpErrorMsgText').innerText = 'Lỗi kết nối máy chủ.';
         document.getElementById('otpErrorBanner').classList.remove('hidden');
+        shakeOtpBoxes();
     } finally {
         btn.disabled = false;
         btn.innerHTML = oldText;

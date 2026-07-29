@@ -58,23 +58,19 @@
   /* ── Page enter/exit motion ── */
   body.stf-motion main {
     opacity: 0;
-    transform: translateY(10px) scale(.995);
-    filter: blur(1px);
+    transform: translateY(5px) scale(.998);
     animation: none !important;
   }
   body.stf-motion.stf-page-ready main {
     opacity: 1;
     transform: translateY(0) scale(1);
-    filter: blur(0);
-    transition: opacity .34s cubic-bezier(.22,1,.36,1),
-                transform .34s cubic-bezier(.22,1,.36,1),
-                filter .34s ease;
+    transition: opacity .16s cubic-bezier(.22,1,.36,1),
+                transform .16s cubic-bezier(.22,1,.36,1);
   }
   body.stf-page-exiting main {
     opacity: 0 !important;
-    transform: translateY(-8px) scale(.992) !important;
-    filter: blur(2px) !important;
-    transition: opacity .2s ease, transform .2s ease, filter .2s ease !important;
+    transform: translateY(-4px) scale(.997) !important;
+    transition: opacity .1s ease, transform .1s ease !important;
   }
 
   /* ── Transition scrim overlay ── */
@@ -83,14 +79,12 @@
     inset: 0;
     z-index: 60;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(255,247,237,.72), rgba(254,237,213,.88));
+    background: linear-gradient(180deg, rgba(255,247,237,.5), rgba(254,237,213,.62));
     opacity: 0;
-    backdrop-filter: blur(0);
-    transition: opacity .2s ease, backdrop-filter .2s ease;
+    transition: opacity .1s ease;
   }
   body.stf-page-exiting .stf-transition-scrim {
     opacity: 1;
-    backdrop-filter: blur(3px);
   }
   .stf-transition-scrim::after {
     content: '';
@@ -102,7 +96,7 @@
     transform-origin: left;
   }
   body.stf-page-exiting .stf-transition-scrim::after {
-    animation: stfRouteLine .42s cubic-bezier(.22,1,.36,1) forwards;
+    animation: stfRouteLine .22s cubic-bezier(.22,1,.36,1) forwards;
   }
   @keyframes stfRouteLine { to { transform: scaleX(1); } }
 
@@ -131,16 +125,12 @@
 
   <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
     <c:set var="uri" value="${pageContext.request.requestURI}" />
-    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mb-1.5">Công việc</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mb-1.5">Tổng quan</p>
     <a href="${pageContext.request.contextPath}/staff/dashboard" class="nav-link ${uri.contains('/staff/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
-    <a href="${pageContext.request.contextPath}/staff/ca-lam" class="nav-link ${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
-      <i class="ti ti-calendar-week text-[19px]"></i>Lịch làm của tôi
-    </a>
-    <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
-      <i class="ti ti-clipboard-list text-[19px]"></i>Đăng ký nghỉ phép
-    </a>
+
+    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mt-4 mb-1.5">Vận hành sân bãi</p>
     <a href="${pageContext.request.contextPath}/staff/checkin" class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
       <i class="ti ti-door-enter text-[19px]"></i>Mở sân / Check-in
     </a>
@@ -150,8 +140,18 @@
     <a href="${pageContext.request.contextPath}/staff/yeu-cau-qr" class="nav-link ${uri.contains('/staff/yeu-cau-qr') || uri.contains('/YeuCauQR.jsp') ? 'active' : ''}">
       <i class="ti ti-qrcode text-[19px]"></i>Yêu cầu từ QR
     </a>
-    <a href="${pageContext.request.contextPath}/staff/hoan-tien" class="nav-link ${uri.contains('/staff/hoan-tien') ? 'active' : ''}">
+
+    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mt-4 mb-1.5">Tài chính</p>
+    <a href="${pageContext.request.contextPath}/staff/hoan-tien" class="nav-link ${uri.contains('/staff/hoan-tien') || uri.contains('/staff/HoanTien.jsp') ? 'active' : ''}">
       <i class="ti ti-receipt-refund text-[19px]"></i>Yêu cầu hoàn tiền
+    </a>
+
+    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mt-4 mb-1.5">Cá nhân</p>
+    <a href="${pageContext.request.contextPath}/staff/ca-lam" class="nav-link ${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
+      <i class="ti ti-calendar-week text-[19px]"></i>Lịch làm của tôi
+    </a>
+    <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
+      <i class="ti ti-clipboard-list text-[19px]"></i>Đăng ký nghỉ phép
     </a>
   </nav>
 
@@ -228,7 +228,7 @@
       document.body.classList.add('stf-page-exiting');
       window.setTimeout(function () {
         window.location.href = url.href;
-      }, 170);
+      }, 90);
     });
   }
 

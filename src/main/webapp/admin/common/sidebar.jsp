@@ -89,35 +89,32 @@
   /* ── Page motion ── */
   body.admin-motion main{
     opacity:0;
-    transform:translateY(10px) scale(.995);
-    filter:blur(1px);
+    transform:translateY(5px) scale(.998);
     animation:none !important;
   }
   body.admin-motion.admin-page-ready main{
     opacity:1;
     transform:translateY(0) scale(1);
-    filter:blur(0);
-    transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .34s cubic-bezier(.22,1,.36,1),filter .34s ease;
+    transition:opacity .16s cubic-bezier(.22,1,.36,1),transform .16s cubic-bezier(.22,1,.36,1);
   }
   body.admin-page-exiting main{
     opacity:0 !important;
-    transform:translateY(-8px) scale(.992) !important;
-    filter:blur(2px) !important;
-    transition:opacity .2s ease,transform .2s ease,filter .2s ease !important;
+    transform:translateY(-4px) scale(.997) !important;
+    transition:opacity .1s ease,transform .1s ease !important;
   }
   .admin-transition-scrim{
     position:fixed;inset:0;z-index:60;pointer-events:none;
-    background:linear-gradient(180deg,rgba(248,250,252,.72),rgba(241,245,249,.88));
-    opacity:0;backdrop-filter:blur(0);
-    transition:opacity .2s ease,backdrop-filter .2s ease;
+    background:linear-gradient(180deg,rgba(248,250,252,.5),rgba(241,245,249,.62));
+    opacity:0;
+    transition:opacity .1s ease;
   }
-  body.admin-page-exiting .admin-transition-scrim{opacity:1;backdrop-filter:blur(3px)}
+  body.admin-page-exiting .admin-transition-scrim{opacity:1}
   .admin-transition-scrim::after{
     content:'';position:absolute;left:260px;right:0;top:64px;height:2px;
     background:linear-gradient(90deg,transparent,#2563eb,#38bdf8,transparent);
     transform:scaleX(0);transform-origin:left;
   }
-  body.admin-page-exiting .admin-transition-scrim::after{animation:adminRouteLine .42s cubic-bezier(.22,1,.36,1) forwards}
+  body.admin-page-exiting .admin-transition-scrim::after{animation:adminRouteLine .22s cubic-bezier(.22,1,.36,1) forwards}
   @keyframes adminRouteLine{to{transform:scaleX(1)}}
   @media (max-width:1023px){.admin-transition-scrim::after{left:0}}
   @media (prefers-reduced-motion:reduce){
@@ -467,7 +464,7 @@
       document.body.classList.add('admin-page-exiting');
       window.setTimeout(function () {
         window.location.href = url.href;
-      }, 170);
+      }, 90);
     });
   }
 

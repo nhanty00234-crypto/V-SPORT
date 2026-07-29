@@ -75,23 +75,19 @@
   /* ── Page enter/exit motion ── */
   body.mgr-motion main {
     opacity: 0;
-    transform: translateY(10px) scale(.995);
-    filter: blur(1px);
+    transform: translateY(5px) scale(.998);
     animation: none !important;
   }
   body.mgr-motion.mgr-page-ready main {
     opacity: 1;
     transform: translateY(0) scale(1);
-    filter: blur(0);
-    transition: opacity .34s cubic-bezier(.22,1,.36,1),
-                transform .34s cubic-bezier(.22,1,.36,1),
-                filter .34s ease;
+    transition: opacity .16s cubic-bezier(.22,1,.36,1),
+                transform .16s cubic-bezier(.22,1,.36,1);
   }
   body.mgr-page-exiting main {
     opacity: 0 !important;
-    transform: translateY(-8px) scale(.992) !important;
-    filter: blur(2px) !important;
-    transition: opacity .2s ease, transform .2s ease, filter .2s ease !important;
+    transform: translateY(-4px) scale(.997) !important;
+    transition: opacity .1s ease, transform .1s ease !important;
   }
 
   /* ── Transition scrim overlay ── */
@@ -100,14 +96,12 @@
     inset: 0;
     z-index: 60;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(250,245,255,.72), rgba(243,232,255,.88));
+    background: linear-gradient(180deg, rgba(250,245,255,.5), rgba(243,232,255,.62));
     opacity: 0;
-    backdrop-filter: blur(0);
-    transition: opacity .2s ease, backdrop-filter .2s ease;
+    transition: opacity .1s ease;
   }
   body.mgr-page-exiting .mgr-transition-scrim {
     opacity: 1;
-    backdrop-filter: blur(3px);
   }
   .mgr-transition-scrim::after {
     content: '';
@@ -119,7 +113,7 @@
     transform-origin: left;
   }
   body.mgr-page-exiting .mgr-transition-scrim::after {
-    animation: mgrRouteLine .42s cubic-bezier(.22,1,.36,1) forwards;
+    animation: mgrRouteLine .22s cubic-bezier(.22,1,.36,1) forwards;
   }
   @keyframes mgrRouteLine { to { transform: scaleX(1); } }
 
@@ -371,11 +365,11 @@
     </c:if>
     <c:if test="${serviceModuleApproved}">
     <a href="${pageContext.request.contextPath}/manager/dich-vu"
-      class="nav-link ${uri.contains('/manager/dich-vu') ? 'active' : ''}">
+      class="nav-link ${uri.contains('/manager/dich-vu') || uri.contains('/manager/DichVu.jsp') ? 'active' : ''}">
       <i class="ti ti-tools text-[19px]"></i>Quản lý dịch vụ
     </a>
     <a href="${pageContext.request.contextPath}/manager/yeu-cau-dich-vu"
-      class="nav-link ${uri.contains('/yeu-cau-dich-vu') ? 'active' : ''}">
+      class="nav-link ${uri.contains('/yeu-cau-dich-vu') || uri.contains('/YeuCauDichVu.jsp') ? 'active' : ''}">
       <i class="ti ti-clipboard-list text-[19px]"></i>Yêu cầu dịch vụ
     </a>
     </c:if>
@@ -384,11 +378,11 @@
       <i class="ti ti-receipt text-[19px]"></i>Quản lý hóa đơn
     </a>
     <a href="${pageContext.request.contextPath}/manager/hoan-tien"
-      class="nav-link ${uri.contains('/manager/hoan-tien') ? 'active' : ''}">
+      class="nav-link ${uri.contains('/manager/hoan-tien') || uri.contains('/manager/HoanTien.jsp') ? 'active' : ''}">
       <i class="ti ti-receipt-refund text-[19px]"></i>Yêu cầu hoàn tiền
     </a>
     <a href="${pageContext.request.contextPath}/manager/khuyen-mai"
-      class="nav-link ${uri.contains('/manager/khuyen-mai') ? 'active' : ''}">
+      class="nav-link ${uri.contains('/manager/khuyen-mai') || uri.contains('/manager/KhuyenMai.jsp') ? 'active' : ''}">
       <i class="ti ti-discount-2 text-[19px]"></i>Mã khuyến mãi
     </a>
 
@@ -421,7 +415,7 @@
       <i class="ti ti-trash text-[19px]"></i>Thùng rác
     </a>
     <a href="${pageContext.request.contextPath}/manager/audit-log"
-      class="nav-link ${uri.contains('/manager/audit-log') ? 'active' : ''}">
+      class="nav-link ${uri.contains('/manager/audit-log') || uri.contains('/manager/AuditLog.jsp') ? 'active' : ''}">
       <i class="ti ti-history text-[19px]"></i>Nhật Ký Thao Tác
     </a>
   </nav>
@@ -502,7 +496,7 @@
       document.body.classList.add('mgr-page-exiting');
       window.setTimeout(function () {
         window.location.href = url.href;
-      }, 170);
+      }, 90);
     });
   }
 

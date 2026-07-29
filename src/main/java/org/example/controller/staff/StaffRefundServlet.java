@@ -6,10 +6,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.google.gson.Gson;
+import org.example.model.Hoantien;
 import org.example.model.TaiKhoan;
 import org.example.service.RefundService;
+import org.example.util.RefundStatus;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * GET  /staff/hoan-tien        — danh sách yêu cầu hoàn tiền của cơ sở (Lễ tân/Bảo vệ)
@@ -22,6 +30,11 @@ import java.io.IOException;
 public class StaffRefundServlet extends HttpServlet {
 
     private final RefundService refundService = new RefundService();
+    private final Gson gson = new Gson();
+
+    /** Các trạng thái coi là "đã xử lý xong" — hiển thị trong tab Lịch sử xử lý. */
+    private static final List<String> PROCESSED_STATUSES = List.of(
+            RefundStatus.DA_DUYET, RefundStatus.DANG_HOAN_TIEN, RefundStatus.DA_HOAN_TIEN, RefundStatus.TU_CHOI);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -30,9 +43,14 @@ public class StaffRefundServlet extends HttpServlet {
         int coSoId = getCoSoId(staff);
         if (coSoId <= 0) { resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tài khoản chưa được gán cơ sở."); return; }
 
+        if ("json-history".equals(req.getParameter("format"))) {
+            handleHistoryJson(req, resp, coSoId);
+            return;
+        }
+
         int page = Math.max(1, parseIntSafe(req.getParameter("page"), 1));
         String trangThaiFilter = sanitize(req.getParameter("trangThai"));
-        boolean validFilter = trangThaiFilter != null && org.example.util.RefundStatus.isValid(trangThaiFilter);
+        boolean validFilter = trangThaiFilter != null && RefundStatus.isValid(trangThaiFilter);
 
         req.setAttribute("danhSachHoanTien", validFilter
                 ? refundService.getByCoSoAndTrangThai(coSoId, trangThaiFilter, page)
@@ -40,7 +58,34 @@ public class StaffRefundServlet extends HttpServlet {
         req.setAttribute("page", page);
         req.setAttribute("coSoId", coSoId);
         req.setAttribute("trangThaiFilter", validFilter ? trangThaiFilter : "");
+        req.setAttribute("userRole", staff.getRoleId() == 4 ? "Lễ tân trực ca" : "Bảo vệ trực ca");
         req.getRequestDispatcher("/staff/HoanTien.jsp").forward(req, resp);
+    }
+
+    /** Trả JSON danh sách yêu cầu đã xử lý (Đã duyệt/Đang CK/Đã hoàn tiền/Từ chối) để tab Lịch sử xử lý polling real-time. */
+    private void handleHistoryJson(HttpServletRequest req, HttpServletResponse resp, int coSoId) throws IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+        List<Hoantien> all = refundService.getByCoSo(coSoId, 1);
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (Hoantien ht : all) {
+            if (!PROCESSED_STATUSES.contains(ht.getTrangThai())) continue;
+            Map<String, Object> row = new HashMap<>();
+            row.put("hoanTienId", ht.getHoanTienId());
+            row.put("datSanId", ht.getDatSanId());
+            row.put("trangThai", ht.getTrangThai());
+            row.put("soTienDeNghiHoan", ht.getSoTienDeNghiHoan());
+            row.put("soTienDuocDuyet", ht.getSoTienDuocDuyet());
+            row.put("lyDoTuChoi", ht.getLyDoTuChoi());
+            row.put("ghiChuXuLy", ht.getGhiChuXuLy());
+            row.put("maGiaoDichHoan", ht.getMaGiaoDichHoan());
+            row.put("approvedAt", ht.getApprovedAt() != null ? fmt.format(ht.getApprovedAt()) : null);
+            row.put("completedAt", ht.getCompletedAt() != null ? fmt.format(ht.getCompletedAt()) : null);
+            row.put("updatedAt", ht.getUpdatedAt() != null ? fmt.format(ht.getUpdatedAt()) : null);
+            rows.add(row);
+        }
+        resp.getWriter().write(gson.toJson(Map.of("success", true, "rows", rows)));
     }
 
     @Override

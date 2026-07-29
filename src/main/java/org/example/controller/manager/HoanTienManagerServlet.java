@@ -8,11 +8,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.google.gson.Gson;
+import org.example.model.Hoantien;
 import org.example.model.TaiKhoan;
 import org.example.service.RefundService;
+import org.example.util.RefundStatus;
 import org.example.util.RoleRedirectUtil;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * GET  /manager/hoan-tien        — danh sách yêu cầu hoàn tiền của cơ sở
@@ -27,6 +35,10 @@ public class HoanTienManagerServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(HoanTienManagerServlet.class);
 
     private final RefundService refundService = new RefundService();
+    private final Gson gson = new Gson();
+
+    private static final List<String> PROCESSED_STATUSES = List.of(
+            RefundStatus.DA_DUYET, RefundStatus.DANG_HOAN_TIEN, RefundStatus.DA_HOAN_TIEN, RefundStatus.TU_CHOI);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -34,6 +46,11 @@ public class HoanTienManagerServlet extends HttpServlet {
         if (manager == null) return;
         int coSoId = getCoSoId(manager);
         if (coSoId <= 0) { resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tài khoản chưa được gán cơ sở."); return; }
+
+        if ("json-history".equals(req.getParameter("format"))) {
+            handleHistoryJson(req, resp, coSoId);
+            return;
+        }
 
         int page = Math.max(1, parseIntSafe(req.getParameter("page"), 1));
         String trangThaiFilter = sanitize(req.getParameter("trangThai"));
@@ -46,6 +63,32 @@ public class HoanTienManagerServlet extends HttpServlet {
         req.setAttribute("coSoId", coSoId);
         req.setAttribute("trangThaiFilter", validFilter ? trangThaiFilter : "");
         req.getRequestDispatcher("/manager/HoanTien.jsp").forward(req, resp);
+    }
+
+    /** Trả JSON danh sách yêu cầu đã xử lý (Đã duyệt/Đang CK/Đã hoàn tiền/Từ chối) để tab Lịch sử xử lý polling real-time. */
+    private void handleHistoryJson(HttpServletRequest req, HttpServletResponse resp, int coSoId) throws IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+        List<Hoantien> all = refundService.getByCoSo(coSoId, 1);
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (Hoantien ht : all) {
+            if (!PROCESSED_STATUSES.contains(ht.getTrangThai())) continue;
+            Map<String, Object> row = new HashMap<>();
+            row.put("hoanTienId", ht.getHoanTienId());
+            row.put("datSanId", ht.getDatSanId());
+            row.put("trangThai", ht.getTrangThai());
+            row.put("soTienDeNghiHoan", ht.getSoTienDeNghiHoan());
+            row.put("soTienDuocDuyet", ht.getSoTienDuocDuyet());
+            row.put("lyDoTuChoi", ht.getLyDoTuChoi());
+            row.put("ghiChuXuLy", ht.getGhiChuXuLy());
+            row.put("maGiaoDichHoan", ht.getMaGiaoDichHoan());
+            row.put("approvedAt", ht.getApprovedAt() != null ? fmt.format(ht.getApprovedAt()) : null);
+            row.put("completedAt", ht.getCompletedAt() != null ? fmt.format(ht.getCompletedAt()) : null);
+            row.put("updatedAt", ht.getUpdatedAt() != null ? fmt.format(ht.getUpdatedAt()) : null);
+            rows.add(row);
+        }
+        resp.getWriter().write(gson.toJson(Map.of("success", true, "rows", rows)));
     }
 
     @Override
