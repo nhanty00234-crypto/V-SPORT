@@ -137,6 +137,21 @@ public class NhanSuManagerServlet extends HttpServlet {
                 if (password == null || password.isEmpty()) errors.put("password", "Mật khẩu không được để trống");
                 if (!errors.isEmpty()) throw new IllegalArgumentException(errors.toString());
 
+                // Check if email is locked out due to prior >5 failed OTP entries
+                if (org.example.util.OtpRateLimitUtil.isEmailLockedOut(email)) {
+                    long mins = org.example.util.OtpRateLimitUtil.getLockoutRemainingMinutes(email);
+                    String msg = "Email (" + email + ") đã bị tạm khóa do nhập sai OTP quá 5 lần. Vui lòng thử lại sau " + mins + " phút.";
+                    String requestedWith = req.getHeader("X-Requested-With");
+                    if ("XMLHttpRequest".equals(requestedWith)) {
+                        resp.setContentType("application/json;charset=UTF-8");
+                        resp.getWriter().write("{\"success\": false, \"requiresOtp\": false, \"loi\": \"" + msg + "\"}");
+                        return;
+                    }
+                    session.setAttribute("error", msg);
+                    resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                    return;
+                }
+
                 // Validate strong password
                 org.example.util.ValidationUtils.validateStrongPassword(password);
 
@@ -198,6 +213,19 @@ public class NhanSuManagerServlet extends HttpServlet {
 
                     boolean isEmailChanged = (newEmail != null && !newEmail.equalsIgnoreCase(account.getEmail()));
                     if (isEmailChanged) {
+                        if (org.example.util.OtpRateLimitUtil.isEmailLockedOut(newEmail)) {
+                            long mins = org.example.util.OtpRateLimitUtil.getLockoutRemainingMinutes(newEmail);
+                            String msg = "Email (" + newEmail + ") đã bị tạm khóa do nhập sai OTP quá 5 lần. Vui lòng thử lại sau " + mins + " phút.";
+                            String requestedWith = req.getHeader("X-Requested-With");
+                            if ("XMLHttpRequest".equals(requestedWith)) {
+                                resp.setContentType("application/json;charset=UTF-8");
+                                resp.getWriter().write("{\"success\": false, \"requiresOtp\": false, \"loi\": \"" + msg + "\"}");
+                                return;
+                            }
+                            session.setAttribute("error", msg);
+                            resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                            return;
+                        }
                         org.example.util.ValidationUtils.validateEmail(newEmail);
                         if (new org.example.dao.impl.TaiKhoanDAOImpl().kiemtraEmail(newEmail)) {
                             throw new IllegalArgumentException("Email đã tồn tại trên hệ thống!");

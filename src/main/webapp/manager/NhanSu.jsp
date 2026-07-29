@@ -253,15 +253,28 @@
           </div>
           
           <div class="flex gap-2 justify-center my-3" id="otpBoxesContainer">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
-              <input type="text" maxlength="1" class="otp-box w-10 h-12 border border-violet-100 rounded-xl text-center font-bold text-lg focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
           </div>
           
-          <div id="otpErrorBanner" class="hidden p-2.5 bg-red-50 border border-red-100 text-red-650 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
+          <div class="text-xs text-violet-600 font-medium">
+              Chưa nhận được mã? 
+              <button type="button" id="btnResendOtpStaff" onclick="resendStaffOtp()" class="font-bold text-violet-700 hover:underline disabled:opacity-40 disabled:no-underline cursor-pointer">
+                  Gửi lại mã (<span id="resendCountDisplay">0</span>/5)
+              </button>
+              <span id="resendTimerDisplay" class="text-violet-500 font-normal ml-1 hidden">(chờ <span id="timerSeconds">60</span>s)</span>
+          </div>
+
+          <div id="otpNoticeBanner" class="hidden p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 mt-2">
+              <span class="material-symbols-outlined text-[16px]">check_circle</span>
+              <span id="otpNoticeMsgText"></span>
+          </div>
+
+          <div id="otpErrorBanner" class="hidden p-2.5 bg-red-50 border border-red-100 text-red-650 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 mt-2">
               <span class="material-symbols-outlined text-[16px]">error</span>
               <span id="otpErrorMsgText">Mã OTP không hợp lệ.</span>
           </div>
@@ -467,35 +480,107 @@ document.addEventListener('DOMContentLoaded', () => {
     const boxes = document.querySelectorAll('.otp-box');
     boxes.forEach((box, idx, arr) => {
         box.addEventListener('input', (e) => {
-            const val = e.target.value;
-            // Allow only numbers
-            if (val && !/^[0-9]$/.test(val)) {
-                e.target.value = '';
-                return;
-            }
-            if (val && idx < arr.length - 1) {
+            const v = e.target.value.replace(/\D/g, '');
+            e.target.value = v ? v[0] : '';
+            if (v && idx < arr.length - 1) {
                 arr[idx + 1].focus();
             }
         });
         box.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+            if (e.key === 'Backspace') {
+                if (!e.target.value && idx > 0) {
+                    arr[idx - 1].focus();
+                    arr[idx - 1].value = '';
+                }
+            } else if (e.key === 'ArrowLeft' && idx > 0) {
                 arr[idx - 1].focus();
+            } else if (e.key === 'ArrowRight' && idx < arr.length - 1) {
+                arr[idx + 1].focus();
             }
         });
         box.addEventListener('paste', (e) => {
             e.preventDefault();
-            const text = e.clipboardData.getData('text').trim();
-            if (/^\d{6}$/.test(text)) {
-                text.split('').forEach((char, i) => {
-                    arr[i].value = char;
+            const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+            if (text.length > 0) {
+                const digits = text.split('');
+                arr.forEach((b, i) => {
+                    b.value = digits[i] || '';
                 });
-                arr[5].focus();
+                const targetIdx = Math.min(digits.length, arr.length) - 1;
+                if (targetIdx >= 0 && targetIdx < arr.length) {
+                    arr[targetIdx].focus();
+                }
             }
         });
     });
 });
 
 let pendingStaffParams = null;
+let resendTimerInterval = null;
+
+function startResendCooldown(seconds) {
+    const btn = document.getElementById('btnResendOtpStaff');
+    const timerWrap = document.getElementById('resendTimerDisplay');
+    const timerSec = document.getElementById('timerSeconds');
+    if (!btn || !timerWrap || !timerSec) return;
+
+    btn.disabled = true;
+    timerWrap.classList.remove('hidden');
+    let left = seconds;
+    timerSec.innerText = left;
+
+    if (resendTimerInterval) clearInterval(resendTimerInterval);
+    resendTimerInterval = setInterval(() => {
+        left--;
+        timerSec.innerText = left;
+        if (left <= 0) {
+            clearInterval(resendTimerInterval);
+            timerWrap.classList.add('hidden');
+            const countStr = document.getElementById('resendCountDisplay').innerText;
+            if (parseInt(countStr) < 5) {
+                btn.disabled = false;
+            }
+        }
+    }, 1000);
+}
+
+async function resendStaffOtp() {
+    const btn = document.getElementById('btnResendOtpStaff');
+    const noticeBanner = document.getElementById('otpNoticeBanner');
+    const noticeText = document.getElementById('otpNoticeMsgText');
+    const errorBanner = document.getElementById('otpErrorBanner');
+
+    noticeBanner.classList.add('hidden');
+    errorBanner.classList.add('hidden');
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(_ctxPath + '/resend-otp', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            if (data.resendCount !== undefined) {
+                document.getElementById('resendCountDisplay').innerText = data.resendCount;
+            }
+            noticeText.innerText = data.thongbao || 'Đã gửi lại mã OTP mới!';
+            noticeBanner.classList.remove('hidden');
+            startResendCooldown(60);
+        } else {
+            document.getElementById('otpErrorMsgText').innerText = data.loi || 'Không thể gửi lại mã OTP.';
+            errorBanner.classList.remove('hidden');
+            btn.disabled = false;
+        }
+    } catch(e) {
+        console.error('Lỗi khi gửi lại OTP:', e);
+        document.getElementById('otpErrorMsgText').innerText = 'Lỗi kết nối khi gửi lại OTP.';
+        errorBanner.classList.remove('hidden');
+        btn.disabled = false;
+    }
+}
 
 function cancelOtpVerification() {
     document.getElementById('otpVerificationSection').classList.add('hidden');
@@ -503,6 +588,7 @@ function cancelOtpVerification() {
     // Clear boxes
     document.querySelectorAll('.otp-box').forEach(box => box.value = '');
     document.getElementById('otpErrorBanner').classList.add('hidden');
+    document.getElementById('otpNoticeBanner').classList.add('hidden');
 }
 
 async function handleStaffSubmit(e) {
@@ -541,11 +627,17 @@ async function handleStaffSubmit(e) {
         }
 
         const data = await response.json();
+        if (data.loi) {
+            alert(data.loi);
+            return;
+        }
         if (data.requiresOtp) {
             // Show inline OTP block smoothly
             document.getElementById('otpTargetEmail').innerText = data.email;
             document.getElementById('staffFieldsContainer').classList.add('hidden');
             document.getElementById('otpVerificationSection').classList.remove('hidden');
+            document.getElementById('resendCountDisplay').innerText = '0';
+            document.querySelectorAll('.otp-box').forEach(b => b.value = '');
             document.querySelectorAll('.otp-box')[0].focus();
             pendingStaffParams = params;
         } else {
@@ -592,6 +684,11 @@ async function submitOtpVerification() {
             alert(data.message || 'Thay đổi Email và thông tin thành công!');
             window.location.reload();
         } else {
+            if (data.lockedOut) {
+                alert(data.loi);
+                window.location.reload();
+                return;
+            }
             document.getElementById('otpErrorMsgText').innerText = data.loi || 'Mã OTP không đúng. Vui lòng nhập lại.';
             document.getElementById('otpErrorBanner').classList.remove('hidden');
             boxes.forEach(b => b.value = '');
@@ -599,7 +696,7 @@ async function submitOtpVerification() {
         }
     } catch(err) {
         console.error(err);
-        document.getElementById('otpErrorMsgText').innerText = 'Lỗi kết nối. Vui lòng thử lại.';
+        document.getElementById('otpErrorMsgText').innerText = 'Lỗi kết nối máy chủ.';
         document.getElementById('otpErrorBanner').classList.remove('hidden');
     } finally {
         btn.disabled = false;

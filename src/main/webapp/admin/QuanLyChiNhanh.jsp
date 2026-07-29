@@ -1293,14 +1293,57 @@ var DRAWER_DATA = {};
   // ═══════════ PAYOS OTP MODAL ═══════════
   let payosOtpFails = 0, payosResendTimer = null;
 
+  function initPayOSOtpInputEvents() {
+    const boxes = document.querySelectorAll('.payos-otp');
+    boxes.forEach((box, idx) => {
+      if (box.dataset.otpBound === 'true') return;
+      box.dataset.otpBound = 'true';
+
+      box.addEventListener('input', e => {
+        const v = e.target.value.replace(/\D/g, '');
+        e.target.value = v ? v[0] : '';
+        if (v && idx < boxes.length - 1) {
+          boxes[idx + 1].focus();
+        }
+      });
+      box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace') {
+          if (!e.target.value && idx > 0) {
+            boxes[idx - 1].focus();
+            boxes[idx - 1].value = '';
+          }
+        } else if (e.key === 'ArrowLeft' && idx > 0) {
+          boxes[idx - 1].focus();
+        } else if (e.key === 'ArrowRight' && idx < boxes.length - 1) {
+          boxes[idx + 1].focus();
+        } else if (e.key === 'Enter') {
+          submitPayOSOtp();
+        }
+      });
+      box.addEventListener('paste', e => {
+        e.preventDefault();
+        const d = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').split('');
+        boxes.forEach((b, i) => b.value = d[i] || '');
+        const targetIdx = Math.min(d.length - 1, boxes.length - 1);
+        if (targetIdx >= 0 && targetIdx < boxes.length) {
+          boxes[targetIdx].focus();
+        }
+      });
+    });
+  }
+
   function openPayOSOtpModal(maskedEmail, resendWaitSeconds) {
+    initPayOSOtpInputEvents();
     document.getElementById('payosOtpEmailDisplay').textContent = maskedEmail || '';
     document.getElementById('payosOtpErr').classList.add('hidden');
     payosOtpFails = 0;
     document.getElementById('payosOtpFails').textContent = '0';
     document.querySelectorAll('.payos-otp').forEach(b => b.value = '');
     document.getElementById('modalPayOSOtp').classList.remove('hidden');
-    setTimeout(() => document.querySelector('.payos-otp[data-index="0"]').focus(), 100);
+    setTimeout(() => {
+      const firstBox = document.querySelector('.payos-otp[data-index="0"]');
+      if (firstBox) firstBox.focus();
+    }, 100);
     payosStartResendCountdown(resendWaitSeconds || 60);
   }
 
@@ -1309,27 +1352,7 @@ var DRAWER_DATA = {};
     clearInterval(payosResendTimer);
   }
 
-  document.querySelectorAll('.payos-otp').forEach(box => {
-    box.addEventListener('input', e => {
-      const v = e.target.value.replace(/\D/g, '');
-      e.target.value = v ? v[0] : '';
-      if (v && +e.target.dataset.index < 5)
-        document.querySelector('.payos-otp[data-index="' + (+e.target.dataset.index + 1) + '"]').focus();
-    });
-    box.addEventListener('keydown', e => {
-      if (e.key === 'Backspace' && !e.target.value) {
-        const p = document.querySelector('.payos-otp[data-index="' + (+e.target.dataset.index - 1) + '"]');
-        if (p) { p.focus(); p.value = ''; }
-      }
-      if (e.key === 'Enter') submitPayOSOtp();
-    });
-    box.addEventListener('paste', e => {
-      e.preventDefault();
-      const d = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').split('');
-      document.querySelectorAll('.payos-otp').forEach((b,i) => b.value = d[i]||'');
-      document.querySelector('.payos-otp[data-index="' + Math.min(d.length-1,5) + '"]').focus();
-    });
-  });
+  document.addEventListener('DOMContentLoaded', initPayOSOtpInputEvents);
 
   function submitPayOSOtp() {
     const err = document.getElementById('payosOtpErr');
@@ -1505,7 +1528,7 @@ var DRAWER_DATA = {};
 
       <div class="flex justify-end gap-3 pt-2 border-t border-zinc-50">
         <button type="button" onclick="closePayOSModal()" id="payosCancelBtn" class="h-10 px-5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all">Hủy</button>
-        <button type="submit" id="payosSaveBtn" class="h-10 px-6 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/10 flex items-center gap-2">
+        <button type="submit" id="payosSaveBtn" class="h-10 px-6 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 flex items-center gap-2">
           <i class="ti ti-device-floppy text-sm"></i>Lưu cấu hình
         </button>
       </div>
@@ -1528,19 +1551,19 @@ var DRAWER_DATA = {};
     </div>
 
     <div class="flex justify-center gap-2">
-      <input type="text" maxlength="1" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" data-index="0"/>
-      <input type="text" maxlength="1" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" data-index="1"/>
-      <input type="text" maxlength="1" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" data-index="2"/>
-      <input type="text" maxlength="1" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" data-index="3"/>
-      <input type="text" maxlength="1" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" data-index="4"/>
-      <input type="text" maxlength="1" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" data-index="5"/>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" data-index="0"/>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" data-index="1"/>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" data-index="2"/>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" data-index="3"/>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" data-index="4"/>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="payos-otp adm-otp w-11 h-12 text-center text-xl font-bold border-2 border-zinc-200 rounded-xl bg-white text-zinc-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" data-index="5"/>
     </div>
 
     <div id="payosOtpErr" class="hidden text-center text-sm text-red-500 font-medium -mt-2"></div>
     <p class="text-center text-xs text-zinc-400">Số lần nhập sai: <span id="payosOtpFails" class="font-bold text-red-500">0</span>/5</p>
 
     <button type="button" onclick="submitPayOSOtp()" id="btnPayOSOtpVerify"
-            class="w-full h-11 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
+            class="w-full h-11 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 flex items-center justify-center gap-2">
       <i class="ti ti-shield-check text-sm"></i> Xác thực OTP
     </button>
     <div class="flex items-center justify-between -mt-1">

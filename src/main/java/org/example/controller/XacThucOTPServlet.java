@@ -103,53 +103,44 @@ public class XacThucOTPServlet extends HttpServlet {
                 attempts++;
                 session.setAttribute("otpAttempts", attempts);
 
-                Integer resendCount = (Integer) session.getAttribute("resendCount");
-                if (resendCount == null) {
-                    resendCount = 0;
-                }
+                TaiKhoan tempAcc = (TaiKhoan) session.getAttribute("tempAccount");
+                String targetEmail = tempAcc != null ? tempAcc.getEmail() : (String) session.getAttribute("email");
 
-                if (resendCount == 0) {
-                    if (attempts >= 5) {
-                        session.setAttribute("needResend", true);
-                        session.removeAttribute("otp");
-                        req.setAttribute("loi", "Bạn đã nhập sai 5 lần. Vui lòng nhấn 'Gửi lại ngay' để nhận mã OTP mới.");
-                        req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
-                        return;
-                    } else {
-                        req.setAttribute("loi", "Mã xác thực không chính xác. Bạn còn " + (5 - attempts) + " lần thử.");
-                        req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
+                if (attempts >= 5) {
+                    if (targetEmail != null) {
+                        org.example.util.OtpRateLimitUtil.lockoutEmail(targetEmail);
+                    }
+                    session.removeAttribute("otp");
+                    session.removeAttribute("tempAccount");
+                    session.removeAttribute("authType");
+                    session.removeAttribute("otpAttempts");
+                    session.removeAttribute("resendCount");
+                    session.removeAttribute("needResend");
+
+                    String lockMsg = "Bạn đã nhập sai mã OTP 5 lần! Email (" + (targetEmail != null ? targetEmail : "") + ") đã bị tạm khóa trong 15 phút.";
+                    if (isAjax) {
+                        resp.setContentType("application/json;charset=UTF-8");
+                        resp.getWriter().write("{\"success\": false, \"lockedOut\": true, \"loi\": \"" + lockMsg + "\"}");
                         return;
                     }
+                    session.setAttribute("error", lockMsg);
+                    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
+                    if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
+                        resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
+                    } else {
+                        resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+                    }
+                    return;
                 } else {
-                    if (attempts >= 3) {
-                        // Kick back to admin page with error
-                        session.removeAttribute("otp");
-                        session.removeAttribute("tempAccount");
-                        session.removeAttribute("authType");
-                        session.removeAttribute("otpAttempts");
-                        session.removeAttribute("resendCount");
-                        session.removeAttribute("needResend");
-                        String errorMsg = ("ADMIN_EDIT".equals(authType) || "MANAGER_EDIT".equals(authType))
-                            ? "Cập nhật tài khoản thất bại vì không nhập đúng OTP!"
-                            : "Tạo tài khoản thất bại vì không nhập đúng OTP!";
-                        session.setAttribute("error", errorMsg);
-                        TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("user");
-                        if (isAjax) {
-                            resp.setContentType("application/json;charset=UTF-8");
-                            resp.getWriter().write("{\"success\": false, \"loi\": \"" + errorMsg + "\", \"redirect\": \"" + (loggedInUser != null && loggedInUser.getRoleId() == 2 ? "/manager/nhan-su" : "/admin/nhan-su") + "\"}");
-                            return;
-                        }
-                        if (loggedInUser != null && loggedInUser.getRoleId() == 2) {
-                            resp.sendRedirect(req.getContextPath() + "/manager/nhan-su");
-                        } else {
-                            resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
-                        }
-                        return;
-                    } else {
-                        req.setAttribute("loi", "Mã xác thực mới không chính xác. Bạn còn " + (3 - attempts) + " lần thử.");
-                        req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
+                    String attemptMsg = "Mã xác thực không chính xác. Bạn còn " + (5 - attempts) + " lần thử.";
+                    if (isAjax) {
+                        resp.setContentType("application/json;charset=UTF-8");
+                        resp.getWriter().write("{\"success\": false, \"loi\": \"" + attemptMsg + "\"}");
                         return;
                     }
+                    req.setAttribute("loi", attemptMsg);
+                    req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
+                    return;
                 }
             } else {
                 if (isAjax) {
@@ -558,6 +549,23 @@ public class XacThucOTPServlet extends HttpServlet {
             req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
             return;
         }
+
+        Integer resendCount = (Integer) session.getAttribute("resendCount");
+        if (resendCount == null) resendCount = 0;
+        if (resendCount >= 5) {
+            String limitMsg = "Bạn đã vượt quá số lần gửi lại mã OTP tối đa (5/5 lần).";
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\": false, \"loi\": \"" + limitMsg + "\", \"resendCount\": " + resendCount + "}");
+                return;
+            }
+            req.setAttribute("loi", limitMsg);
+            req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
+            return;
+        }
+
+        resendCount++;
+        session.setAttribute("resendCount", resendCount);
         
         // Gửi OTP mới
         String otpString = "";
@@ -570,14 +578,15 @@ public class XacThucOTPServlet extends HttpServlet {
         session.setAttribute("otp", otpString);
         session.setAttribute("otpAttempts", 0); // Reset số lần thử khi gửi lại mã mới
         
+        String resendSuccessMsg = "Mã OTP mới đã được gửi thành công đến email. (Đã gửi lại " + resendCount + "/5 lần)";
         if (isAjax) {
             resp.setContentType("application/json;charset=UTF-8");
-            resp.getWriter().write("{\"success\": true, \"thongbao\": \"Mã OTP mới đã được gửi thành công đến email của bạn.\"}");
+            resp.getWriter().write("{\"success\": true, \"thongbao\": \"" + resendSuccessMsg + "\", \"resendCount\": " + resendCount + "}");
             return;
         }
 
         req.setAttribute("email", email);
-        req.setAttribute("thongbao", "Mã OTP mới đã được gửi thành công đến email của bạn.");
+        req.setAttribute("thongbao", resendSuccessMsg);
         req.getRequestDispatcher("/auth/NhapMa.jsp").forward(req, resp);
     }
 }

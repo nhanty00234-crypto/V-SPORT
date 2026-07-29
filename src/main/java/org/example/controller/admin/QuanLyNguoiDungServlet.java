@@ -220,6 +220,15 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                 return;
             }
 
+            if (org.example.util.OtpRateLimitUtil.isEmailLockedOut(email)) {
+                long mins = org.example.util.OtpRateLimitUtil.getLockoutRemainingMinutes(email);
+                String msg = "Email (" + email + ") đã bị tạm khóa do nhập sai OTP quá 5 lần. Vui lòng thử lại sau " + mins + " phút.";
+                if (isAjax) { sendJsonError(resp, msg); return; }
+                req.getSession().setAttribute("error", msg);
+                resp.sendRedirect(req.getContextPath() + "/admin/nhan-su");
+                return;
+            }
+
             if (!org.example.util.ValidationUtil.isValidEmail(email)) {
                 String msg = "Định dạng Email không hợp lệ và không được chứa khoảng trắng!";
                 if (isAjax) { sendJsonError(resp, msg); return; }

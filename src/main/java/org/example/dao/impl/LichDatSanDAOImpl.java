@@ -372,6 +372,25 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             // New columns might not be present in some select statements
         }
 
+        // Map DepositAmount & PaymentMethodConfirmed — cần thiết để calculatePreview()
+        // có thể lấy số tiền đặt cọc khi HoaDon chưa tồn tại.
+        try {
+            BigDecimal depositAmt = rs.getBigDecimal("DepositAmount");
+            if (depositAmt != null) {
+                lich.setDepositAmount(depositAmt);
+            }
+        } catch (SQLException e) {
+            // Column might not be present in all queries
+        }
+        try {
+            String pmConfirmed = rs.getNString("PaymentMethodConfirmed");
+            if (pmConfirmed != null) {
+                lich.setPaymentMethodConfirmed(pmConfirmed);
+            }
+        } catch (SQLException e) {
+            // Column might not be present in all queries
+        }
+
         try {
             String tenSan = rs.getNString("TenSan");
             if (tenSan != null) {

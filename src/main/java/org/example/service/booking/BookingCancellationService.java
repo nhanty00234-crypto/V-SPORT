@@ -126,15 +126,20 @@ public class BookingCancellationService {
 
         Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
         if (lich == null) {
+            logger.warn("[cancellation-preview] BOOKING_ID_NOT_FOUND datSanId={}, accountId={}", datSanId, accountId);
             preview.message = "Không tìm thấy đơn đặt sân.";
             return preview;
         }
         if (lich.getAccountId() == null || lich.getAccountId() != accountId) {
+            logger.warn("[cancellation-preview] BOOKING_NOT_OWNED_BY_ACCOUNT datSanId={}, bookingAccountId={}, requestAccountId={}",
+                    datSanId, lich.getAccountId(), accountId);
             preview.message = "Bạn không có quyền xem đơn này.";
             return preview;
         }
 
         if (!isCancellableStatus(lich.getTrangThai())) {
+            logger.info("[cancellation-preview] BOOKING_FILTERED_BY_STATUS datSanId={}, accountId={}, trangThai={}",
+                    datSanId, accountId, lich.getTrangThai());
             preview.message = "Chỉ có thể hủy đơn đang ở trạng thái 'Chờ xác nhận', 'Đã xác nhận' hoặc 'Chờ thanh toán'. Đơn hiện tại ở trạng thái '" + lich.getTrangThai() + "'.";
             return preview;
         }
@@ -151,6 +156,14 @@ public class BookingCancellationService {
         BigDecimal paidAmt = null;
         if (hoaDonId > 0) {
             paidAmt = RefundService.loadPaidAmount(hoaDonId);
+            if (paidAmt == null) {
+                logger.warn("[cancellation-preview] PAYMENT_RECORD_MISSING hoaDonId={} datSanId={} accountId={}",
+                        hoaDonId, datSanId, accountId);
+            }
+        } else {
+            logger.info("[cancellation-preview] BOOKING_FOUND_BUT_INVOICE_MISSING datSanId={} accountId={} " +
+                    "trangThai={} depositAmount={}", datSanId, accountId,
+                    lich.getTrangThai(), lich.getDepositAmount());
         }
         if (paidAmt == null || paidAmt.compareTo(BigDecimal.ZERO) == 0) {
             paidAmt = lich.getDepositAmount();

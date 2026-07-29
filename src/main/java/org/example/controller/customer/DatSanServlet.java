@@ -117,13 +117,39 @@ public class DatSanServlet extends HttpServlet {
     // PHẦN 1: XỬ LÝ GET - Hiển thị trang
     // =========================================================================
 
+    /**
+     * Parse chuỗi thành số nguyên dương. Trả null nếu null/rỗng/âm/không parse được.
+     * Dùng chung cho mọi handler cần đọc integer từ request parameter.
+     */
+    private static Integer parsePositiveInt(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        try {
+            int value = Integer.parseInt(raw.trim());
+            return value > 0 ? value : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getServletPath();
+        String action = req.getParameter("action");
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
-        if (path.contains("booking-cancellation-preview") || ("preview".equals(req.getParameter("action")) && path.equals("/customer/huy-dat-san"))) {
+        LOGGER.info(String.format(
+            "[DatSanServlet] doGet uri=%s, path=%s, action=%s, datSanId=%s, query=%s",
+            req.getRequestURI(), path, action,
+            req.getParameter("datSanId"),
+            req.getQueryString()));
+
+        // ── Cancellation preview – xử lý trước tất cả, return ngay ──
+        if (path.contains("booking-cancellation-preview")
+                || ("preview".equals(action) && "/customer/huy-dat-san".equals(path))) {
+            LOGGER.info("[DatSanServlet] → handleCancellationPreview");
             handleCancellationPreview(req, resp, user);
             return;
         }
@@ -1649,10 +1675,31 @@ public class DatSanServlet extends HttpServlet {
 
     private void handleGetDichVu(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
             throws ServletException, IOException {
+        // ── Validation: datSanId bắt buộc, phải là số nguyên dương ──
+        Integer datSanId = parsePositiveInt(req.getParameter("datSanId"));
+        if (datSanId == null) {
+            LOGGER.warning(String.format(
+                "[handleGetDichVu] Missing or invalid datSanId param: '%s', accountId=%s, uri=%s",
+                req.getParameter("datSanId"),
+                user != null ? user.getAccountId() : "null",
+                req.getRequestURI()));
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("{\"error\":\"Thiếu hoặc sai tham số datSanId.\"}");
+            return;
+        }
+        if (user == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().write("{\"error\":\"Chưa đăng nhập.\"}" );
+            return;
+        }
         try {
-            int datSanId = Integer.parseInt(req.getParameter("datSanId"));
             Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
-            if (lich == null || lich.getAccountId() != user.getAccountId()) {
+            if (lich == null || !Integer.valueOf(user.getAccountId()).equals(lich.getAccountId())) {
+                LOGGER.warning(String.format(
+                    "[handleGetDichVu] Forbidden: datSanId=%d, requestAccountId=%d, lichAccountId=%s",
+                    datSanId, user.getAccountId(), lich != null ? lich.getAccountId() : "null"));
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập đơn đặt này.");
                 return;
             }
