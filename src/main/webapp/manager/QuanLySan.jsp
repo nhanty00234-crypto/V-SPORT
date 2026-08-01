@@ -20,33 +20,35 @@
 
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
 
-  <!-- Header section -->
-  <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-      <h2 class="text-2xl font-black tracking-tight text-purple-950">Sân thi đấu chi nhánh</h2>
-      <p class="text-sm text-zinc-500 mt-0.5">Quản lý toàn bộ sân cho thuê tại cơ sở của bạn</p>
+  <!-- Header + Tabs Card -->
+  <section class="rounded-3xl border border-purple-150 bg-white shadow-sm shadow-purple-100/40 px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-5">
+      <div>
+        <h2 class="text-2xl font-black tracking-tight text-purple-950">Sân thi đấu chi nhánh</h2>
+        <p class="text-sm text-zinc-500 mt-0.5">Quản lý toàn bộ sân cho thuê tại cơ sở của bạn</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="mainActionBtn" onclick="openCreateModal()"
+                class="group relative flex items-center gap-2 h-12 px-6 rounded-2xl text-white text-sm font-bold active:scale-95 transition-all overflow-hidden"
+                style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 60%,#6d28d9 100%);box-shadow:0 4px 18px 0 rgba(124,58,237,.45),0 1.5px 0 rgba(255,255,255,.18) inset;">
+          <!-- shimmer sweep -->
+          <span class="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
+          <span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span>
+          <span>Thêm sân mới</span>
+          <span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>
+        </button>
+      </div>
     </div>
-    <div class="flex items-center gap-2">
-      <button id="mainActionBtn" onclick="openCreateModal()"
-              class="group relative flex items-center gap-2 h-12 px-6 rounded-2xl text-white text-sm font-bold active:scale-95 transition-all overflow-hidden"
-              style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 60%,#6d28d9 100%);box-shadow:0 4px 18px 0 rgba(124,58,237,.45),0 1.5px 0 rgba(255,255,255,.18) inset;">
-        <!-- shimmer sweep -->
-        <span class="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
-        <span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span>
-        <span>Thêm sân mới</span>
-        <span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>
+
+    <!-- Navigation Tabs -->
+    <div class="flex border-t border-purple-100 gap-6">
+      <button id="btnTabCourts" onclick="switchTab('courts')" class="pt-3 pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all">
+        <span class="material-symbols-outlined text-[18px]">stadium</span>Danh sách sân thi đấu
+      </button>
+      <button id="btnTabTypes" onclick="switchTab('types')" class="pt-3 pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all">
+        <span class="material-symbols-outlined text-[18px]">payments</span>Cấu hình loại sân & Bảng giá
       </button>
     </div>
-  </section>
-
-  <!-- Navigation Tabs -->
-  <section class="flex border-b border-purple-100 gap-6">
-    <button id="btnTabCourts" onclick="switchTab('courts')" class="pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all">
-      <span class="material-symbols-outlined text-[18px]">stadium</span>Danh sách sân thi đấu
-    </button>
-    <button id="btnTabTypes" onclick="switchTab('types')" class="pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all">
-      <span class="material-symbols-outlined text-[18px]">payments</span>Cấu hình loại sân & Bảng giá
-    </button>
   </section>
 
   <!-- Alert Messages -->
@@ -330,20 +332,18 @@
         <span>Sân này đang có trận đấu diễn ra (Đang sử dụng/Đang dùng). Bạn không thể thay đổi tên, loại sân hoặc trạng thái lúc này.</span>
       </div>
 
-      <!-- Tên sân -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Tên sân *</label>
-        <input type="text" name="tenSan" id="courtName"
-               placeholder="Tên hiển thị (VD: Sân Bóng Đá 1)"
-               oninput="courtNameEdited = true; clearFieldError('courtName'); updateBulkNamePreview(); updateCardPreview()"
-               class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors">
-        <span id="err-courtName" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
-          <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtName-msg"></span>
-        </span>
-      </div>
-
-      <!-- Loại sân + Trạng thái cùng hàng -->
+      <!-- Tên sân + Loại sân cùng hàng -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-purple-900">Tên sân *</label>
+          <input type="text" name="tenSan" id="courtName"
+                 placeholder="VD: Sân Bóng Đá 1"
+                 oninput="courtNameEdited = true; clearFieldError('courtName'); updateBulkNamePreview(); updateCardPreview()"
+                 class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors">
+          <span id="err-courtName" class="hidden text-[11px] text-red-500 font-medium flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtName-msg"></span>
+          </span>
+        </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-purple-900">Loại sân &amp; Bảng giá *</label>
           <select name="loaiSanID" id="courtTypeSelect"
@@ -354,6 +354,10 @@
             <span class="material-symbols-outlined text-[13px]">error</span><span id="err-courtTypeSelect-msg"></span>
           </span>
         </div>
+      </div>
+
+      <!-- Trạng thái + Ảnh sân cùng hàng -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-purple-900">Trạng thái sân *</label>
           <select name="trangThai" id="courtStatus" onchange="updateCardPreview()"
@@ -361,70 +365,74 @@
             <!-- Populated by JS depending on create/edit mode -->
           </select>
         </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-purple-900">
+            Ảnh sân <span class="font-normal text-zinc-400">(Tùy chọn)</span>
+          </label>
+          <input type="file" name="courtImageFile" id="courtImageFile"
+                 accept="image/png,image/jpeg,image/webp,image/gif"
+                 onchange="updateImagePreview(); updateCardPreview()"
+                 class="hidden">
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="document.getElementById('courtImageFile').click()"
+                    class="h-10 px-3 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-purple-700 hover:bg-purple-50 truncate">
+              Chọn ảnh
+            </button>
+            <button type="button" id="clearCourtImageBtn" onclick="clearCourtImageSelection()"
+                    class="hidden h-10 px-3 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 shrink-0">
+              Bỏ
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p id="courtImageFileName" class="text-[11px] text-zinc-500 -mt-2">Chưa chọn ảnh nào.</p>
+      <div id="courtImagePreviewWrap" class="hidden relative rounded-xl overflow-hidden border border-purple-100 bg-zinc-50 -mt-2" style="height:90px">
+        <img id="courtImagePreview" src="" alt="preview" class="w-full h-full object-cover"
+             onload="document.getElementById('courtImageError').classList.add('hidden')"
+             onerror="document.getElementById('courtImageError').classList.remove('hidden')">
+        <div id="courtImageError" class="hidden absolute inset-0 flex items-center justify-center bg-red-50">
+          <div class="flex flex-col items-center gap-1 text-red-400">
+            <span class="material-symbols-outlined text-[22px]">broken_image</span>
+            <span class="text-[11px] font-semibold">URL ảnh không hợp lệ</span>
+          </div>
+        </div>
       </div>
 
       <!-- Mô tả -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">Mô tả chi tiết</label>
-        <textarea name="moTa" id="courtDesc" rows="3"
+        <label class="text-xs font-semibold text-purple-900">Mô tả chi tiết <span class="font-normal text-zinc-400">(Tùy chọn)</span></label>
+        <textarea name="moTa" id="courtDesc" rows="2"
                   placeholder="Sân cỏ nhân tạo chất lượng cao, lưới bao đầy đủ..."
                   class="px-3 py-2 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 resize-none"></textarea>
       </div>
 
-      <!-- Ảnh sân -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900">
-          Link ảnh sân <span class="font-normal text-zinc-400">(Tùy chọn)</span>
-        </label>
-        <input type="file" name="courtImageFile" id="courtImageFile"
-               accept="image/png,image/jpeg,image/webp,image/gif"
-               onchange="updateImagePreview(); updateCardPreview()"
-               class="hidden">
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="document.getElementById('courtImageFile').click()"
-                  class="h-10 px-4 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-purple-700 hover:bg-purple-50">
-            Chọn ảnh từ máy
-          </button>
-          <button type="button" id="clearCourtImageBtn" onclick="clearCourtImageSelection()"
-                  class="hidden h-10 px-3 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50">
-            Bỏ ảnh
-          </button>
-        </div>
-        <p id="courtImageFileName" class="text-[11px] text-zinc-500">Chưa chọn ảnh nào.</p>
-        <div id="courtImagePreviewWrap" class="hidden relative rounded-xl overflow-hidden border border-purple-100 bg-zinc-50" style="height:130px">
-          <img id="courtImagePreview" src="" alt="preview" class="w-full h-full object-cover"
-               onload="document.getElementById('courtImageError').classList.add('hidden')"
-               onerror="document.getElementById('courtImageError').classList.remove('hidden')">
-          <div id="courtImageError" class="hidden absolute inset-0 flex items-center justify-center bg-red-50">
-            <div class="flex flex-col items-center gap-1 text-red-400">
-              <span class="material-symbols-outlined text-[28px]">broken_image</span>
-              <span class="text-[11px] font-semibold">URL ảnh không hợp lệ</span>
+      <!-- Xem trước hiển thị: thu gọn, có thể mở rộng -->
+      <details class="group rounded-xl border border-purple-100">
+        <summary class="cursor-pointer list-none flex items-center justify-between px-3 py-2 text-xs font-semibold text-purple-900 select-none">
+          <span class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">visibility</span>Xem trước hiển thị
+          </span>
+          <span class="material-symbols-outlined text-[16px] text-purple-400 transition-transform group-open:rotate-180">expand_more</span>
+        </summary>
+        <div class="px-3 pb-3">
+          <div class="rounded-2xl border border-purple-100 overflow-hidden bg-white shadow-sm">
+            <div class="relative h-20 bg-zinc-100">
+              <img id="cardPrevImg" src="" alt="" class="w-full h-full object-cover">
+              <span id="cardPrevStatus" class="absolute top-2 right-2 badge badge-green text-[10px]">Sẵn sàng</span>
+              <span id="cardPrevSport" class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-bold text-white uppercase">—</span>
+            </div>
+            <div class="p-3">
+              <h4 id="cardPrevName" class="font-bold text-purple-950 text-sm">Tên sân...</h4>
+              <p id="cardPrevType" class="text-[10px] text-purple-500 font-semibold mt-0.5">Loại sân</p>
+              <div class="flex items-center justify-between text-[11px] mt-1.5">
+                <span id="cardPrevPrice" class="font-bold text-zinc-800">—</span>
+                <span id="cardPrevLightHours" class="text-zinc-400 text-[10px]">—</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Mini-card preview: sân sẽ hiển thị như thế nào -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-purple-900 flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">visibility</span>Xem trước hiển thị
-        </label>
-        <div class="rounded-2xl border border-purple-100 overflow-hidden bg-white shadow-sm">
-          <div class="relative h-24 bg-zinc-100">
-            <img id="cardPrevImg" src="" alt="" class="w-full h-full object-cover">
-            <span id="cardPrevStatus" class="absolute top-2 right-2 badge badge-green text-[10px]">Sẵn sàng</span>
-            <span id="cardPrevSport" class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-bold text-white uppercase">—</span>
-          </div>
-          <div class="p-3">
-            <h4 id="cardPrevName" class="font-bold text-purple-950 text-sm">Tên sân...</h4>
-            <p id="cardPrevType" class="text-[10px] text-purple-500 font-semibold mt-0.5">Loại sân</p>
-            <div class="flex items-center justify-between text-[11px] mt-1.5">
-              <span id="cardPrevPrice" class="font-bold text-zinc-800">—</span>
-              <span id="cardPrevLightHours" class="text-zinc-400 text-[10px]">—</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      </details>
 
       <div class="flex justify-end gap-2 pt-3 border-t border-purple-50">
         <button type="button" onclick="closeCourtModal()" class="h-10 px-4 rounded-xl border border-purple-200 text-sm font-semibold text-purple-700 hover:bg-purple-50">Hủy</button>
@@ -890,8 +898,8 @@
     const pricingView = document.getElementById('pricingTypesView');
 
     if (tab === 'courts') {
-      btnTabCourts.className = 'pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
-      btnTabTypes.className = 'pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
+      btnTabCourts.className = 'pt-3 pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
+      btnTabTypes.className = 'pt-3 pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
       mainActionBtn.innerHTML = `<span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span><span>Thêm sân mới</span><span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>`;
       mainActionBtn.setAttribute('onclick', 'openCreateModal()');
       
@@ -900,8 +908,8 @@
       pricingView.classList.add('hidden');
       setViewMode(viewMode);
     } else {
-      btnTabTypes.className = 'pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
-      btnTabCourts.className = 'pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
+      btnTabTypes.className = 'pt-3 pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
+      btnTabCourts.className = 'pt-3 pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
       mainActionBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">playlist_add</span>Thêm loại sân`;
       mainActionBtn.setAttribute('onclick', 'openCreateTypeModal()');
 

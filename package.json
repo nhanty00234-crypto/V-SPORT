@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "playwright": "^1.61.1",
-    "puppeteer": "^24.43.1"
-  }
-}
