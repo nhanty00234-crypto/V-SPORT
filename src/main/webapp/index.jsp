@@ -606,7 +606,7 @@
                                 <input type="text" id="loginEmail" class="form-control" placeholder="Nhập email hoặc số điện thoại..." required aria-describedby="loginEmailError">
                                 <div id="loginEmailError" class="error-message"><i class="fas fa-exclamation-circle"></i> Vui lòng nhập email hoặc số điện thoại</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="loginPassword">Mật khẩu <span>*</span></label>
                                 <div class="password-input-wrap">
@@ -617,12 +617,12 @@
                                 </div>
                                 <div id="loginPasswordError" class="error-message"><i class="fas fa-exclamation-circle"></i> Vui lòng nhập mật khẩu</div>
                             </div>
-                            
+
                             <div class="form-check">
                                 <input type="checkbox" id="rememberMe">
                                 <label for="rememberMe">Ghi nhớ đăng nhập</label>
                             </div>
-                            
+
                             <div class="auth-actions">
                                 <button type="submit" class="btn btn-primary btn-auth" id="loginSubmitBtn">
                                     <i class="fas fa-spinner"></i>
@@ -655,36 +655,39 @@
                                 <input type="email" id="regEmail" class="form-control" placeholder="Nhập email..." required aria-describedby="regEmailError">
                                 <div id="regEmailError" class="error-message"><i class="fas fa-exclamation-circle"></i> Email không hợp lệ</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="regPassword">Mật khẩu <span>*</span></label>
                                 <div class="password-input-wrap">
-                                    <input type="password" id="regPassword" class="form-control" placeholder="Nhập mật khẩu..." required aria-describedby="regPasswordError">
+                                    <input type="password" id="regPassword" class="form-control" placeholder="Nhập mật khẩu..." required autocomplete="new-password" aria-describedby="regPasswordError" oninput="onRegPasswordInput()">
                                     <button type="button" class="password-toggle" aria-label="Hiện/ẩn mật khẩu">
                                         <i class="far fa-eye-slash"></i>
                                     </button>
                                 </div>
-                                <div class="password-helper">Mật khẩu tối thiểu 8 ký tự, gồm chữ và số.</div>
-                                <div id="regPasswordError" class="error-message"><i class="fas fa-exclamation-circle"></i> Mật khẩu chưa đạt yêu cầu</div>
+                                <div class="password-helper">Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (vd: <strong>Password1!</strong>).</div>
+                                <div id="regPasswordError" class="error-message"><i class="fas fa-exclamation-circle"></i> Mật khẩu cần có chữ hoa, chữ thường, số và ký tự đặc biệt</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="regConfirmPassword">Xác nhận mật khẩu <span>*</span></label>
                                 <div class="password-input-wrap">
-                                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu..." required aria-describedby="regConfirmPasswordError">
+                                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu..." required autocomplete="new-password" aria-describedby="regConfirmPasswordError" oninput="onRegConfirmInput()">
                                     <button type="button" class="password-toggle" aria-label="Hiện/ẩn mật khẩu">
                                         <i class="far fa-eye-slash"></i>
                                     </button>
                                 </div>
                                 <div id="regConfirmPasswordError" class="error-message"><i class="fas fa-exclamation-circle"></i> Mật khẩu xác nhận không khớp</div>
+                                <div id="regConfirmOk" style="display:none;align-items:center;gap:5px;color:#16a34a;font-size:11.5px;font-weight:600;margin-top:5px;">
+                                    <i class="fas fa-check-circle"></i> Mật khẩu khớp
+                                </div>
                             </div>
-                            
+
                             <div class="form-check">
                                 <input type="checkbox" id="agreeTerms" required>
                                 <label for="agreeTerms">Tôi đồng ý với Điều khoản sử dụng và Chính sách bảo mật</label>
-                                <div id="agreeTermsError" class="error-message" style="position: absolute; bottom: -20px;"><i class="fas fa-exclamation-circle"></i> Vui lòng đồng ý với điều khoản</div>
+                                <div id="agreeTermsError" class="error-message"><i class="fas fa-exclamation-circle"></i> Vui lòng đồng ý với điều khoản</div>
                             </div>
-                            
+
                             <div class="auth-actions">
                                 <button type="submit" class="btn btn-primary btn-auth" id="registerSubmitBtn" style="width: 100%;">
                                     <i class="fas fa-spinner"></i>
@@ -695,21 +698,21 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Forgot Password Modal -->
             <div class="modal-overlay" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
                 <div class="modal-content">
                     <button class="modal-close" aria-label="Đóng" id="closeModalBtn"><i class="fas fa-times"></i></button>
                     <h3 id="modalTitle">Khôi phục mật khẩu</h3>
                     <p>Nhập email của bạn và chúng tôi sẽ gửi cho bạn một liên kết để đặt lại mật khẩu.</p>
-                    
+
                     <form id="forgotForm" novalidate>
                         <div class="form-group">
                             <label for="forgotEmail">Email <span>*</span></label>
                             <input type="email" id="forgotEmail" class="form-control" placeholder="Nhập email..." required aria-describedby="forgotEmailError">
                             <div id="forgotEmailError" class="error-message"><i class="fas fa-exclamation-circle"></i> Email không hợp lệ</div>
                         </div>
-                        
+
                         <div class="auth-actions">
                             <button type="submit" class="btn btn-primary btn-auth" id="forgotSubmitBtn" style="width: 100%;">
                                 <i class="fas fa-spinner"></i>
@@ -719,13 +722,81 @@
                     </form>
                 </div>
             </div>
-            
-            <!-- Success Toast -->
+
+            <!-- Toast -->
             <div class="success-toast" id="successToast">
-                <i class="fas fa-check-circle" style="margin-right: 8px;"></i> <span id="toastMessage">Thành công!</span>
+                <i class="fas fa-check-circle" id="toastIcon" style="margin-right: 8px;"></i> <span id="toastMessage">Thành công!</span>
             </div>
         </div>
     </main>
+
+    <!-- OTP Verification Modal -->
+    <div id="otpModal" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" role="dialog" aria-modal="true">
+        <div style="background:#fff;border-radius:20px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.2);overflow:hidden;animation:otpCardIn .28s cubic-bezier(.34,1.3,.64,1);">
+
+            <!-- Compact header -->
+            <div style="background:#0f172a;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:9px;">
+                    <div style="width:28px;height:28px;background:#01e281;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#042d1a;">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <span style="color:#fff;font-size:13px;font-weight:700;letter-spacing:.5px;font-family:'Outfit',sans-serif;">Xác minh tài khoản</span>
+                </div>
+                <span id="otpTimerDisplay" style="font-size:13px;font-weight:700;color:#01e281;font-family:'JetBrains Mono','Courier New',monospace;">5:00</span>
+            </div>
+
+            <!-- Body -->
+            <div style="padding:24px 28px 26px;">
+                <p style="font-size:13px;color:#64748b;margin:0 0 20px;line-height:1.5;">
+                    Mã 6 số đã gửi tới <strong id="otpEmailDisplay" style="color:#0f172a;"></strong>
+                </p>
+
+                <!-- 6 OTP boxes -->
+                <div id="otpBoxRow" style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                </div>
+
+                <!-- Submit -->
+                <button id="otpSubmitBtn" disabled style="width:100%;padding:13px;border:none;border-radius:12px;background:#0f172a;color:#fff;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;opacity:.35;transition:all .2s;">
+                    <i class="fas fa-spinner" id="otpSpinner" style="display:none;animation:spin 1s linear infinite;"></i>
+                    <span>Xác minh</span>
+                </button>
+
+                <!-- Resend -->
+                <div style="text-align:center;margin-top:14px;font-size:12.5px;color:#94a3b8;">
+                    <a href="#" id="otpResendLink" style="color:#94a3b8;font-weight:600;pointer-events:none;text-decoration:none;">Gửi lại mã</a>
+                    <span id="otpResendCooldown" style="color:#94a3b8;margin-left:4px;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .otp-digit {
+            width:46px; height:54px; border-radius:12px;
+            border:2px solid #e2e8f0;
+            text-align:center; font-size:22px; font-weight:700;
+            font-family:'JetBrains Mono','Courier New',monospace;
+            color:#0f172a; outline:none; transition:all .18s; background:#fff;
+        }
+        .otp-digit:focus { border-color:#01e281; box-shadow:0 0 0 3px rgba(1,226,129,.15); transform:scale(1.06); }
+        .otp-digit.filled { border-color:#01e281; background:#f0fff8; color:#065f46; }
+        @keyframes otpCardIn {
+            from { opacity:0; transform:scale(.92) translateY(18px); }
+            to   { opacity:1; transform:scale(1)   translateY(0); }
+        }
+        @keyframes otpShake {
+            0%,100% { transform:translateX(0); }
+            20%     { transform:translateX(-5px); }
+            40%     { transform:translateX(5px); }
+            60%     { transform:translateX(-3px); }
+            80%     { transform:translateX(3px); }
+        }
+    </style>
 
     <!-- Footer -->
     <jsp:include page="/common/footer.jsp" />
@@ -781,14 +852,11 @@
             }
         });
             // --- AUTH LOGIC ---
-            
+
             const homeView = document.getElementById('homeView');
             const authView = document.getElementById('authView');
-            const accountBtns = document.querySelectorAll('.icon-btn');
-            
-            // Find auth button
             const accountBtn = document.getElementById('authBtn');
-            
+
             // Routing
             const urlParams = new URLSearchParams(window.location.search);
             const wantsAuthView = window.location.hash === '#auth' || urlParams.has('auth');
@@ -809,8 +877,6 @@
 
             window.addEventListener('hashchange', handleRoute);
 
-            // Initial route check — mở luôn cho cả điều hướng qua hash (#auth) lẫn qua
-            // query string (?auth=login, dùng bởi các servlet redirect khi cần đăng nhập).
             if (wantsAuthView) {
                 handleRoute();
 
@@ -826,14 +892,14 @@
 
             // Giữ redirect param (nếu có) để gắn vào form đăng nhập, dùng sau khi login thành công.
             const pendingRedirect = urlParams.get('redirect');
-            
+
             if (accountBtn) {
                 accountBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     window.location.hash = '#auth';
                 });
             }
-            
+
             // Breadcrumb and Logo click to home
             const breadcrumbHome = document.getElementById('breadcrumbHome');
             if (breadcrumbHome) {
@@ -842,27 +908,26 @@
                     window.location.hash = '#home';
                 });
             }
-            
+
             const mainLogo = document.querySelector('.logo');
             if (mainLogo) {
                 mainLogo.addEventListener('click', (e) => {
-                    // Only prevent default if we're in auth view to go back, otherwise let it be
                     if (window.location.hash === '#auth') {
                         e.preventDefault();
                         window.location.hash = '#home';
                     }
                 });
             }
-            
+
             // Auth Tabs (Mobile)
             const tabBtns = document.querySelectorAll('.auth-tab-btn');
             const authCols = document.querySelectorAll('.auth-col');
-            
+
             tabBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     tabBtns.forEach(b => b.classList.remove('active'));
                     authCols.forEach(c => c.classList.remove('active'));
-                    
+
                     btn.classList.add('active');
                     const targetId = btn.getAttribute('data-target');
                     document.getElementById(targetId).classList.add('active');
@@ -933,12 +998,20 @@
             const successToast = document.getElementById('successToast');
             const toastMessage = document.getElementById('toastMessage');
             
-            function showToast(msg) {
+            function showToast(msg, isError) {
+                const icon = document.getElementById('toastIcon');
                 toastMessage.textContent = msg;
+                if (isError) {
+                    successToast.classList.add('error');
+                    if (icon) { icon.className = 'fas fa-times-circle'; icon.style.marginRight = '8px'; }
+                } else {
+                    successToast.classList.remove('error');
+                    if (icon) { icon.className = 'fas fa-check-circle'; icon.style.marginRight = '8px'; }
+                }
                 successToast.classList.add('active');
                 setTimeout(() => {
                     successToast.classList.remove('active');
-                }, 3000);
+                }, 3500);
             }
 
             // Newsletter signup - backend chưa sẵn sàng, chỉ validate và báo đang phát triển
@@ -949,10 +1022,10 @@
                     const emailInput = newsletterForm.querySelector('input[type="email"]');
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailInput || !emailRegex.test(emailInput.value.trim())) {
-                        showToast('Vui lòng nhập một địa chỉ email hợp lệ.');
+                        showToast('Vui lòng nhập một địa chỉ email hợp lệ.', true);
                         return;
                     }
-                    showToast('Chức năng đăng ký nhận ưu đãi đang được phát triển.');
+                    showToast('Chức năng đăng ký nhận ưu đãi đang được phát triển.', false);
                     newsletterForm.reset();
                 });
             }
@@ -962,10 +1035,10 @@
                 const errorMsg = document.getElementById(input.id + 'Error');
                 if (show) {
                     input.setAttribute('aria-invalid', 'true');
-                    if (errorMsg) errorMsg.style.display = 'block';
+                    if (errorMsg) errorMsg.classList.add('visible');
                 } else {
                     input.removeAttribute('aria-invalid');
-                    if (errorMsg) errorMsg.style.display = 'none';
+                    if (errorMsg) errorMsg.classList.remove('visible');
                 }
             };
             
@@ -1038,19 +1111,19 @@
                         btnText.textContent = originalText;
                         
                         if (data.success) {
-                            showToast('Đăng nhập thành công!');
+                            showToast('Đăng nhập thành công!', false);
                             setTimeout(() => {
                                 window.location.href = data.redirectUrl;
                             }, 500);
                         } else {
-                            showToast('Lỗi: ' + (data.loi || 'Đăng nhập thất bại'));
+                            showToast('Lỗi: ' + (data.loi || 'Đăng nhập thất bại'), true);
                         }
                     })
                     .catch(error => {
                         loginSubmitBtn.disabled = false;
                         loginSubmitBtn.classList.remove('loading');
                         btnText.textContent = originalText;
-                        showToast('Lỗi kết nối máy chủ');
+                        showToast('Lỗi kết nối máy chủ', true);
                         console.error('Error:', error);
                     });
                 });
@@ -1081,10 +1154,10 @@
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailRegex.test(email.value.trim())) { showError(email, true); isValid = false; if (!firstError) firstError = email; }
                     
-                    const passRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
-                    if (!passRegex.test(password.value)) { showError(password, true); isValid = false; if (!firstError) firstError = password; }
-                    
-                    if (password.value !== confirm.value || !confirm.value) { showError(confirm, true); isValid = false; if (!firstError) firstError = confirm; }
+                    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+                    if (!passRegex.test(password.value.trim())) { showError(password, true); isValid = false; if (!firstError) firstError = password; }
+
+                    if (!confirm.value.trim() || password.value.trim() !== confirm.value.trim()) { showError(confirm, true); isValid = false; if (!firstError) firstError = confirm; }
                     
                     if (!terms.checked) { showError(terms, true); isValid = false; if (!firstError) firstError = terms; }
                     
@@ -1093,23 +1166,246 @@
                         return;
                     }
                     
-                    // Simulate API Call
                     registerSubmitBtn.disabled = true;
                     registerSubmitBtn.classList.add('loading');
                     const btnText = registerSubmitBtn.querySelector('.btn-text');
                     const originalText = btnText.textContent;
                     btnText.textContent = 'Đang tạo tài khoản...';
-                    
-                    setTimeout(() => {
+
+                    const params = new URLSearchParams();
+                    params.append('fullname', name.value.trim());
+                    params.append('phone', phone.value.trim());
+                    params.append('email', email.value.trim());
+                    params.append('password', password.value.trim());
+                    params.append('confirm_password', confirm.value.trim());
+                    params.append('agree', 'Đồng ý');
+
+                    fetch('${pageContext.request.contextPath}/dangky', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: params
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.step === 'otp') {
+                            openOtpModal(data.email);
+                        } else if (data.success && data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            registerSubmitBtn.disabled = false;
+                            registerSubmitBtn.classList.remove('loading');
+                            btnText.textContent = originalText;
+                            showToast(data.loi || 'Đã xảy ra lỗi, vui lòng thử lại.', true);
+                        }
+                    })
+                    .catch(() => {
                         registerSubmitBtn.disabled = false;
                         registerSubmitBtn.classList.remove('loading');
                         btnText.textContent = originalText;
-                        showToast('Tạo tài khoản thành công!');
-                        registerForm.reset();
-                    }, 800);
+                        showToast('Lỗi kết nối, vui lòng thử lại.', true);
+                    });
                 });
             }
             
+            // ── OTP MODAL LOGIC ──────────────────────────────────────────
+            (function() {
+                const modal = document.getElementById('otpModal');
+                const boxes = Array.from(document.querySelectorAll('.otp-digit'));
+                const submitBtn = document.getElementById('otpSubmitBtn');
+                const spinner = document.getElementById('otpSpinner');
+                const timerEl = document.getElementById('otpTimerDisplay');
+                const resendLink = document.getElementById('otpResendLink');
+                const resendCooldown = document.getElementById('otpResendCooldown');
+                const emailDisplay = document.getElementById('otpEmailDisplay');
+
+                let otpEmail = '';
+                let expireTimer, resendTimer;
+
+                // Style helpers (use CSS classes)
+                function setBoxBlur(box) {
+                    box.classList.toggle('filled', !!box.value);
+                }
+                function shakeBoxes() {
+                    boxes.forEach(b => {
+                        b.style.borderColor = '#dc2626';
+                        b.style.animation = 'otpShake .4s ease';
+                        setTimeout(() => { b.style.animation = ''; b.style.borderColor = ''; setBoxBlur(b); }, 500);
+                    });
+                }
+
+                function updateState() {
+                    const full = boxes.every(b => b.value);
+                    submitBtn.disabled = !full;
+                    submitBtn.style.opacity = full ? '1' : '.35';
+                    submitBtn.style.cursor = full ? 'pointer' : 'not-allowed';
+                }
+
+                // OTP box interactions
+                boxes.forEach((box, i) => {
+                    box.addEventListener('blur', () => setBoxBlur(box));
+                    box.addEventListener('keydown', e => {
+                        if (e.key === 'Backspace') {
+                            if (!box.value && i > 0) { boxes[i-1].focus(); boxes[i-1].value = ''; setBoxBlur(boxes[i-1]); }
+                            else box.value = '';
+                            updateState();
+                        } else if (e.key === 'ArrowLeft' && i > 0) boxes[i-1].focus();
+                        else if (e.key === 'ArrowRight' && i < 5) boxes[i+1].focus();
+                    });
+                    box.addEventListener('input', e => {
+                        const raw = box.value.replace(/\D/g,'').slice(-1);
+                        box.value = raw;
+                        updateState();
+                        if (raw && i < 5) boxes[i+1].focus();
+                    });
+                    box.addEventListener('paste', e => {
+                        e.preventDefault();
+                        const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+                        text.split('').slice(0,6).forEach((ch, idx) => { if (boxes[idx]) boxes[idx].value = ch; });
+                        updateState();
+                        const last = Math.min(text.length, 5);
+                        if (boxes[last]) boxes[last].focus();
+                    });
+                });
+
+                // Countdown timer (5 min)
+                function startExpireTimer() {
+                    clearInterval(expireTimer);
+                    let secs = 5 * 60;
+                    function tick() {
+                        const m = Math.floor(secs / 60), s = secs % 60;
+                        timerEl.textContent = m + ':' + String(s).padStart(2,'0');
+                        timerEl.style.color = secs < 30 ? '#f87171' : '#01e281';
+                        if (secs <= 0) { clearInterval(expireTimer); timerEl.textContent = 'Hết hạn'; }
+                        secs--;
+                    }
+                    tick(); expireTimer = setInterval(tick, 1000);
+                }
+
+                // Resend cooldown (60s)
+                function startResendCooldown() {
+                    clearInterval(resendTimer);
+                    resendLink.style.color = '#94a3b8';
+                    resendLink.style.pointerEvents = 'none';
+                    let secs = 60;
+                    function tick() {
+                        resendCooldown.textContent = 'Có thể gửi lại sau ' + secs + 's';
+                        if (secs <= 0) {
+                            clearInterval(resendTimer);
+                            resendCooldown.textContent = '';
+                            resendLink.style.color = '#01a85a';
+                            resendLink.style.pointerEvents = 'auto';
+                        }
+                        secs--;
+                    }
+                    tick(); resendTimer = setInterval(tick, 1000);
+                }
+
+                // Open modal
+                window.openOtpModal = function(email) {
+                    otpEmail = email;
+                    emailDisplay.textContent = email;
+                    boxes.forEach(b => { b.value = ''; setBoxBlur(b); });
+                    updateState();
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    startExpireTimer();
+                    startResendCooldown();
+                    setTimeout(() => boxes[0].focus(), 150);
+                };
+
+                // Resend OTP
+                resendLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (resendLink.style.pointerEvents === 'none') return;
+                    fetch('${pageContext.request.contextPath}/resend-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: 'email=' + encodeURIComponent(otpEmail)
+                    }).catch(() => {});
+                    startExpireTimer();
+                    startResendCooldown();
+                    boxes.forEach(b => { b.value = ''; setBoxBlur(b); });
+                    updateState();
+                    boxes[0].focus();
+                });
+
+                // Submit OTP
+                submitBtn.addEventListener('click', () => {
+                    const code = boxes.map(b => b.value).join('');
+                    if (code.length < 6) { shakeBoxes(); return; }
+
+                    submitBtn.disabled = true;
+                    spinner.style.display = 'inline-block';
+
+                    const p = new URLSearchParams();
+                    p.append('otp', code);
+                    p.append('email', otpEmail);
+
+                    fetch('${pageContext.request.contextPath}/nhapma', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: p
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        spinner.style.display = 'none';
+                        if (data.success) {
+                            clearInterval(expireTimer);
+                            clearInterval(resendTimer);
+                            modal.style.display = 'none';
+                            document.body.style.overflow = '';
+                            showToast('Tạo tài khoản thành công! Đang chuyển trang...', false);
+                            setTimeout(() => { window.location.href = data.redirectUrl || '${pageContext.request.contextPath}/index.jsp?auth=login'; }, 1500);
+                        } else {
+                            shakeBoxes();
+                            submitBtn.disabled = false;
+                            showToast(data.loi || 'Mã OTP không đúng, vui lòng thử lại.', true);
+                        }
+                    })
+                    .catch(() => {
+                        spinner.style.display = 'none';
+                        submitBtn.disabled = false;
+                        shakeBoxes();
+                        showToast('Lỗi kết nối, vui lòng thử lại.', true);
+                    });
+                });
+
+                // Close on backdrop click (optional — prevent accidental close)
+                modal.addEventListener('click', (e) => { if (e.target === modal) { /* intentionally no close */ } });
+            })();
+            // ── END OTP MODAL ──────────────────────────────────────────────
+
+            // Real-time password matching feedback
+            const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+            function onRegPasswordInput() {
+                const pw = document.getElementById('regPassword');
+                const cf = document.getElementById('regConfirmPassword');
+                if (!pw) return;
+                showError(pw, pw.value.trim() && !PASS_REGEX.test(pw.value.trim()));
+                if (cf && cf.value.trim()) updateConfirmFeedback(pw, cf);
+            }
+            function onRegConfirmInput() {
+                const pw = document.getElementById('regPassword');
+                const cf = document.getElementById('regConfirmPassword');
+                if (!pw || !cf) return;
+                updateConfirmFeedback(pw, cf);
+            }
+            function updateConfirmFeedback(pw, cf) {
+                const ok = document.getElementById('regConfirmOk');
+                const errEl = document.getElementById('regConfirmPasswordError');
+                const match = cf.value.trim() && pw.value.trim() === cf.value.trim();
+                if (match) {
+                    showError(cf, false);
+                    if (ok) ok.style.display = 'flex';
+                } else {
+                    if (ok) ok.style.display = 'none';
+                    if (cf.value.trim()) showError(cf, true);
+                }
+            }
+
             // ── Universal scroll-reveal helper ──────────────────────────
             function makeObserver(selector, staggerMs, threshold) {
                 const els = document.querySelectorAll(selector);

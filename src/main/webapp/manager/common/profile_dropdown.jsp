@@ -96,7 +96,7 @@
         <p id="avatarError" class="hidden mt-1 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-center w-full max-w-xs"></p>
       </div>
       <div class="px-6 py-5">
-        <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4">Thông tin chi tiết</p>
+        <p class="text-[10px] font-bold text-zinc-500 mb-4">Thông tin chi tiết</p>
         <div class="grid grid-cols-2 gap-4">
           <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Họ và tên</label><input type="text" id="editFullName" value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : ''}" class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 focus:border-purple-700 focus:outline-none transition-colors font-medium"></div>
           <div class="col-span-2 sm:col-span-1"><label class="block text-xs font-semibold text-zinc-500 mb-1.5">Mã tài khoản</label><input type="text" value="ACC-${sessionScope.user.accountId}" readonly class="w-full h-10 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-500 cursor-not-allowed focus:outline-none font-medium"></div>

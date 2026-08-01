@@ -1696,19 +1696,19 @@ function openDrawer(coSoId, status) {
 
   document.getElementById('drawerBody').innerHTML = [
     '<div class="p-4 bg-zinc-50 rounded-xl border border-zinc-100">',
-      '<p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Thông tin cơ sở</p>',
+      '<p class="text-[10px] font-bold text-zinc-400 mb-3">Thông tin cơ sở</p>',
       infoRow('ti-building-stadium', 'Tên cơ sở', data.tenCoSo),
       infoRow('ti-map-pin', 'Địa chỉ', data.diaChi),
       infoRow('ti-phone', 'Điện thoại', data.sdtCoSo || '—'),
     '</div>',
     '<div class="p-4 bg-zinc-50 rounded-xl border border-zinc-100">',
-      '<p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Thông tin quản lý</p>',
+      '<p class="text-[10px] font-bold text-zinc-400 mb-3">Thông tin quản lý</p>',
       infoRow('ti-user', 'Họ tên', data.mgrName),
       infoRow('ti-mail', 'Email', data.mgrEmail),
       infoRow('ti-phone', 'SĐT', data.mgrSdt || '—'),
     '</div>',
     '<div class="p-4 bg-zinc-50 rounded-xl border border-zinc-100">',
-      '<p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Loại dịch vụ đăng ký</p>',
+      '<p class="text-[10px] font-bold text-zinc-400 mb-2">Loại dịch vụ đăng ký</p>',
       '<div class="flex flex-wrap gap-1.5 mt-1">' + capHtml + '</div>',
     '</div>'
   ].join('');

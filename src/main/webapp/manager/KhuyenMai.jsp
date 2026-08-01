@@ -27,7 +27,7 @@
   .filter-chip.active { background:#4c1d95; color:#ffffff; border-color:#4c1d95; font-weight:700; box-shadow:0 2px 8px rgba(76,29,149,.25); }
 
   .km-table { width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; }
-  .km-table th { text-align:left; font-size:10.5px; font-weight:800; color:#5b21b6; text-transform:uppercase; letter-spacing:.03em; padding:10px 8px; border-bottom:1px solid #e9d5ff; background:#faf5ff; white-space:normal; word-break:break-word; }
+  .km-table th { text-align:left; font-size:10.5px; font-weight:800; color:#5b21b6; padding:10px 8px; border-bottom:1px solid #e9d5ff; background:#faf5ff; white-space:normal; word-break:break-word; }
   .km-table td { padding:10px 8px; border-bottom:1px solid #f3e8ff; font-size:12.5px; color:#0f172a; vertical-align:middle; word-break:break-word; }
   .km-table tr:hover td { background:#faf5ff; }
 
@@ -351,7 +351,7 @@
 
     <div class="drawer-body px-6 py-5 flex flex-col gap-4">
 
-      <p class="text-xs font-extrabold uppercase tracking-wider" style="color:var(--km-navy);">Thông tin chung</p>
+      <p class="text-xs font-extrabold" style="color:var(--km-navy);">Thông tin chung</p>
       <div class="km-form-grid cols-2">
         <div class="field span-2">
           <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -376,7 +376,7 @@
       </div>
 
       <div class="flex items-center justify-between gap-2 mt-1">
-        <p class="text-xs font-extrabold uppercase tracking-wider" style="color:var(--km-navy);">Hình ảnh chương trình</p>
+        <p class="text-xs font-extrabold" style="color:var(--km-navy);">Hình ảnh chương trình</p>
         <span class="km-upl-count" id="kmImgCount">0/5 ảnh</span>
       </div>
       <p class="hint -mt-2">Tải tối đa 5 ảnh cho mỗi chương trình. Mỗi ảnh không vượt quá 5&nbsp;MB. Hỗ trợ JPG, PNG và WEBP. Khuyến nghị tỉ lệ 16:9.</p>
@@ -394,7 +394,7 @@
       <div class="km-img-grid" id="kmImageGrid"></div>
       <p class="hint">Ảnh đầu tiên (hoặc ảnh được đánh dấu) sẽ là ảnh bìa. Bấm "Đặt làm ảnh bìa" để đổi. Xóa ảnh có hiệu lực ngay, không cần bấm Lưu.</p>
 
-      <p class="text-xs font-extrabold uppercase tracking-wider mt-1" style="color:var(--km-navy);">Hình thức giảm</p>
+      <p class="text-xs font-extrabold mt-1" style="color:var(--km-navy);">Hình thức giảm</p>
       <div class="flex gap-2.5">
         <button type="button" class="discount-mode-btn active" id="modeBtnPercent" onclick="setDiscountMode('PERCENT')">Giảm theo phần trăm</button>
         <button type="button" class="discount-mode-btn" id="modeBtnFixed" onclick="setDiscountMode('FIXED')">Giảm số tiền cố định</button>
@@ -420,7 +420,7 @@
       <input type="hidden" name="giaTriGiam" id="f_giaTriGiam"/>
       <input type="hidden" name="giamToiDa" id="f_giamToiDa"/>
 
-      <p class="text-xs font-extrabold uppercase tracking-wider mt-1" style="color:var(--km-navy);">Điều kiện áp dụng</p>
+      <p class="text-xs font-extrabold mt-1" style="color:var(--km-navy);">Điều kiện áp dụng</p>
       <div class="km-form-grid cols-2">
         <div class="field span-2">
           <label for="f_giaTriToiThieu">Giá trị đơn tối thiểu (đ)</label>

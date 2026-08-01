@@ -1206,8 +1206,16 @@ public class CheckInServlet extends HttpServlet {
             data.put("splitBills", splitBills);
             data.put("tenSan", san.getTenSan());
             data.put("ngayDat", lich.getNgayDat() != null ? lich.getNgayDat().toString() : "");
-            data.put("gioBatDau", lich.getGioBatDau() != null ? lich.getGioBatDau().toString().substring(0, 5) : "00:00");
-            data.put("gioKetThuc", lich.getGioKetThuc() != null ? lich.getGioKetThuc().toString().substring(0, 5) : "00:00");
+            // Dùng actual_start_time (bao gồm giây) để tránh timer bị lệch khi mở sân giữa phút
+            java.time.LocalTime actualStart = (lich.getActualStartTime() != null ? lich.getActualStartTime() : lich.getGioBatDau());
+            data.put("gioBatDau", actualStart != null ? actualStart.toString().substring(0, 8) : "00:00:00");
+            // OPEN_ENDED đang chạy: gioKetThuc = thời điểm hiện tại (real-time), không phải 23:59 placeholder
+            boolean isOpenEndedActive = "OPEN_ENDED".equals(lich.getTimeMode()) && "Đang sử dụng".equals(lich.getTrangThai()) && lich.getActualEndAt() == null;
+            if (isOpenEndedActive) {
+                data.put("gioKetThuc", java.time.LocalTime.now().toString().substring(0, 8));
+            } else {
+                data.put("gioKetThuc", lich.getGioKetThuc() != null ? lich.getGioKetThuc().toString().substring(0, 5) : "00:00");
+            }
             data.put("timeMode", lich.getTimeMode());
             data.put("isEarly", isEarly);
             data.put("minutesEarly", minutesEarly);

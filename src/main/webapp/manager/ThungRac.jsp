@@ -75,7 +75,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm border-collapse">
           <thead>
-            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs uppercase tracking-wider">
+            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs">
               <th class="pb-3 pl-2">Tên sân</th>
               <th class="pb-3">Trạng thái</th>
               <th class="pb-3">Mô tả</th>
@@ -118,7 +118,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm border-collapse">
           <thead>
-            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs uppercase tracking-wider">
+            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs">
               <th class="pb-3 pl-2">Tên loại</th>
               <th class="pb-3">Giá không đèn</th>
               <th class="pb-3">Giá có đèn</th>
@@ -163,7 +163,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm border-collapse">
           <thead>
-            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs uppercase tracking-wider">
+            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs">
               <th class="pb-3 pl-2">Mã SKU</th>
               <th class="pb-3">Tên sản phẩm</th>
               <th class="pb-3">Đơn giá</th>
@@ -208,7 +208,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm border-collapse">
           <thead>
-            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs uppercase tracking-wider">
+            <tr class="border-b border-purple-50 text-purple-900 font-bold text-xs">
               <th class="pb-3 pl-2">Username</th>
               <th class="pb-3">Họ và tên</th>
               <th class="pb-3">Email</th>

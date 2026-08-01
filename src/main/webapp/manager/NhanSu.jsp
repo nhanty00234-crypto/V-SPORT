@@ -252,18 +252,18 @@
       <div id="staffFieldsContainer" class="flex flex-col gap-4">
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-violet-900">Họ và tên <span class="text-red-500">*</span></label>
-            <input type="text" id="staffName" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+            <input type="text" id="staffName" class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-violet-900">Vai trò <span class="text-red-500">*</span></label>
-            <select id="staffRole" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+            <select id="staffRole" class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
               <option value="4">Lễ tân</option>
               <option value="5">Bảo vệ</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-violet-900">Email <span class="text-red-500">*</span></label>
-            <input type="email" id="staffEmail" required class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
+            <input type="email" id="staffEmail" class="h-9 px-3 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none">
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
@@ -273,7 +273,7 @@
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-violet-900">Mật khẩu <span class="text-red-500">*</span></label>
               <div class="relative flex items-center">
-                <input type="password" id="staffPassword" placeholder="••••••••" autocomplete="new-password" required class="h-9 pl-3 pr-10 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none w-full">
+                <input type="password" id="staffPassword" placeholder="••••••••" autocomplete="new-password" class="h-9 pl-3 pr-10 rounded-lg border border-violet-100 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none w-full">
                 <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-zinc-400 hover:text-zinc-650 focus:outline-none flex items-center">
                   <span id="passwordEyeIcon" class="material-symbols-outlined text-[18px]">visibility</span>
                 </button>
@@ -785,16 +785,38 @@ async function handleStaffSubmit(e) {
     e.preventDefault();
     clearFieldErrors();
     const editId = document.getElementById('staffEditId').value;
+
+    // JS validation (replaces browser native required tooltips)
+    const fullName = document.getElementById('staffName').value.trim();
+    const email = document.getElementById('staffEmail').value.trim();
+    const password = document.getElementById('staffPassword').value;
+    const roleId = document.getElementById('staffRole').value;
+    let hasError = false;
+    if (!fullName) { markFieldInvalid('staffName', 'Vui lòng nhập họ và tên.'); hasError = true; }
+    if (!email) { markFieldInvalid('staffEmail', 'Vui lòng nhập email.'); hasError = true; }
+    if (!editId && !password) { markFieldInvalid('staffPassword', 'Vui lòng nhập mật khẩu.'); hasError = true; }
+    if (!editId && password && password.length < 6) { markFieldInvalid('staffPassword', 'Mật khẩu phải có ít nhất 6 ký tự.'); hasError = true; }
+    if (!roleId) { markFieldInvalid('staffRole', 'Vui lòng chọn vai trò.'); hasError = true; }
+    if (hasError) return;
+
     const params = new URLSearchParams();
     params.append('action', editId ? 'update' : 'add');
     if (editId) {
         params.append('accountId', editId);
     }
-    params.append('fullName', document.getElementById('staffName').value);
-    params.append('email', document.getElementById('staffEmail').value);
+    params.append('fullName', fullName);
+    params.append('email', email);
     params.append('phoneNumber', document.getElementById('staffPhone').value);
-    params.append('roleId', document.getElementById('staffRole').value);
-    params.append('password', document.getElementById('staffPassword').value);
+    params.append('roleId', roleId);
+    params.append('password', password);
+
+    // Show loading state on submit button
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Đang xử lý...';
+    }
 
     try {
         const response = await fetch(_ctxPath + '/manager/nhan-su', {
@@ -813,16 +835,19 @@ async function handleStaffSubmit(e) {
 
         if (!response.ok) {
             const text = await response.text();
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHtml; }
             handleStaffError(text);
             return;
         }
 
         const data = await response.json();
         if (data.loi) {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHtml; }
             handleStaffError(data.loi);
             return;
         }
         if (data.requiresOtp) {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHtml; }
             // Show inline OTP block smoothly
             document.getElementById('otpTargetEmail').innerText = data.email;
             document.getElementById('staffFieldsContainer').classList.add('hidden');
@@ -838,6 +863,7 @@ async function handleStaffSubmit(e) {
         }
     } catch (error) {
         console.error('Error submitting staff:', error);
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHtml; }
         showVsToast('Lỗi kết nối máy chủ. Vui lòng thử lại.', 'error');
     }
 }

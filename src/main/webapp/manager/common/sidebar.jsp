@@ -365,7 +365,7 @@
     </div>
     <div>
       <p class="text-sm font-extrabold text-purple-950 leading-tight tracking-tight">V-SPORT</p>
-      <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Manager Portal</p>
+      <p class="text-[10px] text-purple-600 font-bold">Manager Portal</p>
     </div>
   </div>
 

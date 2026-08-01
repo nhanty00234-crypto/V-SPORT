@@ -36,7 +36,7 @@
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-[.18em] text-white/60 mb-1">Cổng thông tin quản lý</p>
+          <p class="text-[10px] font-bold text-white/60 mb-1">Cổng thông tin quản lý</p>
           <h2 class="text-2xl font-black text-white tracking-tight drop-shadow">
             Chào mừng trở lại, <span class="text-yellow-300">${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}</span>!
           </h2>
@@ -58,7 +58,7 @@
       <div class="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2.5">
         <span class="material-symbols-outlined text-[18px] text-white/70">today</span>
         <div class="text-white">
-          <p class="text-[10px] text-white/60 font-semibold uppercase tracking-wider">Hôm nay</p>
+          <p class="text-[10px] text-white/60 font-semibold">Hôm nay</p>
           <p class="text-sm font-bold leading-tight">${dashboardData.todayBookingCount != null ? dashboardData.todayBookingCount : 0} lịch đặt</p>
         </div>
       </div>

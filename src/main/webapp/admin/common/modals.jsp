@@ -19,26 +19,26 @@
   <div class="flex-1 overflow-y-auto p-8 flex flex-col gap-10">
     <!-- Theme Section -->
     <section class="space-y-6">
-      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Giao diện cá nhân</p>
+      <p class="text-[10px] font-bold text-gray-400 ml-1">Giao diện cá nhân</p>
       <div class="grid grid-cols-3 gap-3">
         <button id="themeLight" onclick="setTheme('light')" class="theme-opt group flex flex-col items-center gap-3 py-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 transition-all">
           <span class="material-symbols-outlined text-2xl text-gray-400 group-hover:text-gray-600">light_mode</span>
-          <span class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Sáng</span>
+          <span class="text-[11px] font-bold text-gray-400">Sáng</span>
         </button>
         <button id="themeDark" onclick="setTheme('dark')" class="theme-opt group flex flex-col items-center gap-3 py-5 rounded-xl border border-[#d92550]/30 bg-[#d92550]/5 transition-all">
           <span class="material-symbols-outlined text-2xl text-[#d92550]">dark_mode</span>
-          <span class="text-[11px] font-bold uppercase tracking-widest text-[#d92550]">Tối</span>
+          <span class="text-[11px] font-bold text-[#d92550]">Tối</span>
         </button>
         <button id="themeSystem" onclick="setTheme('system')" class="theme-opt group flex flex-col items-center gap-3 py-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 transition-all">
           <span class="material-symbols-outlined text-2xl text-gray-400 group-hover:text-gray-600">routine</span>
-          <span class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Auto</span>
+          <span class="text-[11px] font-bold text-gray-400">Auto</span>
         </button>
       </div>
     </section>
 
     <!-- Notification Section -->
     <section class="space-y-6">
-      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Thông báo & Âm thanh</p>
+      <p class="text-[10px] font-bold text-gray-400 ml-1">Thông báo & Âm thanh</p>
       <div class="space-y-2">
         <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
           <div class="flex items-center gap-4 text-gray-600 font-bold text-sm">
@@ -61,10 +61,10 @@
 
     <!-- App Info -->
     <section class="space-y-6">
-      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Thông báo phiên bản</p>
+      <p class="text-[10px] font-bold text-gray-400 ml-1">Thông báo phiên bản</p>
       <div class="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden text-xs font-bold">
         <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-          <span class="text-gray-400 uppercase tracking-widest">Phiên bản</span>
+          <span class="text-gray-400">Phiên bản</span>
           <span class="text-[#d92550] bg-[#d92550]/5 px-3 py-1 rounded-full">v2.5.0-Kero</span>
         </div>
       </div>
@@ -97,16 +97,16 @@
           </label>
           <input id="avatarUpload" type="file" accept="image/*" class="hidden" onchange="previewAvatar(this)">
         </div>
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cập nhật ảnh đại diện</p>
+        <p class="text-[10px] font-bold text-gray-400">Cập nhật ảnh đại diện</p>
       </div>
 
       <div class="grid grid-cols-2 gap-8">
         <div class="space-y-1.5">
-          <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Họ và tên</label>
+          <label class="text-[11px] font-bold text-gray-400 ml-1">Họ và tên</label>
           <input type="text" id="editFullName" value="${user.fullName != null ? user.fullName : 'Admin'}" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[#495057] focus:outline-none focus:border-[#d92550]/30 transition-all font-bold">
         </div>
         <div class="space-y-1.5">
-          <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Mã nhân viên</label>
+          <label class="text-[11px] font-bold text-gray-400 ml-1">Mã nhân viên</label>
           <input type="text" value="ACC${user.accountId != null ? user.accountId : '001'}" readonly class="w-full bg-gray-100 border border-gray-100 rounded-xl px-4 py-3 text-gray-400 cursor-not-allowed text-[13px]">
         </div>
       </div>

@@ -692,8 +692,8 @@ public class CheckInDAO {
         String sql = "SELECT s.SanID, s.TenSan, s.LoaiSanID, s.CoSoID, s.TrangThai, s.MoTa, s.HinhAnh, " +
                      "ls.TenLoai AS TenLoaiSan, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen, " +
                      "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS DatSanIDActive, " +
-                     "(SELECT TOP 1 CONVERT(VARCHAR(5), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive, " +
-                     "(SELECT TOP 1 CONVERT(VARCHAR(5), lds.GioKetThuc, 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioKetThucActive, " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(8), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive, " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(8), lds.GioKetThuc, 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioKetThucActive, " +
                      "(SELECT TOP 1 lds.GhiChu FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GhiChuActive, " +
                      "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioKetThuc AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS ScheduledEndActive, " +
                      "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(COALESCE(lds.actual_start_time, lds.GioBatDau) AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS ActualStartActive, " +

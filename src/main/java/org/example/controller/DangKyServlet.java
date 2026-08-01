@@ -17,6 +17,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.io.IOException;
 
 @WebServlet("/dangky")
+@jakarta.servlet.annotation.MultipartConfig
 public class DangKyServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(DangKyServlet.class);

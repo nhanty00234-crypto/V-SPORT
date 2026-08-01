@@ -87,7 +87,7 @@
             <span class="material-symbols-outlined text-[18px] text-purple-700">event</span>
           </div>
           <div>
-            <p class="text-[10px] text-zinc-500 font-semibold uppercase">Tổng số đơn</p>
+            <p class="text-[10px] text-zinc-500 font-semibold">Tổng số đơn</p>
             <p class="text-xl font-black text-purple-950" id="stat-total">0</p>
           </div>
         </div>
@@ -98,7 +98,7 @@
             <span class="material-symbols-outlined text-[18px] text-amber-700">pending</span>
           </div>
           <div>
-            <p class="text-[10px] text-amber-600 font-semibold uppercase">Chờ duyệt</p>
+            <p class="text-[10px] text-amber-600 font-semibold">Chờ duyệt</p>
             <p class="text-xl font-black text-amber-700" id="stat-pending">0</p>
           </div>
         </div>
@@ -109,7 +109,7 @@
             <span class="material-symbols-outlined text-[18px] text-green-700">check_circle</span>
           </div>
           <div>
-            <p class="text-[10px] text-green-600 font-semibold uppercase">Đã xác nhận</p>
+            <p class="text-[10px] text-green-600 font-semibold">Đã xác nhận</p>
             <p class="text-xl font-black text-green-700" id="stat-approved">0</p>
           </div>
         </div>
@@ -120,7 +120,7 @@
             <span class="material-symbols-outlined text-[18px] text-red-600">cancel</span>
           </div>
           <div>
-            <p class="text-[10px] text-red-500 font-semibold uppercase">Đã hủy</p>
+            <p class="text-[10px] text-red-500 font-semibold">Đã hủy</p>
             <p class="text-xl font-black text-red-600" id="stat-canceled">0</p>
           </div>
         </div>
@@ -131,7 +131,7 @@
             <span class="material-symbols-outlined text-[18px] text-blue-700">play_circle</span>
           </div>
           <div>
-            <p class="text-[10px] text-blue-600 font-semibold uppercase">Đang chơi/Xong</p>
+            <p class="text-[10px] text-blue-600 font-semibold">Đang chơi/Xong</p>
             <p class="text-xl font-black text-blue-800" id="stat-active">0</p>
           </div>
         </div>
@@ -178,14 +178,14 @@
         <table class="w-full text-sm">
           <thead class="bg-purple-50/20 border-b border-purple-50">
             <tr>
-              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-purple-600">Mã ĐS</th>
-              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-purple-600">Khách hàng</th>
-              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-purple-600">Sân bóng</th>
-              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-purple-600">Thời gian đặt</th>
-              <th class="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-purple-600">Tổng tiền</th>
-              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-purple-600">Trạng thái</th>
-              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-purple-600">Ghi chú</th>
-              <th class="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-purple-600">Thao tác</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold text-purple-600">Mã ĐS</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold text-purple-600">Khách hàng</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold text-purple-600">Sân bóng</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold text-purple-600">Thời gian đặt</th>
+              <th class="px-5 py-3 text-right text-[11px] font-bold text-purple-600">Tổng tiền</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold text-purple-600">Trạng thái</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold text-purple-600">Ghi chú</th>
+              <th class="px-5 py-3 text-right text-[11px] font-bold text-purple-600">Thao tác</th>
             </tr>
           </thead>
           <tbody id="bookingTableBody" class="divide-y divide-purple-50">
@@ -200,7 +200,7 @@
                 <td class="px-5 py-4">
                   <div class="flex items-center gap-1.5">
                     <span class="font-mono text-xs text-purple-800 font-bold">#${item.datSanId}</span>
-                    <span class="new-order-badge hidden px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-wide">Mới</span>
+                    <span class="new-order-badge hidden px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold">Mới</span>
                   </div>
                   <c:if test="${not empty item.createdTime}">
                     <fmt:parseDate value="${item.createdTime.toString().substring(0,16)}" pattern="yyyy-MM-dd'T'HH:mm" var="createdParsed"/>
@@ -349,7 +349,7 @@
         <input type="hidden" id="rejectId" name="id" value="">
         
         <div>
-          <label for="rejectReason" class="block text-xs font-bold text-purple-900 uppercase">Lý do từ chối</label>
+          <label for="rejectReason" class="block text-xs font-bold text-purple-900">Lý do từ chối</label>
           <textarea id="rejectReason" name="reason" rows="3" required maxlength="255" placeholder="Nhập lý do từ chối đơn đặt sân..." 
                     class="mt-1.5 w-full p-3 border border-purple-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 resize-none"></textarea>
         </div>

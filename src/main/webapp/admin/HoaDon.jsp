@@ -234,7 +234,7 @@ body { font-family: 'Inter', sans-serif; }
 
       <!-- Court Booking details (if any) -->
       <div id="detailCourtSection" class="hidden">
-        <p class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Thông tin sân đã đặt</p>
+        <p class="text-xs font-bold text-zinc-400 mb-2">Thông tin sân đã đặt</p>
         <div class="bg-zinc-50 rounded-xl p-3 border border-zinc-150 flex flex-col gap-2">
           <div class="flex justify-between">
             <span class="text-zinc-650 font-medium" id="detailCourtName">-</span>
@@ -249,7 +249,7 @@ body { font-family: 'Inter', sans-serif; }
 
       <!-- Products & Services list (if any) -->
       <div id="detailServiceSection" class="hidden">
-        <p class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Sản phẩm & Dịch vụ</p>
+        <p class="text-xs font-bold text-zinc-400 mb-2">Sản phẩm & Dịch vụ</p>
         <div class="overflow-x-auto">
         <table class="w-full text-xs">
           <thead>
@@ -904,7 +904,13 @@ document.addEventListener('DOMContentLoaded', () => {
     <c:remove var="message" scope="session"/>
   </c:if>
   <c:if test="${not empty sessionScope.error}">
-    alert('${sessionScope.error}');
+    (function(){
+      var b = document.createElement('div');
+      b.className = 'p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-start gap-3 animate-fade-in-up fixed top-4 left-1/2 -translate-x-1/2 z-[9999] shadow-lg w-[90%] max-w-md';
+      b.innerHTML = '<span class="material-symbols-outlined text-[20px] shrink-0">error</span><div><span class="font-bold block text-red-700">Lỗi thao tác</span><span class="leading-normal block mt-0.5">${sessionScope.error}</span></div><button onclick="this.parentElement.remove()" class="ml-auto text-red-400 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-[18px]">close</span></button>';
+      document.body.appendChild(b);
+      setTimeout(function(){ b.remove(); }, 5000);
+    })();
     <c:remove var="error" scope="session"/>
   </c:if>
 });

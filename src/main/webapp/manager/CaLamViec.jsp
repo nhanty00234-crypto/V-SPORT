@@ -389,7 +389,7 @@
             <div class="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-purple-600 text-[14px]">content_copy</span>
             </div>
-            <span class="text-[10px] font-bold text-purple-400 tracking-widest uppercase">Bước 1</span>
+            <span class="text-[10px] font-bold text-purple-400">Bước 1</span>
           </div>
           <div>
             <h4 class="text-sm font-bold text-zinc-800 leading-tight">Sao chép lịch</h4>
@@ -435,7 +435,7 @@
             <div class="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-blue-600 text-[14px]">auto_fix_high</span>
             </div>
-            <span class="text-[10px] font-bold text-blue-400 tracking-widest uppercase">Bước 2</span>
+            <span class="text-[10px] font-bold text-blue-400">Bước 2</span>
           </div>
           <div>
             <h4 class="text-sm font-bold text-zinc-800 leading-tight">Đề xuất lịch tự động</h4>
@@ -481,7 +481,7 @@
             <div class="w-6 h-6 rounded-lg bg-emerald-200 flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-emerald-700 text-[14px]">send</span>
             </div>
-            <span class="text-[10px] font-bold text-emerald-500 tracking-widest uppercase">Bước 3</span>
+            <span class="text-[10px] font-bold text-emerald-500">Bước 3</span>
           </div>
           <div>
             <h4 class="text-sm font-bold text-emerald-900 leading-tight">Chốt &amp; gửi lịch</h4>
@@ -1029,7 +1029,7 @@ function updateWeekDays() {
     wrapper.className = `flex flex-col items-center justify-center p-3.5 rounded-xl border cursor-pointer select-none transition-all text-center bg-white border-zinc-200 hover:border-purple-300 hover:bg-purple-50/10`;
     
     wrapper.innerHTML = `
-      <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">\${dayNames[i]}</span>
+      <span class="text-[10px] font-bold text-zinc-500">\${dayNames[i]}</span>
       <span class="text-sm font-extrabold text-zinc-800 my-1">\${displayDate}</span>
       <input type="checkbox" id="\${checkboxId}" value="\${dateStr}" \${isChecked ? 'checked' : ''} \${isDisabled ? 'disabled' : ''} onchange="updateCheckboxStyles(); triggerRealtimeValidation();"
              class="w-4 h-4 text-purple-650 rounded border-zinc-300 focus:ring-purple-500 cursor-pointer mt-1">
@@ -1400,10 +1400,10 @@ function updateWizardSummary() {
   const timeText = (startTime && endTime) ? `\${formatTime(startTime)} - \${formatTime(endTime)}` : '—';
 
   box.innerHTML = `
-    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Nhân viên</p><p class="font-bold text-purple-950 mt-0.5">\${staffText}</p></div>
-    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Ngày làm</p><p class="font-bold text-purple-950 mt-0.5">\${daysText}</p></div>
-    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Ca làm</p><p class="font-bold text-purple-950 mt-0.5">\${tplText}</p></div>
-    <div><p class="text-xs text-purple-400 font-bold uppercase tracking-wide">Giờ làm việc</p><p class="font-bold text-purple-950 mt-0.5">\${timeText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold">Nhân viên</p><p class="font-bold text-purple-950 mt-0.5">\${staffText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold">Ngày làm</p><p class="font-bold text-purple-950 mt-0.5">\${daysText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold">Ca làm</p><p class="font-bold text-purple-950 mt-0.5">\${tplText}</p></div>
+    <div><p class="text-xs text-purple-400 font-bold">Giờ làm việc</p><p class="font-bold text-purple-950 mt-0.5">\${timeText}</p></div>
   `;
 }
 
@@ -1971,7 +1971,7 @@ function renderCalendar() {
 
     html += `<div class="flex flex-col gap-2 min-h-[400px]">
         <div class="text-center pb-2 border-b border-purple-50">
-          <p class="text-xs font-semibold text-purple-600 uppercase">\${dayName}</p>
+          <p class="text-xs font-semibold text-purple-600">\${dayName}</p>
           <p class="text-lg font-bold \${isToday ? 'text-purple-600' : 'text-zinc-800'}">\${dateNum}</p>
         </div>
         <div class="flex flex-col gap-2 flex-1">`;

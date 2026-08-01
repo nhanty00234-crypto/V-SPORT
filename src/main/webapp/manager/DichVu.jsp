@@ -221,7 +221,7 @@
       <div class="field"><label>Ghi chú dành cho khách</label><textarea name="customerNote" id="f_customerNote" rows="2"></textarea></div>
 
       <div id="racketConfigBlock" class="border-t border-slate-100 pt-3.5 mt-1 flex flex-col gap-3.5">
-        <p class="text-xs font-bold text-teal-700 uppercase tracking-wide">Cấu hình căng lưới</p>
+        <p class="text-xs font-bold text-teal-700">Cấu hình căng lưới</p>
         <div class="field"><label>Loại vợt nhận (CSV)</label><input type="text" name="racketTypes" id="f_racketTypes" placeholder="Cầu lông,Tennis"/></div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="field"><label>Giá công căng (đ) *</label><input type="number" min="0" step="1000" name="stringingPrice" id="f_stringingPrice"/></div>

@@ -91,7 +91,7 @@
     <form method="get" action="${pageContext.request.contextPath}/manager/hoa-don"
           class="flex flex-wrap gap-3 items-end">
       <div class="flex flex-col gap-1 min-w-[140px]">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Trạng thái</label>
+        <label class="text-[10px] font-bold text-zinc-400">Trạng thái</label>
         <select name="filterStatus"
                 class="border border-slate-200 rounded-lg px-3 py-2 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200">
           <option value="">Tất cả</option>
@@ -101,7 +101,7 @@
         </select>
       </div>
       <div class="flex flex-col gap-1 min-w-[130px]">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Loại hóa đơn</label>
+        <label class="text-[10px] font-bold text-zinc-400">Loại hóa đơn</label>
         <select name="filterLoai"
                 class="border border-slate-200 rounded-lg px-3 py-2 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200">
           <option value="">Tất cả</option>
@@ -110,17 +110,17 @@
         </select>
       </div>
       <div class="flex flex-col gap-1">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Từ ngày</label>
+        <label class="text-[10px] font-bold text-zinc-400">Từ ngày</label>
         <input type="date" name="filterFrom" value="${filterFrom}"
                class="border border-slate-200 rounded-lg px-3 py-2 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200"/>
       </div>
       <div class="flex flex-col gap-1">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Đến ngày</label>
+        <label class="text-[10px] font-bold text-zinc-400">Đến ngày</label>
         <input type="date" name="filterTo" value="${filterTo}"
                class="border border-slate-200 rounded-lg px-3 py-2 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200"/>
       </div>
       <div class="flex flex-col gap-1 flex-1 min-w-[180px]">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Tìm kiếm</label>
+        <label class="text-[10px] font-bold text-zinc-400">Tìm kiếm</label>
         <input type="text" name="filterSearch" value="${filterSearch}"
                placeholder="Số HĐ, tên khách, tên sân…"
                class="border border-slate-200 rounded-lg px-3 py-2 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200"/>
@@ -152,7 +152,7 @@
     <div class="overflow-x-auto">
       <table class="w-full text-xs">
         <thead>
-          <tr class="bg-slate-50 text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
+          <tr class="bg-slate-50 text-[10px] text-zinc-400 font-bold">
             <th class="px-4 py-3 text-left">Số HĐ</th>
             <th class="px-4 py-3 text-left">Loại</th>
             <th class="px-4 py-3 text-left">Sân / Ngày</th>
@@ -324,7 +324,7 @@
     <form id="createServiceForm" class="px-6 py-5 space-y-4" onsubmit="submitCreateServiceInvoice(event)">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Đơn đặt sân</label>
+          <label class="text-[10px] font-bold text-zinc-400">Đơn đặt sân</label>
           <select name="datSanId" required class="border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200">
             <option value="">-- Chọn đơn đặt sân --</option>
             <c:forEach var="booking" items="${payableBookings}">
@@ -333,7 +333,7 @@
           </select>
         </div>
         <div class="flex flex-col gap-1">
-          <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Ghi chú</label>
+          <label class="text-[10px] font-bold text-zinc-400">Ghi chú</label>
           <input name="ghiChu" maxlength="255" value="Manager lập hóa đơn dịch vụ"
                  class="border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200"/>
         </div>
@@ -381,7 +381,7 @@
           </div>
         </div>
         <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
-          <p class="text-[11px] text-emerald-700 font-bold uppercase tracking-widest">Tổng tiền dịch vụ</p>
+          <p class="text-[11px] text-emerald-700 font-bold">Tổng tiền dịch vụ</p>
           <p id="createServiceTotal" class="text-2xl font-black text-emerald-800 mt-1">0đ</p>
         </div>
       </div>
@@ -512,7 +512,7 @@ function openDetail(hoaDonId) {
         '</div>' +
         '<hr class="border-slate-100 my-3"/>' +
         '<table class="w-full text-xs">' +
-          '<thead><tr class="text-zinc-400 text-[10px] uppercase"><th class="text-left pb-1">Sản phẩm/DV</th><th class="text-right pb-1">SL</th><th class="text-right pb-1">Đơn giá</th><th class="text-right pb-1">Thành tiền</th></tr></thead>' +
+          '<thead><tr class="text-zinc-400 text-[10px]"><th class="text-left pb-1">Sản phẩm/DV</th><th class="text-right pb-1">SL</th><th class="text-right pb-1">Đơn giá</th><th class="text-right pb-1">Thành tiền</th></tr></thead>' +
           '<tbody>' + itemsHtml + '</tbody>' +
         '</table>' +
         '<hr class="border-slate-100 my-3"/>' +

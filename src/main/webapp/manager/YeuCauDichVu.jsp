@@ -28,7 +28,7 @@
   .drawer-panel { position:fixed; top:0; right:0; height:100vh; width:100%; max-width:560px; background:#fff; z-index:71;
     transform:translateX(100%); transition:transform .25s ease; overflow-y:auto; box-shadow:-10px 0 30px rgba(0,0,0,.15); display:flex; flex-direction:column; }
   .drawer-panel.open { transform:translateX(0); }
-  .dsec-label { font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em; margin: 14px 0 6px; }
+  .dsec-label { font-size:11px; font-weight:800; color:#94a3b8; margin: 14px 0 6px; }
   .drow { display:flex; justify-content:space-between; font-size:13.5px; padding:6px 0; border-bottom:1px dashed #f1f5f9; }
   .drow span:first-child { color:#64748b; }
   .drow span:last-child { font-weight:700; color:#0f172a; text-align:right; max-width:60%; }

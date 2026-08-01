@@ -391,7 +391,7 @@
     <section class="hero-gradient rounded-2xl border ${themeBorderStrong} p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
         <div class="absolute -top-12 -right-12 w-64 h-64 ${isManager ? 'bg-purple-300/10' : 'bg-orange-300/10'} rounded-full blur-3xl pointer-events-none"></div>
         <div>
-            <span class="text-[10px] font-extrabold uppercase tracking-widest ${themeTextMedium} block mb-0.5">BẢNG ĐIỀU KHIỂN CHI NHÁNH CƠ SỞ</span>
+            <span class="text-[10px] font-extrabold ${themeTextMedium} block mb-0.5">BẢNG ĐIỀU KHIỂN CHI NHÁNH CƠ SỞ</span>
             <h2 class="text-xl font-black ${themeTextDark} tracking-tight">Kích hoạt & Giám sát sân bãi thời gian thực</h2>
             <p class="text-xs ${themeTextMedium} mt-1">Đảm bảo việc mở sân chính xác và xử lý tranh chấp đặt sân online.</p>
         </div>
@@ -400,27 +400,27 @@
     <!-- Dashboard Stats Grid -->
     <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
         <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-zinc-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Tổng số sân</span>
+            <span class="text-[9px] text-zinc-550 font-bold block">Tổng số sân</span>
             <span id="stat-total" class="text-lg font-black text-zinc-800 mt-1">${danhSachSan.size()}</span>
         </div>
         <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-green-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Sẵn sàng</span>
+            <span class="text-[9px] text-zinc-550 font-bold block">Sẵn sàng</span>
             <span id="stat-available" class="text-lg font-black text-green-600 mt-1">${availCount}</span>
         </div>
         <div class="card p-3.5 flex flex-col items-center justify-center bg-white border ${themeBorder} shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Đang sử dụng</span>
+            <span class="text-[9px] text-zinc-550 font-bold block">Đang sử dụng</span>
             <span id="stat-in-use" class="text-lg font-black ${themeText} mt-1">${useCount}</span>
         </div>
         <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-amber-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Bảo trì</span>
+            <span class="text-[9px] text-zinc-550 font-bold block">Bảo trì</span>
             <span id="stat-maintenance" class="text-lg font-black text-amber-600 mt-1">${maintCount}</span>
         </div>
         <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-red-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Tạm đóng</span>
+            <span class="text-[9px] text-zinc-550 font-bold block">Tạm đóng</span>
             <span id="stat-closed" class="text-lg font-black text-red-650 mt-1">${closeCount}</span>
         </div>
         <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-zinc-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block uppercase tracking-wider">Lịch hôm nay</span>
+            <span class="text-[9px] text-zinc-550 font-bold block">Lịch hôm nay</span>
             <span id="stat-today" class="text-lg font-black ${themeTextMedium} mt-1">${danhSachLich.size()}</span>
         </div>
     </section>
@@ -571,86 +571,186 @@
         </c:choose>
     </section>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <!-- 4. DANH SÁCH LỊCH ĐẶT SÂN TRONG NGÀY (Today's Bookings Schedule Dashboard) -->
-        <section class="card p-5 xl:col-span-3 border ${themeBorder} overflow-hidden flex flex-col justify-between">
-            <div>
-                <!-- Header with Tabs -->
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b ${themeBorder} pb-4 mb-5 gap-4">
-                    <h3 class="text-base font-black ${themeTextDark} tracking-tight flex items-center gap-2">
-                        <span class="material-symbols-outlined ${themeIcon}">calendar_today</span>
-                        Vận Hành & Check-in Hôm Nay
-                    </h3>
-                    
-                    <div class="flex bg-zinc-100 p-1 rounded-xl text-xs font-bold gap-1 self-start lg:self-auto shadow-inner">
-                        <button type="button" id="tab-btn-playing" onclick="switchBookingTab('playing')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-555 hover:text-zinc-800">
-                            <span class="material-symbols-outlined text-[16px]">sports_soccer</span>
-                            Đang chơi
-                            <span id="badge-count-playing" class="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
-                        </button>
-                        <button type="button" id="tab-btn-waiting" onclick="switchBookingTab('waiting')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-555 hover:text-zinc-800">
-                            <span class="material-symbols-outlined text-[16px]">schedule</span>
-                            Chờ check-in
-                            <span id="badge-count-waiting" class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
-                        </button>
-                        <button type="button" id="tab-btn-completed" onclick="switchBookingTab('completed')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-500 hover:text-zinc-700">
-                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                            Đã xong hôm nay
-                            <span id="badge-count-completed" class="bg-zinc-400 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
-                        </button>
-                        <button type="button" id="tab-btn-preorders" onclick="switchBookingTab('preorders')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-zinc-500 hover:text-zinc-700">
-                            <span class="material-symbols-outlined text-[16px]">local_cafe</span>
-                            Dịch vụ đặt trước
-                            <span id="badge-count-preorders" class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
-                        </button>
+    <!-- 4. DANH SÁCH LỊCH ĐẶT SÂN TRONG NGÀY -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+        <!-- Panel Header -->
+        <div class="px-5 pt-5 pb-4 border-b border-slate-100">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                <!-- Title -->
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-9 h-9 rounded-xl ${isManager ? 'bg-purple-100' : 'bg-orange-100'} flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px] ${themeIcon}">today</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 tracking-tight leading-tight">Vận Hành &amp; Check-in Hôm Nay</h3>
+                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Theo dõi thời gian thực · Tự cập nhật mỗi 30 giây</p>
                     </div>
                 </div>
 
-                <!-- Search Input -->
-                <div class="mb-5 relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <span class="material-symbols-outlined text-zinc-450 text-[18px]">search</span>
-                    </div>
-                    <input type="text" id="booking-search-input" oninput="onBookingSearch(this.value)" placeholder="Tìm kiếm nhanh ca chơi theo tên khách, số điện thoại hoặc sân..." class="w-full text-xs pl-10 pr-4 py-2.5 border border-zinc-200 focus:border-zinc-400 rounded-xl bg-white focus:outline-none transition-all placeholder-zinc-400 text-zinc-800">
-                </div>
-
-                <!-- Tab Contents -->
-                <!-- Tab 1: Playing -->
-                <div id="tab-content-playing" class="tab-pane hidden">
-                    <div id="list-playing" class="flex flex-col gap-2.5">
-                        <!-- Filled by JS -->
-                    </div>
-                </div>
-
-                <!-- Tab 2: Waiting -->
-                <div id="tab-content-waiting" class="tab-pane hidden">
-                    <div id="list-waiting" class="flex flex-col gap-2.5">
-                        <!-- Filled by JS -->
-                    </div>
-                </div>
-
-                <!-- Tab 3: Completed -->
-                <div id="tab-content-completed" class="tab-pane hidden">
-                    <div id="list-completed" class="flex flex-col gap-2.5">
-                        <!-- Filled by JS -->
-                    </div>
-                </div>
-
-                <!-- Tab 4: Dịch vụ khách đặt trước (Phase 8A) -->
-                <div id="tab-content-preorders" class="tab-pane hidden">
-                    <div id="preorders-loading" class="text-xs text-zinc-400 py-4 text-center hidden">Đang tải...</div>
-                    <div id="preorders-empty" class="text-xs text-zinc-400 py-4 text-center hidden">Chưa có dịch vụ nào được khách đặt trước hôm nay.</div>
-                    <div id="list-preorders" class="flex flex-col gap-2.5"></div>
+                <!-- Tab pills -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" id="tab-btn-playing" onclick="switchBookingTab('playing')"
+                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
+                        <span class="material-symbols-outlined text-[15px]" style="font-variation-settings:'FILL' 1">sports_soccer</span>
+                        Đang chơi
+                        <span id="badge-count-playing" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
+                    </button>
+                    <button type="button" id="tab-btn-waiting" onclick="switchBookingTab('waiting')"
+                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
+                        <span class="material-symbols-outlined text-[15px]">pending</span>
+                        Chờ check-in
+                        <span id="badge-count-waiting" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
+                    </button>
+                    <button type="button" id="tab-btn-completed" onclick="switchBookingTab('completed')"
+                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
+                        <span class="material-symbols-outlined text-[15px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+                        Đã xong
+                        <span id="badge-count-completed" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
+                    </button>
+                    <button type="button" id="tab-btn-preorders" onclick="switchBookingTab('preorders')"
+                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
+                        <span class="material-symbols-outlined text-[15px]">room_service</span>
+                        Dịch vụ trước
+                        <span id="badge-count-preorders" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Helpful tips -->
-            <div class="mt-6 p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-[10px] text-zinc-550 flex items-center gap-2">
-                <span class="material-symbols-outlined text-zinc-400 text-[16px]">info</span>
-                <span>Mẹo: Staff có thể nhấn vào biểu tượng <span class="material-symbols-outlined text-[12px] inline-block align-middle text-[#630ed4]">content_copy</span> để copy nhanh số điện thoại của khách hàng, hoặc click số điện thoại để gọi.</span>
+            <!-- Search -->
+            <div class="mt-4 relative">
+                <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none material-symbols-outlined text-slate-350 text-[17px]">search</span>
+                <input type="text" id="booking-search-input" oninput="onBookingSearch(this.value)"
+                       placeholder="Tìm theo tên khách, SĐT hoặc sân..."
+                       class="w-full pl-10 pr-4 py-2.5 text-xs font-semibold border-2 border-slate-200 focus:border-${isManager ? 'purple' : 'orange'}-400 rounded-xl bg-slate-50 focus:bg-white focus:outline-none transition-all placeholder-slate-350 text-slate-700">
             </div>
-        </section>
-    </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="p-4">
+            <div id="tab-content-playing"  class="tab-pane hidden"><div id="list-playing"  class="flex flex-col gap-3"></div></div>
+            <div id="tab-content-waiting"  class="tab-pane hidden"><div id="list-waiting"  class="flex flex-col gap-3"></div></div>
+            <div id="tab-content-completed" class="tab-pane hidden"><div id="list-completed" class="flex flex-col gap-3"></div></div>
+            <div id="tab-content-preorders" class="tab-pane hidden">
+                <div id="preorders-loading" class="text-xs text-slate-400 py-6 text-center hidden">Đang tải...</div>
+                <div id="preorders-empty"   class="text-xs text-slate-400 py-6 text-center hidden">Chưa có dịch vụ nào được khách đặt trước hôm nay.</div>
+                <div id="list-preorders" class="flex flex-col gap-3"></div>
+            </div>
+        </div>
+
+        <!-- Tips footer -->
+        <div class="mx-4 mb-4 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10.5px] text-slate-500 flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400 text-[15px] shrink-0">info</span>
+            <span>Mẹo: Click số điện thoại để gọi · Nhấn <span class="material-symbols-outlined text-[11px] align-middle text-${isManager ? 'purple' : 'orange'}-600">content_copy</span> để copy số</span>
+        </div>
+    </section>
+
+    <style>
+        .ci-tab.active-playing  { background:#dcfce7; border-color:#86efac; color:#15803d; }
+        .ci-tab.active-playing  .badge-num { background:#22c55e; color:#fff; }
+        .ci-tab.active-waiting  { background:${isManager ? '#f3e8ff' : '#ffedd5'}; border-color:${isManager ? '#c4b5fd' : '#fdba74'}; color:${isManager ? '#6d28d9' : '#c2410c'}; }
+        .ci-tab.active-waiting  .badge-num { background:${isManager ? '#7c3aed' : '#ea580c'}; color:#fff; }
+        .ci-tab.active-completed { background:#f1f5f9; border-color:#cbd5e1; color:#475569; }
+        .ci-tab.active-completed .badge-num { background:#64748b; color:#fff; }
+        .ci-tab.active-preorders { background:#fef3c7; border-color:#fcd34d; color:#92400e; }
+        .ci-tab.active-preorders .badge-num { background:#f59e0b; color:#fff; }
+
+        /* Booking row */
+        .ci-row {
+            display: flex; align-items: center;
+            border-radius: 14px;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
+            overflow: hidden;
+            transition: box-shadow .15s, border-color .15s, transform .15s;
+            gap: 0;
+            min-height: 72px;
+        }
+        .ci-row:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-1px); }
+        .ci-row-strip { width: 5px; min-width: 5px; align-self: stretch; flex-shrink: 0; }
+        .ci-row-body  { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0; padding: 12px 14px; min-width: 0; }
+        .ci-row-actions { padding: 10px 14px 10px 0; flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+
+        .ci-col { display: flex; flex-direction: column; justify-content: center; padding: 0 12px 0 0; }
+        .ci-col:first-child { padding-left: 0; }
+        .ci-col-court  { min-width: 150px; }
+        .ci-col-guest  { min-width: 160px; }
+        .ci-col-time   { min-width: 120px; }
+        .ci-col-status { min-width: 150px; }
+        .ci-col-timer  { min-width: 130px; }
+
+        .ci-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; margin-bottom: 3px; }
+        .ci-value { font-size: 12.5px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+        .ci-sub   { font-size: 10px; font-weight: 600; color: #64748b; margin-top: 2px; }
+
+        /* Status strip colors */
+        .strip-playing   { background: #22c55e; }
+        .strip-waiting   { background: ${isManager ? '#7c3aed' : '#f97316'}; }
+        .strip-completed { background: #94a3b8; }
+
+        /* Timer pill */
+        .ci-timer {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 10px; border-radius: 999px;
+            font-size: 11.5px; font-weight: 900; font-family: 'JetBrains Mono', monospace, sans-serif;
+            background: #dcfce7; color: #15803d;
+            border: 1.5px solid #86efac;
+        }
+        .ci-timer .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: ci-blink 1.4s ease-in-out infinite; }
+        @keyframes ci-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        /* Action buttons */
+        .ci-btn-primary {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; border-radius: 10px; border: none;
+            font-size: 11px; font-weight: 800; cursor: pointer;
+            transition: transform .1s, box-shadow .15s;
+            white-space: nowrap;
+            background: ${isManager ? '#7c3aed' : '#ea580c'};
+            color: #fff;
+            box-shadow: 0 2px 8px ${isManager ? 'rgba(124,58,237,.3)' : 'rgba(234,88,12,.3)'};
+        }
+        .ci-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px ${isManager ? 'rgba(124,58,237,.4)' : 'rgba(234,88,12,.4)'}; }
+        .ci-btn-primary:active { transform: scale(.97); }
+
+        .ci-btn-checkin {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; border-radius: 10px; border: none;
+            font-size: 11px; font-weight: 800; cursor: pointer;
+            transition: transform .1s, box-shadow .15s;
+            white-space: nowrap;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(22,163,74,.3);
+        }
+        .ci-btn-checkin:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(22,163,74,.4); }
+        .ci-btn-checkin:active { transform: scale(.97); }
+
+        .ci-btn-cancel {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 9px;
+            border: 1.5px solid #fecaca; background: #fff5f5; color: #dc2626;
+            cursor: pointer; transition: background .15s;
+        }
+        .ci-btn-cancel:hover { background: #fee2e2; }
+
+        /* Empty state */
+        .ci-empty {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 24px; text-align: center; gap: 10px;
+        }
+        .ci-empty-icon { font-size: 40px; opacity: .25; }
+        .ci-empty p { font-size: 13px; font-weight: 700; color: #94a3b8; margin: 0; }
+
+        @media (max-width: 767px) {
+            .ci-row { flex-direction: column; align-items: stretch; }
+            .ci-row-strip { width: auto; min-width: auto; height: 4px; }
+            .ci-row-body { flex-direction: column; gap: 8px; padding: 12px 14px; }
+            .ci-row-actions { padding: 0 14px 12px; justify-content: flex-end; }
+            .ci-col { padding: 0; min-width: 0; width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+            .ci-label { display: none; }
+        }
+    </style>
 
 </main>
 
@@ -964,7 +1064,7 @@
                             <!-- Trạng thái / Thanh toán -->
                             <div class="flex items-center gap-2 min-w-[160px] shrink-0">
                                 <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
-                                <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                <span class="badge \${nguonBadgeClass} text-[8px]">\${b.nguonDatSan}</span>
                             </div>
 
                             <!-- Timer -->
@@ -1025,7 +1125,7 @@
                             <div class="flex items-center gap-2 min-w-[200px] shrink-0">
                                 <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
                                 <span class="badge \${statusTheme} text-[8px] uppercase font-bold tracking-tight">\${b.trangThai === 'Chờ xác nhận' ? 'Chờ duyệt' : b.trangThai}</span>
-                                <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                <span class="badge \${nguonBadgeClass} text-[8px]">\${b.nguonDatSan}</span>
                             </div>
 
                             <!-- Ghi chú (nếu có) -->
@@ -1083,7 +1183,7 @@
 
                             <!-- Nguồn đặt sân -->
                             <div class="flex items-center gap-2 min-w-[90px] shrink-0">
-                                <span class="badge \${nguonBadgeClass} text-[8px] uppercase tracking-wider">\${b.nguonDatSan}</span>
+                                <span class="badge \${nguonBadgeClass} text-[8px]">\${b.nguonDatSan}</span>
                                 <span class="badge badge-gray text-[8px] uppercase font-bold tracking-tight">\${b.trangThai}</span>
                             </div>
 
@@ -1157,7 +1257,7 @@
         const parts = timeStr.split(':');
         if (parts.length < 2) return null;
         const d = new Date();
-        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parts.length >= 3 ? parseInt(parts[2], 10) : 0, 0);
         return d;
     }
 
@@ -1693,7 +1793,7 @@
                 <!-- LEFT (~60%): Dịch vụ -->
                 <section class="flex-none lg:flex-[3] min-w-0 bg-white rounded-xl border border-[#ccc3d8] p-4 lg:p-5 flex flex-col lg:min-h-0">
                     <div class="mb-3 shrink-0">
-                        <h2 class="text-sm font-bold uppercase tracking-wide text-[#0b1c30]">Dịch vụ</h2>
+                        <h2 class="text-sm font-bold text-[#0b1c30]">Dịch vụ</h2>
                     </div>
                     <!-- Category Filter Tabs -->
                     <div class="flex flex-wrap gap-2 mb-3 shrink-0">
@@ -2130,7 +2230,7 @@
         <div class="space-y-6">
         <!-- Court Specifications -->
         <div class="bg-zinc-50 rounded-2xl p-4 border border-zinc-150 space-y-3">
-            <h4 class="text-[11px] font-bold text-zinc-450 uppercase tracking-wider">Thông tin nhanh</h4>
+            <h4 class="text-[11px] font-bold text-zinc-450">Thông tin nhanh</h4>
             <div class="grid grid-cols-2 gap-4 text-xs">
                 <div>
                     <span class="text-zinc-550 block">Thời gian hiện tại:</span>
@@ -2352,6 +2452,7 @@
     let currentBankTransferPayment = null;
     let currentPayOSPayment = null;
     let payosPollTimer = null;
+    let openEndedLiveTimer = null;
 
     function setPaymentModalState(state) {
         currentPaymentModalState = state;
@@ -2474,7 +2575,7 @@
             const isOutOfStock = prod.SoLuongTon <= 0;
             const cardClass = isOutOfStock ? "pos-card disabled" : "pos-card";
             const stockText = isOutOfStock 
-                ? `<span class="px-2 py-0.5 rounded-md bg-red-50 text-red-650 font-bold text-[9px] uppercase tracking-wide">Hết hàng</span>` 
+                ? `<span class="px-2 py-0.5 rounded-md bg-red-50 text-red-650 font-bold text-[9px]">Hết hàng</span>` 
                 : `<span class="text-[10px] text-zinc-500 font-semibold">Kho: <strong class="text-zinc-700 font-bold">\${prod.SoLuongTon}</strong></span>`;
             
             const cat = getProductCategory(prod);
@@ -2622,7 +2723,7 @@
         currentProposedEarlyDiscount = data.proposedEarlyDiscount || 0;
 
         document.getElementById("staff-invoice-court-name").textContent = data.tenSan;
-        document.getElementById("staff-invoice-time-slot").textContent = data.gioBatDau + ' - ' + data.gioKetThuc;
+        document.getElementById("staff-invoice-time-slot").textContent = data.gioBatDau.substring(0, 5) + ' - ' + data.gioKetThuc.substring(0, 5);
 
         const statusBadge = document.getElementById("staff-invoice-payment-status");
         statusBadge.textContent = data.trangThaiThanhToan;
@@ -2645,8 +2746,26 @@
 
         // Populate court details (disclosure - "Xem chi tiết")
         document.getElementById("staff-detail-court-rate").textContent = formatCurrency(data.donGiaGio) + "/giờ";
-        document.getElementById("staff-detail-start-time").textContent = data.gioBatDau;
-        document.getElementById("staff-detail-end-time").textContent = data.gioKetThuc;
+        document.getElementById("staff-detail-start-time").textContent = data.gioBatDau.substring(0, 5);
+        document.getElementById("staff-detail-end-time").textContent = data.gioKetThuc.substring(0, 5);
+
+        // OPEN_ENDED đang chạy: cập nhật "Giờ kết thúc" và header time-slot theo real-time
+        if (openEndedLiveTimer) { clearInterval(openEndedLiveTimer); openEndedLiveTimer = null; }
+        const isOpenEndedLive = data.timeMode === 'OPEN_ENDED' && data.bookingTrangThai === 'Đang sử dụng' && !data.actualEndAt;
+        if (isOpenEndedLive) {
+            const endTimeEl = document.getElementById("staff-detail-end-time");
+            const timeSlotEl = document.getElementById("staff-invoice-time-slot");
+            const startDisplay = data.gioBatDau.substring(0, 5);
+            openEndedLiveTimer = setInterval(() => {
+                const now = getServerNow();
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const ss = String(now.getSeconds()).padStart(2, '0');
+                const nowStr = hh + ':' + mm + ':' + ss;
+                if (endTimeEl) endTimeEl.textContent = hh + ':' + mm;
+                if (timeSlotEl) timeSlotEl.textContent = startDisplay + ' - ' + hh + ':' + mm;
+            }, 1000);
+        }
 
         const earlyContainer = document.getElementById("staff-detail-early-container");
         if (data.phuThuNhanSom > 0) {
@@ -3255,7 +3374,7 @@
 
         if (payment.bookingSource === 'PREBOOKED') {
             const badge = document.createElement('span');
-            badge.className = 'inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md ' + (isManager ? 'bg-purple-50 text-purple-700' : 'bg-orange-50 text-orange-700');
+            badge.className = 'inline-block text-[10px] font-bold px-2 py-1 rounded-md ' + (isManager ? 'bg-purple-50 text-purple-700' : 'bg-orange-50 text-orange-700');
             badge.textContent = 'Đặt trước · Trả sau';
             el.appendChild(badge);
             const wrap = document.createElement('div');
@@ -4040,6 +4159,7 @@
             || currentPaymentModalState === PaymentModalState.VERIFYING_PAYOS) return;
 
         stopPayOSPolling();
+        if (openEndedLiveTimer) { clearInterval(openEndedLiveTimer); openEndedLiveTimer = null; }
         const wasSuccess = currentPaymentModalState === PaymentModalState.SUCCESS;
         const modal = document.getElementById("staffInvoiceModal");
         const errorBox = document.getElementById('staff-payment-error');
@@ -4259,7 +4379,7 @@
                                     <span class="badge \${statusBadgeClass} text-[9px] font-bold tracking-tight uppercase">\${b.trangThaiThanhToan}</span>
                                 </div>
                                 <div class="flex justify-between items-center pt-2 border-t \${themeBorder}">
-                                    <span class="text-[10px] text-zinc-550 font-semibold uppercase tracking-wider bg-zinc-150 px-2 py-0.5 rounded">Nguồn: \${b.nguonDatSan}</span>
+                                    <span class="text-[10px] text-zinc-550 font-semibold bg-zinc-150 px-2 py-0.5 rounded">Nguồn: \${b.nguonDatSan}</span>
                                     <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
                                         <input type="hidden" name="action" value="checkInPreBooked">
                                         <input type="hidden" name="datSanId" value="\${b.datSanId}">

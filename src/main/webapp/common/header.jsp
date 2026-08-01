@@ -2,933 +2,632 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-<!-- Load FontAwesome and Google Fonts for consistent styling -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 
 <style>
     :root {
-        --primary: #AFD639; 
-        --primary-hover: #AEDB2B;
-        --secondary-blue: #427CF0;
-        --secondary-blue-hover: #2763DB;
-        --dark: #111827;
-        --white: #ffffff;
-        --transition: all 0.3s ease;
+        --primary: #3DD68C;
+        --primary-hover: #2ec47d;
+        --header-bg: #0F1B2D;
+        --header-bg-nav: #0a1525;
+        --header-border: rgba(255,255,255,0.07);
+        --header-text: #ffffff;
+        --header-muted: rgba(255,255,255,0.55);
+        --transition: all 0.25s ease;
     }
-    
-    .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 32px;
-        background: #ffffff;
+
+    /* ── WRAPPER ── */
+    .site-header {
         position: sticky;
         top: 0;
-        z-index: 100;
-        border-bottom: 1px solid #c5c9b0;
-        box-sizing: border-box;
+        z-index: 200;
+        background: var(--header-bg);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    .site-header * { box-sizing: border-box; }
+
+    /* ── TOP ROW ── */
+    .navbar-top {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 0 32px;
         height: 64px;
+        border-bottom: 1px solid var(--header-border);
     }
-    .navbar * {
-        box-sizing: border-box;
-    }
+
+    /* Logo */
     .logo-container {
         text-decoration: none;
         display: flex;
         align-items: center;
         gap: 10px;
-        transition: transform 0.2s ease;
+        flex-shrink: 0;
+        transition: opacity 0.2s;
     }
-    .logo-container:hover {
-        transform: scale(1.03);
-    }
+    .logo-container:hover { opacity: 0.85; }
     .logo-img {
-        height: 36px;
-        width: 36px;
-        object-fit: cover;
-        border-radius: 6px;
-        border: 1px solid #f0f0f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        height: 36px; width: 36px;
+        object-fit: cover; border-radius: 8px;
     }
     .logo-text {
         font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 24px;
-        text-transform: uppercase;
-        letter-spacing: -0.5px;
-        color: var(--dark);
+        font-weight: 700; font-size: 22px;
+        text-transform: uppercase; letter-spacing: -0.5px;
+        color: var(--header-text);
     }
-    .logo-text span {
-        color: var(--primary);
+    .logo-text span { color: var(--primary); }
+
+    /* Search */
+    .header-search {
+        flex: 1; max-width: 520px; position: relative;
     }
-    .nav-links {
-        list-style: none;
-        display: flex;
-        gap: 8px;
-        margin: 0;
-        padding: 0;
-        align-items: center;
-    }
-    .nav-links a {
-        text-decoration: none;
-        color: #4b5563;
-        font-family: 'Poppins', sans-serif;
-        font-size: 15px;
-        text-transform: none;
-        letter-spacing: -0.1px;
-        font-weight: 500;
-        padding: 8px 16px;
+    .header-search input {
+        width: 100%; height: 42px;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.11);
         border-radius: 9999px;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-        display: inline-block;
+        color: var(--header-text);
+        font-family: 'Poppins', sans-serif; font-size: 14px;
+        padding: 0 44px 0 20px;
+        outline: none;
+        transition: border-color 0.2s, background 0.2s;
     }
-    .nav-links a:hover, .nav-links a.active {
-        color: #000000;
+    .header-search input::placeholder { color: var(--header-muted); }
+    .header-search input:focus {
+        border-color: var(--primary);
+        background: rgba(255,255,255,0.11);
     }
-    .nav-links a::after {
-        content: '';
-        position: absolute;
-        bottom: 4px;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background-color: #afd639;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        transform: translateX(-50%);
-    }
-    .nav-links a:hover::after, .nav-links a.active::after {
-        width: 30%;
-    }
-    .nav-links a:hover {
-        background-color: #f3f4f6;
-    }
-    .nav-links a.active {
-        font-weight: 600;
-        background-color: #f3f4f6;
+    .header-search-icon {
+        position: absolute; right: 16px; top: 50%;
+        transform: translateY(-50%);
+        color: var(--header-muted); pointer-events: none;
     }
 
-    /* Actions Container */
+    /* Call Center */
+    .header-callcenter {
+        display: flex; align-items: center; gap: 10px;
+        flex-shrink: 0; margin-left: auto;
+    }
+    .callcenter-icon-wrap {
+        width: 38px; height: 38px; border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.11);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--header-text); flex-shrink: 0;
+    }
+    .callcenter-label {
+        font-family: 'Poppins', sans-serif;
+        font-size: 11px; color: var(--header-muted); line-height: 1.3;
+    }
+    .callcenter-number {
+        font-family: 'Poppins', sans-serif;
+        font-size: 15px; font-weight: 700;
+        color: var(--header-text); line-height: 1.3;
+    }
+
+    /* Icon buttons */
     .header-icons {
-        display: flex;
-        align-items: center;
-        gap: 24px;
+        display: flex; align-items: center; gap: 6px; flex-shrink: 0;
     }
     .header-icon-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        color: #0F0F0F;
-        background: transparent;
-        border: none;
+        display: flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px;
+        color: var(--header-text);
+        background: transparent; border: none;
         cursor: pointer;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-        position: relative;
-        padding: 0;
+        transition: background 0.2s, transform 0.15s;
+        position: relative; padding: 0; border-radius: 50%;
+        text-decoration: none;
     }
     .header-icon-btn:hover {
+        background: rgba(255,255,255,0.1);
         transform: scale(1.05);
-        opacity: 0.85;
+        color: var(--header-text);
     }
-    .header-icon-btn:active {
-        transform: scale(0.95);
-    }
+    .header-icon-btn:active { transform: scale(0.95); }
     .header-icon-badge {
-        position: absolute;
-        bottom: -2px;
-        right: -2px;
-        width: 15px;
-        height: 15px;
-        background-color: #9dc93c;
-        border-radius: 50%;
-        border: 1.5px solid #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 9px;
-        font-weight: 700;
-        color: #ffffff;
-        line-height: 1;
+        position: absolute; top: 2px; right: 2px;
+        min-width: 16px; height: 16px;
+        background: var(--primary);
+        border-radius: 999px;
+        border: 2px solid var(--header-bg);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 9px; font-weight: 700;
+        color: #111827; line-height: 1; padding: 0 3px;
     }
-    
-    /* Elegant dropdown menu */
-    .menu-grid-container {
-        position: relative;
-    }
+
+    /* User dropdown */
+    .menu-grid-container { position: relative; }
     .menu-grid-dropdown {
-        position: absolute;
-        right: 0;
-        top: 100%;
-        margin-top: 10px;
-        width: 192px;
-        background-color: #ffffff;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        border-radius: 6px;
-        overflow: hidden;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.2s ease;
-        z-index: 1000;
-        border: 1px solid #f0f0f0;
+        position: absolute; right: 0; top: calc(100% + 10px);
+        width: 200px; background: #ffffff;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+        border-radius: 10px; overflow: hidden;
+        opacity: 0; visibility: hidden;
+        transform: translateY(6px);
+        transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+        z-index: 1000; border: 1px solid #f0f0f0;
     }
-    .menu-grid-container:hover .menu-grid-dropdown,
     .menu-grid-dropdown.show {
-        opacity: 1;
-        visibility: visible;
+        opacity: 1; visibility: visible; transform: translateY(0);
     }
     .menu-grid-header {
         padding: 10px 16px;
-        background-color: #f9f9f9;
-        border-bottom: 1px solid #f0f0f0;
+        background: #f9fafb; border-bottom: 1px solid #f0f0f0;
     }
     .menu-grid-header .title {
-        font-size: 11px;
-        color: #999999;
-        margin: 0;
-        text-transform: uppercase;
-        font-weight: 600;
+        font-size: 10px; color: #9ca3af; margin: 0;
+        text-transform: uppercase; font-weight: 600; letter-spacing: 0.06em;
     }
     .menu-grid-header .name {
-        font-size: 13px;
-        font-weight: 700;
-        color: #0F0F0F;
+        font-size: 13px; font-weight: 700; color: #111827;
         margin: 2px 0 0 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .menu-grid-item {
-        display: block;
-        padding: 10px 16px;
-        font-size: 13.5px;
-        font-weight: 600;
-        color: #444444;
-        text-decoration: none;
-        transition: background-color 0.2s ease, color 0.2s ease;
+        display: block; padding: 10px 16px;
+        font-size: 13px; font-weight: 500; color: #374151;
+        text-decoration: none; transition: background 0.15s;
     }
-    .menu-grid-item:hover {
-        background-color: #f9f9f9;
-        color: #000000;
+    .menu-grid-item:hover { background: #f3f4f6; color: #111827; }
+    .menu-grid-item.logout { color: #dc2626; border-top: 1px solid #f0f0f0; }
+    .menu-grid-item.logout:hover { background: #fef2f2; }
+
+    /* ── BOTTOM NAV ── */
+    .navbar-bottom {
+        display: flex; align-items: center;
+        padding: 0 32px; height: 48px; gap: 4px;
+        background: var(--header-bg-nav);
     }
-    .menu-grid-item.logout {
-        color: #dc2626;
-        border-top: 1px solid #f0f0f0;
+    .nav-links {
+        list-style: none; display: flex; gap: 2px;
+        margin: 0; padding: 0; align-items: center;
     }
-    .menu-grid-item.logout:hover {
-        background-color: #fef2f2;
+    .nav-links a {
+        text-decoration: none; color: var(--header-muted);
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px; font-weight: 500;
+        padding: 6px 14px; border-radius: 9999px;
+        transition: color 0.2s, background 0.2s;
+        display: inline-flex; align-items: center; gap: 6px;
+        white-space: nowrap;
+    }
+    .nav-links a:hover { color: var(--header-text); background: rgba(255,255,255,0.08); }
+    .nav-links a.active { color: var(--header-text); background: rgba(255,255,255,0.1); font-weight: 600; }
+
+    /* Bản đồ pill */
+    .nav-pill-map {
+        background: var(--primary) !important;
+        color: #111827 !important; font-weight: 700 !important;
+        padding: 6px 16px !important;
+    }
+    .nav-pill-map:hover { background: var(--primary-hover) !important; color: #111827 !important; }
+
+    /* HOT badge */
+    .nav-hot-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #ef4444; color: #fff;
+        font-size: 9px; font-weight: 800;
+        border-radius: 4px; padding: 1px 5px;
+        letter-spacing: 0.06em; line-height: 1.4;
     }
 
-    /* Actions Container */
-    .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 15px;
+    /* Tin tức dropdown */
+    .nav-dropdown-wrap { position: relative; }
+    .nav-dropdown-menu {
+        position: absolute; top: calc(100% + 8px); left: 0;
+        min-width: 180px; background: #ffffff;
+        border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+        overflow: hidden; opacity: 0; visibility: hidden;
+        transform: translateY(6px);
+        transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+        z-index: 500; border: 1px solid #f0f0f0;
     }
+    .nav-dropdown-wrap:hover .nav-dropdown-menu {
+        opacity: 1; visibility: visible; transform: translateY(0);
+    }
+    .nav-dropdown-item {
+        display: block; padding: 10px 16px;
+        font-size: 13px; font-weight: 500; color: #374151;
+        text-decoration: none; transition: background 0.15s;
+    }
+    .nav-dropdown-item:hover { background: #f3f4f6; color: #111827; }
 
-    /* Shimmering Register Button */
-    .btn-register-shimmer {
-        position: relative;
-        padding: 10px 24px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-        color: var(--dark) !important;
-        font-size: 0.9rem;
-        font-weight: 750;
-        border-radius: 4px;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        overflow: hidden;
-        border: none;
-        box-shadow: 0 4px 15px rgba(175, 214, 57, 0.2);
-        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        cursor: pointer;
-    }
-
-    .btn-register-shimmer::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -150%;
-        width: 50%;
-        height: 100%;
-        background: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.4) 50%,
-            rgba(255, 255, 255, 0) 100%
-        );
-        transform: skewX(-20deg);
-        transition: none;
-    }
-
-    .btn-register-shimmer:hover::before { animation: shimmerEffect 1.5s infinite; }
-    .btn-register-shimmer:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(175, 214, 57, 0.4);
-        color: var(--dark) !important;
-    }
-    .btn-register-shimmer:active {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(175, 214, 57, 0.3);
-    }
-    .btn-register-shimmer i {
-        font-size: 1rem;
-        transition: transform 0.3s ease;
-    }
-    .btn-register-shimmer:hover i { transform: translateX(4px); }
-
-    @keyframes shimmerEffect {
-        0% { left: -150%; }
-        100% { left: 150%; }
-    }
-    
-    /* User dropdown styling to match the new green theme */
-    .user-menu-container {
-        position: relative;
-    }
-    .user-menu-btn {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        padding: 5px 10px 5px 5px;
-        border-radius: 999px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        cursor: pointer;
-        transition: var(--transition);
-        min-height: 42px;
-    }
-    .user-menu-btn:hover {
-        background-color: #f8fafc;
-        border-color: #cbd5e1;
-    }
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background-color: var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--dark);
-        font-weight: 700;
-        font-size: 12px;
-    }
-    .user-name {
-        font-size: 13px;
-        font-weight: 900;
-        color: var(--dark);
-    }
-    .user-menu-caret {
-        color: rgba(17, 24, 39, 0.6);
-        transition: transform 0.2s ease;
-    }
-    .user-menu-btn[aria-expanded="true"] .user-menu-caret {
-        transform: rotate(180deg);
-    }
-    .user-dropdown-menu {
-        position: absolute;
-        right: 0;
-        top: 100%;
-        margin-top: 10px;
-        width: 240px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        z-index: 110;
-        overflow: hidden;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(10px);
-        transition: var(--transition);
-    }
-    .user-dropdown-menu.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-    .user-info-header {
-        padding: 16px;
-        background-color: rgba(175, 214, 57, 0.08);
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .user-info-name {
-        display: block;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: var(--dark);
-    }
-    .user-info-email {
-        display: block;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        margin-top: 2px;
-    }
-    .user-dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 16px;
-        color: var(--dark);
-        text-decoration: none;
-        font-size: 0.85rem;
-        transition: var(--transition);
-    }
-    .user-dropdown-item:hover {
-        background-color: rgba(175, 214, 57, 0.08);
-        color: var(--dark);
-    }
-    .user-dropdown-item.logout {
-        color: #ef4444;
-        border-top: 1px solid #f1f5f9;
-    }
-    .user-dropdown-item.logout:hover {
-        background-color: #fef2f2;
-        color: #dc2626;
-    }
-
-    .fade-down { animation: fadeDown 1s cubic-bezier(0.1, 0.8, 0.2, 1); }
+    /* Animations */
+    .fade-down { animation: fadeDown 0.55s cubic-bezier(0.1, 0.8, 0.2, 1); }
     @keyframes fadeDown {
-        from { opacity: 0; transform: translateY(-30px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; transform: translateY(-20px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* Mobile */
     .mobile-menu-btn {
-        display: none;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 8px;
-        color: var(--dark);
-        font-size: 1.4rem;
-        line-height: 1;
+        display: none; background: none; border: none;
+        cursor: pointer; padding: 8px;
+        color: var(--header-text); font-size: 1.3rem; line-height: 1;
+        border-radius: 6px; transition: background 0.2s;
     }
+    .mobile-menu-btn:hover { background: rgba(255,255,255,0.1); }
     .mobile-nav {
-        display: none;
-        position: fixed;
-        top: 69px;
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        z-index: 99;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        display: none; position: fixed;
+        top: 112px; left: 0; right: 0;
+        background: var(--header-bg-nav);
+        z-index: 199;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         flex-direction: column;
-        padding: 12px 16px 16px;
-        gap: 2px;
-        border-top: 1px solid #e2e8f0;
+        padding: 10px 16px 14px; gap: 2px;
+        border-top: 1px solid var(--header-border);
     }
     .mobile-nav.open { display: flex; }
     .mobile-nav-link {
-        display: flex;
-        align-items: center;
-        padding: 12px 14px;
-        border-radius: 10px;
-        color: var(--dark);
-        text-decoration: none;
-        font-size: 0.95rem;
-        font-weight: 500;
-        transition: var(--transition);
+        display: flex; align-items: center;
+        padding: 11px 14px; border-radius: 10px;
+        color: var(--header-muted); text-decoration: none;
+        font-size: 0.95rem; font-weight: 500;
+        transition: background 0.2s, color 0.2s;
     }
     .mobile-nav-link:hover, .mobile-nav-link.active {
-        background-color: #f1f5f9;
-        color: var(--primary);
-        font-weight: 600;
+        background: rgba(255,255,255,0.08); color: var(--header-text);
     }
 
-    /* Book a Court Button */
-    .btn-header-book {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--secondary-blue);
-        color: var(--white) !important;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 13px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        padding: 10px 24px;
-        border-radius: 4px;
-        transition: var(--transition);
-        box-shadow: 0 4px 10px rgba(66, 124, 240, 0.2);
-        text-decoration: none;
-    }
-    .btn-header-book:hover {
-        background-color: var(--secondary-blue-hover);
-        box-shadow: 0 6px 15px rgba(66, 124, 240, 0.3);
-        transform: translateY(-1px);
-    }
-
-    @media (max-width: 1023px) {
-        .btn-header-book {
-            display: none;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .nav-links { display: none; }
-        .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
-    }
-
-    /* Side Drawer Offcanvas CSS */
+    /* Side Drawer */
     .side-drawer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 9999;
-        visibility: hidden;
+        position: fixed; top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: 9999; visibility: hidden;
         transition: visibility 0.3s ease;
     }
-    .side-drawer.open {
-        visibility: visible;
-    }
+    .side-drawer.open { visibility: visible; }
     .side-drawer-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
-        opacity: 0;
+        position: absolute; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); opacity: 0;
         transition: opacity 0.3s ease;
     }
-    .side-drawer.open .side-drawer-overlay {
-        opacity: 1;
-    }
+    .side-drawer.open .side-drawer-overlay { opacity: 1; }
     .side-drawer-content {
-        position: absolute;
-        top: 0;
-        right: -360px;
-        width: 360px;
-        height: 100%;
-        background-color: #ffffff;
-        box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-        display: flex;
-        flex-direction: column;
+        position: absolute; top: 0; right: -360px;
+        width: 360px; height: 100%;
+        background: #ffffff;
+        box-shadow: -5px 0 25px rgba(0,0,0,0.2);
+        display: flex; flex-direction: column;
         transition: right 0.3s ease;
-        padding: 24px;
-        box-sizing: border-box;
-        overflow-y: auto;
+        padding: 24px; box-sizing: border-box; overflow-y: auto;
     }
-    .side-drawer.open .side-drawer-content {
-        right: 0;
-    }
+    .side-drawer.open .side-drawer-content { right: 0; }
     .side-drawer-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        display: flex; justify-content: space-between; align-items: center;
         border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 16px;
-        margin-bottom: 24px;
+        padding-bottom: 16px; margin-bottom: 24px;
     }
     .side-drawer-close {
-        background: none;
-        border: none;
-        font-size: 28px;
-        cursor: pointer;
-        color: #999999;
-        transition: color 0.2s;
-        line-height: 1;
+        background: none; border: none; font-size: 28px;
+        cursor: pointer; color: #999; transition: color 0.2s; line-height: 1;
     }
-    .side-drawer-close:hover {
-        color: #333333;
-    }
-    .side-drawer-section {
-        margin-bottom: 30px;
-    }
+    .side-drawer-close:hover { color: #333; }
+    .side-drawer-section { margin-bottom: 28px; }
     .section-title {
         font-family: 'Barlow Condensed', sans-serif;
-        font-size: 14px;
-        font-weight: 700;
-        color: #999999;
-        letter-spacing: 0.1em;
-        margin-bottom: 16px;
-        margin-top: 0;
+        font-size: 13px; font-weight: 700; color: #9ca3af;
+        letter-spacing: 0.1em; margin-bottom: 14px; margin-top: 0;
         text-transform: uppercase;
     }
     .user-section {
-        background-color: #f9f9f9;
-        padding: 16px;
-        border-radius: 8px;
-        border: 1px solid #f0f0f0;
+        background: #f9fafb; padding: 16px;
+        border-radius: 10px; border: 1px solid #f0f0f0;
     }
-    .drawer-user-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-    }
+    .drawer-user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .avatar-circle {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background-color: #9dc93c;
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        font-weight: 700;
+        width: 44px; height: 44px; border-radius: 50%;
+        background: var(--primary); color: #111827;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; font-weight: 700;
     }
-    .user-details {
-        flex: 1;
-    }
-    .user-name {
-        font-weight: 600;
-        color: #333333;
-        margin: 0;
-        font-size: 15px;
-    }
-    .user-role {
-        font-size: 12px;
-        color: #999999;
-        margin: 0;
-    }
-    .drawer-user-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+    .user-details { flex: 1; }
+    .user-name { font-weight: 600; color: #111827; margin: 0; font-size: 15px; }
+    .user-role { font-size: 12px; color: #9ca3af; margin: 0; }
+    .drawer-user-actions { display: flex; flex-direction: column; gap: 6px; }
     .btn-drawer-action {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #444444;
-        text-decoration: none;
-        font-size: 14px;
-        padding: 8px;
-        border-radius: 4px;
-        transition: background-color 0.2s, color 0.2s;
+        display: flex; align-items: center; gap: 8px;
+        color: #374151; text-decoration: none; font-size: 14px;
+        padding: 8px 10px; border-radius: 6px;
+        transition: background 0.2s, color 0.2s;
     }
-    .btn-drawer-action:hover {
-        background-color: #f0f0f0;
-        color: #000000;
-    }
-    .drawer-guest-info {
-        text-align: center;
-        padding: 8px 0;
-    }
-    .guest-msg {
-        font-size: 13px;
-        color: #666666;
-        margin-bottom: 14px;
-    }
+    .btn-drawer-action:hover { background: #f3f4f6; color: #111827; }
+    .drawer-guest-info { text-align: center; padding: 8px 0; }
+    .guest-msg { font-size: 13px; color: #6b7280; margin-bottom: 14px; }
     .btn-drawer-login {
-        background-color: #333333;
-        color: #ffffff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 13px;
-        transition: background-color 0.2s;
-        width: 100%;
+        background: #111827; color: #fff; border: none;
+        padding: 10px 20px; border-radius: 6px; font-weight: 600;
+        cursor: pointer; font-size: 13px; transition: background 0.2s; width: 100%;
     }
-    .btn-drawer-login:hover {
-        background-color: #000000;
-    }
+    .btn-drawer-login:hover { background: #000; }
     .drawer-link {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: #333333;
-        text-decoration: none;
-        font-size: 16px;
-        font-weight: 600;
-        padding: 10px 0;
-        border-bottom: 1px solid #f9f9f9;
+        display: flex; align-items: center; gap: 12px;
+        color: #374151; text-decoration: none;
+        font-size: 15px; font-weight: 600;
+        padding: 10px 0; border-bottom: 1px solid #f9fafb;
         transition: color 0.2s, padding-left 0.2s;
     }
-    .drawer-link:hover {
-        color: #9dc93c;
-        padding-left: 6px;
-    }
-    .support-channels {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+    .drawer-link:hover { color: var(--primary); padding-left: 6px; }
+    .support-channels { display: flex; flex-direction: column; gap: 10px; }
     .channel-btn {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
-        color: #333333;
-        font-weight: 600;
-        font-size: 14px;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #e0e0e0;
+        display: flex; align-items: center; gap: 12px;
+        text-decoration: none; color: #374151; font-weight: 600; font-size: 14px;
+        padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;
         transition: all 0.2s;
     }
-    .channel-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    .zalo-btn {
-        background-color: #f4f8ff;
-        border-color: #cbdcff;
-    }
-    .zalo-btn:hover {
-        background-color: #e8f1ff;
-        border-color: #a3c3ff;
-    }
-    .messenger-btn {
-        background-color: #fff2f9;
-        border-color: #ffdceb;
-    }
-    .messenger-btn:hover {
-        background-color: #ffe6f3;
-        border-color: #ffb8d9;
-    }
-    .channel-icon {
-        width: 24px;
-        height: 24px;
-    }
-    .side-drawer-footer {
-        margin-top: auto;
-        border-top: 1px solid #f0f0f0;
-        padding-top: 20px;
-    }
-    .contact-item {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 12px;
-    }
-    .contact-item .label {
-        font-size: 12px;
-        color: #999999;
-    }
-    .contact-item .value {
-        font-size: 15px;
-        font-weight: 700;
-        color: #333333;
+    .channel-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
+    .zalo-btn { background: #f0f7ff; border-color: #bfdbfe; }
+    .zalo-btn:hover { background: #dbeafe; }
+    .messenger-btn { background: #fff0f8; border-color: #fbcfe8; }
+    .messenger-btn:hover { background: #fce7f3; }
+    .channel-icon { width: 24px; height: 24px; }
+    .side-drawer-footer { margin-top: auto; border-top: 1px solid #f0f0f0; padding-top: 18px; }
+    .contact-item { display: flex; flex-direction: column; margin-bottom: 10px; }
+    .contact-item .label { font-size: 11px; color: #9ca3af; }
+    .contact-item .value { font-size: 14px; font-weight: 700; color: #111827; }
+
+    @media (max-width: 1023px) { .header-callcenter { display: none; } }
+    @media (max-width: 768px) {
+        .navbar-bottom { display: none; }
+        .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+        .header-search { max-width: none; }
     }
 </style>
 
-<nav class="navbar fade-down">
-    <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container">
-        <img src="${pageContext.request.contextPath}/resources/logo.png" alt="V-SPORT Logo" class="logo-img" />
-        <span class="logo-text">V-SPORT<span>.</span></span>
-    </a>
-    <ul class="nav-links">
-        <li><a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">Trang chủ</a></li>
-        <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">Đặt sân</a></li>
-        <li><a href="${pageContext.request.contextPath}/customer/ghep-keo" id="nav-ghepkeo">Ghép kèo</a></li>
-        <li><a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" id="nav-history">Lịch của tôi</a></li>
-        <li><a href="${pageContext.request.contextPath}/customer/tai-khoan" id="nav-account">Tài khoản</a></li>
-    </ul>
-    
-    <div class="header-icons">
-        <!-- Cart / Booking Bag -->
-        <a href="${pageContext.request.contextPath}/customer/dat-san" class="header-icon-btn">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-            <span class="header-icon-badge">0</span>
+<header class="site-header fade-down">
+    <!-- TOP ROW -->
+    <div class="navbar-top">
+        <a href="${pageContext.request.contextPath}/index.jsp" class="logo-container">
+            <img src="${pageContext.request.contextPath}/resources/logo.png" alt="V-SPORT Logo" class="logo-img" />
+            <span class="logo-text">V- <span>SPORT</span></span>
         </a>
-        
-        <!-- User Icon -->
-        <div class="menu-grid-container" style="position: relative;">
-            <button id="header-user-btn" class="header-icon-btn" onclick="handleUserClick(this)" aria-haspopup="true" aria-expanded="false" aria-label="Tài khoản">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
-            </button>
-            <c:if test="${user != null}">
-                <div id="user-profile-dropdown" class="menu-grid-dropdown">
-                    <div class="menu-grid-header">
-                        <p class="title">Tài khoản</p>
-                        <p class="name">
-                            <c:choose>
-                                <c:when test="${not empty user.fullName}">
-                                    ${fn:escapeXml(user.fullName)}
-                                </c:when>
-                                <c:otherwise>
-                                    ${fn:escapeXml(user.username)}
-                                </c:otherwise>
-                            </c:choose>
-                        </p>
-                    </div>
-                    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-grid-item">Tài khoản</a>
-                    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="menu-grid-item">Lịch của tôi</a>
-                    <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="menu-grid-item">Ghép kèo</a>
-                    <a href="${pageContext.request.contextPath}/logout" class="menu-grid-item logout">Đăng xuất</a>
-                </div>
-            </c:if>
-        </div>
-        
-        <!-- Search Icon -->
-        <button class="header-icon-btn">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-        </button>
-        
-        <!-- Nine-dots grid -->
-        <button onclick="openSideDrawer()" class="header-icon-btn">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="4" height="4" rx="0.5" />
-                <rect x="10" y="3" width="4" height="4" rx="0.5" />
-                <rect x="17" y="3" width="4" height="4" rx="0.5" />
-                <rect x="3" y="10" width="4" height="4" rx="0.5" />
-                <rect x="10" y="10" width="4" height="4" rx="0.5" />
-                <rect x="17" y="10" width="4" height="4" rx="0.5" />
-                <rect x="3" y="17" width="4" height="4" rx="0.5" />
-                <rect x="10" y="17" width="4" height="4" rx="0.5" />
-                <rect x="17" y="17" width="4" height="4" rx="0.5" />
-            </svg>
-        </button>
-        
-        <!-- Mobile Hamburger Button -->
-        <button id="mobileNavBtn" class="mobile-menu-btn" aria-label="Mở menu">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-    </div>
-</nav>
 
-<!-- Mobile Navigation Drawer -->
+        <div class="header-search">
+            <input type="text" placeholder="Tìm tên sân, cơ sở, địa chỉ..." id="header-search-input" />
+            <span class="header-search-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </span>
+        </div>
+
+        <div class="header-callcenter">
+            <div class="callcenter-icon-wrap">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.07 1.18 2 2 0 012.04 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="callcenter-label">Call Center</div>
+                <div class="callcenter-number">818-555 67 88</div>
+            </div>
+        </div>
+
+        <div class="header-icons">
+            <!-- Cart -->
+            <a href="${pageContext.request.contextPath}/customer/dat-san" class="header-icon-btn" title="Giỏ hàng">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+                <span class="header-icon-badge">0</span>
+            </a>
+
+            <!-- Wishlist -->
+            <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="header-icon-btn" title="Yêu thích">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                </svg>
+                <span class="header-icon-badge">0</span>
+            </a>
+
+            <!-- User -->
+            <div class="menu-grid-container">
+                <button id="header-user-btn" class="header-icon-btn"
+                        onclick="handleUserClick(this)"
+                        aria-haspopup="true" aria-expanded="false" aria-label="Tài khoản">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </button>
+                <c:if test="${user != null}">
+                    <div id="user-profile-dropdown" class="menu-grid-dropdown">
+                        <div class="menu-grid-header">
+                            <p class="title">Tài khoản</p>
+                            <p class="name">
+                                <c:choose>
+                                    <c:when test="${not empty user.fullName}">${fn:escapeXml(user.fullName)}</c:when>
+                                    <c:otherwise>${fn:escapeXml(user.username)}</c:otherwise>
+                                </c:choose>
+                            </p>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="menu-grid-item">Tài khoản</a>
+                        <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="menu-grid-item">Lịch của tôi</a>
+                        <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="menu-grid-item">Ghép kèo</a>
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-grid-item logout">Đăng xuất</a>
+                    </div>
+                </c:if>
+            </div>
+
+            <!-- Mobile hamburger -->
+            <button id="mobileNavBtn" class="mobile-menu-btn" aria-label="Mở menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV ROW -->
+    <nav class="navbar-bottom">
+        <ul class="nav-links">
+            <li>
+                <a href="${pageContext.request.contextPath}/customer/ban-do" id="nav-map" class="nav-pill-map">
+                    <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    Bản đồ
+                </a>
+            </li>
+            <li><a href="${pageContext.request.contextPath}/customer/dat-san" id="nav-booking">Đặt sân</a></li>
+            <li>
+                <a href="${pageContext.request.contextPath}/customer/uu-dai" id="nav-uudai">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    Ưu đãi
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/customer/ghep-keo" id="nav-ghepkeo">
+                    Ghép Kèo&nbsp;<span class="nav-hot-badge">HOT</span>
+                </a>
+            </li>
+            <li><a href="${pageContext.request.contextPath}/customer/dich-vu" id="nav-dichvu">Cửa hàng &amp; Dịch vụ</a></li>
+            <li class="nav-dropdown-wrap">
+                <a href="#" id="nav-tintuc">
+                    Tin tức&nbsp;
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </a>
+                <div class="nav-dropdown-menu">
+                    <a href="${pageContext.request.contextPath}/tin-tuc/the-thao" class="nav-dropdown-item">Thể thao</a>
+                    <a href="${pageContext.request.contextPath}/tin-tuc/khuyen-mai" class="nav-dropdown-item">Khuyến mãi</a>
+                    <a href="${pageContext.request.contextPath}/tin-tuc/su-kien" class="nav-dropdown-item">Sự kiện</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Mobile nav -->
 <div id="mobileNav" class="mobile-nav">
-    <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-nav-link" id="mnav-home"><i class="fa-solid fa-house" style="width:20px;margin-right:10px;color:var(--primary)"></i>Trang Chủ</a>
-    <a href="${pageContext.request.contextPath}/customer/dat-san" class="mobile-nav-link" id="mnav-booking"><i class="fa-solid fa-magnifying-glass" style="width:20px;margin-right:10px;color:var(--primary)"></i>Đặt sân</a>
-    <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="mobile-nav-link" id="mnav-ghepkeo"><i class="fa-solid fa-people-group" style="width:20px;margin-right:10px;color:var(--primary)"></i>Ghép kèo</a>
-    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="mobile-nav-link" id="mnav-history"><i class="fa-solid fa-calendar-check" style="width:20px;margin-right:10px;color:var(--primary)"></i>Lịch của tôi</a>
-    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="mobile-nav-link" id="mnav-account"><i class="fa-solid fa-user" style="width:20px;margin-right:10px;color:var(--primary)"></i>Tài khoản</a>
+    <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-nav-link" id="mnav-home">
+        <i class="fa-solid fa-house" style="width:20px;margin-right:10px;color:var(--primary)"></i>Trang Chủ
+    </a>
+    <a href="${pageContext.request.contextPath}/customer/dat-san" class="mobile-nav-link" id="mnav-booking">
+        <i class="fa-solid fa-magnifying-glass" style="width:20px;margin-right:10px;color:var(--primary)"></i>Đặt sân
+    </a>
+    <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="mobile-nav-link" id="mnav-ghepkeo">
+        <i class="fa-solid fa-people-group" style="width:20px;margin-right:10px;color:var(--primary)"></i>Ghép kèo
+    </a>
+    <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" class="mobile-nav-link" id="mnav-history">
+        <i class="fa-solid fa-calendar-check" style="width:20px;margin-right:10px;color:var(--primary)"></i>Lịch của tôi
+    </a>
+    <a href="${pageContext.request.contextPath}/customer/tai-khoan" class="mobile-nav-link" id="mnav-account">
+        <i class="fa-solid fa-user" style="width:20px;margin-right:10px;color:var(--primary)"></i>Tài khoản
+    </a>
 </div>
 
 <script>
-    // User Dropdown Toggle
-    (function() {
-        const userMenuBtn = document.getElementById('header-user-btn');
-        const userDropdown = document.getElementById('user-profile-dropdown');
-        
-        window.handleUserClick = function(btn) {
-            const isLoggedIn = ${user != null ? "true" : "false"};
-            if (isLoggedIn) {
-                if (userDropdown) {
-                    userDropdown.classList.toggle('show');
-                    if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', userDropdown.classList.contains('show') ? 'true' : 'false');
-                }
-            } else {
-                const currentUrl = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
-                window.location.href = "${pageContext.request.contextPath}/dangnhap?redirect=" + currentUrl;
+(function() {
+    // User dropdown
+    const userBtn = document.getElementById('header-user-btn');
+    const userDrop = document.getElementById('user-profile-dropdown');
+
+    window.handleUserClick = function() {
+        const isLoggedIn = ${user != null ? "true" : "false"};
+        if (isLoggedIn) {
+            if (userDrop) {
+                userDrop.classList.toggle('show');
+                userBtn && userBtn.setAttribute('aria-expanded', userDrop.classList.contains('show'));
             }
-        };
-
-        if (userMenuBtn && userDropdown) {
-            document.addEventListener('click', (e) => {
-                if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
-                    userDropdown.classList.remove('show');
-                    userMenuBtn.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    userDropdown.classList.remove('show');
-                    userMenuBtn.setAttribute('aria-expanded', 'false');
-                }
-            });
+        } else {
+            const curr = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+            window.location.href = "${pageContext.request.contextPath}/dangnhap?redirect=" + curr;
         }
-        
-        // Mobile nav toggle
-        const mobileNavBtn = document.getElementById('mobileNavBtn');
-        const mobileNav = document.getElementById('mobileNav');
-        if (mobileNavBtn && mobileNav) {
-            mobileNavBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                mobileNav.classList.toggle('open');
-                mobileNavBtn.querySelector('i').className =
-                    mobileNav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+    };
+
+    if (userBtn && userDrop) {
+        document.addEventListener('click', e => {
+            if (!userDrop.contains(e.target) && !userBtn.contains(e.target)) {
+                userDrop.classList.remove('show');
+                userBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { userDrop.classList.remove('show'); userBtn.setAttribute('aria-expanded', 'false'); }
+        });
+    }
+
+    // Search redirect
+    const searchInput = document.getElementById('header-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                window.location.href = "${pageContext.request.contextPath}/customer/tim-kiem?q=" + encodeURIComponent(searchInput.value.trim());
+            }
+        });
+    }
+
+    // Mobile hamburger
+    const mobileBtn = document.getElementById('mobileNavBtn');
+    const mobileNav = document.getElementById('mobileNav');
+    if (mobileBtn && mobileNav) {
+        mobileBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            mobileNav.classList.toggle('open');
+            mobileBtn.querySelector('i').className = mobileNav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        });
+        document.addEventListener('click', e => {
+            if (!mobileNav.contains(e.target) && !mobileBtn.contains(e.target)) {
+                mobileNav.classList.remove('open');
+                mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+            }
+        });
+        mobileNav.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                mobileNav.classList.remove('open');
+                mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
             });
-            document.addEventListener('click', (e) => {
-                if (!mobileNav.contains(e.target) && !mobileNavBtn.contains(e.target)) {
-                    mobileNav.classList.remove('open');
-                    mobileNavBtn.querySelector('i').className = 'fa-bars';
-                }
-            });
-            mobileNav.querySelectorAll('a').forEach(a => {
-                a.addEventListener('click', () => {
-                    mobileNav.classList.remove('open');
-                    mobileNavBtn.querySelector('i').className = 'fa-solid fa-bars';
-                });
-            });
-        }
+        });
+    }
 
-        // Auto active link based on URL
-        const currentPath = window.location.pathname;
-
-        function pickActiveId(prefixes) {
-            if (currentPath.includes('/customer/ghep-keo')) return prefixes.ghepkeo;
-            if (currentPath.includes('/customer/lich-su-dat-san')) return prefixes.history;
-            if (currentPath.includes('/customer/tai-khoan')) return prefixes.account;
-            if (currentPath.includes('dat-san') || currentPath.includes('ChiTietSan')) return prefixes.booking;
-            if (currentPath.endsWith('index.jsp') || currentPath.endsWith('/')) return prefixes.home;
-            return null;
-        }
-
-        const desktopActiveId = pickActiveId({ ghepkeo: 'nav-ghepkeo', history: 'nav-history', account: 'nav-account', booking: 'nav-booking', home: 'nav-home' });
-        if (desktopActiveId) {
-            const el = document.getElementById(desktopActiveId);
-            if (el) el.classList.add('active');
-        }
-
-        const mobileActiveId = pickActiveId({ ghepkeo: 'mnav-ghepkeo', history: 'mnav-history', account: 'mnav-account', booking: 'mnav-booking', home: 'mnav-home' });
-        if (mobileActiveId) {
-            const el = document.getElementById(mobileActiveId);
-            if (el) el.classList.add('active');
-        }
-    })();
+    // Active link
+    const path = window.location.pathname;
+    function setActive(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
+    if (path.includes('/customer/ghep-keo'))          { setActive('nav-ghepkeo'); setActive('mnav-ghepkeo'); }
+    else if (path.includes('/customer/lich-su-dat-san')) { setActive('mnav-history'); }
+    else if (path.includes('/customer/tai-khoan'))    { setActive('mnav-account'); }
+    else if (path.includes('dat-san') || path.includes('ChiTietSan')) { setActive('nav-booking'); setActive('mnav-booking'); }
+    else if (path.includes('/customer/ban-do'))       { setActive('nav-map'); }
+    else if (path.endsWith('index.jsp') || path.endsWith('/')) { setActive('mnav-home'); }
+})();
 </script>
 
-<!-- Right Sidebar Drawer (Offcanvas Menu) -->
+<!-- Side Drawer -->
 <div id="side-drawer" class="side-drawer">
     <div class="side-drawer-overlay" onclick="closeSideDrawer()"></div>
     <div class="side-drawer-content">
-        <!-- Close button & Logo -->
         <div class="side-drawer-header">
-            <a href="${pageContext.request.contextPath}/index.jsp" class="side-drawer-logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
-                <img alt="V-SPORT Logo" style="height: 36px; border-radius: 4px;" src="${pageContext.request.contextPath}/resources/logo.png"/>
-                <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; color: #111827; letter-spacing: -0.5px;">V-SPORT<span style="color: #afd639;">.</span></span>
+            <a href="${pageContext.request.contextPath}/index.jsp" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <img alt="V-SPORT" style="height:32px;border-radius:6px;" src="${pageContext.request.contextPath}/resources/logo.png"/>
+                <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;color:#111827;letter-spacing:-0.5px;">V- <span style="color:#3DD68C;">SPORT</span></span>
             </a>
             <button class="side-drawer-close" onclick="closeSideDrawer()">&times;</button>
         </div>
 
-        <!-- User Profile Section -->
         <div class="side-drawer-section user-section">
             <c:choose>
                 <c:when test="${user != null}">
                     <div class="drawer-user-info">
                         <div class="avatar-circle">
                             <c:choose>
-                                <c:when test="${not empty user.fullName}">
-                                    ${user.fullName.substring(0,1).toUpperCase()}
-                                </c:when>
-                                <c:otherwise>
-                                    ${user.username.substring(0,1).toUpperCase()}
-                                </c:otherwise>
+                                <c:when test="${not empty user.fullName}">${user.fullName.substring(0,1).toUpperCase()}</c:when>
+                                <c:otherwise>${user.username.substring(0,1).toUpperCase()}</c:otherwise>
                             </c:choose>
                         </div>
                         <div class="user-details">
                             <p class="user-name">
                                 <c:choose>
-                                    <c:when test="${not empty user.fullName}">
-                                        ${user.fullName}
-                                    </c:when>
-                                    <c:otherwise>
-                                        ${user.username}
-                                    </c:otherwise>
+                                    <c:when test="${not empty user.fullName}">${user.fullName}</c:when>
+                                    <c:otherwise>${user.username}</c:otherwise>
                                 </c:choose>
                             </p>
                             <p class="user-role">Thành viên</p>
@@ -943,14 +642,13 @@
                 <c:otherwise>
                     <div class="drawer-guest-info">
                         <p class="guest-msg">Đăng nhập để xem lịch sử đặt sân và quản lý hồ sơ của bạn.</p>
-                        <button class="btn-drawer-login" onclick="closeSideDrawer(); const curr = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash); window.location.href = '${pageContext.request.contextPath}/dangnhap?redirect=' + curr;">Đăng Nhập Ngay</button>
+                        <button class="btn-drawer-login" onclick="closeSideDrawer(); const c=encodeURIComponent(window.location.pathname+window.location.search+window.location.hash); window.location.href='${pageContext.request.contextPath}/dangnhap?redirect='+c;">Đăng Nhập Ngay</button>
                     </div>
                 </c:otherwise>
             </c:choose>
         </div>
 
-        <!-- Navigation Menu -->
-        <div class="side-drawer-section links-section">
+        <div class="side-drawer-section">
             <h4 class="section-title">TIỆN ÍCH HỆ THỐNG</h4>
             <a href="${pageContext.request.contextPath}/index.jsp" class="drawer-link"><i class="fa-solid fa-house"></i> Trang Chủ</a>
             <a href="${pageContext.request.contextPath}/customer/dat-san" class="drawer-link"><i class="fa-solid fa-calendar-days"></i> Tìm Sân Đặt Lịch</a>
@@ -958,8 +656,7 @@
             <a href="${pageContext.request.contextPath}/index.jsp#pricing" class="drawer-link"><i class="fa-solid fa-tags"></i> Bảng Giá Dịch Vụ</a>
         </div>
 
-        <!-- Support Channels (Zalo & Messenger) -->
-        <div class="side-drawer-section support-section">
+        <div class="side-drawer-section">
             <h4 class="section-title">HỖ TRỢ TRỰC TUYẾN</h4>
             <div class="support-channels">
                 <a href="https://zalo.me/0987654321" target="_blank" class="channel-btn zalo-btn">
@@ -973,7 +670,6 @@
             </div>
         </div>
 
-        <!-- Footer / Contact Info -->
         <div class="side-drawer-footer">
             <div class="contact-item">
                 <span class="label">Hotline hỗ trợ:</span>
@@ -988,12 +684,6 @@
 </div>
 
 <script>
-    window.openSideDrawer = function() {
-        const drawer = document.getElementById('side-drawer');
-        if (drawer) drawer.classList.add('open');
-    };
-    window.closeSideDrawer = function() {
-        const drawer = document.getElementById('side-drawer');
-        if (drawer) drawer.classList.remove('open');
-    };
+    window.openSideDrawer  = function() { document.getElementById('side-drawer').classList.add('open');    };
+    window.closeSideDrawer = function() { document.getElementById('side-drawer').classList.remove('open'); };
 </script>

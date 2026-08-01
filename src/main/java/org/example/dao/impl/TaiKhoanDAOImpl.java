@@ -53,7 +53,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     public List<TaiKhoan> getAllAccounts() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT a FROM TaiKhoan a WHERE a.isDeleted = false OR a.isDeleted IS NULL", TaiKhoan.class).getResultList();
+            return em.createQuery("SELECT a FROM TaiKhoan a WHERE a.isDeleted = false OR a.isDeleted IS NULL ORDER BY a.accountId DESC", TaiKhoan.class).getResultList();
         } catch (Exception e) {
             logger.error("Lỗi lấy danh sách tài khoản: {}", e.getMessage(), e);
             return null;
@@ -74,7 +74,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
                     "  SELECT c FROM CoSo c WHERE c.AccountID_QuanLy = a.accountId " +
                     "  AND c.TrangThai NOT IN ('Chờ duyệt', 'Từ chối') " +
                     "  AND (c.isDeleted = false OR c.isDeleted IS NULL)" +
-                    "))", TaiKhoan.class)
+                    ")) ORDER BY a.accountId DESC", TaiKhoan.class)
                 .getResultList();
         } catch (Exception e) {
             logger.error("Lỗi lấy danh sách tài khoản Nhân sự: {}", e.getMessage(), e);

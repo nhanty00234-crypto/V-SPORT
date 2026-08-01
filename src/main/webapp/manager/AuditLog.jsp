@@ -110,7 +110,7 @@
   <section class="card overflow-hidden border border-purple-100 bg-white rounded-2xl shadow-sm">
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="bg-purple-50/50 border-b border-purple-100 text-purple-950 font-bold text-xs uppercase tracking-wider">
+        <thead class="bg-purple-50/50 border-b border-purple-100 text-purple-950 font-bold text-xs">
           <tr>
             <th class="px-5 py-3 text-left">Thời gian</th>
             <th class="px-5 py-3 text-left">Người thực hiện</th>
@@ -147,7 +147,7 @@
                       </div>
                       <div>
                         <p class="font-extrabold text-zinc-900 text-xs"><c:out value="${log.actorName}"/></p>
-                        <p class="text-[9px] text-purple-500 font-bold uppercase tracking-wider">
+                        <p class="text-[9px] text-purple-500 font-bold">
                           <c:choose>
                             <c:when test="${log.actorRole == 1}">Admin</c:when>
                             <c:when test="${log.actorRole == 2}">Manager</c:when>

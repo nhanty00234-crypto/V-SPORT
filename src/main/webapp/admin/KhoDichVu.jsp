@@ -78,7 +78,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div>
       <p class="text-sm font-bold text-zinc-900 leading-tight tracking-tight">V-SPORT</p>
-      <p class="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Manager Portal</p>
+      <p class="text-[10px] text-zinc-400 font-medium">Manager Portal</p>
     </div>
   </div>
   <div class="px-4 py-3 border-b border-zinc-100">
@@ -94,15 +94,15 @@ body { font-family: 'Inter', sans-serif; }
     </div>
   </div>
   <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mb-1.5">Vận hành</p>
+    <p class="text-[10px] font-bold text-zinc-400 px-3 mb-1.5">Vận hành</p>
     <a href="${pageContext.request.contextPath}/admin/tong-quan" class="nav-link"><span class="material-symbols-outlined text-[19px]">space_dashboard</span>Tổng quan</a>
     <a href="${pageContext.request.contextPath}/admin/lich-dat-san" class="nav-link"><span class="material-symbols-outlined text-[19px]">event</span>Lịch đặt sân<span class="ml-auto text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md">5</span></a>
     <a href="${pageContext.request.contextPath}/admin/kho-dich-vu" class="nav-link active"><span class="material-symbols-outlined text-[19px]" style="font-variation-settings:'FILL' 1">inventory_2</span>Kho & Dịch vụ<span class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md">3</span></a>
-    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
+    <p class="text-[10px] font-bold text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
     <a href="${pageContext.request.contextPath}/admin/chi-nhanh" class="nav-link"><span class="material-symbols-outlined text-[19px]">location_on</span>Cơ Sở</a>
     <a href="${pageContext.request.contextPath}/admin/nhan-su" class="nav-link"><span class="material-symbols-outlined text-[19px]">groups</span>Nhân sự</a>
     <a href="${pageContext.request.contextPath}/admin/hoa-don" class="nav-link"><span class="material-symbols-outlined text-[19px]">receipt_long</span>Hóa đơn</a>
-    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
+    <p class="text-[10px] font-bold text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
     <a href="#" class="nav-link"><span class="material-symbols-outlined text-[19px]">contact_support</span>Hỗ trợ Admin</a>
   </nav>
   <div class="px-3 py-3 border-t border-zinc-100">
@@ -237,7 +237,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-blue-300">local_drink</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Đồ uống</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Đồ uống</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Nước suối Aquafina 500ml</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -271,7 +271,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-red-300">bolt</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Đồ uống</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Đồ uống</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Nước tăng lực Redbull</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -308,7 +308,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-purple-300">sports_tennis</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Cho thuê thiết bị</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Cho thuê thiết bị</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Vợt cầu lông Yonex</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -342,7 +342,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-amber-300">sports</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Dụng cụ thể thao</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Dụng cụ thể thao</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Quả cầu lông (lốc 12)</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -377,7 +377,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="absolute inset-0 bg-red-500/5"></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Dịch vụ phụ trợ</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Dịch vụ phụ trợ</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Khăn lau thể thao</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -414,7 +414,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-zinc-400">sports_soccer</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Cho thuê thiết bị</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Cho thuê thiết bị</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Giày bóng đá Adidas size 40</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -448,7 +448,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-amber-300">coffee</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Đồ uống</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Đồ uống</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Cà phê Highlands đóng chai</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -482,7 +482,7 @@ body { font-family: 'Inter', sans-serif; }
         <div class="hidden absolute inset-0 items-center justify-center"><span class="material-symbols-outlined text-[60px] text-emerald-300">sports_soccer</span></div>
       </div>
       <div class="p-3.5">
-        <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Dụng cụ thể thao</p>
+        <p class="text-[10px] font-semibold text-zinc-400 mb-0.5">Dụng cụ thể thao</p>
         <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2">Bóng đá thi đấu FIFA Pro</h3>
         <div class="flex items-end justify-between mb-3">
           <div>
@@ -716,7 +716,7 @@ body { font-family: 'Inter', sans-serif; }
         <!-- SECTION 1: Khách Hàng -->
         <div class="bg-zinc-50/50 border border-zinc-200/80 rounded-2xl p-4 flex flex-col gap-4">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+            <h4 class="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
               <span class="material-symbols-outlined text-[15px]">person</span>Thông tin khách hàng
             </h4>
             <!-- Customer Type Toggle -->
@@ -776,7 +776,7 @@ body { font-family: 'Inter', sans-serif; }
 
         <!-- SECTION 2: Chọn Sân & Bộ Môn -->
         <div class="bg-zinc-50/50 border border-zinc-200/80 rounded-2xl p-4 flex flex-col gap-4">
-          <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+          <h4 class="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[15px]">stadium</span>Cấu hình dịch vụ sân
           </h4>
 
@@ -834,7 +834,7 @@ body { font-family: 'Inter', sans-serif; }
         
         <!-- SECTION 3: Thời gian đặt -->
         <div class="flex flex-col gap-4">
-          <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+          <h4 class="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[15px]">schedule</span>Thời gian & Khung giờ
           </h4>
 
@@ -891,7 +891,7 @@ body { font-family: 'Inter', sans-serif; }
         <!-- SECTION 5: Tóm tắt & Thanh toán -->
         <div class="bg-gradient-to-br from-zinc-900 to-zinc-950 text-white rounded-2xl p-4 shadow-xl flex flex-col gap-3 mt-auto">
           <div class="border-b border-white/10 pb-2.5">
-            <h5 class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Tóm tắt thanh toán</h5>
+            <h5 class="text-[10px] text-zinc-400 font-bold">Tóm tắt thanh toán</h5>
           </div>
 
           <div class="flex flex-col gap-1.5 text-xs text-zinc-300">
@@ -1422,7 +1422,7 @@ function renderProducts(list) {
         </div>
         <div class="p-3.5 flex flex-col justify-between flex-1">
           <div>
-            <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">\${cat.name}</p>
+            <p class="text-[9px] font-bold text-zinc-400 mb-0.5">\${cat.name}</p>
             <h3 class="text-sm font-semibold text-zinc-900 truncate mb-2" title="\${p.TenSanPham}">\${p.TenSanPham}</h3>
             <div class="flex items-end justify-between mb-3">
               <div>

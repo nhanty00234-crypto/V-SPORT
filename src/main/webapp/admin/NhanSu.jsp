@@ -51,11 +51,22 @@ body { font-family: 'Inter', sans-serif; }
       Danh sách nhân sự
       <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold ml-1" id="staffCountDisplay">0</span>
     </h2>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-wrap">
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-zinc-400">search</span>
         <input type="search" id="adminSearchInput" autocomplete="off" placeholder="Tìm theo tên, email, sđt..."
                class="h-9 w-64 pl-9 pr-3 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all">
+      </div>
+      <div class="relative">
+        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[14px] text-zinc-400 pointer-events-none">sort</span>
+        <select id="adminSortSelect" onchange="staffCurrentPage=1;renderStaff()"
+                class="h-9 pl-8 pr-7 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none cursor-pointer">
+          <option value="date_desc">Mới nhất trước</option>
+          <option value="date_asc">Cũ nhất trước</option>
+          <option value="name_asc">Tên A → Z</option>
+          <option value="name_desc">Tên Z → A</option>
+        </select>
+        <span class="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-[14px] text-zinc-400 pointer-events-none">expand_more</span>
       </div>
       <button id="addStaffBtn" onclick="openAddStaff()"
               class="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
@@ -156,7 +167,7 @@ body { font-family: 'Inter', sans-serif; }
         </div>
       </div>
       
-      <div class="relative z-10 text-[9px] text-white/40 font-bold uppercase tracking-wider">
+      <div class="relative z-10 text-[9px] text-white/40 font-bold">
         V-SPORT Suite
       </div>
     </div>
@@ -219,7 +230,7 @@ body { font-family: 'Inter', sans-serif; }
                 <div class="flex h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
                   <div id="strengthBar" class="h-full w-0 transition-all duration-300 rounded-full"></div>
                 </div>
-                <span id="strengthText" class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Yếu</span>
+                <span id="strengthText" class="text-[9px] font-bold text-zinc-400">Yếu</span>
               </div>
             </div>
           </div>
@@ -385,12 +396,21 @@ function renderStaff() {
   if (!staffGrid) return;
 
   const searchValue = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value.toLowerCase().trim() : '';
-  const filtered = staffList.filter(s => {
-    return s.name.toLowerCase().includes(searchValue) || 
-           s.username.toLowerCase().includes(searchValue) || 
-           (s.email && s.email.toLowerCase().includes(searchValue)) || 
+  const sortVal = document.getElementById('adminSortSelect') ? document.getElementById('adminSortSelect').value : 'date_desc';
+
+  let filtered = staffList.filter(s => {
+    return s.name.toLowerCase().includes(searchValue) ||
+           s.username.toLowerCase().includes(searchValue) ||
+           (s.email && s.email.toLowerCase().includes(searchValue)) ||
            (s.phone && s.phone.toLowerCase().includes(searchValue)) ||
            s.VaiTro.toLowerCase().includes(searchValue);
+  });
+
+  filtered = [...filtered].sort((a, b) => {
+    if (sortVal === 'name_asc') return a.name.localeCompare(b.name, 'vi');
+    if (sortVal === 'name_desc') return b.name.localeCompare(a.name, 'vi');
+    if (sortVal === 'date_asc') return (a.id || 0) - (b.id || 0);
+    return (b.id || 0) - (a.id || 0); // date_desc default
   });
 
   document.getElementById('staffCountDisplay').innerText = filtered.length;
@@ -944,17 +964,17 @@ async function submitOtpVerification() {
                 bar.style.width = '33%';
                 bar.className = 'h-full bg-red-500 rounded-full transition-all duration-300';
                 txt.textContent = 'Yếu';
-                txt.className = 'text-[9px] font-bold text-red-500 uppercase tracking-wider block mt-1';
+                txt.className = 'text-[9px] font-bold text-red-500 block mt-1';
             } else if (score <= 4) {
                 bar.style.width = '66%';
                 bar.className = 'h-full bg-amber-500 rounded-full transition-all duration-300';
                 txt.textContent = 'Trung bình';
-                txt.className = 'text-[9px] font-bold text-amber-500 uppercase tracking-wider block mt-1';
+                txt.className = 'text-[9px] font-bold text-amber-500 block mt-1';
             } else {
                 bar.style.width = '100%';
                 bar.className = 'h-full bg-emerald-500 rounded-full transition-all duration-300';
                 txt.textContent = 'Mạnh';
-                txt.className = 'text-[9px] font-bold text-emerald-500 uppercase tracking-wider block mt-1';
+                txt.className = 'text-[9px] font-bold text-emerald-500 block mt-1';
             }
         });
     }

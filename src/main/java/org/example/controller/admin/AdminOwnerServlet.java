@@ -153,11 +153,9 @@ public class AdminOwnerServlet extends HttpServlet {
             case "duyet": {
                 OwnerApprovalService.ApprovalResult result = ownerApprovalService.approve(coSoId, admin.getAccountId());
                 if (result.success) {
-                    syncCourts(coSoId, result.coSo.getLoaiHinhKinhDoanh(), result.coSo.getSoLuongSanDuKien());
-                    // Cho thuê sân là chức năng nền tảng của mọi cơ sở đã duyệt - kích hoạt
-                    // capability SAN ngay, KHÔNG chờ Owner đăng ký riêng (khác với các
-                    // capability tùy chọn như bán sản phẩm, vốn vẫn giữ nguyên PENDING).
+                    // Không tự tạo sân mặc định — owner sẽ tự thêm sân qua trang Quản lý Sân.
                     capabilityApprovalService.activateCourtCapability(coSoId, admin.getAccountId());
+                    capabilityApprovalService.activateWarehouseCapabilities(coSoId, admin.getAccountId());
                     if (result.account != null) {
                         // Tạo mật khẩu ngẫu nhiên mới tại thời điểm duyệt, cập nhật DB rồi gửi email
                         String rawPassword = org.example.controller.OwnerRegisterServlet.generateSecurePassword();

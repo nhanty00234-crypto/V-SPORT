@@ -95,6 +95,46 @@ public class CapabilityApprovalService {
         }
     }
 
+    /**
+     * Kích hoạt 3 capability kho & dịch vụ (SAN_PHAM, THUE_DUNG_CU, DO_AN_NUOC_UONG)
+     * tự động khi Admin duyệt cơ sở. Đây là chức năng mặc định cho mọi cơ sở được duyệt.
+     */
+    public void activateWarehouseCapabilities(int coSoId, int adminId) {
+        String[] types = {
+            Constants.CAPABILITY_SAN_PHAM,
+            Constants.CAPABILITY_THUE_DUNG_CU,
+            Constants.CAPABILITY_DO_AN_NUOC_UONG
+        };
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            for (String type : types) {
+                CoSoCapability existing = em.createQuery(
+                        "SELECT c FROM CoSoCapability c WHERE c.coSoId = :coSoId AND c.capabilityType = :type",
+                        CoSoCapability.class)
+                        .setParameter("coSoId", coSoId)
+                        .setParameter("type", type)
+                        .getResultStream().findFirst().orElse(null);
+                if (existing == null) {
+                    existing = new CoSoCapability();
+                    existing.setCoSoId(coSoId);
+                    existing.setCapabilityType(type);
+                    em.persist(existing);
+                }
+                existing.setTrangThai(Constants.CAPABILITY_STATUS_APPROVED);
+                existing.setApprovedBy(adminId);
+                existing.setApprovedAt(LocalDateTime.now());
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            logger.error("Lỗi kích hoạt warehouse capabilities coSoId={}: {}", coSoId, e.getMessage(), e);
+        } finally {
+            em.close();
+        }
+    }
+
     public Result approve(int capabilityId, int adminId, String note) {
         return transition(capabilityId, Constants.CAPABILITY_STATUS_APPROVED,
                 Set.of(Constants.CAPABILITY_STATUS_PENDING, Constants.CAPABILITY_STATUS_SUSPENDED),

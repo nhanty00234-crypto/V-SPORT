@@ -26,7 +26,7 @@
 
   .rf-table-wrap{background:#fff;border:1px solid #f3e8ff;border-radius:20px;overflow:hidden;}
   .rf-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;}
-  .rf-table thead th{background:#faf5ff;padding:13px 16px;text-align:left;font-size:10.5px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #f3e8ff;}
+  .rf-table thead th{background:#faf5ff;padding:13px 16px;text-align:left;font-size:10.5px;font-weight:800;color:#7c3aed;border-bottom:1px solid #f3e8ff;}
   .rf-table tbody td{padding:13px 16px;border-bottom:1px solid #fafaf9;vertical-align:middle;color:#292524;}
   .rf-table tbody tr:last-child td{border-bottom:none;}
   .rf-table tbody tr:hover td{background:#faf5ff;}
@@ -210,7 +210,7 @@
   <div id="panel-history" class="hidden">
     <div class="rf-table-wrap">
       <div class="flex items-center justify-between px-4 py-3 border-b border-purple-100">
-        <span class="text-xs font-bold text-purple-700 uppercase tracking-wide">Lịch sử xử lý (tự cập nhật)</span>
+        <span class="text-xs font-bold text-purple-700">Lịch sử xử lý (tự cập nhật)</span>
         <span class="flex items-center gap-1.5 text-xs text-zinc-500"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>Real-time</span>
       </div>
       <div id="historyList"></div>

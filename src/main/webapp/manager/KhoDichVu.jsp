@@ -193,7 +193,7 @@
     color: #475569;
     margin-bottom: 6px;
     letter-spacing: 0.02em;
-    text-transform: uppercase;
+    text-transform: none;
   }
   .field-req {
     color: #ef4444;
@@ -202,7 +202,7 @@
     font-size: 11px;
     font-weight: 800;
     color: #94a3b8;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.08em;
     padding: 6px 0 12px;
     display: flex;
@@ -500,14 +500,14 @@
           <table class="w-full text-left text-xs border-collapse">
             <thead class="bg-slate-50 border-b border-slate-200/80">
               <tr>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-32">SKU / Mã</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tên mặt hàng</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Nhóm dịch vụ</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right hidden md:table-cell">Giá nhập</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right hidden md:table-cell">Giá bán lẻ</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center w-28">Tồn kho</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
-                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right w-32">Thao tác</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 w-32">SKU / Mã</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500">Tên mặt hàng</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 hidden sm:table-cell">Nhóm dịch vụ</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 text-right hidden md:table-cell">Giá nhập</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 text-right hidden md:table-cell">Giá bán lẻ</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 text-center w-28">Tồn kho</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500">Trạng thái</th>
+                <th class="px-5 py-4 text-[11px] font-bold text-slate-500 text-right w-32">Thao tác</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -739,7 +739,7 @@
     <div class="px-6 py-5 flex flex-col gap-4">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tên mặt hàng</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-1">Tên mặt hàng</p>
           <p class="font-extrabold text-slate-900 text-base" id="detailName">—</p>
         </div>
         <span class="font-mono text-[11px] text-slate-500 font-bold bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg shrink-0" id="detailSku">—</span>
@@ -747,29 +747,29 @@
 
       <div class="grid grid-cols-2 gap-3">
         <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Nhóm dịch vụ</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-0.5">Nhóm dịch vụ</p>
           <p class="font-bold text-slate-800 text-[13px]" id="detailCategory">—</p>
         </div>
         <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Trạng thái</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-0.5">Trạng thái</p>
           <p class="font-bold text-slate-800 text-[13px]" id="detailStatus">—</p>
         </div>
         <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Giá nhập</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-0.5">Giá nhập</p>
           <p class="font-bold text-slate-800 text-[13px]" id="detailGiaNhap">—</p>
         </div>
         <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Giá bán lẻ</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-0.5">Giá bán lẻ</p>
           <p class="font-extrabold text-slate-900 text-[13px]" id="detailGiaBan">—</p>
         </div>
         <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 col-span-2">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Tồn kho hiện tại</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-0.5">Tồn kho hiện tại</p>
           <p class="font-bold text-slate-800 text-[13px]" id="detailStock">—</p>
         </div>
       </div>
 
       <div>
-        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mô tả</p>
+        <p class="text-[10px] font-bold text-slate-400 mb-1">Mô tả</p>
         <p class="text-[13px] text-slate-600 leading-relaxed" id="detailDesc">—</p>
       </div>
 
@@ -899,7 +899,7 @@
     </div>
 
     <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
-      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mặt hàng được chọn</p>
+      <p class="text-[10px] font-bold text-slate-400 mb-1">Mặt hàng được chọn</p>
       <p class="font-extrabold text-slate-800 text-sm" id="stockProdName">—</p>
       <div class="flex gap-4 mt-2 text-xs text-slate-500">
         <span>Mã SKU: <span class="font-mono font-bold text-slate-700 bg-white border border-slate-200 px-1.5 py-0.5 rounded" id="stockProdSku">—</span></span>
@@ -948,7 +948,7 @@
 
     <div class="px-6 py-5 flex flex-col gap-4">
       <div>
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Nhóm dịch vụ hiện tại</p>
+        <p class="text-xs font-bold text-slate-400 mb-2.5">Nhóm dịch vụ hiện tại</p>
         <div class="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
           <c:choose>
             <c:when test="${empty categories}">
@@ -980,7 +980,7 @@
       </div>
 
       <div class="border-t border-slate-100 pt-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Thêm nhóm mới</p>
+        <p class="text-xs font-bold text-slate-400 mb-2.5">Thêm nhóm mới</p>
         <form action="${pageContext.request.contextPath}/manager/kho-dich-vu" method="POST" onsubmit="return handleAddCategory(event)" class="flex gap-2">
           <input type="hidden" name="action" value="add-category">
           <input type="text" name="tenDanhMuc" id="newCatName" required placeholder="VD: Đồ uống" class="form-input flex-1">
@@ -1020,7 +1020,7 @@
       <div class="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-6">
         <%-- Đồ uống --%>
         <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+          <p class="text-xs font-bold text-slate-400 mb-3 flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[16px] text-blue-500">local_cafe</span>Đồ uống
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1100,7 +1100,7 @@
 
         <%-- Thuê dụng cụ --%>
         <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5 border-t border-slate-100 pt-4">
+          <p class="text-xs font-bold text-slate-400 mb-3 flex items-center gap-1.5 border-t border-slate-100 pt-4">
             <span class="material-symbols-outlined text-[16px] text-violet-500">sports_tennis</span>Thuê dụng cụ
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1180,7 +1180,7 @@
 
         <%-- Dịch vụ khác --%>
         <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5 border-t border-slate-100 pt-4">
+          <p class="text-xs font-bold text-slate-400 mb-3 flex items-center gap-1.5 border-t border-slate-100 pt-4">
             <span class="material-symbols-outlined text-[16px] text-slate-500">more_horiz</span>Dịch vụ khác
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

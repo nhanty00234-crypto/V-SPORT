@@ -146,7 +146,7 @@
   </section>
 
   <!-- Court List & Types Grid Layout Containers -->
-  <section class="min-h-[400px]">
+  <section id="courtListSection">
     <!-- Court Cards (Grid View) -->
     <div id="mainCourtGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <!-- Generated Dynamically -->
@@ -157,7 +157,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="border-b border-purple-200 text-xs font-bold text-purple-800 uppercase tracking-wider bg-purple-50/50">
+            <tr class="border-b border-purple-200 text-xs font-bold text-purple-800 bg-purple-50/50">
               <th class="px-5 py-3.5">Tên sân</th>
               <th class="px-5 py-3.5">Loại sân / Bộ môn</th>
               <th class="px-5 py-3.5">Giá ngày / tối (giờ đèn)</th>
@@ -179,21 +179,26 @@
           <h3 class="text-sm font-bold text-purple-950 font-sans">Cấu hình Loại sân & Bảng giá giờ lên đèn</h3>
           <p class="text-[11px] text-purple-550">Điều chỉnh biểu phí giờ bật đèn riêng cho từng môn thể thao</p>
         </div>
-        <button onclick="openCreateTypeModal()" class="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-purple-600 hover:bg-purple-750 text-white text-[11px] font-bold transition-all shadow-sm">
-          <span class="material-symbols-outlined text-[14px]">add</span>Thêm loại sân mới
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="openAddSportModal()" class="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white hover:bg-purple-50 text-purple-700 text-[11px] font-bold border border-purple-300 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[14px]">sports</span>Thêm môn mới
+          </button>
+          <button onclick="openCreateTypeModal()" class="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-purple-600 hover:bg-purple-750 text-white text-[11px] font-bold transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[14px]">add</span>Thêm loại sân mới
+          </button>
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="border-b border-purple-200 text-xs font-bold text-purple-800 uppercase tracking-wider bg-purple-50/50">
-              <th class="px-5 py-3.5">Mã Loại</th>
-              <th class="px-5 py-3.5">Tên Loại Sân</th>
+            <tr class="border-b border-purple-200 text-xs font-semibold text-purple-700 bg-purple-50/50">
+              <th class="px-5 py-3.5">Mã loại</th>
+              <th class="px-5 py-3.5">Tên loại sân</th>
               <th class="px-5 py-3.5">Bộ môn</th>
-              <th class="px-5 py-3.5">Giá không đèn (Tiêu chuẩn)</th>
-              <th class="px-5 py-3.5">Giá tối (Có đèn)</th>
-              <th class="px-5 py-3.5">Giờ bắt đầu lên đèn</th>
-              <th class="px-5 py-3.5">Giờ kết thúc bật đèn</th>
+              <th class="px-5 py-3.5">Giá không đèn</th>
+              <th class="px-5 py-3.5">Giá có đèn</th>
+              <th class="px-5 py-3.5">Bật đèn từ</th>
+              <th class="px-5 py-3.5">Tắt đèn lúc</th>
               <th class="px-5 py-3.5 text-right">Thao tác</th>
             </tr>
           </thead>
@@ -229,7 +234,7 @@
           <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
             <span class="material-symbols-outlined text-[20px] text-indigo-600" style="font-variation-settings:'FILL' 1">payments</span>
           </div>
-          <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest">Bước 1</span>
+          <span class="text-[11px] font-black text-indigo-500">Bước 1</span>
         </div>
         <div>
           <h4 class="text-sm font-black text-zinc-900 mb-1">Cấu hình loại sân & giá</h4>
@@ -246,7 +251,7 @@
           <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
             <span class="material-symbols-outlined text-[20px] text-purple-600" style="font-variation-settings:'FILL' 1">add_circle</span>
           </div>
-          <span class="text-[11px] font-black text-purple-500 uppercase tracking-widest">Bước 2</span>
+          <span class="text-[11px] font-black text-purple-500">Bước 2</span>
         </div>
         <div>
           <h4 class="text-sm font-black text-zinc-900 mb-1">Thêm sân thi đấu</h4>
@@ -263,7 +268,7 @@
           <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center group-hover:bg-green-100 transition-colors">
             <span class="material-symbols-outlined text-[20px] text-green-600" style="font-variation-settings:'FILL' 1">event_available</span>
           </div>
-          <span class="text-[11px] font-black text-green-500 uppercase tracking-widest">Bước 3</span>
+          <span class="text-[11px] font-black text-green-500">Bước 3</span>
         </div>
         <div>
           <h4 class="text-sm font-black text-zinc-900 mb-1">Mở sân & nhận đặt lịch</h4>
@@ -438,6 +443,37 @@
         <button type="button" onclick="closeCourtModal()" class="h-10 px-4 rounded-xl border border-purple-200 text-sm font-semibold text-purple-700 hover:bg-purple-50">Hủy</button>
         <button type="button" onclick="submitCourtForm()" id="saveCourtBtn"
                 class="h-10 px-5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 shadow shadow-purple-200">Lưu lại</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Thêm môn thể thao mới vào cơ sở -->
+<div id="addSportModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeAddSportModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] border border-purple-100">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-purple-50">
+      <div>
+        <h3 class="text-sm font-bold text-purple-950">Thêm môn thể thao</h3>
+        <p class="text-[11px] text-purple-500 mt-0.5">Mở rộng danh mục môn của cơ sở</p>
+      </div>
+      <button onclick="closeAddSportModal()" class="p-1.5 rounded-lg hover:bg-purple-50"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
+    </div>
+    <form method="POST" action="${pageContext.request.contextPath}/manager/quan-ly-san" class="px-5 py-4 flex flex-col gap-4">
+      <input type="hidden" name="action" value="addSport">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-purple-900">Môn thể thao *</label>
+        <select name="monTheThaoID" required class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          <option value="">-- Chọn môn --</option>
+          <c:forEach items="${dsAllMonTheThao}" var="m">
+            <option value="${m.monTheThaoID}">${m.tenMon}</option>
+          </c:forEach>
+        </select>
+        <p class="text-[11px] text-purple-400">Chỉ hiển thị môn chưa có trong danh sách cơ sở.</p>
+      </div>
+      <div class="flex gap-3 justify-end pt-1">
+        <button type="button" onclick="closeAddSportModal()" class="h-9 px-4 rounded-xl border border-purple-200 text-sm font-semibold text-purple-700 hover:bg-purple-50 transition-all">Hủy</button>
+        <button type="submit" class="h-9 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-all shadow-sm">Thêm môn</button>
       </div>
     </form>
   </div>
@@ -959,12 +995,14 @@
     const listBody = document.getElementById('courtListTableBody');
     const emptyState = document.getElementById('emptyState');
     const emptyFilterState = document.getElementById('emptyFilterState');
+    const courtListSection = document.getElementById('courtListSection');
 
     const totalCourts = (typeof mockSan !== 'undefined') ? mockSan.length : 0; // tất cả sân, không qua filter
 
     if (courts.length === 0) {
       grid.classList.add('hidden');
       document.getElementById('mainCourtList').classList.add('hidden');
+      courtListSection.classList.add('hidden');
       if (totalCourts === 0) {
         // chưa có sân nào — hiện onboarding
         emptyState.classList.remove('hidden');
@@ -978,6 +1016,7 @@
     } else {
       emptyState.classList.add('hidden');
       emptyFilterState.classList.add('hidden');
+      courtListSection.classList.remove('hidden');
       if (viewMode === 'grid') grid.classList.remove('hidden');
       else document.getElementById('mainCourtList').classList.remove('hidden');
     }
@@ -1327,6 +1366,13 @@
 
   function closeTypeModal() {
     document.getElementById('typeModal').classList.add('hidden');
+  }
+
+  function openAddSportModal() {
+    document.getElementById('addSportModal').classList.remove('hidden');
+  }
+  function closeAddSportModal() {
+    document.getElementById('addSportModal').classList.add('hidden');
   }
 
   function deleteType(id) {

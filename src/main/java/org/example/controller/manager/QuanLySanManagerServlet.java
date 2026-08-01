@@ -76,10 +76,12 @@ public class QuanLySanManagerServlet extends HttpServlet {
             List<San> dsSan = sanService.getSansByCoSo(coSoId);
             List<LoaiSan> dsLoaiSan = sanService.getLoaiSansByCoSo(coSoId);
             List<MonTheThao> dsMonTheThao = sanService.getRegisteredMonTheThao(coSoId);
+            List<MonTheThao> dsAllMonTheThao = sanService.getAllMonTheThao();
 
             request.setAttribute("dsSan", dsSan);
             request.setAttribute("dsLoaiSan", dsLoaiSan);
             request.setAttribute("dsMonTheThao", dsMonTheThao);
+            request.setAttribute("dsAllMonTheThao", dsAllMonTheThao);
             request.setAttribute("managerCoSoId", coSoId);
 
             request.getRequestDispatcher("/manager/QuanLySan.jsp").forward(request, response);
@@ -124,6 +126,7 @@ public class QuanLySanManagerServlet extends HttpServlet {
                 case "addType" -> handleAddLoaiSan(request, coSoId, session, manager);
                 case "updateType" -> handleUpdateLoaiSan(request, coSoId, session);
                 case "deleteType" -> handleDeleteLoaiSan(request, coSoId, session, manager);
+                case "addSport" -> handleAddSport(request, coSoId, session, manager);
                 default -> logger.warn("Unknown action: {}", action);
             }
         } catch (IllegalArgumentException e) {
@@ -235,6 +238,44 @@ public class QuanLySanManagerServlet extends HttpServlet {
             "Manager xóa mềm loại sân");
     }
 
+
+    private void handleAddSport(HttpServletRequest req, int coSoId, HttpSession session, TaiKhoan manager) {
+        String monId = req.getParameter("monTheThaoID");
+        if (monId == null || monId.isBlank()) throw new IllegalArgumentException("Vui lòng chọn môn thể thao.");
+
+        // Lấy tên môn thể thao từ DB
+        List<MonTheThao> all = sanService.getAllMonTheThao();
+        MonTheThao mon = all.stream()
+            .filter(m -> String.valueOf(m.getMonTheThaoID()).equals(monId.trim()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Môn thể thao không tồn tại."));
+
+        // Đọc CoSo hiện tại và cập nhật LoaiHinhKinhDoanh
+        org.example.dao.impl.CoSoDAOImpl coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
+        org.example.model.CoSo coSo = coSoDAO.getCoSoById(coSoId);
+        if (coSo == null) throw new IllegalArgumentException("Không tìm thấy cơ sở.");
+
+        String current = coSo.getLoaiHinhKinhDoanh();
+        if (current == null) current = "";
+
+        // Kiểm tra nếu đã có rồi
+        java.util.Set<String> existing = new java.util.LinkedHashSet<>();
+        for (String s : current.split(",")) { String t = s.trim(); if (!t.isEmpty()) existing.add(t); }
+        if (existing.contains(mon.getTenMon())) {
+            session.setAttribute("message", "Môn " + mon.getTenMon() + " đã có trong danh sách của cơ sở.");
+            return;
+        }
+
+        existing.add(mon.getTenMon());
+        coSo.setLoaiHinhKinhDoanh(String.join(", ", existing));
+        coSoDAO.updateCoSo(coSo);
+
+        session.setAttribute("message", "Đã thêm môn " + mon.getTenMon() + " vào cơ sở thành công!");
+        AuditLogService.log(req, manager,
+            AuditLogService.ACTION_UPDATE, "CoSo",
+            String.valueOf(coSoId), coSo.getTenCoSo(),
+            "Manager thêm môn thể thao: " + mon.getTenMon());
+    }
 
     // ==================== REQUEST POPULATORS ====================
 

@@ -1711,7 +1711,7 @@
             display: none;
             animation: fadeIn 0.3s ease-in;
         }
-        
+
         .page-view.active {
             display: block;
         }
@@ -1720,7 +1720,7 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         /* Auth Page Header */
         .auth-header {
             background-color: var(--surface);
@@ -1728,18 +1728,18 @@
             border-bottom: 1px solid var(--border);
             margin-bottom: 60px;
         }
-        
+
         .auth-header-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .auth-title {
             font-size: 28px;
             margin: 0;
         }
-        
+
         .breadcrumb {
             display: flex;
             align-items: center;
@@ -1747,16 +1747,16 @@
             font-size: 14px;
             color: var(--muted-text);
         }
-        
+
         .breadcrumb a {
             color: var(--navy);
             font-weight: 500;
         }
-        
+
         .breadcrumb a:hover {
             color: var(--primary);
         }
-        
+
         /* Auth Layout */
         .auth-container {
             max-width: 1100px;
@@ -1812,15 +1812,29 @@
             box-shadow: 0 0 0 3px rgba(1, 226, 129, 0.1);
         }
         
-        .form-control[aria-invalid="true"] {
-            border-color: var(--danger);
-        }
-        
         .error-message {
-            color: var(--danger);
-            font-size: 12px;
-            margin-top: 5px;
             display: none;
+            align-items: center;
+            gap: 5px;
+            color: #dc2626;
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-top: 5px;
+            padding: 5px 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 7px;
+        }
+        .error-message i {
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .error-message.visible {
+            display: flex;
+        }
+        .form-control[aria-invalid="true"] {
+            border-color: #dc2626 !important;
+            box-shadow: 0 0 0 3px rgba(220,38,38,.1) !important;
         }
         
         /* Auth Password Toggle */
@@ -1998,7 +2012,10 @@
             visibility: hidden;
             transition: var(--transition);
         }
-        
+        .success-toast.error {
+            background: #dc2626;
+            box-shadow: 0 4px 20px rgba(220,38,38,.35);
+        }
         .success-toast.active {
             opacity: 1;
             visibility: visible;
@@ -2011,7 +2028,7 @@
             border-bottom: 1px solid var(--border);
             margin-bottom: 30px;
         }
-        
+
         .auth-tab-btn {
             flex: 1;
             background: none;
@@ -2024,11 +2041,11 @@
             cursor: pointer;
             position: relative;
         }
-        
+
         .auth-tab-btn.active {
             color: var(--primary);
         }
-        
+
         .auth-tab-btn.active::after {
             content: '';
             position: absolute;
@@ -2038,7 +2055,7 @@
             height: 3px;
             background: var(--primary);
         }
-        
+
         /* Auth Responsive */
         @media (max-width: 992px) {
             .auth-container {
@@ -2046,7 +2063,7 @@
                 padding: 40px 30px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .auth-container {
                 display: block;

@@ -361,7 +361,7 @@
     </div>
     <div>
       <p class="text-[15px] font-black text-slate-900 tracking-tight leading-none">V-SPORT</p>
-      <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Admin Portal</p>
+      <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Admin Portal</p>
     </div>
   </div>
 
@@ -370,7 +370,7 @@
     <c:set var="uri" value="${pageContext.request.requestURI}"/>
 
     <!-- Section: Vận hành -->
-    <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-400 px-3 pt-1 pb-2">Vận hành</p>
+    <p class="text-[10px] font-bold text-slate-400 px-3 pt-1 pb-2">Vận hành</p>
 
     <a href="${pageContext.request.contextPath}/admin/tong-quan"
        class="nav-link ${uri.contains('/admin/tong-quan') || uri.contains('/TongQuan') ? 'active' : ''}">
@@ -379,7 +379,7 @@
     </a>
 
     <!-- Section: Quản lý -->
-    <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-400 px-3 pt-5 pb-2">Quản lý</p>
+    <p class="text-[10px] font-bold text-slate-400 px-3 pt-5 pb-2">Quản lý</p>
 
     <a href="${pageContext.request.contextPath}/admin/chi-nhanh"
        class="nav-link ${uri.contains('/admin/chi-nhanh') || uri.contains('/QuanLyChiNhanh') ? 'active' : ''}">

@@ -77,7 +77,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div>
       <p class="text-sm font-bold text-zinc-900 leading-tight tracking-tight">V-SPORT</p>
-      <p class="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Manager Portal</p>
+      <p class="text-[10px] text-zinc-400 font-medium">Manager Portal</p>
     </div>
   </div>
   <div class="px-4 py-3 border-b border-zinc-100">
@@ -93,15 +93,15 @@ body { font-family: 'Inter', sans-serif; }
     </div>
   </div>
   <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mb-1.5">Vận hành</p>
+    <p class="text-[10px] font-bold text-zinc-400 px-3 mb-1.5">Vận hành</p>
     <a href="${pageContext.request.contextPath}/admin/tong-quan" class="nav-link"><span class="material-symbols-outlined text-[19px]">space_dashboard</span>Tổng quan</a>
     <a href="${pageContext.request.contextPath}/admin/lich-dat-san" class="nav-link"><span class="material-symbols-outlined text-[19px]">event</span>Lịch đặt sân<span class="ml-auto text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md">5</span></a>
     <a href="${pageContext.request.contextPath}/admin/kho-dich-vu" class="nav-link"><span class="material-symbols-outlined text-[19px]">inventory_2</span>Kho & Dịch vụ<span class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md">3</span></a>
-    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
+    <p class="text-[10px] font-bold text-zinc-400 px-3 mt-5 mb-1.5">Quản lý</p>
     <a href="${pageContext.request.contextPath}/admin/chi-nhanh" class="nav-link"><span class="material-symbols-outlined text-[19px]">location_on</span>Cơ Sở</a>
     <a href="${pageContext.request.contextPath}/admin/nhan-su" class="nav-link"><span class="material-symbols-outlined text-[19px]">groups</span>Nhân sự</a>
     <a href="${pageContext.request.contextPath}/admin/hoa-don" class="nav-link"><span class="material-symbols-outlined text-[19px]">receipt_long</span>Hóa đơn</a>
-    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
+    <p class="text-[10px] font-bold text-zinc-400 px-3 mt-5 mb-1.5">Hỗ trợ</p>
     <a href="#" class="nav-link"><span class="material-symbols-outlined text-[19px]">contact_support</span>Hỗ trợ Admin</a>
   </nav>
   <div class="px-3 py-3 border-t border-zinc-100">
@@ -298,7 +298,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     
     <div class="px-6 py-4 border-t border-zinc-150 bg-zinc-50 flex justify-between items-center">
-      <span class="text-[10px] text-zinc-450 font-bold font-mono uppercase tracking-wider text-zinc-400">Bảng KhuyenMai</span>
+      <span class="text-[10px] text-zinc-450 font-bold font-mono text-zinc-400">Bảng KhuyenMai</span>
       <div class="flex gap-2">
         <button onclicksibility_off</span></button></div></div>
     </div>
@@ -817,7 +817,13 @@ document.addEventListener('DOMContentLoaded', () => {
     <c:remove var="message" scope="session"/>
   </c:if>
   <c:if test="${not empty sessionScope.error}">
-    alert('${sessionScope.error}');
+    (function(){
+      var b = document.createElement('div');
+      b.className = 'p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-start gap-3 animate-fade-in-up fixed top-4 left-1/2 -translate-x-1/2 z-[9999] shadow-lg w-[90%] max-w-md';
+      b.innerHTML = '<span class="material-symbols-outlined text-[20px] shrink-0">error</span><div><span class="font-bold block text-red-700">Lỗi thao tác</span><span class="leading-normal block mt-0.5">${sessionScope.error}</span></div><button onclick="this.parentElement.remove()" class="ml-auto text-red-400 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-[18px]">close</span></button>';
+      document.body.appendChild(b);
+      setTimeout(function(){ b.remove(); }, 5000);
+    })();
     <c:remove var="error" scope="session"/>
   </c:if>
 });

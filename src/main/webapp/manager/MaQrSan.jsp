@@ -172,15 +172,15 @@
   <!-- Stats -->
   <section class="grid grid-cols-3 gap-3">
     <div class="bg-white border border-purple-100 rounded-2xl p-4">
-      <p class="text-[11px] font-bold uppercase text-zinc-400 tracking-wide">Tổng số sân</p>
+      <p class="text-[11px] font-bold text-zinc-400">Tổng số sân</p>
       <p class="text-2xl font-black text-purple-950 mt-1">${stats.total}</p>
     </div>
     <div class="bg-white border border-emerald-100 rounded-2xl p-4">
-      <p class="text-[11px] font-bold uppercase text-zinc-400 tracking-wide">QR đang hoạt động</p>
+      <p class="text-[11px] font-bold text-zinc-400">QR đang hoạt động</p>
       <p class="text-2xl font-black text-emerald-600 mt-1">${stats.active}</p>
     </div>
     <div class="bg-white border border-zinc-200 rounded-2xl p-4">
-      <p class="text-[11px] font-bold uppercase text-zinc-400 tracking-wide">Sân chưa có QR</p>
+      <p class="text-[11px] font-bold text-zinc-400">Sân chưa có QR</p>
       <p class="text-2xl font-black text-zinc-500 mt-1">${stats.none}</p>
     </div>
   </section>

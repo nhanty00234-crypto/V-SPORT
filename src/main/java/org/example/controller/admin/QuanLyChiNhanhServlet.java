@@ -216,11 +216,9 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
         if (id < 0 || admin == null) { resp.sendRedirect(req.getContextPath() + "/admin/chi-nhanh?tab=pending"); return; }
         OwnerApprovalService.ApprovalResult result = ownerApprovalService.approve(id, admin.getAccountId());
         if (result.success) {
-            Map<String, Integer> sportCounts = buildSportCounts(
-                    result.coSo.getLoaiHinhKinhDoanh(), result.coSo.getSoLuongSanDuKien());
-            syncCourtsForBranch(id, sportCounts);
-            // Kích hoạt capability SAN tự động khi duyệt cơ sở
+            // Không tự tạo sân mặc định — owner sẽ tự thêm sân qua trang Quản lý Sân.
             capabilityApprovalService.activateCourtCapability(id, admin.getAccountId());
+            capabilityApprovalService.activateWarehouseCapabilities(id, admin.getAccountId());
             if (result.account != null) {
                 String rawPassword = org.example.controller.OwnerRegisterServlet.generateSecurePassword();
                 resetAccountPassword(result.account, rawPassword);
