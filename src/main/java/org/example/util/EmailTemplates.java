@@ -116,8 +116,9 @@ public class EmailTemplates {
 
     // ── Phê duyệt đối tác ────────────────────────────────────────────────────
 
-    public static String pheQuyetDoiTac(String fullName, String email, String loginUrl) {
+    public static String pheQuyetDoiTac(String fullName, String email, String rawPassword, String loginUrl) {
         String btn = button("Đăng nhập Cổng Quản Lý ngay ➔", loginUrl != null ? loginUrl : "#");
+        String pwDisplay = rawPassword != null && !rawPassword.isBlank() ? esc(rawPassword) : "(liên hệ quản trị viên)";
         return build(
             "🎊 Phê duyệt đối tác V-SPORT",
             GREEN,
@@ -125,13 +126,19 @@ public class EmailTemplates {
             "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
             + "Ban quản trị V-SPORT xin thông báo: Đơn đăng ký tham gia mạng lưới cơ sở thể thao <strong>\"" + esc(fullName) + "\"</strong> đã được <strong style='color:" + GREEN + ";'>PHÊ DUYỆT THÀNH CÔNG</strong>.<br><br>"
             + "Bạn có thể sử dụng thông tin sau để đăng nhập quản lý cơ sở:<br>"
-            + "• Email: <strong>" + esc(email) + "</strong><br>"
-            + "• Mật khẩu mặc định: <code style='background:#e2e8f0;padding:2px 6px;border-radius:4px;'>123456</code>",
+            + "• Email đăng nhập: <strong>" + esc(email) + "</strong><br>"
+            + "• Mật khẩu: <strong style='font-family:Consolas,monospace;font-size:15px;color:#0f172a;background:#f1f5f9;padding:2px 10px;border-radius:4px;letter-spacing:1px;'>" + pwDisplay + "</strong>",
             btn,
-            "⚠️ Hãy nhớ <strong>thay đổi mật khẩu cá nhân</strong> sau lần đăng nhập đầu tiên để đảm bảo tính an toàn cho hệ thống của bạn.",
+            "⚠️ Hãy <strong>thay đổi mật khẩu ngay</strong> sau lần đăng nhập đầu tiên để bảo mật tài khoản của bạn.",
             null,
             "success"
         );
+    }
+
+    /** @deprecated Dùng {@link #pheQuyetDoiTac(String, String, String, String)} */
+    @Deprecated
+    public static String pheQuyetDoiTac(String fullName, String email, String loginUrl) {
+        return pheQuyetDoiTac(fullName, email, null, loginUrl);
     }
 
     // ── Từ chối đối tác ──────────────────────────────────────────────────────

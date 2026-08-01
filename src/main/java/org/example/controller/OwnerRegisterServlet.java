@@ -367,7 +367,7 @@ public class OwnerRegisterServlet extends HttpServlet {
                 // First-time registration: create new Account
                 managerAcc = new TaiKhoan();
                 managerAcc.setUsername(email);
-                managerAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw("123456", org.mindrot.jbcrypt.BCrypt.gensalt(12)));
+                managerAcc.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(generateSecurePassword(), org.mindrot.jbcrypt.BCrypt.gensalt(12)));
                 managerAcc.setFullName(ownerName);
                 managerAcc.setPhoneNumber(phone);
                 managerAcc.setEmail(email);
@@ -463,5 +463,36 @@ public class OwnerRegisterServlet extends HttpServlet {
             logger.error("[OwnerRegister] softArchiveRejectedOwnerCoSo error for {}", email, e);
             throw e;
         }
+    }
+
+    /**
+     * Sinh mật khẩu ngẫu nhiên đảm bảo đúng validation của hệ thống:
+     * tối thiểu 10 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+     */
+    public static String generateSecurePassword() {
+        java.security.SecureRandom rng = new java.security.SecureRandom();
+        String upper   = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        String lower   = "abcdefghjkmnpqrstuvwxyz";
+        String digits  = "23456789";
+        String special = "!@#$%&*";
+        String all     = upper + lower + digits + special;
+
+        char[] pwd = new char[10];
+        // đảm bảo mỗi nhóm có ít nhất 1 ký tự
+        pwd[0] = upper.charAt(rng.nextInt(upper.length()));
+        pwd[1] = upper.charAt(rng.nextInt(upper.length()));
+        pwd[2] = lower.charAt(rng.nextInt(lower.length()));
+        pwd[3] = lower.charAt(rng.nextInt(lower.length()));
+        pwd[4] = digits.charAt(rng.nextInt(digits.length()));
+        pwd[5] = digits.charAt(rng.nextInt(digits.length()));
+        pwd[6] = special.charAt(rng.nextInt(special.length()));
+        for (int i = 7; i < 10; i++) pwd[i] = all.charAt(rng.nextInt(all.length()));
+
+        // trộn ngẫu nhiên
+        for (int i = 9; i > 0; i--) {
+            int j = rng.nextInt(i + 1);
+            char tmp = pwd[i]; pwd[i] = pwd[j]; pwd[j] = tmp;
+        }
+        return new String(pwd);
     }
 }

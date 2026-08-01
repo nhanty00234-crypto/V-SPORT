@@ -24,10 +24,12 @@
   <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
       <h2 class="text-2xl font-black tracking-tight text-purple-950">Sân thi đấu chi nhánh</h2>
+      <p class="text-sm text-zinc-500 mt-0.5">Quản lý toàn bộ sân cho thuê tại cơ sở của bạn</p>
     </div>
     <div class="flex items-center gap-2">
-      <button id="mainActionBtn" onclick="openCreateModal()" class="flex items-center gap-1.5 h-10 px-4 rounded-xl bg-purple-600 text-white text-sm font-semibold shadow-md shadow-purple-200 hover:bg-purple-700">
-        <span class="material-symbols-outlined text-[16px]">add</span>Thêm sân mới
+      <button id="mainActionBtn" onclick="openCreateModal()"
+              class="flex items-center gap-2 h-11 px-5 rounded-xl bg-purple-600 text-white text-sm font-bold shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[18px]">add_circle</span>+ Thêm sân mới
       </button>
     </div>
   </section>
@@ -196,11 +198,93 @@
     </div>
   </section>
 
-  <!-- Empty State Placeholder -->
-  <section id="emptyState" class="hidden flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-dashed border-purple-200">
-    <span class="material-symbols-outlined text-[48px] text-purple-300">stadium</span>
-    <p class="text-sm font-bold text-purple-900 mt-2">Không tìm thấy sân thi đấu nào</p>
-    <p class="text-xs text-purple-500 mt-0.5">Vui lòng điều chỉnh bộ lọc hoặc tạo thêm sân thi đấu mới.</p>
+  <!-- Empty State — Onboarding guide (hiện khi chưa có sân nào) -->
+  <section id="emptyState" class="hidden flex-col gap-6">
+
+    <!-- Hero empty card -->
+    <div class="flex flex-col items-center justify-center py-12 px-6 text-center bg-gradient-to-br from-purple-50 via-white to-indigo-50 rounded-3xl border-2 border-dashed border-purple-200 shadow-sm">
+      <div class="w-20 h-20 rounded-3xl bg-purple-100 flex items-center justify-center mb-4 shadow-inner">
+        <span class="material-symbols-outlined text-[40px] text-purple-500" style="font-variation-settings:'FILL' 1">stadium</span>
+      </div>
+      <h3 class="text-xl font-black text-purple-950 mb-1">Chưa có sân nào trong hệ thống</h3>
+      <p class="text-sm text-zinc-500 max-w-sm mb-6">Bắt đầu bằng cách thêm sân thi đấu đầu tiên để khách hàng có thể đặt lịch trực tuyến.</p>
+      <button onclick="openCreateModal()"
+              class="flex items-center gap-2 h-12 px-8 rounded-2xl bg-purple-600 text-white font-bold text-sm shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[20px]">add_circle</span>Tạo sân đầu tiên ngay
+      </button>
+    </div>
+
+    <!-- 3-step guide -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Step 1 -->
+      <div class="bg-white rounded-2xl border border-purple-100 p-5 shadow-sm flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group" onclick="switchTab('types')">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+            <span class="material-symbols-outlined text-[20px] text-indigo-600" style="font-variation-settings:'FILL' 1">payments</span>
+          </div>
+          <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest">Bước 1</span>
+        </div>
+        <div>
+          <h4 class="text-sm font-black text-zinc-900 mb-1">Cấu hình loại sân & giá</h4>
+          <p class="text-xs text-zinc-500 leading-relaxed">Thiết lập các loại sân (VIP, tiêu chuẩn…) và biểu giá giờ ngày/tối trước khi tạo sân.</p>
+        </div>
+        <span class="text-xs text-indigo-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+          Đi đến cấu hình <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </span>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="bg-white rounded-2xl border border-purple-100 p-5 shadow-sm flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group" onclick="openCreateModal()">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+            <span class="material-symbols-outlined text-[20px] text-purple-600" style="font-variation-settings:'FILL' 1">add_circle</span>
+          </div>
+          <span class="text-[11px] font-black text-purple-500 uppercase tracking-widest">Bước 2</span>
+        </div>
+        <div>
+          <h4 class="text-sm font-black text-zinc-900 mb-1">Thêm sân thi đấu</h4>
+          <p class="text-xs text-zinc-500 leading-relaxed">Nhấn "Thêm sân mới", đặt tên, chọn loại sân và trạng thái. Hệ thống sẽ tự gắn vào cơ sở của bạn.</p>
+        </div>
+        <span class="text-xs text-purple-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+          Tạo sân ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </span>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bg-white rounded-2xl border border-purple-100 p-5 shadow-sm flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all group">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center group-hover:bg-green-100 transition-colors">
+            <span class="material-symbols-outlined text-[20px] text-green-600" style="font-variation-settings:'FILL' 1">event_available</span>
+          </div>
+          <span class="text-[11px] font-black text-green-500 uppercase tracking-widest">Bước 3</span>
+        </div>
+        <div>
+          <h4 class="text-sm font-black text-zinc-900 mb-1">Mở sân & nhận đặt lịch</h4>
+          <p class="text-xs text-zinc-500 leading-relaxed">Sau khi tạo xong, vào "Mở sân / Check-in" để kích hoạt sân và bắt đầu nhận đặt sân từ khách hàng.</p>
+        </div>
+        <span class="text-xs text-zinc-400 font-semibold flex items-center gap-1">
+          Hoàn thành sau khi tạo sân
+        </span>
+      </div>
+    </div>
+
+    <!-- Tip box -->
+    <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+      <span class="material-symbols-outlined text-[20px] text-amber-600 mt-0.5 flex-shrink-0" style="font-variation-settings:'FILL' 1">lightbulb</span>
+      <p class="text-sm text-amber-800">
+        <strong>Gợi ý:</strong> Nếu đây là lần đầu thiết lập, hãy bắt đầu từ <button onclick="switchTab('types')" class="underline font-bold hover:text-amber-900">tab "Cấu hình loại sân & Bảng giá"</button> để định nghĩa loại sân trước, giúp việc tạo sân nhanh và đúng hơn.
+      </p>
+    </div>
+  </section>
+
+  <!-- Empty State — filter no result (hiện khi lọc không ra kết quả) -->
+  <section id="emptyFilterState" class="hidden flex-col items-center justify-center py-10 text-center bg-white rounded-2xl border border-dashed border-zinc-200">
+    <span class="material-symbols-outlined text-[36px] text-zinc-300 mb-2">search_off</span>
+    <p class="text-sm font-bold text-zinc-600">Không tìm thấy sân phù hợp</p>
+    <p class="text-xs text-zinc-400 mt-0.5">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+    <button onclick="resetFilters()" class="mt-4 text-xs text-purple-600 font-semibold hover:underline flex items-center gap-1">
+      <span class="material-symbols-outlined text-[14px]">refresh</span>Xóa bộ lọc
+    </button>
   </section>
 
 </main>
@@ -849,19 +933,38 @@
     applyFilters();
   }
 
+  function resetFilters() {
+    document.getElementById('filterType').value = 'all';
+    document.getElementById('filterStatus').value = 'all';
+    document.getElementById('searchInput').value = '';
+    applyFilters();
+  }
+
   // RENDER DYNAMIC LISTS
   function renderCourts(courts) {
     const grid = document.getElementById('mainCourtGrid');
     const listBody = document.getElementById('courtListTableBody');
     const emptyState = document.getElementById('emptyState');
+    const emptyFilterState = document.getElementById('emptyFilterState');
+
+    const totalCourts = (typeof mockSan !== 'undefined') ? mockSan.length : 0; // tất cả sân, không qua filter
 
     if (courts.length === 0) {
       grid.classList.add('hidden');
       document.getElementById('mainCourtList').classList.add('hidden');
-      emptyState.classList.remove('hidden');
+      if (totalCourts === 0) {
+        // chưa có sân nào — hiện onboarding
+        emptyState.classList.remove('hidden');
+        emptyFilterState.classList.add('hidden');
+      } else {
+        // có sân nhưng filter không ra — hiện empty filter
+        emptyState.classList.add('hidden');
+        emptyFilterState.classList.remove('hidden');
+      }
       return;
     } else {
       emptyState.classList.add('hidden');
+      emptyFilterState.classList.add('hidden');
       if (viewMode === 'grid') grid.classList.remove('hidden');
       else document.getElementById('mainCourtList').classList.remove('hidden');
     }

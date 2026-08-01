@@ -20,20 +20,46 @@
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
 
   <!-- Welcome banner -->
-  <section class="mgr-banner-shimmer rounded-2xl border border-purple-200 overflow-hidden relative">
-    <div class="absolute -top-12 -right-12 w-64 h-64 bg-purple-300/20 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-indigo-300/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="relative p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <section class="mgr-banner-shimmer rounded-2xl overflow-hidden relative shadow-lg">
+    <!-- decorative blobs -->
+    <div class="absolute -top-10 -right-10 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-10 -left-10 w-44 h-44 bg-indigo-300/20 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="absolute top-0 right-1/3 w-32 h-32 bg-violet-300/10 rounded-full blur-2xl pointer-events-none"></div>
+
+    <div class="relative px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex items-center gap-4">
-        <img src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=7c3aed&color=fff&bold=true" class="w-14 h-14 rounded-2xl object-cover shadow-md ring-4 ring-white" alt="Avatar">
+        <!-- Avatar with white glow ring -->
+        <div class="relative flex-shrink-0">
+          <img src="https://ui-avatars.com/api/?name=${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}&background=ffffff&color=7c3aed&bold=true"
+               class="w-16 h-16 rounded-2xl object-cover shadow-xl ring-4 ring-white/30" alt="Avatar">
+          <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-white shadow live-dot"></span>
+        </div>
+
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1">CỔNG THÔNG TIN QUẢN LÝ</p>
-          <h2 class="text-xl font-black text-purple-950 tracking-tight">Chào mừng trở lại, ${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}!</h2>
-          <div class="flex items-center gap-3 mt-1.5 text-xs text-purple-600 flex-wrap">
-            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">storefront</span>Cơ sở CS${sessionScope.user.coSoId}</span>
-            <span class="text-purple-200">·</span>
-            <span class="flex items-center gap-1 text-purple-700 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 inline-block live-dot"></span>Hệ thống sẵn sàng</span>
+          <p class="text-[10px] font-bold uppercase tracking-[.18em] text-white/60 mb-1">Cổng thông tin quản lý</p>
+          <h2 class="text-2xl font-black text-white tracking-tight drop-shadow">
+            Chào mừng trở lại, <span class="text-yellow-300">${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.username}</span>!
+          </h2>
+          <div class="flex items-center gap-3 mt-1.5 text-xs flex-wrap">
+            <span class="flex items-center gap-1 text-white/80 font-medium">
+              <span class="material-symbols-outlined text-[14px] text-white/60">storefront</span>
+              Cơ sở CS${sessionScope.user.coSoId}
+            </span>
+            <span class="text-white/30">·</span>
+            <span class="flex items-center gap-1.5 text-green-300 font-semibold">
+              <span class="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_6px_2px_rgba(74,222,128,.6)] inline-block live-dot"></span>
+              Hệ thống sẵn sàng
+            </span>
           </div>
+        </div>
+      </div>
+
+      <!-- Quick stats pill -->
+      <div class="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2.5">
+        <span class="material-symbols-outlined text-[18px] text-white/70">today</span>
+        <div class="text-white">
+          <p class="text-[10px] text-white/60 font-semibold uppercase tracking-wider">Hôm nay</p>
+          <p class="text-sm font-bold leading-tight">${dashboardData.todayBookingCount != null ? dashboardData.todayBookingCount : 0} lịch đặt</p>
         </div>
       </div>
     </div>

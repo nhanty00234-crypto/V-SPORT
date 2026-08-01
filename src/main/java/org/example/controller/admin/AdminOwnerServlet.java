@@ -159,7 +159,10 @@ public class AdminOwnerServlet extends HttpServlet {
                     // capability tùy chọn như bán sản phẩm, vốn vẫn giữ nguyên PENDING).
                     capabilityApprovalService.activateCourtCapability(coSoId, admin.getAccountId());
                     if (result.account != null) {
-                        sendApprovalEmail(result.account);
+                        // Tạo mật khẩu ngẫu nhiên mới tại thời điểm duyệt, cập nhật DB rồi gửi email
+                        String rawPassword = org.example.controller.OwnerRegisterServlet.generateSecurePassword();
+                        resetAccountPassword(result.account, rawPassword);
+                        sendApprovalEmail(result.account, rawPassword);
                     }
                     AuditLogService.log(req, admin, coSoId, AuditLogService.ACTION_APPROVE,
                             AuditLogService.ENTITY_CO_SO, String.valueOf(coSoId), result.coSo.getTenCoSo(),
@@ -267,14 +270,29 @@ public class AdminOwnerServlet extends HttpServlet {
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    private void sendApprovalEmail(TaiKhoan account) {
+    private void resetAccountPassword(TaiKhoan account, String rawPassword) {
+        try {
+            String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12));
+            try (Connection conn = DBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                         "UPDATE Accounts SET Password = ? WHERE AccountID = ?")) {
+                ps.setString(1, hashed);
+                ps.setInt(2, account.getAccountId());
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            logger.error("Lỗi reset mật khẩu account {}: {}", account.getAccountId(), e.getMessage(), e);
+        }
+    }
+
+    private void sendApprovalEmail(TaiKhoan account, String rawPassword) {
         final String email = account.getEmail();
         final String name  = account.getFullName();
         new Thread(() -> {
             try {
                 EmailUtil.sendHtmlEmail(email,
                     "V-SPORT — Tài khoản đối tác được phê duyệt",
-                    org.example.util.EmailTemplates.pheQuyetDoiTac(name, email, null));
+                    org.example.util.EmailTemplates.pheQuyetDoiTac(name, email, rawPassword, null));
             } catch (Exception e) {
                 logger.error("Lỗi gửi email phê duyệt tới {}", email, e);
             }

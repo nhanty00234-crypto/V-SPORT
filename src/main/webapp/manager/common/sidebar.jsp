@@ -139,9 +139,17 @@
     100% { background-position: -200% center; }
   }
   .mgr-banner-shimmer {
-    background: linear-gradient(135deg,#4c1d95 0%,#6d28d9 35%,#7c3aed 55%,#8b5cf6 75%,#5b21b6 100%);
+    background: linear-gradient(125deg,
+      #3b0764 0%,
+      #6d28d9 25%,
+      #7c3aed 45%,
+      #a855f7 65%,
+      #4f46e5 85%,
+      #3b0764 100%
+    );
     background-size: 300% 100%;
-    animation: mgrBannerShimmer 6s linear infinite;
+    animation: mgrBannerShimmer 8s ease-in-out infinite;
+    box-shadow: 0 8px 32px -8px rgba(109,40,217,.5), 0 2px 8px -2px rgba(79,70,229,.3);
   }
 
   .mgr-kpi-hover {
@@ -310,12 +318,48 @@
   }
 </style>
 
+<!-- ═══ SIDEBAR ACCORDION CSS ═══ -->
+<style>
+  .nav-group-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; color: #475569;
+    cursor: pointer; width: 100%; background: transparent;
+    border: none; text-align: left;
+    transition: background .15s, color .15s;
+    user-select: none;
+  }
+  .nav-group-header:hover { background: #f5f3ff; color: #6d28d9; }
+  .nav-group-header.group-open { color: #6d28d9; background: #f5f3ff; font-weight: 700; }
+  .nav-group-header .group-arrow {
+    margin-left: auto; font-size: 16px; transition: transform .22s cubic-bezier(.22,1,.36,1);
+    opacity: .5;
+  }
+  .nav-group-header.group-open .group-arrow { transform: rotate(180deg); opacity: 1; }
+  .nav-group-children {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .28s cubic-bezier(.22,1,.36,1), opacity .2s ease;
+    opacity: 0;
+  }
+  .nav-group-children.group-open {
+    max-height: 400px;
+    opacity: 1;
+  }
+  .nav-group-children .nav-link {
+    padding-left: 38px;
+    font-size: 13px;
+  }
+  .nav-group-children .nav-link.active::before { left: 0; }
+  .nav-group-wrap { margin-bottom: 2px; }
+</style>
+
 <!-- ═══ SIDEBAR ═══ -->
 <aside id="sidebar"
   class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-purple-100 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
 
   <!-- Logo -->
-  <div class="px-5 py-4 border-b border-purple-100 flex items-center gap-3">
+  <div class="px-5 py-4 border-b border-purple-100 flex items-center gap-3 shrink-0">
     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center shrink-0 shadow-md shadow-purple-200">
       <i class="ti ti-ball-tennis text-white text-[18px]"></i>
     </div>
@@ -326,98 +370,160 @@
   </div>
 
   <!-- Navigation -->
-  <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+  <nav class="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5" id="sidebarNav">
     <c:set var="uri" value="${pageContext.request.requestURI}" />
 
-    <!-- Tổng quan -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mb-1.5">Tổng quan</p>
+    <%-- Tính active group để auto-open --%>
+    <c:set var="grpVanHanh"   value="${uri.contains('/quan-ly-san') || uri.contains('/QuanLySan') || uri.contains('/ma-qr-san') || uri.contains('/MaQrSan') || uri.contains('/staff/checkin') || uri.contains('/CheckIn') || uri.contains('/dat-san') || uri.contains('/QuanLyDatSan')}" />
+    <c:set var="grpTaiChinh"  value="${uri.contains('/hoa-don') || uri.contains('/QuanLyHoaDon') || uri.contains('/hoan-tien') || uri.contains('/HoanTien') || uri.contains('/khuyen-mai') || uri.contains('/KhuyenMai')}" />
+    <c:set var="grpCuaHang"   value="${uri.contains('/kho-dich-vu') || uri.contains('/KhoDichVu') || uri.contains('/manager/dich-vu') || uri.contains('/DichVu') || uri.contains('/yeu-cau-dich-vu') || uri.contains('/YeuCauDichVu')}" />
+    <c:set var="grpNhanSu"    value="${uri.contains('/nhan-su') || uri.contains('/NhanSu') || uri.contains('/ca-lam') || uri.contains('/CaLamViec')}" />
+    <c:set var="grpKhachHang" value="${uri.contains('/khach-hang') || uri.contains('/KhachHang') || uri.contains('/danh-gia') || uri.contains('/DanhGia')}" />
+    <c:set var="grpHeThong"   value="${uri.contains('/thung-rac') || uri.contains('/ThungRac') || uri.contains('/audit-log') || uri.contains('/AuditLog')}" />
+
+    <!-- ── Dashboard (không có group) ── -->
     <a href="${pageContext.request.contextPath}/manager/dashboard"
       class="nav-link ${uri.contains('/manager/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
 
-    <!-- Vận hành sân bãi -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Vận hành sân bãi</p>
-    <a href="${pageContext.request.contextPath}/manager/quan-ly-san"
-      class="nav-link ${uri.contains('/manager/quan-ly-san') || uri.contains('/QuanLySan.jsp') ? 'active' : ''}">
-      <i class="ti ti-building-stadium text-[19px]"></i>Quản lý sân
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/ma-qr-san"
-      class="nav-link ${uri.contains('/manager/ma-qr-san') || uri.contains('/MaQrSan.jsp') ? 'active' : ''}">
-      <i class="ti ti-qrcode text-[19px]"></i>Mã QR sân
-    </a>
-    <a href="${pageContext.request.contextPath}/staff/checkin"
-      class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
-      <i class="ti ti-door-enter text-[19px]"></i>Mở sân / Check-in
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/dat-san"
-      class="nav-link ${uri.contains('/manager/dat-san') || uri.contains('/QuanLyDatSan.jsp') ? 'active' : ''}">
-      <i class="ti ti-calendar-check text-[19px]"></i>Duyệt đặt sân
-    </a>
+    <!-- ── Vận hành sân ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpVanHanh ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-building-stadium text-[19px] text-purple-500"></i>
+        Vận hành sân
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpVanHanh ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/manager/quan-ly-san"
+          class="nav-link ${uri.contains('/manager/quan-ly-san') || uri.contains('/QuanLySan') ? 'active' : ''}">
+          <i class="ti ti-table-row text-[16px]"></i>Quản lý sân
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/ma-qr-san"
+          class="nav-link ${uri.contains('/manager/ma-qr-san') || uri.contains('/MaQrSan') ? 'active' : ''}">
+          <i class="ti ti-qrcode text-[16px]"></i>Mã QR sân
+        </a>
+        <a href="${pageContext.request.contextPath}/staff/checkin"
+          class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn') ? 'active' : ''}">
+          <i class="ti ti-door-enter text-[16px]"></i>Mở sân / Check-in
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/dat-san"
+          class="nav-link ${uri.contains('/manager/dat-san') || uri.contains('/QuanLyDatSan') ? 'active' : ''}">
+          <i class="ti ti-calendar-check text-[16px]"></i>Đặt sân
+        </a>
+      </div>
+    </div>
 
-    <!-- Kinh doanh & Dịch vụ -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Kinh doanh &amp; Dịch vụ</p>
-    <c:if test="${shopModuleApproved}">
-    <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
-      class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu.jsp') ? 'active' : ''}">
-      <i class="ti ti-package text-[19px]"></i>Kho &amp; Dịch Vụ
-    </a>
+    <!-- ── Tài chính ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpTaiChinh ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-cash text-[19px] text-purple-500"></i>
+        Tài chính
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpTaiChinh ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/manager/hoa-don"
+          class="nav-link ${uri.contains('/manager/hoa-don') || uri.contains('/QuanLyHoaDon') ? 'active' : ''}">
+          <i class="ti ti-receipt text-[16px]"></i>Hóa đơn
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/hoan-tien"
+          class="nav-link ${uri.contains('/manager/hoan-tien') || uri.contains('/HoanTien') ? 'active' : ''}">
+          <i class="ti ti-receipt-refund text-[16px]"></i>Hoàn tiền
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/khuyen-mai"
+          class="nav-link ${uri.contains('/manager/khuyen-mai') || uri.contains('/KhuyenMai') ? 'active' : ''}">
+          <i class="ti ti-discount-2 text-[16px]"></i>Khuyến mãi
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Cửa hàng & Dịch vụ (chỉ khi approved) ── -->
+    <c:if test="${shopModuleApproved || serviceModuleApproved}">
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpCuaHang ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-shopping-bag text-[19px] text-purple-500"></i>
+        Cửa hàng &amp; DV
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpCuaHang ? 'group-open' : ''}">
+        <c:if test="${shopModuleApproved}">
+        <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
+          class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu') ? 'active' : ''}">
+          <i class="ti ti-package text-[16px]"></i>Kho &amp; Hàng hóa
+        </a>
+        </c:if>
+        <c:if test="${serviceModuleApproved}">
+        <a href="${pageContext.request.contextPath}/manager/dich-vu"
+          class="nav-link ${uri.contains('/manager/dich-vu') || uri.contains('/DichVu') ? 'active' : ''}">
+          <i class="ti ti-tools text-[16px]"></i>Dịch vụ
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/yeu-cau-dich-vu"
+          class="nav-link ${uri.contains('/yeu-cau-dich-vu') || uri.contains('/YeuCauDichVu') ? 'active' : ''}">
+          <i class="ti ti-clipboard-list text-[16px]"></i>Yêu cầu DV
+        </a>
+        </c:if>
+      </div>
+    </div>
     </c:if>
-    <c:if test="${serviceModuleApproved}">
-    <a href="${pageContext.request.contextPath}/manager/dich-vu"
-      class="nav-link ${uri.contains('/manager/dich-vu') || uri.contains('/manager/DichVu.jsp') ? 'active' : ''}">
-      <i class="ti ti-tools text-[19px]"></i>Quản lý dịch vụ
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/yeu-cau-dich-vu"
-      class="nav-link ${uri.contains('/yeu-cau-dich-vu') || uri.contains('/YeuCauDichVu.jsp') ? 'active' : ''}">
-      <i class="ti ti-clipboard-list text-[19px]"></i>Yêu cầu dịch vụ
-    </a>
-    </c:if>
-    <a href="${pageContext.request.contextPath}/manager/hoa-don"
-      class="nav-link ${uri.contains('/manager/hoa-don') || uri.contains('/QuanLyHoaDon.jsp') ? 'active' : ''}">
-      <i class="ti ti-receipt text-[19px]"></i>Quản lý hóa đơn
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/hoan-tien"
-      class="nav-link ${uri.contains('/manager/hoan-tien') || uri.contains('/manager/HoanTien.jsp') ? 'active' : ''}">
-      <i class="ti ti-receipt-refund text-[19px]"></i>Yêu cầu hoàn tiền
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/khuyen-mai"
-      class="nav-link ${uri.contains('/manager/khuyen-mai') || uri.contains('/manager/KhuyenMai.jsp') ? 'active' : ''}">
-      <i class="ti ti-discount-2 text-[19px]"></i>Mã khuyến mãi
-    </a>
 
-    <!-- Nhân sự -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Quản lý nhân sự</p>
-    <a href="${pageContext.request.contextPath}/manager/nhan-su"
-      class="nav-link ${uri.contains('/manager/nhan-su') || uri.contains('/NhanSu.jsp') ? 'active' : ''}">
-      <i class="ti ti-users-group text-[19px]"></i>Nhân sự
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/ca-lam"
-      class="nav-link ${uri.contains('/manager/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
-      <i class="ti ti-calendar-time text-[19px]"></i>Lịch làm việc
-    </a>
+    <!-- ── Nhân sự ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpNhanSu ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-users-group text-[19px] text-purple-500"></i>
+        Nhân sự
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpNhanSu ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/manager/nhan-su"
+          class="nav-link ${uri.contains('/manager/nhan-su') || uri.contains('/NhanSu') ? 'active' : ''}">
+          <i class="ti ti-user-check text-[16px]"></i>Danh sách nhân sự
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/ca-lam"
+          class="nav-link ${uri.contains('/manager/ca-lam') || uri.contains('/CaLamViec') ? 'active' : ''}">
+          <i class="ti ti-calendar-time text-[16px]"></i>Ca làm việc
+        </a>
+      </div>
+    </div>
 
-    <!-- Khách hàng -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Khách hàng</p>
-    <a href="${pageContext.request.contextPath}/manager/khach-hang"
-      class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang.jsp') ? 'active' : ''}">
-      <i class="ti ti-user text-[19px]"></i>Quản lý khách hàng
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/danh-gia"
-      class="nav-link ${uri.contains('/manager/danh-gia') || uri.contains('/DanhGia.jsp') ? 'active' : ''}">
-      <i class="ti ti-star text-[19px]"></i>Đánh giá &amp; Phản hồi
-    </a>
+    <!-- ── Khách hàng ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpKhachHang ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-user text-[19px] text-purple-500"></i>
+        Khách hàng
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpKhachHang ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/manager/khach-hang"
+          class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang') ? 'active' : ''}">
+          <i class="ti ti-address-book text-[16px]"></i>Danh sách KH
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/danh-gia"
+          class="nav-link ${uri.contains('/manager/danh-gia') || uri.contains('/DanhGia') ? 'active' : ''}">
+          <i class="ti ti-star text-[16px]"></i>Đánh giá &amp; Phản hồi
+        </a>
+      </div>
+    </div>
 
-    <!-- Hệ thống -->
-    <p class="text-[10px] font-bold uppercase tracking-widest text-purple-500 px-3 mt-4 mb-1.5">Hệ thống</p>
-    <a href="${pageContext.request.contextPath}/manager/thung-rac"
-      class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac.jsp') ? 'active' : ''}">
-      <i class="ti ti-trash text-[19px]"></i>Thùng rác
-    </a>
-    <a href="${pageContext.request.contextPath}/manager/audit-log"
-      class="nav-link ${uri.contains('/manager/audit-log') || uri.contains('/manager/AuditLog.jsp') ? 'active' : ''}">
-      <i class="ti ti-history text-[19px]"></i>Nhật Ký Thao Tác
-    </a>
+    <!-- ── Hệ thống (mờ, đóng mặc định) ── -->
+    <div class="nav-group-wrap mt-1 border-t border-purple-50 pt-2">
+      <button class="nav-group-header ${grpHeThong ? 'group-open' : ''}" onclick="toggleGroup(this)"
+              style="opacity:.65; font-size:12.5px;">
+        <i class="ti ti-settings text-[17px] text-zinc-400"></i>
+        Hệ thống
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpHeThong ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/manager/thung-rac"
+          class="nav-link ${uri.contains('/manager/thung-rac') || uri.contains('/ThungRac') ? 'active' : ''}">
+          <i class="ti ti-trash text-[16px]"></i>Thùng rác
+        </a>
+        <a href="${pageContext.request.contextPath}/manager/audit-log"
+          class="nav-link ${uri.contains('/manager/audit-log') || uri.contains('/AuditLog') ? 'active' : ''}">
+          <i class="ti ti-history text-[16px]"></i>Nhật ký thao tác
+        </a>
+      </div>
+    </div>
+
   </nav>
 
   <!-- Logout -->
@@ -428,6 +534,27 @@
     </a>
   </div>
 </aside>
+
+<script>
+function toggleGroup(btn) {
+  var isOpen = btn.classList.contains('group-open');
+  // đóng group khác (không liên quan đến Hệ thống luôn ẩn)
+  document.querySelectorAll('.nav-group-header.group-open').forEach(function(b) {
+    if (b !== btn) {
+      b.classList.remove('group-open');
+      var ch = b.nextElementSibling;
+      if (ch) ch.classList.remove('group-open');
+    }
+  });
+  if (isOpen) {
+    btn.classList.remove('group-open');
+    btn.nextElementSibling.classList.remove('group-open');
+  } else {
+    btn.classList.add('group-open');
+    btn.nextElementSibling.classList.add('group-open');
+  }
+}
+</script>
 
 <!-- ═══ SIDEBAR JS ═══ -->
 <script>

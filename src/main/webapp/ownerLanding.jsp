@@ -126,12 +126,40 @@ header.nav{
   border-radius:12px;color:var(--ink)}
 .otp-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 .day-chip input{display:none}
-.day-chip span{display:inline-block;padding:8px 16px;border-radius:100px;border:1px solid var(--line);
-  font-size:.85rem;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s}
+.day-chip{display:block}
+.day-chip span{display:block;padding:8px 4px;border-radius:100px;border:1px solid var(--line);
+  font-size:.82rem;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;
+  text-align:center;white-space:nowrap}
 .day-chip input:checked + span{background:var(--accent);color:#fff;border-color:var(--accent)}
 .capability-chip{border:1px solid var(--line);border-radius:14px;background:#fff;transition:all .15s}
 .capability-chip:hover{border-color:#c4b5fd}
 .capability-chip input:checked ~ span,.capability-chip:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+
+/* ===== CUSTOM TIME PICKER ===== */
+.vtimepicker-wrap{position:relative;user-select:none}
+.vtimepicker-btn{width:100%;display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid var(--line);
+  border-radius:11px;font-size:.92rem;font-family:var(--sans);color:var(--ink);background:#fff;
+  cursor:pointer;transition:all .15s;text-align:left}
+.vtimepicker-btn:hover,.vtimepicker-wrap.open .vtimepicker-btn{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.vtimepicker-icon{font-size:18px;color:var(--accent)}
+.vtimepicker-display{flex:1;font-weight:600;font-size:1rem;letter-spacing:.04em}
+.vtimepicker-caret{font-size:18px;color:#94a3b8;transition:transform .2s}
+.vtimepicker-wrap.open .vtimepicker-caret{transform:rotate(180deg)}
+.vtimepicker-popup{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:999;
+  padding:12px 8px;flex-direction:row;gap:4px;align-items:flex-start}
+.vtimepicker-wrap.open .vtimepicker-popup{display:flex}
+.vtimepicker-col{flex:1;display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:#c4b5fd #f5f3ff}
+.vtimepicker-col::-webkit-scrollbar{width:4px}
+.vtimepicker-col::-webkit-scrollbar-thumb{background:#c4b5fd;border-radius:4px}
+.vtimepicker-col button{width:100%;padding:7px 4px;border:none;background:transparent;
+  border-radius:8px;font-size:.88rem;font-family:var(--sans);cursor:pointer;
+  color:#475569;transition:all .12s;text-align:center}
+.vtimepicker-col button:hover{background:#f5f3ff;color:var(--accent)}
+.vtimepicker-col button.active{background:var(--accent);color:#fff;font-weight:700}
+.vtimepicker-sep{font-size:1.4rem;font-weight:700;color:#94a3b8;padding:6px 2px;align-self:flex-start;margin-top:4px}
 
 /* ===== SECTIONS ===== */
 section.block{padding:clamp(56px,8vh,96px) 0}
@@ -393,16 +421,32 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
             <div class="field">
               <label>Giờ mở cửa <span class="text-[#7c3aed]">*</span></label>
-              <div class="flex gap-2">
-                <select id="openTimeH" onchange="syncOwnerTime('open')" class="flex-1 cursor-pointer"></select>
-                <select id="openTimeM" onchange="syncOwnerTime('open')" class="w-[80px] cursor-pointer"></select>
+              <div class="vtimepicker-wrap" id="openTimePicker" data-target="openTime" data-default="06:00">
+                <button type="button" class="vtimepicker-btn" onclick="vtpToggle('openTimePicker')">
+                  <span class="material-symbols-outlined vtimepicker-icon">schedule</span>
+                  <span class="vtimepicker-display" id="openTimePicker-display">06:00</span>
+                  <span class="material-symbols-outlined vtimepicker-caret">expand_more</span>
+                </button>
+                <div class="vtimepicker-popup" id="openTimePicker-popup">
+                  <div class="vtimepicker-col" id="openTimePicker-hours"></div>
+                  <div class="vtimepicker-sep">:</div>
+                  <div class="vtimepicker-col" id="openTimePicker-minutes"></div>
+                </div>
               </div>
             </div>
             <div class="field">
               <label>Giờ đóng cửa <span class="text-[#7c3aed]">*</span></label>
-              <div class="flex gap-2">
-                <select id="closeTimeH" onchange="syncOwnerTime('close')" class="flex-1 cursor-pointer"></select>
-                <select id="closeTimeM" onchange="syncOwnerTime('close')" class="w-[80px] cursor-pointer"></select>
+              <div class="vtimepicker-wrap" id="closeTimePicker" data-target="closeTime" data-default="22:00">
+                <button type="button" class="vtimepicker-btn" onclick="vtpToggle('closeTimePicker')">
+                  <span class="material-symbols-outlined vtimepicker-icon">schedule</span>
+                  <span class="vtimepicker-display" id="closeTimePicker-display">22:00</span>
+                  <span class="material-symbols-outlined vtimepicker-caret">expand_more</span>
+                </button>
+                <div class="vtimepicker-popup" id="closeTimePicker-popup">
+                  <div class="vtimepicker-col" id="closeTimePicker-hours"></div>
+                  <div class="vtimepicker-sep">:</div>
+                  <div class="vtimepicker-col" id="closeTimePicker-minutes"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -410,7 +454,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
           <!-- Operating days -->
           <div class="mb-5">
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Ngày hoạt động <span class="text-[#7c3aed]">*</span></label>
-            <div class="flex flex-wrap gap-2" id="operatingDays">
+            <div class="grid grid-cols-7 gap-2" id="operatingDays">
               <label class="day-chip cursor-pointer">
                 <input type="checkbox" value="T2" checked/>
                 <span>Thứ 2</span>
@@ -452,7 +496,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
           <div class="mb-5">
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Hoạt động và dịch vụ tại cơ sở</label>
             <p class="text-xs text-slate-400 mb-3">Ngoài cho thuê sân, chọn thêm nếu cơ sở của bạn có các hoạt động sau. Mỗi lựa chọn cần quản trị viên phê duyệt riêng trước khi được kích hoạt.</p>
-            <div class="flex flex-col gap-2" id="capabilityList">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="capabilityList">
               <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
                 <input type="checkbox" value="SAN_PHAM" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
                 <span class="text-sm text-slate-600"><b class="text-slate-900">Bán sản phẩm thể thao</b> — giày, áo quần, vợt, bóng, phụ kiện</span>
@@ -1337,37 +1381,113 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         clearOwnerDraft();
     }
 
-    function syncOwnerTime(which) {
-        const hVal = document.getElementById(which + 'TimeH').value;
-        const mVal = document.getElementById(which + 'TimeM').value;
-        document.getElementById(which + 'Time').value = hVal + ':' + mVal;
-    }
-    window.syncOwnerTime = syncOwnerTime;
-
-    // Init 24h time selects for opening/closing hours
+    // ===== CUSTOM TIME PICKER =====
     (function() {
-        function buildTimeSelects(prefix, defaultH, defaultM) {
-            const hSel = document.getElementById(prefix + 'H');
-            const mSel = document.getElementById(prefix + 'M');
-            if (!hSel || !mSel) return;
+        const MINUTES = [0, 15, 30, 45];
+
+        function initVtp(wrapId, defaultTime) {
+            const wrap = document.getElementById(wrapId);
+            if (!wrap) return;
+            const [dh, dm] = (defaultTime || '00:00').split(':').map(Number);
+            const targetId = wrap.dataset.target;
+            let selH = dh, selM = dm;
+
+            const hCol = document.getElementById(wrapId + '-hours');
+            const mCol = document.getElementById(wrapId + '-minutes');
+
+            // Build hour buttons 0-23
             for (let h = 0; h <= 23; h++) {
-                const o = document.createElement('option');
-                o.value = String(h).padStart(2, '0');
-                o.textContent = String(h).padStart(2, '0') + 'h';
-                if (h === defaultH) o.selected = true;
-                hSel.appendChild(o);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = String(h).padStart(2, '0') + ':00';
+                if (h === selH) btn.classList.add('active');
+                btn.addEventListener('click', function() {
+                    selH = h;
+                    hCol.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    commit();
+                });
+                hCol.appendChild(btn);
             }
-            [0, 15, 30, 45].forEach(function(m) {
-                const o = document.createElement('option');
-                o.value = String(m).padStart(2, '0');
-                o.textContent = String(m).padStart(2, '0');
-                if (m === defaultM) o.selected = true;
-                mSel.appendChild(o);
+
+            // Build minute buttons
+            MINUTES.forEach(function(m) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = ':' + String(m).padStart(2, '0');
+                if (m === selM) btn.classList.add('active');
+                btn.addEventListener('click', function() {
+                    selM = m;
+                    mCol.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    commit();
+                });
+                mCol.appendChild(btn);
             });
+
+            function commit() {
+                const val = String(selH).padStart(2, '0') + ':' + String(selM).padStart(2, '0');
+                document.getElementById(wrapId + '-display').textContent = val;
+                if (targetId) document.getElementById(targetId).value = val;
+            }
+
+            // Scroll selected hour into view
+            setTimeout(function() {
+                const activeH = hCol.querySelector('.active');
+                if (activeH) activeH.scrollIntoView({block: 'center'});
+            }, 0);
+
+            commit();
         }
-        buildTimeSelects('openTime',  6, 0);
-        buildTimeSelects('closeTime', 22, 0);
+
+        initVtp('openTimePicker',  '06:00');
+        initVtp('closeTimePicker', '22:00');
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('.vtimepicker-wrap.open').forEach(function(w) {
+                if (!w.contains(e.target)) w.classList.remove('open');
+            });
+        });
     })();
+
+    window.vtpSetTime = function(wrapId, timeStr) {
+        if (!timeStr) return;
+        const parts = timeStr.split(':');
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1] || '0', 10);
+        const wrap = document.getElementById(wrapId);
+        if (!wrap) return;
+        const targetId = wrap.dataset.target;
+        // Update active states
+        const hCol = document.getElementById(wrapId + '-hours');
+        const mCol = document.getElementById(wrapId + '-minutes');
+        if (hCol) hCol.querySelectorAll('button').forEach(function(b, i) {
+            b.classList.toggle('active', i === h);
+        });
+        if (mCol) mCol.querySelectorAll('button').forEach(function(b, i) {
+            const mins = [0, 15, 30, 45];
+            b.classList.toggle('active', mins[i] === m);
+        });
+        const val = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        const disp = document.getElementById(wrapId + '-display');
+        if (disp) disp.textContent = val;
+        if (targetId) document.getElementById(targetId).value = val;
+    };
+
+    window.vtpToggle = function(wrapId) {
+        const wrap = document.getElementById(wrapId);
+        if (!wrap) return;
+        const isOpen = wrap.classList.contains('open');
+        // Close all others
+        document.querySelectorAll('.vtimepicker-wrap.open').forEach(function(w) { w.classList.remove('open'); });
+        if (!isOpen) {
+            wrap.classList.add('open');
+            // Scroll selected hour into view after popup opens
+            const activeH = document.getElementById(wrapId + '-hours').querySelector('.active');
+            if (activeH) setTimeout(function() { activeH.scrollIntoView({block: 'center'}); }, 50);
+        }
+    };
 
     // ==========================================
     // BẢN NHÁP ĐĂNG KÝ (sessionStorage) — chống mất dữ liệu khi reload
@@ -1424,10 +1544,8 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             step3: {
                 selectedSports: selectedSports,
                 courtQuantities: courtQuantities,
-                openTimeH: ownerDraftGetVal('openTimeH'),
-                openTimeM: ownerDraftGetVal('openTimeM'),
-                closeTimeH: ownerDraftGetVal('closeTimeH'),
-                closeTimeM: ownerDraftGetVal('closeTimeM'),
+                openTime: document.getElementById('openTimePicker') ? document.getElementById('openTimePicker').value : '',
+                closeTime: document.getElementById('closeTimePicker') ? document.getElementById('closeTimePicker').value : '',
                 operatingDays: operatingDays,
                 description: ownerDraftGetVal('regDescription'),
                 capabilities: capabilities
@@ -1526,10 +1644,8 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             });
         }
 
-        if (s3.openTimeH) { document.getElementById('openTimeH').value = s3.openTimeH; syncOwnerTime('open'); }
-        if (s3.openTimeM) { document.getElementById('openTimeM').value = s3.openTimeM; syncOwnerTime('open'); }
-        if (s3.closeTimeH) { document.getElementById('closeTimeH').value = s3.closeTimeH; syncOwnerTime('close'); }
-        if (s3.closeTimeM) { document.getElementById('closeTimeM').value = s3.closeTimeM; syncOwnerTime('close'); }
+        if (s3.openTime) { vtpSetTime('openTimePicker', s3.openTime); }
+        if (s3.closeTime) { vtpSetTime('closeTimePicker', s3.closeTime); }
 
         if (s3.description) document.getElementById('regDescription').value = s3.description;
 
@@ -1605,7 +1721,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
 
     // Tự động lưu draft khi người dùng nhập/chọn (không gắn cho OTP box / file input)
     const OWNER_DRAFT_WATCHED_SELECTOR = '#ownerName, #regEmail, #regPhone, #regAddress, #regDescription, ' +
-        '#openTimeH, #openTimeM, #closeTimeH, #closeTimeM, #operatingDays input[type="checkbox"], .court-qty, ' +
+        '#openTimePicker, #closeTimePicker, #operatingDays input[type="checkbox"], .court-qty, ' +
         '#capabilityList input[type="checkbox"]';
 
     ['input', 'change', 'focusout'].forEach(function(evt) {

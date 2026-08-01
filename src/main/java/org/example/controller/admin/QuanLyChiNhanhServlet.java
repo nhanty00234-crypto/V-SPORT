@@ -222,7 +222,9 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             // Kích hoạt capability SAN tự động khi duyệt cơ sở
             capabilityApprovalService.activateCourtCapability(id, admin.getAccountId());
             if (result.account != null) {
-                sendApprovalEmail(result.account);
+                String rawPassword = org.example.controller.OwnerRegisterServlet.generateSecurePassword();
+                resetAccountPassword(result.account, rawPassword);
+                sendApprovalEmail(result.account, rawPassword);
             }
             AuditLogService.log(req, admin, id, AuditLogService.ACTION_APPROVE,
                     AuditLogService.ENTITY_CO_SO, String.valueOf(id),
@@ -461,13 +463,28 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
         try { return Integer.parseInt(s); } catch (Exception e) { return defaultVal; }
     }
 
-    private void sendApprovalEmail(TaiKhoan account) {
+    private void resetAccountPassword(TaiKhoan account, String rawPassword) {
+        try {
+            String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12));
+            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+                 java.sql.PreparedStatement ps = conn.prepareStatement(
+                         "UPDATE Accounts SET Password = ? WHERE AccountID = ?")) {
+                ps.setString(1, hashed);
+                ps.setInt(2, account.getAccountId());
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            logger.error("Lỗi reset mật khẩu account {}: {}", account.getAccountId(), e.getMessage(), e);
+        }
+    }
+
+    private void sendApprovalEmail(TaiKhoan account, String rawPassword) {
         new Thread(() -> {
             try {
                 EmailUtil.sendHtmlEmail(
                     account.getEmail(),
                     "V-SPORT — Tài khoản đối tác được phê duyệt",
-                    org.example.util.EmailTemplates.pheQuyetDoiTac(account.getFullName(), account.getEmail(), null)
+                    org.example.util.EmailTemplates.pheQuyetDoiTac(account.getFullName(), account.getEmail(), rawPassword, null)
                 );
             } catch (Exception e) {
                 logger.error("Lỗi gửi email phê duyệt đến {}", account.getEmail(), e);
