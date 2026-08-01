@@ -107,13 +107,54 @@
     body.stf-page-exiting main { opacity:1!important; transform:none!important; filter:none!important; transition:none!important; }
     .stf-transition-scrim { display: none !important; }
   }
+
+  .nav-link .material-symbols-outlined,
+  .nav-link .ti { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .nav-link:hover .material-symbols-outlined,
+  .nav-link:hover .ti { transform: scale(1.15); color: #ea580c; }
+</style>
+
+<!-- ═══ SIDEBAR ACCORDION CSS ═══ -->
+<style>
+  .nav-group-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; color: #6b7280;
+    cursor: pointer; width: 100%; background: transparent;
+    border: none; text-align: left;
+    transition: background .15s, color .15s;
+    user-select: none;
+  }
+  .nav-group-header:hover { background: #fff7ed; color: #c2410c; }
+  .nav-group-header.group-open { color: #c2410c; background: #fff7ed; font-weight: 700; }
+  .nav-group-header .group-arrow {
+    margin-left: auto; font-size: 16px; transition: transform .22s cubic-bezier(.22,1,.36,1);
+    opacity: .5;
+  }
+  .nav-group-header.group-open .group-arrow { transform: rotate(180deg); opacity: 1; }
+  .nav-group-children {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .28s cubic-bezier(.22,1,.36,1), opacity .2s ease;
+    opacity: 0;
+  }
+  .nav-group-children.group-open {
+    max-height: 400px;
+    opacity: 1;
+  }
+  .nav-group-children .nav-link {
+    padding-left: 38px;
+    font-size: 13px;
+  }
+  .nav-group-children .nav-link.active::before { left: 0; }
+  .nav-group-wrap { margin-bottom: 2px; }
 </style>
 
 <!-- ═══ SIDEBAR ═══ -->
 <aside id="sidebar"
   class="w-[248px] h-screen fixed left-0 top-0 bg-white border-r border-orange-100 z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
 
-  <div class="px-5 py-4 border-b border-orange-50 flex items-center gap-3">
+  <div class="px-5 py-4 border-b border-orange-50 flex items-center gap-3 shrink-0">
     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shrink-0 shadow-md shadow-orange-200">
       <i class="ti ti-ball-tennis text-white text-[18px]"></i>
     </div>
@@ -123,38 +164,81 @@
     </div>
   </div>
 
-  <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5" id="sidebarNav">
     <c:set var="uri" value="${pageContext.request.requestURI}" />
-    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mb-1.5">Tổng quan</p>
-    <a href="${pageContext.request.contextPath}/staff/dashboard" class="nav-link ${uri.contains('/staff/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
+
+    <%-- Tính active group để auto-open --%>
+    <c:set var="grpVanHanh"  value="${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') || uri.contains('/staff/dat-san') || uri.contains('/QuanLyDatSan.jsp') || uri.contains('/staff/yeu-cau-qr') || uri.contains('/YeuCauQR.jsp')}" />
+    <c:set var="grpTaiChinh" value="${uri.contains('/staff/hoan-tien') || uri.contains('/staff/HoanTien.jsp')}" />
+    <c:set var="grpCaNhan"   value="${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') || uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_')}" />
+
+    <!-- ── Tổng quan (không có group) ── -->
+    <a href="${pageContext.request.contextPath}/staff/dashboard"
+      class="nav-link ${uri.contains('/staff/dashboard') || uri.contains('/Dashboard.jsp') ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
 
-    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mt-4 mb-1.5">Vận hành sân bãi</p>
-    <a href="${pageContext.request.contextPath}/staff/checkin" class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
-      <i class="ti ti-door-enter text-[19px]"></i>Mở sân / Check-in
-    </a>
-    <a href="${pageContext.request.contextPath}/staff/dat-san" class="nav-link ${uri.contains('/staff/dat-san') || uri.contains('/QuanLyDatSan.jsp') ? 'active' : ''}">
-      <i class="ti ti-calendar-check text-[19px]"></i>Duyệt đặt sân
-    </a>
-    <a href="${pageContext.request.contextPath}/staff/yeu-cau-qr" class="nav-link ${uri.contains('/staff/yeu-cau-qr') || uri.contains('/YeuCauQR.jsp') ? 'active' : ''}">
-      <i class="ti ti-qrcode text-[19px]"></i>Yêu cầu từ QR
-    </a>
+    <!-- ── Vận hành sân bãi ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpVanHanh ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-building-stadium text-[19px] text-orange-500"></i>
+        Vận hành sân bãi
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpVanHanh ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/staff/checkin"
+          class="nav-link ${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') ? 'active' : ''}">
+          <i class="ti ti-door-enter text-[16px]"></i>Mở sân / Check-in
+        </a>
+        <a href="${pageContext.request.contextPath}/staff/dat-san"
+          class="nav-link ${uri.contains('/staff/dat-san') || uri.contains('/QuanLyDatSan.jsp') ? 'active' : ''}">
+          <i class="ti ti-calendar-check text-[16px]"></i>Duyệt đặt sân
+        </a>
+        <a href="${pageContext.request.contextPath}/staff/yeu-cau-qr"
+          class="nav-link ${uri.contains('/staff/yeu-cau-qr') || uri.contains('/YeuCauQR.jsp') ? 'active' : ''}">
+          <i class="ti ti-qrcode text-[16px]"></i>Yêu cầu từ QR
+        </a>
+      </div>
+    </div>
 
-    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mt-4 mb-1.5">Tài chính</p>
-    <a href="${pageContext.request.contextPath}/staff/hoan-tien" class="nav-link ${uri.contains('/staff/hoan-tien') || uri.contains('/staff/HoanTien.jsp') ? 'active' : ''}">
-      <i class="ti ti-receipt-refund text-[19px]"></i>Yêu cầu hoàn tiền
-    </a>
+    <!-- ── Tài chính ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpTaiChinh ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-cash text-[19px] text-orange-500"></i>
+        Tài chính
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpTaiChinh ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/staff/hoan-tien"
+          class="nav-link ${uri.contains('/staff/hoan-tien') || uri.contains('/staff/HoanTien.jsp') ? 'active' : ''}">
+          <i class="ti ti-receipt-refund text-[16px]"></i>Yêu cầu hoàn tiền
+        </a>
+      </div>
+    </div>
 
-    <p class="text-[10px] font-bold uppercase tracking-widest text-orange-400 px-3 mt-4 mb-1.5">Cá nhân</p>
-    <a href="${pageContext.request.contextPath}/staff/ca-lam" class="nav-link ${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
-      <i class="ti ti-calendar-week text-[19px]"></i>Lịch làm của tôi
-    </a>
-    <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
-      <i class="ti ti-clipboard-list text-[19px]"></i>Đăng ký nghỉ phép
-    </a>
+    <!-- ── Cá nhân ── -->
+    <div class="nav-group-wrap">
+      <button class="nav-group-header ${grpCaNhan ? 'group-open' : ''}" onclick="toggleGroup(this)">
+        <i class="ti ti-user text-[19px] text-orange-500"></i>
+        Cá nhân
+        <i class="ti ti-chevron-down group-arrow"></i>
+      </button>
+      <div class="nav-group-children ${grpCaNhan ? 'group-open' : ''}">
+        <a href="${pageContext.request.contextPath}/staff/ca-lam"
+          class="nav-link ${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') ? 'active' : ''}">
+          <i class="ti ti-calendar-week text-[16px]"></i>Lịch làm của tôi
+        </a>
+        <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi"
+          class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
+          <i class="ti ti-clipboard-list text-[16px]"></i>Đăng ký nghỉ phép
+        </a>
+      </div>
+    </div>
+
   </nav>
 
+  <!-- Logout -->
   <div class="px-3 py-3 border-t border-orange-50 shrink-0">
     <a href="${pageContext.request.contextPath}/logout"
       class="nav-link text-red-500 hover:bg-red-50 hover:text-red-600 text-xs font-semibold">
@@ -162,6 +246,26 @@
     </a>
   </div>
 </aside>
+
+<script>
+function toggleGroup(btn) {
+  var isOpen = btn.classList.contains('group-open');
+  document.querySelectorAll('.nav-group-header.group-open').forEach(function(b) {
+    if (b !== btn) {
+      b.classList.remove('group-open');
+      var ch = b.nextElementSibling;
+      if (ch) ch.classList.remove('group-open');
+    }
+  });
+  if (isOpen) {
+    btn.classList.remove('group-open');
+    btn.nextElementSibling.classList.remove('group-open');
+  } else {
+    btn.classList.add('group-open');
+    btn.nextElementSibling.classList.add('group-open');
+  }
+}
+</script>
 
 <!-- ═══ SIDEBAR JS ═══ -->
 <script>
