@@ -201,85 +201,96 @@
         }
         @media (min-width: 640px) { .ttv-section-heading { grid-column: 1/-1; } }
 
-        /* Court card — redesigned */
+        /* Court card — Bold & Sporty */
         .court-card {
             background: #fff;
-            border-radius: var(--ttv-radius);
-            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            border: 1.5px solid #e2e8f0;
             padding: 0;
             cursor: pointer;
             display: flex; flex-direction: column;
-            transition: border-color 180ms, box-shadow 180ms, transform 140ms;
+            transition: border-color 200ms, box-shadow 200ms, transform 160ms;
             width: 100%;
             box-sizing: border-box;
             overflow: hidden;
             margin-bottom: 12px;
             position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
         }
         @media (min-width: 640px) { .court-card { margin-bottom: 0; } }
 
+        /* Top accent strip */
         .court-card::before {
             content: '';
-            position: absolute; left: 0; top: 0; bottom: 0;
-            width: 5px;
-            background: var(--sport-color, #01e281);
-            transition: width 180ms;
+            position: absolute; left: 0; top: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0a4d2e 0%, #16a34a 60%, #4ade80 100%);
+            transition: height 200ms;
+        }
+        .court-card.no-avail::before {
+            background: #cbd5e1;
         }
         .court-card:hover {
-            border-color: var(--sport-color, var(--ttv-primary));
-            box-shadow: 0 8px 28px rgba(0,0,0,.1), 0 2px 8px rgba(0,0,0,.06);
-            transform: translateY(-2px);
+            border-color: #16a34a;
+            box-shadow: 0 10px 32px rgba(22,163,74,.18), 0 2px 8px rgba(0,0,0,.07);
+            transform: translateY(-3px);
         }
-        .court-card:hover::before { width: 6px; }
-        .court-card:active { transform: translateY(0) scale(0.99); }
+        .court-card:hover::before { height: 5px; }
+        .court-card:active { transform: translateY(-1px) scale(0.99); }
+        .court-card.no-avail { opacity: .62; }
+        .court-card.no-avail:hover { border-color: #94a3b8; box-shadow: 0 6px 18px rgba(0,0,0,.1); }
 
         .court-card-inner {
             display: flex; align-items: center; gap: 14px;
-            padding: 16px 16px 16px 20px;
+            padding: 14px 14px 14px 16px;
+            margin-top: 4px; /* space for accent strip */
         }
 
+        /* Icon — dark green box */
         .court-card-icon {
-            width: 52px; height: 52px; border-radius: 14px;
-            background: var(--sport-bg, #f0faf5);
+            width: 54px; height: 54px; border-radius: 14px;
+            background: linear-gradient(135deg, #0a4d2e 0%, #166534 100%);
             display: flex; align-items: center; justify-content: center;
             font-size: 26px; flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            box-shadow: 0 4px 12px rgba(10,77,46,.35);
         }
+
         .court-card-info { flex: 1; min-width: 0; }
         .court-card-name {
             font-size: 15px; font-weight: 800; color: #0f172a;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            margin-bottom: 5px;
+            margin-bottom: 6px; letter-spacing: -.01em;
         }
         .court-card-meta {
             display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
         }
         .court-card-badge {
             display: inline-flex; align-items: center;
-            padding: 3px 9px; border-radius: 999px;
-            font-size: 10px; font-weight: 800; letter-spacing: .03em;
-            background: var(--sport-bg, #f0faf5);
-            color: var(--sport-color, #0d6e3f);
-            border: 1px solid var(--sport-border, #bbf7d0);
+            padding: 3px 10px; border-radius: 6px;
+            font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+            background: #0a4d2e;
+            color: #fff;
         }
         .court-card-price {
             font-size: 13px; font-weight: 800;
-            color: var(--sport-color, #16a34a);
+            color: #15803d;
         }
 
         .court-card-right {
             display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0;
         }
-        .court-card-status {
+        .court-card-avail {
             display: inline-flex; align-items: center; gap: 5px;
-            padding: 4px 10px; border-radius: 999px;
-            font-size: 11px; font-weight: 800;
+            padding: 5px 11px; border-radius: 999px;
+            font-size: 11px; font-weight: 800; letter-spacing: .02em;
         }
-        .court-card-status.has-slots {
+        .court-card-avail.has-slots {
             background: #dcfce7; color: #15803d;
+            border: 1px solid #bbf7d0;
         }
-        .court-card-status.no-slots {
+        .court-card-avail.no-slots {
             background: #f1f5f9; color: #94a3b8;
+            border: 1px solid #e2e8f0;
         }
         .avail-dot {
             width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
@@ -291,11 +302,11 @@
             50% { opacity: .6; transform: scale(.85); }
         }
         .court-card-arrow {
-            color: #cbd5e1; flex-shrink: 0; transition: color 180ms, transform 180ms;
+            color: #d1d5db; flex-shrink: 0; transition: color 200ms, transform 200ms;
         }
         .court-card:hover .court-card-arrow {
-            color: var(--sport-color, var(--ttv-primary));
-            transform: translateX(3px);
+            color: #16a34a;
+            transform: translateX(4px);
         }
 
         /* ── STEP 2: Timeline ── */
@@ -959,24 +970,28 @@
         state.courts.forEach(function(court) {
             var hasAvail = court.slots && court.slots.some(function(s) { return s.status === 'AVAILABLE'; });
             var card = document.createElement('div');
-            card.className = 'court-card';
+            card.className = 'court-card' + (hasAvail ? '' : ' no-avail');
             card.setAttribute('role', 'listitem');
             card.setAttribute('tabindex', '0');
             card.setAttribute('aria-label', (court.tenSan || 'Sân ' + court.sanId) + (hasAvail ? ' – Còn trống' : ' – Hết giờ'));
             card.innerHTML =
-                '<div class="court-card-icon">' + courtIcon(court.tenLoai) + '</div>' +
-                '<div class="court-card-info">' +
-                    '<div class="court-card-name">' + escHtml(court.tenSan || 'Sân #' + court.sanId) + '</div>' +
-                    '<div class="court-card-meta">' +
-                        (court.tenLoai ? '<span class="court-card-badge">' + escHtml(court.tenLoai) + '</span>' : '') +
-                        (court.giaKhongDen ? '<span class="court-card-price">' + fmtVnd(court.giaKhongDen) + '/giờ</span>' : '') +
+                '<div class="court-card-inner">' +
+                    '<div class="court-card-icon">' + courtIcon(court.tenLoai) + '</div>' +
+                    '<div class="court-card-info">' +
+                        '<div class="court-card-name">' + escHtml(court.tenSan || 'Sân #' + court.sanId) + '</div>' +
+                        '<div class="court-card-meta">' +
+                            (court.tenLoai ? '<span class="court-card-badge">' + escHtml(court.tenLoai) + '</span>' : '') +
+                            (court.giaKhongDen ? '<span class="court-card-price">' + fmtVnd(court.giaKhongDen) + '/giờ</span>' : '') +
+                        '</div>' +
                     '</div>' +
-                '</div>' +
-                '<div class="court-card-avail ' + (hasAvail ? 'has-slots' : 'no-slots') + '">' +
-                    '<div class="avail-dot"></div>' +
-                    (hasAvail ? 'Còn trống' : 'Hết giờ') +
-                '</div>' +
-                '<svg class="court-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+                    '<div class="court-card-right">' +
+                        '<div class="court-card-avail ' + (hasAvail ? 'has-slots' : 'no-slots') + '">' +
+                            '<div class="avail-dot"></div>' +
+                            (hasAvail ? 'Còn trống' : 'Hết giờ') +
+                        '</div>' +
+                        '<svg class="court-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>' +
+                    '</div>' +
+                '</div>';
 
             card.addEventListener('click', function() { ttvGoToStep2(court); });
             card.addEventListener('keydown', function(e) {

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <jsp:include page="/common/xtra-head.jsp" />
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home-commerce.css">
 <body>
 
     <!-- Header -->
