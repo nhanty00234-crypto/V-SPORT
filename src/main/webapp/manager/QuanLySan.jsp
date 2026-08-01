@@ -28,8 +28,13 @@
     </div>
     <div class="flex items-center gap-2">
       <button id="mainActionBtn" onclick="openCreateModal()"
-              class="flex items-center gap-2 h-11 px-5 rounded-xl bg-purple-600 text-white text-sm font-bold shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all">
-        <span class="material-symbols-outlined text-[18px]">add_circle</span>+ Thêm sân mới
+              class="group relative flex items-center gap-2 h-12 px-6 rounded-2xl text-white text-sm font-bold active:scale-95 transition-all overflow-hidden"
+              style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 60%,#6d28d9 100%);box-shadow:0 4px 18px 0 rgba(124,58,237,.45),0 1.5px 0 rgba(255,255,255,.18) inset;">
+        <!-- shimmer sweep -->
+        <span class="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
+        <span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span>
+        <span>Thêm sân mới</span>
+        <span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>
       </button>
     </div>
   </section>
@@ -887,7 +892,7 @@
     if (tab === 'courts') {
       btnTabCourts.className = 'pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
       btnTabTypes.className = 'pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
-      mainActionBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">add</span>Thêm sân mới`;
+      mainActionBtn.innerHTML = `<span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span><span>Thêm sân mới</span><span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>`;
       mainActionBtn.setAttribute('onclick', 'openCreateModal()');
       
       toolbar.classList.remove('hidden');
