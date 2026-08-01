@@ -19,7 +19,6 @@ public class FilterQuyenManager implements Filter {
     // Route -> capability nào (ít nhất 1 trong danh sách) phải APPROVED mới được vào.
     // Đây là chốt chặn backend thật sự (Part G) - không dựa vào việc ẩn menu bằng CSS/JS.
     private static final Map<String, List<String>> CAPABILITY_GATED_PATHS = Map.of(
-            "/manager/kho-dich-vu", Constants.SHOP_MODULE_CAPABILITIES,
             "/manager/dich-vu", Constants.SERVICE_MODULE_CAPABILITIES,
             "/manager/yeu-cau-dich-vu", Constants.SERVICE_MODULE_CAPABILITIES
     );

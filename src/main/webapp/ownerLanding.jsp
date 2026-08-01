@@ -13,6 +13,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 :root{
   --ink:#0f172a;
@@ -717,44 +719,66 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
 </div>
 
 <!-- Custom Geolocation Modal -->
-<div id="geoModal" class="hidden fixed inset-0 z-[8000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 geo-animate-fade">
+<div id="geoModal" class="hidden fixed inset-0 z-[8000] flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-4">
   <style>
-    @keyframes geoFadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes geoScaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .geo-animate-fade { animation: geoFadeIn 180ms ease-out forwards; }
-    .geo-animate-scale { animation: geoScaleUp 240ms cubic-bezier(.16, 1, .3, 1) forwards; }
+    @keyframes geoFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes geoSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    #geoModal:not(.hidden) { animation: geoFadeIn 180ms ease-out forwards; }
+    #geoModalBox { animation: geoSlideUp 260ms cubic-bezier(.16,1,.3,1) forwards; }
+    #geoMapEl { height: 340px; border-radius: 12px; overflow: hidden; z-index: 0; }
+    @media (min-height: 700px) { #geoMapEl { height: 400px; } }
+    .geo-search-wrap { position: relative; }
+    .geo-search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 9999; max-height: 200px; overflow-y: auto; }
+    .geo-search-item { padding: 10px 14px; font-size: 13px; cursor: pointer; color: #1e293b; border-bottom: 1px solid #f1f5f9; transition: background 120ms; }
+    .geo-search-item:last-child { border-bottom: none; }
+    .geo-search-item:hover { background: #f8fafc; }
+    .geo-coord-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #7c3aed14; border: 1px solid #7c3aed30; border-radius: 999px; font-size: 12px; font-weight: 700; color: #6d28d9; }
   </style>
-  <div class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 w-full max-w-md text-slate-900 shadow-2xl relative geo-animate-scale">
-    <!-- Close button -->
-    <button type="button" onclick="closeGeoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-all bg-transparent border-none cursor-pointer focus:outline-none">
-      <span class="material-symbols-outlined text-2xl">close</span>
-    </button>
-
-    <div class="flex items-center gap-3 mb-4">
-      <span class="material-symbols-outlined text-[#7c3aed] text-3xl">location_on</span>
-      <h3 class="text-xl font-extrabold tracking-wide">Nhập vị trí cơ sở</h3>
-    </div>
-
-    <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-      Dán tọa độ Google Map (VD: <code class="text-[#7c3aed]">10.7626, 106.6601</code>) hoặc link bản đồ có dạng <code class="text-[#7c3aed]">@vĩ_độ,kinh_độ</code> để tự động lấy địa chỉ.<br/>
-      <span class="text-[#7c3aed]/80">Cách chính xác nhất:</span> mở Google Maps tại vị trí cơ sở, bấm giữ/click phải, copy tọa độ rồi dán vào đây.
-    </p>
-
-    <div class="mb-6">
-      <div class="field">
-        <label for="geoInput">Tọa độ hoặc Link Google Map</label>
-        <input type="text" id="geoInput" placeholder="Dán tọa độ hoặc link tại đây..." />
+  <div id="geoModalBox" class="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col" style="max-height:92vh;">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[#7c3aed] text-2xl">location_on</span>
+        <h3 class="text-lg font-extrabold text-slate-900">Chọn vị trí cơ sở</h3>
       </div>
+      <button type="button" onclick="closeGeoModal()" class="text-slate-400 hover:text-slate-700 transition-all bg-transparent border-none cursor-pointer p-1">
+        <span class="material-symbols-outlined text-2xl">close</span>
+      </button>
     </div>
 
-    <div class="flex flex-col gap-3">
-      <button type="button" onclick="submitGeoInput()" class="btn btn-primary w-full justify-center py-3.5 text-sm">
-        <span class="material-symbols-outlined text-lg">travel_explore</span> Xác nhận &amp; Tìm địa chỉ
-      </button>
-      <button type="button" onclick="useCurrentGps()" id="btnUseGps" class="btn btn-outline w-full justify-center py-3 text-sm">
-        <span class="material-symbols-outlined text-lg">my_location</span> Lấy vị trí gần đúng hiện tại
-      </button>
-      <p class="text-xs text-slate-400 text-center leading-relaxed px-1">Lưu ý: Trên laptop/PC, vị trí có thể bị lệch. Để chính xác nhất, hãy copy tọa độ trực tiếp từ Google Maps.</p>
+    <!-- Search box -->
+    <div class="px-5 pb-3 flex-shrink-0">
+      <div class="geo-search-wrap">
+        <input type="text" id="geoSearchInput" placeholder="Tìm địa chỉ hoặc tên cơ sở..."
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#7c3aed] transition-colors" autocomplete="off"/>
+        <div id="geoSearchResults" class="geo-search-results hidden"></div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2">Bấm vào bản đồ hoặc kéo điểm ghim để chọn vị trí chính xác.</p>
+    </div>
+
+    <!-- Map -->
+    <div class="px-5 flex-shrink-0">
+      <div id="geoMapEl"></div>
+    </div>
+
+    <!-- Coord preview + actions -->
+    <div class="px-5 py-4 flex-shrink-0">
+      <div id="geoCoordPill" class="geo-coord-pill mb-3 hidden">
+        <span class="material-symbols-outlined text-[14px]">my_location</span>
+        <span id="geoCoordText">—</span>
+      </div>
+      <div id="geoCoordNone" class="text-xs text-slate-400 mb-3">Chưa chọn vị trí — bấm vào bản đồ để ghim điểm.</div>
+      <div class="flex gap-2">
+        <button type="button" onclick="geoUseGps()" id="geoGpsBtn"
+          class="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:border-[#7c3aed] hover:text-[#7c3aed] transition-all bg-white">
+          <span class="material-symbols-outlined text-base">my_location</span> Vị trí hiện tại
+        </button>
+        <button type="button" onclick="geoConfirm()" id="geoConfirmBtn" disabled
+          class="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
+          style="background:#7c3aed; opacity:.4; cursor:not-allowed;">
+          <span class="material-symbols-outlined text-base">check_circle</span> Xác nhận vị trí
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -828,158 +852,197 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     // ==========================================
     // STEP 1 -> STEP 2 (Send OTP)
     // ==========================================
+    // ==========================================
+    // GEO MAP MODAL
+    // ==========================================
+    let geoMap = null;
+    let geoMarker = null;
+    let geoPendingLat = null;
+    let geoPendingLng = null;
+    let geoSearchTimer = null;
+
+    const GEO_DEFAULT = [16.047079, 108.206230]; // Đà Nẵng — trung tâm VN
+
     function autoFillAddress() {
-        document.getElementById('geoInput').value = "";
         document.getElementById('geoModal').classList.remove('hidden');
-        document.getElementById('geoInput').focus();
+        document.body.style.overflow = 'hidden';
+        setTimeout(initGeoMap, 80);
     }
     window.autoFillAddress = autoFillAddress;
 
     function closeGeoModal() {
         document.getElementById('geoModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        document.getElementById('geoSearchResults').classList.add('hidden');
+        document.getElementById('geoSearchInput').value = '';
     }
     window.closeGeoModal = closeGeoModal;
 
-    // Parse tọa độ từ nhiều dạng input khác nhau
-    function parseCoordinates(input) {
-        if (!input) return null;
-        const s = input.trim();
+    function initGeoMap() {
+        if (geoMap) {
+            geoMap.invalidateSize();
+            return;
+        }
+        // Khởi tạo tại tọa độ đã lưu (nếu có) hoặc default
+        const savedLat = parseFloat(document.getElementById('viDo').value);
+        const savedLng = parseFloat(document.getElementById('kinhDo').value);
+        const center = (savedLat && savedLng) ? [savedLat, savedLng] : GEO_DEFAULT;
+        const zoom   = (savedLat && savedLng) ? 16 : 6;
 
-        // Cảnh báo link rút gọn (maps.app.goo.gl) — không có tọa độ trực tiếp
-        if (/maps\.app\.goo\.gl/i.test(s)) {
-            return { error: "Link Google Maps rút gọn không chứa tọa độ trực tiếp. Vui lòng mở link, copy tọa độ hoặc link đầy đủ có dạng @vĩ_độ,kinh_độ." };
+        geoMap = L.map('geoMapEl', { zoomControl: true, attributionControl: true });
+        geoMap.setView(center, zoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+        }).addTo(geoMap);
+
+        // Nếu đã có tọa độ cũ, đặt marker sẵn
+        if (savedLat && savedLng) {
+            geoSetPin(savedLat, savedLng, false);
         }
 
-        // Thử tìm @lat,lng trong URL Google Maps
-        const atMatch = s.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-        if (atMatch) return validate(atMatch[1], atMatch[2]);
+        // Click bản đồ để ghim
+        geoMap.on('click', function(e) {
+            geoSetPin(e.latlng.lat, e.latlng.lng, true);
+        });
 
-        // Thử q=lat,lng hoặc query=lat,lng
-        const qMatch = s.match(/[?&](?:q|query)=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-        if (qMatch) return validate(qMatch[1], qMatch[2]);
+        // Search input
+        const inp = document.getElementById('geoSearchInput');
+        inp.addEventListener('input', function() {
+            clearTimeout(geoSearchTimer);
+            const q = inp.value.trim();
+            if (q.length < 3) { document.getElementById('geoSearchResults').classList.add('hidden'); return; }
+            geoSearchTimer = setTimeout(function() { geoSearchAddress(q); }, 400);
+        });
+        inp.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeGeoModal(); });
 
-        // Thử tọa độ thuần: "lat, lng" hoặc "lat lng"
-        const plainMatch = s.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
-        if (plainMatch) return validate(plainMatch[1], plainMatch[2]);
-
-        // Thử tìm bất kỳ cặp số nào trong chuỗi (fallback cho URL dạng khác)
-        const anyMatch = s.match(/(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)/);
-        if (anyMatch) return validate(anyMatch[1], anyMatch[2]);
-
-        return null;
-    }
-
-    function validate(latStr, lngStr) {
-        const lat = parseFloat(parseFloat(latStr).toFixed(7));
-        const lng = parseFloat(parseFloat(lngStr).toFixed(7));
-        if (isNaN(lat) || isNaN(lng)) return null;
-        if (lat < -90 || lat > 90) return { error: "Vĩ độ phải nằm trong khoảng -90 đến 90." };
-        if (lng < -180 || lng > 180) return { error: "Kinh độ phải nằm trong khoảng -180 đến 180." };
-        return { lat, lng };
-    }
-
-    function setLocationCoords(lat, lng, accuracy) {
-        document.getElementById('viDo').value = lat;
-        document.getElementById('kinhDo').value = lng;
-
-        let msg = 'Đã nhận vị trí: ' + lat + ', ' + lng;
-        if (accuracy !== undefined) {
-            const acc = Math.round(accuracy);
-            if (acc <= 50) {
-                msg = 'Đã lấy vị trí hiện tại. Độ chính xác khoảng ±' + acc + 'm.';
-            } else if (acc <= 200) {
-                msg = 'Đã lấy vị trí gần đúng. Độ chính xác khoảng ±' + acc + 'm. Hãy kiểm tra lại trên Google Maps.';
-            } else {
-                msg = 'Vị trí có độ chính xác thấp khoảng ±' + acc + 'm. Bạn nên copy tọa độ từ Google Maps để chính xác hơn.';
+        // Đóng search khi click ngoài
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.geo-search-wrap')) {
+                document.getElementById('geoSearchResults').classList.add('hidden');
             }
-        }
-        document.getElementById('coordPreviewText').textContent = msg;
-
-        const mapsLink = document.getElementById('coordMapsLink');
-        mapsLink.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
-        mapsLink.classList.remove('hidden');
-
-        document.getElementById('coordPreview').classList.remove('hidden');
+        });
     }
 
-    function submitGeoInput() {
-        const input = document.getElementById('geoInput').value.trim();
-        if (!input) {
-            alert("Vui lòng dán tọa độ hoặc link Google Map.");
-            return;
-        }
-        const result = parseCoordinates(input);
-        if (result && result.error) {
-            alert(result.error);
-            return;
-        }
-        if (result) {
-            setLocationCoords(result.lat, result.lng);
-            closeGeoModal();
-            fetchAddressFromCoords(result.lat, result.lng);
-            saveOwnerDraft();
+    function geoSetPin(lat, lng, reverseGeocode) {
+        lat = parseFloat(lat.toFixed(6));
+        lng = parseFloat(lng.toFixed(6));
+        geoPendingLat = lat;
+        geoPendingLng = lng;
+
+        const icon = L.divIcon({
+            className: '',
+            html: '<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin-left:-16px;margin-top:-32px"><svg viewBox="0 0 24 24" width="32" height="32" fill="#7c3aed" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>',
+            iconSize: [32, 32], iconAnchor: [0, 0]
+        });
+
+        if (geoMarker) {
+            geoMarker.setLatLng([lat, lng]);
         } else {
-            alert("Không đọc được tọa độ. Vui lòng nhập dạng 10.7626, 106.6601 hoặc dán link Google Maps có chứa tọa độ.");
+            geoMarker = L.marker([lat, lng], { icon: icon, draggable: true }).addTo(geoMap);
+            geoMarker.on('dragend', function(e) {
+                const ll = e.target.getLatLng();
+                geoSetPin(ll.lat, ll.lng, true);
+            });
+        }
+
+        geoMap.panTo([lat, lng]);
+
+        // Hiện tọa độ
+        document.getElementById('geoCoordText').textContent = lat + ', ' + lng;
+        document.getElementById('geoCoordPill').classList.remove('hidden');
+        document.getElementById('geoCoordNone').classList.add('hidden');
+
+        // Bật nút xác nhận
+        const btn = document.getElementById('geoConfirmBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+
+        if (reverseGeocode) {
+            document.getElementById('geoCoordText').textContent = lat + ', ' + lng + ' — đang lấy địa chỉ...';
+            fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&accept-language=vi')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    const addr = data && data.display_name ? data.display_name : '';
+                    document.getElementById('geoCoordText').textContent = lat + ', ' + lng + (addr ? ' — ' + addr.substring(0, 60) + '…' : '');
+                    if (addr) document.getElementById('geoSearchInput').value = addr.substring(0, 80);
+                })
+                .catch(function() {
+                    document.getElementById('geoCoordText').textContent = lat + ', ' + lng;
+                });
         }
     }
-    window.submitGeoInput = submitGeoInput;
 
-    function useCurrentGps() {
-        if (!navigator.geolocation) {
-            alert("Trình duyệt không hỗ trợ lấy vị trí hiện tại.");
-            return;
-        }
-        const btn = document.getElementById('btnUseGps');
-        const geoInput = document.getElementById('geoInput');
-        const originalText = btn.innerHTML;
+    function geoSearchAddress(q) {
+        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&countrycodes=vn&limit=5&accept-language=vi')
+            .then(function(r) { return r.json(); })
+            .then(function(results) {
+                const box = document.getElementById('geoSearchResults');
+                if (!results || !results.length) { box.classList.add('hidden'); return; }
+                box.innerHTML = '';
+                results.forEach(function(item) {
+                    const div = document.createElement('div');
+                    div.className = 'geo-search-item';
+                    div.textContent = item.display_name;
+                    div.addEventListener('click', function() {
+                        document.getElementById('geoSearchInput').value = item.display_name;
+                        box.classList.add('hidden');
+                        geoSetPin(parseFloat(item.lat), parseFloat(item.lon), false);
+                        geoMap.setView([parseFloat(item.lat), parseFloat(item.lon)], 17);
+                        document.getElementById('geoCoordText').textContent = parseFloat(item.lat).toFixed(6) + ', ' + parseFloat(item.lon).toFixed(6) + ' — ' + item.display_name.substring(0, 60) + '…';
+                    });
+                    box.appendChild(div);
+                });
+                box.classList.remove('hidden');
+            })
+            .catch(function() {});
+    }
+
+    function geoUseGps() {
+        if (!navigator.geolocation) { alert('Trình duyệt không hỗ trợ lấy vị trí.'); return; }
+        const btn = document.getElementById('geoGpsBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></span> Đang định vị...';
-
+        btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:4px"></span> Đang định vị...';
+        if (!document.getElementById('geoMapEl').querySelector('style')) {
+            const s = document.createElement('style'); s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}'; document.head.appendChild(s);
+        }
         navigator.geolocation.getCurrentPosition(
             function(pos) {
                 btn.disabled = false;
-                btn.innerHTML = originalText;
-
-                const lat = parseFloat(pos.coords.latitude.toFixed(7));
-                const lng = parseFloat(pos.coords.longitude.toFixed(7));
-                const accuracy = Math.round(pos.coords.accuracy);
-
-                geoInput.value = lat + ', ' + lng;
-
-                if (accuracy > 200) {
-                    const confirmed = window.confirm(
-                        'Vị trí lấy được có độ chính xác thấp khoảng ±' + accuracy + 'm.\n\n' +
-                        'Điều này thường xảy ra trên laptop/PC khi dùng Wi-Fi hoặc IP.\n\n' +
-                        'Bạn vẫn muốn dùng vị trí này?\n' +
-                        '(Bấm Hủy để nhập tọa độ từ Google Maps thay thế.)'
-                    );
-                    if (!confirmed) return;
-                }
-
-                setLocationCoords(lat, lng, accuracy);
-                closeGeoModal();
-                fetchAddressFromCoords(lat, lng);
-                saveOwnerDraft();
+                btn.innerHTML = '<span class="material-symbols-outlined text-base">my_location</span> Vị trí hiện tại';
+                geoMap.setView([pos.coords.latitude, pos.coords.longitude], 17);
+                geoSetPin(pos.coords.latitude, pos.coords.longitude, true);
             },
             function(err) {
                 btn.disabled = false;
-                btn.innerHTML = originalText;
-                let errorMsg;
-                if (err.code === err.PERMISSION_DENIED) {
-                    errorMsg = "Bạn đã từ chối quyền vị trí. Hãy cho phép quyền vị trí hoặc nhập tọa độ thủ công.";
-                } else if (err.code === err.POSITION_UNAVAILABLE) {
-                    errorMsg = "Không lấy được vị trí từ thiết bị. Vui lòng nhập tọa độ hoặc dán link Google Maps.";
-                } else if (err.code === err.TIMEOUT) {
-                    errorMsg = "Quá thời gian lấy vị trí. Vui lòng thử lại hoặc nhập tọa độ thủ công.";
-                } else {
-                    errorMsg = "Không lấy được vị trí hiện tại. Vui lòng nhập tọa độ thủ công.";
-                }
-                alert(errorMsg);
+                btn.innerHTML = '<span class="material-symbols-outlined text-base">my_location</span> Vị trí hiện tại';
+                alert('Không lấy được vị trí: ' + err.message);
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     }
-    window.useCurrentGps = useCurrentGps;
+    window.geoUseGps = geoUseGps;
+
+    function geoConfirm() {
+        if (geoPendingLat === null) return;
+        setLocationCoords(geoPendingLat, geoPendingLng);
+        closeGeoModal();
+        fetchAddressFromCoords(geoPendingLat, geoPendingLng);
+        saveOwnerDraft();
+    }
+    window.geoConfirm = geoConfirm;
+
+    function setLocationCoords(lat, lng) {
+        document.getElementById('viDo').value = lat;
+        document.getElementById('kinhDo').value = lng;
+        document.getElementById('coordPreviewText').textContent = 'Đã xác nhận vị trí: ' + lat + ', ' + lng;
+        const mapsLink = document.getElementById('coordMapsLink');
+        mapsLink.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+        mapsLink.classList.remove('hidden');
+        document.getElementById('coordPreview').classList.remove('hidden');
+    }
 
     function fetchAddressFromCoords(lat, lon, callback) {
         const addrInput = document.getElementById('regAddress');

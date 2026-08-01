@@ -437,21 +437,18 @@
       </div>
     </div>
 
-    <!-- ── Cửa hàng & Dịch vụ (chỉ khi approved) ── -->
-    <c:if test="${shopModuleApproved || serviceModuleApproved}">
+    <!-- ── Kho & Dịch vụ ── -->
     <div class="nav-group-wrap">
       <button class="nav-group-header ${grpCuaHang ? 'group-open' : ''}" onclick="toggleGroup(this)">
         <i class="ti ti-shopping-bag text-[19px] text-purple-500"></i>
-        Cửa hàng &amp; DV
+        Kho &amp; Dịch vụ
         <i class="ti ti-chevron-down group-arrow"></i>
       </button>
       <div class="nav-group-children ${grpCuaHang ? 'group-open' : ''}">
-        <c:if test="${shopModuleApproved}">
         <a href="${pageContext.request.contextPath}/manager/kho-dich-vu"
           class="nav-link ${uri.contains('/manager/kho-dich-vu') || uri.contains('/KhoDichVu') ? 'active' : ''}">
           <i class="ti ti-package text-[16px]"></i>Kho &amp; Hàng hóa
         </a>
-        </c:if>
         <c:if test="${serviceModuleApproved}">
         <a href="${pageContext.request.contextPath}/manager/dich-vu"
           class="nav-link ${uri.contains('/manager/dich-vu') || uri.contains('/DichVu') ? 'active' : ''}">
@@ -464,7 +461,6 @@
         </c:if>
       </div>
     </div>
-    </c:if>
 
     <!-- ── Nhân sự ── -->
     <div class="nav-group-wrap">
