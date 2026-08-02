@@ -69,26 +69,35 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
     }
 
     @Override
-    public List<DanhGia> findByCoSoId(int coSoId, int filterSoSao, int page, int pageSize) {
+    public List<DanhGia> findByCoSoId(int coSoId, int filterSoSao, String searchName, int page, int pageSize) {
         List<DanhGia> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
+        boolean hasStarFilter = filterSoSao >= 1 && filterSoSao <= 5;
+        boolean hasNameFilter = searchName != null && !searchName.trim().isEmpty();
         String sql =
-            "SELECT dg.* FROM DanhGia dg " +
+            "SELECT dg.*, tk.FullName AS CustomerName FROM DanhGia dg " +
             "JOIN LichDatSan lds ON dg.DatSanID = lds.DatSanID " +
             "JOIN San s ON lds.SanID = s.SanID " +
+            "LEFT JOIN TaiKhoan tk ON dg.AccountID_NguoiDanhGia = tk.AccountID " +
             "WHERE s.CoSoID = ? " +
-            (filterSoSao >= 1 && filterSoSao <= 5 ? "AND dg.SoSao = ? " : "") +
+            (hasStarFilter ? "AND dg.SoSao = ? " : "") +
+            (hasNameFilter ? "AND tk.FullName LIKE ? " : "") +
             "ORDER BY dg.NgayDanhGia DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             int idx = 1;
             ps.setInt(idx++, coSoId);
-            if (filterSoSao >= 1 && filterSoSao <= 5) ps.setInt(idx++, filterSoSao);
+            if (hasStarFilter) ps.setInt(idx++, filterSoSao);
+            if (hasNameFilter) ps.setNString(idx++, "%" + searchName.trim() + "%");
             ps.setInt(idx++, offset);
             ps.setInt(idx, pageSize);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(map(rs));
+                while (rs.next()) {
+                    DanhGia dg = map(rs);
+                    dg.setCustomerName(rs.getString("CustomerName"));
+                    list.add(dg);
+                }
             }
         } catch (SQLException e) {
             logger.error("findByCoSoId coSoId={}: {}", coSoId, e.getMessage(), e);

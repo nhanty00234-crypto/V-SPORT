@@ -216,7 +216,7 @@
                   <td class="py-4 pl-5 font-semibold text-purple-950"><c:out value="${it.entityType}"/></td>
                   <td class="py-4 text-zinc-700"><c:out value="${it.displayName}"/></td>
                   <td class="py-4 text-zinc-500"><c:out value="${it.deletedByName}"/></td>
-                  <td class="py-4 text-zinc-500"><c:out value="${it.deletedAt}"/></td>
+                  <td class="py-4 text-zinc-500"><c:if test="${not empty it.deletedAt}">${fn:substring(it.deletedAt, 8, 10)}/${fn:substring(it.deletedAt, 5, 7)}/${fn:substring(it.deletedAt, 0, 4)} ${fn:substring(it.deletedAt, 11, 16)}</c:if></td>
                   <td class="py-4">
                     <c:choose>
                       <c:when test="${it.restored}"><span class="badge badge-green">Đã thu hồi</span></c:when>
@@ -264,7 +264,7 @@
                 <td class="py-4 pl-5 font-semibold text-purple-950"><c:out value="${it.displayName}"/></td>
                 <td class="py-4 text-zinc-500"><c:out value="${it.oldStatus}"/></td>
                 <td class="py-4 text-zinc-500"><c:out value="${it.deletedByName}"/></td>
-                <td class="py-4 text-zinc-500"><c:out value="${it.deletedAt}"/></td>
+                <td class="py-4 text-zinc-500"><c:if test="${not empty it.deletedAt}">${fn:substring(it.deletedAt, 8, 10)}/${fn:substring(it.deletedAt, 5, 7)}/${fn:substring(it.deletedAt, 0, 4)} ${fn:substring(it.deletedAt, 11, 16)}</c:if></td>
                 <td class="py-4">
                   <c:choose>
                     <c:when test="${it.restored}"><span class="badge badge-green">Đã thu hồi</span></c:when>
@@ -319,7 +319,7 @@
                 <td class="py-4 pl-5 font-semibold text-purple-950"><c:out value="${it.displayName}"/></td>
                 <td class="py-4 text-zinc-500"><c:out value="${it.oldStatus}"/></td>
                 <td class="py-4 text-zinc-500"><c:out value="${it.deletedByName}"/></td>
-                <td class="py-4 text-zinc-500"><c:out value="${it.deletedAt}"/></td>
+                <td class="py-4 text-zinc-500"><c:if test="${not empty it.deletedAt}">${fn:substring(it.deletedAt, 8, 10)}/${fn:substring(it.deletedAt, 5, 7)}/${fn:substring(it.deletedAt, 0, 4)} ${fn:substring(it.deletedAt, 11, 16)}</c:if></td>
                 <td class="py-4">
                   <c:choose>
                     <c:when test="${it.restored}"><span class="badge badge-green">Đã thu hồi</span></c:when>
@@ -372,7 +372,7 @@
               <tr class="border-b border-purple-50 hover:bg-purple-50/30 transition-colors">
                 <td class="py-4 pl-5 font-semibold text-purple-950"><c:out value="${it.displayName}"/></td>
                 <td class="py-4 text-zinc-500"><c:out value="${it.deletedByName}"/></td>
-                <td class="py-4 text-zinc-500"><c:out value="${it.deletedAt}"/></td>
+                <td class="py-4 text-zinc-500"><c:if test="${not empty it.deletedAt}">${fn:substring(it.deletedAt, 8, 10)}/${fn:substring(it.deletedAt, 5, 7)}/${fn:substring(it.deletedAt, 0, 4)} ${fn:substring(it.deletedAt, 11, 16)}</c:if></td>
                 <td class="py-4">
                   <c:choose>
                     <c:when test="${it.restored}"><span class="badge badge-green">Đã thu hồi</span></c:when>

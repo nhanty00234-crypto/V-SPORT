@@ -22,7 +22,7 @@
 
         /* Hero Banner Header */
         .acc-hero {
-            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, #163e5c 100%);
+            background: linear-gradient(135deg, #1b5e42 0%, #287A58 55%, #3aaa72 100%);
             color: #fff;
             padding: 36px 0 32px 0;
             margin-bottom: 32px;

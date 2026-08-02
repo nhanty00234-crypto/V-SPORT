@@ -79,9 +79,9 @@ public class DanhGiaService {
         return DgResult.ok("Cảm ơn bạn đã đánh giá!");
     }
 
-    /** Manager: lấy danh sách đánh giá. filterSoSao = 0 → tất cả, 1–5 → lọc theo sao. */
-    public List<DanhGia> getForManager(int coSoId, int filterSoSao, int page) {
-        return dao.findByCoSoId(coSoId, filterSoSao, page, 20);
+    /** Manager: lấy danh sách đánh giá. filterSoSao = 0 → tất cả, searchName null/"" → không lọc tên. */
+    public List<DanhGia> getForManager(int coSoId, int filterSoSao, String searchName, int page) {
+        return dao.findByCoSoId(coSoId, filterSoSao, searchName, page, 20);
     }
 
     public double avgRating(int coSoId) {

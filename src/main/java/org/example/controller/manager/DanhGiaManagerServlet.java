@@ -1,6 +1,5 @@
 package org.example.controller.manager;
 
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,13 +8,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.example.model.DanhGia;
 import org.example.model.TaiKhoan;
-import org.example.util.JPAUtil;
+import org.example.service.DanhGiaService;
 
 import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/manager/danh-gia")
 public class DanhGiaManagerServlet extends HttpServlet {
+
+    private final DanhGiaService service = new DanhGiaService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -27,27 +28,35 @@ public class DanhGiaManagerServlet extends HttpServlet {
             return;
         }
 
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            List<DanhGia> dsDanhGia = em.createQuery("SELECT d FROM DanhGia d ORDER BY d.ngayDanhGia DESC", DanhGia.class)
-                    .setMaxResults(100)
-                    .getResultList();
+        int coSoId = user.getCoSoId() != null ? user.getCoSoId() : 0;
 
-            double avgRating = 5.0;
-            if (!dsDanhGia.isEmpty()) {
-                double sum = 0;
-                for (DanhGia d : dsDanhGia) {
-                    sum += d.getSoSao();
-                }
-                avgRating = Math.round((sum / dsDanhGia.size()) * 10.0) / 10.0;
-            }
+        int filterSoSao = 0;
+        try { filterSoSao = Integer.parseInt(request.getParameter("soSao")); } catch (Exception ignored) {}
+        if (filterSoSao < 0 || filterSoSao > 5) filterSoSao = 0;
 
-            request.setAttribute("dsDanhGia", dsDanhGia);
-            request.setAttribute("avgRating", avgRating);
-            request.setAttribute("totalReviews", dsDanhGia.size());
-            request.getRequestDispatcher("/manager/DanhGia.jsp").forward(request, response);
-        } finally {
-            em.close();
+        int page = 1;
+        try { page = Integer.parseInt(request.getParameter("page")); } catch (Exception ignored) {}
+        if (page < 1) page = 1;
+
+        String searchName = request.getParameter("q");
+        if (searchName != null) searchName = searchName.trim();
+
+        List<DanhGia> dsDanhGia = service.getForManager(coSoId, filterSoSao, searchName, page);
+        double avgRaw = service.avgRating(coSoId);
+        String avgRating = avgRaw > 0 ? String.format("%.1f", avgRaw) : "—";
+
+        int totalReviews = service.getForManager(coSoId, 0, null, 1).size();
+        if (filterSoSao == 0 && (searchName == null || searchName.isEmpty()) && page == 1) {
+            totalReviews = dsDanhGia.size();
         }
+
+        request.setAttribute("dsDanhGia", dsDanhGia);
+        request.setAttribute("avgRating", avgRating);
+        request.setAttribute("totalReviews", totalReviews);
+        request.setAttribute("filterSoSao", filterSoSao);
+        request.setAttribute("searchName", searchName != null ? searchName : "");
+        request.setAttribute("currentPage", page);
+        request.setAttribute("hasMore", dsDanhGia.size() == 20);
+        request.getRequestDispatcher("/manager/DanhGia.jsp").forward(request, response);
     }
 }

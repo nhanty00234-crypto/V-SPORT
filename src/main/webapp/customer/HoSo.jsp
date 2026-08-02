@@ -21,7 +21,7 @@
 
         /* Hero Banner Header */
         .acc-hero {
-            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, #163e5c 100%);
+            background: linear-gradient(135deg, #1b5e42 0%, #287A58 55%, #3aaa72 100%);
             color: #fff;
             padding: 36px 0 32px 0;
             margin-bottom: 32px;
@@ -406,12 +406,12 @@
                             <input type="text" id="pfFullName" name="fullName" class="pf-input" required value="${fn:escapeXml(account.fullName)}" placeholder="Nhập họ và tên đầy đủ" />
                         </div>
                         <div class="pf-field">
-                            <label class="pf-label">Email <span class="pf-badge-verified"><i class="fas fa-check-circle"></i> Đã xác minh</span></label>
-                            <input type="email" class="pf-input" value="${fn:escapeXml(account.email)}" disabled title="Email không thể thay đổi trực tiếp" />
+                            <label class="pf-label">Email <span class="pf-badge-verified" style="font-size:11px;color:#15803d;background:#dcfce7;padding:2px 8px;border-radius:999px;"><i class="fas fa-lock"></i> Đổi email yêu cầu OTP</span></label>
+                            <input type="email" id="pfEmail" name="email" class="pf-input" value="${fn:escapeXml(account.email)}" placeholder="Nhập địa chỉ email mới" />
                         </div>
                         <div class="pf-field">
                             <label class="pf-label">Số điện thoại</label>
-                            <input type="text" id="pfPhone" name="phone" class="pf-input" value="${fn:escapeXml(account.phoneNumber)}" placeholder="Nhập số điện thoại liên hệ" />
+                            <input type="text" id="pfPhone" name="phoneNumber" class="pf-input" value="${fn:escapeXml(account.phoneNumber)}" placeholder="Nhập số điện thoại liên hệ" />
                     </div>
 
                     <!-- Group 2: Sở thích thể thao -->
@@ -485,6 +485,35 @@
 
 <jsp:include page="/common/footer.jsp" />
 
+<!-- OTP Email Verification Modal -->
+<div id="pfOtpModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.5);">
+  <div style="background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.18);width:100%;max-width:440px;padding:32px;position:relative;">
+    <button onclick="document.getElementById('pfOtpModal').style.display='none'" style="position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;font-size:18px;color:#9ca3af;line-height:1;">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="width:44px;height:44px;border-radius:12px;background:#d1fae5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-envelope-open-text" style="color:#065f46;font-size:18px;"></i></div>
+      <div>
+        <h3 style="margin:0;font-size:16px;font-weight:800;color:#111827;">Xác thực Email mới</h3>
+        <p style="margin:4px 0 0;font-size:12px;color:#6b7280;">Mã có hiệu lực trong 5 phút</p>
+      </div>
+    </div>
+    <p style="font-size:13.5px;color:#374151;margin-bottom:20px;line-height:1.6;">Mã OTP đã được gửi đến <strong id="pfOtpEmailTarget" style="color:#065f46;word-break:break-all;"></strong>. Nhập mã để xác nhận đổi email.</p>
+    <div id="pfOtpBoxes" style="display:flex;gap:8px;justify-content:center;align-items:center;">
+      <input type="text" inputmode="numeric" maxlength="1" class="pf-otp-box" data-idx="0" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:900;border:2px solid #d1fae5;border-radius:12px;outline:none;color:#111827;background:#f0fdf4;transition:border-color 0.15s,box-shadow 0.15s;">
+      <input type="text" inputmode="numeric" maxlength="1" class="pf-otp-box" data-idx="1" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:900;border:2px solid #d1fae5;border-radius:12px;outline:none;color:#111827;background:#f0fdf4;transition:border-color 0.15s,box-shadow 0.15s;">
+      <input type="text" inputmode="numeric" maxlength="1" class="pf-otp-box" data-idx="2" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:900;border:2px solid #d1fae5;border-radius:12px;outline:none;color:#111827;background:#f0fdf4;transition:border-color 0.15s,box-shadow 0.15s;">
+      <span style="color:#d1d5db;font-weight:700;font-size:20px;user-select:none;margin:0 2px;">—</span>
+      <input type="text" inputmode="numeric" maxlength="1" class="pf-otp-box" data-idx="3" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:900;border:2px solid #d1fae5;border-radius:12px;outline:none;color:#111827;background:#f0fdf4;transition:border-color 0.15s,box-shadow 0.15s;">
+      <input type="text" inputmode="numeric" maxlength="1" class="pf-otp-box" data-idx="4" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:900;border:2px solid #d1fae5;border-radius:12px;outline:none;color:#111827;background:#f0fdf4;transition:border-color 0.15s,box-shadow 0.15s;">
+      <input type="text" inputmode="numeric" maxlength="1" class="pf-otp-box" data-idx="5" style="width:48px;height:56px;text-align:center;font-size:22px;font-weight:900;border:2px solid #d1fae5;border-radius:12px;outline:none;color:#111827;background:#f0fdf4;transition:border-color 0.15s,box-shadow 0.15s;">
+    </div>
+    <p id="pfOtpError" style="display:none;margin:12px 0 0;font-size:12px;font-weight:600;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;"></p>
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button onclick="document.getElementById('pfOtpModal').style.display='none'" style="flex:1;height:46px;border:1.5px solid #e5e7eb;border-radius:12px;background:#fff;font-size:13.5px;font-weight:700;color:#374151;cursor:pointer;">Hủy</button>
+      <button onclick="pfVerifyOtp()" style="flex:1;height:46px;border:none;border-radius:12px;background:linear-gradient(135deg,#1b5e42 0%,#3aaa72 100%);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(27,94,66,0.28);">Xác nhận OTP</button>
+    </div>
+  </div>
+</div>
+
 <script>
 document.getElementById('profileForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -495,9 +524,11 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
     alertEl.className = 'pf-alert';
     alertEl.style.display = 'none';
 
-    var p1 = new FormData();
+    var p1 = new URLSearchParams();
+    p1.append('action', 'updateInfo');
     p1.append('fullName', document.getElementById('pfFullName').value);
-    p1.append('phone', document.getElementById('pfPhone').value);
+    p1.append('email', document.getElementById('pfEmail').value);
+    p1.append('phoneNumber', document.getElementById('pfPhone').value);
 
     var p2 = new URLSearchParams();
     var sportVal = document.getElementById('pfSportId').value;
@@ -517,20 +548,35 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
 
     var p4 = new URLSearchParams();
     var noteVal = document.getElementById('pfNote').value;
-    if (noteVal) p4.append('noteText', noteVal);
+    if (noteVal) p4.append('note', noteVal);
 
     Promise.all([
-        fetch('${ctx}/account/update-profile', { method: 'POST', body: p1 }),
+        fetch('${ctx}/account/update-profile', { method: 'POST', body: p1, headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} }),
         fetch('${ctx}/customer/ho-so/cap-nhat-ca-nhan-hoa', { method: 'POST', body: p2, headers: {'Content-Type': 'application/x-www-form-urlencoded'} }),
         fetch('${ctx}/customer/ho-so/cap-nhat-the-chat', { method: 'POST', body: p3, headers: {'Content-Type': 'application/x-www-form-urlencoded'} }),
         fetch('${ctx}/customer/ho-so/cap-nhat-ghi-chu', { method: 'POST', body: p4, headers: {'Content-Type': 'application/x-www-form-urlencoded'} })
-    ]).then(function() {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
-        alertEl.className = 'pf-alert success';
-        alertEl.textContent = 'Hồ sơ cá nhân đã được cập nhật thành công!';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(function() { location.reload(); }, 1200);
+    ]).then(function(responses) {
+        return responses[0].json().then(function(data) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
+            if (data.requiresOtp) {
+                document.getElementById('pfOtpEmailTarget').textContent = data.email || document.getElementById('pfEmail').value;
+                _pfClearOtpBoxes();
+                document.getElementById('pfOtpError').style.display = 'none';
+                document.getElementById('pfOtpModal').style.display = 'flex';
+                setTimeout(function() { var b = document.querySelector('#pfOtpBoxes .pf-otp-box'); if(b) b.focus(); }, 80);
+                alertEl.className = 'pf-alert success';
+                alertEl.textContent = data.message || 'Mã OTP đã được gửi đến email mới của bạn.';
+            } else if (data.success) {
+                alertEl.className = 'pf-alert success';
+                alertEl.textContent = 'Hồ sơ cá nhân đã được cập nhật thành công!';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(function() { location.reload(); }, 1200);
+            } else {
+                alertEl.className = 'pf-alert danger';
+                alertEl.textContent = data.message || 'Không thể lưu thay đổi.';
+            }
+        });
     }).catch(function() {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
@@ -538,6 +584,74 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
         alertEl.textContent = 'Không thể lưu thay đổi. Vui lòng kiểm tra lại thông tin.';
     });
 });
+
+function _pfGetOtp() {
+    return Array.from(document.querySelectorAll('#pfOtpBoxes .pf-otp-box')).map(function(i){return i.value;}).join('');
+}
+function _pfClearOtpBoxes() {
+    document.querySelectorAll('#pfOtpBoxes .pf-otp-box').forEach(function(b){
+        b.value=''; b.style.borderColor='#d1fae5';
+    });
+}
+function _pfInitOtpBoxes() {
+    var boxes = Array.from(document.querySelectorAll('#pfOtpBoxes .pf-otp-box'));
+    boxes.forEach(function(box, idx) {
+        box.addEventListener('input', function() {
+            var v = this.value.replace(/\D/g,'');
+            this.value = v ? v[v.length-1] : '';
+            this.style.borderColor = this.value ? '#10b981' : '#d1fae5';
+            if (this.value && idx < boxes.length-1) boxes[idx+1].focus();
+        });
+        box.addEventListener('keydown', function(e) {
+            if (e.key==='Backspace' && !this.value && idx>0) { boxes[idx-1].focus(); boxes[idx-1].value=''; boxes[idx-1].style.borderColor='#d1fae5'; }
+            if (e.key==='ArrowLeft' && idx>0) boxes[idx-1].focus();
+            if (e.key==='ArrowRight' && idx<boxes.length-1) boxes[idx+1].focus();
+            if (e.key==='Enter') pfVerifyOtp();
+        });
+        box.addEventListener('paste', function(e) {
+            e.preventDefault();
+            var data = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
+            boxes.forEach(function(b,i){ b.value=data[i]||''; b.style.borderColor=b.value?'#10b981':'#d1fae5'; });
+            var next = Math.min(data.length, boxes.length-1);
+            boxes[next].focus();
+        });
+        box.addEventListener('focus', function(){ this.select(); });
+    });
+}
+document.addEventListener('DOMContentLoaded', _pfInitOtpBoxes);
+
+function pfVerifyOtp() {
+    var otp = _pfGetOtp().trim();
+    var errEl = document.getElementById('pfOtpError');
+    if (!/^\d{6}$/.test(otp)) {
+        errEl.textContent = 'Vui lòng nhập mã OTP gồm 6 chữ số.';
+        errEl.style.display = 'block';
+        return;
+    }
+    var params = new URLSearchParams();
+    params.append('action', 'verifyEmailOtp');
+    params.append('otp', otp);
+    fetch('${ctx}/account/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: params
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) {
+            document.getElementById('pfOtpModal').style.display = 'none';
+            var alertEl = document.getElementById('pfAlert');
+            alertEl.className = 'pf-alert success';
+            alertEl.textContent = data.message || 'Email đã được cập nhật thành công!';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(function() { location.reload(); }, 1200);
+        } else {
+            errEl.textContent = data.message || 'Mã OTP không chính xác.';
+            errEl.style.display = 'block';
+        }
+    }).catch(function() {
+        errEl.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+        errEl.style.display = 'block';
+    });
+}
 </script>
 </body>
 </html>

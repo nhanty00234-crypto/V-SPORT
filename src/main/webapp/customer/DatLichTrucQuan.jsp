@@ -36,10 +36,10 @@
            HEADER
         ══════════════════════════════ */
         .ttv-header {
-            background: linear-gradient(135deg, #0d3d24 0%, #0a2318 100%);
+            background: linear-gradient(135deg, #1b5e42 0%, #287A58 55%, #3aaa72 100%);
             color: #fff;
             flex-shrink: 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,.35);
+            box-shadow: 0 4px 20px rgba(0,0,0,.18);
         }
         .ttv-header-top {
             display: grid;
@@ -466,12 +466,12 @@
            FOOTER
         ══════════════════════════════ */
         .ttv-footer {
-            background: linear-gradient(135deg, #0d3d24 0%, #0a2318 100%);
+            background: linear-gradient(135deg, #1b5e42 0%, #287A58 55%, #3aaa72 100%);
             color: #fff;
             padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-            box-shadow: 0 -8px 28px rgba(0,0,0,.3);
+            box-shadow: 0 -6px 20px rgba(0,0,0,.15);
             flex-shrink: 0;
-            border-top: 1px solid rgba(255,255,255,.07);
+            border-top: 1px solid rgba(255,255,255,.12);
         }
         @media (min-width: 1024px) { .ttv-footer { padding: 12px 28px calc(12px + env(safe-area-inset-bottom, 0px)); } }
 

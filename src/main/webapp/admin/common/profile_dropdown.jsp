@@ -138,8 +138,16 @@
       <button type="button" onclick="document.getElementById('profileEmailOtpModal').classList.add('hidden')" class="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px] text-zinc-500">close</span></button>
     </div>
     <div class="px-6 py-5">
-      <p class="text-sm text-zinc-600 leading-relaxed">Mã OTP đã được gửi đến <strong id="profileOtpEmailTarget" class="text-zinc-900"></strong>. Nhập mã để hoàn tất thay đổi hồ sơ.</p>
-      <input id="profileEmailOtpInput" type="text" maxlength="6" inputmode="numeric" placeholder="••••••" class="mt-4 w-full h-12 rounded-lg border border-zinc-200 text-center text-xl font-black tracking-[0.35em] focus:border-blue-700 focus:outline-none">
+      <p class="text-sm text-zinc-600 leading-relaxed mb-5">Mã OTP đã được gửi đến <strong id="profileOtpEmailTarget" class="text-zinc-900 break-all"></strong>. Nhập mã để hoàn tất thay đổi hồ sơ.</p>
+      <div class="flex gap-2 justify-center" id="profileOtpBoxes">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box-admin w-11 h-13 text-center text-xl font-black border-2 border-zinc-200 rounded-xl focus:border-blue-700 focus:outline-none transition-colors bg-zinc-50 focus:bg-white" style="height:52px;" data-idx="0">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box-admin w-11 h-13 text-center text-xl font-black border-2 border-zinc-200 rounded-xl focus:border-blue-700 focus:outline-none transition-colors bg-zinc-50 focus:bg-white" style="height:52px;" data-idx="1">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box-admin w-11 h-13 text-center text-xl font-black border-2 border-zinc-200 rounded-xl focus:border-blue-700 focus:outline-none transition-colors bg-zinc-50 focus:bg-white" style="height:52px;" data-idx="2">
+        <span class="flex items-center text-zinc-300 font-bold text-lg select-none">—</span>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box-admin w-11 h-13 text-center text-xl font-black border-2 border-zinc-200 rounded-xl focus:border-blue-700 focus:outline-none transition-colors bg-zinc-50 focus:bg-white" style="height:52px;" data-idx="3">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box-admin w-11 h-13 text-center text-xl font-black border-2 border-zinc-200 rounded-xl focus:border-blue-700 focus:outline-none transition-colors bg-zinc-50 focus:bg-white" style="height:52px;" data-idx="4">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-box-admin w-11 h-13 text-center text-xl font-black border-2 border-zinc-200 rounded-xl focus:border-blue-700 focus:outline-none transition-colors bg-zinc-50 focus:bg-white" style="height:52px;" data-idx="5">
+      </div>
       <p id="profileEmailOtpError" class="hidden mt-3 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
     </div>
     <div class="px-6 pb-5 flex gap-3 justify-end">
@@ -335,11 +343,11 @@
         if (data.success) {
           if (data.requiresOtp) {
             document.getElementById('profileOtpEmailTarget').textContent = data.email || email;
-            document.getElementById('profileEmailOtpInput').value = '';
+            _clearAdminOtpBoxes();
             document.getElementById('profileEmailOtpError').classList.add('hidden');
             document.getElementById('editProfileModal').classList.add('hidden');
             document.getElementById('profileEmailOtpModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('profileEmailOtpInput').focus(), 80);
+            setTimeout(() => { const b = document.querySelector('#profileOtpBoxes .otp-box-admin'); if(b) b.focus(); }, 80);
             showToast('Đã gửi OTP', data.message);
             return;
           }
@@ -384,14 +392,55 @@
     }
   }
 
+  function _getAdminOtp() {
+    return Array.from(document.querySelectorAll('#profileOtpBoxes .otp-box-admin')).map(i => i.value).join('');
+  }
+
+  function _clearAdminOtpBoxes() {
+    document.querySelectorAll('#profileOtpBoxes .otp-box-admin').forEach(b => {
+      b.value = '';
+      b.classList.remove('border-red-400', 'border-blue-700');
+      b.classList.add('border-zinc-200');
+    });
+  }
+
+  function _initAdminOtpBoxes() {
+    const boxes = document.querySelectorAll('#profileOtpBoxes .otp-box-admin');
+    boxes.forEach((box, idx) => {
+      box.addEventListener('input', function() {
+        const v = this.value.replace(/\D/g, '');
+        this.value = v.slice(0, 1);
+        if (v && idx < boxes.length - 1) boxes[idx + 1].focus();
+      });
+      box.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && idx > 0) boxes[idx - 1].focus();
+        if (e.key === 'ArrowLeft' && idx > 0) { e.preventDefault(); boxes[idx - 1].focus(); }
+        if (e.key === 'ArrowRight' && idx < boxes.length - 1) { e.preventDefault(); boxes[idx + 1].focus(); }
+        if (e.key === 'Enter') verifyProfileEmailOtp();
+      });
+      box.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        boxes.forEach((b, i) => { b.value = paste[i] || ''; });
+        const next = Math.min(paste.length, boxes.length - 1);
+        boxes[next].focus();
+      });
+      box.addEventListener('focus', function() { this.select(); });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', _initAdminOtpBoxes);
+
   function verifyProfileEmailOtp() {
-    const otp = document.getElementById('profileEmailOtpInput').value.trim();
+    const otp = _getAdminOtp();
     const err = document.getElementById('profileEmailOtpError');
     if (!/^\d{6}$/.test(otp)) {
-      err.textContent = 'Vui lòng nhập mã OTP gồm 6 chữ số.';
+      err.textContent = 'Vui lòng nhập đủ 6 chữ số.';
       err.classList.remove('hidden');
+      document.querySelectorAll('#profileOtpBoxes .otp-box-admin').forEach(b => b.classList.add('border-red-400'));
       return;
     }
+    err.classList.add('hidden');
 
     const params = new URLSearchParams();
     params.append('action', 'verifyEmailOtp');
@@ -408,10 +457,12 @@
         syncProfileUi(data.fullName, data.email, data.phoneNumber);
         document.getElementById('profileEmailOtpModal').classList.add('hidden');
         document.getElementById('editProfileModal').classList.add('hidden');
+        _clearAdminOtpBoxes();
         showToast('Thành công', data.message);
       } else {
         err.textContent = data.message || 'Không thể xác thực OTP.';
         err.classList.remove('hidden');
+        document.querySelectorAll('#profileOtpBoxes .otp-box-admin').forEach(b => b.classList.add('border-red-400'));
       }
     })
     .catch(error => {

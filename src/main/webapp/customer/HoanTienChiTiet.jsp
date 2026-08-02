@@ -29,7 +29,7 @@
         }
 
         .refund-hero {
-            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, #163e5c 100%);
+            background: linear-gradient(135deg, #1b5e42 0%, #287A58 55%, #3aaa72 100%);
             color: #ffffff;
             padding: 20px 0 16px;
         }

@@ -29,6 +29,9 @@ public class DanhGia {
     @Column(name = "NgayDanhGia")
     private LocalDateTime ngayDanhGia;
 
+    @jakarta.persistence.Transient
+    private String customerName;
+
     public DanhGia() {
     }
 
@@ -97,6 +100,9 @@ public class DanhGia {
     public void setNgayDanhGia(LocalDateTime ngayDanhGia) {
         this.ngayDanhGia = ngayDanhGia;
     }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
     @Override
     public String toString() {

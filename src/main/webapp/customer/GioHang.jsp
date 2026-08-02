@@ -835,7 +835,7 @@
 <!-- CUSTOMER SERVICE BOOKING MODAL -->
 <div id="customerServiceModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #fff; width: 100%; max-width: 600px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden;">
-        <div style="background: linear-gradient(135deg, var(--navy-dark), var(--navy)); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; color: #fff;">
+        <div style="background: linear-gradient(135deg, #1b5e42, #287A58); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; color: #fff;">
             <h3 style="font-size: 16px; font-weight: 800; margin: 0; font-family: 'Poppins', sans-serif;"><i class="fas fa-concierge-bell" style="color: var(--primary); margin-right: 8px;"></i> Đặt thêm dịch vụ / Nước uống</h3>
             <button onclick="closeCustomerServiceModal()" style="background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 18px;"><i class="fas fa-times"></i></button>
         </div>
