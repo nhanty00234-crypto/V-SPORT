@@ -1,6 +1,39 @@
 <%-- Shared <head> content for all Manager role pages --%>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%-- CSRF: token cho JS auto-inject vào form và AJAX --%>
+<meta name="csrf-token" content="${sessionScope.csrfToken}">
+<script>
+(function() {
+    var token = document.querySelector('meta[name="csrf-token"]');
+    if (!token || !token.content) return;
+    var csrf = token.content;
+    function injectCsrf(root) {
+        (root || document).querySelectorAll('form[method="post"],form[method="POST"]').forEach(function(f) {
+            if (!f.querySelector('input[name="_csrf"]')) {
+                var h = document.createElement('input');
+                h.type = 'hidden'; h.name = '_csrf'; h.value = csrf;
+                f.appendChild(h);
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() { injectCsrf(document); });
+    if (window.MutationObserver) {
+        new MutationObserver(function(ms) {
+            ms.forEach(function(m) { m.addedNodes.forEach(function(n) { if (n.nodeType === 1) injectCsrf(n.tagName === 'FORM' ? n.parentNode : n); }); });
+        }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+    }
+    var origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+        opts = opts || {};
+        if (opts.method && opts.method.toUpperCase() === 'POST') opts.headers = Object.assign({}, opts.headers, { 'X-CSRF-Token': csrf });
+        return origFetch.call(this, url, opts);
+    };
+    var origOpen = XMLHttpRequest.prototype.open, origSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function(m) { this._vsm = m; return origOpen.apply(this, arguments); };
+    XMLHttpRequest.prototype.send = function() { if (this._vsm && this._vsm.toUpperCase() === 'POST') this.setRequestHeader('X-CSRF-Token', csrf); return origSend.apply(this, arguments); };
+})();
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
