@@ -412,6 +412,16 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
 
+        // --- Chặn đặt sân nếu điểm uy tín quá thấp ---
+        if (user.getDiemUyTin() < org.example.util.Constants.REPUTATION_BOOKING_BLOCK_THRESHOLD) {
+            session.setAttribute("error", "Tài khoản của bạn đã bị hạn chế đặt sân do điểm uy tín quá thấp ("
+                + user.getDiemUyTin() + " điểm, tối thiểu cần "
+                + org.example.util.Constants.REPUTATION_BOOKING_BLOCK_THRESHOLD
+                + " điểm). Vui lòng liên hệ quản lý để được hỗ trợ.");
+            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+            return;
+        }
+
         // --- Validate số lượng dịch vụ trước khi vào transaction ---
         for (int qty : serviceQtys) {
             if (qty <= 0) {
