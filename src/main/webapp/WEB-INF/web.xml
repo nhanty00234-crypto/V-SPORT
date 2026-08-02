@@ -25,5 +25,14 @@
         <error-code>500</error-code>
         <!--  <location>/Error.jsp</location> -->
     </error-page>
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+            <!-- Bật <secure>true</secure> khi deploy lên HTTPS production -->
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
 </web-app>
 <!--  Reload comment 3 -->
