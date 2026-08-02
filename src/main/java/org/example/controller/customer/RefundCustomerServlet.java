@@ -17,8 +17,10 @@ import org.example.service.RefundService;
 import org.example.util.Constants;
 import org.example.util.RoleRedirectUtil;
 
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 
 /**
  * GET  /customer/hoan-tien              — danh sách yêu cầu hoàn tiền của mình
@@ -40,6 +42,7 @@ public class RefundCustomerServlet extends HttpServlet {
 
     private final RefundService refundService = new RefundService();
     private final RefundQrService refundQrService = new RefundQrService();
+    private final Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -51,7 +54,26 @@ public class RefundCustomerServlet extends HttpServlet {
             int hoanTienId = parseIntSafe(idParam, 0);
             Hoantien ht = hoanTienId > 0 ? refundService.findByIdAndAccountId(hoanTienId, user.getAccountId()) : null;
             if (ht == null) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy yêu cầu hoàn tiền.");
+                if ("json".equals(req.getParameter("format"))) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\":false,\"error\":\"not_found\"}");
+                } else {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy yêu cầu hoàn tiền.");
+                }
+                return;
+            }
+            if ("json".equals(req.getParameter("format"))) {
+                resp.setContentType("application/json;charset=UTF-8");
+                SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                java.util.Map<String, Object> out = new java.util.HashMap<>();
+                out.put("success", true);
+                out.put("trangThai", ht.getTrangThai());
+                out.put("soTienDuocDuyet", ht.getSoTienDuocDuyet());
+                out.put("maGiaoDichHoan", ht.getMaGiaoDichHoan());
+                out.put("ghiChuXuLy", ht.getGhiChuXuLy());
+                out.put("approvedAt", ht.getApprovedAt() != null ? fmt.format(ht.getApprovedAt()) : null);
+                out.put("completedAt", ht.getCompletedAt() != null ? fmt.format(ht.getCompletedAt()) : null);
+                resp.getWriter().write(gson.toJson(out));
                 return;
             }
             req.setAttribute("hoanTien", ht);

@@ -4,6 +4,7 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%
     String ctx = request.getContextPath();
+    request.setAttribute("ctx", ctx);
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -198,7 +199,13 @@
                       <button onclick="openStartProcessing(${ht.hoanTienId})" class="rf-act-btn rf-act-process">Bắt đầu CK</button>
                     </c:if>
                     <c:if test="${ht.trangThai == 'DANG_HOAN_TIEN'}">
-                      <button onclick="openComplete(${ht.hoanTienId})" class="rf-act-btn rf-act-complete">Xác nhận đã CK</button>
+                      <button type="button" class="rf-act-btn rf-act-complete"
+                        data-complete-id="${ht.hoanTienId}"
+                        data-complete-amount="${ht.soTienDuocDuyet}"
+                        data-complete-bank="${fn:escapeXml(ht.nganHangNhan)}"
+                        data-complete-account="${fn:escapeXml(ht.soTaiKhoanNhan)}"
+                        data-complete-holder="${fn:escapeXml(ht.chuTaiKhoanNhan)}"
+                        onclick="openCompleteFromButton(this)">Xác nhận đã CK</button>
                     </c:if>
                     <c:if test="${ht.trangThai == 'DA_HOAN_TIEN' || ht.trangThai == 'TU_CHOI' || ht.trangThai == 'DA_HUY' || ht.trangThai == 'CHO_BO_SUNG_THONG_TIN'}">
                       <span class="text-zinc-400 text-xs">—</span>
@@ -345,17 +352,34 @@
     <input type="hidden" name="action" value="complete"/>
     <input type="hidden" name="hoanTienId" id="completeId"/>
     <h3 class="font-bold text-lg mb-4">Xác nhận đã chuyển khoản</h3>
+
+    <div class="rf-qr-box mb-4" id="completeInfoBox">
+      <div class="flex-1">
+        <div class="text-xs text-zinc-500 font-semibold">Đã chuyển khoản tới</div>
+        <div id="completeBankName" class="text-sm font-bold text-zinc-900 mt-0.5">—</div>
+        <div id="completeAccountNo" class="text-xs text-zinc-600 font-mono">—</div>
+        <div id="completeHolderName" class="text-xs text-zinc-500">—</div>
+        <div class="text-xs text-zinc-500 font-semibold mt-2">Số tiền đã duyệt</div>
+        <div id="completeAmount" class="text-base font-extrabold text-blue-600">—</div>
+      </div>
+      <div class="flex flex-col items-center justify-center gap-1 ml-2">
+        <span class="material-symbols-outlined text-[40px] text-green-500">check_circle</span>
+        <span class="text-[10px] font-bold text-green-600">Đã chuyển khoản</span>
+      </div>
+    </div>
+
     <div class="mb-4">
-      <label class="block text-sm font-medium mb-1">Mã giao dịch ngân hàng</label>
-      <input type="text" name="maGiaoDich" class="w-full border rounded-lg p-2 text-sm" placeholder="VD: FT23001XXXXXX"/>
+      <label class="block text-sm font-medium mb-1">Mã giao dịch ngân hàng <span class="text-red-500">*</span></label>
+      <input type="text" name="maGiaoDich" id="completeTxCode" required class="w-full border rounded-lg p-2 text-sm" placeholder="VD: FT23001XXXXXX"/>
+      <p class="text-xs text-zinc-400 mt-1">Nhập mã giao dịch để khách hàng đối chiếu.</p>
     </div>
     <div class="mb-4">
       <label class="block text-sm font-medium mb-1">Ghi chú (tuỳ chọn)</label>
-      <textarea name="ghiChu" rows="2" class="w-full border rounded-lg p-2 text-sm"></textarea>
+      <textarea name="ghiChu" rows="2" class="w-full border rounded-lg p-2 text-sm" placeholder="VD: Đã CK lúc 15:30 ngày 02/08..."></textarea>
     </div>
     <div class="flex gap-2 justify-end">
       <button type="button" onclick="closeModals()" class="px-4 py-2 border rounded text-sm">Huỷ</button>
-      <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Xác nhận</button>
+      <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Xác nhận hoàn tất</button>
     </div>
   </form>
 </div>
@@ -397,7 +421,13 @@ function applySlaWarnings(){
   var overdueRows = rows.filter(function(r){ return r.getAttribute('data-overdue') === '1'; });
   overdueRows.reverse().forEach(function(r){ tbody.insertBefore(r, tbody.firstChild); });
 }
-document.addEventListener('DOMContentLoaded', applySlaWarnings);
+document.addEventListener('DOMContentLoaded', function(){
+  applySlaWarnings();
+  // Tự chuyển sang tab lịch sử sau khi action thành công để thấy cập nhật ngay
+  if (window.location.search.indexOf('success=') !== -1) {
+    switchRefundTab('history');
+  }
+});
 
 function openApproveFromButton(btn){
   var d = btn.dataset;
@@ -440,6 +470,18 @@ function openApprove(id, bankName, accountNo, holderName, amount){
 function openReject(id){ document.getElementById('rejectId').value=id; document.getElementById('modalReject').classList.remove('hidden'); }
 function openMoreInfo(id){ document.getElementById('moreInfoId').value=id; document.getElementById('modalMoreInfo').classList.remove('hidden'); }
 function openStartProcessing(id){ document.getElementById('startProcessingId').value=id; document.getElementById('modalStartProcessing').classList.remove('hidden'); }
+function openCompleteFromButton(btn){
+  var d = btn.dataset;
+  var id = Number(d.completeId);
+  var amount = Number(d.completeAmount);
+  document.getElementById('completeId').value = id;
+  document.getElementById('completeTxCode').value = '';
+  document.getElementById('completeBankName').innerText = (d.completeBank && d.completeBank !== 'null') ? d.completeBank : '—';
+  document.getElementById('completeAccountNo').innerText = (d.completeAccount && d.completeAccount !== 'null') ? d.completeAccount : '—';
+  document.getElementById('completeHolderName').innerText = (d.completeHolder && d.completeHolder !== 'null') ? d.completeHolder : '—';
+  document.getElementById('completeAmount').innerText = amount ? Number(amount).toLocaleString('vi-VN') + ' đ' : '—';
+  document.getElementById('modalComplete').classList.remove('hidden');
+}
 function openComplete(id){ document.getElementById('completeId').value=id; document.getElementById('modalComplete').classList.remove('hidden'); }
 function closeModals(){
   ['modalApprove','modalReject','modalMoreInfo','modalStartProcessing','modalComplete'].forEach(id=>document.getElementById(id).classList.add('hidden'));
@@ -467,7 +509,7 @@ function switchRefundTab(tab){
 
   if (!isList) {
     fetchHistory();
-    if (!historyPollTimer) historyPollTimer = setInterval(fetchHistory, 8000);
+    if (!historyPollTimer) historyPollTimer = setInterval(fetchHistory, 3000);
   } else if (historyPollTimer) {
     clearInterval(historyPollTimer);
     historyPollTimer = null;

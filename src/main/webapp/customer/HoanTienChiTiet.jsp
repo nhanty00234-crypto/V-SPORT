@@ -468,6 +468,54 @@
     }
 
     document.addEventListener('DOMContentLoaded', onBankFieldChange);
+
+    // ── Real-time status polling (customer side) ──────────────────────────────
+    var _currentStatus = '${hoanTien.trangThai}';
+    var _terminalStatuses = ['DA_HOAN_TIEN', 'TU_CHOI', 'DA_HUY'];
+    var _hoanTienId = ${hoanTien.hoanTienId};
+    var _ctxPath = '${pageContext.request.contextPath}';
+
+    var STATUS_LABELS = {
+      'DA_DUYET': 'Đã duyệt — Nhân viên đang chuẩn bị chuyển khoản',
+      'DANG_HOAN_TIEN': 'Đang chuyển khoản về tài khoản của bạn',
+      'DA_HOAN_TIEN': 'Đã hoàn tiền thành công!',
+      'TU_CHOI': 'Yêu cầu bị từ chối'
+    };
+
+    function _showStatusToast(newStatus, data) {
+      var msg = STATUS_LABELS[newStatus] || ('Trạng thái cập nhật: ' + newStatus);
+      var isGood = newStatus === 'DA_HOAN_TIEN' || newStatus === 'DA_DUYET' || newStatus === 'DANG_HOAN_TIEN';
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 20px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.15);max-width:360px;'
+        + (isGood ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;' : 'background:#fef2f2;color:#991b1b;border:1px solid #fecaca;');
+      toast.innerHTML = (isGood ? '✅ ' : '⚠️ ') + msg;
+      if (newStatus === 'DA_HOAN_TIEN' && data && data.maGiaoDichHoan) {
+        toast.innerHTML += '<br><span style="font-size:12px;font-weight:600;">Mã GD: ' + data.maGiaoDichHoan + '</span>';
+      }
+      document.body.appendChild(toast);
+      setTimeout(function(){ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(function(){ toast.remove(); }, 500); }, 5000);
+    }
+
+    if (_terminalStatuses.indexOf(_currentStatus) === -1) {
+      var _pollTimer = setInterval(function() {
+        fetch(_ctxPath + '/customer/hoan-tien?id=' + _hoanTienId + '&format=json')
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if (!data.success) return;
+            var newStatus = data.trangThai;
+            if (newStatus !== _currentStatus) {
+              _currentStatus = newStatus;
+              _showStatusToast(newStatus, data);
+              if (_terminalStatuses.indexOf(newStatus) !== -1) {
+                clearInterval(_pollTimer);
+              }
+              // Reload sau 2s để trang hiển thị đầy đủ thông tin mới
+              setTimeout(function(){ window.location.reload(); }, 2000);
+            }
+          })
+          .catch(function(){});
+      }, 4000);
+    }
 </script>
 
 <jsp:include page="/common/footer.jsp" />
