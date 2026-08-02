@@ -98,11 +98,7 @@
 
         /* ---- Hero (P5) -------------------------------------------------------- */
         .match-hero {
-            background: linear-gradient(135deg,
-                        var(--vs-primary-950, #0A1B26) 0%,
-                        var(--vs-primary-900, #122d40) 38%,
-                        var(--vs-primary-700, #1a3c54) 78%,
-                        var(--vs-cyan-600, #01c771) 100%);
+            background: linear-gradient(135deg, #1b5e42 0%, #287A58 55%, #3aaa72 100%);
             color: #fff;
             position: relative;
             overflow: hidden;
@@ -111,7 +107,7 @@
             content: "";
             position: absolute; right: -70px; top: -80px;
             width: 300px; height: 300px; pointer-events: none;
-            background: radial-gradient(circle, rgba(255, 255, 255, .13), transparent 68%);
+            background: radial-gradient(circle, rgba(255, 255, 255, .18), transparent 68%);
         }
         .match-hero-inner {
             width: min(1280px, calc(100% - 40px));
@@ -238,13 +234,33 @@
         .match-tab-label { overflow: hidden; text-overflow: ellipsis; }
 
         /* ---- Bộ lọc (P8) ------------------------------------------------------ */
-        .match-filters { padding: 18px; margin-bottom: 16px; }
-        .match-filter-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
-            gap: 14px;
-            align-items: end;
+        .match-filters { padding: 16px 20px; margin-bottom: 16px; }
+        .match-filter-row {
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
         }
+        .match-filter-row .match-field { min-width: 160px; flex: 1; }
+        .match-filter-row .match-filter-button { flex-shrink: 0; }
+        .match-filter-divider {
+            width: 1px; height: 32px; background: var(--vs-border, #DCE5EF); flex-shrink: 0;
+        }
+        .match-date-chips {
+            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+        }
+        .match-date-chip {
+            height: 38px; padding: 0 14px;
+            border: 1px solid var(--vs-border, #DCE5EF); border-radius: 999px;
+            background: #fff; color: var(--vs-text, #102A43);
+            font-family: inherit; font-size: 13px; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+            transition: all .15s ease;
+        }
+        .match-date-chip:hover { border-color: #3aaa72; color: #1b5e42; }
+        .match-date-chip.is-active {
+            background: #287A58; border-color: #287A58;
+            color: #fff; box-shadow: 0 2px 8px rgba(40,122,88,.25);
+        }
+        .match-filter-sep { margin: 12px 0 10px; border: none; border-top: 1px solid var(--vs-border, #DCE5EF); }
+
         .match-field { min-width: 0; }
         .match-field-label {
             display: flex; align-items: center; gap: 6px;
@@ -252,7 +268,7 @@
             color: var(--vs-text-secondary, #486581);
             margin-bottom: 7px;
         }
-        .match-field-label svg { color: var(--vs-primary-600, #01c771); flex-shrink: 0; }
+        .match-field-label svg { color: #287A58; flex-shrink: 0; }
         .match-input {
             width: 100%; height: 46px; padding: 0 13px;
             background: #fff; color: var(--vs-text, #102A43);
@@ -850,8 +866,12 @@
     <div class="match-panel" id="gkPanelKhamPha" role="tabpanel" aria-labelledby="gkTabKhamPha">
 
         <%-- Bộ lọc (P8) --%>
+        <%-- Hidden date inputs - JS reads these --%>
+        <input type="date" id="gkFilterFrom" hidden aria-hidden="true" />
+        <input type="date" id="gkFilterTo"   hidden aria-hidden="true" />
+
         <section class="match-card-surface match-filters" aria-label="Bộ lọc kèo">
-            <div class="match-filter-grid">
+            <div class="match-filter-row">
                 <div class="match-field">
                     <label class="match-field-label" for="gkFilterCoSo">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
@@ -876,43 +896,35 @@
                         </c:forEach>
                     </select>
                 </div>
-                <div class="match-field">
-                    <label class="match-field-label" for="gkFilterFrom">
+                <div class="match-filter-divider" aria-hidden="true"></div>
+                <div>
+                    <div class="match-field-label" style="margin-bottom:7px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
-                        Từ ngày
-                    </label>
-                    <input type="date" lang="vi" id="gkFilterFrom" class="match-input" aria-label="Lọc từ ngày" />
+                        Thời gian
+                    </div>
+                    <div class="match-date-chips" role="group" aria-label="Lọc theo thời gian">
+                        <button type="button" class="match-date-chip is-active" data-range="all" onclick="gkSetDateRange('all',this)">Tất cả</button>
+                        <button type="button" class="match-date-chip" data-range="today" onclick="gkSetDateRange('today',this)">Hôm nay</button>
+                        <button type="button" class="match-date-chip" data-range="week" onclick="gkSetDateRange('week',this)">Tuần này</button>
+                        <button type="button" class="match-date-chip" data-range="month" onclick="gkSetDateRange('month',this)">Tháng này</button>
+                    </div>
                 </div>
-                <div class="match-field">
-                    <label class="match-field-label" for="gkFilterTo">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-                        Đến ngày
-                    </label>
-                    <input type="date" lang="vi" id="gkFilterTo" class="match-input" aria-label="Lọc đến ngày" />
-                </div>
-                <button type="button" class="match-filter-button is-search" onclick="gkLoadDiscover()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <div class="match-filter-divider" aria-hidden="true"></div>
+                <button type="button" class="match-filter-button is-search" onclick="gkLoadDiscover()" style="flex-shrink:0;height:46px;margin-top:19px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     Tìm kèo
                 </button>
-                <button type="button" class="match-filter-button is-clear" onclick="gkClearFilters()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    Xóa lọc
-                </button>
             </div>
-            <%-- Chip lọc uy tín nhanh (hiển sau bộ lọc chính) --%>
-            <div class="match-chip-row" role="group" aria-label="Lọc theo uy tín yêu cầu" style="margin-top:12px;">
-                <button type="button" class="match-chip is-active" data-rep="all" onclick="gkFilterByRep('all', this)">Tất cả</button>
-                <button type="button" class="match-chip" data-rep="0" onclick="gkFilterByRep('0', this)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Không yêu cầu uy tín
-                </button>
-                <button type="button" class="match-chip" data-rep="40" onclick="gkFilterByRep('40', this)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Tôi có thể tham gia (uy tín ≤ 40)
-                </button>
-                <button type="button" class="match-chip" data-rep="eligible" onclick="gkFilterByRep('eligible', this)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Phù hợp với tôi
+            <hr class="match-filter-sep">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div class="match-chip-row" role="group" aria-label="Lọc theo uy tín">
+                    <button type="button" class="match-chip is-active" data-rep="all" onclick="gkFilterByRep('all', this)">Tất cả</button>
+                    <button type="button" class="match-chip" data-rep="0" onclick="gkFilterByRep('0', this)">Không yêu cầu uy tín</button>
+                    <button type="button" class="match-chip" data-rep="eligible" onclick="gkFilterByRep('eligible', this)">Phù hợp với tôi</button>
+                </div>
+                <button type="button" class="match-filter-button is-clear" onclick="gkClearFilters()" style="height:34px;padding:0 14px;font-size:13px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    Xóa lọc
                 </button>
             </div>
         </section>
@@ -1351,11 +1363,37 @@
         else window.location.href = CTX + '/index.jsp';
     };
 
+    window.gkSetDateRange = function (range, btn) {
+        var today = new Date();
+        var fmt = function (d) { return d.toISOString().split('T')[0]; };
+        var from = '', to = '';
+        if (range === 'today') {
+            from = to = fmt(today);
+        } else if (range === 'week') {
+            var mon = new Date(today); mon.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+            var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            from = fmt(mon); to = fmt(sun);
+        } else if (range === 'month') {
+            from = fmt(new Date(today.getFullYear(), today.getMonth(), 1));
+            to   = fmt(new Date(today.getFullYear(), today.getMonth() + 1, 0));
+        }
+        document.getElementById('gkFilterFrom').value = from;
+        document.getElementById('gkFilterTo').value   = to;
+        document.querySelectorAll('.match-date-chip').forEach(function (c) { c.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        gkLoadDiscover();
+    };
+
     window.gkClearFilters = function () {
         document.getElementById('gkFilterCoSo').value = '';
         document.getElementById('gkFilterSport').value = '';
         document.getElementById('gkFilterFrom').value = '';
         document.getElementById('gkFilterTo').value = '';
+        var allChip = document.querySelector('.match-date-chip[data-range="all"]');
+        if (allChip) {
+            document.querySelectorAll('.match-date-chip').forEach(function (c) { c.classList.remove('is-active'); });
+            allChip.classList.add('is-active');
+        }
         gkLoadDiscover();
     };
 

@@ -1098,9 +1098,9 @@ body { background: var(--vs-bg); color: var(--vs-text); }
    ═══════════════════════════════════════════════════════════ */
 .vs-footer {
   background: var(--vs-dark); color: rgba(255,255,255,.65);
-  padding: 72px 0 32px;
+  padding: 64px 0 28px;
   font-size: 14px; line-height: 1.7;
-  margin-top: auto;
+  flex-shrink: 0;
 }
 .vs-footer .vs-container { max-width: 1280px; }
 .vs-footer__grid {
