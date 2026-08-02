@@ -160,6 +160,9 @@ public class CustomerAccountServlet extends HttpServlet {
         boolean nearestBookingUrgentEligible = nearestBooking != null
                 && "Đã xác nhận".equals(nearestBooking.getTrangThai());
 
+        // Sync session so banner/other pages always reflect latest DB data
+        session.setAttribute("user", account);
+
         req.setAttribute("account", account);
         req.setAttribute("totalBookings", dsLich.size());
         req.setAttribute("upcomingCount", upcomingCount);

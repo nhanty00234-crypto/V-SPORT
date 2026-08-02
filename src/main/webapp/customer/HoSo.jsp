@@ -196,12 +196,15 @@
         }
 
         /* Main Content Card */
+        .acc-main-panel { min-width: 0; width: 100%; }
         .acc-content-card {
             background: #ffffff;
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 28px;
             box-shadow: var(--shadow-small);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* Page Header */
@@ -412,6 +415,7 @@
                         <div class="pf-field">
                             <label class="pf-label">Số điện thoại</label>
                             <input type="text" id="pfPhone" name="phoneNumber" class="pf-input" value="${fn:escapeXml(account.phoneNumber)}" placeholder="Nhập số điện thoại liên hệ" />
+                        </div>
                     </div>
 
                     <!-- Group 2: Sở thích thể thao -->

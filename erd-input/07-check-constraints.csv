@@ -1,0 +1,29 @@
+SchemaName,TableName,ConstraintName,ColumnName,CheckExpression,Notes
+dbo,DanhGia,CK_DanhGia_SoSao,SoSao,[SoSao] >= 1 AND [SoSao] <= 5,Rating must be 1-5 stars
+dbo,Accounts,CK_Accounts_ChieuCao,ChieuCaoCm,[ChieuCaoCm] >= 50 AND [ChieuCaoCm] <= 260,Height in cm; migration_customer_profile
+dbo,Accounts,CK_Accounts_CanNang,CanNangKg,[CanNangKg] >= 20 AND [CanNangKg] <= 300,Weight in kg; migration_customer_profile
+dbo,Accounts,CK_Accounts_TrinhDoChoi,TrinhDoChoi,[TrinhDoChoi] IN ('Mới chơi','Cơ bản','Trung bình','Khá','Nâng cao'),Skill level values; migration_customer_profile
+dbo,Accounts,CK_Accounts_TanSuatChoi,TanSuatChoi,[TanSuatChoi] IN ('Hàng ngày','4-5 lần/tuần','2-3 lần/tuần','1 lần/tuần','2-3 lần/tháng','Ít hơn') OR [TanSuatChoi] IS NULL,Play frequency values; migration_customer_profile
+dbo,LichDatSan_DichVu,CK_LDSDV_Quantity,Quantity,[Quantity] > 0,Delivery quantity must be positive
+dbo,LichDatSan_DichVu,CK_LDSDV_Status,Status,[Status] IN ('Chờ chuẩn bị','Đã giao','Đã hủy'),Pre-order service status values
+dbo,CourtChargeSegment,CK_CourtChargeSegment_RateType,RateType,[RateType] IN ('WITHOUT_LIGHT','WITH_LIGHT'),Lighting rate type for billing segments
+dbo,Teams,CK_Teams_MaxMembers,MaxMembers,[MaxMembers] >= 2 AND [MaxMembers] <= 30,Team size constraint
+dbo,Teams,CK_Teams_Status,Status,[Status] IN ('ACTIVE','INACTIVE','DISBANDED','SUSPENDED'),Team status values
+dbo,TeamMembers,CK_TeamMembers_MemberRole,MemberRole,[MemberRole] IN ('CAPTAIN','CO_CAPTAIN','MEMBER'),Team member role values
+dbo,TeamMembers,CK_TeamMembers_MemberStatus,MemberStatus,[MemberStatus] IN ('ACTIVE','LEFT','REMOVED'),Team member status values
+dbo,TeamInvitations,CK_TeamInvitations_ProposedRole,ProposedRole,[ProposedRole] IN ('CO_CAPTAIN','MEMBER'),Invitation role can only be CO_CAPTAIN or MEMBER
+dbo,TeamInvitations,CK_TeamInvitations_Status,Status,[Status] IN ('PENDING','ACCEPTED','REJECTED','CANCELLED','EXPIRED'),Team invitation status values
+dbo,TeamJoinRequests,CK_TeamJoinRequests_Status,Status,[Status] IN ('PENDING','APPROVED','REJECTED','CANCELLED'),Team join request status values
+dbo,NhomChiaTien,CK_NhomChiaTien_SplitType,SplitType,[SplitType] IN ('EQUAL','CUSTOM','ITEMIZED'),Bill split method
+dbo,NhomChiaTien,CK_NhomChiaTien_TrangThai,TrangThai,[TrangThai] IN ('DRAFT','ACTIVE','PARTIALLY_PAID','PAID','CANCELLED','EXPIRED'),Bill split group status
+dbo,NhomChiaTienChiTiet,CK_NhomChiaTienChiTiet_TrangThai,TrangThai,[TrangThai] IN ('PENDING','PROCESSING','PAID','CANCELLED','EXPIRED'),Individual bill split status
+dbo,NhomChiaTienChiTiet,CK_NhomChiaTienChiTiet_SoTien,SoTien,[SoTien] > 0,Amount must be positive
+dbo,SportService,CK_SportService_ServiceType,ServiceType,[ServiceType] IN ('CANG_LUOI','THAY_QUAN_CAN','SUA_VOT','BAO_DUONG','HUAN_LUYEN_VIEN','KHAC'),Sport service type values
+dbo,RacketStringingConfig,CK_RacketStringingConfig_TensionUnit,TensionUnit,[TensionUnit] IN ('kg','lbs'),Tension measurement unit
+dbo,ServiceMaterial,CK_ServiceMaterial_Status,Status,[Status] IN ('DANG_CO','TAM_HET','NGUNG_SU_DUNG'),Material stock status
+dbo,ServiceOrder,CK_ServiceOrder_Status,Status,[Status] IN ('PENDING','CONFIRMED','WAITING_DROP_OFF','RECEIVED','IN_PROGRESS','COMPLETED','DELIVERED','CANCELLED'),8 status values for sport service order lifecycle
+dbo,RacketStringingOrderDetail,CK_RacketStringingOrderDetail_TensionUnit,TensionUnit,[TensionUnit] IN ('kg','lbs'),Tension unit for stringing detail
+dbo,RacketStringingOrderDetail,CK_RacketStringingOrderDetail_Quantity,Quantity,[Quantity] > 0,Number of rackets must be positive
+dbo,QRRequest,CK_QRRequest_RequestType,RequestType,[RequestType] IN ('CALL_STAFF','ORDER_ITEM','SERVICE_REQUEST'),QR scan request type values
+dbo,QRRequest,CK_QRRequest_Status,Status,[Status] IN ('NEW','IN_PROGRESS','DONE','CANCELLED'),QR request handling status
+dbo,GhepKeo,CK_GhepKeo_HinhThucDuyet,HinhThucDuyet,[HinhThucDuyet] IN ('AUTO','MANUAL') OR [HinhThucDuyet] IS NULL,Matchmaking approval mode; migration_matchmaking_complete_flow

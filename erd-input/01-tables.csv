@@ -1,0 +1,59 @@
+SchemaName,TableName,TableType,RowCount,Description
+dbo,Roles,BASE TABLE,N/A (not connected),Vai trò hệ thống (Admin/QuanLy/NhanVien/KhachHang)
+dbo,CoSo,BASE TABLE,N/A (not connected),Cơ sở thể thao (facility/venue)
+dbo,Accounts,BASE TABLE,N/A (not connected),Tài khoản người dùng (tất cả vai trò)
+dbo,MonTheThao,BASE TABLE,N/A (not connected),Môn thể thao (bóng đá/cầu lông/tennis...)
+dbo,MonTheThaoYeuThich,BASE TABLE,N/A (not connected),Môn thể thao yêu thích của tài khoản (bảng nối N-N)
+dbo,LoaiSan,BASE TABLE,N/A (not connected),Loại sân (phân loại theo môn thể thao và giá)
+dbo,San,BASE TABLE,N/A (not connected),Sân thi đấu cụ thể tại cơ sở
+dbo,DanhMucSanPham,BASE TABLE,N/A (not connected),Danh mục sản phẩm/dịch vụ bán lẻ
+dbo,SanPham_DichVu,BASE TABLE,N/A (not connected),Sản phẩm và dịch vụ bán kèm tại cơ sở
+dbo,LichDatSan,BASE TABLE,N/A (not connected),Lịch đặt sân (booking record) - bảng trung tâm
+dbo,GhepKeo,BASE TABLE,N/A (not connected),Yêu cầu ghép kèo tìm người chơi cùng
+dbo,ChiTietGhepKeo,BASE TABLE,N/A (not connected),Người tham gia ghép kèo
+dbo,DanhGia,BASE TABLE,N/A (not connected),Đánh giá sau khi đặt sân (1-5 sao)
+dbo,LichSuELO,BASE TABLE,N/A (not connected),Lịch sử điểm ELO/trình độ của tài khoản
+dbo,NhatKyChat,BASE TABLE,N/A (not connected),Nhật ký hội thoại chatbot
+dbo,TheGiuXe,BASE TABLE,N/A (not connected),Thẻ/chỗ gửi xe tại cơ sở
+dbo,LichXeRaVao,BASE TABLE,N/A (not connected),Lịch sử xe ra vào bãi đỗ
+dbo,KhuyenMai,BASE TABLE,N/A (not connected),Mã khuyến mãi/giảm giá
+dbo,HoaDon,BASE TABLE,N/A (not connected),Hóa đơn thanh toán
+dbo,ChiTietHoaDon,BASE TABLE,N/A (not connected),Chi tiết sản phẩm trong hóa đơn
+dbo,ChiaHoaDon,BASE TABLE,N/A (not connected),Chia hóa đơn theo từng người (cơ chế cũ - xem ghi chú anomaly)
+dbo,MaQR,BASE TABLE,N/A (not connected),Mã QR thanh toán liên kết ChiaHoaDon
+dbo,YeuCauSOS,BASE TABLE,N/A (not connected),Yêu cầu tìm người chơi khẩn cấp (SOS)
+dbo,NhatKySOSGui,BASE TABLE,N/A (not connected),Nhật ký gửi thông báo SOS
+dbo,ThongBao,BASE TABLE,N/A (not connected),Thông báo hệ thống gửi đến tài khoản
+dbo,CaLamViec,BASE TABLE,N/A (not connected),Ca làm việc của nhân viên tại cơ sở
+dbo,HoanTien,BASE TABLE,N/A (not connected),Yêu cầu hoàn tiền cho khách hàng
+dbo,AuditLog,BASE TABLE,N/A (not connected),Nhật ký kiểm toán hành động hệ thống
+dbo,LichDatSan_DichVu,BASE TABLE,N/A (not connected),Đặt trước dịch vụ/sản phẩm kèm lịch đặt sân
+dbo,AdminTrash,BASE TABLE,N/A (not connected),Thùng rác admin - lưu vết xóa mềm
+dbo,CoSoNganHang,BASE TABLE,N/A (not connected),Thông tin ngân hàng của cơ sở (1-1 với CoSo)
+dbo,BookingExtension,BASE TABLE,N/A (not connected),Lịch sử gia hạn thời gian đặt sân
+dbo,CourtChargeSegment,BASE TABLE,N/A (not connected),Phân đoạn tính phí sân theo giờ (có/không đèn)
+dbo,PayOSPaymentAttempt,BASE TABLE,N/A (not connected),Lần thử thanh toán qua PayOS
+dbo,CustomerReputationHistory,BASE TABLE,N/A (not connected),Lịch sử điểm uy tín của khách hàng
+dbo,CoSoCapability,BASE TABLE,N/A (not connected),Khả năng/tính năng được duyệt cho cơ sở
+dbo,QRRequest,BASE TABLE,N/A (not connected),Yêu cầu từ mã QR sân (gọi nhân viên/đặt món)
+dbo,SanQR,BASE TABLE,N/A (not connected),Mã QR gắn với sân (1-1 với San)
+dbo,SanQRTokenHistory,BASE TABLE,N/A (not connected),Lịch sử token QR của sân
+dbo,SportService,BASE TABLE,N/A (not connected),Dịch vụ thể thao chuyên biệt (căng lưới/sửa vợt...)
+dbo,RacketStringingConfig,BASE TABLE,N/A (not connected),Cấu hình dịch vụ căng lưới vợt (1-1 với SportService)
+dbo,ServiceMaterial,BASE TABLE,N/A (not connected),Vật liệu/lưới dùng cho dịch vụ thể thao
+dbo,ServiceOrder,BASE TABLE,N/A (not connected),Đơn đặt dịch vụ thể thao chuyên biệt
+dbo,RacketStringingOrderDetail,BASE TABLE,N/A (not connected),Chi tiết đơn căng lưới vợt (1-1 với ServiceOrder)
+dbo,ServiceOrderStatusHistory,BASE TABLE,N/A (not connected),Lịch sử trạng thái đơn dịch vụ (DDL suy ra từ Java model)
+dbo,Teams,BASE TABLE,N/A (not connected),Đội nhóm thể thao
+dbo,TeamMembers,BASE TABLE,N/A (not connected),Thành viên đội nhóm
+dbo,TeamInvitations,BASE TABLE,N/A (not connected),Lời mời tham gia đội nhóm
+dbo,TeamJoinRequests,BASE TABLE,N/A (not connected),Yêu cầu xin vào đội nhóm
+dbo,NhomChiaTien,BASE TABLE,N/A (not connected),Nhóm chia tiền hóa đơn (thay thế ChiaHoaDon)
+dbo,NhomChiaTienChiTiet,BASE TABLE,N/A (not connected),Chi tiết phần tiền của từng người trong nhóm
+dbo,KhuyenMaiHinhAnh,BASE TABLE,N/A (not connected),Hình ảnh đính kèm chương trình khuyến mãi
+dbo,LichSuKhuyenMai,BASE TABLE,N/A (not connected),Lịch sử sử dụng mã khuyến mãi theo tài khoản
+dbo,YeuCauNghi,BASE TABLE,N/A (not connected),Yêu cầu nghỉ phép của nhân viên
+dbo,CaLamViecAudit,BASE TABLE,N/A (not connected),Audit log ca làm việc (DDL suy ra từ Java model)
+dbo,CaLamViecAvailability,BASE TABLE,N/A (not connected),Lịch sẵn sàng làm việc (DDL suy ra từ Java model)
+dbo,CaLamViecSwapRequest,BASE TABLE,N/A (not connected),Yêu cầu hoán đổi ca làm việc (DDL suy ra từ Java model)
+dbo,SoftHold,BASE TABLE,N/A (not connected),Giữ chỗ tạm thời trước khi xác nhận đặt sân (DDL suy ra từ Java model)

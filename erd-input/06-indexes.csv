@@ -1,0 +1,73 @@
+SchemaName,TableName,IndexName,IndexType,IsUnique,IsFiltered,FilterExpression,Columns,IncludedColumns,Notes
+dbo,Accounts,PK_Accounts,CLUSTERED,YES,NO,,AccountID,,Primary key clustered index
+dbo,Accounts,UQ_Accounts_Username,NONCLUSTERED,YES,NO,,Username,,Unique constraint index; allows NULL
+dbo,Accounts,UQ_Accounts_GoogleID,NONCLUSTERED,YES,NO,,GoogleID,,Unique constraint index; allows NULL
+dbo,Accounts,UQ_Accounts_FacebookID,NONCLUSTERED,YES,NO,,FacebookID,,Unique constraint index; allows NULL
+dbo,Accounts,UQ_Accounts_Email,NONCLUSTERED,YES,NO,,Email,,Unique constraint index; allows NULL
+dbo,Roles,PK_Roles,CLUSTERED,YES,NO,,RoleID,,
+dbo,CoSo,PK_CoSo,CLUSTERED,YES,NO,,CoSoID,,
+dbo,MonTheThao,PK_MonTheThao,CLUSTERED,YES,NO,,MonTheThaoID,,
+dbo,MonTheThaoYeuThich,PK_MonTheThaoYeuThich,CLUSTERED,YES,NO,,"AccountID, MonTheThaoID",,Composite PK clustered
+dbo,LoaiSan,PK_LoaiSan,CLUSTERED,YES,NO,,LoaiSanID,,
+dbo,San,PK_San,CLUSTERED,YES,NO,,SanID,,
+dbo,DanhMucSanPham,PK_DanhMucSanPham,CLUSTERED,YES,NO,,DanhMucID,,
+dbo,SanPham_DichVu,PK_SanPham_DichVu,CLUSTERED,YES,NO,,SanPhamID,,
+dbo,LichDatSan,PK_LichDatSan,CLUSTERED,YES,NO,,DatSanID,,Central booking table
+dbo,GhepKeo,PK_GhepKeo,CLUSTERED,YES,NO,,KeoID,,
+dbo,ChiTietGhepKeo,PK_ChiTietGhepKeo,CLUSTERED,YES,NO,,ChiTietKeoID,,
+dbo,ChiTietGhepKeo,UX_ChiTietGhepKeo_Active_Keo_Account,NONCLUSTERED,YES,YES,"TrangThaiThamGia <> 'DaRoi'","KeoID, AccountID_NguoiThamGia",,Filtered unique index - migration_matchmaking_complete_flow
+dbo,DanhGia,PK_DanhGia,CLUSTERED,YES,NO,,DanhGiaID,,
+dbo,DanhGia,UQ_DanhGia_DatSan_Account,NONCLUSTERED,YES,NO,,"DatSanID, AccountID_NguoiDanhGia",,Unique constraint from migration_notification_marketing_refund_review
+dbo,LichSuELO,PK_LichSuELO,CLUSTERED,YES,NO,,LichSuELOID,,
+dbo,NhatKyChat,PK_NhatKyChat,CLUSTERED,YES,NO,,NhatKyChatID,,
+dbo,TheGiuXe,PK_TheGiuXe,CLUSTERED,YES,NO,,TheID,,
+dbo,LichXeRaVao,PK_LichXeRaVao,CLUSTERED,YES,NO,,LichXeID,,
+dbo,KhuyenMai,PK_KhuyenMai,CLUSTERED,YES,NO,,KhuyenMaiID,,
+dbo,KhuyenMai,UQ_KhuyenMai_MaCode,NONCLUSTERED,YES,NO,,MaCode,,
+dbo,HoaDon,PK_HoaDon,CLUSTERED,YES,NO,,HoaDonID,,
+dbo,ChiTietHoaDon,PK_ChiTietHoaDon,CLUSTERED,YES,NO,,ChiTietID,,
+dbo,ChiaHoaDon,PK_ChiaHoaDon,CLUSTERED,YES,NO,,ChiaHoaDonID,,Dead code table
+dbo,MaQR,PK_MaQR,CLUSTERED,YES,NO,,MaQRID,,
+dbo,YeuCauSOS,PK_YeuCauSOS,CLUSTERED,YES,NO,,YeuCauSOSID,,
+dbo,NhatKySOSGui,PK_NhatKySOSGui,CLUSTERED,YES,NO,,NhatKySOSGuiID,,
+dbo,ThongBao,PK_ThongBao,CLUSTERED,YES,NO,,ThongBaoID,,
+dbo,ThongBao,UQ_ThongBao_Account_Loai_MaBanGhi,NONCLUSTERED,YES,NO,,"AccountID, LoaiThongBao, MaBanGhi",,From migration_notification_marketing_refund_review / migration_thongbao_table
+dbo,CaLamViec,PK_CaLamViec,CLUSTERED,YES,NO,,CaLamViecID,,
+dbo,HoanTien,PK_HoanTien,CLUSTERED,YES,NO,,HoanTienID,,
+dbo,AuditLog,PK_AuditLog,CLUSTERED,YES,NO,,AuditLogID,,
+dbo,LichDatSan_DichVu,PK_LichDatSan_DichVu,CLUSTERED,YES,NO,,Id,,
+dbo,AdminTrash,PK_AdminTrash,CLUSTERED,YES,NO,,TrashID,,
+dbo,CoSoNganHang,PK_CoSoNganHang,CLUSTERED,YES,NO,,CoSoID,,PK is also FK
+dbo,BookingExtension,PK_BookingExtension,CLUSTERED,YES,NO,,ExtensionID,,
+dbo,CourtChargeSegment,PK_CourtChargeSegment,CLUSTERED,YES,NO,,SegmentID,,
+dbo,PayOSPaymentAttempt,PK_PayOSPaymentAttempt,CLUSTERED,YES,NO,,AttemptID,,
+dbo,PayOSPaymentAttempt,UQ_PayOSPaymentAttempt_OrderCode,NONCLUSTERED,YES,NO,,OrderCode,,
+dbo,CustomerReputationHistory,PK_CustomerReputationHistory,CLUSTERED,YES,NO,,ReputationHistoryID,,
+dbo,CoSoCapability,PK_CoSoCapability,CLUSTERED,YES,NO,,CapabilityID,,
+dbo,CoSoCapability,UQ_CoSoCapability_CoSo_CapabilityType,NONCLUSTERED,YES,NO,,"CoSoID, CapabilityType",,
+dbo,QRRequest,PK_QRRequest,CLUSTERED,YES,NO,,RequestID,,
+dbo,SanQR,PK_SanQR,CLUSTERED,YES,NO,,SanQRID,,
+dbo,SanQR,UQ_SanQR_SanID,NONCLUSTERED,YES,NO,,SanID,,Enforces 1-1 with San
+dbo,SanQRTokenHistory,PK_SanQRTokenHistory,CLUSTERED,YES,NO,,HistoryID,,
+dbo,SportService,PK_SportService,CLUSTERED,YES,NO,,ServiceID,,
+dbo,RacketStringingConfig,PK_RacketStringingConfig,CLUSTERED,YES,NO,,ConfigID,,
+dbo,RacketStringingConfig,UQ_RacketStringingConfig_ServiceID,NONCLUSTERED,YES,NO,,ServiceID,,Enforces 1-1 with SportService
+dbo,ServiceMaterial,PK_ServiceMaterial,CLUSTERED,YES,NO,,MaterialID,,
+dbo,ServiceOrder,PK_ServiceOrder,CLUSTERED,YES,NO,,OrderID,,
+dbo,RacketStringingOrderDetail,PK_RacketStringingOrderDetail,CLUSTERED,YES,NO,,DetailID,,
+dbo,RacketStringingOrderDetail,UQ_RacketStringingOrderDetail_OrderID,NONCLUSTERED,YES,NO,,OrderID,,Enforces 1-1 with ServiceOrder
+dbo,ServiceOrderStatusHistory,PK_ServiceOrderStatusHistory,CLUSTERED,YES,NO,,HistoryID,,DDL inferred from Java model
+dbo,Teams,PK_Teams,CLUSTERED,YES,NO,,TeamID,,
+dbo,TeamMembers,PK_TeamMembers,CLUSTERED,YES,NO,,TeamMemberID,,
+dbo,TeamInvitations,PK_TeamInvitations,CLUSTERED,YES,NO,,InvitationID,,
+dbo,TeamJoinRequests,PK_TeamJoinRequests,CLUSTERED,YES,NO,,JoinRequestID,,
+dbo,NhomChiaTien,PK_NhomChiaTien,CLUSTERED,YES,NO,,NhomChiaTienID,,
+dbo,NhomChiaTienChiTiet,PK_NhomChiaTienChiTiet,CLUSTERED,YES,NO,,ChiTietID,,
+dbo,NhomChiaTienChiTiet,UQ_NhomChiaTienChiTiet_ShareToken,NONCLUSTERED,YES,NO,,ShareToken,,
+dbo,KhuyenMaiHinhAnh,PK_KhuyenMaiHinhAnh,CLUSTERED,YES,NO,,HinhAnhID,,Column name inferred
+dbo,LichSuKhuyenMai,PK_LichSuKhuyenMai,CLUSTERED,YES,NO,,LichSuKhuyenMaiID,,
+dbo,YeuCauNghi,PK_YeuCauNghi,CLUSTERED,YES,NO,,YeuCauNghiID,,
+dbo,CaLamViecAudit,PK_CaLamViecAudit,CLUSTERED,YES,NO,,AuditID,,DDL fully inferred from Java model
+dbo,CaLamViecAvailability,PK_CaLamViecAvailability,CLUSTERED,YES,NO,,AvailabilityID,,DDL fully inferred from Java model
+dbo,CaLamViecSwapRequest,PK_CaLamViecSwapRequest,CLUSTERED,YES,NO,,SwapRequestID,,DDL fully inferred from Java model
+dbo,SoftHold,PK_SoftHold,CLUSTERED,YES,NO,,HoldID,,DDL fully inferred from Java model

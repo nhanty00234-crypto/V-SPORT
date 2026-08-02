@@ -1,0 +1,60 @@
+SchemaName,TableName,PKConstraintName,ColumnName,OrdinalPosition,IsIdentity,DataType,Notes
+dbo,Roles,PK_Roles,RoleID,1,YES,INT,
+dbo,CoSo,PK_CoSo,CoSoID,1,YES,INT,
+dbo,Accounts,PK_Accounts,AccountID,1,YES,INT,
+dbo,MonTheThao,PK_MonTheThao,MonTheThaoID,1,YES,INT,
+dbo,MonTheThaoYeuThich,PK_MonTheThaoYeuThich,AccountID,1,NO,INT,Composite PK (2 columns)
+dbo,MonTheThaoYeuThich,PK_MonTheThaoYeuThich,MonTheThaoID,2,NO,INT,Composite PK (2 columns)
+dbo,LoaiSan,PK_LoaiSan,LoaiSanID,1,YES,INT,
+dbo,San,PK_San,SanID,1,YES,INT,
+dbo,DanhMucSanPham,PK_DanhMucSanPham,DanhMucID,1,YES,INT,
+dbo,SanPham_DichVu,PK_SanPham_DichVu,SanPhamID,1,YES,INT,
+dbo,LichDatSan,PK_LichDatSan,DatSanID,1,YES,INT,Central booking table
+dbo,GhepKeo,PK_GhepKeo,KeoID,1,YES,INT,
+dbo,ChiTietGhepKeo,PK_ChiTietGhepKeo,ChiTietKeoID,1,YES,INT,
+dbo,DanhGia,PK_DanhGia,DanhGiaID,1,YES,INT,
+dbo,LichSuELO,PK_LichSuELO,LichSuELOID,1,YES,INT,
+dbo,NhatKyChat,PK_NhatKyChat,NhatKyChatID,1,YES,INT,
+dbo,TheGiuXe,PK_TheGiuXe,TheID,1,YES,INT,
+dbo,LichXeRaVao,PK_LichXeRaVao,LichXeID,1,YES,INT,
+dbo,KhuyenMai,PK_KhuyenMai,KhuyenMaiID,1,YES,INT,
+dbo,HoaDon,PK_HoaDon,HoaDonID,1,YES,INT,
+dbo,ChiTietHoaDon,PK_ChiTietHoaDon,ChiTietID,1,YES,INT,
+dbo,ChiaHoaDon,PK_ChiaHoaDon,ChiaHoaDonID,1,YES,INT,Dead code - replaced by NhomChiaTien
+dbo,MaQR,PK_MaQR,MaQRID,1,YES,INT,
+dbo,YeuCauSOS,PK_YeuCauSOS,YeuCauSOSID,1,YES,INT,
+dbo,NhatKySOSGui,PK_NhatKySOSGui,NhatKySOSGuiID,1,YES,INT,
+dbo,ThongBao,PK_ThongBao,ThongBaoID,1,YES,INT,
+dbo,CaLamViec,PK_CaLamViec,CaLamViecID,1,YES,INT,
+dbo,HoanTien,PK_HoanTien,HoanTienID,1,YES,INT,
+dbo,AuditLog,PK_AuditLog,AuditLogID,1,YES,BIGINT,BIGINT for high-volume audit log
+dbo,LichDatSan_DichVu,PK_LichDatSan_DichVu,Id,1,YES,INT,
+dbo,AdminTrash,PK_AdminTrash,TrashID,1,YES,INT,
+dbo,CoSoNganHang,PK_CoSoNganHang,CoSoID,1,NO,INT,PK is also FK to CoSo (1-1 relationship)
+dbo,BookingExtension,PK_BookingExtension,ExtensionID,1,YES,INT,
+dbo,CourtChargeSegment,PK_CourtChargeSegment,SegmentID,1,YES,INT,
+dbo,PayOSPaymentAttempt,PK_PayOSPaymentAttempt,AttemptID,1,YES,BIGINT,BIGINT for payment attempts
+dbo,CustomerReputationHistory,PK_CustomerReputationHistory,ReputationHistoryID,1,YES,BIGINT,BIGINT for history records
+dbo,CoSoCapability,PK_CoSoCapability,CapabilityID,1,YES,INT,
+dbo,QRRequest,PK_QRRequest,RequestID,1,YES,INT,
+dbo,SanQR,PK_SanQR,SanQRID,1,YES,INT,
+dbo,SanQRTokenHistory,PK_SanQRTokenHistory,HistoryID,1,YES,INT,
+dbo,SportService,PK_SportService,ServiceID,1,YES,INT,
+dbo,RacketStringingConfig,PK_RacketStringingConfig,ConfigID,1,YES,INT,
+dbo,ServiceMaterial,PK_ServiceMaterial,MaterialID,1,YES,INT,
+dbo,ServiceOrder,PK_ServiceOrder,OrderID,1,YES,INT,
+dbo,RacketStringingOrderDetail,PK_RacketStringingOrderDetail,DetailID,1,YES,INT,
+dbo,ServiceOrderStatusHistory,PK_ServiceOrderStatusHistory,HistoryID,1,YES,INT,DDL inferred from Java model
+dbo,Teams,PK_Teams,TeamID,1,YES,INT,
+dbo,TeamMembers,PK_TeamMembers,TeamMemberID,1,YES,INT,
+dbo,TeamInvitations,PK_TeamInvitations,InvitationID,1,YES,INT,
+dbo,TeamJoinRequests,PK_TeamJoinRequests,JoinRequestID,1,YES,INT,
+dbo,NhomChiaTien,PK_NhomChiaTien,NhomChiaTienID,1,YES,INT,
+dbo,NhomChiaTienChiTiet,PK_NhomChiaTienChiTiet,ChiTietID,1,YES,INT,
+dbo,KhuyenMaiHinhAnh,PK_KhuyenMaiHinhAnh,HinhAnhID,1,YES,INT,Column name inferred
+dbo,LichSuKhuyenMai,PK_LichSuKhuyenMai,LichSuKhuyenMaiID,1,YES,INT,
+dbo,YeuCauNghi,PK_YeuCauNghi,YeuCauNghiID,1,YES,INT,Confirmed via view SQL and Java model
+dbo,CaLamViecAudit,PK_CaLamViecAudit,AuditID,1,YES,INT,DDL fully inferred from Java model
+dbo,CaLamViecAvailability,PK_CaLamViecAvailability,AvailabilityID,1,YES,INT,DDL fully inferred from Java model
+dbo,CaLamViecSwapRequest,PK_CaLamViecSwapRequest,SwapRequestID,1,YES,INT,DDL fully inferred from Java model
+dbo,SoftHold,PK_SoftHold,HoldID,1,YES,INT,DDL fully inferred from Java model

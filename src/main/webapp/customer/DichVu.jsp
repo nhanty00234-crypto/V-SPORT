@@ -7,56 +7,147 @@
 <jsp:include page="/common/xtra-head.jsp" />
 <title>Dịch vụ thể thao gần bạn - V-SPORT</title>
 <style>
+  /* ─── Layout ─── */
   .dv-wrap { max-width: var(--container-width); margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* ─── Header ─── */
+  .dv-header { margin-bottom: 4px; }
   .dv-header h1 { font-size: 28px; font-weight: 800; color: var(--navy); margin: 0 0 6px; }
   .dv-header p { color: var(--body-text); font-size: 14.5px; margin: 0; }
-  .dv-search { display:flex; gap:10px; margin: 22px 0 14px; flex-wrap: wrap; }
-  .dv-search input[type="text"] {
-    flex: 1; min-width: 240px; padding: 12px 16px; border-radius: var(--radius-medium);
-    border: 1px solid var(--border); font-size: 14px; outline: none;
-  }
-  .dv-search input[type="text"]:focus { border-color: var(--primary); }
-  .dv-gps-btn, .dv-filter-btn {
-    padding: 12px 18px; border-radius: var(--radius-medium); border: 1px solid var(--border);
-    background: var(--surface); font-weight: 700; font-size: 13.5px; color: var(--navy); cursor: pointer;
-    display:flex; align-items:center; gap:6px; white-space: nowrap;
-  }
-  .dv-gps-btn.is-active { border-color: var(--primary); color: var(--primary-hover); background:#eafff5; }
-  .dv-tabs { display:flex; gap:6px; border-bottom: 1px solid var(--border); margin: 20px 0 4px; }
+
+  /* ─── Tabs ─── */
+  .dv-tabs { display:flex; gap:0; border-bottom: 2px solid var(--border); margin: 20px 0 20px; }
   .dv-tab {
-    padding: 10px 18px; border: none; background: none; font-size: 14px; font-weight: 700;
-    color: var(--muted-text); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    padding: 11px 22px; border: none; background: none; font-size: 14px; font-weight: 700;
+    color: var(--muted-text); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: color .15s, border-color .15s;
   }
   .dv-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+  .dv-tab:hover:not(.active) { color: var(--body-text); }
+
+  /* ─── Search bar ─── */
+  .dv-search { display:flex; gap:10px; margin: 0 0 14px; flex-wrap: wrap; }
+  .dv-search input[type="text"] {
+    flex: 1; min-width: 240px; padding: 12px 16px; border-radius: var(--radius-medium);
+    border: 1.5px solid var(--border); font-size: 14px; outline: none; background: var(--surface);
+    transition: border-color .15s;
+  }
+  .dv-search input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34,197,94,.1); }
+  .dv-gps-btn, .dv-filter-btn {
+    padding: 12px 18px; border-radius: var(--radius-medium); border: 1.5px solid var(--border);
+    background: var(--surface); font-weight: 700; font-size: 13.5px; color: var(--navy); cursor: pointer;
+    display:flex; align-items:center; gap:6px; white-space: nowrap; transition: all .15s;
+  }
+  .dv-gps-btn:hover { background: #f0f9ff; border-color: #93c5fd; }
+  .dv-gps-btn.is-active { border-color: var(--primary); color: #15803d; background:#f0fdf4; }
+
+  /* ─── Quick filter chips ─── */
   .dv-quick-filters { display:flex; gap:8px; flex-wrap: wrap; margin-bottom: 22px; }
   .dv-chip {
-    padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
-    font-size: 12.5px; font-weight: 700; color: var(--body-text); cursor: pointer; user-select:none;
+    padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface);
+    font-size: 12.5px; font-weight: 600; color: var(--body-text); cursor: pointer; user-select:none;
+    transition: all .15s;
   }
+  .dv-chip:hover { border-color: var(--navy); color: var(--navy); }
   .dv-chip.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+  /* ─── Service grid (2-col feel) ─── */
   .dv-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+
+  /* ─── Service card ─── */
   .dv-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-medium);
-    overflow: hidden; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-small);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; cursor: pointer; transition: box-shadow .2s, transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
   }
-  .dv-card:hover { box-shadow: var(--shadow-medium); transform: translateY(-2px); }
-  .dv-card-img { height: 140px; background: linear-gradient(135deg,#122d40,#1a3c54); position:relative; }
+  .dv-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.12); transform: translateY(-3px); }
+  .dv-card-img { height: 140px; background: linear-gradient(135deg,#0f2336,#1a3c54); position:relative; overflow:hidden; }
   .dv-card-img img { width:100%; height:100%; object-fit:cover; }
   .dv-status-badge {
-    position:absolute; top:10px; left:10px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:800;
+    position:absolute; top:10px; left:10px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;
+    backdrop-filter: blur(4px);
   }
-  .dv-status-open { background:#dcfce7; color:#166534; }
-  .dv-status-paused { background:#f1f5f9; color:#475569; }
-  .dv-status-lowstock { background:#fef9c3; color:#854d0e; }
-  .dv-status-outofstock { background:#fee2e2; color:#991b1b; }
+  .dv-status-open { background:rgba(220,252,231,.9); color:#15803d; }
+  .dv-status-paused { background:rgba(241,245,249,.9); color:#475569; }
+  .dv-status-lowstock { background:rgba(254,249,195,.9); color:#92400e; }
+  .dv-status-outofstock { background:rgba(254,226,226,.9); color:#b91c1c; }
   .dv-card-body { padding: 14px 16px 16px; }
-  .dv-card-body h3 { font-size: 15px; font-weight: 800; color: var(--navy); margin: 0 0 4px; }
+  .dv-card-body h3 { font-size: 15px; font-weight: 800; color: var(--navy); margin: 0 0 4px; line-height:1.3; }
   .dv-card-facility { font-size: 12.5px; color: var(--muted-text); margin: 0 0 8px; display:flex; align-items:center; gap:4px; }
   .dv-card-meta { display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color: var(--body-text); }
   .dv-price { font-weight: 800; color: var(--navy); font-size: 14.5px; }
+
+  /* ─── Product grid (3-4 col, tighter cards) ─── */
+  .sp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .sp-card {
+    background: #fff; border: 1px solid #e8ecf0; border-radius: 14px;
+    overflow: hidden; cursor: pointer; transition: box-shadow .2s, transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05); display: flex; flex-direction: column;
+  }
+  .sp-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.13); transform: translateY(-3px); }
+
+  .sp-img-wrap {
+    position: relative; padding-top: 75%; /* 4:3 */
+    background: linear-gradient(135deg,#f1f5f9,#e2e8f0); overflow: hidden;
+  }
+  .sp-img-wrap img {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    transition: transform .3s;
+  }
+  .sp-card:hover .sp-img-wrap img { transform: scale(1.04); }
+  .sp-img-placeholder {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; color:#94a3b8; gap:6px;
+  }
+  .sp-img-placeholder i { font-size:28px; }
+  .sp-img-placeholder span { font-size:11px; font-weight:600; }
+
+  .sp-stock-badge {
+    position:absolute; top:8px; left:8px; padding:3px 9px;
+    border-radius:999px; font-size:10.5px; font-weight:700; backdrop-filter:blur(4px);
+  }
+  .sp-stock-in  { background:rgba(220,252,231,.92); color:#15803d; }
+  .sp-stock-low { background:rgba(254,249,195,.92); color:#92400e; }
+  .sp-stock-out { background:rgba(254,226,226,.92); color:#b91c1c; }
+
+  .sp-card-body { padding: 12px 14px 14px; flex:1; display:flex; flex-direction:column; gap:4px; }
+  .sp-card-name { font-size:14px; font-weight:800; color:#0f2336; margin:0; line-height:1.3;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .sp-card-cat  { font-size:11.5px; color:#64748b; font-weight:600; margin:0; }
+  .sp-card-loc  { font-size:11.5px; color:#94a3b8; display:flex; align-items:center; gap:3px; margin:0; }
+  .sp-card-footer { margin-top:auto; padding-top:10px; display:flex; align-items:center; justify-content:space-between; }
+  .sp-price { font-size:15px; font-weight:800; color:#0f2336; }
+  .sp-price-unit { font-size:11px; color:#94a3b8; font-weight:600; }
+  .sp-buy-btn {
+    padding:6px 12px; border-radius:8px; background:#0f2336; color:#fff;
+    font-size:11.5px; font-weight:700; border:none; cursor:pointer; transition:background .15s;
+    white-space:nowrap;
+  }
+  .sp-buy-btn:hover { background:#1e40af; }
+  .sp-buy-btn:disabled { background:#94a3b8; cursor:default; }
+
+  /* ─── Section separator for product panel ─── */
+  #dvPanelProduct .sp-section-header {
+    display: flex; align-items:center; justify-content:space-between;
+    margin-bottom: 16px;
+  }
+  #dvPanelProduct .sp-count-badge {
+    font-size:12px; font-weight:700; color:#64748b;
+    background:#f1f5f9; padding:3px 10px; border-radius:999px;
+  }
+
+  /* ─── Empty state ─── */
   .dv-empty { text-align:center; padding: 60px 20px; color: var(--muted-text); }
   .dv-empty i { font-size: 40px; margin-bottom: 12px; opacity:.4; }
 
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .sp-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
+  }
   @media (max-width: 768px) {
     .dv-wrap { padding: 24px min(20px, 5vw) 70px; }
     .dv-header h1 { font-size: 24px; }
@@ -64,11 +155,15 @@
     .dv-search input[type="text"] { min-width: 0; width: 100%; }
     .dv-gps-btn { width: 100%; justify-content: center; }
     .dv-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .sp-grid { grid-template-columns: repeat(3, 1fr); gap:10px; }
   }
-  @media (max-width: 430px) {
+  @media (max-width: 480px) {
     .dv-wrap { padding: 20px min(16px, 4vw) 70px; }
     .dv-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .dv-card-img { height: 110px; }
+    .sp-grid { grid-template-columns: repeat(2, 1fr); gap:10px; }
+    .sp-card-name { font-size:13px; }
+    .sp-price { font-size:13.5px; }
     .dv-tabs { overflow-x: auto; }
     .dv-quick-filters { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
     .dv-chip { flex-shrink: 0; }
@@ -150,7 +245,11 @@
       <div class="dv-chip active" data-all="1">Tất cả</div>
     </div>
 
-    <div id="spGrid" class="dv-grid"></div>
+    <div class="sp-section-header">
+      <span id="spCountBadge" class="sp-count-badge" style="display:none;"></span>
+    </div>
+
+    <div id="spGrid" class="sp-grid"></div>
     <div id="spEmpty" class="dv-empty" style="display:none;">
       <i id="spEmptyIcon" class="fa-solid fa-bag-shopping"></i>
       <p id="spEmptyTitle" style="font-weight:800;color:var(--navy);font-size:16px;margin:0 0 6px;">Chưa có sản phẩm phù hợp</p>
@@ -661,11 +760,19 @@
     }
   }
 
+  function stockBadgeCls(status) {
+    if (status === 'CON_HANG') return 'sp-stock-in';
+    if (status === 'SAP_HET') return 'sp-stock-low';
+    return 'sp-stock-out';
+  }
+
   function renderProductResults(list) {
     var grid = document.getElementById('spGrid');
     var empty = document.getElementById('spEmpty');
+    var countBadge = document.getElementById('spCountBadge');
     grid.innerHTML = '';
     if (!list.length) {
+      countBadge.style.display = 'none';
       var filtered = hasActiveProductFilter();
       document.getElementById('spEmptyIcon').className = filtered ? 'fa-solid fa-magnifying-glass' : 'fa-solid fa-bag-shopping';
       document.getElementById('spEmptyTitle').textContent = filtered
@@ -679,27 +786,43 @@
       return;
     }
     empty.style.display = 'none';
+    countBadge.textContent = list.length + ' sản phẩm';
+    countBadge.style.display = 'inline-block';
+
     list.forEach(function(p) {
       var card = document.createElement('div');
-      card.className = 'dv-card';
+      card.className = 'sp-card';
       card.onclick = function(){ openProductDetail(p.productId); };
+
       var img = p.image ? (ctxPath + p.image) : '';
       var stock = stockLabel(p.stockStatus);
-      var distanceHtml = (p.distanceKm != null) ? ('<span><i class="fa-solid fa-route"></i> ' + p.distanceKm + ' km</span>') : '';
+      var badgeCls = stockBadgeCls(p.stockStatus);
+      var isOut = p.stockStatus === 'HET_HANG';
+
+      var imgInner = img
+        ? '<img src="' + img + '" alt="' + escapeHtml(p.name) + '" loading="lazy">'
+        : '<div class="sp-img-placeholder"><i class="fa-solid fa-shirt"></i><span>Chưa có ảnh</span></div>';
+
+      var priceHtml = '<span class="sp-price">' + fmtMoney(p.price) + '</span>'
+        + (p.unit ? '<span class="sp-price-unit">/' + escapeHtml(p.unit) + '</span>' : '');
+
+      var btnHtml = '<button class="sp-buy-btn" ' + (isOut ? 'disabled' : '') + '>'
+        + (isOut ? 'Hết hàng' : 'Xem chi tiết') + '</button>';
+
       card.innerHTML =
-        '<div class="dv-card-img">' + (img ? '<img src="' + img + '" alt="">' : '') +
-          '<span class="dv-status-badge ' + stock.cls + '">' + stock.text + '</span></div>' +
-        '<div class="dv-card-body">' +
-          '<h3>' + escapeHtml(p.name) + '</h3>' +
-          '<p class="dv-card-facility"><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(p.coSoName) + '</p>' +
-          '<div class="dv-card-meta">' +
-            '<span>' + escapeHtml(p.category || '') + '</span>' +
-            distanceHtml +
-          '</div>' +
-          '<div class="dv-card-meta" style="margin-top:6px;">' +
-            '<span class="dv-price">' + fmtMoney(p.price) + (p.unit ? ('/' + escapeHtml(p.unit)) : '') + '</span>' +
-          '</div>' +
-        '</div>';
+        '<div class="sp-img-wrap">' + imgInner
+          + '<span class="sp-stock-badge ' + badgeCls + '">' + stock.text + '</span>'
+        + '</div>'
+        + '<div class="sp-card-body">'
+          + '<p class="sp-card-name">' + escapeHtml(p.name) + '</p>'
+          + (p.category ? '<p class="sp-card-cat">' + escapeHtml(p.category) + '</p>' : '')
+          + '<p class="sp-card-loc"><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(p.coSoName) + '</p>'
+          + '<div class="sp-card-footer">'
+            + '<div>' + priceHtml + '</div>'
+            + btnHtml
+          + '</div>'
+        + '</div>';
+
       grid.appendChild(card);
     });
   }

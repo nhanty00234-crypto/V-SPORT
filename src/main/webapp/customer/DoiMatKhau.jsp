@@ -13,6 +13,7 @@
             background-color: var(--background);
             padding-bottom: 60px;
             animation: accFadeIn 0.25s ease-out;
+            min-height: calc(100vh - 200px);
         }
         @keyframes accFadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -192,13 +193,16 @@
         .acc-nav-item.danger { color: #dc2626; }
 
         /* Main Content Card */
+        .acc-main-panel { min-width: 0; width: 100%; }
         .acc-content-card {
             background: #ffffff;
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 28px;
             box-shadow: var(--shadow-small);
-            max-width: 680px;
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 760px;
         }
 
         /* Page Header */
@@ -393,11 +397,11 @@
 
                 <div id="cpAlert" class="cp-alert" role="alert"></div>
 
-                <form id="changePasswordForm">
+                <div id="changePasswordForm">
                     <div class="cp-field">
                         <label class="cp-label">Mật khẩu hiện tại <span class="required">*</span></label>
                         <div class="cp-input-wrap">
-                            <input type="password" id="currentPassword" name="currentPassword" class="cp-input" required autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại" />
+                            <input type="text" id="currentPassword" class="cp-input" autocomplete="off" placeholder="Nhập mật khẩu hiện tại" style="-webkit-text-security:disc;font-family:text-security-disc,sans-serif;" />
                             <button type="button" class="cp-eye-btn" onclick="togglePass('currentPassword', this)" aria-label="Hiện/ẩn mật khẩu">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -407,7 +411,7 @@
                     <div class="cp-field">
                         <label class="cp-label">Mật khẩu mới <span class="required">*</span></label>
                         <div class="cp-input-wrap">
-                            <input type="password" id="newPassword" name="newPassword" class="cp-input" required autocomplete="new-password" placeholder="Tối thiểu 8 ký tự (chữ hoa, chữ thường, số, ký tự đặc biệt)" />
+                            <input type="text" id="newPassword" class="cp-input" autocomplete="off" placeholder="Tối thiểu 8 ký tự (chữ hoa, chữ thường, số, ký tự đặc biệt)" style="-webkit-text-security:disc;font-family:text-security-disc,sans-serif;" />
                             <button type="button" class="cp-eye-btn" onclick="togglePass('newPassword', this)" aria-label="Hiện/ẩn mật khẩu">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -417,7 +421,7 @@
                     <div class="cp-field">
                         <label class="cp-label">Xác nhận mật khẩu mới <span class="required">*</span></label>
                         <div class="cp-input-wrap">
-                            <input type="password" id="confirmPassword" name="confirmPassword" class="cp-input" required autocomplete="new-password" placeholder="Nhập lại mật khẩu mới" />
+                            <input type="text" id="confirmPassword" class="cp-input" autocomplete="off" placeholder="Nhập lại mật khẩu mới" style="-webkit-text-security:disc;font-family:text-security-disc,sans-serif;" />
                             <button type="button" class="cp-eye-btn" onclick="togglePass('confirmPassword', this)" aria-label="Hiện/ẩn mật khẩu">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -433,11 +437,11 @@
 
                     <div class="cp-action-bar">
                         <a href="${ctx}/customer/tai-khoan" class="cp-btn-cancel">Hủy</a>
-                        <button type="submit" id="cpSaveBtn" class="cp-btn-save">
+                        <button type="button" id="cpSaveBtn" class="cp-btn-save" onclick="submitChangePassword()">
                             <i class="fas fa-check-circle"></i> Cập nhật mật khẩu
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </main>
     </div>
@@ -449,20 +453,20 @@
 function togglePass(inputId, btn) {
     var input = document.getElementById(inputId);
     var icon = btn.querySelector('i');
-    if (input.type === 'password') {
-        input.type = 'text';
+    var isHidden = input.style.webkitTextSecurity === 'disc' || input.style.webkitTextSecurity === '';
+    if (isHidden || input.style.webkitTextSecurity !== 'none') {
+        input.style.webkitTextSecurity = 'none';
         icon.className = 'fas fa-eye-slash';
     } else {
-        input.type = 'password';
+        input.style.webkitTextSecurity = 'disc';
         icon.className = 'fas fa-eye';
     }
 }
 
-document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+function submitChangePassword() {
     var btn = document.getElementById('cpSaveBtn');
     var alertEl = document.getElementById('cpAlert');
-    
+
     var curPass = document.getElementById('currentPassword').value.trim();
     var newPass = document.getElementById('newPassword').value.trim();
     var confPass = document.getElementById('confirmPassword').value.trim();
@@ -501,7 +505,9 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
         if (data.success) {
             alertEl.className = 'cp-alert success';
             alertEl.textContent = data.message || 'Đổi mật khẩu thành công!';
-            document.getElementById('changePasswordForm').reset();
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
         } else {
             alertEl.className = 'cp-alert danger';
             alertEl.textContent = data.message || 'Mật khẩu hiện tại không đúng hoặc không đủ độ mạnh.';
@@ -513,7 +519,7 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
         alertEl.className = 'cp-alert danger';
         alertEl.textContent = 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.';
     });
-});
+}
 </script>
 </body>
 </html>

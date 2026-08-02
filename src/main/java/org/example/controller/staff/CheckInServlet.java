@@ -316,7 +316,7 @@ public class CheckInServlet extends HttpServlet {
                             );
                             // Đổi thành effective hourly rate để checkInKhachVangLai có thể tính lại đúng tổng
                             double hours = (double) duration / 60.0;
-                            donGia = hours > 0 ? priceResult.totalAmount().doubleValue() / hours : ls.getGiaKhongDen();
+                            donGia = hours > 0 ? priceResult.totalCourtAmount().doubleValue() / hours : ls.getGiaKhongDen();
                         } catch (Exception pricingEx) {
                             logger.warn("Không thể tính giá theo CourtPricingService, dùng giá tại thời điểm check-in: {}", pricingEx.getMessage());
                             java.time.LocalTime nowTime = java.time.LocalTime.now();

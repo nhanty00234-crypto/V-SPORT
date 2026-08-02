@@ -162,7 +162,7 @@
             <i class="fas fa-star"></i>
         </div>
         <div>
-            <div class="acc-stat-num">${account.diemUyTin != null ? account.diemUyTin : 80}</div>
+            <div class="acc-stat-num">${account.diemUyTin}/100</div>
             <div class="acc-stat-lbl">Điểm uy tín</div>
         </div>
     </a>

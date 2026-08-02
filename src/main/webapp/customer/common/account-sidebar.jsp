@@ -12,6 +12,9 @@
         <a href="${ctx}/customer/ho-so" class="acc-nav-item ${activePage eq 'profile' ? 'active' : ''}">
             <i class="fas fa-user-cog"></i> Cập nhật hồ sơ
         </a>
+        <a href="${ctx}/customer/lich-su-diem-uy-tin" class="acc-nav-item ${activePage eq 'reputation' ? 'active' : ''}">
+            <i class="fas fa-star"></i> Điểm uy tín
+        </a>
         <a href="${ctx}/customer/doi-mat-khau" class="acc-nav-item ${activePage eq 'password' ? 'active' : ''}">
             <i class="fas fa-lock"></i> Đổi mật khẩu
         </a>

@@ -211,15 +211,15 @@
         }
 
         /* Main Panel */
-        .acc-main-panel {
-            min-width: 0;
-        }
+        .acc-main-panel { min-width: 0; width: 100%; }
         .acc-content-card {
             background: #ffffff;
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 28px;
             box-shadow: var(--shadow-small);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* Stats Grid */

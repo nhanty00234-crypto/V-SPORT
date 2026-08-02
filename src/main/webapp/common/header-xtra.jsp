@@ -1,9 +1,28 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="org.example.model.TaiKhoan" %>
+<style>
+/* Active nav state — high-specificity override to ensure it wins on all pages */
+.vs-header .vs-nav__link.is-active,
+.vs-header .vs-nav__link.is-active:visited {
+  color: #287A58 !important;
+  font-weight: 700;
+}
+.vs-header .vs-nav__link.is-active::after {
+  transform: scaleX(1) !important;
+  background: #287A58;
+}
+.vs-header .vs-nav__link:hover {
+  color: #287A58 !important;
+}
+.vs-header .vs-nav__link:hover::after {
+  transform: scaleX(1) !important;
+}
+</style>
 <%
     String vsNavPath = request.getRequestURI().substring(request.getContextPath().length());
     boolean vsNavBanDo   = vsNavPath.startsWith("/customer/BanDo.jsp") || vsNavPath.startsWith("/customer/ban-do");
-    boolean vsNavDatSan  = vsNavPath.startsWith("/customer/dat-san")   || vsNavPath.startsWith("/customer/tim-kiem");
+    boolean vsNavDatSan  = vsNavPath.startsWith("/customer/dat-san") || vsNavPath.startsWith("/customer/tim-kiem")
+                        || vsNavPath.startsWith("/customer/chi-tiet-san") || vsNavPath.startsWith("/customer/lich-su-dat-san");
     boolean vsNavUuDai   = vsNavPath.startsWith("/customer/uu-dai");
     boolean vsNavGhepKeo = vsNavPath.startsWith("/customer/ghep-keo");
     boolean vsNavDichVu  = vsNavPath.startsWith("/customer/dich-vu");
@@ -126,9 +145,20 @@
           <i class="fas fa-chevron-down vs-user-chevron" id="vsUserChevron"></i>
         </button>
         <div class="vs-user-dropdown" id="vsUserDropdown" role="menu" hidden>
+          <!-- Account header -->
+          <div class="vs-user-dd-header">
+            <div class="vs-user-dd-avatar" id="vsUserDdAvatar"><i class="fas fa-user"></i></div>
+            <div class="vs-user-dd-info">
+              <div class="vs-user-dd-name"><%= user.getFullName() %></div>
+              <div class="vs-user-dd-email"><%= user.getEmail() != null ? user.getEmail() : "" %></div>
+            </div>
+          </div>
+          <div class="vs-user-dropdown-divider"></div>
+          <!-- Account management -->
           <a href="${pageContext.request.contextPath}/customer/tai-khoan" role="menuitem">
-            <i class="fas fa-user"></i>Tài khoản
+            <i class="fas fa-id-card"></i>Thông tin cá nhân
           </a>
+          <div class="vs-user-dropdown-divider"></div>
           <a href="${pageContext.request.contextPath}/customer/lich-su-dat-san" role="menuitem">
             <i class="fas fa-history"></i>Lịch sử đặt sân
           </a>
@@ -136,7 +166,7 @@
             <i class="fas fa-hand-holding-usd"></i>Yêu cầu hoàn tiền
           </a>
           <div class="vs-user-dropdown-divider"></div>
-          <a href="${pageContext.request.contextPath}/logout" role="menuitem">
+          <a href="${pageContext.request.contextPath}/logout" role="menuitem" class="vs-user-dd-logout">
             <i class="fas fa-sign-out-alt"></i>Đăng xuất
           </a>
         </div>
@@ -148,18 +178,13 @@
       <a href="<%= vsAuthHref %>" class="vs-hdr-icon" id="authBtn" aria-label="Đăng nhập">
         <i class="far fa-user"></i>
       </a>
-      <a href="<%= vsAuthHref %>" class="vs-header__cta">
-        <i class="fas fa-sign-in-alt"></i>Đăng nhập
-      </a>
 
       <% } %>
 
-      <!-- Book CTA (logged-in users) -->
-      <% if (user != null) { %>
+      <!-- Book CTA — always shown -->
       <a href="${pageContext.request.contextPath}/customer/dat-san" class="vs-header__cta">
         <i class="fas fa-calendar-plus"></i>Đặt sân
       </a>
-      <% } %>
 
       <!-- Hamburger (mobile) -->
       <button type="button" class="vs-hamburger" id="vsMobileMenuBtn"
@@ -299,11 +324,22 @@
 .vs-user-name{font-size:13.5px;font-weight:700;color:var(--vs-text,#17211E);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .vs-user-chevron{font-size:10px;color:var(--vs-muted,#6E746F);transition:transform .15s;}
 .vs-user-btn[aria-expanded="true"] .vs-user-chevron{transform:rotate(180deg);}
-.vs-user-dropdown{position:absolute;top:calc(100% + 10px);right:0;z-index:2000;width:220px;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(7,26,47,.18),0 2px 8px rgba(7,26,47,.1);border:1px solid #DCE5EF;padding:8px;display:flex;flex-direction:column;animation:vsNotifFadeIn .18s ease;}
+.vs-user-dropdown{position:absolute;top:calc(100% + 10px);right:0;z-index:2000;width:260px;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(7,26,47,.18),0 2px 8px rgba(7,26,47,.1);border:1px solid #DCE5EF;padding:8px;display:flex;flex-direction:column;animation:vsNotifFadeIn .18s ease;}
 .vs-user-dropdown[hidden]{display:none!important;}
-.vs-user-dropdown a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:#122d40;text-decoration:none;transition:background .12s;}
+.vs-user-dd-header{display:flex;align-items:center;gap:10px;padding:10px 8px 8px;}
+.vs-user-dd-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#287A58,#3db57a);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden;}
+.vs-user-dd-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.vs-user-dd-info{min-width:0;flex:1;}
+.vs-user-dd-name{font-size:13.5px;font-weight:700;color:#122d40;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vs-user-dd-email{font-size:11.5px;color:#829AB1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vs-user-dd-section-label{font-size:10.5px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;padding:4px 12px 2px;}
+.vs-user-dropdown a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:#122d40;text-decoration:none;transition:background .12s;position:relative;}
 .vs-user-dropdown a:hover{background:#F1F5F9;}
-.vs-user-dropdown a i{width:16px;color:#287A58;font-size:13px;}
+.vs-user-dropdown a i{width:16px;color:#287A58;font-size:13px;flex-shrink:0;}
+.vs-user-dd-logout{color:#E5484D!important;}
+.vs-user-dd-logout i{color:#E5484D!important;}
+.vs-user-dd-logout:hover{background:#FFF0F0!important;}
+.vs-user-dd-notif-dot{width:7px;height:7px;border-radius:50%;background:#E5484D;position:absolute;right:12px;top:50%;transform:translateY(-50%);}
 .vs-user-dropdown-divider{height:1px;background:#EEF2F6;margin:6px 4px;}
 @media (max-width:480px){.vs-notif-dropdown{right:-60px;width:calc(100vw - 20px);}}
 </style>
@@ -368,6 +404,10 @@ document.addEventListener("DOMContentLoaded", function() {
     var searchClose   = document.getElementById('vsMobileSearchClose');
     if(searchBtn && searchOverlay){
         searchBtn.addEventListener('click', function(){
+            if(window.innerWidth >= 768){
+                window.location.href = '${pageContext.request.contextPath}/customer/tim-kiem';
+                return;
+            }
             searchOverlay.classList.add('is-open');
             document.body.classList.add('vs-scroll-locked');
             var inp = searchOverlay.querySelector('input[name="q"]');
@@ -528,5 +568,30 @@ document.addEventListener("DOMContentLoaded", function() {
     btn.addEventListener('click',function(e){ e.stopPropagation(); if(dropdown.hidden) open(); else close(); });
     document.addEventListener('click',function(e){ if(!dropdown.hidden&&!dropdown.contains(e.target)&&e.target!==btn) close(); });
     document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+
+    /* Sync unread dot with notification badge */
+    var notifDot = document.getElementById('vsUserDdNotifDot');
+    var notifBadge = document.getElementById('vsNotifBadge');
+    if(notifDot && notifBadge){
+        var obs = new MutationObserver(function(){
+            notifDot.style.display = notifBadge.style.opacity==='0'||notifBadge.style.display==='none' ? 'none' : 'block';
+        });
+        obs.observe(notifBadge, {attributes:true,attributeFilter:['style']});
+    }
+
+    /* Load avatar into dropdown header */
+    var ddAvatar = document.getElementById('vsUserDdAvatar');
+    var hdrAvatar = document.getElementById('vsUserAvatar');
+    if(ddAvatar){
+        fetch('${pageContext.request.contextPath}/customer/api/profile-avatar')
+            .then(function(r){return r.ok?r.json():null;})
+            .then(function(d){
+                if(!d||!d.avatarUrl) return;
+                var img=document.createElement('img');
+                img.src=d.avatarUrl; img.alt='Avatar';
+                ddAvatar.innerHTML=''; ddAvatar.appendChild(img);
+                if(hdrAvatar){ hdrAvatar.innerHTML=''; var img2=img.cloneNode(); hdrAvatar.appendChild(img2); }
+            }).catch(function(){});
+    }
 })();
 </script>

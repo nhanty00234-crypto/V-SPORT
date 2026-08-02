@@ -49,6 +49,9 @@ public class LichSuDiemUyTinServlet extends HttpServlet {
         String reputationLabel = ReputationLabel.of(currentScore);
         boolean canMatchmake = currentScore >= Constants.REPUTATION_MATCHMAKING_THRESHOLD;
 
+        // Sync session so banner/other pages always reflect latest DB data
+        session.setAttribute("user", freshAccount);
+
         req.setAttribute("account", freshAccount);
         req.setAttribute("historyList", historyList);
         req.setAttribute("currentScore", currentScore);

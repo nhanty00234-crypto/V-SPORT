@@ -15,7 +15,7 @@
             <div class="acc-user-info">
                 <h1 class="acc-user-name">
                     ${fn:escapeXml(not empty accUser.fullName ? accUser.fullName : accUser.username)}
-                    <span class="acc-rep-chip"><i class="fas fa-shield-alt"></i> Uy tín: ${accUser.diemUyTin != null ? accUser.diemUyTin : 80}/100</span>
+                    <span class="acc-rep-chip"><i class="fas fa-shield-alt"></i> Uy tín: ${accUser.diemUyTin}/100</span>
                 </h1>
                 <div class="acc-user-meta">
                     <span><i class="fas fa-envelope"></i> ${not empty accUser.email ? fn:escapeXml(accUser.email) : 'Chưa cập nhật email'}</span>

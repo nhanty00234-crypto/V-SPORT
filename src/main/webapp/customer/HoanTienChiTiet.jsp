@@ -470,5 +470,7 @@
     document.addEventListener('DOMContentLoaded', onBankFieldChange);
 </script>
 
+<jsp:include page="/common/footer.jsp" />
+
 </body>
 </html>
