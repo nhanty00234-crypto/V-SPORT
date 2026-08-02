@@ -43,6 +43,8 @@ public final class Constants {
     
     // Ngưỡng Ghép kèo
     public static final int REPUTATION_MATCHMAKING_THRESHOLD = 60;
+    // Ngưỡng khóa đặt sân: tài khoản có điểm uy tín dưới mức này không được đặt sân
+    public static final int REPUTATION_BOOKING_BLOCK_THRESHOLD = 20;
 
     // Ngưỡng hiển thị nhãn uy tín:
     // - 80–100: "Uy tín tốt"
