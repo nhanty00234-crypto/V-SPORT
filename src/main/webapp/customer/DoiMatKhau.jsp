@@ -485,7 +485,7 @@ function submitChangePassword() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...';
     alertEl.className = 'cp-alert';
-    alertEl.style.display = 'none';
+    alertEl.style.display = '';
 
     var params = new URLSearchParams();
     params.append('action', 'changePassword');
@@ -502,6 +502,7 @@ function submitChangePassword() {
     .then(function(data) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check-circle"></i> Cập nhật mật khẩu';
+        alertEl.style.display = '';
         if (data.success) {
             alertEl.className = 'cp-alert success';
             alertEl.textContent = data.message || 'Đổi mật khẩu thành công!';
@@ -516,6 +517,7 @@ function submitChangePassword() {
     .catch(function() {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check-circle"></i> Cập nhật mật khẩu';
+        alertEl.style.display = '';
         alertEl.className = 'cp-alert danger';
         alertEl.textContent = 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.';
     });

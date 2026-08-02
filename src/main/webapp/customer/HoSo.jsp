@@ -434,26 +434,26 @@
                             <label class="pf-label">Trình độ chơi</label>
                             <select id="pfLevel" class="pf-select">
                                 <option value="">Chọn trình độ</option>
-                                <option value="Mới chơi" ${profileExtra.levelSkill eq 'Mới chơi' ? 'selected' : ''}>Mới chơi</option>
-                                <option value="Cơ bản" ${profileExtra.levelSkill eq 'Cơ bản' ? 'selected' : ''}>Cơ bản</option>
-                                <option value="Trung bình" ${profileExtra.levelSkill eq 'Trung bình' ? 'selected' : ''}>Trung bình</option>
-                                <option value="Khá" ${profileExtra.levelSkill eq 'Khá' ? 'selected' : ''}>Khá</option>
-                                <option value="Nâng cao" ${profileExtra.levelSkill eq 'Nâng cao' ? 'selected' : ''}>Nâng cao</option>
+                                <option value="Mới chơi" ${profileExtra.skillLevel eq 'Mới chơi' ? 'selected' : ''}>Mới chơi</option>
+                                <option value="Cơ bản" ${profileExtra.skillLevel eq 'Cơ bản' ? 'selected' : ''}>Cơ bản</option>
+                                <option value="Trung bình" ${profileExtra.skillLevel eq 'Trung bình' ? 'selected' : ''}>Trung bình</option>
+                                <option value="Khá" ${profileExtra.skillLevel eq 'Khá' ? 'selected' : ''}>Khá</option>
+                                <option value="Nâng cao" ${profileExtra.skillLevel eq 'Nâng cao' ? 'selected' : ''}>Nâng cao</option>
                             </select>
                         </div>
                         <div class="pf-field">
                             <label class="pf-label">Tần suất chơi</label>
                             <select id="pfFrequency" class="pf-select">
                                 <option value="">Chọn tần suất</option>
-                                <option value="1 lần/tuần" ${profileExtra.frequency eq '1 lần/tuần' ? 'selected' : ''}>1 lần/tuần</option>
-                                <option value="2-3 lần/tuần" ${profileExtra.frequency eq '2-3 lần/tuần' ? 'selected' : ''}>2-3 lần/tuần</option>
-                                <option value="4+ lần/tuần" ${profileExtra.frequency eq '4+ lần/tuần' ? 'selected' : ''}>4+ lần/tuần</option>
-                                <option value="Không cố định" ${profileExtra.frequency eq 'Không cố định' ? 'selected' : ''}>Không cố định</option>
+                                <option value="1 lần/tuần" ${profileExtra.playFrequency eq '1 lần/tuần' ? 'selected' : ''}>1 lần/tuần</option>
+                                <option value="2-3 lần/tuần" ${profileExtra.playFrequency eq '2-3 lần/tuần' ? 'selected' : ''}>2-3 lần/tuần</option>
+                                <option value="4+ lần/tuần" ${profileExtra.playFrequency eq '4+ lần/tuần' ? 'selected' : ''}>4+ lần/tuần</option>
+                                <option value="Không cố định" ${profileExtra.playFrequency eq 'Không cố định' ? 'selected' : ''}>Không cố định</option>
                             </select>
                         </div>
                         <div class="pf-field">
                             <label class="pf-label">Khu vực hay chơi</label>
-                            <input type="text" id="pfLocation" class="pf-input" value="${fn:escapeXml(profileExtra.favoriteLocation)}" placeholder="Ví dụ: Quận 1, Bình Thạnh..." />
+                            <input type="text" id="pfLocation" class="pf-input" value="${fn:escapeXml(profileExtra.preferredLocation)}" placeholder="Ví dụ: Quận 1, Bình Thạnh..." />
                         </div>
                     </div>
 
@@ -470,7 +470,7 @@
                         </div>
                         <div class="pf-field pf-field-full">
                             <label class="pf-label">Giới thiệu ngắn</label>
-                            <textarea id="pfNote" class="pf-textarea" rows="3" placeholder="Chia sẻ đôi chút về phong cách thi đấu hoặc kinh nghiệm thể thao của bạn...">${fn:escapeXml(profileExtra.personalNote)}</textarea>
+                            <textarea id="pfNote" class="pf-textarea" rows="3" placeholder="Chia sẻ đôi chút về phong cách thi đấu hoặc kinh nghiệm thể thao của bạn...">${fn:escapeXml(profileExtra.specialNote)}</textarea>
                         </div>
                     </div>
 
