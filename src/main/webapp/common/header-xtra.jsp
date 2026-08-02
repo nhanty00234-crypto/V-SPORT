@@ -7,10 +7,10 @@
     boolean vsNavUuDai   = vsNavPath.startsWith("/customer/uu-dai");
     boolean vsNavGhepKeo = vsNavPath.startsWith("/customer/ghep-keo");
     boolean vsNavDichVu  = vsNavPath.startsWith("/customer/dich-vu");
+    boolean vsNavHome    = vsNavPath.equals("") || vsNavPath.equals("/") || vsNavPath.startsWith("/index.jsp");
     TaiKhoan user = (TaiKhoan) session.getAttribute("user");
     String vsAuthHref;
-    boolean vsIsHome = request.getRequestURI().equals(request.getContextPath() + "/index.jsp")
-                    || request.getRequestURI().equals(request.getContextPath() + "/");
+    boolean vsIsHome = vsNavHome;
     if (vsIsHome) {
         vsAuthHref = "#auth";
     } else {
@@ -33,6 +33,12 @@
     <!-- Desktop nav -->
     <nav class="vs-header__nav" aria-label="Điều hướng chính">
       <ul class="vs-nav__list">
+        <li class="vs-nav__item">
+          <a href="${pageContext.request.contextPath}/"
+             class="vs-nav__link <%= vsNavHome ? "is-active" : "" %>">
+            <i class="fas fa-home" style="font-size:13px;"></i>Trang chủ
+          </a>
+        </li>
         <li class="vs-nav__item">
           <a href="${pageContext.request.contextPath}/customer/BanDo.jsp"
              class="vs-nav__link <%= vsNavBanDo ? "is-active" : "" %>">

@@ -4,695 +4,900 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏸</text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏟️</text></svg>">
 <title>V-Sport — Nâng Tầm Quản Lý Cơ Sở Thể Thao</title>
-<meta name="description" content="Hệ thống quản lý thông minh giúp tối ưu lịch đặt sân, quản lý hội viên và tăng doanh thu hiệu quả với công nghệ AI tiên tiến.">
-<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Hệ thống quản lý thông minh giúp tối ưu lịch đặt sân, quản lý hội viên và tăng doanh thu hiệu quả.">
+<meta name="theme-color" content="#ea580c">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <style>
+/* =====================================================
+   V-SPORT OWNER LANDING — Orange Theme
+   Inspired by ThanhTruc_Project / Nhiệt Đới Xanh design
+   ===================================================== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
 :root{
-  --ink:#0f172a;
-  --ink-2:#334155;
-  --muted:#64748b;
-  --paper:#ffffff;
-  --paper-2:#f8fafc;
-  --paper-3:#f1f5f9;
-  --line:#e2e8f0;
-  --accent:#7c3aed;
-  --accent-2:#9333ea;
-  --accent-soft:#f5f3ff;
-  --sans:"Be Vietnam Pro",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --maxw:1280px;
-  --pad:clamp(20px,5vw,64px);
+  --cream:#FDFBF7;
+  --cream-dark:#F5F0E8;
+  --cream-warm:#FFF3E8;
+  --orange:#ea580c;
+  --orange-dark:#c2410c;
+  --orange-light:#f97316;
+  --accent:#fb923c;
+  --accent-light:#fdba74;
+  --white:#FFFFFF;
+  --text-dark:#1c0f07;
+  --text-body:#4a3520;
+  --text-muted:#78614a;
+  --border:#E8E0D0;
+  --font:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --section-py:96px;
+  --max-w:1200px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --transition:all 0.4s var(--ease);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:var(--sans);
-  background:var(--paper);
-  color:var(--ink);
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
-img{display:block;max-width:100%;height:auto}
-a{color:inherit;text-decoration:none}
-::selection{background:var(--accent);color:#fff}
-.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad)}
-h1,h2,h3{font-weight:800;letter-spacing:-.02em;line-height:1.1}
-.eyebrow{font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
-.lead{font-size:clamp(1rem,1.3vw,1.15rem);color:var(--ink-2);font-weight:400}
-.h2{font-size:clamp(1.8rem,3.6vw,2.7rem)}
-.card-shadow{box-shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.10)}
 
-/* ===== NAV ===== */
-header.nav{
-  position:sticky;top:0;left:0;width:100%;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px var(--pad);background:rgba(255,255,255,.85);backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line);
-}
-.brand{font-weight:800;font-size:1.3rem;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-.brand span{color:var(--accent)}
-.nav-links{display:flex;gap:28px;align-items:center}
-.nav-links a:not(.btn){font-size:.88rem;font-weight:600;color:var(--ink-2);transition:color .2s}
-.nav-links a:not(.btn):hover{color:var(--accent)}
-@media(max-width:820px){.nav-links a:not(.btn):not(.btn-outline){display:none}}
-.btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;font-weight:700;font-size:.9rem;
-  padding:11px 20px;transition:all .2s;border:1px solid transparent;cursor:pointer}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-2);transform:translateY(-1px)}
-.btn-outline{border-color:var(--line);color:var(--ink);background:#fff}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font);color:var(--text-body);background:var(--cream);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4,h5,h6{font-family:var(--font);color:var(--text-dark);line-height:1.15;font-weight:700}
+a{text-decoration:none;color:inherit;transition:var(--transition)}
+img{max-width:100%;display:block}
+ul{list-style:none}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+.section{padding:var(--section-py) 0;position:relative}
 
-/* ===== HERO (full-width photo thesis) ===== */
-.hero{position:relative;min-height:min(78vh,720px);display:flex;align-items:flex-end;overflow:hidden;
-  background:var(--ink)}
-.hero-media{position:absolute;inset:0}
-.hero-media img{width:100%;height:100%;object-fit:cover;object-position:65% 50%}
-.hero-media::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(0deg,rgba(15,23,42,.92) 0%,rgba(15,23,42,.55) 46%,rgba(15,23,42,.22) 72%,rgba(15,23,42,.08) 100%)}
-.hero-content{position:relative;z-index:2;color:#fff;padding:clamp(40px,8vh,88px) 0 clamp(36px,6vh,56px)}
-.hero-content .eyebrow{color:#c4b5fd}
-.hero h1{font-size:clamp(2.1rem,4.8vw,3.5rem);margin-top:14px;max-width:17ch;color:#fff}
-.hero .lead{margin-top:18px;max-width:54ch;color:#e2e8f0}
-.hero-benefits{margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 28px}
-.hero-benefits div{display:flex;align-items:center;gap:9px;font-size:.88rem;color:#f1f5f9;font-weight:500}
-.hero-benefits .material-symbols-outlined{color:#c4b5fd;font-size:19px}
-.hero-actions{margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:18px}
-.hero-stats{display:flex;gap:clamp(20px,4vw,40px)}
-.hero-stats div{text-align:left}
-.hero-stats .v{font-size:1.4rem;font-weight:800;color:#fff;line-height:1}
-.hero-stats .k{font-size:.7rem;color:#cbd5e1;font-weight:600;margin-top:3px}
+.section-label{display:inline-flex;align-items:center;gap:10px;font-size:0.72rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:16px}
+.section-label::before{content:'';width:36px;height:2px;background:var(--accent)}
+.section-title{font-size:clamp(2rem,5vw,3.2rem);margin-bottom:18px;color:var(--text-dark);font-weight:800}
+.section-subtitle{font-size:1.1rem;color:var(--text-muted);max-width:560px;line-height:1.8}
 
-/* ===== REGISTRATION (own section, below hero) ===== */
-.registration{background:var(--paper-2);padding:clamp(48px,7vh,80px) 0}
-.registration-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(32px,5vw,64px);align-items:start}
-@media(max-width:980px){.registration-grid{grid-template-columns:1fr}}
-.registration-intro h2{margin-top:10px}
-.registration-intro .lead{margin-top:14px;max-width:44ch}
-.registration-steps-mini{margin-top:32px;display:flex;flex-direction:column;gap:18px}
-.registration-steps-mini div{display:flex;gap:14px;align-items:flex-start}
-.registration-steps-mini .n{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);
-  font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.registration-steps-mini h4{font-size:.92rem;font-weight:700;color:var(--ink)}
-.registration-steps-mini p{font-size:.82rem;color:var(--muted);margin-top:2px}
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(50px);transition:opacity 0.9s var(--ease),transform 0.9s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}.reveal-delay-4{transition-delay:0.4s}
+.reveal-delay-5{transition-delay:0.5s}
 
-/* ===== REGISTRATION CARD ===== */
-.reg-card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:clamp(22px,3vw,32px);
-  position:relative}
-.field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:7px}
-.field input,.field textarea,.field select{
-  width:100%;padding:12px 15px;border:1px solid var(--line);border-radius:11px;font-size:.92rem;
-  font-family:var(--sans);color:var(--ink);background:#fff;transition:all .15s;
+/* PARALLAX SPORTS */
+.parallax-sport{position:fixed;font-size:2.5rem;opacity:0.07;pointer-events:none;z-index:0;will-change:transform}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:20px 0;transition:var(--transition);background:transparent}
+.navbar.scrolled{background:rgba(253,251,247,0.88);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);padding:12px 0;box-shadow:0 1px 30px rgba(0,0,0,0.07);border-bottom:1px solid rgba(234,88,12,0.1)}
+.navbar .container{display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{display:flex;align-items:center;gap:12px}
+.navbar-logo{width:44px;height:44px;background:linear-gradient(135deg,var(--orange),var(--orange-light));border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(234,88,12,0.3)}
+.navbar-logo svg{width:24px;height:24px;fill:var(--white)}
+.navbar-name{font-size:1.25rem;font-weight:800;color:var(--text-dark);letter-spacing:-0.3px}
+.navbar-name span{color:var(--orange-light)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{font-size:0.88rem;font-weight:500;color:var(--text-body);padding:8px 18px;border-radius:50px}
+.nav-links a:hover{color:var(--orange);background:rgba(234,88,12,0.06)}
+.nav-links a.active{color:var(--orange);background:var(--cream-warm);font-weight:600}
+.nav-cta{font-weight:600!important;color:var(--white)!important;background:var(--orange)!important;padding:10px 26px!important;border-radius:50px!important;box-shadow:0 4px 16px rgba(234,88,12,0.3)}
+.nav-cta:hover{background:var(--orange-dark)!important;transform:translateY(-2px);box-shadow:0 8px 24px rgba(234,88,12,0.4)!important}
+.nav-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none}
+.nav-toggle span{width:24px;height:2px;background:var(--text-dark);border-radius:2px;transition:var(--transition)}
+@media(max-width:768px){
+  .nav-toggle{display:flex}
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:4px;background:var(--white);padding:16px 24px;border-top:1px solid var(--border);box-shadow:0 12px 30px rgba(0,0,0,0.08)}
+  .nav-links.active{display:flex}
+  .nav-links a{padding:12px 16px;border-radius:12px}
 }
-.field input::placeholder,.field textarea::placeholder{color:#94a3b8}
-.field input:focus,.field textarea:focus,.field select:focus{
-  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.12)
-}
-.step-dot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;font-size:.82rem;
-  font-weight:700;white-space:nowrap;transition:all .2s;background:var(--paper-3);color:var(--muted)}
-.step-dot.active{background:var(--accent);color:#fff}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-weight:700;font-size:0.95rem;padding:16px 36px;border-radius:50px;border:none;cursor:pointer;transition:var(--transition)}
+.btn-primary{background:var(--orange);color:var(--white);box-shadow:0 6px 24px rgba(234,88,12,0.35)}
+.btn-primary:hover{transform:translateY(-3px);background:var(--orange-dark);box-shadow:0 12px 36px rgba(234,88,12,0.45)}
+.btn-secondary{background:var(--white);color:var(--orange);border:2px solid var(--border)}
+.btn-secondary:hover{border-color:var(--orange);transform:translateY(-2px)}
+.btn-outline{border:1px solid var(--border);color:var(--text-dark);background:var(--white);border-radius:12px;padding:11px 20px;font-family:var(--font);font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-outline:hover{border-color:var(--orange);color:var(--orange)}
+.btn svg{width:18px;height:18px}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:var(--cream);padding-top:80px}
+.hero::before{content:'';position:absolute;top:-20%;right:-10%;width:700px;height:700px;background:radial-gradient(circle,rgba(251,146,60,0.12) 0%,transparent 70%);border-radius:50%;animation:floatBlob 14s ease-in-out infinite}
+.hero::after{content:'';position:absolute;bottom:-20%;left:-15%;width:600px;height:600px;background:radial-gradient(circle,rgba(234,88,12,0.06) 0%,transparent 70%);border-radius:50%;animation:floatBlob 18s ease-in-out infinite reverse}
+@keyframes floatBlob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-30px) scale(1.05)}66%{transform:translate(-20px,20px) scale(0.95)}}
+.hero .container{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:900px){.hero .container{grid-template-columns:1fr;gap:40px}}
+.hero-content{max-width:540px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(234,88,12,0.08);border:1px solid rgba(234,88,12,0.15);padding:8px 18px;border-radius:50px;font-size:0.78rem;font-weight:600;color:var(--orange);margin-bottom:28px;animation:fadeInDown 0.8s var(--ease) 0.2s both}
+.hero-badge svg{width:16px;height:16px;fill:var(--accent)}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.hero h1{font-size:clamp(2.8rem,6vw,4.5rem);color:var(--text-dark);margin-bottom:10px;line-height:1.05;font-weight:900;letter-spacing:-1px;animation:fadeInUp 0.8s var(--ease) 0.4s both}
+.hero h1 .highlight{background:linear-gradient(135deg,var(--orange),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-slogan{font-size:1.1rem;font-style:italic;color:var(--text-muted);margin-bottom:40px;font-weight:400;animation:fadeInUp 0.8s var(--ease) 0.6s both}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.hero-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;animation:fadeInUp 0.8s var(--ease) 0.8s both}
+.hero-visual{position:relative;display:flex;align-items:center;justify-content:center;animation:fadeInUp 1s var(--ease) 0.5s both;perspective:800px}
+.hero-3d-container{position:relative;width:100%;max-width:420px;aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.hero-3d-bg{position:absolute;inset:0;background:linear-gradient(160deg,var(--cream-warm) 0%,rgba(251,146,60,0.2) 50%,var(--cream-dark) 100%);border-radius:40% 60% 55% 45%/55% 45% 60% 40%;animation:morphBlob 12s ease-in-out infinite}
+@keyframes morphBlob{0%,100%{border-radius:40% 60% 55% 45%/55% 45% 60% 40%}25%{border-radius:55% 45% 40% 60%/40% 60% 45% 55%}50%{border-radius:45% 55% 60% 40%/60% 40% 55% 45%}75%{border-radius:60% 40% 45% 55%/45% 55% 40% 60%}}
+.hero-product-img{position:relative;z-index:2;width:82%;border-radius:22px;filter:drop-shadow(0 20px 40px rgba(234,88,12,0.25));animation:float3D 5s ease-in-out infinite;object-fit:cover;aspect-ratio:4/3}
+@keyframes float3D{0%,100%{transform:translateY(0) rotateY(0) rotateX(0)}25%{transform:translateY(-12px) rotateY(3deg) rotateX(2deg)}50%{transform:translateY(-20px) rotateY(0) rotateX(-2deg)}75%{transform:translateY(-8px) rotateY(-3deg) rotateX(1deg)}}
+.floating-sport{position:absolute;font-size:2rem;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.1));animation:floatAround 7s ease-in-out infinite;z-index:3}
+.sport-1{top:8%;left:5%;animation-delay:0s}.sport-2{top:5%;right:10%;animation-delay:1.2s}
+.sport-3{bottom:15%;left:8%;animation-delay:2.4s}.sport-4{bottom:8%;right:5%;animation-delay:3.6s}
+@keyframes floatAround{0%,100%{transform:translate(0,0) rotate(0) scale(1)}25%{transform:translate(8px,-14px) rotate(8deg) scale(1.1)}50%{transform:translate(-6px,-22px) rotate(-5deg) scale(1)}75%{transform:translate(12px,-8px) rotate(10deg) scale(1.05)}}
+
+/* STATS BAR */
+.stats-bar{background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:40px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-item{text-align:center}
+.stat-number{font-size:2.2rem;font-weight:900;color:var(--orange);line-height:1}
+.stat-label{font-size:0.85rem;color:var(--text-muted);margin-top:6px;font-weight:500}
+
+/* STORY */
+.story{background:var(--cream-dark);position:relative;overflow:hidden}
+.story::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(251,146,60,0.08) 0%,transparent 70%);border-radius:50%;animation:floatBlob 16s ease-in-out infinite}
+.story .container{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;position:relative;z-index:1}
+@media(max-width:900px){.story .container{grid-template-columns:1fr;gap:40px}}
+.story-visual{position:relative}
+.story-image-wrapper{width:100%;aspect-ratio:4/5;border-radius:30px;overflow:hidden;background:#fffbf5;display:flex;align-items:center;justify-content:center}
+.story-img{width:100%;height:100%;object-fit:cover}
+.story-stat{position:absolute;bottom:20px;right:-20px;background:var(--white);border-radius:16px;padding:16px 24px;box-shadow:0 8px 32px rgba(234,88,12,0.15);text-align:center}
+.story-stat-number{font-size:2rem;font-weight:900;color:var(--orange)}
+.story-stat-label{font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-top:2px}
+.story-highlights{display:flex;gap:20px;flex-wrap:wrap;margin-top:28px}
+.story-highlight-item{display:flex;align-items:center;gap:10px}
+.story-highlight-icon{font-size:1.4rem}
+.story-highlight-text{font-size:0.85rem;color:var(--text-body);font-weight:600;line-height:1.4}
+
+/* VALUES */
+.values{background:var(--white)}
+.values-header{max-width:640px;margin-bottom:clamp(32px,5vh,52px)}
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:768px){.values-grid{grid-template-columns:1fr}}
+.value-card{background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:32px;transition:var(--transition)}
+.value-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 16px 40px rgba(234,88,12,0.1)}
+.value-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--cream-warm),rgba(251,146,60,0.2));display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:20px}
+.value-card h3{font-size:1.05rem;margin-bottom:10px;color:var(--text-dark)}
+.value-card p{font-size:0.9rem;color:var(--text-muted);line-height:1.7}
+
+/* SPORTS SHOWCASE */
+.sports-section{background:var(--cream-dark)}
+.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:900px){.shop-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.shop-grid{grid-template-columns:1fr 1fr}}
+.shop-card{background:var(--white);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:var(--transition)}
+.shop-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(234,88,12,0.12);border-color:var(--accent)}
+.shop-card-media{aspect-ratio:1;background:linear-gradient(135deg,var(--cream-warm),rgba(251,146,60,0.15));display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.shop-card-body{padding:16px}
+.shop-card-name{font-weight:700;font-size:0.95rem;color:var(--text-dark);margin-bottom:4px}
+.shop-card-desc{font-size:0.8rem;color:var(--text-muted);line-height:1.5}
+
+/* REGISTRATION CHECKOUT SECTION */
+.checkout{background:linear-gradient(160deg,var(--orange-dark) 0%,var(--orange) 60%,var(--orange-light) 100%);position:relative;overflow:hidden}
+.checkout::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 70%);border-radius:50%}
+.checkout .container{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:start}
+@media(max-width:900px){.checkout .container{grid-template-columns:1fr;gap:40px}}
+.checkout-info .section-label{color:var(--accent-light)}
+.checkout-info .section-label::before{background:rgba(255,255,255,0.4)}
+.checkout-info .section-title{color:var(--white)}
+.checkout-info .section-subtitle{color:rgba(255,255,255,0.8)}
+.checkout-features{display:flex;flex-direction:column;gap:20px;margin-top:32px}
+.checkout-feature{display:flex;align-items:center;gap:16px}
+.checkout-feature-icon{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.checkout-feature-text h4{font-size:0.95rem;font-weight:700;color:var(--white)}
+.checkout-feature-text p{font-size:0.85rem;color:rgba(255,255,255,0.7);margin-top:2px}
+
+/* FORM CARD */
+.order-form-wrapper{background:var(--white);border-radius:28px;padding:clamp(24px,4vw,40px);box-shadow:0 24px 60px rgba(0,0,0,0.18)}
+.order-form-title{font-size:1.05rem;font-weight:800;color:var(--text-dark);padding-bottom:16px;border-bottom:2px solid var(--cream-warm);margin-bottom:22px;display:flex;align-items:center;gap:10px}
+
+/* FORM ELEMENTS (kept from original) */
+.field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px}
+.field input,.field textarea,.field select{width:100%;padding:12px 15px;border:1px solid var(--border);border-radius:11px;font-size:.92rem;font-family:var(--font);color:var(--text-dark);background:var(--cream);transition:all .15s}
+.field input::placeholder,.field textarea::placeholder{color:#b5a99a}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(234,88,12,.12);background:var(--white)}
+.step-dot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;font-size:.82rem;font-weight:700;white-space:nowrap;transition:all .2s;background:#f1f5f9;color:#94a3b8}
+.step-dot.active{background:var(--orange);color:#fff}
 .step-dot.done{background:#dcfce7;color:#15803d}
-.step-num{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:7px;
-  font-size:.7rem;background:rgba(255,255,255,.25)}
+.step-num{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:7px;font-size:.7rem;background:rgba(255,255,255,.25)}
 .step-dot.active .step-num{background:rgba(255,255,255,.28)}
 .step-dot:not(.active):not(.done) .step-num{background:#e2e8f0}
-.otp-box{width:46px;height:52px;text-align:center;font-size:1.2rem;font-weight:800;border:2px solid var(--line);
-  border-radius:12px;color:var(--ink)}
-.otp-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.otp-box{width:46px;height:52px;text-align:center;font-size:1.2rem;font-weight:800;border:2px solid var(--border);border-radius:12px;color:var(--text-dark);background:var(--cream);font-family:var(--font)}
+.otp-box:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(234,88,12,.12);background:var(--white)}
 .day-chip input{display:none}
 .day-chip{display:block}
-.day-chip span{display:block;padding:8px 4px;border-radius:100px;border:1px solid var(--line);
-  font-size:.82rem;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;
-  text-align:center;white-space:nowrap}
-.day-chip input:checked + span{background:var(--accent);color:#fff;border-color:var(--accent)}
-.capability-chip{border:1px solid var(--line);border-radius:14px;background:#fff;transition:all .15s}
-.capability-chip:hover{border-color:#c4b5fd}
-.capability-chip input:checked ~ span,.capability-chip:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
-
-/* ===== CUSTOM TIME PICKER ===== */
+.day-chip span{display:block;padding:8px 4px;border-radius:100px;border:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text-body);cursor:pointer;transition:all .15s;text-align:center;white-space:nowrap}
+.day-chip input:checked + span{background:var(--orange);color:#fff;border-color:var(--orange)}
+.capability-chip{border:1px solid var(--border);border-radius:14px;background:#fff;transition:all .15s}
+.capability-chip:hover{border-color:var(--accent-light)}
+.capability-chip input:checked ~ span,.capability-chip:has(input:checked){border-color:var(--orange);background:rgba(234,88,12,.04)}
 .vtimepicker-wrap{position:relative;user-select:none}
-.vtimepicker-btn{width:100%;display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid var(--line);
-  border-radius:11px;font-size:.92rem;font-family:var(--sans);color:var(--ink);background:#fff;
-  cursor:pointer;transition:all .15s;text-align:left}
-.vtimepicker-btn:hover,.vtimepicker-wrap.open .vtimepicker-btn{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
-.vtimepicker-icon{font-size:18px;color:var(--accent)}
+.vtimepicker-btn{width:100%;display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid var(--border);border-radius:11px;font-size:.92rem;font-family:var(--font);color:var(--text-dark);background:var(--cream);cursor:pointer;transition:all .15s;text-align:left}
+.vtimepicker-btn:hover,.vtimepicker-wrap.open .vtimepicker-btn{border-color:var(--orange);box-shadow:0 0 0 3px rgba(234,88,12,.12)}
+.vtimepicker-icon{font-size:18px;color:var(--orange)}
 .vtimepicker-display{flex:1;font-weight:600;font-size:1rem;letter-spacing:.04em}
 .vtimepicker-caret{font-size:18px;color:#94a3b8;transition:transform .2s}
 .vtimepicker-wrap.open .vtimepicker-caret{transform:rotate(180deg)}
-.vtimepicker-popup{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
-  background:#fff;border:1px solid #e2e8f0;border-radius:14px;
-  box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:999;
-  padding:12px 8px;flex-direction:row;gap:4px;align-items:flex-start}
+.vtimepicker-popup{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:999;padding:12px 8px;flex-direction:row;gap:4px;align-items:flex-start}
 .vtimepicker-wrap.open .vtimepicker-popup{display:flex}
-.vtimepicker-col{flex:1;display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;
-  scrollbar-width:thin;scrollbar-color:#c4b5fd #f5f3ff}
+.vtimepicker-col{flex:1;display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#fdba74 #fff7ed}
 .vtimepicker-col::-webkit-scrollbar{width:4px}
-.vtimepicker-col::-webkit-scrollbar-thumb{background:#c4b5fd;border-radius:4px}
-.vtimepicker-col button{width:100%;padding:7px 4px;border:none;background:transparent;
-  border-radius:8px;font-size:.88rem;font-family:var(--sans);cursor:pointer;
-  color:#475569;transition:all .12s;text-align:center}
-.vtimepicker-col button:hover{background:#f5f3ff;color:var(--accent)}
-.vtimepicker-col button.active{background:var(--accent);color:#fff;font-weight:700}
+.vtimepicker-col::-webkit-scrollbar-thumb{background:#fdba74;border-radius:4px}
+.vtimepicker-col button{width:100%;padding:7px 4px;border:none;background:transparent;border-radius:8px;font-size:.88rem;font-family:var(--font);cursor:pointer;color:#475569;transition:all .12s;text-align:center}
+.vtimepicker-col button:hover{background:#fff7ed;color:var(--orange)}
+.vtimepicker-col button.active{background:var(--orange);color:#fff;font-weight:700}
 .vtimepicker-sep{font-size:1.4rem;font-weight:700;color:#94a3b8;padding:6px 2px;align-self:flex-start;margin-top:4px}
-
-/* ===== SECTIONS ===== */
-section.block{padding:clamp(56px,8vh,96px) 0}
-.eyebrow.muted{color:var(--muted)}
-.section-head{max-width:640px;margin-bottom:clamp(32px,5vh,52px)}
-.section-head h2{margin-top:10px}
-.section-head .lead{margin-top:14px}
-
-/* feature cards */
-.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-@media(max-width:900px){.feature-grid{grid-template-columns:1fr}}
-.feature-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;transition:all .2s}
-.feature-card:hover{border-color:#c4b5fd;transform:translateY(-2px)}
-.feature-card .ico{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
-  display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-.feature-card h3{font-size:1.05rem;margin-bottom:8px}
-.feature-card p{font-size:.88rem;color:var(--muted);font-weight:400}
-
-/* process steps */
-.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-@media(max-width:900px){.process-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.process-grid{grid-template-columns:1fr}}
-.process-card{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:22px}
-.process-card .num{font-size:1.8rem;font-weight:800;color:var(--accent);line-height:1}
-.process-card h3{font-size:.98rem;margin:12px 0 6px}
-.process-card p{font-size:.84rem;color:var(--muted)}
-
-/* solution split */
-.solution-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,64px);align-items:center}
-@media(max-width:860px){.solution-grid{grid-template-columns:1fr}}
-.solution-media{border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:var(--paper-3)}
-.solution-media img{width:100%;height:100%;object-fit:cover}
-.ledger div{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);font-size:.9rem}
-.ledger div:first-child{border-top:1px solid var(--line)}
-.ledger span:first-child{color:var(--muted)}
-.ledger span:last-child{font-weight:700}
-
-/* testimonial */
-.quote-band{background:var(--accent);color:#fff;border-radius:28px;padding:clamp(36px,6vw,60px);margin-inline:var(--pad)}
-.quote-band q{font-size:clamp(1.2rem,2.4vw,1.7rem);font-weight:600;line-height:1.35;quotes:none;display:block}
-.quote-band .who{margin-top:20px;font-size:.85rem;opacity:.85;font-weight:600}
-
-/* marquee */
-.marquee{overflow:hidden;padding:36px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.mrow{display:flex;white-space:nowrap;width:max-content;animation:scroll-left 30s linear infinite}
-.mrow span{font-size:1.1rem;font-weight:700;padding:0 22px;color:var(--ink-2);display:inline-flex;align-items:center;gap:22px}
-.mrow span::after{content:"•";color:var(--accent)}
-@keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* final CTA */
-.final-cta{background:linear-gradient(135deg,var(--ink),#1e1b4b);border-radius:28px;color:#fff;
-  padding:clamp(40px,6vw,64px);margin-inline:var(--pad);text-align:center}
-.final-cta h2{color:#fff;font-size:clamp(1.8rem,4vw,2.6rem)}
-.final-cta p{color:#cbd5e1;margin-top:14px;max-width:52ch;margin-inline:auto}
-
-/* footer */
-footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:48px 0 28px}
-.foot-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;padding-bottom:36px}
-.foot-top p{color:var(--muted);font-size:.88rem;max-width:34ch;margin-top:10px}
-.foot-col h4{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-  font-weight:700;margin-bottom:14px}
-.foot-col a{display:block;padding:5px 0;font-size:.88rem;color:var(--ink-2);transition:color .2s}
-.foot-col a:hover{color:var(--accent)}
-.foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:24px;
-  border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
-@media(max-width:760px){.foot-top{grid-template-columns:1fr 1fr}}
-
-/* alerts */
 .alert{border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:600}
 .alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
 .alert-error{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c}
-
 #stepIndicators::-webkit-scrollbar{display:none}
 #stepIndicators{-ms-overflow-style:none;scrollbar-width:none}
+
+/* PROCESS */
+.process-section{background:var(--cream-warm)}
+.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:900px){.process-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.process-grid{grid-template-columns:1fr}}
+.process-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:24px;transition:var(--transition)}
+.process-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.process-card .num{font-size:1.8rem;font-weight:900;color:var(--orange);line-height:1}
+.process-card h3{font-size:0.95rem;font-weight:700;margin:12px 0 6px;color:var(--text-dark)}
+.process-card p{font-size:0.84rem;color:var(--text-muted)}
+
+/* QUOTE */
+.quote-band{background:linear-gradient(135deg,var(--orange),var(--orange-light));border-radius:28px;padding:clamp(36px,6vw,60px);margin-inline:clamp(16px,3vw,48px);color:#fff}
+.quote-band q{font-size:clamp(1.2rem,2.4vw,1.7rem);font-weight:600;line-height:1.35;quotes:none;display:block}
+.quote-band .who{margin-top:20px;font-size:0.85rem;opacity:.85;font-weight:600}
+
+/* MARQUEE */
+.marquee-wrap{overflow:hidden;padding:32px 0;background:var(--cream);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.mrow{display:flex;white-space:nowrap;width:max-content;animation:scroll-left 30s linear infinite}
+.mrow span{font-size:1.1rem;font-weight:700;padding:0 22px;color:var(--text-muted);display:inline-flex;align-items:center;gap:22px}
+.mrow span::after{content:"🏆"}
+@keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* FOOTER */
+.footer-vs{background:var(--text-dark);color:rgba(255,255,255,0.7);padding:clamp(40px,6vw,60px) 0 28px}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;padding-bottom:32px}
+@media(max-width:760px){.footer-top{grid-template-columns:1fr 1fr}}
+.footer-brand-title{font-size:1.8rem;font-weight:900;color:var(--white);margin-bottom:6px}
+.footer-brand-title span{color:var(--accent)}
+.footer-brand-slogan{font-size:0.88rem;color:rgba(255,255,255,0.4);margin-top:6px;max-width:28ch;line-height:1.6}
+.footer-col h4{font-size:0.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);font-weight:700;margin-bottom:14px}
+.footer-col a{display:block;padding:5px 0;font-size:0.88rem;color:rgba(255,255,255,0.55);transition:color .2s}
+.footer-col a:hover{color:var(--accent)}
+.footer-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);font-size:0.8rem;color:rgba(255,255,255,0.3)}
 </style>
 </head>
 <body>
 
-<header class="nav">
-  <a href="${pageContext.request.contextPath}/" class="brand">V-SPORT<span>.</span></a>
-  <nav class="nav-links">
-    <a href="#features">Tính năng</a>
-    <a href="#process">Quy trình</a>
-    <a href="#solution">Giải pháp</a>
-    <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-outline">Đăng nhập</a>
-    <a href="#begin" class="btn btn-primary">Đăng ký ngay</a>
-  </nav>
-</header>
+<!-- PARALLAX SPORTS (decorative) -->
+<div class="parallax-sport" style="top:18%;left:3%" data-speed="0.3">⚽</div>
+<div class="parallax-sport" style="top:42%;right:2%" data-speed="0.5">🏸</div>
+<div class="parallax-sport" style="top:68%;left:6%" data-speed="0.2">🎾</div>
+<div class="parallax-sport" style="top:82%;right:4%" data-speed="0.4">🏓</div>
 
-<main>
-
-  <!-- ================= HERO (photo thesis) ================= -->
-  <section class="hero">
-    <div class="hero-media">
-      <img src="${pageContext.request.contextPath}/assets/images/owner/owner-hero-vsport.webp" alt="Chủ cơ sở thể thao quan sát sân bóng và sân tennis từ ban công, quản lý bằng V-SPORT trên máy tính bảng">
-    </div>
-    <div class="wrap hero-content">
-      <p class="eyebrow">V-SPORT · GIẢI PHÁP VẬN HÀNH THỂ THAO</p>
-      <h1>Nâng tầm vận hành cơ sở thể thao của bạn.</h1>
-      <p class="lead">Quản lý lịch sân, nhân sự, thanh toán và doanh thu trên một nền tảng duy nhất — giúp cơ sở vận hành chính xác và phát triển bền vững.</p>
-      <div class="hero-benefits">
-        <div><span class="material-symbols-outlined">event_available</span> Quản lý lịch sân tập trung</div>
-        <div><span class="material-symbols-outlined">monitoring</span> Theo dõi doanh thu theo thời gian thực</div>
-        <div><span class="material-symbols-outlined">groups</span> Vận hành nhân sự và dịch vụ hiệu quả</div>
+<!-- ================================================================ NAVBAR ================================================================ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="${pageContext.request.contextPath}/" class="navbar-brand">
+      <div class="navbar-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
       </div>
+      <span class="navbar-name">V-SPORT<span>.</span></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#story">Về V-SPORT</a>
+      <a href="#sports">Quản lý</a>
+      <a href="#process">Quy trình</a>
+      <a href="${pageContext.request.contextPath}/index.jsp">Đăng nhập</a>
+      <a href="#begin" class="nav-cta">Đăng ký ngay</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ================================================================ HERO ================================================================ -->
+<section class="hero section" id="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/></svg>
+        Nền Tảng Quản Lý Thể Thao #1 Việt Nam
+      </div>
+      <h1>
+        Sân Thể Thao<br>
+        Vận Hành<br>
+        <span class="highlight">Thông Minh Hơn</span>
+      </h1>
+      <p class="hero-slogan">"Tối Ưu Vận Hành — Tăng Doanh Thu Bền Vững"</p>
       <div class="hero-actions">
-        <a href="#begin" class="btn btn-primary" style="padding:13px 28px;font-size:.95rem">Đăng ký cơ sở miễn phí</a>
-        <div class="hero-stats">
-          <div><div class="v">500+</div><div class="k">Cơ sở tin dùng</div></div>
-          <div><div class="v">99%</div><div class="k">Hài lòng</div></div>
-          <div><div class="v">24/7</div><div class="k">Hỗ trợ</div></div>
+        <a href="#begin" class="btn btn-primary">
+          <i class="fa-solid fa-rocket"></i>
+          Đăng Ký Miễn Phí
+        </a>
+        <a href="#sports" class="btn btn-secondary">Xem Giải Pháp</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-3d-container">
+        <div class="hero-3d-bg"></div>
+        <img src="${pageContext.request.contextPath}/assets/images/owner/owner-hero-vsport.webp"
+             alt="Cơ sở thể thao được quản lý bởi V-SPORT"
+             class="hero-product-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:82%;aspect-ratio:4/3;border-radius:22px;background:linear-gradient(135deg,var(--cream-warm),rgba(251,146,60,0.3));flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative;z-index:2;">
+          <span style="font-size:4rem">🏟️</span>
+          <span style="font-weight:800;color:var(--orange);font-size:1rem">V-SPORT</span>
+        </div>
+        <span class="floating-sport sport-1">⚽</span>
+        <span class="floating-sport sport-2">🏸</span>
+        <span class="floating-sport sport-3">🎾</span>
+        <span class="floating-sport sport-4">🏓</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ STATS BAR ================================================================ -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item reveal reveal-delay-1">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Cơ sở tin dùng</div>
+      </div>
+      <div class="stat-item reveal reveal-delay-2">
+        <div class="stat-number">10k+</div>
+        <div class="stat-label">Người chơi mỗi ngày</div>
+      </div>
+      <div class="stat-item reveal reveal-delay-3">
+        <div class="stat-number">99%</div>
+        <div class="stat-label">Chủ cơ sở hài lòng</div>
+      </div>
+      <div class="stat-item reveal reveal-delay-4">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Hỗ trợ kỹ thuật</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ STORY / ABOUT ================================================================ -->
+<section class="story section" id="story">
+  <div class="container">
+    <div class="story-visual reveal">
+      <div class="story-image-wrapper">
+        <img src="${pageContext.request.contextPath}/assets/images/owner/owner-hero-vsport.webp"
+             alt="V-SPORT nền tảng quản lý thể thao"
+             class="story-img"
+             onerror="this.style.fontSize='5rem';this.style.textAlign='center';this.outerHTML='<div style=\'font-size:5rem;text-align:center\'>🏟️</div>'">
+      </div>
+      <div class="story-stat">
+        <div class="story-stat-number">25%</div>
+        <div class="story-stat-label">Tăng doanh thu<br>trung bình</div>
+      </div>
+    </div>
+
+    <div class="story-content reveal reveal-delay-2">
+      <span class="section-label">Câu Chuyện Của Chúng Tôi</span>
+      <h2 class="section-title">Sứ Mệnh Của V-SPORT</h2>
+      <p style="color:var(--text-body);line-height:1.8;margin-bottom:16px">
+        V-SPORT ra đời từ trăn trở thực tế: các chủ cơ sở thể thao tại Việt Nam vẫn đang quản lý sân bằng sổ tay, Excel và tin nhắn thủ công — vừa dễ sai sót, vừa mất doanh thu vào những khung giờ trống không ai biết.
+      </p>
+      <p style="color:var(--text-body);line-height:1.8">
+        Chúng tôi xây dựng một nền tảng duy nhất tích hợp đặt lịch trực tuyến, quản lý hội viên, báo cáo doanh thu và vận hành nhân sự — giúp bạn tập trung vào thể thao, không phải giấy tờ.
+      </p>
+      <div class="story-highlights">
+        <div class="story-highlight-item">
+          <div class="story-highlight-icon">🏟️</div>
+          <div class="story-highlight-text">Quản lý đa<br>loại sân</div>
+        </div>
+        <div class="story-highlight-item">
+          <div class="story-highlight-icon">📊</div>
+          <div class="story-highlight-text">Báo cáo<br>thời gian thực</div>
+        </div>
+        <div class="story-highlight-item">
+          <div class="story-highlight-icon">📱</div>
+          <div class="story-highlight-text">Khách đặt<br>qua app</div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= REGISTRATION ================= -->
-  <section class="registration" id="begin">
-    <div class="wrap registration-grid">
-      <div class="registration-intro">
-        <p class="eyebrow muted">/ Đăng ký cơ sở</p>
-        <h2 class="h2">Bắt đầu số hóa vận hành ngay hôm nay.</h2>
-        <p class="lead">Điền thông tin bên cạnh — đội ngũ V-SPORT sẽ liên hệ trong vòng 24 giờ để hỗ trợ bạn cấu hình hệ thống.</p>
-        <div class="registration-steps-mini">
-          <div><span class="n">1</span><div><h4>Thông tin cơ bản</h4><p>Tên cơ sở, email và số điện thoại liên hệ.</p></div></div>
-          <div><span class="n">2</span><div><h4>Xác thực email</h4><p>Nhập mã OTP gửi tới email để xác minh chủ quyền.</p></div></div>
-          <div><span class="n">3</span><div><h4>Cấu hình sân</h4><p>Môn thể thao, số lượng sân và khung giờ hoạt động.</p></div></div>
+<!-- ================================================================ VALUES / FEATURES ================================================================ -->
+<section class="values section" id="features">
+  <div class="container">
+    <div class="values-header reveal">
+      <span class="section-label">Giá Trị Cốt Lõi</span>
+      <h2 class="section-title">Ba Giải Pháp Vận Hành Vượt Trội</h2>
+      <p class="section-subtitle">
+        Hệ thống tích hợp đầy đủ công cụ giúp bạn quản lý cơ sở thể thao chuyên nghiệp và hiệu quả.
+      </p>
+    </div>
+    <div class="values-grid">
+      <div class="value-card reveal reveal-delay-1">
+        <div class="value-icon">📅</div>
+        <h3>Đặt Lịch Thông Minh</h3>
+        <p>Giao diện đặt lịch trực quan, tránh trùng lịch tức thì. Khách tự đặt sân trực tuyến 24/7 — không cần gọi điện.</p>
+      </div>
+      <div class="value-card reveal reveal-delay-2">
+        <div class="value-icon">👥</div>
+        <h3>Quản Lý Hội Viên</h3>
+        <p>Theo dõi gói tập, lịch sử đặt sân và điểm thưởng. Điểm danh tự động thông qua mã QR Code tiện lợi.</p>
+      </div>
+      <div class="value-card reveal reveal-delay-3">
+        <div class="value-icon">📈</div>
+        <h3>Báo Cáo Doanh Thu</h3>
+        <p>Dashboard thời gian thực, biểu đồ doanh thu theo giờ/ngày/tháng. Nhận diện khung giờ vàng để tối ưu giá.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ SPORTS SHOWCASE ================================================================ -->
+<section class="sports-section section" id="sports">
+  <div class="container">
+    <div class="reveal" style="max-width:640px;margin-bottom:48px">
+      <span class="section-label">Quản Lý</span>
+      <h2 class="section-title">Môn Thể Thao Được Hỗ Trợ</h2>
+      <p class="section-subtitle">V-SPORT hỗ trợ quản lý đa dạng loại hình thể thao — từ sân bóng đến gym, bể bơi đến yoga.</p>
+    </div>
+    <div class="shop-grid">
+      <div class="shop-card reveal reveal-delay-1">
+        <div class="shop-card-media">⚽</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Bóng Đá</div>
+          <div class="shop-card-desc">Sân 5, 7, 11 người — đặt lịch theo ca, theo nhóm</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-2">
+        <div class="shop-card-media">🏸</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Cầu Lông</div>
+          <div class="shop-card-desc">Quản lý nhiều sân, bán vé giờ và theo tháng</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-3">
+        <div class="shop-card-media">🎾</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Tennis</div>
+          <div class="shop-card-desc">Lịch HLV, gói thuê sân và dịch vụ căng vợt</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-4">
+        <div class="shop-card-media">🏐</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Bóng Chuyền</div>
+          <div class="shop-card-desc">Đặt sân cho nhóm, giải đấu nội bộ và câu lạc bộ</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-1">
+        <div class="shop-card-media">🏀</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Bóng Rổ</div>
+          <div class="shop-card-desc">Phân sân theo khu vực, quản lý hội viên câu lạc bộ</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-2">
+        <div class="shop-card-media">🏓</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Bóng Bàn</div>
+          <div class="shop-card-desc">Đặt theo giờ, cho thuê bàn và vợt linh hoạt</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-3">
+        <div class="shop-card-media">💪</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Gym &amp; Fitness</div>
+          <div class="shop-card-desc">Gói tập theo tháng, check-in QR, lịch PT cá nhân</div>
+        </div>
+      </div>
+      <div class="shop-card reveal reveal-delay-4">
+        <div class="shop-card-media">🏊</div>
+        <div class="shop-card-body">
+          <div class="shop-card-name">Bơi Lội</div>
+          <div class="shop-card-desc">Vé bơi theo lượt, đăng ký khóa học và lịch HLV</div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal" style="text-align:center;margin-top:36px">
+      <a href="#begin" class="btn btn-secondary">
+        <i class="fa-solid fa-plus"></i>
+        Đăng ký môn thể thao của bạn
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ PROCESS ================================================================ -->
+<section class="process-section section" id="process">
+  <div class="container">
+    <div class="reveal" style="max-width:640px;margin-bottom:48px">
+      <span class="section-label">Quy Trình</span>
+      <h2 class="section-title">Bốn Bước Đơn Giản — Hệ Thống Sẵn Sàng</h2>
+    </div>
+    <div class="process-grid">
+      <div class="process-card reveal reveal-delay-1">
+        <div class="num">01</div>
+        <h3>Đăng ký thông tin</h3>
+        <p>Điền thông tin cơ bản về cơ sở của bạn chỉ trong 1 phút để khởi tạo tài khoản quản lý.</p>
+      </div>
+      <div class="process-card reveal reveal-delay-2">
+        <div class="num">02</div>
+        <h3>Xác thực Email</h3>
+        <p>Nhập mã OTP gửi tới email để xác minh danh tính và bảo mật tài khoản.</p>
+      </div>
+      <div class="process-card reveal reveal-delay-3">
+        <div class="num">03</div>
+        <h3>Cấu hình cơ sở</h3>
+        <p>Khai báo môn thể thao, số sân và khung giờ mở cửa — đội V-SPORT hỗ trợ 24/7.</p>
+      </div>
+      <div class="process-card reveal reveal-delay-4">
+        <div class="num">04</div>
+        <h3>Vận hành ngay</h3>
+        <p>Sân của bạn hiển thị trên hệ sinh thái V-SPORT và đón nhận lịch đặt đầu tiên.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ MARQUEE ================================================================ -->
+<div class="marquee-wrap" aria-hidden="true">
+  <div class="mrow">
+    <span>Bóng đá</span><span>Cầu lông</span><span>Tennis</span><span>Bóng rổ</span><span>Bóng chuyền</span><span>Pickleball</span><span>Bơi lội</span><span>Gym</span>
+    <span>Bóng đá</span><span>Cầu lông</span><span>Tennis</span><span>Bóng rổ</span><span>Bóng chuyền</span><span>Pickleball</span><span>Bơi lội</span><span>Gym</span>
+  </div>
+</div>
+
+<!-- ================================================================ QUOTE ================================================================ -->
+<section class="section" style="padding-top:60px;padding-bottom:60px">
+  <div class="quote-band">
+    <q>Từ khi dùng V-SPORT, tôi không còn bị đau đầu vì trùng lịch đặt sân của khách nữa. Doanh thu tăng hơn 25% nhờ tối ưu các khung giờ trống.</q>
+    <p class="who">— Anh Minh Tuấn · Chủ sân bóng Tân Bình, TP.HCM</p>
+  </div>
+</section>
+
+<!-- ================================================================ REGISTRATION ================================================================ -->
+<section class="checkout section" id="begin">
+  <div class="container">
+    <div class="checkout-info reveal">
+      <span class="section-label">Đăng Ký Cơ Sở</span>
+      <h2 class="section-title">Đăng Ký Ngay Hôm Nay</h2>
+      <p class="section-subtitle">
+        Điền thông tin bên cạnh — đội ngũ V-SPORT sẽ liên hệ trong vòng 24 giờ để hỗ trợ cấu hình hệ thống.
+      </p>
+      <div class="checkout-features">
+        <div class="checkout-feature">
+          <div class="checkout-feature-icon">🚀</div>
+          <div class="checkout-feature-text">
+            <h4>Thiết lập trong 5 phút</h4>
+            <p>Đăng ký đơn giản, không cần kỹ thuật</p>
+          </div>
+        </div>
+        <div class="checkout-feature">
+          <div class="checkout-feature-icon">🆓</div>
+          <div class="checkout-feature-text">
+            <h4>Dùng thử 30 ngày miễn phí</h4>
+            <p>Không ràng buộc, không cần thẻ tín dụng</p>
+          </div>
+        </div>
+        <div class="checkout-feature">
+          <div class="checkout-feature-icon">🛡️</div>
+          <div class="checkout-feature-text">
+            <h4>Bảo mật dữ liệu chuẩn</h4>
+            <p>Mã hóa đầu cuối, backup tự động hàng ngày</p>
+          </div>
+        </div>
+        <div class="checkout-feature">
+          <div class="checkout-feature-icon">📞</div>
+          <div class="checkout-feature-text">
+            <h4>Hỗ trợ 24/7 miễn phí</h4>
+            <p>Đội ngũ kỹ thuật luôn sẵn sàng hỗ trợ bạn</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-form-wrapper reveal reveal-delay-2">
+      <div class="order-form-title">
+        <span style="font-size:1.2rem">📋</span> Thông Tin Đăng Ký Cơ Sở
+      </div>
+
+      <!-- Success Alert -->
+      <div id="successAlert" class="hidden mb-5 alert alert-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>Đăng ký thành công! Chúng tôi sẽ sớm liên hệ với bạn.</span>
+      </div>
+      <!-- Error Alert -->
+      <div id="errorAlert" class="hidden mb-5 alert alert-error">
+        <span class="material-symbols-outlined">error</span>
+        <span id="errorMessage"></span>
+      </div>
+
+      <!-- Step Indicators -->
+      <div class="flex items-center justify-between gap-2 mb-6 overflow-x-auto pb-1" id="stepIndicators">
+        <div class="step-dot active" data-step="1">
+          <span class="step-num">1</span> <span class="hidden sm:inline">Thông tin</span>
+        </div>
+        <div class="flex-grow h-px bg-slate-200 min-w-[8px] max-w-[28px]"></div>
+        <div class="step-dot" data-step="2">
+          <span class="step-num">2</span> <span class="hidden sm:inline">Xác thực OTP</span>
+        </div>
+        <div class="flex-grow h-px bg-slate-200 min-w-[8px] max-w-[28px]"></div>
+        <div class="step-dot" data-step="3">
+          <span class="step-num">3</span> <span class="hidden sm:inline">Cơ sở &amp; Sân</span>
         </div>
       </div>
 
-      <!-- ====== REGISTRATION FORM ====== -->
-      <div class="reg-card card-shadow">
-        <!-- Success Alert -->
-        <div id="successAlert" class="hidden mb-5 alert alert-success">
-          <span class="material-symbols-outlined">check_circle</span>
-          <span>Đăng ký thành công! Chúng tôi sẽ sớm liên hệ với bạn.</span>
-        </div>
-        <!-- Error Alert -->
-        <div id="errorAlert" class="hidden mb-5 alert alert-error">
-          <span class="material-symbols-outlined">error</span>
-          <span id="errorMessage"></span>
-        </div>
+      <!-- Xóa bản nháp -->
+      <div class="flex justify-end -mt-3 mb-3">
+        <button type="button" onclick="confirmResetOwnerDraft()" class="text-slate-400 hover:text-slate-600 text-xs underline underline-offset-2 bg-transparent border-none cursor-pointer transition-colors">Xóa bản nháp / Bắt đầu lại</button>
+      </div>
 
-        <!-- Step Indicators -->
-        <div class="flex items-center justify-between gap-2 mb-6 overflow-x-auto pb-1" id="stepIndicators">
-          <div class="step-dot active" data-step="1">
-            <span class="step-num">1</span> <span class="hidden sm:inline">Thông tin</span>
+      <!-- ====== STEP 1 ====== -->
+      <div id="formStep1" class="form-step">
+        <h3 class="text-lg font-extrabold mb-5 text-slate-900">Thông tin cơ bản</h3>
+        <div class="flex flex-col gap-4">
+          <div class="field">
+            <label for="ownerName">Tên cơ sở <span class="text-[#ea580c]">*</span></label>
+            <input type="text" id="ownerName" name="ownerName" required placeholder="VD: Sân bóng Tân Bình" />
           </div>
-          <div class="flex-grow h-px bg-slate-200 min-w-[8px] max-w-[28px]"></div>
-          <div class="step-dot" data-step="2">
-            <span class="step-num">2</span> <span class="hidden sm:inline">Xác thực OTP</span>
-          </div>
-          <div class="flex-grow h-px bg-slate-200 min-w-[8px] max-w-[28px]"></div>
-          <div class="step-dot" data-step="3">
-            <span class="step-num">3</span> <span class="hidden sm:inline">Cơ sở &amp; Sân</span>
-          </div>
-        </div>
-
-        <!-- Xóa bản nháp / Bắt đầu lại -->
-        <div class="flex justify-end -mt-3 mb-3">
-          <button type="button" onclick="confirmResetOwnerDraft()" class="text-slate-400 hover:text-slate-600 text-xs underline underline-offset-2 bg-transparent border-none cursor-pointer transition-colors">Xóa bản nháp / Bắt đầu lại</button>
-        </div>
-
-        <!-- ====== STEP 1: Basic Info ====== -->
-        <div id="formStep1" class="form-step">
-          <h3 class="text-lg font-extrabold mb-5 text-slate-900">Thông tin cơ bản</h3>
-          <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="field">
-              <label for="ownerName">Tên cơ sở <span class="text-[#7c3aed]">*</span></label>
-              <input type="text" id="ownerName" name="ownerName" required placeholder="VD: Sân bóng Tân Bình" />
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="field">
-                <label for="regEmail">Email liên hệ <span class="text-[#7c3aed]">*</span></label>
-                <input type="email" id="regEmail" required placeholder="email@example.com" />
-              </div>
-              <div class="field">
-                <label for="regPhone">Số điện thoại <span class="text-[#7c3aed]">*</span></label>
-                <input type="tel" id="regPhone" required placeholder="0912 345 678" />
-              </div>
+              <label for="regEmail">Email liên hệ <span class="text-[#ea580c]">*</span></label>
+              <input type="email" id="regEmail" required placeholder="email@example.com" />
             </div>
             <div class="field">
-              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 sm:gap-4 mb-1">
-                <label for="regAddress" class="!mb-0">Địa chỉ cơ sở</label>
-                <button type="button" onclick="autoFillAddress()" class="text-xs text-[#7c3aed] hover:underline flex items-center gap-1 bg-transparent border-none cursor-pointer focus:outline-none font-semibold">
-                  <span class="material-symbols-outlined text-[14px]">my_location</span> Lấy vị trí / Tọa độ GG Map
-                </button>
-              </div>
-              <input type="text" id="regAddress" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" />
-              <div id="coordPreview" class="hidden mt-1.5 flex flex-col gap-0.5">
-                <div class="flex items-start gap-1.5">
-                  <span class="material-symbols-outlined mt-px text-[14px] text-[#7c3aed]">location_on</span>
-                  <span id="coordPreviewText" class="text-xs leading-snug text-[#7c3aed]"></span>
-                </div>
-                <a id="coordMapsLink" href="#" target="_blank" rel="noopener noreferrer" class="hidden text-xs underline pl-5 text-[#7c3aed]">Mở Google Maps để kiểm tra vị trí</a>
-              </div>
+              <label for="regPhone">Số điện thoại <span class="text-[#ea580c]">*</span></label>
+              <input type="tel" id="regPhone" required placeholder="0912 345 678" />
             </div>
-            <button type="button" onclick="goToStep2()" class="btn btn-primary w-full justify-center py-3.5 text-base mt-1">
-              Tiếp tục — Xác thực Email <span class="material-symbols-outlined align-middle text-lg">arrow_forward</span>
-            </button>
           </div>
-        </div>
-
-        <!-- ====== STEP 2: OTP Verification ====== -->
-        <div id="formStep2" class="form-step hidden">
-          <h3 class="text-lg font-extrabold mb-2 text-slate-900">Xác thực Email</h3>
-          <p class="text-slate-500 text-sm mb-5">Chúng tôi đã gửi mã OTP đến <strong id="otpEmailDisplay" class="text-[#7c3aed]"></strong>. Vui lòng nhập mã bên dưới.</p>
-          <p id="otpValidityHint" class="hidden text-slate-400 text-xs -mt-3 mb-3"></p>
-          <div class="flex justify-center gap-2 mb-5" id="otpInputs">
-            <input type="text" maxlength="1" class="otp-box" data-index="0" />
-            <input type="text" maxlength="1" class="otp-box" data-index="1" />
-            <input type="text" maxlength="1" class="otp-box" data-index="2" />
-            <input type="text" maxlength="1" class="otp-box" data-index="3" />
-            <input type="text" maxlength="1" class="otp-box" data-index="4" />
-            <input type="text" maxlength="1" class="otp-box" data-index="5" />
-          </div>
-          <div id="otpError" class="hidden text-center text-red-600 text-sm mb-4 font-semibold"></div>
-          <div class="flex flex-col gap-3">
-            <button type="button" onclick="verifyOtp()" id="btnVerifyOtp" class="btn btn-primary w-full justify-center py-3.5 text-base">
-              Xác thực OTP
-            </button>
-            <div class="flex items-center justify-between mt-1">
-              <button type="button" onclick="goToStep1()" class="text-slate-500 hover:text-slate-800 transition-colors text-sm flex items-center gap-1 bg-transparent border-none cursor-pointer font-semibold">
-                <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
-              </button>
-              <button type="button" onclick="resendOtp()" id="btnResendOtp" class="text-[#7c3aed] hover:text-[#9333ea] text-sm transition-colors disabled:opacity-40 bg-transparent border-none cursor-pointer font-semibold" disabled>
-                Gửi lại mã<span id="resendCountdownWrap"> (<span id="resendCountdown">60</span>s)</span>
+          <div class="field">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 sm:gap-4 mb-1">
+              <label for="regAddress" class="!mb-0">Địa chỉ cơ sở</label>
+              <button type="button" onclick="autoFillAddress()" class="text-xs text-[#ea580c] hover:underline flex items-center gap-1 bg-transparent border-none cursor-pointer focus:outline-none font-semibold">
+                <span class="material-symbols-outlined text-[14px]">my_location</span> Lấy vị trí / Tọa độ GG Map
               </button>
             </div>
+            <input type="text" id="regAddress" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" />
+            <div id="coordPreview" class="hidden mt-1.5 flex flex-col gap-0.5">
+              <div class="flex items-start gap-1.5">
+                <span class="material-symbols-outlined mt-px text-[14px] text-[#ea580c]">location_on</span>
+                <span id="coordPreviewText" class="text-xs leading-snug text-[#ea580c]"></span>
+              </div>
+              <a id="coordMapsLink" href="#" target="_blank" rel="noopener noreferrer" class="hidden text-xs underline pl-5 text-[#ea580c]">Mở Google Maps để kiểm tra vị trí</a>
+            </div>
           </div>
-          <p class="text-center text-slate-400 text-xs mt-4">Số lần nhập sai: <span id="otpAttemptCount" class="font-bold text-red-500">0</span>/5</p>
+          <button type="button" onclick="goToStep2()" class="btn btn-primary w-full justify-center py-3.5 text-base mt-1">
+            Tiếp tục — Xác thực Email <span class="material-symbols-outlined align-middle text-lg">arrow_forward</span>
+          </button>
         </div>
+      </div>
 
-        <!-- ====== STEP 3: Sports, Courts, Operating Hours ====== -->
-        <div id="formStep3" class="form-step hidden">
-          <h3 class="text-lg font-extrabold mb-5 text-slate-900">Cấu hình cơ sở</h3>
-
-          <!-- Sports selector -->
-          <div class="field mb-5">
-            <label>Môn thể thao / Dịch vụ <span class="text-[#7c3aed]">*</span></label>
-            <button type="button" onclick="openSportsPopup()" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-left flex items-center justify-between hover:border-[#7c3aed]/50 transition-all cursor-pointer">
-              <span id="sportsPreviewText" class="text-slate-400">Chọn các môn thể thao...</span>
-              <span class="material-symbols-outlined text-[#7c3aed]">add_circle</span>
-            </button>
-          </div>
-
-          <!-- Selected sports tags + court quantities -->
-          <div id="courtQuantitySection" class="hidden mb-5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Số lượng sân từng môn</label>
-            <div id="courtQuantityList" class="flex flex-col gap-3"></div>
-          </div>
-
-          <!-- Operating hours -->
-          <input type="hidden" id="openTime"  value="06:00">
-          <input type="hidden" id="closeTime" value="22:00">
-          <!-- Coordinates (set by geo modal) -->
-          <input type="hidden" id="viDo"   name="viDo">
-          <input type="hidden" id="kinhDo" name="kinhDo">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-            <div class="field">
-              <label>Giờ mở cửa <span class="text-[#7c3aed]">*</span></label>
-              <div class="vtimepicker-wrap" id="openTimePicker" data-target="openTime" data-default="06:00">
-                <button type="button" class="vtimepicker-btn" onclick="vtpToggle('openTimePicker')">
-                  <span class="material-symbols-outlined vtimepicker-icon">schedule</span>
-                  <span class="vtimepicker-display" id="openTimePicker-display">06:00</span>
-                  <span class="material-symbols-outlined vtimepicker-caret">expand_more</span>
-                </button>
-                <div class="vtimepicker-popup" id="openTimePicker-popup">
-                  <div class="vtimepicker-col" id="openTimePicker-hours"></div>
-                  <div class="vtimepicker-sep">:</div>
-                  <div class="vtimepicker-col" id="openTimePicker-minutes"></div>
-                </div>
-              </div>
-            </div>
-            <div class="field">
-              <label>Giờ đóng cửa <span class="text-[#7c3aed]">*</span></label>
-              <div class="vtimepicker-wrap" id="closeTimePicker" data-target="closeTime" data-default="22:00">
-                <button type="button" class="vtimepicker-btn" onclick="vtpToggle('closeTimePicker')">
-                  <span class="material-symbols-outlined vtimepicker-icon">schedule</span>
-                  <span class="vtimepicker-display" id="closeTimePicker-display">22:00</span>
-                  <span class="material-symbols-outlined vtimepicker-caret">expand_more</span>
-                </button>
-                <div class="vtimepicker-popup" id="closeTimePicker-popup">
-                  <div class="vtimepicker-col" id="closeTimePicker-hours"></div>
-                  <div class="vtimepicker-sep">:</div>
-                  <div class="vtimepicker-col" id="closeTimePicker-minutes"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Operating days -->
-          <div class="mb-5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Ngày hoạt động <span class="text-[#7c3aed]">*</span></label>
-            <div class="grid grid-cols-7 gap-2" id="operatingDays">
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="T2" checked/>
-                <span>Thứ 2</span>
-              </label>
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="T3" checked/>
-                <span>Thứ 3</span>
-              </label>
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="T4" checked/>
-                <span>Thứ 4</span>
-              </label>
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="T5" checked/>
-                <span>Thứ 5</span>
-              </label>
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="T6" checked/>
-                <span>Thứ 6</span>
-              </label>
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="T7" checked/>
-                <span>Thứ 7</span>
-              </label>
-              <label class="day-chip cursor-pointer">
-                <input type="checkbox" value="CN" checked/>
-                <span>Chủ nhật</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div class="field mb-5">
-            <label for="regDescription">Mô tả thêm về cơ sở</label>
-            <textarea id="regDescription" rows="3" placeholder="Dịch vụ đi kèm, tiện ích, lưu ý đặc biệt..." class="resize-vertical"></textarea>
-          </div>
-
-          <!-- Business capabilities (ngoài cho thuê sân, cần Admin duyệt riêng từng mục) -->
-          <div class="mb-5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Hoạt động và dịch vụ tại cơ sở</label>
-            <p class="text-xs text-slate-400 mb-3">Ngoài cho thuê sân, chọn thêm nếu cơ sở của bạn có các hoạt động sau. Mỗi lựa chọn cần quản trị viên phê duyệt riêng trước khi được kích hoạt.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="capabilityList">
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="SAN_PHAM" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Bán sản phẩm thể thao</b> — giày, áo quần, vợt, bóng, phụ kiện</span>
-              </label>
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="THUE_DUNG_CU" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Cho thuê dụng cụ thể thao</b> — vợt, bóng, giày, áo bib...</span>
-              </label>
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="DO_AN_NUOC_UONG" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Đồ ăn và nước uống</b> — quầy giải khát, đồ ăn nhẹ tại chỗ</span>
-              </label>
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="HUAN_LUYEN_VIEN" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Cung cấp huấn luyện viên</b> — HLV riêng hoặc theo nhóm</span>
-              </label>
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="LOP_HOC" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Tổ chức lớp học</b> — lớp học theo lịch, theo khóa</span>
-              </label>
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="DICH_VU_THE_THAO" id="capDichVuTheThao" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Cung cấp dịch vụ thể thao</b> — căng lưới vợt, thay quấn cán, sửa chữa/bảo dưỡng dụng cụ...</span>
-              </label>
-              <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <input type="checkbox" value="KHAC" class="w-5 h-5 accent-[#7c3aed] flex-shrink-0"/>
-                <span class="text-sm text-slate-600"><b class="text-slate-900">Dịch vụ khác</b> — sẽ trao đổi thêm với V-SPORT sau khi duyệt</span>
-              </label>
-            </div>
-            <!-- Sub-options bên ngoài #capabilityList: chỉ mô tả nhu cầu, KHÔNG được thu thập vào mảng
-                 capabilities[] gửi lên server (JS collector chỉ query trong #capabilityList) -->
-            <div id="dichVuTheThaoOptions" class="hidden mt-2 ml-8 flex flex-col gap-1.5 pl-3 border-l border-slate-200">
-              <p class="text-xs text-slate-500 mb-1">Loại dịch vụ dự kiến cung cấp (không bắt buộc):</p>
-              <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="CANG_LUOI_VOT" class="w-4 h-4 accent-[#7c3aed]"/> Căng lưới vợt (cầu lông/tennis)</label>
-              <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="THAY_QUAN_CAN" class="w-4 h-4 accent-[#7c3aed]"/> Thay quấn cán</label>
-              <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="SUA_CHUA_VOT" class="w-4 h-4 accent-[#7c3aed]"/> Sửa chữa vợt</label>
-              <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="BAO_DUONG_DUNG_CU" class="w-4 h-4 accent-[#7c3aed]"/> Bảo dưỡng dụng cụ</label>
-              <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="HUAN_LUYEN_VIEN_DV" class="w-4 h-4 accent-[#7c3aed]"/> Huấn luyện viên</label>
-              <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="DICH_VU_KHAC" class="w-4 h-4 accent-[#7c3aed]"/> Dịch vụ khác</label>
-              <p class="text-[11px] text-slate-400 mt-1">Đây chỉ là mô tả nhu cầu đăng ký, chưa tạo dịch vụ công khai. Sau khi được duyệt, bạn sẽ cấu hình chi tiết trong khu vực Quản lý dịch vụ.</p>
-            </div>
-          </div>
-          <script>
-            document.addEventListener('DOMContentLoaded', function () {
-              var toggle = document.getElementById('capDichVuTheThao');
-              var opts = document.getElementById('dichVuTheThaoOptions');
-              if (toggle && opts) {
-                toggle.addEventListener('change', function () {
-                  opts.classList.toggle('hidden', !toggle.checked);
-                });
-              }
-            });
-          </script>
-
-          <div class="flex gap-3">
-            <button type="button" onclick="goToStep2Back()" class="btn btn-outline flex-shrink-0 py-3.5">
+      <!-- ====== STEP 2: OTP ====== -->
+      <div id="formStep2" class="form-step hidden">
+        <h3 class="text-lg font-extrabold mb-2 text-slate-900">Xác thực Email</h3>
+        <p class="text-slate-500 text-sm mb-5">Chúng tôi đã gửi mã OTP đến <strong id="otpEmailDisplay" class="text-[#ea580c]"></strong>. Vui lòng nhập mã bên dưới.</p>
+        <p id="otpValidityHint" class="hidden text-slate-400 text-xs -mt-3 mb-3"></p>
+        <div class="flex justify-center gap-2 mb-5" id="otpInputs">
+          <input type="text" maxlength="1" class="otp-box" data-index="0" />
+          <input type="text" maxlength="1" class="otp-box" data-index="1" />
+          <input type="text" maxlength="1" class="otp-box" data-index="2" />
+          <input type="text" maxlength="1" class="otp-box" data-index="3" />
+          <input type="text" maxlength="1" class="otp-box" data-index="4" />
+          <input type="text" maxlength="1" class="otp-box" data-index="5" />
+        </div>
+        <div id="otpError" class="hidden text-center text-red-600 text-sm mb-4 font-semibold"></div>
+        <div class="flex flex-col gap-3">
+          <button type="button" onclick="verifyOtp()" id="btnVerifyOtp" class="btn btn-primary w-full justify-center py-3.5 text-base">
+            Xác thực OTP
+          </button>
+          <div class="flex items-center justify-between mt-1">
+            <button type="button" onclick="goToStep1()" class="text-slate-500 hover:text-slate-800 transition-colors text-sm flex items-center gap-1 bg-transparent border-none cursor-pointer font-semibold">
               <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
             </button>
-            <button type="button" onclick="submitFullForm()" class="btn btn-primary flex-1 justify-center py-3.5 text-base">
-              🚀 Gửi đăng ký
+            <button type="button" onclick="resendOtp()" id="btnResendOtp" class="text-[#ea580c] hover:text-[#c2410c] text-sm transition-colors disabled:opacity-40 bg-transparent border-none cursor-pointer font-semibold" disabled>
+              Gửi lại mã<span id="resendCountdownWrap"> (<span id="resendCountdown">60</span>s)</span>
             </button>
           </div>
         </div>
+        <p class="text-center text-slate-400 text-xs mt-4">Số lần nhập sai: <span id="otpAttemptCount" class="font-bold text-red-500">0</span>/5</p>
+      </div>
+
+      <!-- ====== STEP 3: Sports, Courts, Hours ====== -->
+      <div id="formStep3" class="form-step hidden">
+        <h3 class="text-lg font-extrabold mb-5 text-slate-900">Cấu hình cơ sở</h3>
+
+        <div class="field mb-5">
+          <label>Môn thể thao / Dịch vụ <span class="text-[#ea580c]">*</span></label>
+          <button type="button" onclick="openSportsPopup()" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-left flex items-center justify-between hover:border-[#ea580c]/50 transition-all cursor-pointer">
+            <span id="sportsPreviewText" class="text-slate-400">Chọn các môn thể thao...</span>
+            <span class="material-symbols-outlined text-[#ea580c]">add_circle</span>
+          </button>
+        </div>
+
+        <div id="courtQuantitySection" class="hidden mb-5">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Số lượng sân từng môn</label>
+          <div id="courtQuantityList" class="flex flex-col gap-3"></div>
+        </div>
+
+        <input type="hidden" id="openTime"  value="06:00">
+        <input type="hidden" id="closeTime" value="22:00">
+        <input type="hidden" id="viDo"   name="viDo">
+        <input type="hidden" id="kinhDo" name="kinhDo">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+          <div class="field">
+            <label>Giờ mở cửa <span class="text-[#ea580c]">*</span></label>
+            <div class="vtimepicker-wrap" id="openTimePicker" data-target="openTime" data-default="06:00">
+              <button type="button" class="vtimepicker-btn" onclick="vtpToggle('openTimePicker')">
+                <span class="material-symbols-outlined vtimepicker-icon">schedule</span>
+                <span class="vtimepicker-display" id="openTimePicker-display">06:00</span>
+                <span class="material-symbols-outlined vtimepicker-caret">expand_more</span>
+              </button>
+              <div class="vtimepicker-popup" id="openTimePicker-popup">
+                <div class="vtimepicker-col" id="openTimePicker-hours"></div>
+                <div class="vtimepicker-sep">:</div>
+                <div class="vtimepicker-col" id="openTimePicker-minutes"></div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Giờ đóng cửa <span class="text-[#ea580c]">*</span></label>
+            <div class="vtimepicker-wrap" id="closeTimePicker" data-target="closeTime" data-default="22:00">
+              <button type="button" class="vtimepicker-btn" onclick="vtpToggle('closeTimePicker')">
+                <span class="material-symbols-outlined vtimepicker-icon">schedule</span>
+                <span class="vtimepicker-display" id="closeTimePicker-display">22:00</span>
+                <span class="material-symbols-outlined vtimepicker-caret">expand_more</span>
+              </button>
+              <div class="vtimepicker-popup" id="closeTimePicker-popup">
+                <div class="vtimepicker-col" id="closeTimePicker-hours"></div>
+                <div class="vtimepicker-sep">:</div>
+                <div class="vtimepicker-col" id="closeTimePicker-minutes"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Ngày hoạt động <span class="text-[#ea580c]">*</span></label>
+          <div class="grid grid-cols-7 gap-2" id="operatingDays">
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="T2" checked/><span>Thứ 2</span></label>
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="T3" checked/><span>Thứ 3</span></label>
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="T4" checked/><span>Thứ 4</span></label>
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="T5" checked/><span>Thứ 5</span></label>
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="T6" checked/><span>Thứ 6</span></label>
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="T7" checked/><span>Thứ 7</span></label>
+            <label class="day-chip cursor-pointer"><input type="checkbox" value="CN" checked/><span>CN</span></label>
+          </div>
+        </div>
+
+        <div class="field mb-5">
+          <label for="regDescription">Mô tả thêm về cơ sở</label>
+          <textarea id="regDescription" rows="3" placeholder="Dịch vụ đi kèm, tiện ích, lưu ý đặc biệt..." class="resize-vertical"></textarea>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Hoạt động và dịch vụ tại cơ sở</label>
+          <p class="text-xs text-slate-400 mb-3">Ngoài cho thuê sân, chọn thêm nếu cơ sở của bạn có các hoạt động sau. Mỗi lựa chọn cần quản trị viên phê duyệt riêng.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="capabilityList">
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="SAN_PHAM" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Bán sản phẩm thể thao</b> — giày, áo quần, vợt, bóng, phụ kiện</span>
+            </label>
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="THUE_DUNG_CU" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Cho thuê dụng cụ thể thao</b> — vợt, bóng, giày, áo bib...</span>
+            </label>
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="DO_AN_NUOC_UONG" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Đồ ăn và nước uống</b> — quầy giải khát, đồ ăn nhẹ tại chỗ</span>
+            </label>
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="HUAN_LUYEN_VIEN" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Cung cấp huấn luyện viên</b> — HLV riêng hoặc theo nhóm</span>
+            </label>
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="LOP_HOC" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Tổ chức lớp học</b> — lớp học theo lịch, theo khóa</span>
+            </label>
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="DICH_VU_THE_THAO" id="capDichVuTheThao" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Cung cấp dịch vụ thể thao</b> — căng lưới vợt, thay quấn cán, sửa chữa/bảo dưỡng...</span>
+            </label>
+            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <input type="checkbox" value="KHAC" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
+              <span class="text-sm text-slate-600"><b class="text-slate-900">Dịch vụ khác</b> — sẽ trao đổi thêm với V-SPORT sau khi duyệt</span>
+            </label>
+          </div>
+          <div id="dichVuTheThaoOptions" class="hidden mt-2 ml-8 flex flex-col gap-1.5 pl-3 border-l border-slate-200">
+            <p class="text-xs text-slate-500 mb-1">Loại dịch vụ dự kiến cung cấp (không bắt buộc):</p>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="CANG_LUOI_VOT" class="w-4 h-4 accent-[#ea580c]"/> Căng lưới vợt (cầu lông/tennis)</label>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="THAY_QUAN_CAN" class="w-4 h-4 accent-[#ea580c]"/> Thay quấn cán</label>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="SUA_CHUA_VOT" class="w-4 h-4 accent-[#ea580c]"/> Sửa chữa vợt</label>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="BAO_DUONG_DUNG_CU" class="w-4 h-4 accent-[#ea580c]"/> Bảo dưỡng dụng cụ</label>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="HUAN_LUYEN_VIEN_DV" class="w-4 h-4 accent-[#ea580c]"/> Huấn luyện viên</label>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="DICH_VU_KHAC" class="w-4 h-4 accent-[#ea580c]"/> Dịch vụ khác</label>
+            <p class="text-[11px] text-slate-400 mt-1">Đây chỉ là mô tả nhu cầu đăng ký. Sau khi được duyệt, bạn sẽ cấu hình chi tiết trong khu vực Quản lý dịch vụ.</p>
+          </div>
+        </div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            var toggle = document.getElementById('capDichVuTheThao');
+            var opts = document.getElementById('dichVuTheThaoOptions');
+            if (toggle && opts) {
+              toggle.addEventListener('change', function () {
+                opts.classList.toggle('hidden', !toggle.checked);
+              });
+            }
+          });
+        </script>
+
+        <div class="flex gap-3">
+          <button type="button" onclick="goToStep2Back()" class="btn-outline flex-shrink-0 py-3.5">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
+          </button>
+          <button type="button" onclick="submitFullForm()" class="btn btn-primary flex-1 justify-center py-3.5 text-base">
+            🚀 Gửi đăng ký
+          </button>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= FEATURES ================= -->
-  <section class="block" id="features">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow muted">/ Tính năng cốt lõi</p>
-        <h2 class="h2">Ba giải pháp vận hành vượt trội.</h2>
-        <p class="lead">Hệ thống tích hợp mọi công cụ cần thiết để tối ưu doanh thu và quản lý sân chơi hiệu quả.</p>
-      </div>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="ico"><span class="material-symbols-outlined">event_available</span></div>
-          <h3>Đặt lịch thông minh</h3>
-          <p>Giao diện đặt lịch trực quan, tránh trùng lịch trong 3 giây.</p>
-        </div>
-        <div class="feature-card">
-          <div class="ico"><span class="material-symbols-outlined">groups</span></div>
-          <h3>Quản lý Hội viên</h3>
-          <p>Theo dõi gói tập, điểm danh tự động thông qua mã QR Code.</p>
-        </div>
-        <div class="feature-card">
-          <div class="ico"><span class="material-symbols-outlined">monitoring</span></div>
-          <h3>Báo cáo Doanh thu</h3>
-          <p>Báo cáo thời gian thực, minh bạch biểu đồ doanh thu chi tiết.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= PROCESS ================= -->
-  <section class="block" id="process" style="background:var(--paper-2)">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow muted">/ Quy trình</p>
-        <h2 class="h2">Bốn bước đơn giản. Hệ thống sẵn sàng vận hành.</h2>
-      </div>
-      <div class="process-grid">
-        <div class="process-card">
-          <div class="num">01</div>
-          <h3>Đăng ký thông tin</h3>
-          <p>Điền thông tin cơ bản về cơ sở của bạn chỉ trong 1 phút để khởi tạo tài khoản quản lý.</p>
-        </div>
-        <div class="process-card">
-          <div class="num">02</div>
-          <h3>Xác thực Email</h3>
-          <p>Nhập mã bảo mật OTP gửi trực tiếp tới email của bạn để xác minh chủ quyền.</p>
-        </div>
-        <div class="process-card">
-          <div class="num">03</div>
-          <h3>Cấu hình sân</h3>
-          <p>Khai báo môn thể thao, số lượng sân hiện có và khung giờ mở cửa hoạt động.</p>
-        </div>
-        <div class="process-card">
-          <div class="num">04</div>
-          <h3>Vận hành hệ thống</h3>
-          <p>Sân của bạn lập tức hiển thị trên hệ sinh thái V-Sport để đón nhận lịch đặt sân đầu tiên.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= SOLUTION ================= -->
-  <section class="block" id="solution">
-    <div class="wrap solution-grid">
-      <div class="solution-media">
-        <img src="${pageContext.request.contextPath}/assets/images/owner/owner-hero-vsport.webp" alt="V-SPORT Sports Management Platform">
-      </div>
+<!-- ================================================================ FOOTER ================================================================ -->
+<footer class="footer-vs">
+  <div class="container">
+    <div class="footer-top">
       <div>
-        <p class="eyebrow muted">/ Giải pháp quản lý</p>
-        <h2 class="h2" style="margin-top:10px">Giải phóng thời gian. Tối ưu doanh thu cơ sở.</h2>
-        <p class="lead" style="margin-top:14px">Không còn những cuốn sổ tay ghi chép hay file Excel phức tạp dễ sai sót. V-Sport mang lại giao diện tinh tế, dễ dàng làm quen trong vài phút và bảo mật dữ liệu chuẩn quốc tế.</p>
-        <div class="ledger" style="margin-top:24px">
-          <div><span>Thời gian thiết lập</span><span>Dưới 5 phút</span></div>
-          <div><span>Nền tảng vận hành</span><span>Cloud &amp; Mobile</span></div>
-          <div><span>Hỗ trợ kỹ thuật</span><span>24/7 Miễn phí</span></div>
+        <div class="footer-brand-title">V-SPORT<span>.</span></div>
+        <div class="footer-brand-slogan">Nâng tầm vận hành cơ sở thể thao Việt Nam.</div>
+        <div style="display:flex;gap:12px;margin-top:20px">
+          <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);font-size:0.9rem;transition:var(--transition)" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);font-size:0.9rem;transition:var(--transition)">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);font-size:0.9rem;transition:var(--transition)">
+            <i class="fab fa-tiktok"></i>
+          </a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ================= QUOTE ================= -->
-  <section class="block" style="padding-top:0">
-    <div class="quote-band">
-      <q>Từ khi dùng V-Sport, tôi không còn bị đau đầu vì trùng lịch đặt sân của khách nữa. Doanh thu tăng hơn 25% nhờ tối ưu các khung giờ trống.</q>
-      <p class="who">— Anh Minh Tuấn · Chủ sân bóng Tân Bình</p>
-    </div>
-  </section>
-
-  <!-- ================= MARQUEE ================= -->
-  <section class="marquee" aria-hidden="true">
-    <div class="mrow">
-      <span>Bóng đá</span><span>Bóng rổ</span><span>Cầu lông</span><span>Tennis</span><span>Bóng chuyền</span><span>Billiards</span><span>Pickleball</span>
-      <span>Bóng đá</span><span>Bóng rổ</span><span>Cầu lông</span><span>Tennis</span><span>Bóng chuyền</span><span>Billiards</span><span>Pickleball</span>
-    </div>
-  </section>
-
-  <!-- ================= FINAL CTA ================= -->
-  <section class="block">
-    <div class="wrap">
-      <div class="final-cta">
-        <p class="eyebrow" style="color:#c4b5fd">/ Sẵn sàng đồng hành</p>
-        <h2 style="margin-top:14px">Bắt đầu số hóa ngay hôm nay?</h2>
-        <p>Đội ngũ chúng tôi sẽ liên hệ trong vòng 24 giờ để hỗ trợ bạn cấu hình hệ thống — miễn phí dùng thử 30 ngày, không ràng buộc hợp đồng dài hạn.</p>
-        <a href="#begin" class="btn btn-primary" style="margin-top:24px;padding:14px 32px;font-size:1rem">Đăng ký cơ sở miễn phí</a>
+      <div class="footer-col">
+        <h4>Tính năng</h4>
+        <a href="#features">Đặt lịch thông minh</a>
+        <a href="#features">Quản lý hội viên</a>
+        <a href="#features">Báo cáo doanh thu</a>
+      </div>
+      <div class="footer-col">
+        <h4>Thông tin</h4>
+        <a href="#story">Về V-SPORT</a>
+        <a href="#process">Quy trình</a>
+        <a href="#sports">Môn thể thao</a>
+      </div>
+      <div class="footer-col">
+        <h4>Liên kết</h4>
+        <a href="#begin">Đăng ký đối tác</a>
+        <a href="${pageContext.request.contextPath}/index.jsp">Đăng nhập</a>
       </div>
     </div>
-  </section>
-
-  <!-- ================= FOOTER ================= -->
-  <footer class="foot">
-    <div class="wrap">
-      <div class="foot-top">
-        <div>
-          <a href="#" class="brand">V-SPORT<span style="color:var(--accent)">.</span></a>
-          <p>Hệ thống quản lý thể thao hàng đầu. Đơn giản hóa quy trình vận hành và tối ưu doanh thu của bạn.</p>
-        </div>
-        <div class="foot-col"><h4>Tính năng</h4><a href="#features">Đặt lịch</a><a href="#features">Hội viên</a><a href="#features">Báo cáo</a></div>
-        <div class="foot-col"><h4>Thông tin</h4><a href="#process">Quy trình</a><a href="#solution">Giải pháp</a></div>
-        <div class="foot-col"><h4>Liên kết</h4><a href="#begin">Đăng ký đối tác</a><a href="${pageContext.request.contextPath}/index.jsp">Đăng nhập</a></div>
-      </div>
-      <div class="foot-bottom">
-        <span>© 2026 V-Sport. Tất cả quyền được bảo lưu.</span>
-        <span>Premium Sports Management.</span>
-      </div>
+    <div class="footer-bottom">
+      <span>© 2026 V-Sport. Tất cả quyền được bảo lưu.</span>
+      <span>Premium Sports Management Platform.</span>
     </div>
-  </footer>
-
-</main>
+  </div>
+</footer>
 
 <!-- ====== SPORTS POPUP MODAL ====== -->
 <div id="sportsPopup" class="fixed inset-0 z-[100] hidden">
@@ -705,15 +910,11 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
       </button>
     </div>
     <div class="p-6 overflow-y-auto flex-1">
-      <div class="grid grid-cols-2 gap-3" id="sportsGrid">
-        <!-- Sports will be generated by JS -->
-      </div>
+      <div class="grid grid-cols-2 gap-3" id="sportsGrid"></div>
     </div>
     <div class="p-6 border-t border-slate-100 flex justify-between items-center">
-      <span class="text-sm text-slate-500">Đã chọn: <strong id="selectedSportsCount" class="text-[#7c3aed]">0</strong> môn</span>
-      <button onclick="confirmSportsSelection()" class="btn btn-primary px-8 py-3">
-        Xác nhận
-      </button>
+      <span class="text-sm text-slate-500">Đã chọn: <strong id="selectedSportsCount" class="text-[#ea580c]">0</strong> môn</span>
+      <button onclick="confirmSportsSelection()" class="btn btn-primary px-8 py-3">Xác nhận</button>
     </div>
   </div>
 </div>
@@ -732,36 +933,29 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     .geo-search-item { padding: 10px 14px; font-size: 13px; cursor: pointer; color: #1e293b; border-bottom: 1px solid #f1f5f9; transition: background 120ms; }
     .geo-search-item:last-child { border-bottom: none; }
     .geo-search-item:hover { background: #f8fafc; }
-    .geo-coord-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #7c3aed14; border: 1px solid #7c3aed30; border-radius: 999px; font-size: 12px; font-weight: 700; color: #6d28d9; }
+    .geo-coord-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #ea580c14; border: 1px solid #ea580c30; border-radius: 999px; font-size: 12px; font-weight: 700; color: #9a3412; }
   </style>
   <div id="geoModalBox" class="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col" style="max-height:92vh;">
-    <!-- Header -->
     <div class="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-[#7c3aed] text-2xl">location_on</span>
+        <span class="material-symbols-outlined text-[#ea580c] text-2xl">location_on</span>
         <h3 class="text-lg font-extrabold text-slate-900">Chọn vị trí cơ sở</h3>
       </div>
       <button type="button" onclick="closeGeoModal()" class="text-slate-400 hover:text-slate-700 transition-all bg-transparent border-none cursor-pointer p-1">
         <span class="material-symbols-outlined text-2xl">close</span>
       </button>
     </div>
-
-    <!-- Search box -->
     <div class="px-5 pb-3 flex-shrink-0">
       <div class="geo-search-wrap">
         <input type="text" id="geoSearchInput" placeholder="Tìm địa chỉ hoặc tên cơ sở..."
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#7c3aed] transition-colors" autocomplete="off"/>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c] transition-colors" autocomplete="off"/>
         <div id="geoSearchResults" class="geo-search-results hidden"></div>
       </div>
       <p class="text-xs text-slate-400 mt-2">Bấm vào bản đồ hoặc kéo điểm ghim để chọn vị trí chính xác.</p>
     </div>
-
-    <!-- Map -->
     <div class="px-5 flex-shrink-0">
       <div id="geoMapEl"></div>
     </div>
-
-    <!-- Coord preview + actions -->
     <div class="px-5 py-4 flex-shrink-0">
       <div id="geoCoordPill" class="geo-coord-pill mb-3 hidden">
         <span class="material-symbols-outlined text-[14px]">my_location</span>
@@ -770,12 +964,12 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
       <div id="geoCoordNone" class="text-xs text-slate-400 mb-3">Chưa chọn vị trí — bấm vào bản đồ để ghim điểm.</div>
       <div class="flex gap-2">
         <button type="button" onclick="geoUseGps()" id="geoGpsBtn"
-          class="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:border-[#7c3aed] hover:text-[#7c3aed] transition-all bg-white">
+          class="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:border-[#ea580c] hover:text-[#ea580c] transition-all bg-white">
           <span class="material-symbols-outlined text-base">my_location</span> Vị trí hiện tại
         </button>
         <button type="button" onclick="geoConfirm()" id="geoConfirmBtn" disabled
           class="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
-          style="background:#7c3aed; opacity:.4; cursor:not-allowed;">
+          style="background:#ea580c; opacity:.4; cursor:not-allowed;">
           <span class="material-symbols-outlined text-base">check_circle</span> Xác nhận vị trí
         </button>
       </div>
@@ -795,8 +989,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     let selectedSports = []; // [{name, icon}]
     let emailVerified = false;
 
-    // Cờ do backend đặt khi JSP được forward lại kèm dữ liệu form (vd: lỗi validate).
-    // Khi true, bản nháp trong sessionStorage KHÔNG được ghi đè lên dữ liệu backend trả về.
     if (typeof window.ownerServerFormHasData === 'undefined') {
         window.ownerServerFormHasData = false;
     }
@@ -828,7 +1020,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         document.getElementById('formStep1').classList.toggle('hidden', step !== 1);
         document.getElementById('formStep2').classList.toggle('hidden', step !== 2);
         document.getElementById('formStep3').classList.toggle('hidden', step !== 3);
-        // Update step indicators
         document.querySelectorAll('#stepIndicators .step-dot').forEach(dot => {
             const s = parseInt(dot.dataset.step);
             if (s < step) {
@@ -850,9 +1041,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     function hideError() { document.getElementById('errorAlert').classList.add('hidden'); }
 
     // ==========================================
-    // STEP 1 -> STEP 2 (Send OTP)
-    // ==========================================
-    // ==========================================
     // GEO MAP MODAL
     // ==========================================
     let geoMap = null;
@@ -861,7 +1049,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     let geoPendingLng = null;
     let geoSearchTimer = null;
 
-    const GEO_DEFAULT = [16.047079, 108.206230]; // Đà Nẵng — trung tâm VN
+    const GEO_DEFAULT = [16.047079, 108.206230];
 
     function autoFillAddress() {
         document.getElementById('geoModal').classList.remove('hidden');
@@ -883,7 +1071,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             geoMap.invalidateSize();
             return;
         }
-        // Khởi tạo tại tọa độ đã lưu (nếu có) hoặc default
         const savedLat = parseFloat(document.getElementById('viDo').value);
         const savedLng = parseFloat(document.getElementById('kinhDo').value);
         const center = (savedLat && savedLng) ? [savedLat, savedLng] : GEO_DEFAULT;
@@ -897,17 +1084,14 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
         }).addTo(geoMap);
 
-        // Nếu đã có tọa độ cũ, đặt marker sẵn
         if (savedLat && savedLng) {
             geoSetPin(savedLat, savedLng, false);
         }
 
-        // Click bản đồ để ghim
         geoMap.on('click', function(e) {
             geoSetPin(e.latlng.lat, e.latlng.lng, true);
         });
 
-        // Search input
         const inp = document.getElementById('geoSearchInput');
         inp.addEventListener('input', function() {
             clearTimeout(geoSearchTimer);
@@ -917,7 +1101,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         });
         inp.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeGeoModal(); });
 
-        // Đóng search khi click ngoài
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.geo-search-wrap')) {
                 document.getElementById('geoSearchResults').classList.add('hidden');
@@ -933,7 +1116,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
 
         const icon = L.divIcon({
             className: '',
-            html: '<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin-left:-16px;margin-top:-32px"><svg viewBox="0 0 24 24" width="32" height="32" fill="#7c3aed" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>',
+            html: '<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin-left:-16px;margin-top:-32px"><svg viewBox="0 0 24 24" width="32" height="32" fill="#ea580c" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>',
             iconSize: [32, 32], iconAnchor: [0, 0]
         });
 
@@ -948,13 +1131,10 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         }
 
         geoMap.panTo([lat, lng]);
-
-        // Hiện tọa độ
         document.getElementById('geoCoordText').textContent = lat + ', ' + lng;
         document.getElementById('geoCoordPill').classList.remove('hidden');
         document.getElementById('geoCoordNone').classList.add('hidden');
 
-        // Bật nút xác nhận
         const btn = document.getElementById('geoConfirmBtn');
         btn.disabled = false;
         btn.style.opacity = '1';
@@ -1047,7 +1227,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     function fetchAddressFromCoords(lat, lon, callback) {
         const addrInput = document.getElementById('regAddress');
         const originalPlaceholder = addrInput.placeholder;
-        const savedAddress = addrInput.value.trim(); // giữ lại nếu API lỗi
+        const savedAddress = addrInput.value.trim();
         addrInput.disabled = true;
         addrInput.value = "";
         addrInput.placeholder = "Đang lấy địa chỉ từ tọa độ [" + parseFloat(lat).toFixed(4) + ", " + parseFloat(lon).toFixed(4) + "]...";
@@ -1060,14 +1240,14 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 if (data && data.display_name) {
                     addrInput.value = data.display_name;
                 } else {
-                    addrInput.value = savedAddress; // khôi phục, không alert
+                    addrInput.value = savedAddress;
                 }
                 if (callback) callback();
             })
             .catch(() => {
                 addrInput.disabled = false;
                 addrInput.placeholder = originalPlaceholder;
-                addrInput.value = savedAddress; // khôi phục địa chỉ cũ
+                addrInput.value = savedAddress;
                 const hint = document.getElementById('coordPreviewText');
                 if (hint) hint.textContent += ' — Không tự lấy được địa chỉ, hãy nhập thủ công.';
                 if (callback) callback();
@@ -1085,14 +1265,9 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         if (!name) { showError('Vui lòng nhập tên cơ sở.'); return; }
         if (!email) { showError('Vui lòng nhập email.'); return; }
         if (!phone) { showError('Vui lòng nhập số điện thoại.'); return; }
-
-        // Validate email format
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Email không hợp lệ.'); return; }
-
-        // Validate phone format
         if (!/^(0|\+84)[35789][0-9]{8}$/.test(phone)) { showError('Số điện thoại không hợp lệ.'); return; }
 
-        // Send OTP via AJAX
         document.getElementById('otpEmailDisplay').textContent = email;
         sendOtpToServer(email);
     }
@@ -1120,7 +1295,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 showStep(2);
                 startResendCountdown();
                 saveOwnerDraft();
-                // Focus first OTP box
                 document.querySelector('.otp-box[data-index="0"]').focus();
             } else {
                 showError(data.message || 'Không thể gửi OTP. Vui lòng thử lại.');
@@ -1150,7 +1324,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 if (prev) { prev.focus(); prev.value = ''; }
             }
         });
-        // Allow paste
         box.addEventListener('paste', (e) => {
             e.preventDefault();
             const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
@@ -1175,7 +1348,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
 
         const email = document.getElementById('regEmail').value.trim();
         const btn = document.getElementById('btnVerifyOtp');
-        if (btn.disabled) return; // chống double-click / double-submit
+        if (btn.disabled) return;
         btn.disabled = true;
         fetch('${pageContext.request.contextPath}/owner/verify-otp', {
             method: 'POST',
@@ -1192,10 +1365,8 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             } else {
                 otpAttempts++;
                 document.getElementById('otpAttemptCount').textContent = otpAttempts;
-                // Clear OTP boxes
                 document.querySelectorAll('.otp-box').forEach(b => b.value = '');
                 document.querySelector('.otp-box[data-index="0"]').focus();
-
                 if (otpAttempts >= 5) {
                     showError('Bạn đã nhập sai OTP quá 5 lần. Vui lòng quay lại và thử lại.');
                     showStep(1);
@@ -1250,7 +1421,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         }
         const email = document.getElementById('regEmail').value.trim();
         sendOtpToServer(email);
-        // Reset OTP fields
         document.querySelectorAll('.otp-box').forEach(b => b.value = '');
         otpAttempts = 0;
         document.getElementById('otpAttemptCount').textContent = '0';
@@ -1273,8 +1443,8 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             const div = document.createElement('label');
             div.className = 'sport-item cursor-pointer';
             div.innerHTML = '<input type="checkbox" value="' + sport.name + '" data-icon="' + sport.icon + '" class="hidden peer sport-checkbox" ' + (isSelected ? 'checked' : '') + ' />' +
-                '<div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 peer-checked:border-[#7c3aed] peer-checked:bg-[#7c3aed]/10 transition-all hover:bg-slate-50">' +
-                    '<span class="material-symbols-outlined text-[22px] peer-checked:text-[#7c3aed] text-slate-400">' + sport.icon + '</span>' +
+                '<div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 peer-checked:border-[#ea580c] peer-checked:bg-[#ea580c]/10 transition-all hover:bg-slate-50">' +
+                    '<span class="material-symbols-outlined text-[22px] peer-checked:text-[#ea580c] text-slate-400">' + sport.icon + '</span>' +
                     '<span class="text-sm font-medium text-slate-800">' + sport.name + '</span>' +
                 '</div>';
             grid.appendChild(div);
@@ -1291,18 +1461,15 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         if (e.target.classList.contains('sport-checkbox')) updateSportsCount();
     });
 
-    // Make functions globally accessible so inline HTML event handlers can call them
     window.openSportsPopup = function() {
         initSportsGrid();
         document.getElementById('sportsPopup').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     };
-
     window.closeSportsPopup = function() {
         document.getElementById('sportsPopup').classList.add('hidden');
         document.body.style.overflow = '';
     };
-
     window.confirmSportsSelection = function() {
         selectedSports = [];
         document.querySelectorAll('#sportsGrid .sport-checkbox:checked').forEach(cb => {
@@ -1336,7 +1503,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         selectedSports.forEach(sport => {
             const row = document.createElement('div');
             row.className = 'flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200';
-            row.innerHTML = '<span class="material-symbols-outlined text-[#7c3aed] text-[22px]">' + sport.icon + '</span>' +
+            row.innerHTML = '<span class="material-symbols-outlined text-[#ea580c] text-[22px]">' + sport.icon + '</span>' +
                 '<span class="flex-1 font-medium text-slate-800 text-sm">' + sport.name + '</span>' +
                 '<div class="flex items-center gap-2">' +
                     '<button type="button" onclick="changeQty(this,-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-all text-lg font-bold text-slate-700 cursor-pointer">−</button>' +
@@ -1368,22 +1535,18 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         const closeTime = document.getElementById('closeTime').value;
         if (!openTime || !closeTime) { showError('Vui lòng chọn giờ mở cửa và đóng cửa.'); return; }
 
-        // Collect operating days
         const days = [];
         document.querySelectorAll('#operatingDays input[type="checkbox"]:checked').forEach(cb => days.push(cb.value));
         if (days.length === 0) { showError('Vui lòng chọn ít nhất 1 ngày hoạt động.'); return; }
 
-        // Collect court data
         const sportsData = [];
         document.querySelectorAll('.court-qty').forEach(input => {
             sportsData.push({ sport: input.dataset.sport, quantity: parseInt(input.value) || 1 });
         });
 
-        // Collect selected business capabilities (optional — court rental itself is not a checkbox here)
         const capabilities = [];
         document.querySelectorAll('#capabilityList input[type="checkbox"]:checked').forEach(cb => capabilities.push(cb.value));
 
-        // Build form data
         const formData = new URLSearchParams();
         formData.append('ownerName', document.getElementById('ownerName').value.trim());
         formData.append('email', document.getElementById('regEmail').value.trim());
@@ -1428,14 +1591,12 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         });
     };
 
-    // Attach step transition functions to window so they are globally callable
     window.goToStep1 = goToStep1;
     window.goToStep2 = goToStep2;
     window.goToStep2Back = goToStep2Back;
     window.verifyOtp = verifyOtp;
     window.resendOtp = resendOtp;
 
-    // URL param alerts
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('success')) {
         document.getElementById('successAlert').classList.remove('hidden');
@@ -1458,7 +1619,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
             const hCol = document.getElementById(wrapId + '-hours');
             const mCol = document.getElementById(wrapId + '-minutes');
 
-            // Build hour buttons 0-23
             for (let h = 0; h <= 23; h++) {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -1473,7 +1633,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 hCol.appendChild(btn);
             }
 
-            // Build minute buttons
             MINUTES.forEach(function(m) {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -1494,7 +1653,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 if (targetId) document.getElementById(targetId).value = val;
             }
 
-            // Scroll selected hour into view
             setTimeout(function() {
                 const activeH = hCol.querySelector('.active');
                 if (activeH) activeH.scrollIntoView({block: 'center'});
@@ -1506,7 +1664,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         initVtp('openTimePicker',  '06:00');
         initVtp('closeTimePicker', '22:00');
 
-        // Close on outside click
         document.addEventListener('click', function(e) {
             document.querySelectorAll('.vtimepicker-wrap.open').forEach(function(w) {
                 if (!w.contains(e.target)) w.classList.remove('open');
@@ -1522,7 +1679,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         const wrap = document.getElementById(wrapId);
         if (!wrap) return;
         const targetId = wrap.dataset.target;
-        // Update active states
         const hCol = document.getElementById(wrapId + '-hours');
         const mCol = document.getElementById(wrapId + '-minutes');
         if (hCol) hCol.querySelectorAll('button').forEach(function(b, i) {
@@ -1542,24 +1698,21 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         const wrap = document.getElementById(wrapId);
         if (!wrap) return;
         const isOpen = wrap.classList.contains('open');
-        // Close all others
         document.querySelectorAll('.vtimepicker-wrap.open').forEach(function(w) { w.classList.remove('open'); });
         if (!isOpen) {
             wrap.classList.add('open');
-            // Scroll selected hour into view after popup opens
             const activeH = document.getElementById(wrapId + '-hours').querySelector('.active');
             if (activeH) setTimeout(function() { activeH.scrollIntoView({block: 'center'}); }, 50);
         }
     };
 
     // ==========================================
-    // BẢN NHÁP ĐĂNG KÝ (sessionStorage) — chống mất dữ liệu khi reload
+    // BẢN NHÁP ĐĂNG KÝ (sessionStorage)
     // ==========================================
     const OWNER_DRAFT_KEY = 'vsport_owner_registration_draft';
-    const OWNER_DRAFT_TTL_MS = 2 * 60 * 60 * 1000; // 2 giờ
+    const OWNER_DRAFT_TTL_MS = 2 * 60 * 60 * 1000;
     const OWNER_DRAFT_VERSION = 1;
 
-    // Debounce đơn giản: trì hoãn thực thi để không ghi sessionStorage liên tục
     function debounce(fn, wait) {
         let timer = null;
         return function() {
@@ -1575,23 +1728,19 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         return el ? el.value.trim() : '';
     }
 
-    // Thu thập dữ liệu KHÔNG nhạy cảm từ form hiện tại (không đọc OTP/password)
     function collectOwnerDraft() {
         const courtQuantities = {};
         document.querySelectorAll('.court-qty').forEach(function(input) {
             courtQuantities[input.dataset.sport] = input.value;
         });
-
         const operatingDays = [];
         document.querySelectorAll('#operatingDays input[type="checkbox"]:checked').forEach(function(cb) {
             operatingDays.push(cb.value);
         });
-
         const capabilities = [];
         document.querySelectorAll('#capabilityList input[type="checkbox"]:checked').forEach(function(cb) {
             capabilities.push(cb.value);
         });
-
         return {
             version: OWNER_DRAFT_VERSION,
             savedAt: Date.now(),
@@ -1620,9 +1769,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         try {
             const draft = collectOwnerDraft();
             sessionStorage.setItem(OWNER_DRAFT_KEY, JSON.stringify(draft));
-        } catch (e) {
-            // sessionStorage có thể bị trình duyệt chặn (chế độ ẩn danh nghiêm ngặt...) — bỏ qua an toàn
-        }
+        } catch (e) {}
     }
     const debouncedSaveOwnerDraft = debounce(saveOwnerDraft, 400);
 
@@ -1632,32 +1779,19 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
     }
 
     function clearOwnerDraft() {
-        try { sessionStorage.removeItem(OWNER_DRAFT_KEY); } catch (e) { /* bỏ qua */ }
+        try { sessionStorage.removeItem(OWNER_DRAFT_KEY); } catch (e) {}
     }
 
     function loadOwnerDraft() {
         let raw;
-        try {
-            raw = sessionStorage.getItem(OWNER_DRAFT_KEY);
-        } catch (e) {
-            return null;
-        }
+        try { raw = sessionStorage.getItem(OWNER_DRAFT_KEY); } catch (e) { return null; }
         if (!raw) return null;
-
         let draft;
-        try {
-            draft = JSON.parse(raw);
-        } catch (e) {
-            clearOwnerDraft(); // JSON hỏng — xóa key để không lặp lại lỗi ở lần sau
-            return null;
-        }
-
+        try { draft = JSON.parse(raw); } catch (e) { clearOwnerDraft(); return null; }
         if (!draft || draft.version !== OWNER_DRAFT_VERSION || isDraftExpired(draft)) {
             clearOwnerDraft();
             return null;
         }
-
-        // Nếu chỉ có 1 trong 2 giá trị tọa độ thì bỏ luôn cặp tọa độ lỗi, không restore
         if (draft.fields) {
             const hasVi = !!draft.fields.viDo;
             const hasKinh = !!draft.fields.kinhDo;
@@ -1666,16 +1800,11 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 draft.fields.kinhDo = '';
             }
         }
-
         return draft;
     }
 
-    // Điều hướng bước dùng khi khôi phục / reset — không kèm side-effect gửi OTP hay submit
-    function goToRegistrationStep(step) {
-        showStep(step);
-    }
+    function goToRegistrationStep(step) { showStep(step); }
 
-    // Đổ dữ liệu draft vào các input thật trên form (không đụng tới bước hiện tại / OTP)
     function restoreOwnerDraftFieldsToDom(draft) {
         const f = draft.fields || {};
         if (f.tenCoSo) document.getElementById('ownerName').value = f.tenCoSo;
@@ -1686,7 +1815,7 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         if (f.viDo && f.kinhDo) {
             document.getElementById('viDo').value = f.viDo;
             document.getElementById('kinhDo').value = f.kinhDo;
-            setLocationCoords(f.viDo, f.kinhDo); // chỉ hiển thị lại preview, không gọi GPS/Nominatim
+            setLocationCoords(f.viDo, f.kinhDo);
         }
 
         const s3 = draft.step3 || {};
@@ -1700,18 +1829,14 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
                 });
             }
         }
-
         if (Array.isArray(s3.operatingDays) && s3.operatingDays.length) {
             document.querySelectorAll('#operatingDays input[type="checkbox"]').forEach(function(cb) {
                 cb.checked = s3.operatingDays.indexOf(cb.value) !== -1;
             });
         }
-
         if (s3.openTime) { vtpSetTime('openTimePicker', s3.openTime); }
         if (s3.closeTime) { vtpSetTime('closeTimePicker', s3.closeTime); }
-
         if (s3.description) document.getElementById('regDescription').value = s3.description;
-
         if (Array.isArray(s3.capabilities) && s3.capabilities.length) {
             document.querySelectorAll('#capabilityList input[type="checkbox"]').forEach(function(cb) {
                 cb.checked = s3.capabilities.indexOf(cb.value) !== -1;
@@ -1719,7 +1844,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         }
     }
 
-    // Gọi server để biết trạng thái OTP/xác thực THẬT (không bao giờ tin sessionStorage cho việc này)
     function fetchOwnerOtpStatus() {
         return fetch('${pageContext.request.contextPath}/owner/otp-status')
             .then(function(r) { return r.json(); })
@@ -1734,55 +1858,44 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         el.classList.remove('hidden');
     }
 
-    // Suy ra cooldown còn lại của nút "Gửi lại mã" (60s) từ thời gian OTP đã tồn tại (tối đa 5 phút)
     function applyResendCooldownFromOtpValidity(secondsRemainingOtpValidity) {
         const elapsedSinceSent = Math.max(0, 300 - (secondsRemainingOtpValidity || 0));
         const cooldownLeft = Math.max(0, 60 - elapsedSinceSent);
         startResendCountdown(cooldownLeft);
     }
 
-    // Đối chiếu bước muốn khôi phục với trạng thái OTP thật trên server (CASE A/B/C)
     async function reconcileOtpState(candidateStep, emailForDisplay) {
         if (!candidateStep || candidateStep <= 1) {
             goToRegistrationStep(1);
             return;
         }
-
         const status = await fetchOwnerOtpStatus();
-
         if (status.emailVerified) {
-            // CASE C — server xác nhận email đã verify, không bắt xác minh lại
             emailVerified = true;
             if (emailForDisplay) document.getElementById('otpEmailDisplay').textContent = emailForDisplay;
             goToRegistrationStep(3);
             return;
         }
-
         if (status.otpActive) {
-            // CASE A — OTP server vẫn còn hiệu lực, không tự gửi lại
             document.getElementById('otpEmailDisplay').textContent = status.otpEmail || emailForDisplay || '';
             goToRegistrationStep(2);
             applyResendCooldownFromOtpValidity(status.secondsRemaining);
             showOtpValidityHint(status.secondsRemaining);
             return;
         }
-
-        // CASE B — OTP hết hạn hoặc không còn phiên hợp lệ
         emailVerified = false;
         showError('Phiên xác thực đã hết hạn. Vui lòng gửi lại OTP.');
         goToRegistrationStep(1);
     }
 
     async function initOwnerRegistrationDraft() {
-        if (window.ownerServerFormHasData) return; // ưu tiên dữ liệu backend, không ghi đè bằng draft cũ
+        if (window.ownerServerFormHasData) return;
         const draft = loadOwnerDraft();
         if (!draft) return;
-
         restoreOwnerDraftFieldsToDom(draft);
         await reconcileOtpState(draft.currentStep, draft.fields && draft.fields.email);
     }
 
-    // Tự động lưu draft khi người dùng nhập/chọn (không gắn cho OTP box / file input)
     const OWNER_DRAFT_WATCHED_SELECTOR = '#ownerName, #regEmail, #regPhone, #regAddress, #regDescription, ' +
         '#openTimePicker, #closeTimePicker, #operatingDays input[type="checkbox"], .court-qty, ' +
         '#capabilityList input[type="checkbox"]';
@@ -1795,7 +1908,6 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         });
     });
 
-    // Nút "Xóa bản nháp / Bắt đầu lại"
     window.confirmResetOwnerDraft = function() {
         const ok = window.confirm('Bạn có chắc muốn xóa toàn bộ thông tin đã nhập và bắt đầu lại không?');
         if (!ok) return;
@@ -1814,19 +1926,16 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         document.getElementById('coordPreviewText').textContent = '';
         document.getElementById('coordMapsLink').classList.add('hidden');
         document.getElementById('regDescription').value = '';
-
         selectedSports = [];
         renderCourtQuantities();
         document.querySelectorAll('#operatingDays input[type="checkbox"]').forEach(function(cb) { cb.checked = true; });
         document.querySelectorAll('#capabilityList input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
-
         emailVerified = false;
         otpAttempts = 0;
         resendCount = 0;
         clearInterval(resendTimer);
         document.querySelectorAll('.otp-box').forEach(function(b) { b.value = ''; });
         document.getElementById('otpValidityHint').classList.add('hidden');
-
         hideError();
         goToRegistrationStep(1);
     }
@@ -1835,12 +1944,51 @@ footer.foot{background:var(--paper-2);border-top:1px solid var(--line);padding:4
         initOwnerRegistrationDraft();
     });
 
-    // Khôi phục từ bfcache (nút back/forward trình duyệt): chỉ đồng bộ lại trạng thái OTP,
-    // KHÔNG gửi lại OTP, KHÔNG submit lại — dữ liệu form đã được bfcache giữ nguyên.
     window.addEventListener('pageshow', function(e) {
         if (e.persisted && currentStep > 1) {
             reconcileOtpState(currentStep, ownerDraftGetVal('regEmail'));
         }
+    });
+
+    // ==========================================
+    // NAVBAR + REVEAL + PARALLAX (ThanhTruc patterns)
+    // ==========================================
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    const navToggle = document.getElementById('navToggle');
+    const navLinksEl = document.getElementById('navLinks');
+    if (navToggle) {
+        navToggle.addEventListener('click', () => navLinksEl.classList.toggle('active'));
+        navLinksEl.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinksEl.classList.remove('active'));
+        });
+    }
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        document.querySelectorAll('.parallax-sport').forEach(el => {
+            const speed = parseFloat(el.dataset.speed) || 0.3;
+            el.style.transform = 'translateY(' + (scrollY * speed * -0.5) + 'px)';
+        });
+    });
+
+    // Social link hover
+    document.querySelectorAll('.social-link').forEach(a => {
+        a.addEventListener('mouseenter', () => { a.style.background = 'var(--orange)'; a.style.color = '#fff'; });
+        a.addEventListener('mouseleave', () => { a.style.background = 'rgba(255,255,255,0.1)'; a.style.color = 'rgba(255,255,255,0.6)'; });
     });
 </script>
 

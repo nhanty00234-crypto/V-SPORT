@@ -1,0 +1,83 @@
+---
+title: V-SPORT ERD - Ghép kèo & Xã hội
+---
+erDiagram
+  GhepKeo {
+    INT KeoID PK "NOT NULL"
+    INT DatSanID
+    INT AccountID_NguoiTao
+    INT MonTheThaoID
+    NVARCHAR(MAX) MoTa
+    NVARCHAR(50) TrinhDo
+    NVARCHAR(50) TrangThai
+  }
+  ChiTietGhepKeo {
+    INT ChiTietKeoID PK "NOT NULL"
+    INT KeoID
+    INT AccountID_NguoiThamGia
+    NVARCHAR(50) TrangThaiThamGia
+    NVARCHAR(50) ViTriThamGia
+  }
+  LichSuELO {
+    INT LichSuELOID PK "NOT NULL"
+    INT AccountID "NOT NULL"
+    INT DatSanID
+    INT DiemTruoc "NOT NULL"
+    INT DiemSau "NOT NULL"
+    INT ThayDoi "NOT NULL"
+    NVARCHAR(255) LyDo
+    DATETIME ThoiGian
+  }
+  DanhGia {
+    INT DanhGiaID PK "NOT NULL"
+    INT DatSanID
+    INT AccountID_NguoiDanhGia
+    INT AccountID_NguoiBiDanhGia
+    INT SoSao
+    NVARCHAR(MAX) BinhLuan
+    DATETIME NgayDanhGia
+  }
+  NhatKyChat {
+    INT NhatKyChatID PK "NOT NULL"
+    INT AccountID
+    NVARCHAR(20) Kenh "NOT NULL"
+    INT TurnSo "NOT NULL"
+    NVARCHAR(10) VaiTro "NOT NULL"
+    NVARCHAR(MAX) NoiDung "NOT NULL"
+    NVARCHAR(50) TrangThaiBot
+    DATETIME ThoiGian
+  }
+  NhatKySOSGui {
+    INT NhatKySOSGuiID PK "NOT NULL"
+    INT YeuCauSOSID "NOT NULL"
+    INT AccountID_NhanGui "NOT NULL"
+    DATETIME ThoiGianGui
+    BIT DaXem
+    NVARCHAR(50) PhanHoi
+  }
+  YeuCauSOS {
+    INT YeuCauSOSID PK "NOT NULL"
+    INT AccountID_Tao "NOT NULL"
+    INT DatSanID
+    INT MonTheThaoID
+    INT SoNguoiCanTuyen "NOT NULL"
+    NVARCHAR(100) ViTriCanTuyen
+    NVARCHAR(MAX) GhiChu
+    NVARCHAR(50) TrangThai
+    DATETIME ThoiGianTao
+  }
+  Accounts ||--o{ ChiTietGhepKeo : "AccountID_NguoiThamGia"
+  GhepKeo ||--o{ ChiTietGhepKeo : "KeoID"
+  LichDatSan ||--o{ DanhGia : "DatSanID"
+  Accounts ||--o{ DanhGia : "AccountID_NguoiBiDanhGia"
+  Accounts ||--o{ GhepKeo : "AccountID_NguoiTao"
+  LichDatSan ||--o{ GhepKeo : "DatSanID"
+  MonTheThao ||--o{ GhepKeo : "MonTheThaoID"
+  Accounts ||--o{ LichSuELO : "AccountID"
+  LichDatSan ||--o{ LichSuELO : "DatSanID"
+  Accounts ||--o{ NhatKyChat : "AccountID"
+  Accounts ||--o{ NhatKySOSGui : "AccountID_NhanGui"
+  YeuCauSOS ||--o{ NhatKySOSGui : "YeuCauSOSID"
+  Accounts ||--o{ YeuCauSOS : "AccountID_Tao"
+  LichDatSan ||--o{ YeuCauSOS : "DatSanID"
+  MonTheThao ||--o{ YeuCauSOS : "MonTheThaoID"

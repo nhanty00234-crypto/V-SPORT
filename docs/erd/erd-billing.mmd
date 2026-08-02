@@ -1,0 +1,167 @@
+---
+title: V-SPORT ERD - Hóa đơn & Thanh toán
+---
+erDiagram
+  HoaDon {
+    INT HoaDonID PK "NOT NULL"
+    INT DatSanID
+    INT AccountID_KhachHang
+    INT AccountID_NhanVien
+    DATETIME NgayLap
+    DECIMAL(18,2) TongTienSan
+    DECIMAL(18,2) TongTienDichVu
+    DECIMAL(18,2) PhiGuiXe
+    INT KhuyenMaiID
+    DECIMAL(18,2) GiamGia
+    FLOAT TongThanhToan
+    NVARCHAR(50) PhuongThucThanhToan
+    NVARCHAR(50) TrangThaiThanhToan
+    BIT IsDeleted
+    NVARCHAR(500) GhiChu
+    NVARCHAR(50) LoaiHoaDon
+    INT ParentHoaDonID
+    NVARCHAR(50) PaymentReference
+  }
+  ChiTietHoaDon {
+    INT ChiTietID PK "NOT NULL"
+    INT HoaDonID
+    INT SanPhamID
+    INT SoLuong "NOT NULL"
+    FLOAT DonGiaTaiThoiDiemBan
+    FLOAT ThanhTien
+  }
+  HoanTien {
+    INT HoanTienID PK "NOT NULL"
+    INT HoaDonID "NOT NULL"
+    INT AccountID "NOT NULL"
+    NUMERIC(38,2) SoTienHoan
+    NVARCHAR(255) LyDo
+    NVARCHAR(50) TrangThai
+    DATETIME ThoiGianYeuCau
+    DATETIME ThoiGianHoan
+    INT DatSanID
+    INT NguoiDuyetID
+    NVARCHAR(255) GhiChu
+    DECIMAL(18,2) SoTienDaThanhToan
+    DECIMAL(18,2) SoTienDeNghiHoan
+    DECIMAL(18,2) SoTienDuocDuyet
+    INT CoSoID
+    NVARCHAR(500) QrNhanTienPath
+    NVARCHAR(500) GhiChuKhachHang
+    NVARCHAR(500) LyDoTuChoi
+    DATETIME2 ApprovedAt
+    DATETIME2 CompletedAt
+    DATETIME2 UpdatedAt "NOT NULL"
+    INT AccountID_NguoiXuLy
+    NVARCHAR(500) GhiChuXuLy
+    NVARCHAR(100) MaGiaoDichHoan
+    DATETIME ThoiGianXuLy
+    NVARCHAR(100) NganHangNhan
+    NVARCHAR(30) SoTaiKhoanNhan
+    NVARCHAR(100) ChuTaiKhoanNhan
+  }
+  KhuyenMai {
+    INT KhuyenMaiID PK "NOT NULL"
+    VARCHAR(50) MaCode "NOT NULL"
+    NVARCHAR(255) MoTa
+    NVARCHAR(20) LoaiGiam "NOT NULL"
+    FLOAT GiaTriGiam
+    DATE NgayBatDau "NOT NULL"
+    DATE NgayKetThuc "NOT NULL"
+    INT SoLanToiDa
+    INT SoLanDaDung
+    INT CoSoID
+    NVARCHAR(20) TrangThai
+    BIT IsDeleted
+    DECIMAL(18,2) GiaTriToiThieu
+    DECIMAL(18,2) GiamToiDa
+    BIT HienThiCongKhai "NOT NULL"
+  }
+  KhuyenMaiHinhAnh {
+    INT HinhAnhID PK "NOT NULL"
+    INT KhuyenMaiID "NOT NULL"
+    NVARCHAR(500) DuongDan "NOT NULL"
+    NVARCHAR(255) TenFileGoc
+    NVARCHAR(100) MimeType
+    BIGINT DungLuong
+    INT ChieuRong
+    INT ChieuCao
+    INT ThuTu "NOT NULL"
+    BIT LaAnhBia "NOT NULL"
+    DATETIME2 CreatedAt "NOT NULL"
+    DATETIME2 UpdatedAt
+  }
+  LichSuKhuyenMai {
+    INT HistoryID PK "NOT NULL"
+    INT KhuyenMaiID "NOT NULL"
+    INT AccountID "NOT NULL"
+    INT DatSanID
+    DECIMAL(18,2) DiscountAmount "NOT NULL"
+    DATETIME UsedAt "NOT NULL"
+  }
+  NhomChiaTien {
+    INT NhomChiaTienID PK "NOT NULL"
+    INT HoaDonID "NOT NULL"
+    INT DatSanID "NOT NULL"
+    INT CreatedByAccountID "NOT NULL"
+    NVARCHAR(20) SplitType "NOT NULL"
+    DECIMAL(18,2) TongTien "NOT NULL"
+    NVARCHAR(20) TrangThai "NOT NULL"
+    DATETIME ExpiresAt
+    DATETIME CreatedAt "NOT NULL"
+    DATETIME UpdatedAt "NOT NULL"
+  }
+  NhomChiaTienChiTiet {
+    INT ChiTietID PK "NOT NULL"
+    INT NhomChiaTienID "NOT NULL"
+    INT AccountID
+    NVARCHAR(100) DisplayName "NOT NULL"
+    CHAR(43) ShareToken "NOT NULL"
+    DECIMAL(18,2) SoTien "NOT NULL"
+    NVARCHAR(20) TrangThai "NOT NULL"
+    NVARCHAR(30) PaymentMethod
+    NVARCHAR(100) PaymentTransactionID
+    INT PayerAccountID
+    DATETIME PaidAt
+    INT ConfirmedByStaffID
+    DATETIME CreatedAt "NOT NULL"
+    DATETIME UpdatedAt "NOT NULL"
+  }
+  PayOSPaymentAttempt {
+    BIGINT AttemptID PK "NOT NULL"
+    INT HoaDonID "NOT NULL"
+    INT DatSanID "NOT NULL"
+    INT CoSoID "NOT NULL"
+    BIGINT OrderCode "NOT NULL"
+    NVARCHAR(100) PaymentLinkID
+    NVARCHAR(1000) CheckoutUrl
+    NVARCHAR(MAX) QrCode
+    NVARCHAR(30) Status "NOT NULL"
+    DECIMAL(18,2) Amount "NOT NULL"
+    NVARCHAR(100) Description "NOT NULL"
+    DATETIME2 CreatedAt "NOT NULL"
+    DATETIME2 PaidAt
+    DATETIME2 CancelledAt
+    DATETIME2 LastCheckedAt
+    NVARCHAR(500) FailureReason
+  }
+  HoaDon ||--o{ ChiTietHoaDon : "HoaDonID"
+  SanPham_DichVu ||--o{ ChiTietHoaDon : "SanPhamID"
+  LichDatSan ||--o{ HoaDon : "DatSanID"
+  Accounts ||--o{ HoaDon : "AccountID_KhachHang"
+  KhuyenMai ||--o{ HoaDon : "KhuyenMaiID"
+  HoaDon ||--o{ HoaDon : "ParentHoaDonID"
+  Accounts ||--o{ HoanTien : "AccountID"
+  HoaDon ||--o{ HoanTien : "HoaDonID"
+  CoSo ||--o{ KhuyenMai : "CoSoID"
+  KhuyenMai ||--o{ KhuyenMaiHinhAnh : "KhuyenMaiID"
+  Accounts ||--o{ LichSuKhuyenMai : "AccountID"
+  KhuyenMai ||--o{ LichSuKhuyenMai : "KhuyenMaiID"
+  Accounts ||--o{ NhomChiaTien : "CreatedByAccountID"
+  LichDatSan ||--o{ NhomChiaTien : "DatSanID"
+  HoaDon ||--o{ NhomChiaTien : "HoaDonID"
+  Accounts ||--o{ NhomChiaTienChiTiet : "AccountID"
+  NhomChiaTien ||--o{ NhomChiaTienChiTiet : "NhomChiaTienID"
+  CoSo ||--o{ PayOSPaymentAttempt : "CoSoID"
+  HoaDon ||--o{ PayOSPaymentAttempt : "HoaDonID"
+  LichDatSan ||--o{ PayOSPaymentAttempt : "DatSanID"

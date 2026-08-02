@@ -78,8 +78,8 @@ public class GhepKeoService {
             return Result.fail("Bạn chỉ có thể gắn kèo cho ca đặt sân của chính mình.");
         }
         String tt = booking.getTrangThai();
-        if (!"Chờ xác nhận".equals(tt) && !"Đã xác nhận".equals(tt) && !"Chờ thanh toán".equals(tt)) {
-            return Result.fail("Ca đặt sân không còn hiệu lực để tạo kèo (trạng thái: " + tt + ").");
+        if (!"Đã xác nhận".equals(tt)) {
+            return Result.fail("Ca đặt sân phải ở trạng thái 'Đã xác nhận' mới có thể tạo kèo (trạng thái hiện tại: " + tt + "). Vui lòng chờ quản lý duyệt booking trước.");
         }
         if (booking.getNgayDat() != null && booking.getNgayDat().isBefore(LocalDate.now())) {
             return Result.fail("Ca đặt sân đã diễn ra, không thể tạo kèo mới.");

@@ -524,8 +524,10 @@ public class DatSanServlet extends HttpServlet {
                     }
 
                     // ── 3b. Kiểm tra trạng thái sân ──
-                    // Chỉ cho phép đặt khi sân ở trạng thái 'Sẵn sàng'
-                    if (!"Sẵn sàng".equals(sanTrangThai)) {
+                    // Cho phép đặt khi sân ở trạng thái 'Sẵn sàng' hoặc 'Đang sử dụng' (khung giờ khác).
+                    // Trạng thái 'Bảo trì' hoặc trạng thái khác mới thực sự chặn đặt sân.
+                    // Trùng lịch theo khung giờ sẽ do kiểm tra overlap (3d) bên dưới xử lý.
+                    if (!"Sẵn sàng".equals(sanTrangThai) && !"Đang sử dụng".equals(sanTrangThai)) {
                         conn.rollback();
                         session.setAttribute("error",
                                 "Sân này hiện đang ở trạng thái [" + sanTrangThai + "] và không thể đặt. " +

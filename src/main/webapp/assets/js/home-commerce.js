@@ -77,17 +77,21 @@ function initStickyHeader() {
    ══════════════════════════════════════════════════════════ */
 function initNavActive() {
   const path = location.pathname;
+
+  function shouldBeActive(href) {
+    if (!href || href === '#') return false;
+    const clean = href.replace(/^.*contextPath\}/, '');
+    // Skip root/home href (e.g. "/Backend_java/" or "/") — would match every URL
+    const segments = clean.replace(/^\//, '').split('/').filter(Boolean);
+    if (segments.length <= 1) return false;
+    return path.includes(clean);
+  }
+
   qsa('.vs-nav__link').forEach(a => {
-    const href = a.getAttribute('href') || '';
-    if (href !== '#' && path.includes(href.replace(/^.*contextPath\}/, ''))) {
-      a.classList.add('is-active');
-    }
+    if (shouldBeActive(a.getAttribute('href'))) a.classList.add('is-active');
   });
   qsa('.vs-mob-nav a').forEach(a => {
-    const href = a.getAttribute('href') || '';
-    if (href !== '#' && path.includes(href.replace(/^.*contextPath\}/, ''))) {
-      a.classList.add('is-active');
-    }
+    if (shouldBeActive(a.getAttribute('href'))) a.classList.add('is-active');
   });
 }
 

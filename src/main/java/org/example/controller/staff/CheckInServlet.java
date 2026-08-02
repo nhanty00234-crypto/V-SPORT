@@ -301,18 +301,37 @@ public class CheckInServlet extends HttpServlet {
                 // Get base price from LoaiSan
                 org.example.dao.impl.LoaiSanDAOImpl loaiSanDAO = new org.example.dao.impl.LoaiSanDAOImpl();
                 org.example.model.LoaiSan ls = loaiSanDAO.getLoaiSanById(targetSan.getLoaiSanID());
-                double basePrice = 0.0;
                 if (ls != null) {
-                    basePrice = ls.getGiaKhongDen();
-                    java.time.LocalTime nowTime = java.time.LocalTime.now();
-                    if (org.example.service.manager.SanService.isLightingTime(
-                            nowTime, ls.getGioBatDauLenDen(), ls.getGioKetThucLenDen())) {
-                        basePrice = ls.getGiaCoDen();
+                    if (!"OPEN".equals(playMode)) {
+                        // FIXED_DURATION: tính giá đúng theo khung giờ có đèn/không đèn cho toàn bộ khoảng thời gian
+                        java.time.LocalDateTime nowDt = java.time.LocalDateTime.now();
+                        java.time.LocalDateTime sessionEnd = nowDt.plusMinutes(duration);
+                        try {
+                            org.example.service.pricing.CourtPricingService pricingService = new org.example.service.pricing.CourtPricingService();
+                            org.example.service.pricing.CourtPriceResult priceResult = pricingService.calculate(
+                                    nowDt, sessionEnd,
+                                    ls.getGioBatDauLenDen(), ls.getGioKetThucLenDen(),
+                                    java.math.BigDecimal.valueOf(ls.getGiaKhongDen()),
+                                    java.math.BigDecimal.valueOf(ls.getGiaCoDen())
+                            );
+                            // Đổi thành effective hourly rate để checkInKhachVangLai có thể tính lại đúng tổng
+                            double hours = (double) duration / 60.0;
+                            donGia = hours > 0 ? priceResult.totalAmount().doubleValue() / hours : ls.getGiaKhongDen();
+                        } catch (Exception pricingEx) {
+                            logger.warn("Không thể tính giá theo CourtPricingService, dùng giá tại thời điểm check-in: {}", pricingEx.getMessage());
+                            java.time.LocalTime nowTime = java.time.LocalTime.now();
+                            donGia = org.example.service.manager.SanService.isLightingTime(
+                                    nowTime, ls.getGioBatDauLenDen(), ls.getGioKetThucLenDen())
+                                    ? ls.getGiaCoDen() : ls.getGiaKhongDen();
+                        }
+                    } else {
+                        // OPEN mode: giá ban đầu chỉ là ước tính, sẽ tính lại khi checkout bằng CourtPricingService
+                        java.time.LocalTime nowTime = java.time.LocalTime.now();
+                        donGia = org.example.service.manager.SanService.isLightingTime(
+                                nowTime, ls.getGioBatDauLenDen(), ls.getGioKetThucLenDen())
+                                ? ls.getGiaCoDen() : ls.getGiaKhongDen();
                     }
                 }
-
-                // Price changes are not allowed for anyone in this feature. Always enforce the calculated base price.
-                donGia = basePrice;
 
                 String ghiChu = "Walk-in";
                 if ("OPEN".equals(playMode)) {

@@ -99,28 +99,162 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
     @Override
     public boolean updateStatus(int id, String newStatus, Integer staffAccountId, int staffCoSoId) throws SQLException {
         boolean setDelivered = "Đã giao".equals(newStatus);
-        String sql = "UPDATE ldv SET " +
-                "ldv.Status = ?, " +
-                (setDelivered ? "ldv.DeliveredAt = SYSDATETIME(), ldv.DeliveredBy = ? " : "ldv.DeliveredAt = ldv.DeliveredAt ") +
-                "FROM LichDatSan_DichVu ldv " +
-                "INNER JOIN LichDatSan lds ON ldv.DatSanID = lds.DatSanID " +
-                "INNER JOIN San s ON lds.SanID = s.SanID " +
-                "WHERE ldv.Id = ? AND s.CoSoID = ? AND ldv.Status = N'Chờ chuẩn bị'";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            int idx = 1;
-            ps.setString(idx++, newStatus);
-            if (setDelivered) {
-                if (staffAccountId != null) {
-                    ps.setInt(idx++, staffAccountId);
-                } else {
-                    ps.setNull(idx++, Types.INTEGER);
+
+        if (!setDelivered) {
+            // Hủy: chỉ cập nhật trạng thái, không cần tạo hóa đơn/trừ kho
+            String sql = "UPDATE ldv SET ldv.Status = ? " +
+                    "FROM LichDatSan_DichVu ldv " +
+                    "INNER JOIN LichDatSan lds ON ldv.DatSanID = lds.DatSanID " +
+                    "INNER JOIN San s ON lds.SanID = s.SanID " +
+                    "WHERE ldv.Id = ? AND s.CoSoID = ? AND ldv.Status = N'Chờ chuẩn bị'";
+            try (Connection conn = DBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, newStatus);
+                ps.setInt(2, id);
+                ps.setInt(3, staffCoSoId);
+                return ps.executeUpdate() > 0;
+            }
+        }
+
+        // Đã giao: cập nhật trạng thái + trừ tồn kho + tạo hóa đơn SPLIT
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Lấy thông tin dịch vụ và khóa dòng
+            String sqlSelect = "SELECT ldv.DatSanID, ldv.SanPhamID, ldv.Quantity, ldv.UnitPrice, ldv.TotalPrice, " +
+                    "s.CoSoID, lds.AccountID " +
+                    "FROM LichDatSan_DichVu ldv WITH (UPDLOCK, ROWLOCK) " +
+                    "INNER JOIN LichDatSan lds ON ldv.DatSanID = lds.DatSanID " +
+                    "INNER JOIN San s ON lds.SanID = s.SanID " +
+                    "WHERE ldv.Id = ? AND s.CoSoID = ? AND ldv.Status = N'Chờ chuẩn bị'";
+            int datSanId, sanPhamId, quantity;
+            BigDecimal unitPrice, totalPrice;
+            Integer customerAccountId = null;
+            try (PreparedStatement ps = conn.prepareStatement(sqlSelect)) {
+                ps.setInt(1, id);
+                ps.setInt(2, staffCoSoId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        conn.rollback();
+                        return false;
+                    }
+                    datSanId = rs.getInt("DatSanID");
+                    sanPhamId = rs.getInt("SanPhamID");
+                    quantity = rs.getInt("Quantity");
+                    unitPrice = rs.getBigDecimal("UnitPrice");
+                    totalPrice = rs.getBigDecimal("TotalPrice");
+                    int accId = rs.getInt("AccountID");
+                    if (!rs.wasNull()) customerAccountId = accId;
                 }
             }
-            ps.setInt(idx++, id);
-            ps.setInt(idx, staffCoSoId);
-            int rows = ps.executeUpdate();
-            return rows > 0;
+
+            // 2. Cập nhật trạng thái "Đã giao"
+            String sqlUpdate = "UPDATE LichDatSan_DichVu SET Status = N'Đã giao', DeliveredAt = SYSDATETIME(), DeliveredBy = ? WHERE Id = ? AND Status = N'Chờ chuẩn bị'";
+            try (PreparedStatement ps = conn.prepareStatement(sqlUpdate)) {
+                if (staffAccountId != null) ps.setInt(1, staffAccountId);
+                else ps.setNull(1, Types.INTEGER);
+                ps.setInt(2, id);
+                if (ps.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // 3. Trừ tồn kho sản phẩm
+            String sqlStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon - ? WHERE SanPhamID = ? AND SoLuongTon >= ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlStock)) {
+                ps.setInt(1, quantity);
+                ps.setInt(2, sanPhamId);
+                ps.setInt(3, quantity);
+                int rows = ps.executeUpdate();
+                if (rows == 0) {
+                    conn.rollback();
+                    throw new SQLException("Sản phẩm không đủ tồn kho để giao.");
+                }
+            }
+
+            // 4. Tạo hóa đơn SPLIT cho dịch vụ đã giao
+            // Lấy MAIN HoaDonID để làm ParentHoaDonID
+            int parentHoaDonId = -1;
+            boolean hasLoaiHoaDon = false;
+            boolean hasParentHoaDonID = false;
+            // Kiểm tra cột tồn tại
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'HoaDon') AND name = N'LoaiHoaDon'");
+                 ResultSet rs = ps.executeQuery()) {
+                hasLoaiHoaDon = rs.next();
+            }
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'HoaDon') AND name = N'ParentHoaDonID'");
+                 ResultSet rs = ps.executeQuery()) {
+                hasParentHoaDonID = rs.next();
+            }
+
+            if (hasLoaiHoaDon) {
+                String sqlMain = "SELECT HoaDonID FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+                try (PreparedStatement ps = conn.prepareStatement(sqlMain)) {
+                    ps.setInt(1, datSanId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) parentHoaDonId = rs.getInt("HoaDonID");
+                    }
+                }
+            }
+
+            // Tạo SPLIT invoice cho dịch vụ
+            String sqlInsertHD;
+            if (hasLoaiHoaDon && hasParentHoaDonID) {
+                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                        "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, LoaiHoaDon, ParentHoaDonID) " +
+                        "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, N'Chưa thanh toán', N'SPLIT', ?)";
+            } else if (hasLoaiHoaDon) {
+                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                        "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, LoaiHoaDon) " +
+                        "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, N'Chưa thanh toán', N'SPLIT')";
+            } else {
+                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                        "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
+                        "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, N'Chưa thanh toán')";
+            }
+            int newHoaDonId;
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsertHD, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, datSanId);
+                if (customerAccountId != null) ps.setInt(2, customerAccountId);
+                else ps.setNull(2, Types.INTEGER);
+                if (staffAccountId != null) ps.setInt(3, staffAccountId);
+                else ps.setNull(3, Types.INTEGER);
+                ps.setBigDecimal(4, totalPrice);
+                ps.setBigDecimal(5, totalPrice);
+                if (hasLoaiHoaDon && hasParentHoaDonID) {
+                    if (parentHoaDonId > 0) ps.setInt(6, parentHoaDonId);
+                    else ps.setNull(6, Types.INTEGER);
+                }
+                ps.executeUpdate();
+                try (ResultSet genKeys = ps.getGeneratedKeys()) {
+                    if (!genKeys.next()) throw new SQLException("Không thể tạo hóa đơn dịch vụ.");
+                    newHoaDonId = genKeys.getInt(1);
+                }
+            }
+
+            // 5. Tạo ChiTietHoaDon cho SPLIT invoice
+            String sqlInsertCT = "INSERT INTO ChiTietHoaDon (HoaDonID, SanPhamID, SoLuong, DonGia, ThanhTien) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsertCT)) {
+                ps.setInt(1, newHoaDonId);
+                ps.setInt(2, sanPhamId);
+                ps.setInt(3, quantity);
+                ps.setBigDecimal(4, unitPrice);
+                ps.setBigDecimal(5, totalPrice);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { /* ignore */ }
+            throw e;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { /* ignore */ }
         }
     }
 

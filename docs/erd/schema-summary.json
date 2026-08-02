@@ -1,0 +1,108 @@
+{
+  "modules": [
+    {
+      "key": "accounts",
+      "title": "Tài khoản & Phân quyền",
+      "tables": [
+        "Accounts",
+        "Roles",
+        "AdminTrash",
+        "AuditLog",
+        "CustomerReputationHistory",
+        "MonTheThaoYeuThich",
+        "ThongBao"
+      ],
+      "mmd": "erd-accounts.mmd"
+    },
+    {
+      "key": "facilities",
+      "title": "Cơ sở & Sân",
+      "tables": [
+        "CoSo",
+        "CoSoCapability",
+        "CoSoNganHang",
+        "San",
+        "SanQR",
+        "SanQRTokenHistory",
+        "QRRequest",
+        "LoaiSan",
+        "LoaiSan_KhungGioDen_Backup",
+        "MonTheThao"
+      ],
+      "mmd": "erd-facilities.mmd"
+    },
+    {
+      "key": "booking",
+      "title": "Đặt sân & Lịch",
+      "tables": [
+        "LichDatSan",
+        "SoftHold",
+        "CourtChargeSegment",
+        "CaLamViec",
+        "CaLamViec_Audit",
+        "CaLamViec_Availability",
+        "CaLamViec_SwapRequest",
+        "YeuCauNghi",
+        "YeuCauNghi_Audit"
+      ],
+      "mmd": "erd-booking.mmd"
+    },
+    {
+      "key": "billing",
+      "title": "Hóa đơn & Thanh toán",
+      "tables": [
+        "HoaDon",
+        "ChiTietHoaDon",
+        "HoanTien",
+        "KhuyenMai",
+        "KhuyenMaiHinhAnh",
+        "LichSuKhuyenMai",
+        "NhomChiaTien",
+        "NhomChiaTienChiTiet",
+        "PayOSPaymentAttempt"
+      ],
+      "mmd": "erd-billing.mmd"
+    },
+    {
+      "key": "services",
+      "title": "Dịch vụ & Sản phẩm",
+      "tables": [
+        "SportService",
+        "ServiceOrder",
+        "ServiceOrderStatusHistory",
+        "ServiceMaterial",
+        "SanPham_DichVu",
+        "DanhMucSanPham",
+        "RacketStringingConfig",
+        "RacketStringingOrderDetail"
+      ],
+      "mmd": "erd-services.mmd"
+    },
+    {
+      "key": "social",
+      "title": "Ghép kèo & Xã hội",
+      "tables": [
+        "GhepKeo",
+        "ChiTietGhepKeo",
+        "LichSuELO",
+        "DanhGia",
+        "NhatKyChat",
+        "NhatKySOSGui",
+        "YeuCauSOS"
+      ],
+      "mmd": "erd-social.mmd"
+    },
+    {
+      "key": "parking",
+      "title": "Gửi xe & Tiện ích",
+      "tables": [
+        "TheGiuXe",
+        "LichXeRaVao"
+      ],
+      "mmd": "erd-parking.mmd"
+    }
+  ],
+  "totalTables": 53,
+  "totalFKs": 103,
+  "generatedAt": "2026-08-02T06:55:53.633Z"
+}

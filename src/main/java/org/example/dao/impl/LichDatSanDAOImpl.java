@@ -41,10 +41,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
      * (bước submit booking chính thức) và SoftHoldDAOImpl.createHold() (bước giữ chỗ tạm), để
      * một khách đã đạt giới hạn không thể tạo SoftHold chặn slot của người khác dù chưa đặt được.
      * Nhận Connection từ caller để dùng chung transaction khi caller đã mở sẵn.
+     * Chỉ đếm các trạng thái thực sự chiếm slot: "Chờ xác nhận", "Đã xác nhận", "Đang sử dụng".
+     * Không đếm: "Đã hủy", "Quá hạn", "Không đến", "Chờ thanh toán" (các đơn không còn hiệu lực).
      */
     public static int countActiveBookingsForAccountAndDate(Connection conn, int accountId, java.time.LocalDate ngayDat)
             throws SQLException {
-        String sql = "SELECT COUNT(*) FROM LichDatSan WHERE AccountID = ? AND NgayDat = ? AND TrangThai <> N'Đã hủy'";
+        String sql = "SELECT COUNT(*) FROM LichDatSan WHERE AccountID = ? AND NgayDat = ? AND TrangThai IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đang sử dụng')";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
             ps.setDate(2, Date.valueOf(ngayDat));
@@ -924,12 +926,16 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             // 2. Kiểm tra/Tạo hóa đơn nếu chưa có
             int hoaDonId = -1;
-            String sqlCheckInvoice = "SELECT HoaDonID FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlCheckInvoice = "SELECT HoaDonID, TrangThaiThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
             psCheckInvoice = conn.prepareStatement(sqlCheckInvoice);
             psCheckInvoice.setInt(1, datSanId);
             rsInv = psCheckInvoice.executeQuery();
             if (rsInv.next()) {
                 hoaDonId = rsInv.getInt("HoaDonID");
+                String invoiceStatus = rsInv.getString("TrangThaiThanhToan");
+                if ("Đã thanh toán".equals(invoiceStatus)) {
+                    throw new Exception("Hóa đơn đã được thanh toán. Không thể thêm hoặc sửa dịch vụ sau khi thanh toán.");
+                }
             } else {
                 boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
                 String sqlInsertInvoice = hasLoaiHoaDon

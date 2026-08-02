@@ -1,0 +1,140 @@
+---
+title: V-SPORT ERD - Cơ sở & Sân
+---
+erDiagram
+  CoSo {
+    INT CoSoID PK "NOT NULL"
+    NVARCHAR(100) TenCoSo "NOT NULL"
+    NVARCHAR(255) DiaChi
+    VARCHAR(15) SoDienThoai
+    NVARCHAR(50) TrangThai
+    TIME GioMoCua
+    TIME GioDongCua
+    NVARCHAR(500) HinhAnh
+    NVARCHAR(MAX) MoTa
+    NVARCHAR(255) LoaiHinhKinhDoanh
+    INT SoLuongSanDuKien
+    INT AccountID_QuanLy
+    VARCHAR(255) PayOS_ClientID
+    VARCHAR(255) PayOS_ApiKey
+    VARCHAR(255) PayOS_ChecksumKey
+    BIT IsDeleted
+    DATETIME DeletedAt
+    INT DeletedBy
+    DECIMAL(10,7) ViDo
+    DECIMAL(10,7) KinhDo
+  }
+  CoSoCapability {
+    INT CapabilityID PK "NOT NULL"
+    INT CoSoID "NOT NULL"
+    NVARCHAR(50) CapabilityType "NOT NULL"
+    NVARCHAR(20) TrangThai "NOT NULL"
+    DATETIME2 RequestedAt "NOT NULL"
+    INT ApprovedBy
+    DATETIME2 ApprovedAt
+    NVARCHAR(500) RejectReason
+    NVARCHAR(500) Note
+    DATETIME2 UpdatedAt "NOT NULL"
+  }
+  CoSoNganHang {
+    INT CoSoID PK "NOT NULL"
+    NVARCHAR(100) BankName "NOT NULL"
+    VARCHAR(20) BankShortCode "NOT NULL"
+    NVARCHAR(100) AccountName "NOT NULL"
+    VARCHAR(50) AccountNumber "NOT NULL"
+    DATETIME2 UpdatedAt "NOT NULL"
+  }
+  San {
+    INT SanID PK "NOT NULL"
+    NVARCHAR(50) TenSan "NOT NULL"
+    INT LoaiSanID
+    INT CoSoID "NOT NULL"
+    NVARCHAR(50) TrangThai
+    NVARCHAR(MAX) MoTa
+    NVARCHAR(500) HinhAnh
+    BIT IsDeleted
+    DATETIME DeletedAt
+    INT DeletedBy
+  }
+  SanQR {
+    INT SanQRID PK "NOT NULL"
+    INT SanID "NOT NULL"
+    UNIQUEIDENTIFIER Token "NOT NULL"
+    NVARCHAR(20) TrangThai "NOT NULL"
+    DATETIME2 CreatedAt "NOT NULL"
+    INT CreatedBy
+    DATETIME2 UpdatedAt "NOT NULL"
+    INT UpdatedBy
+    INT RegenerateCount "NOT NULL"
+    NVARCHAR(12) ShortCode
+  }
+  SanQRTokenHistory {
+    INT HistoryID PK "NOT NULL"
+    INT SanQRID "NOT NULL"
+    INT SanID "NOT NULL"
+    UNIQUEIDENTIFIER Token
+    NVARCHAR(20) TrangThai "NOT NULL"
+    DATETIME2 IssuedAt "NOT NULL"
+    DATETIME2 RevokedAt
+    INT RevokedBy
+    NVARCHAR(200) RevokeReason
+    NVARCHAR(64) TokenHash
+    NVARCHAR(12) ShortCode
+  }
+  QRRequest {
+    INT RequestID PK "NOT NULL"
+    INT SanID "NOT NULL"
+    INT CoSoID "NOT NULL"
+    VARCHAR(64) GuestToken "NOT NULL"
+    INT CustomerID
+    VARCHAR(20) RequestType "NOT NULL"
+    NVARCHAR(MAX) ItemsJson
+    NVARCHAR(255) Note
+    VARCHAR(20) Status "NOT NULL"
+    DATETIME2 CreatedAt "NOT NULL"
+    DATETIME2 UpdatedAt "NOT NULL"
+    INT HandledByStaffID
+  }
+  LoaiSan {
+    INT LoaiSanID PK "NOT NULL"
+    INT MonTheThaoID "NOT NULL"
+    NVARCHAR(50) TenLoai "NOT NULL"
+    FLOAT GiaKhongDen
+    DECIMAL(18,2) GiaCoDen
+    TIME GioBatDauLenDen
+    INT CoSoID
+    TIME GioKetThucLenDen
+    BIT IsDeleted "NOT NULL"
+    DATETIME DeletedAt
+    INT DeletedBy
+  }
+  LoaiSan_KhungGioDen_Backup {
+    INT KhungGioDenID "NOT NULL"
+    INT LoaiSanID "NOT NULL"
+    TIME GioBatDau "NOT NULL"
+    TIME GioKetThuc "NOT NULL"
+    BIT IsDeleted "NOT NULL"
+    DATETIME2 DeletedAt
+    INT DeletedBy
+    DATETIME2 CreatedAt "NOT NULL"
+    DATETIME2 UpdatedAt
+  }
+  MonTheThao {
+    INT MonTheThaoID PK "NOT NULL"
+    NVARCHAR(50) TenMon "NOT NULL"
+  }
+  Accounts ||--o{ CoSo : "AccountID_QuanLy"
+  Accounts ||--o{ CoSoCapability : "ApprovedBy"
+  CoSo ||--o{ CoSoCapability : "CoSoID"
+  CoSo ||--o{ CoSoNganHang : "CoSoID"
+  CoSo ||--o{ LoaiSan : "CoSoID"
+  MonTheThao ||--o{ LoaiSan : "MonTheThaoID"
+  CoSo ||--o{ QRRequest : "CoSoID"
+  San ||--o{ QRRequest : "SanID"
+  CoSo ||--o{ San : "CoSoID"
+  LoaiSan ||--o{ San : "LoaiSanID"
+  Accounts ||--o{ SanQR : "CreatedBy"
+  San ||--o{ SanQR : "SanID"
+  Accounts ||--o{ SanQRTokenHistory : "RevokedBy"
+  San ||--o{ SanQRTokenHistory : "SanID"
+  SanQR ||--o{ SanQRTokenHistory : "SanQRID"

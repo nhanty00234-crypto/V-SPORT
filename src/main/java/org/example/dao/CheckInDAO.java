@@ -389,9 +389,10 @@ public class CheckInDAO {
             // 2. Kịch bản Khách vãng lai bị kẹt lịch sắp tới (Walk-in Conflict Check)
             // Hệ thống kiểm tra xem trong khoảng thời gian khách chơi [now, endTime] có lịch đặt nào đã xác nhận không.
             // Công thức: GioBatDau < endTime AND GioKetThuc > now
+            // Dùng HoldExpiresAt (cơ chế mới) cho "Chờ thanh toán", đồng bộ với DatSanServlet.
             String sqlCheckConflict = "SELECT DatSanID, GioBatDau, GioKetThuc, TrangThai FROM LichDatSan " +
                                       "WHERE SanID = ? AND NgayDat = ? " +
-                                      "AND (TrangThai IN (?, ?) OR (TrangThai = ? AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
+                                      "AND (TrangThai IN (?, ?) OR (TrangThai = ? AND HoldExpiresAt > SYSUTCDATETIME())) " +
                                       "AND GioBatDau < CAST(? AS time) AND GioKetThuc > CAST(? AS time)";
             psCheckConflict = conn.prepareStatement(sqlCheckConflict);
             psCheckConflict.setInt(1, sanId);
@@ -976,11 +977,17 @@ public class CheckInDAO {
                 throw new CheckInException("Database chưa có cột LoaiHoaDon nên chưa hỗ trợ tách bill dịch vụ. Vui lòng chạy script /sql/migration_hoadon_loai.sql hoặc thêm dịch vụ vào hóa đơn chính.");
             }
 
-            String sqlMain = "SELECT HoaDonID FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlMain = "SELECT HoaDonID, TrangThaiThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
             try (PreparedStatement ps = conn.prepareStatement(sqlMain)) {
                 ps.setInt(1, datSanId);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) parentHoaDonId = rs.getInt("HoaDonID");
+                    if (rs.next()) {
+                        parentHoaDonId = rs.getInt("HoaDonID");
+                        String mainStatus = rs.getString("TrangThaiThanhToan");
+                        if ("Đã thanh toán".equals(mainStatus)) {
+                            throw new CheckInException("Hóa đơn sân đã được thanh toán. Không thể thêm dịch vụ sau khi hóa đơn đã thanh toán.");
+                        }
+                    }
                 }
             }
 

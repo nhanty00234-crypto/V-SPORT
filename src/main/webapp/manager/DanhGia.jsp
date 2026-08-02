@@ -54,38 +54,86 @@
   </div>
 
   <!-- Filter Bar -->
-  <div class="bg-white rounded-2xl border border-zinc-200/70 shadow-sm p-3 flex flex-wrap items-center gap-2">
-    <!-- Search box -->
-    <form method="get" action="" class="flex items-center gap-2 flex-1 min-w-[200px]">
-      <input type="hidden" name="soSao" value="${filterSoSao}" />
-      <div class="relative flex-1">
-        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[16px] pointer-events-none">search</span>
-        <input type="text" name="q" value="${searchName}"
-               placeholder="Tìm theo tên khách hàng…"
-               class="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border border-zinc-200 focus:outline-none focus:border-purple-400 bg-zinc-50" />
+  <div class="bg-white rounded-2xl border border-zinc-200/70 shadow-sm p-4 flex flex-col gap-3">
+    <form method="get" action="" id="filterForm" class="flex flex-wrap items-end gap-3">
+
+      <!-- Search by name -->
+      <div class="flex flex-col gap-1 flex-1 min-w-[180px]">
+        <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Tên khách hàng</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[15px] pointer-events-none">search</span>
+          <input type="text" name="q" value="${searchName}"
+                 placeholder="Nhập tên…"
+                 class="w-full pl-8 pr-3 h-9 rounded-xl text-xs border border-zinc-200 focus:outline-none focus:border-purple-400 bg-zinc-50" />
+        </div>
       </div>
-      <button type="submit" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 transition-colors">Tìm</button>
-      <c:if test="${not empty searchName}">
-        <a href="?soSao=${filterSoSao}" class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-zinc-200 text-zinc-500 hover:border-red-300 hover:text-red-500 transition-colors">✕ Xóa</a>
-      </c:if>
+
+      <!-- Date From -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Từ ngày</label>
+        <input type="date" name="dateFrom" value="${dateFrom}"
+               class="h-9 px-3 rounded-xl text-xs border border-zinc-200 focus:outline-none focus:border-purple-400 bg-zinc-50" />
+      </div>
+
+      <!-- Date To -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Đến ngày</label>
+        <input type="date" name="dateTo" value="${dateTo}"
+               class="h-9 px-3 rounded-xl text-xs border border-zinc-200 focus:outline-none focus:border-purple-400 bg-zinc-50" />
+      </div>
+
+      <!-- Star filter -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Số sao</label>
+        <div class="flex items-center gap-1.5">
+          <input type="hidden" name="soSao" id="soSaoInput" value="${filterSoSao}" />
+          <button type="button" onclick="setStar(0)"
+                  class="star-btn px-3 h-9 rounded-xl text-xs font-bold border transition-colors ${filterSoSao == 0 ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-zinc-600 border-zinc-200 hover:border-purple-400 hover:text-purple-700'}"
+                  data-val="0">Tất cả</button>
+          <c:forEach begin="5" end="1" step="-1" var="s">
+            <button type="button" onclick="setStar(${s})"
+                    class="star-btn px-2.5 h-9 rounded-xl text-xs font-bold border transition-colors flex items-center gap-0.5
+                           ${filterSoSao == s ? 'bg-amber-400 text-white border-amber-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-amber-300 hover:text-amber-600'}"
+                    data-val="${s}">
+              ${s}<span class="material-symbols-outlined text-[13px]">star</span>
+            </button>
+          </c:forEach>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-end gap-2">
+        <button type="submit"
+                class="h-9 px-4 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-700 transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">filter_list</span>Lọc
+        </button>
+        <c:if test="${not empty searchName or not empty dateFrom or not empty dateTo or filterSoSao != 0}">
+          <a href="?" class="h-9 px-3 rounded-xl text-xs font-semibold border border-zinc-200 text-zinc-500 hover:border-red-300 hover:text-red-500 transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">close</span>Xóa bộ lọc
+          </a>
+        </c:if>
+      </div>
     </form>
-    <!-- Star filter -->
-    <div class="flex items-center gap-1.5 flex-wrap">
-      <span class="text-xs font-semibold text-zinc-400">Sao:</span>
-      <a href="?soSao=0&q=${searchName}"
-         class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors
-                ${filterSoSao == 0 ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-zinc-600 border-zinc-200 hover:border-purple-400 hover:text-purple-700'}">
-        Tất cả
-      </a>
-      <c:forEach begin="5" end="1" step="-1" var="s">
-        <a href="?soSao=${s}&q=${searchName}"
-           class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors flex items-center gap-0.5
-                  ${filterSoSao == s ? 'bg-amber-400 text-white border-amber-400' : 'bg-white text-zinc-600 border-zinc-200 hover:border-amber-300 hover:text-amber-600'}">
-          ${s}<span class="material-symbols-outlined text-[13px]">star</span>
-        </a>
-      </c:forEach>
-    </div>
   </div>
+
+  <script>
+  function setStar(val) {
+    document.getElementById('soSaoInput').value = val;
+    document.querySelectorAll('.star-btn').forEach(function(btn) {
+      var isActive = parseInt(btn.dataset.val) === val;
+      if (val === 0) {
+        btn.className = btn.className.replace(/bg-amber-400 text-white border-amber-400/g,'bg-white text-zinc-600 border-zinc-200 hover:border-amber-300 hover:text-amber-600');
+        if (isActive) btn.className = btn.className.replace('bg-white text-zinc-600 border-zinc-200 hover:border-purple-400 hover:text-purple-700','bg-purple-600 text-white border-purple-600');
+      } else {
+        if (btn.dataset.val === '0') {
+          btn.className = btn.className.replace('bg-purple-600 text-white border-purple-600','bg-white text-zinc-600 border-zinc-200 hover:border-purple-400 hover:text-purple-700');
+        }
+      }
+    });
+    // simple visual feedback — submit on click
+    document.getElementById('filterForm').submit();
+  }
+  </script>
 
   <!-- Review List -->
   <div class="bg-white rounded-2xl border border-zinc-200/70 shadow-sm overflow-hidden">
@@ -172,7 +220,7 @@
         <div class="px-5 py-4 border-t border-zinc-100 flex items-center justify-between">
           <c:choose>
             <c:when test="${currentPage > 1}">
-              <a href="?soSao=${filterSoSao}&q=${searchName}&page=${currentPage - 1}" class="text-xs font-semibold text-purple-600 hover:underline flex items-center gap-1">
+              <a href="?soSao=${filterSoSao}&q=${searchName}&dateFrom=${dateFrom}&dateTo=${dateTo}&page=${currentPage - 1}" class="text-xs font-semibold text-purple-600 hover:underline flex items-center gap-1">
                 <span class="material-symbols-outlined text-[14px]">arrow_back</span> Trang trước
               </a>
             </c:when>
@@ -181,7 +229,7 @@
           <span class="text-xs text-zinc-400">Trang ${currentPage}</span>
           <c:choose>
             <c:when test="${hasMore}">
-              <a href="?soSao=${filterSoSao}&q=${searchName}&page=${currentPage + 1}" class="text-xs font-semibold text-purple-600 hover:underline flex items-center gap-1">
+              <a href="?soSao=${filterSoSao}&q=${searchName}&dateFrom=${dateFrom}&dateTo=${dateTo}&page=${currentPage + 1}" class="text-xs font-semibold text-purple-600 hover:underline flex items-center gap-1">
                 Trang sau <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
               </a>
             </c:when>

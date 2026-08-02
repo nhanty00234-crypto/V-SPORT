@@ -11,6 +11,7 @@ import org.example.model.TaiKhoan;
 import org.example.service.DanhGiaService;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @WebServlet("/manager/danh-gia")
@@ -40,23 +41,36 @@ public class DanhGiaManagerServlet extends HttpServlet {
 
         String searchName = request.getParameter("q");
         if (searchName != null) searchName = searchName.trim();
+        if (searchName != null && searchName.isEmpty()) searchName = null;
 
-        List<DanhGia> dsDanhGia = service.getForManager(coSoId, filterSoSao, searchName, page);
+        LocalDate dateFrom = null;
+        LocalDate dateTo   = null;
+        try {
+            String f = request.getParameter("dateFrom");
+            if (f != null && !f.isEmpty()) dateFrom = LocalDate.parse(f);
+        } catch (Exception ignored) {}
+        try {
+            String t = request.getParameter("dateTo");
+            if (t != null && !t.isEmpty()) dateTo = LocalDate.parse(t);
+        } catch (Exception ignored) {}
+
+        List<DanhGia> dsDanhGia = service.getForManager(coSoId, filterSoSao, searchName, dateFrom, dateTo, page);
         double avgRaw = service.avgRating(coSoId);
         String avgRating = avgRaw > 0 ? String.format("%.1f", avgRaw) : "—";
 
-        int totalReviews = service.getForManager(coSoId, 0, null, 1).size();
-        if (filterSoSao == 0 && (searchName == null || searchName.isEmpty()) && page == 1) {
-            totalReviews = dsDanhGia.size();
-        }
+        int totalReviews = service.getForManager(coSoId, 0, null, null, null, 1).size();
+        boolean noFilter = filterSoSao == 0 && searchName == null && dateFrom == null && dateTo == null && page == 1;
+        if (noFilter) totalReviews = dsDanhGia.size();
 
-        request.setAttribute("dsDanhGia", dsDanhGia);
-        request.setAttribute("avgRating", avgRating);
+        request.setAttribute("dsDanhGia",    dsDanhGia);
+        request.setAttribute("avgRating",    avgRating);
         request.setAttribute("totalReviews", totalReviews);
-        request.setAttribute("filterSoSao", filterSoSao);
-        request.setAttribute("searchName", searchName != null ? searchName : "");
-        request.setAttribute("currentPage", page);
-        request.setAttribute("hasMore", dsDanhGia.size() == 20);
+        request.setAttribute("filterSoSao",  filterSoSao);
+        request.setAttribute("searchName",   searchName != null ? searchName : "");
+        request.setAttribute("dateFrom",     dateFrom  != null ? dateFrom.toString()  : "");
+        request.setAttribute("dateTo",       dateTo    != null ? dateTo.toString()    : "");
+        request.setAttribute("currentPage",  page);
+        request.setAttribute("hasMore",      dsDanhGia.size() == 20);
         request.getRequestDispatcher("/manager/DanhGia.jsp").forward(request, response);
     }
 }

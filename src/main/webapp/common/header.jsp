@@ -383,6 +383,15 @@
         <!-- Center Nav -->
         <ul class="nav-links">
             <li>
+                <a href="${pageContext.request.contextPath}/index.jsp" id="nav-home">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+                        <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    </svg>
+                    Trang chủ
+                </a>
+            </li>
+            <li>
                 <a href="${pageContext.request.contextPath}/customer/ban-do" id="nav-map" class="nav-pill-map">
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -581,12 +590,14 @@
     // Active link
     const path = window.location.pathname;
     function setActive(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
-    if (path.includes('/customer/ghep-keo'))          { setActive('nav-ghepkeo'); setActive('mnav-ghepkeo'); }
+    if (path.includes('/customer/ghep-keo'))             { setActive('nav-ghepkeo'); setActive('mnav-ghepkeo'); }
     else if (path.includes('/customer/lich-su-dat-san')) { setActive('mnav-history'); }
-    else if (path.includes('/customer/tai-khoan'))    { setActive('mnav-account'); }
+    else if (path.includes('/customer/tai-khoan'))       { setActive('mnav-account'); }
+    else if (path.includes('/customer/uu-dai'))          { setActive('nav-uudai'); }
+    else if (path.includes('/customer/dich-vu'))         { setActive('nav-dichvu'); }
     else if (path.includes('dat-san') || path.includes('ChiTietSan')) { setActive('nav-booking'); setActive('mnav-booking'); }
-    else if (path.includes('/customer/ban-do'))       { setActive('nav-map'); }
-    else if (path.endsWith('index.jsp') || path.endsWith('/')) { setActive('mnav-home'); }
+    else if (path.includes('/customer/ban-do'))          { setActive('nav-map'); }
+    else if (path.endsWith('index.jsp') || path === '/' || path.endsWith('/')) { setActive('nav-home'); setActive('mnav-home'); }
 })();
 </script>
 

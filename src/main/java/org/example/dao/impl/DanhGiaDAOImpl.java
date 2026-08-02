@@ -69,11 +69,15 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
     }
 
     @Override
-    public List<DanhGia> findByCoSoId(int coSoId, int filterSoSao, String searchName, int page, int pageSize) {
+    public List<DanhGia> findByCoSoId(int coSoId, int filterSoSao, String searchName,
+                                       java.time.LocalDate dateFrom, java.time.LocalDate dateTo,
+                                       int page, int pageSize) {
         List<DanhGia> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
         boolean hasStarFilter = filterSoSao >= 1 && filterSoSao <= 5;
         boolean hasNameFilter = searchName != null && !searchName.trim().isEmpty();
+        boolean hasDateFrom   = dateFrom != null;
+        boolean hasDateTo     = dateTo   != null;
         String sql =
             "SELECT dg.*, tk.FullName AS CustomerName FROM DanhGia dg " +
             "JOIN LichDatSan lds ON dg.DatSanID = lds.DatSanID " +
@@ -82,6 +86,8 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
             "WHERE s.CoSoID = ? " +
             (hasStarFilter ? "AND dg.SoSao = ? " : "") +
             (hasNameFilter ? "AND tk.FullName LIKE ? " : "") +
+            (hasDateFrom   ? "AND dg.NgayDanhGia >= ? " : "") +
+            (hasDateTo     ? "AND dg.NgayDanhGia < DATEADD(day,1,?) " : "") +
             "ORDER BY dg.NgayDanhGia DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
@@ -90,6 +96,8 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
             ps.setInt(idx++, coSoId);
             if (hasStarFilter) ps.setInt(idx++, filterSoSao);
             if (hasNameFilter) ps.setNString(idx++, "%" + searchName.trim() + "%");
+            if (hasDateFrom)   ps.setDate(idx++, java.sql.Date.valueOf(dateFrom));
+            if (hasDateTo)     ps.setDate(idx++, java.sql.Date.valueOf(dateTo));
             ps.setInt(idx++, offset);
             ps.setInt(idx, pageSize);
             try (ResultSet rs = ps.executeQuery()) {

@@ -18,8 +18,10 @@ public interface DanhGiaDAO {
      */
     boolean isBookingCompletedByCustomer(int datSanId, int accountId);
 
-    /** Manager: lấy đánh giá của cơ sở, filter theo soSao nếu != 0, tìm theo tên KH nếu không rỗng. Phân trang. */
-    List<DanhGia> findByCoSoId(int coSoId, int filterSoSao, String searchName, int page, int pageSize);
+    /** Manager: lấy đánh giá của cơ sở. filterSoSao=0 bỏ qua, searchName/dateFrom/dateTo null bỏ qua. */
+    List<DanhGia> findByCoSoId(int coSoId, int filterSoSao, String searchName,
+                                java.time.LocalDate dateFrom, java.time.LocalDate dateTo,
+                                int page, int pageSize);
 
     /** Tính điểm trung bình sao cho cơ sở. */
     double avgByCoSoId(int coSoId);
