@@ -106,7 +106,7 @@
   <nav class="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5" id="sidebarNav">
     <%-- guardPage được set bởi servlet, dùng để xác định active state chính xác sau forward() --%>
     <c:set var="gp" value="${requestScope.guardPage}"/>
-    <c:set var="grpCongViec" value="${gp == 'diem-danh' || gp == 'bao-cao-su-co' || gp == 'lich-su-su-co'}"/>
+    <c:set var="grpCongViec" value="${gp == 'diem-danh' || gp == 'bao-cao-su-co' || gp == 'lich-su-su-co' || gp == 'luong'}"/>
 
     <!-- Tổng quan -->
     <a href="${pageContext.request.contextPath}/guard/dashboard"
@@ -133,6 +133,10 @@
         <a href="${pageContext.request.contextPath}/guard/lich-su-su-co"
            class="nav-link ${gp == 'lich-su-su-co' ? 'active' : ''}">
           <i class="ti ti-history text-[16px]"></i>Lịch sử sự cố
+        </a>
+        <a href="${pageContext.request.contextPath}/guard/luong"
+           class="nav-link ${gp == 'luong' ? 'active' : ''}">
+          <i class="ti ti-cash text-[16px]"></i>Lương của tôi
         </a>
       </div>
     </div>
