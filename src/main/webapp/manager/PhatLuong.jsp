@@ -28,7 +28,13 @@
   <div class="flex items-center justify-between gap-4 flex-wrap">
     <div class="text-sm text-slate-600">
       Kỳ ${ky.ngayBatDau} → ${ky.ngayKetThuc} · Trạng thái:
-      <span class="font-bold text-slate-800">${ky.trangThai}</span>
+      <span class="font-bold text-slate-800">
+        <c:choose>
+          <c:when test="${ky.trangThai eq 'DaPhat'}">Đã phát</c:when>
+          <c:when test="${ky.trangThai eq 'DangTinh'}">Đã tính</c:when>
+          <c:otherwise>Nháp</c:otherwise>
+        </c:choose>
+      </span>
     </div>
     <c:if test="${ky.trangThai ne 'DaPhat'}">
       <form method="post" action="${pageContext.request.contextPath}/manager/luong"
