@@ -472,17 +472,15 @@
       </div>
       <canvas id="fsCanvas" class="hidden"></canvas>
 
-      <%-- Chất lượng khuôn mặt theo thời gian thực --%>
+      <%-- Các mẫu đã chụp --%>
       <div>
         <div class="flex items-baseline justify-between mb-1.5">
-          <span class="text-xs font-semibold text-zinc-500">Chất lượng khuôn mặt</span>
-          <span id="fsQuality" class="text-zinc-300 font-black text-lg">--%</span>
+          <span class="text-xs font-semibold text-zinc-500">Mẫu đã chụp</span>
+          <span id="fsSampleCount" class="text-violet-600 font-black text-sm">0 / 3</span>
         </div>
-        <div class="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
-          <div id="fsQualityBar" class="h-2.5 rounded-full transition-all duration-200" style="width:0%;background:#f59e0b"></div>
-        </div>
-        <p id="fsQualityHint" class="text-[11px] text-zinc-400 mt-1">
-          Cần đạt ≥ <b class="text-violet-600"><span id="fsRequired">70</span>%</b> theo ngưỡng cơ sở đang cấu hình
+        <div id="fsSampleStrip" class="flex gap-2"></div>
+        <p class="text-[11px] text-zinc-400 mt-1.5">
+          Chụp 3 mẫu ở góc và ánh sáng khác nhau để nhận diện ổn định hơn. Tối thiểu 1 mẫu.
         </p>
       </div>
 
@@ -496,9 +494,13 @@
               class="flex-1 h-11 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm transition flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-[18px]">videocam</span>Mở camera
       </button>
+      <button type="button" id="fsBtnCapture" onclick="fsCaptureSample()" disabled
+              class="flex-1 h-11 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">photo_camera</span>Chụp mẫu
+      </button>
       <button type="button" id="fsBtnSave" onclick="fsSaveEnroll()" disabled
               class="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-bold text-sm transition flex items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-[18px]">save</span>Lưu khuôn mặt
+        <span class="material-symbols-outlined text-[18px]">save</span>Lưu
       </button>
     </div>
   </div>
@@ -550,23 +552,59 @@
   // Ngưỡng Euclidean của cơ sở quy đổi sang % — dùng chung thang đo với màn điểm danh
   var FS_REQUIRED = Math.round(Math.max(0, Math.min(100, (1 - FS_THRESHOLD / FS_MAX_DISTANCE) * 100)));
 
+  var FS_RECOMMENDED_SAMPLES = 3;
+  var FS_MIN_DETECT_SCORE = 0.7;   // điểm tin cậy tối thiểu của bộ phát hiện để chụp
+  var FS_DUP_DISTANCE = 0.2;       // gần hơn mức này coi như trùng mẫu cũ
+  var FS_DIFF_DISTANCE = 0.6;      // xa hơn mức này có thể là người khác
+
   var _fsTargetId = null;
   var _fsStream = null;
   var _fsLoopId = null;
   var _fsModelsLoaded = false;
-  var _fsDescriptor = null;
-  var _fsSnapshot = null;
+  var _fsSamples = [];      // [{descriptor: [...], snapshot: dataUrl}]
+  var _fsLiveDetection = null;  // detection của frame mới nhất, dùng khi bấm Chụp mẫu
 
-  document.getElementById('fsRequired').textContent = FS_REQUIRED;
+  function fsEuclidean(a, b) {
+    var sum = 0;
+    for (var i = 0; i < Math.min(a.length, b.length); i++) {
+      var d = a[i] - b[i];
+      sum += d * d;
+    }
+    return Math.sqrt(sum);
+  }
+
+  function fsRenderSamples() {
+    var strip = document.getElementById('fsSampleStrip');
+    strip.innerHTML = '';
+    _fsSamples.forEach(function (s, idx) {
+      var wrap = document.createElement('div');
+      wrap.className = 'relative w-14 h-14 rounded-lg overflow-hidden bg-zinc-100 shrink-0';
+      var img = document.createElement('img');
+      img.src = s.snapshot;
+      img.className = 'w-full h-full object-cover scale-x-[-1]';
+      img.alt = 'Mẫu ' + (idx + 1);
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'absolute top-0 right-0 bg-black/60 text-white text-[10px] leading-none px-1 py-0.5';
+      del.textContent = '×';
+      del.onclick = function () { _fsSamples.splice(idx, 1); fsRenderSamples(); };
+      wrap.appendChild(img);
+      wrap.appendChild(del);
+      strip.appendChild(wrap);
+    });
+    document.getElementById('fsSampleCount').textContent =
+      _fsSamples.length + ' / ' + FS_RECOMMENDED_SAMPLES;
+    document.getElementById('fsBtnSave').disabled = _fsSamples.length === 0;
+  }
 
   function fsOpenEnroll(accountId, fullName) {
     _fsTargetId = accountId;
-    _fsDescriptor = null;
-    _fsSnapshot = null;
+    _fsSamples = [];
     document.getElementById('fsEnrollName').textContent = fullName;
     document.getElementById('fsShot').classList.add('hidden');
     document.getElementById('fsBtnSave').disabled = true;
-    fsSetQuality(null);
+    document.getElementById('fsBtnCapture').disabled = true;
+    fsRenderSamples();
     fsStatus('Nhấn "Mở camera" để bắt đầu', 'text-zinc-500');
     var m = document.getElementById('fsEnrollModal');
     m.classList.remove('hidden');
@@ -591,27 +629,10 @@
     el.className = 'text-sm text-center font-medium min-h-[2.5rem] ' + (cls || 'text-zinc-500');
   }
 
-  function fsSetQuality(percent) {
-    var q = document.getElementById('fsQuality');
-    var bar = document.getElementById('fsQualityBar');
-    if (percent === null) {
-      q.textContent = '--%';
-      q.className = 'text-zinc-300 font-black text-lg';
-      bar.style.width = '0%';
-      return;
-    }
-    var ok = percent >= FS_REQUIRED;
-    q.textContent = percent + '%';
-    q.className = ok ? 'text-green-600 font-black text-lg' : 'text-amber-500 font-black text-lg';
-    bar.style.width = percent + '%';
-    bar.style.background = ok ? '#16a34a' : '#f59e0b';
-  }
-
   async function fsStartCamera() {
     fsStopCamera();
     document.getElementById('fsShot').classList.add('hidden');
-    document.getElementById('fsBtnSave').disabled = true;
-    _fsDescriptor = null;
+    _fsLiveDetection = null;
 
     try {
       if (!_fsModelsLoaded) {
@@ -644,29 +665,42 @@
       .withFaceLandmarks(true)
       .withFaceDescriptor();
 
-    if (!det) {
-      fsSetQuality(null);
-      fsStatus('Không thấy khuôn mặt — đưa mặt vào giữa khung, đủ sáng', 'text-zinc-500');
+    if (!det || det.detection.score < FS_MIN_DETECT_SCORE) {
+      _fsLiveDetection = null;
+      document.getElementById('fsBtnCapture').disabled = true;
+      fsStatus('Chưa thấy khuôn mặt rõ — đưa mặt vào giữa khung, đủ sáng', 'text-zinc-500');
       return;
     }
 
-    // Điểm tin cậy của bộ phát hiện, quy về % để quản lý biết ảnh đã đủ tốt chưa
-    var percent = Math.round(det.detection.score * 100);
-    fsSetQuality(percent);
+    _fsLiveDetection = det;
+    document.getElementById('fsBtnCapture').disabled = false;
+    fsStatus('Đã sẵn sàng — nhấn "Chụp mẫu"', 'text-green-600 font-semibold');
+  }
 
-    if (percent >= FS_REQUIRED) {
-      _fsDescriptor = Array.from(det.descriptor);
-      _fsSnapshot = fsCapture(video);
-      fsStopCamera();
+  /** Chụp frame hiện tại thành một mẫu, kèm cảnh báo trùng lặp / khác người. */
+  function fsCaptureSample() {
+    if (!_fsLiveDetection) return;
+    var descriptor = Array.from(_fsLiveDetection.descriptor);
+    var video = document.getElementById('fsVideo');
 
-      var shot = document.getElementById('fsShot');
-      shot.src = _fsSnapshot;
-      shot.classList.remove('hidden');
-      document.getElementById('fsBtnSave').disabled = false;
-      fsStatus('✓ Đã chụp đạt ' + percent + '%. Nhấn "Lưu khuôn mặt" để xác nhận.', 'text-green-600 font-bold');
-    } else {
-      fsStatus('Chưa đủ rõ (' + percent + '%) — cần ≥ ' + FS_REQUIRED + '%', 'text-amber-600');
+    var warning = '';
+    if (_fsSamples.length > 0) {
+      var best = Infinity;
+      _fsSamples.forEach(function (s) {
+        var d = fsEuclidean(s.descriptor, descriptor);
+        if (d < best) best = d;
+      });
+      if (best < FS_DUP_DISTANCE) {
+        warning = ' Mẫu gần trùng mẫu đã có, hãy chụp ở góc hoặc ánh sáng khác.';
+      } else if (best > FS_DIFF_DISTANCE) {
+        warning = ' Ảnh này có thể không phải cùng một người.';
+      }
     }
+
+    _fsSamples.push({ descriptor: descriptor, snapshot: fsCapture(video) });
+    fsRenderSamples();
+    fsStatus('✓ Đã thêm mẫu ' + _fsSamples.length + '.' + warning,
+             warning ? 'text-amber-600 font-semibold' : 'text-green-600 font-bold');
   }
 
   function fsCapture(video) {
@@ -678,7 +712,7 @@
   }
 
   async function fsSaveEnroll() {
-    if (!_fsDescriptor || !_fsTargetId) return;
+    if (!_fsSamples.length || !_fsTargetId) return;
     document.getElementById('fsBtnSave').disabled = true;
     fsStatus('Đang lưu...', 'text-zinc-500');
 
@@ -688,14 +722,14 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          descriptor: _fsDescriptor,
-          photo: _fsSnapshot,
+          descriptors: _fsSamples.map(function (s) { return s.descriptor; }),
+          photo: _fsSamples[0].snapshot,
           _csrf: csrf ? csrf.content : ''
         })
       });
       var data = await res.json();
       if (data.success) {
-        fsStatus('✓ Đăng ký thành công! Đang tải lại...', 'text-green-600 font-bold');
+        fsStatus('✓ Đã lưu ' + _fsSamples.length + ' mẫu! Đang tải lại...', 'text-green-600 font-bold');
         setTimeout(function () { location.reload(); }, 900);
       } else {
         fsStatus('Lỗi: ' + (data.error || 'Không thể lưu'), 'text-red-600 font-bold');
