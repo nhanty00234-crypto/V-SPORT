@@ -316,10 +316,10 @@
 </main>
 
 <!-- Cảnh báo chưa tới khung giờ điểm danh -->
-<div id="staffAlert" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[70] max-w-md w-[calc(100%-2rem)]">
+<div id="attendanceAlert" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[70] max-w-md w-[calc(100%-2rem)]">
   <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 shadow-lg flex items-start gap-2.5">
     <i class="ti ti-alert-circle text-[18px] shrink-0 mt-px"></i>
-    <span class="text-sm font-semibold leading-snug"></span>
+    <span data-alert-text class="text-sm font-semibold leading-snug"></span>
   </div>
 </div>
 
@@ -352,7 +352,7 @@
       <div id="faceProgress" class="bg-orange-500 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
     </div>
 
-    <button onclick="closeFaceModal()"
+    <button onclick="Attendance.closeModal()"
             class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-xl text-sm transition">
       Hủy
     </button>
@@ -360,15 +360,14 @@
 </div>
 
 <script src="${pageContext.request.contextPath}/assets/js/face-attendance.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/attendance-shared.js"></script>
 <script>
 var _ctx = '<%=request.getContextPath()%>';
 var _currentCaId = null;
 var _currentAction = null;
 var _myId = ${sessionScope.user.accountId};
 var _faceRequired = ${faceConfig != null ? faceConfig.faceRequired : true};
-// Khung giờ điểm danh vào ca: mở sớm 15 phút, đóng 60 phút sau giờ bắt đầu.
-var CHECKIN_OPEN_BEFORE = 15;
-var CHECKIN_CLOSE_AFTER = 60;
+Attendance.initModal({ contextPath: _ctx });
 
 var shifts = [], coworkers = [], swaps = [];
 
@@ -485,12 +484,6 @@ function renderCalendar() {
   grid.innerHTML = html;
 }
 
-function parseMinutes(hhmmss) {
-  if (!hhmmss) return -1;
-  var p = hhmmss.split(':');
-  return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
-}
-
 function buildShiftActionBtn(s) {
   if (!s.trangThai || s.trangThai === 'Cancelled' || s.trangThai === 'CheckedOut' || s.trangThai === 'Draft') {
     return '';
@@ -511,7 +504,7 @@ function buildShiftActionBtn(s) {
       return '<div class="mt-2 w-full text-[10px] py-1.5 px-2 bg-amber-50 text-amber-700 font-semibold rounded-lg text-center leading-snug">'
            + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh</div>';
     }
-    var ready = checkInWindow(s).ok;
+    var ready = Attendance.checkInWindow(s).ok;
     var cls = ready
       ? 'bg-green-600 hover:bg-green-700 text-white'
       : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500';
@@ -522,51 +515,10 @@ function buildShiftActionBtn(s) {
   return '';
 }
 
-/**
- * Ca có đang trong khung giờ điểm danh không.
- * Mở trước giờ bắt đầu CHECKIN_OPEN_BEFORE phút, đóng sau CHECKIN_CLOSE_AFTER phút.
- */
-function checkInWindow(s) {
-  if (s.ngayLam !== todayStr) {
-    var d = s.ngayLam.split('-');
-    return { ok: false, reason: 'Chưa đến ngày làm việc của bạn — ca này vào ngày ' + d[2] + '/' + d[1] + '/' + d[0] + '.' };
-  }
-  var startMin = parseMinutes(s.gioBatDau);
-  var now = new Date();
-  var nowMin = now.getHours() * 60 + now.getMinutes();
-
-  if (nowMin < startMin - CHECKIN_OPEN_BEFORE) {
-    return { ok: false, reason: 'Chưa đến giờ điểm danh — mở lúc ' + fmtMin(startMin - CHECKIN_OPEN_BEFORE)
-             + ' (trước giờ vào ca ' + CHECKIN_OPEN_BEFORE + ' phút).' };
-  }
-  if (nowMin > startMin + CHECKIN_CLOSE_AFTER) {
-    return { ok: false, reason: 'Đã quá giờ điểm danh — hạn cuối là ' + fmtMin(startMin + CHECKIN_CLOSE_AFTER)
-             + '. Liên hệ quản lý để được điểm danh thủ công.' };
-  }
-  return { ok: true };
-}
-
-function fmtMin(total) {
-  var t = ((total % 1440) + 1440) % 1440;
-  return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
-}
-
 /** Bấm "Điểm danh" trên thẻ ca: kiểm tra khung giờ trước khi mở camera. */
 function tryCheckIn(caId) {
   var s = shifts.find(function (x) { return x.caLamViecId === caId; });
-  if (!s) return;
-  var w = checkInWindow(s);
-  if (!w.ok) { showStaffAlert(w.reason); return; }
-  openFaceModal('checkin', caId);
-}
-
-/** Thông báo đỏ nổi góc trên, tự ẩn sau 4s. */
-function showStaffAlert(msg) {
-  var box = document.getElementById('staffAlert');
-  box.querySelector('span').textContent = msg;
-  box.classList.remove('hidden');
-  clearTimeout(box._t);
-  box._t = setTimeout(function () { box.classList.add('hidden'); }, 4000);
+  if (s) Attendance.tryCheckIn(s);
 }
 
 
@@ -610,7 +562,7 @@ function renderTodayCard() {
       btns.innerHTML = '<div class="px-4 py-2 bg-white/20 text-white/90 rounded-lg text-xs font-semibold">'
                      + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh</div>';
     } else {
-      var ready = checkInWindow(s).ok;
+      var ready = Attendance.checkInWindow(s).ok;
       btns.innerHTML = '<button type="button" onclick="tryCheckIn(' + s.caLamViecId + ')"'
              + ' class="px-4 py-2 rounded-lg text-xs font-bold transition-all '
              + (ready ? 'bg-white text-green-700 hover:bg-green-50' : 'bg-white/30 text-white/70 hover:bg-white/40')
@@ -754,83 +706,33 @@ function switchSwapTab(name) {
   });
 }
 
-// ── Face Attendance Modal Functions ──
-function openFaceModal(action, caId) {
-  _currentCaId = caId;
-  _currentAction = action;
-  document.getElementById('faceModal').classList.remove('hidden');
-  document.getElementById('faceModalTitle').textContent =
-    action === 'checkin' ? 'Điểm danh VÀO CA' : 'Điểm danh KẾT THÚC CA';
-  startFaceAttendance(action, caId);
-}
+// ── Điểm danh (dùng chung với GUARD qua attendance-shared.js) ──
+function openFaceModal(action, caId) { Attendance.openModal(action, caId); }
 
-// Quick action: tự chọn ca hôm nay và hành động phù hợp (vào ca / kết thúc ca)
+// Lối tắt "Điểm danh": tự chọn ca hôm nay và hành động phù hợp
 function openTodayFaceModal() {
-  var todayStr = new Date().toISOString().slice(0, 10);
-  var todayShifts = shifts.filter(function(s) {
-    return s.ngayLam === todayStr && s.trangThai !== 'Cancelled';
-  });
-  if (todayShifts.length === 0) {
-    showStaffAlert('Hôm nay bạn không có ca làm việc nào được phân công.');
+  if (_faceRequired === false) {
+    Attendance.alert('Điểm danh khuôn mặt đang tắt — liên hệ quản lý để được điểm danh hộ.');
     return;
   }
-  todayShifts.sort(function(a, b) { return (a.gioBatDau || '').localeCompare(b.gioBatDau || ''); });
+  var today = Attendance.todayStr();
+  var todayShifts = shifts.filter(function(s) {
+    return s.ngayLam === today && s.trangThai !== 'Cancelled';
+  }).sort(function(a, b) { return (a.gioBatDau || '').localeCompare(b.gioBatDau || ''); });
+
+  if (todayShifts.length === 0) {
+    Attendance.alert('Hôm nay bạn không có ca làm việc nào được phân công.');
+    return;
+  }
 
   // Đang trong ca -> kết thúc ca (không giới hạn khung giờ)
-  var inShift = todayShifts.find(function(s) { return s.gioVaoThuc && !s.gioRaThuc; });
-  if (inShift) { openFaceModal('checkout', inShift.caLamViecId); return; }
+  var inShift = todayShifts.find(function(s) { return s.trangThai === 'CheckedIn'; });
+  if (inShift) { Attendance.openModal('checkout', inShift.caLamViecId); return; }
 
-  var pending = todayShifts.find(function(s) { return !s.gioVaoThuc; });
-  if (!pending) { showStaffAlert('Bạn đã hoàn thành tất cả ca hôm nay.'); return; }
+  var pending = todayShifts.find(function(s) { return s.trangThai !== 'CheckedOut'; });
+  if (!pending) { Attendance.alert('Bạn đã hoàn thành tất cả ca hôm nay.'); return; }
 
-  var w = checkInWindow(pending);
-  if (!w.ok) { showStaffAlert(w.reason); return; }
-  openFaceModal('checkin', pending.caLamViecId);
-}
-
-function closeFaceModal() {
-  FaceAttendance.stop();
-  document.getElementById('faceModal').classList.add('hidden');
-  resetFaceMatch();
-}
-
-function resetFaceMatch() {
-  var m = document.getElementById('faceMatch');
-  m.textContent = '--%';
-  m.className = 'text-zinc-300 font-black text-lg';
-  document.getElementById('faceMatchBar').style.width = '0%';
-  document.getElementById('faceMatchHint').textContent = 'Đưa khuôn mặt vào giữa khung hình';
-  document.getElementById('faceProgress').style.width = '0%';
-}
-
-async function startFaceAttendance(action, caId) {
-  const statusEl = document.getElementById('faceStatus');
-  const progressEl = document.getElementById('faceProgress');
-  resetFaceMatch();
-
-  const ready = await FaceAttendance.init({
-    videoEl: document.getElementById('faceVideo'),
-    statusEl: statusEl,
-    matchEl: document.getElementById('faceMatch'),
-    matchBarEl: document.getElementById('faceMatchBar'),
-    matchHintEl: document.getElementById('faceMatchHint'),
-    contextPath: _ctx,
-    caLamViecId: caId,
-    action: action,
-    onSuccess: function(data) {
-      progressEl.style.width = '100%';
-      statusEl.textContent = '✓ Thành công! Độ khớp: ' + data.confidence.toFixed(1) + '%';
-      statusEl.className = 'text-green-600 font-bold text-sm text-center';
-      setTimeout(() => { closeFaceModal(); location.reload(); }, 1500);
-    },
-    onError: function(msg) {
-      statusEl.textContent = '✗ ' + (msg || 'Lỗi nhận diện');
-      statusEl.className = 'text-red-600 font-bold text-sm text-center';
-    }
-  });
-
-  if (ready === false) return;   // chưa đăng ký khuôn mặt — không mở camera
-  await FaceAttendance.start();
+  Attendance.tryCheckIn(pending);
 }
 
 // ── Init ──

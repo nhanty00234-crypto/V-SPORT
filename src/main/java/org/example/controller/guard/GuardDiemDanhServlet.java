@@ -15,7 +15,11 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @WebServlet("/guard/diem-danh")
 public class GuardDiemDanhServlet extends HttpServlet {
@@ -28,31 +32,50 @@ public class GuardDiemDanhServlet extends HttpServlet {
         TaiKhoan user = getUser(req, resp);
         if (user == null) return;
 
-        CaLamViec caHomNay = caLamViecDAO.getCaHomNay(user.getAccountId(), LocalDate.now());
-        List<CaLamViec> lichSu = caLamViecDAO.getCaByAccountIDAndDateRange(
-                user.getAccountId(),
-                LocalDate.now().minusDays(7),
-                LocalDate.now().minusDays(1));
-        List<CaLamViec> caSapToi = caLamViecDAO.getCaByAccountIDAndDateRange(
-                user.getAccountId(),
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(7));
+        // Lưới tuần cần điều hướng qua lại, nên trả cùng khoảng ngày như bên Lễ tân
+        if ("json".equals(req.getParameter("format"))) {
+            List<CaLamViec> shifts = caLamViecDAO.getCaByAccountIDAndDateRange(
+                            user.getAccountId(),
+                            LocalDate.now().minusWeeks(4),
+                            LocalDate.now().plusWeeks(8))
+                    .stream().filter(CaLamViec::isPublished).collect(Collectors.toList());
 
-        System.out.println("[DEBUG-SHIFT] GuardDiemDanhServlet: sessionAccountId=" + user.getAccountId()
-                + " username=" + user.getUsername()
-                + " today=" + LocalDate.now()
-                + " caHomNayFound=" + (caHomNay != null)
-                + " lichSuCount=" + lichSu.size());
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
+            resp.getWriter().write(buildShiftsJson(shifts));
+            return;
+        }
 
         CoSoFaceConfig faceConfig = user.getCoSoId() != null
             ? faceConfigDAO.findByCoSo(user.getCoSoId())
             : new CoSoFaceConfig();
         req.setAttribute("faceConfig", faceConfig);
-        req.setAttribute("caHomNay", caHomNay);
-        req.setAttribute("lichSuCa", lichSu);
-        req.setAttribute("caSapToi", caSapToi);
         req.setAttribute("guardPage", "diem-danh");
         req.getRequestDispatcher("/guard/DiemDanh.jsp").forward(req, resp);
+    }
+
+    private String buildShiftsJson(List<CaLamViec> shifts) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (CaLamViec s : shifts) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("caLamViecId", s.getCaLamViecId());
+            m.put("ngayLam", s.getNgayLam() != null ? s.getNgayLam().toString() : "");
+            m.put("gioBatDau", s.getGioBatDau() != null ? s.getGioBatDau().toString() : "");
+            m.put("gioKetThuc", s.getGioKetThuc() != null ? s.getGioKetThuc().toString() : "");
+            m.put("tenCa", s.getTenCa());
+            m.put("viTri", s.getViTri());
+            m.put("trangThai", s.getTrangThai());
+            m.put("gioNghi", s.getGioNghi());
+            m.put("ghiChu", s.getGhiChu());
+            m.put("faceVerified", s.isFaceVerified());
+            m.put("faceConfidence", s.getFaceConfidence());
+            m.put("gioVaoThuc", s.getGioVaoThuc() != null ? s.getGioVaoThuc().toString() : null);
+            m.put("gioRaThuc", s.getGioRaThuc() != null ? s.getGioRaThuc().toString() : null);
+            rows.add(m);
+        }
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("shifts", rows);
+        return new com.google.gson.Gson().toJson(data);
     }
 
     @Override

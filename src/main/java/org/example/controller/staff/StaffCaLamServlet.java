@@ -170,6 +170,8 @@ public class StaffCaLamServlet extends HttpServlet {
             m.put("trangThai", s.getTrangThai());
             m.put("gioNghi", s.getGioNghi());
             m.put("ghiChu", s.getGhiChu());
+            m.put("gioVaoThuc", s.getGioVaoThuc() != null ? s.getGioVaoThuc().toString() : null);
+            m.put("gioRaThuc", s.getGioRaThuc() != null ? s.getGioRaThuc().toString() : null);
             shiftsList.add(m);
         }
         data.put("shifts", shiftsList);

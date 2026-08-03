@@ -82,6 +82,9 @@ public class TaiKhoan {
     @Column(name = "SoTaiKhoan")
     private String soTaiKhoan;
 
+    @Column(name = "QrImagePath")
+    private String qrImagePath;
+
     @Column(name = "ViTriSoTruong")
     private String viTriSoTruong;
 
@@ -402,6 +405,15 @@ public class TaiKhoan {
 
     public void setSoTaiKhoan(String soTaiKhoan) {
         this.soTaiKhoan = soTaiKhoan;
+    }
+
+    /** Đường dẫn tương đối tới ảnh QR ngân hàng tĩnh nhân viên tự upload, ví dụ "nhan-vien-qr/12/<uuid>.png". */
+    public String getQrImagePath() {
+        return qrImagePath;
+    }
+
+    public void setQrImagePath(String qrImagePath) {
+        this.qrImagePath = qrImagePath;
     }
 
     public String getViTriSoTruong() {

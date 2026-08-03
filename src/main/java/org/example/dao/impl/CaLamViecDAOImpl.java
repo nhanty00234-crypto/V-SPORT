@@ -721,4 +721,22 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         }
         return list;
     }
+
+    @Override
+    public int countCaHoanThanh(int accountId, int coSoId, LocalDate tuNgay, LocalDate denNgay) throws Exception {
+        String sql = "SELECT COUNT(*) FROM CaLamViec " +
+                "WHERE AccountID = ? AND CoSoID = ? " +
+                "  AND NgayLam BETWEEN ? AND ? " +
+                "  AND TrangThai IN ('CheckedOut', 'Confirmed') " +
+                "  AND (IsDeleted = 0 OR IsDeleted IS NULL)";
+        try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setInt(2, coSoId);
+            ps.setDate(3, Date.valueOf(tuNgay));
+            ps.setDate(4, Date.valueOf(denNgay));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
 }

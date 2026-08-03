@@ -612,6 +612,34 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             throw new RuntimeException("resetFaceData failed", e);
         }
     }
+
+    @Override
+    public void updateBankInfo(int accountId, String maNganHang, String soTaiKhoan) throws Exception {
+        String sql = "UPDATE Accounts SET MaNganHang = ?, SoTaiKhoan = ? WHERE AccountID = ?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, blankToNull(maNganHang));
+            ps.setString(2, blankToNull(soTaiKhoan));
+            ps.setInt(3, accountId);
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public void updateQrImagePath(int accountId, String qrImagePath) throws Exception {
+        String sql = "UPDATE Accounts SET QrImagePath = ? WHERE AccountID = ?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, blankToNull(qrImagePath));
+            ps.setInt(2, accountId);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Chuỗi rỗng trong cột ngân hàng dễ gây QR hỏng — lưu NULL cho rõ ràng. */
+    private static String blankToNull(String v) {
+        return (v == null || v.isBlank()) ? null : v.trim();
+    }
 }
 
 

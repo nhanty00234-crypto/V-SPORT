@@ -134,4 +134,11 @@ public interface CaLamViecDAO {
      * mới nhất trước, đã join sẵn tên nhân viên.
      */
     List<org.example.model.FaceAttendanceLog> getFaceAttendanceHistory(int coSoId, int limit);
+
+    /**
+     * Đếm số ca ĐÃ HOÀN THÀNH của một nhân viên trong khoảng ngày, dùng để tính phụ cấp theo ca.
+     * Chỉ tính trạng thái 'CheckedOut' và 'Confirmed'; bỏ qua ca đã xoá mềm.
+     * Khoảng ngày là inclusive hai đầu.
+     */
+    int countCaHoanThanh(int accountId, int coSoId, LocalDate tuNgay, LocalDate denNgay) throws Exception;
 }

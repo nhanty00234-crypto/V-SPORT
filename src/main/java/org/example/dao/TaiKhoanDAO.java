@@ -75,4 +75,10 @@ public interface TaiKhoanDAO {
 
     /** Xóa đăng ký khuôn mặt của một tài khoản để nhân viên đăng ký lại. */
     void resetFaceData(int accountId);
+
+    /** Nhân viên tự cập nhật ngân hàng nhận lương. Truyền null/blank để xoá thông tin. */
+    void updateBankInfo(int accountId, String maNganHang, String soTaiKhoan) throws Exception;
+
+    /** Lưu đường dẫn ảnh QR tĩnh của nhân viên; truyền null để gỡ ảnh. */
+    void updateQrImagePath(int accountId, String qrImagePath) throws Exception;
 }
