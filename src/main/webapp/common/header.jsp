@@ -365,6 +365,35 @@
     .contact-item .label { font-size: 11px; color: #9ca3af; }
     .contact-item .value { font-size: 14px; font-weight: 700; color: #111827; }
 
+    /* Search */
+    .search-wrap {
+        position: relative;
+        display: flex; align-items: center;
+    }
+    .search-input-box {
+        position: absolute; right: 38px; top: 50%; transform: translateY(-50%);
+        width: 0; overflow: hidden;
+        transition: width 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+    }
+    .search-wrap.open .search-input-box {
+        width: 220px; opacity: 1;
+    }
+    .search-input-box input {
+        width: 100%;
+        height: 36px;
+        border: 1.5px solid var(--primary);
+        border-radius: 8px;
+        padding: 0 12px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13.5px;
+        outline: none;
+        background: #fff;
+        color: var(--header-text);
+        box-shadow: 0 2px 8px rgba(45,122,79,0.08);
+    }
+    .search-input-box input::placeholder { color: #9ca3af; }
+
     @media (max-width: 1024px) {
         .nav-links { display: none; }
         .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
@@ -373,6 +402,7 @@
         .navbar-top { padding: 0 16px; }
         .btn-login { display: none; }
         .header-divider { display: none; }
+        .search-wrap.open .search-input-box { width: 160px; }
     }
 </style>
 
@@ -436,6 +466,18 @@
 
         <!-- Right Actions -->
         <div class="header-actions">
+            <!-- Search -->
+            <div class="search-wrap" id="search-wrap">
+                <div class="search-input-box">
+                    <input type="text" id="header-search-input" placeholder="Tìm kiếm sân, dịch vụ..." autocomplete="off"/>
+                </div>
+                <button class="header-icon-btn" id="search-toggle-btn" title="Tìm kiếm" onclick="toggleSearch(event)">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
+            </div>
+
             <!-- Cart -->
             <a href="${pageContext.request.contextPath}/customer/dat-san" class="header-icon-btn" title="Giỏ hàng">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -563,15 +605,34 @@
         });
     }
 
-    // Search redirect
+    // Search toggle + submit
+    const searchWrap = document.getElementById('search-wrap');
     const searchInput = document.getElementById('header-search-input');
+
+    window.toggleSearch = function(e) {
+        e.stopPropagation();
+        const isOpen = searchWrap.classList.toggle('open');
+        if (isOpen) {
+            setTimeout(() => searchInput && searchInput.focus(), 320);
+        }
+    };
+
     if (searchInput) {
         searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter' && searchInput.value.trim()) {
                 window.location.href = "${pageContext.request.contextPath}/customer/tim-kiem?q=" + encodeURIComponent(searchInput.value.trim());
             }
+            if (e.key === 'Escape') {
+                searchWrap.classList.remove('open');
+            }
         });
     }
+
+    document.addEventListener('click', e => {
+        if (searchWrap && !searchWrap.contains(e.target)) {
+            searchWrap.classList.remove('open');
+        }
+    });
 
     // Mobile hamburger
     const mobileBtn = document.getElementById('mobileNavBtn');

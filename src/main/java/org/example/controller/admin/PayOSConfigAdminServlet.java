@@ -106,18 +106,27 @@ public class PayOSConfigAdminServlet extends HttpServlet {
             return;
         }
 
+        String adminEmail = admin.getEmail();
+        if (adminEmail == null || adminEmail.trim().isEmpty()) {
+            logger.error("Admin AccountID={} không có email, không thể gửi OTP cấu hình PayOS cho CoSoID={}", admin.getAccountId(), coSoId);
+            writeJson(resp, 400, errorJson("Tài khoản admin chưa được thiết lập địa chỉ email. Vui lòng cập nhật email cho tài khoản trước khi thực hiện thao tác này."));
+            return;
+        }
+
         String otp = ResetSecurityUtil.generateOtp();
-        String maskedEmail = ResetSecurityUtil.maskEmail(admin.getEmail());
+        String maskedEmail = ResetSecurityUtil.maskEmail(adminEmail);
         PayOSConfigChallenge challenge = PayOSConfigChallenge.create(
                 coSoId, admin.getAccountId(), maskedEmail,
                 prepared.finalClientId, prepared.finalApiKey, prepared.finalChecksumKey,
                 prepared.fieldsChanged, otp, System.currentTimeMillis());
 
         try {
+            logger.info("Gửi OTP cấu hình PayOS CoSoID={} đến email={}", coSoId, maskedEmail);
             sendOtpEmail(admin, prepared.coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS");
+            logger.info("Gửi OTP thành công đến {}", maskedEmail);
         } catch (Exception e) {
-            logger.error("Lỗi gửi email OTP cấu hình PayOS cho CoSoID {}: {}", coSoId, e.getMessage());
-            writeJson(resp, 502, errorJson("Không thể gửi mã xác thực. Vui lòng thử lại sau."));
+            logger.error("Lỗi gửi email OTP cấu hình PayOS cho CoSoID={}, email={}: {}", coSoId, maskedEmail, e.getMessage(), e);
+            writeJson(resp, 502, errorJson("Không thể gửi mã xác thực đến " + maskedEmail + ". Vui lòng kiểm tra cấu hình email hoặc thử lại sau."));
             return;
         }
 
@@ -210,6 +219,12 @@ public class PayOSConfigAdminServlet extends HttpServlet {
             return;
         }
 
+        String adminEmail = admin.getEmail();
+        if (adminEmail == null || adminEmail.trim().isEmpty()) {
+            writeJson(resp, 400, errorJson("Tài khoản admin chưa được thiết lập địa chỉ email."));
+            return;
+        }
+
         String otp = ResetSecurityUtil.generateOtp();
         CoSo coSo = null;
         try {
@@ -217,11 +232,14 @@ public class PayOSConfigAdminServlet extends HttpServlet {
         } catch (Exception ignored) {
             // best-effort chỉ để lấy tên cơ sở cho nội dung email; không chặn resend nếu lỗi
         }
+        String maskedEmailResend = ResetSecurityUtil.maskEmail(adminEmail);
         try {
+            logger.info("Gửi lại OTP cấu hình PayOS CoSoID={} đến email={}", coSoId, maskedEmailResend);
             sendOtpEmail(admin, coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS (gửi lại)");
+            logger.info("Gửi lại OTP thành công đến {}", maskedEmailResend);
         } catch (Exception e) {
-            logger.error("Lỗi gửi lại email OTP PayOS cho CoSoID {}: {}", coSoId, e.getMessage());
-            writeJson(resp, 502, errorJson("Không thể gửi lại mã. Vui lòng thử lại sau."));
+            logger.error("Lỗi gửi lại email OTP PayOS cho CoSoID={}, email={}: {}", coSoId, maskedEmailResend, e.getMessage(), e);
+            writeJson(resp, 502, errorJson("Không thể gửi lại mã đến " + maskedEmailResend + ". Vui lòng kiểm tra cấu hình email hoặc thử lại sau."));
             return;
         }
         challenge.applyResend(otp, now);
@@ -235,7 +253,8 @@ public class PayOSConfigAdminServlet extends HttpServlet {
     private void sendOtpEmail(TaiKhoan admin, CoSo coSo, String otp, String subject) throws Exception {
         String coSoName = coSo != null ? coSo.getTenCoSo() : "cơ sở đã chọn";
         String adminName = admin.getFullName() != null ? admin.getFullName() : admin.getUsername();
-        EmailUtil.sendHtmlEmail(admin.getEmail(), "V-SPORT — Xác thực cấu hình PayOS",
+        String emailSubject = (subject != null && !subject.isBlank()) ? subject : "V-SPORT — Xác thực cấu hình PayOS";
+        EmailUtil.sendHtmlEmail(admin.getEmail(), emailSubject,
                 org.example.util.EmailTemplates.otpPayOSConfig(adminName, coSoName, otp));
     }
 

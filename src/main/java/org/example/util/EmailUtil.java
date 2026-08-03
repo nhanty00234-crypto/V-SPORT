@@ -32,15 +32,19 @@ public class EmailUtil {
     }
 
     public static void sendEmail(String toAddress, String subject, String body) throws MessagingException {
+        if (toAddress == null || toAddress.trim().isEmpty()) {
+            throw new MessagingException("Địa chỉ email người nhận không được để trống.");
+        }
         Properties props = new Properties();
         props.put("mail.smtp.host", HOST);
         props.put("mail.smtp.port", PORT);
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", "true"); 
+        props.put("mail.smtp.ssl.enable", "true");
         props.put("mail.smtp.socketFactory.port", PORT);
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.connectiontimeout", "5000");
-        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+        props.put("mail.smtp.writetimeout", "10000");
 
         // Force Jakarta Activation to use Eclipse Angus content handlers to avoid conflicts (configured via reflection to avoid compile issues)
         try {
@@ -81,6 +85,9 @@ public class EmailUtil {
     }
 
     public static void sendHtmlEmail(String toAddress, String subject, String htmlBody) throws MessagingException, UnsupportedEncodingException {
+        if (toAddress == null || toAddress.trim().isEmpty()) {
+            throw new MessagingException("Địa chỉ email người nhận không được để trống.");
+        }
         Properties props = new Properties();
         props.put("mail.smtp.host", HOST);
         props.put("mail.smtp.port", PORT);
@@ -88,8 +95,9 @@ public class EmailUtil {
         props.put("mail.smtp.ssl.enable", "true");
         props.put("mail.smtp.socketFactory.port", PORT);
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.connectiontimeout", "5000");
-        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+        props.put("mail.smtp.writetimeout", "10000");
 
         try {
             Class<?> commandMapClass = Class.forName("jakarta.activation.CommandMap");

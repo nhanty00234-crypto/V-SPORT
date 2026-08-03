@@ -1552,6 +1552,7 @@ var DRAWER_DATA = {};
       <h4 class="text-base font-bold text-zinc-900 mb-1">Xác thực thay đổi PayOS</h4>
       <p class="text-sm text-zinc-500">Mã OTP 6 chữ số đã được gửi đến</p>
       <p class="text-sm font-semibold text-blue-600 mt-0.5" id="payosOtpEmailDisplay"></p>
+      <p class="text-xs text-zinc-400 mt-1">Không thấy email? Kiểm tra thư mục <strong>Spam / Thư rác</strong></p>
     </div>
 
     <div class="flex justify-center gap-2">
