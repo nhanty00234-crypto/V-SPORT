@@ -74,7 +74,7 @@
         <span class="text-[13px] font-medium text-zinc-700">Đổi mật khẩu</span>
       </button>
       <div class="border-t border-zinc-100 mt-1 pt-1">
-        <a href="${pageContext.request.contextPath}/dangxuat"
+        <a href="${pageContext.request.contextPath}/logout"
            class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-50 transition-colors">
           <i class="ti ti-logout text-[16px] text-red-500"></i>
           <span class="text-[13px] font-medium text-red-600">Đăng xuất</span>

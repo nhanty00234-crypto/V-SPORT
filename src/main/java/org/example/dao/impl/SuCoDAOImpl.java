@@ -40,17 +40,17 @@ public class SuCoDAOImpl implements SuCoDAO {
 
     @Override
     public List<SuCo> getByBaoVe(int baoVeId, int limit) {
-        String sql = "SELECT sc.*, a.FullName AS TenBaoVe, san.TenSan " +
+        String sql = "SELECT TOP (?) sc.*, a.FullName AS TenBaoVe, san.TenSan " +
                      "FROM SuCo sc " +
                      "LEFT JOIN Accounts a ON sc.BaoVeID = a.AccountID " +
                      "LEFT JOIN San san ON sc.SanID = san.SanID " +
                      "WHERE sc.BaoVeID = ? " +
-                     "ORDER BY sc.ThoiGianTao DESC LIMIT ?";
+                     "ORDER BY sc.ThoiGianTao DESC";
         List<SuCo> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, baoVeId);
-            ps.setInt(2, limit);
+            ps.setInt(1, limit);
+            ps.setInt(2, baoVeId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) list.add(mapRow(rs));
             }
@@ -62,22 +62,20 @@ public class SuCoDAOImpl implements SuCoDAO {
 
     @Override
     public List<SuCo> getByCoSo(int coSoId, String trangThai, int limit) {
-        String sql = "SELECT sc.*, a.FullName AS TenBaoVe, san.TenSan " +
+        String sqlFinal = "SELECT TOP (?) sc.*, a.FullName AS TenBaoVe, san.TenSan " +
                      "FROM SuCo sc " +
                      "LEFT JOIN Accounts a ON sc.BaoVeID = a.AccountID " +
                      "LEFT JOIN San san ON sc.SanID = san.SanID " +
                      "WHERE sc.CoSoID = ? " +
                      (trangThai != null ? "AND sc.TrangThai = ? " : "") +
-                     "ORDER BY sc.ThoiGianTao DESC LIMIT ?";
+                     "ORDER BY sc.ThoiGianTao DESC";
         List<SuCo> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, coSoId);
+             PreparedStatement ps = conn.prepareStatement(sqlFinal)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, coSoId);
             if (trangThai != null) {
-                ps.setString(2, trangThai);
-                ps.setInt(3, limit);
-            } else {
-                ps.setInt(2, limit);
+                ps.setString(3, trangThai);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) list.add(mapRow(rs));
@@ -90,7 +88,7 @@ public class SuCoDAOImpl implements SuCoDAO {
 
     @Override
     public boolean updateTrangThai(int suCoId, String trangThai, String ghiChuXuLy, int xuLyBoi) {
-        String sql = "UPDATE SuCo SET TrangThai=?, GhiChuXuLy=?, ThoiGianXuLy=NOW(), XuLyBoi=? WHERE SuCoID=?";
+        String sql = "UPDATE SuCo SET TrangThai=?, GhiChuXuLy=?, ThoiGianXuLy=GETDATE(), XuLyBoi=? WHERE SuCoID=?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, trangThai);
@@ -106,7 +104,7 @@ public class SuCoDAOImpl implements SuCoDAO {
 
     @Override
     public int countTodayByBaoVe(int baoVeId) {
-        String sql = "SELECT COUNT(*) FROM SuCo WHERE BaoVeID=? AND DATE(ThoiGianTao)=CURDATE()";
+        String sql = "SELECT COUNT(*) FROM SuCo WHERE BaoVeID=? AND CAST(ThoiGianTao AS DATE)=CAST(GETDATE() AS DATE)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, baoVeId);
@@ -121,7 +119,7 @@ public class SuCoDAOImpl implements SuCoDAO {
 
     @Override
     public int countTodayByCoSo(int coSoId) {
-        String sql = "SELECT COUNT(*) FROM SuCo WHERE CoSoID=? AND DATE(ThoiGianTao)=CURDATE()";
+        String sql = "SELECT COUNT(*) FROM SuCo WHERE CoSoID=? AND CAST(ThoiGianTao AS DATE)=CAST(GETDATE() AS DATE)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);

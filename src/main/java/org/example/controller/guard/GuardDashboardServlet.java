@@ -34,6 +34,7 @@ public class GuardDashboardServlet extends HttpServlet {
 
         req.setAttribute("caHomNay", caHomNay);
         req.setAttribute("suCoHomNay", suCoHomNay);
+        req.setAttribute("guardPage", "dashboard");
         req.getRequestDispatcher("/guard/Dashboard.jsp").forward(req, resp);
     }
 }

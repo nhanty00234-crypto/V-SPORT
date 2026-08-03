@@ -593,7 +593,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public CaLamViec getCaHomNay(int accountId, LocalDate ngay) {
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID=? AND NgayLam=? AND IsDeleted=0 AND IsPublished=1 ORDER BY GioBatDau ASC LIMIT 1";
+        String sql = "SELECT TOP 1 * FROM CaLamViec WHERE AccountID=? AND NgayLam=? AND IsDeleted=0 AND IsPublished=1 ORDER BY GioBatDau ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -609,7 +609,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean checkInCa(int caLamViecId) {
-        String sql = "UPDATE CaLamViec SET GioVaoThuc=NOW(), TrangThai='CheckedIn' WHERE CaLamViecID=? AND GioVaoThuc IS NULL";
+        String sql = "UPDATE CaLamViec SET GioVaoThuc=GETDATE(), TrangThai='CheckedIn' WHERE CaLamViecID=? AND GioVaoThuc IS NULL";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, caLamViecId);
@@ -622,7 +622,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean checkOutCa(int caLamViecId) {
-        String sql = "UPDATE CaLamViec SET GioRaThuc=NOW(), TrangThai='CheckedOut' WHERE CaLamViecID=? AND GioVaoThuc IS NOT NULL AND GioRaThuc IS NULL";
+        String sql = "UPDATE CaLamViec SET GioRaThuc=GETDATE(), TrangThai='CheckedOut' WHERE CaLamViecID=? AND GioVaoThuc IS NOT NULL AND GioRaThuc IS NULL";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, caLamViecId);

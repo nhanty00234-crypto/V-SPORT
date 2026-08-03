@@ -104,16 +104,17 @@
 
   <!-- Navigation -->
   <nav class="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5" id="sidebarNav">
-    <c:set var="uri" value="${pageContext.request.requestURI}"/>
+    <%-- guardPage được set bởi servlet, dùng để xác định active state chính xác sau forward() --%>
+    <c:set var="gp" value="${requestScope.guardPage}"/>
+    <c:set var="grpCongViec" value="${gp == 'diem-danh' || gp == 'bao-cao-su-co' || gp == 'lich-su-su-co'}"/>
 
     <!-- Tổng quan -->
     <a href="${pageContext.request.contextPath}/guard/dashboard"
-       class="nav-link ${uri.contains('/guard/dashboard') ? 'active' : ''}">
+       class="nav-link ${gp == 'dashboard' ? 'active' : ''}">
       <i class="ti ti-layout-dashboard text-[19px]"></i>Tổng quan
     </a>
 
     <!-- Công việc -->
-    <c:set var="grpCongViec" value="${uri.contains('/guard/diem-danh') || uri.contains('/guard/bao-cao-su-co') || uri.contains('/guard/lich-su-su-co')}"/>
     <div class="nav-group-wrap">
       <button class="nav-group-header ${grpCongViec ? 'group-open' : ''}" onclick="toggleGroup(this)">
         <i class="ti ti-shield-check text-[19px] text-rose-500"></i>
@@ -122,15 +123,15 @@
       </button>
       <div class="nav-group-children ${grpCongViec ? 'group-open' : ''}">
         <a href="${pageContext.request.contextPath}/guard/diem-danh"
-           class="nav-link ${uri.contains('/guard/diem-danh') ? 'active' : ''}">
+           class="nav-link ${gp == 'diem-danh' ? 'active' : ''}">
           <i class="ti ti-id-badge text-[16px]"></i>Điểm danh ca
         </a>
         <a href="${pageContext.request.contextPath}/guard/bao-cao-su-co"
-           class="nav-link ${uri.contains('/guard/bao-cao-su-co') ? 'active' : ''}">
+           class="nav-link ${gp == 'bao-cao-su-co' ? 'active' : ''}">
           <i class="ti ti-alert-triangle text-[16px]"></i>Báo cáo sự cố
         </a>
         <a href="${pageContext.request.contextPath}/guard/lich-su-su-co"
-           class="nav-link ${uri.contains('/guard/lich-su-su-co') ? 'active' : ''}">
+           class="nav-link ${gp == 'lich-su-su-co' ? 'active' : ''}">
           <i class="ti ti-history text-[16px]"></i>Lịch sử sự cố
         </a>
       </div>
@@ -139,7 +140,7 @@
 
   <!-- Logout -->
   <div class="px-3 py-3 border-t border-rose-50 shrink-0">
-    <a href="${pageContext.request.contextPath}/dangxuat"
+    <a href="${pageContext.request.contextPath}/logout"
        class="nav-link text-red-500 hover:bg-red-50 hover:text-red-600 text-xs font-semibold">
       <i class="ti ti-logout text-[16px] text-red-500"></i>Đăng xuất
     </a>
@@ -198,8 +199,8 @@ function toggleGroup(btn) {
       var appPath = '${pageContext.request.contextPath}';
       var pn = url.pathname;
       var isGuardRoute = appPath
-        ? (pn.indexOf(appPath + '/guard') === 0 || pn.indexOf(appPath + '/dangxuat') === 0)
-        : (pn.indexOf('/guard') === 0 || pn.indexOf('/dangxuat') === 0);
+        ? (pn.indexOf(appPath + '/guard') === 0 || pn.indexOf(appPath + '/logout') === 0)
+        : (pn.indexOf('/guard') === 0 || pn.indexOf('/logout') === 0);
       if (!isGuardRoute) return;
 
       event.preventDefault();

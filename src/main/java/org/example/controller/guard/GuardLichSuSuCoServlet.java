@@ -31,6 +31,7 @@ public class GuardLichSuSuCoServlet extends HttpServlet {
 
         req.setAttribute("danhSachSuCo", danhSach);
         req.setAttribute("filterTrangThai", filter);
+        req.setAttribute("guardPage", "lich-su-su-co");
         req.getRequestDispatcher("/guard/LichSuSuCo.jsp").forward(req, resp);
     }
 }

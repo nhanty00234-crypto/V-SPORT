@@ -40,6 +40,7 @@ public class GuardBaoCaoSuCoServlet extends HttpServlet {
 
         List<San> danhSachSan = sanDAO.getSansByCoSo(user.getCoSoId());
         req.setAttribute("danhSachSan", danhSachSan);
+        req.setAttribute("guardPage", "bao-cao-su-co");
         req.getRequestDispatcher("/guard/BaoCaoSuCo.jsp").forward(req, resp);
     }
 

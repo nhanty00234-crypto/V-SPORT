@@ -32,6 +32,7 @@ public class GuardDiemDanhServlet extends HttpServlet {
 
         req.setAttribute("caHomNay", caHomNay);
         req.setAttribute("lichSuCa", lichSu);
+        req.setAttribute("guardPage", "diem-danh");
         req.getRequestDispatcher("/guard/DiemDanh.jsp").forward(req, resp);
     }
 
