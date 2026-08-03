@@ -38,6 +38,6 @@ public final class UngLuongValidator {
 
     private static String dinhDang(BigDecimal v) {
         if (v.signum() < 0) v = BigDecimal.ZERO;
-        return NumberFormat.getInstance(Locale.of("vi", "VN")).format(v);
+        return NumberFormat.getInstance(new Locale("vi", "VN")).format(v);
     }
 }

@@ -3,9 +3,21 @@
 **Chuẩn bị**
 1. Chạy `sql/migration_salary.sql` trên database (bắt buộc — `TaiKhoan` là JPA entity nên
    thiếu cột `Accounts.QrImagePath` sẽ làm hỏng mọi truy vấn tài khoản).
+   Đã áp dụng trên server dùng chung `14.225.217.109/QuanLiSport` ngày 2026-08-04.
 2. Đảm bảo cơ sở có ít nhất 2 nhân viên (1 lễ tân RoleID=4, 1 bảo vệ RoleID=5).
 3. Tạo sẵn vài ca `CaLamViec` trạng thái `CheckedOut` trong tháng hiện tại cho các nhân viên đó.
 4. Đặt biến môi trường `VSPORT_UPLOAD_DIR` (nếu không, ảnh QR lưu ở `~/vsport-uploads`).
+
+> [!IMPORTANT]
+> **Phụ cấp theo ca sẽ ra 0 nếu ca chưa được chấm công.** Theo spec §4, chỉ ca ở trạng thái
+> `CheckedOut` hoặc `Confirmed` mới được tính. Khảo sát dữ liệu ngày 2026-08-04: toàn hệ thống
+> có 94 ca `Published`, 17 `Confirmed` nhưng chỉ **1** ca `CheckedOut` — luồng check-in/check-out
+> gần như chưa được dùng. Riêng cơ sở 31 có 42 ca `Published` và 1 `Confirmed`.
+>
+> Đây là hành vi ĐÚNG theo thiết kế, không phải lỗi: ca mới chỉ được xếp lịch (`Published`)
+> chưa phải bằng chứng nhân viên đã đi làm. Nhưng trước khi phát lương thật, cần siết quy trình
+> để nhân viên thực sự check-out ca, nếu không phụ cấp sẽ bằng 0. Khi test bước 2, hãy tự đổi
+> vài ca sang `CheckedOut` để thấy phụ cấp khác 0.
 
 ## 1. Cấu hình lương (Manager)
 - [ ] Vào `/manager/luong/cau-hinh` — thấy đủ lễ tân và bảo vệ của cơ sở mình, KHÔNG thấy nhân viên cơ sở khác.
