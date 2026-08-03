@@ -1769,6 +1769,8 @@ function submitDuyet(coSoId) {
   form.action = contextPath + '/admin/chi-nhanh';
   addField(form, 'action', 'duyet');
   addField(form, 'id', coSoId);
+  var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  if (csrfMeta) addField(form, '_csrf', csrfMeta.content);
   document.body.appendChild(form);
   form.submit();
 }
@@ -1798,6 +1800,8 @@ function submitTuChoi() {
   addField(form, 'action', 'tu-choi');
   addField(form, 'id', coSoId);
   addField(form, 'reason', reason);
+  var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  if (csrfMeta) addField(form, '_csrf', csrfMeta.content);
   document.body.appendChild(form);
   form.submit();
 }
