@@ -106,10 +106,13 @@ public class UpdateProfileServlet extends HttpServlet {
                 fieldErrors.put("fullName", "Họ và tên phải từ 2 đến 100 ký tự.");
             }
 
-            if (email == null || email.isEmpty()) {
-                fieldErrors.put("email", "Email không được để trống.");
-            } else if (!org.example.util.ValidationUtil.isValidEmail(email)) {
-                fieldErrors.put("email", "Email không hợp lệ và không được chứa khoảng trắng.");
+            // email == null means caller explicitly skipped it (e.g. GUARD/staff role)
+            if (email != null) {
+                if (email.isEmpty()) {
+                    fieldErrors.put("email", "Email không được để trống.");
+                } else if (!org.example.util.ValidationUtil.isValidEmail(email)) {
+                    fieldErrors.put("email", "Email không hợp lệ và không được chứa khoảng trắng.");
+                }
             }
 
             if (phoneNumber == null || phoneNumber.isEmpty()) {
@@ -166,7 +169,8 @@ public class UpdateProfileServlet extends HttpServlet {
                         account.setGioiTinh(newGenderValue);
                     }
 
-                    boolean emailChanged = account.getEmail() == null || !email.equalsIgnoreCase(account.getEmail());
+                    // email param absent → role không được đổi email, giữ nguyên
+                    boolean emailChanged = email != null && (account.getEmail() == null || !email.equalsIgnoreCase(account.getEmail()));
                     if (emailChanged && taiKhoanDAO.kiemtraEmail(email)) {
                         resp.getWriter().write(validationErrorJson(java.util.Map.of("email", "Email đã được sử dụng bởi tài khoản khác.")));
                         return;
