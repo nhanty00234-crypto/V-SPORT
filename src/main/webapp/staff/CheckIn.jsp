@@ -320,11 +320,11 @@
                          font-weight:800;line-height:16px;text-align:center;pointer-events:none;
                          box-shadow:0 0 0 2px #fff;white-space:nowrap;"></span>
           </button>
-          <div id="ciNotifDropdown" hidden
-               style="position:absolute;top:calc(100% + 8px);right:0;z-index:3000;width:320px;
+          <div id="ciNotifDropdown"
+               style="display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:3000;width:320px;
                       background:#fff;border-radius:12px;
                       box-shadow:0 12px 40px rgba(7,26,47,.18);
-                      border:1px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden;">
+                      border:1px solid #e5e7eb;flex-direction:column;overflow:hidden;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px 8px;border-bottom:1px solid #f3f4f6;">
               <span style="font-size:13px;font-weight:800;color:#111827;">Thông báo</span>
               <button id="ciNotifClear" type="button"
@@ -357,7 +357,7 @@
   function updateBadge(){var u=items.filter(function(n){return!n.daDoc;}).length;if(u>0){badge.textContent=u>99?'99+':u;badge.style.display='inline-block';}else{badge.style.display='none';}}
   function showToast(tieuDe,noiDung,duongDan){var accentColor=isManager?'#7c3aed':'#ea580c';var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;max-width:300px;background:#fff;border:1px solid #e5e7eb;border-left:4px solid '+accentColor+';border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:12px 14px;cursor:pointer;';t.innerHTML='<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:3px;">'+escH(tieuDe)+'</div>'+(noiDung?'<div style="font-size:11.5px;color:#6b7280;">'+escH(noiDung)+'</div>':'');if(duongDan)t.addEventListener('click',function(){window.location.href=ctx+duongDan;});document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},5000);}
   function fetchNotifications(){fetch(apiUrl+'?format=json&limit=8',{headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var newUnread=data.unread||0;if(lastUnread>=0&&newUnread>lastUnread&&data.items&&data.items.length){var n=data.items[0];if(n&&!n.daDoc)showToast(n.tieuDe,n.noiDung,n.duongDan);}lastUnread=newUnread;items=(data.items||[]).map(function(n){return{id:n.id,tieuDe:n.tieuDe,noiDung:n.noiDung,daDoc:n.daDoc,duongDan:n.duongDan,thoiGian:n.thoiGian,loai:n.loai};});updateBadge();if(isOpen)renderList();}).catch(function(){});}
-  function open(){isOpen=true;dropdown.hidden=false;}function close(){isOpen=false;dropdown.hidden=true;}
+  function open(){isOpen=true;dropdown.style.display='flex';}function close(){isOpen=false;dropdown.style.display='none';}
   btn.addEventListener('click',function(e){e.stopPropagation();if(isOpen)close();else open();renderList();});
   document.addEventListener('click',function(e){if(isOpen&&wrap&&!wrap.contains(e.target))close();});
   if(clearBtn){clearBtn.addEventListener('click',function(){fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'action=markAllRead'}).then(function(){items.forEach(function(n){n.daDoc=true;});updateBadge();renderList();}).catch(function(){});});}

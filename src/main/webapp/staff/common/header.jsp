@@ -27,11 +27,11 @@
                      box-shadow:0 0 0 2px #fff;white-space:nowrap;"></span>
       </button>
       <!-- Dropdown -->
-      <div id="staffNotifDropdown" hidden
-           style="position:absolute;top:calc(100% + 8px);right:0;z-index:3000;width:340px;
+      <div id="staffNotifDropdown"
+           style="display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:3000;width:340px;
                   max-width:min(340px,calc(100vw - 16px));background:#fff;border-radius:14px;
                   box-shadow:0 12px 40px rgba(7,26,47,.18),0 2px 8px rgba(7,26,47,.1);
-                  border:1px solid #fed7aa;display:flex;flex-direction:column;overflow:hidden;
+                  border:1px solid #fed7aa;flex-direction:column;overflow:hidden;
                   animation:staffNotifIn .16s ease;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:1px solid #ffedd5;background:#fff;">
           <span style="font-size:13px;font-weight:800;color:#431407;">Thông báo</span>
@@ -160,8 +160,8 @@
         if(isOpen) renderList();
       }).catch(function(){});
   }
-  function open(){ isOpen=true; dropdown.hidden=false; btn.setAttribute('aria-expanded','true'); renderList(); }
-  function close(){ isOpen=false; dropdown.hidden=true; btn.setAttribute('aria-expanded','false'); }
+  function open(){ isOpen=true; dropdown.style.display='flex'; btn.setAttribute('aria-expanded','true'); renderList(); }
+  function close(){ isOpen=false; dropdown.style.display='none'; btn.setAttribute('aria-expanded','false'); }
   btn.addEventListener('click', function(e){ e.stopPropagation(); if(isOpen) close(); else open(); });
   document.addEventListener('click', function(e){ if(isOpen && wrap && !wrap.contains(e.target)) close(); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && isOpen) close(); });
