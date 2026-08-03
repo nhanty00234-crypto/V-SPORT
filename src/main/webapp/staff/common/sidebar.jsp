@@ -236,6 +236,12 @@
       </div>
     </div>
 
+    <!-- ── Đăng ký khuôn mặt ── -->
+    <a href="${pageContext.request.contextPath}/staff/enroll-face"
+      class="nav-link ${uri.contains('/staff/enroll-face') || uri.contains('/FaceEnroll.jsp') ? 'active' : ''}">
+      <i class="ti ti-face-id text-[19px]"></i>Đăng ký khuôn mặt
+    </a>
+
   </nav>
 
   <!-- Logout -->

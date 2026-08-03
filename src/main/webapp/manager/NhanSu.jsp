@@ -6,6 +6,7 @@
 <head>
 <title>Quản lý nhân sự cơ sở — V-SPORT</title>
 <jsp:include page="/manager/common/manager_head.jsp" />
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
   .nav-link { display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;color:#52525b;font-size:14px;font-weight:500;text-decoration:none;transition:all .15s;white-space:nowrap;position:relative; }
   .nav-link:hover { background:#f4f4f5;color:#18181b; }
@@ -298,7 +299,7 @@
               <h3 class="text-sm font-bold text-violet-950">Xác thực OTP thay đổi Email</h3>
               <p class="text-xs text-violet-500 mt-1">Một mã xác thực gồm 6 chữ số đã được gửi tới <span class="font-bold text-violet-900" id="otpTargetEmail"></span>.</p>
           </div>
-          
+
           <div class="flex gap-2 justify-center my-3" id="otpBoxesContainer">
               <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
               <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
@@ -307,9 +308,9 @@
               <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
               <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="otp-box w-10 h-12 border border-violet-200 rounded-xl text-center font-bold text-lg text-violet-950 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 outline-none transition-all">
           </div>
-          
+
           <div class="text-xs text-violet-600 font-medium">
-              Chưa nhận được mã? 
+              Chưa nhận được mã?
               <button type="button" id="btnResendOtpStaff" onclick="resendStaffOtp()" class="font-bold text-violet-700 hover:underline disabled:opacity-40 disabled:no-underline cursor-pointer">
                   Gửi lại mã (<span id="resendCountDisplay">0</span>/5)
               </button>
@@ -333,6 +334,36 @@
                   <span class="material-symbols-outlined text-[16px]">check</span>
               </button>
           </div>
+      </div>
+
+      <!-- Face Enrollment Section (Visible only when editing staff) -->
+      <div id="faceEnrollmentSection" class="hidden border-t border-violet-50 pt-4 mt-4">
+        <h4 class="font-bold text-violet-700 text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-rose-500" style="font-variation-settings:'FILL' 1">face</span>
+          Khuôn mặt điểm danh
+        </h4>
+        <div id="managerFaceStatus" class="text-sm text-zinc-400 mb-3">Đang tải...</div>
+        <div class="flex gap-3 items-start">
+          <div id="managerFacePreview" class="w-20 h-20 rounded-xl bg-zinc-100 overflow-hidden hidden">
+            <img id="managerFaceImg" class="w-full h-full object-cover" alt="Face photo"/>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs text-zinc-400 mb-2">Upload ảnh chân dung rõ mặt (JPG/PNG, tối đa 5MB)</p>
+            <div class="flex gap-2">
+              <input type="file" id="managerFaceFile" accept="image/jpeg,image/png" class="hidden"
+                     onchange="previewManagerFace(event)"/>
+              <button type="button" onclick="document.getElementById('managerFaceFile').click()"
+                      class="text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold px-3 py-2 rounded-lg transition">
+                Chọn ảnh
+              </button>
+              <button type="button" id="btnManagerSaveFace" onclick="saveManagerFace()" disabled
+                      class="text-xs bg-rose-600 hover:bg-rose-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-semibold px-3 py-2 rounded-lg transition">
+                Lưu khuôn mặt
+              </button>
+            </div>
+            <p id="managerFaceUploadStatus" class="text-xs mt-2 min-h-[1rem]"></p>
+          </div>
+        </div>
       </div>
     </form>
   </div>
@@ -487,6 +518,95 @@ function clearFieldErrors() {
     document.querySelectorAll('.vs-field-error').forEach(f => f.classList.remove('vs-field-error'));
 }
 
+// ==================== FACE ENROLLMENT FUNCTIONS ====================
+
+let _managerTargetId = null;
+let _managerFaceDescriptor = null;
+let _managerFacePhoto = null;
+let _managerModelsLoaded = false;
+const FACE_MODEL_URL = _ctxPath + '/assets/face-models';
+
+async function loadManagerFaceStatus(accountId) {
+  _managerTargetId = accountId;
+  const res = await fetch(_ctxPath + '/face/enroll?targetAccountId=' + accountId);
+  const data = await res.json();
+  const statusEl = document.getElementById('managerFaceStatus');
+  const previewEl = document.getElementById('managerFacePreview');
+  const imgEl = document.getElementById('managerFaceImg');
+  if (data.enrolled) {
+    statusEl.innerHTML = '<span class="text-green-600 font-semibold">✓ Đã đăng ký khuôn mặt</span> — ' + (data.enrolledAt || '');
+    if (data.imagePath) {
+      imgEl.src = _ctxPath + data.imagePath;
+      previewEl.classList.remove('hidden');
+    }
+  } else {
+    statusEl.textContent = 'Chưa đăng ký khuôn mặt';
+  }
+}
+
+async function previewManagerFace(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('managerFaceUploadStatus');
+  statusEl.textContent = 'Đang phân tích khuôn mặt...';
+
+  if (!_managerModelsLoaded) {
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(FACE_MODEL_URL),
+      faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
+    ]);
+    _managerModelsLoaded = true;
+  }
+
+  const img = await faceapi.bufferToImage(file);
+  const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+    .withFaceLandmarks(true).withFaceDescriptor();
+
+  if (!detection) {
+    statusEl.textContent = '✗ Không tìm thấy khuôn mặt trong ảnh. Chọn ảnh khác.';
+    statusEl.className = 'text-xs mt-2 text-red-600';
+    return;
+  }
+
+  _managerFaceDescriptor = JSON.stringify(Array.from(detection.descriptor));
+  _managerFacePhoto = null; // sẽ upload file gốc
+
+  statusEl.textContent = '✓ Nhận diện thành công. Nhấn "Lưu khuôn mặt".';
+  statusEl.className = 'text-xs mt-2 text-green-600 font-semibold';
+  document.getElementById('btnManagerSaveFace').disabled = false;
+
+  // Preview
+  document.getElementById('managerFaceImg').src = URL.createObjectURL(file);
+  document.getElementById('managerFacePreview').classList.remove('hidden');
+}
+
+async function saveManagerFace() {
+  if (!_managerFaceDescriptor || !_managerTargetId) return;
+  const statusEl = document.getElementById('managerFaceUploadStatus');
+  statusEl.textContent = 'Đang lưu...';
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  const file = document.getElementById('managerFaceFile').files[0];
+  const formData = new FormData();
+  formData.append('descriptor', _managerFaceDescriptor);
+  if (file) formData.append('photo', file);
+  formData.append('_csrf', csrfToken);
+
+  const res = await fetch(_ctxPath + '/face/enroll?targetAccountId=' + _managerTargetId, {
+    method: 'POST', body: formData
+  });
+  const data = await res.json();
+  if (data.success) {
+    statusEl.textContent = '✓ Đã lưu khuôn mặt thành công!';
+    statusEl.className = 'text-xs mt-2 text-green-600 font-bold';
+    document.getElementById('btnManagerSaveFace').disabled = true;
+  } else {
+    statusEl.textContent = '✗ Lỗi: ' + (data.error || 'Không thể lưu');
+    statusEl.className = 'text-xs mt-2 text-red-600';
+  }
+}
+
 let staffList = [];
 
 // Load staff list on page load
@@ -582,6 +702,9 @@ function openAddStaff() {
     document.querySelectorAll('.otp-box').forEach(b => b.value = '');
     document.getElementById('otpErrorBanner').classList.add('hidden');
 
+    // Hide face enrollment section when adding new staff
+    document.getElementById('faceEnrollmentSection').classList.add('hidden');
+
     document.getElementById('staffModal').classList.remove('hidden');
 }
 
@@ -600,6 +723,15 @@ function editStaff(id) {
     document.getElementById('otpVerificationSection').classList.add('hidden');
     document.querySelectorAll('.otp-box').forEach(b => b.value = '');
     document.getElementById('otpErrorBanner').classList.add('hidden');
+
+    // Show face enrollment section when editing and reset file input
+    document.getElementById('faceEnrollmentSection').classList.remove('hidden');
+    document.getElementById('managerFaceFile').value = '';
+    document.getElementById('btnManagerSaveFace').disabled = true;
+    _managerFaceDescriptor = null;
+    _managerFacePhoto = null;
+    document.getElementById('managerFaceUploadStatus').textContent = '';
+    loadManagerFaceStatus(s.id);
 
     document.getElementById('staffModal').classList.remove('hidden');
 }

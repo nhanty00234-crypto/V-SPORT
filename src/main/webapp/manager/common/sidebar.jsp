@@ -478,6 +478,10 @@
           class="nav-link ${uri.contains('/manager/ca-lam') || uri.contains('/CaLamViec') ? 'active' : ''}">
           <i class="ti ti-calendar-time text-[16px]"></i>Ca làm việc
         </a>
+        <a href="${pageContext.request.contextPath}/manager/face-settings"
+          class="nav-link ${uri.contains('/manager/face-settings') ? 'active' : ''}">
+          <i class="ti ti-face-id text-[16px]"></i>Cài đặt khuôn mặt
+        </a>
       </div>
     </div>
 
