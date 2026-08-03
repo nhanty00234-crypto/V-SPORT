@@ -345,6 +345,7 @@ var _ctx = '<%=request.getContextPath()%>';
 var _currentCaId = null;
 var _currentAction = null;
 var _myId = ${sessionScope.user.accountId};
+var _faceRequired = ${faceConfig != null ? faceConfig.faceRequired : true};
 
 var shifts = [], coworkers = [], swaps = [];
 
@@ -472,9 +473,18 @@ function buildShiftActionBtn(s) {
     return '';
   }
   if (s.trangThai === 'CheckedIn') {
-    return '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')"'
+    var html = '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')"'
          + ' class="mt-2 w-full text-[11px] py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
          + '<i class="ti ti-logout text-[13px]"></i>Kết thúc ca</button>';
+    if (!_faceRequired) {
+      html += '<form method="post" action="' + _ctx + '/staff/ca-lam" style="margin-top:6px"'
+           + ' onsubmit="return confirm(\'Xác nhận kết thúc ca thủ công?\')">'
+           + '<input type="hidden" name="action" value="checkOut">'
+           + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
+           + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
+           + '</form>';
+    }
+    return html;
   }
   if (s.trangThai === 'Published') {
     return '<button onclick="doShiftAction(\'confirmShift\',' + s.caLamViecId + ',\'Xác nhận bạn sẽ tham gia ca làm việc này?\')"'
@@ -499,9 +509,18 @@ function buildShiftActionBtn(s) {
       return '<div class="mt-2 w-full text-[11px] py-1.5 bg-red-50 text-red-400 font-semibold rounded-lg flex items-center justify-center gap-1 cursor-not-allowed">'
            + '<i class="ti ti-clock-x text-[13px]"></i>Quá giờ điểm danh</div>';
     }
-    return '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')"'
+    var html = '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')"'
          + ' class="mt-2 w-full text-[11px] py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
          + '<i class="ti ti-login text-[13px]"></i>Điểm danh vào ca</button>';
+    if (!_faceRequired) {
+      html += '<form method="post" action="' + _ctx + '/staff/ca-lam" style="margin-top:6px"'
+           + ' onsubmit="return confirm(\'Xác nhận vào ca thủ công?\')">'
+           + '<input type="hidden" name="action" value="checkIn">'
+           + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
+           + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
+           + '</form>';
+    }
+    return html;
   }
   return '';
 }
@@ -564,10 +583,28 @@ function renderTodayCard() {
     } else if (nowMin > startMin + 30) {
       btns.innerHTML = '<div class="px-4 py-2 bg-white/30 text-white/60 rounded-lg text-xs font-bold cursor-not-allowed">Quá giờ điểm danh</div>';
     } else {
-      btns.innerHTML = '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-green-700 rounded-lg text-xs font-bold hover:bg-green-50 transition-all">Điểm danh vào ca</button>';
+      var html = '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-green-700 rounded-lg text-xs font-bold hover:bg-green-50 transition-all">Điểm danh vào ca</button>';
+      if (!_faceRequired) {
+        html += ' <form method="post" action="' + _ctx + '/staff/ca-lam" style="display:inline-block;margin-left:8px"'
+             + ' onsubmit="return confirm(\'Xác nhận vào ca thủ công?\')">'
+             + '<input type="hidden" name="action" value="checkIn">'
+             + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
+             + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
+             + '</form>';
+      }
+      btns.innerHTML = html;
     }
   } else if (s.trangThai === 'CheckedIn') {
-    btns.innerHTML = '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
+    var html = '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
+    if (!_faceRequired) {
+      html += ' <form method="post" action="' + _ctx + '/staff/ca-lam" style="display:inline-block;margin-left:8px"'
+           + ' onsubmit="return confirm(\'Xác nhận kết thúc ca thủ công?\')">'
+           + '<input type="hidden" name="action" value="checkOut">'
+           + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
+           + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
+           + '</form>';
+    }
+    btns.innerHTML = html;
   }
 }
 
