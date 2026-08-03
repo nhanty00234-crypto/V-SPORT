@@ -26,6 +26,27 @@ public class CaLamViec {
     private LocalDateTime gioVaoThuc;
     private LocalDateTime gioRaThuc;
 
+    // Face attendance fields
+    private boolean faceVerified;
+    private String faceCheckInImage;
+    private Double faceConfidence;
+    private boolean faceLivenessPassed;
+    private String faceCheckOutImage;
+    private Double faceCheckOutConfidence;
+
+    public boolean isFaceVerified() { return faceVerified; }
+    public void setFaceVerified(boolean faceVerified) { this.faceVerified = faceVerified; }
+    public String getFaceCheckInImage() { return faceCheckInImage; }
+    public void setFaceCheckInImage(String faceCheckInImage) { this.faceCheckInImage = faceCheckInImage; }
+    public Double getFaceConfidence() { return faceConfidence; }
+    public void setFaceConfidence(Double faceConfidence) { this.faceConfidence = faceConfidence; }
+    public boolean isFaceLivenessPassed() { return faceLivenessPassed; }
+    public void setFaceLivenessPassed(boolean faceLivenessPassed) { this.faceLivenessPassed = faceLivenessPassed; }
+    public String getFaceCheckOutImage() { return faceCheckOutImage; }
+    public void setFaceCheckOutImage(String faceCheckOutImage) { this.faceCheckOutImage = faceCheckOutImage; }
+    public Double getFaceCheckOutConfidence() { return faceCheckOutConfidence; }
+    public void setFaceCheckOutConfidence(Double faceCheckOutConfidence) { this.faceCheckOutConfidence = faceCheckOutConfidence; }
+
     public CaLamViec() {
     }
 

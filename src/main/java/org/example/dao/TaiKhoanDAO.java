@@ -66,4 +66,10 @@ public interface TaiKhoanDAO {
     long getTotalStaff();
 
     List<TaiKhoan> findAll();
+
+    /** Cập nhật face descriptor và ảnh khuôn mặt cho tài khoản. */
+    void updateFaceData(int accountId, String descriptorJson, String imagePath);
+
+    /** Lấy face data (chỉ accountId, faceDescriptor, faceImagePath, faceEnrolledAt). */
+    TaiKhoan getFaceData(int accountId);
 }

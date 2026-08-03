@@ -560,6 +560,45 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     public List<TaiKhoan> findAll() {
         return List.of();
     }
+
+    @Override
+    public void updateFaceData(int accountId, String descriptorJson, String imagePath) {
+        String sql = "UPDATE TaiKhoan SET FaceDescriptor=?, FaceImagePath=?, FaceEnrolledAt=GETDATE() WHERE AccountID=?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, descriptorJson);
+            ps.setString(2, imagePath);
+            ps.setInt(3, accountId);
+            ps.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            logger.error("updateFaceData failed for accountId={}: {}", accountId, e.getMessage(), e);
+            throw new RuntimeException("updateFaceData failed", e);
+        }
+    }
+
+    @Override
+    public TaiKhoan getFaceData(int accountId) {
+        String sql = "SELECT AccountID, FaceDescriptor, FaceImagePath, FaceEnrolledAt FROM TaiKhoan WHERE AccountID=?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    TaiKhoan tk = new TaiKhoan();
+                    tk.setAccountId(rs.getInt("AccountID"));
+                    tk.setFaceDescriptor(rs.getString("FaceDescriptor"));
+                    tk.setFaceImagePath(rs.getString("FaceImagePath"));
+                    java.sql.Timestamp ts = rs.getTimestamp("FaceEnrolledAt");
+                    if (ts != null) tk.setFaceEnrolledAt(ts.toLocalDateTime());
+                    return tk;
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            logger.error("getFaceData failed for accountId={}: {}", accountId, e.getMessage(), e);
+            throw new RuntimeException("getFaceData failed", e);
+        }
+        return null;
+    }
 }
 
 

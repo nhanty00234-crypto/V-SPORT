@@ -510,7 +510,53 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
             if (raThuc != null) ca.setGioRaThuc(raThuc.toLocalDateTime());
         } catch (SQLException ignored) {}
 
+        try {
+            ca.setFaceVerified(rs.getBoolean("FaceVerified"));
+            ca.setFaceCheckInImage(rs.getString("FaceCheckInImage"));
+            double conf = rs.getDouble("FaceConfidence");
+            if (!rs.wasNull()) ca.setFaceConfidence(conf);
+            ca.setFaceLivenessPassed(rs.getBoolean("FaceLivenessPassed"));
+            ca.setFaceCheckOutImage(rs.getString("FaceCheckOutImage"));
+            double confOut = rs.getDouble("FaceCheckOutConfidence");
+            if (!rs.wasNull()) ca.setFaceCheckOutConfidence(confOut);
+        } catch (SQLException ignored) { /* cột chưa tồn tại trên DB cũ */ }
+
         return ca;
+    }
+
+    @Override
+    public boolean faceCheckIn(int caLamViecId, String imagePath, double confidence, boolean livenessPassed) {
+        String sql = "UPDATE CaLamViec SET GioVaoThuc=GETDATE(), TrangThai='CheckedIn', " +
+                     "FaceVerified=1, FaceCheckInImage=?, FaceConfidence=?, FaceLivenessPassed=? " +
+                     "WHERE CaLamViecID=? AND GioVaoThuc IS NULL";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, imagePath);
+            ps.setDouble(2, confidence);
+            ps.setBoolean(3, livenessPassed);
+            ps.setInt(4, caLamViecId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("faceCheckIn failed for caLamViecId={}: {}", caLamViecId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean faceCheckOut(int caLamViecId, String imagePath, double confidence) {
+        String sql = "UPDATE CaLamViec SET GioRaThuc=GETDATE(), TrangThai='CheckedOut', " +
+                     "FaceCheckOutImage=?, FaceCheckOutConfidence=? " +
+                     "WHERE CaLamViecID=? AND GioVaoThuc IS NOT NULL AND GioRaThuc IS NULL";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, imagePath);
+            ps.setDouble(2, confidence);
+            ps.setInt(3, caLamViecId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("faceCheckOut failed for caLamViecId={}: {}", caLamViecId, e.getMessage(), e);
+            return false;
+        }
     }
 
     @Override

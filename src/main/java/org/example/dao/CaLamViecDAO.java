@@ -122,4 +122,10 @@ public interface CaLamViecDAO {
 
     /** Ghi giờ ra ca thực tế */
     boolean checkOutCa(int caLamViecId);
+
+    /** Ghi giờ vào ca thực tế kèm kết quả nhận diện khuôn mặt */
+    boolean faceCheckIn(int caLamViecId, String imagePath, double confidence, boolean livenessPassed);
+
+    /** Ghi giờ ra ca thực tế kèm kết quả nhận diện khuôn mặt */
+    boolean faceCheckOut(int caLamViecId, String imagePath, double confidence);
 }
