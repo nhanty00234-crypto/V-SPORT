@@ -56,11 +56,15 @@ window.FaceAttendance = (function () {
     // ── Main detection loop ────────────────────────────────────────────────────
 
     async function detectionLoop() {
+        if (!_intervalId) return;   // vòng đã bị dừng (timeout/stop/retry) — bỏ qua lần chạy trễ
+
         const video = _opts.videoEl;
         const detection = await faceapi
             .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
             .withFaceLandmarks(true)  // true = tiny landmark model
             .withFaceDescriptor();
+
+        if (!_intervalId) return;   // vòng đã bị dừng trong lúc chờ detect — không ghi đè trạng thái
 
         if (!detection) {
             _streak = 0;
@@ -187,6 +191,8 @@ window.FaceAttendance = (function () {
     }
 
     async function start() {
+        stopLoop();   // dọn timer của lần chạy trước (vd. bấm "Thử lại") trước khi hẹn lại
+
         _streak = 0;
         _bestDistance = Infinity;
         _bestDetection = null;
