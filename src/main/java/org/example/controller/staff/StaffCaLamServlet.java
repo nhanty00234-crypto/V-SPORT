@@ -4,9 +4,12 @@ import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;
 import org.example.model.CaLamViecAvailability;
 import org.example.model.CaLamViecSwapRequest;
+import org.example.model.CoSoFaceConfig;
 import org.example.service.manager.CaLamService;
 import org.example.dao.CaLamViecDAO;
+import org.example.dao.CoSoFaceConfigDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
+import org.example.dao.impl.CoSoFaceConfigDAOImpl;
 import org.example.util.Constants;
 
 import jakarta.servlet.ServletException;
@@ -30,6 +33,7 @@ public class StaffCaLamServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(StaffCaLamServlet.class);
     private final CaLamService caLamService = new CaLamService();
     private final CaLamViecDAO caLamViecDAO = new CaLamViecDAOImpl();
+    private final CoSoFaceConfigDAO faceConfigDAO = new CoSoFaceConfigDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -78,6 +82,10 @@ public class StaffCaLamServlet extends HttpServlet {
             return;
         }
 
+        CoSoFaceConfig faceConfig = user.getCoSoId() != null
+            ? faceConfigDAO.findByCoSo(user.getCoSoId())
+            : new CoSoFaceConfig();
+        req.setAttribute("faceConfig", faceConfig);
         req.getRequestDispatcher("/staff/CaLamViec.jsp").forward(req, resp);
     }
 

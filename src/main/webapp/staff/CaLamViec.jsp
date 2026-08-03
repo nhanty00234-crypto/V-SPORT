@@ -6,6 +6,7 @@
 <head>
 <title>Lịch làm của tôi — V-SPORT</title>
 <jsp:include page="/staff/common/staff_head.jsp" />
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
   .tab-btn {
     display: flex; align-items: center; gap: 8px;
@@ -314,8 +315,35 @@
 
 </main>
 
+<!-- Face Attendance Modal -->
+<div id="faceModal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
+  <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm mx-4 flex flex-col items-center gap-4">
+    <h3 class="font-black text-orange-900 text-lg" id="faceModalTitle">Điểm danh khuôn mặt</h3>
+
+    <div class="relative w-full aspect-square bg-zinc-900 rounded-2xl overflow-hidden">
+      <video id="faceVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay muted playsinline></video>
+    </div>
+
+    <p id="faceStatus" class="text-zinc-600 text-sm text-center font-medium min-h-[2.5rem]">
+      Đang khởi động camera...
+    </p>
+
+    <div class="w-full bg-zinc-100 rounded-full h-2">
+      <div id="faceProgress" class="bg-orange-500 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+    </div>
+
+    <button onclick="closeFaceModal()"
+            class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-xl text-sm transition">
+      Hủy
+    </button>
+  </div>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/face-attendance.js"></script>
 <script>
 var _ctx = '<%=request.getContextPath()%>';
+var _currentCaId = null;
+var _currentAction = null;
 var _myId = ${sessionScope.user.accountId};
 
 var shifts = [], coworkers = [], swaps = [];
@@ -444,7 +472,7 @@ function buildShiftActionBtn(s) {
     return '';
   }
   if (s.trangThai === 'CheckedIn') {
-    return '<button onclick="doShiftAction(\'checkOut\',' + s.caLamViecId + ',\'Xác nhận kết thúc ca?\')"'
+    return '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')"'
          + ' class="mt-2 w-full text-[11px] py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
          + '<i class="ti ti-logout text-[13px]"></i>Kết thúc ca</button>';
   }
@@ -471,7 +499,7 @@ function buildShiftActionBtn(s) {
       return '<div class="mt-2 w-full text-[11px] py-1.5 bg-red-50 text-red-400 font-semibold rounded-lg flex items-center justify-center gap-1 cursor-not-allowed">'
            + '<i class="ti ti-clock-x text-[13px]"></i>Quá giờ điểm danh</div>';
     }
-    return '<button onclick="doShiftAction(\'checkIn\',' + s.caLamViecId + ',\'Điểm danh vào ca làm việc?\')"'
+    return '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')"'
          + ' class="mt-2 w-full text-[11px] py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
          + '<i class="ti ti-login text-[13px]"></i>Điểm danh vào ca</button>';
   }
@@ -536,10 +564,10 @@ function renderTodayCard() {
     } else if (nowMin > startMin + 30) {
       btns.innerHTML = '<div class="px-4 py-2 bg-white/30 text-white/60 rounded-lg text-xs font-bold cursor-not-allowed">Quá giờ điểm danh</div>';
     } else {
-      btns.innerHTML = '<button onclick="doShiftAction(\'checkIn\',' + s.caLamViecId + ',\'Vào ca làm việc?\')" class="px-4 py-2 bg-white text-green-700 rounded-lg text-xs font-bold hover:bg-green-50 transition-all">Điểm danh vào ca</button>';
+      btns.innerHTML = '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-green-700 rounded-lg text-xs font-bold hover:bg-green-50 transition-all">Điểm danh vào ca</button>';
     }
   } else if (s.trangThai === 'CheckedIn') {
-    btns.innerHTML = '<button onclick="doShiftAction(\'checkOut\',' + s.caLamViecId + ',\'Kết thúc ca?\')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
+    btns.innerHTML = '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
   }
 }
 
@@ -671,6 +699,46 @@ function switchSwapTab(name) {
         : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 text-zinc-600 hover:bg-zinc-200';
     }
   });
+}
+
+// ── Face Attendance Modal Functions ──
+function openFaceModal(action, caId) {
+  _currentCaId = caId;
+  _currentAction = action;
+  document.getElementById('faceModal').classList.remove('hidden');
+  document.getElementById('faceModalTitle').textContent =
+    action === 'checkin' ? 'Điểm danh VÀO CA' : 'Điểm danh KẾT THÚC CA';
+  startFaceAttendance(action, caId);
+}
+
+function closeFaceModal() {
+  FaceAttendance.stop();
+  document.getElementById('faceModal').classList.add('hidden');
+}
+
+async function startFaceAttendance(action, caId) {
+  const statusEl = document.getElementById('faceStatus');
+  const progressEl = document.getElementById('faceProgress');
+
+  await FaceAttendance.init({
+    videoEl: document.getElementById('faceVideo'),
+    statusEl: statusEl,
+    contextPath: _ctx,
+    caLamViecId: caId,
+    action: action,
+    onSuccess: function(data) {
+      progressEl.style.width = '100%';
+      statusEl.textContent = '✓ Thành công! Độ khớp: ' + data.confidence.toFixed(1) + '%';
+      statusEl.className = 'text-green-600 font-bold text-sm text-center';
+      setTimeout(() => { closeFaceModal(); location.reload(); }, 1500);
+    },
+    onError: function(msg) {
+      statusEl.textContent = '✗ ' + (msg || 'Lỗi nhận diện');
+      statusEl.className = 'text-red-600 font-bold text-sm text-center';
+    }
+  });
+
+  await FaceAttendance.start();
 }
 
 // ── Init ──
