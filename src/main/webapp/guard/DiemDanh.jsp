@@ -378,10 +378,13 @@ function openTodayFaceModal() {
 async function loadData() {
   try {
     var res = await fetch(_ctx + '/guard/diem-danh?format=json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     var data = await res.json();
     shifts = data.shifts || [];
   } catch (e) {
+    // Không nuốt lỗi: lưới trống vì lỗi tải khác hẳn lưới trống vì không có ca
     shifts = [];
+    Attendance.alert('Không tải được lịch làm việc: ' + e.message + '. Thử tải lại trang.');
   }
   renderTodayCard();
   renderWeek();

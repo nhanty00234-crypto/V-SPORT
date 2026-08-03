@@ -27,6 +27,18 @@ public final class AttendanceWindow {
     private AttendanceWindow() {}
 
     /**
+     * Ca có hiện cho nhân viên (Lễ tân / Bảo vệ) thấy không.
+     *
+     * Không dùng riêng cột IsPublished: trong dữ liệu thực tế nó lệch với TrangThai
+     * — có ca TrangThai='Published' nhưng IsPublished=0, khiến nhân viên không thấy
+     * ca dù quản lý đã chọn "Đã gửi (Nhân viên thấy)". TrangThai mới là thứ màn hình
+     * quản lý điều khiển, nên lấy nó làm chuẩn và coi IsPublished là tín hiệu phụ.
+     */
+    public static boolean visibleToStaff(CaLamViec ca) {
+        return ca != null && (ca.isPublished() || !"Draft".equals(ca.getTrangThai()));
+    }
+
+    /**
      * Kiểm tra ca có đang trong khung giờ điểm danh vào ca không.
      *
      * @return null nếu hợp lệ, ngược lại là thông báo lỗi hiển thị cho người dùng.

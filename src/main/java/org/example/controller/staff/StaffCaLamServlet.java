@@ -59,7 +59,7 @@ public class StaffCaLamServlet extends HttpServlet {
                 LocalDate windowEnd = LocalDate.now().plusWeeks(8);
                 List<CaLamViec> shifts = caLamViecDAO.getCaByAccountIDAndDateRange(accountId, windowStart, windowEnd)
                         .stream()
-                        .filter(s -> s.isPublished())
+                        .filter(AttendanceWindow::visibleToStaff)
                         .collect(Collectors.toList());
 
                 // 2. Coworkers list (for swap requests)

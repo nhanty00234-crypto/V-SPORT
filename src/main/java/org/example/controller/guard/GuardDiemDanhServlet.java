@@ -7,6 +7,7 @@ import org.example.dao.impl.CoSoFaceConfigDAOImpl;
 import org.example.model.CaLamViec;
 import org.example.model.CoSoFaceConfig;
 import org.example.model.TaiKhoan;
+import org.example.util.AttendanceWindow;
 import org.example.util.Constants;
 
 import jakarta.servlet.ServletException;
@@ -38,7 +39,7 @@ public class GuardDiemDanhServlet extends HttpServlet {
                             user.getAccountId(),
                             LocalDate.now().minusWeeks(4),
                             LocalDate.now().plusWeeks(8))
-                    .stream().filter(CaLamViec::isPublished).collect(Collectors.toList());
+                    .stream().filter(AttendanceWindow::visibleToStaff).collect(Collectors.toList());
 
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
