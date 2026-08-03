@@ -308,6 +308,33 @@
         </div>
     </div>
     <div class="flex items-center gap-1.5">
+        <!-- Notification bell -->
+        <div class="relative" id="ciNotifWrap">
+          <button id="ciNotifBtn" type="button"
+                  class="relative p-2 rounded-lg ${isManager ? 'hover:bg-purple-50 text-purple-600' : 'hover:bg-orange-50 text-orange-600'} transition-colors"
+                  aria-label="Thông báo">
+            <span class="material-symbols-outlined text-[22px]">notifications</span>
+            <span id="ciNotifBadge"
+                  style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;padding:0 4px;
+                         border-radius:999px;background:${isManager ? '#7c3aed' : '#ea580c'};color:#fff;font-size:9.5px;
+                         font-weight:800;line-height:16px;text-align:center;pointer-events:none;
+                         box-shadow:0 0 0 2px #fff;white-space:nowrap;"></span>
+          </button>
+          <div id="ciNotifDropdown" hidden
+               style="position:absolute;top:calc(100% + 8px);right:0;z-index:3000;width:320px;
+                      background:#fff;border-radius:12px;
+                      box-shadow:0 12px 40px rgba(7,26,47,.18);
+                      border:1px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px 8px;border-bottom:1px solid #f3f4f6;">
+              <span style="font-size:13px;font-weight:800;color:#111827;">Thông báo</span>
+              <button id="ciNotifClear" type="button"
+                      style="background:none;border:none;font-size:11.5px;font-weight:700;color:${isManager ? '#7c3aed' : '#ea580c'};cursor:pointer;padding:3px 6px;border-radius:4px;">Đọc tất cả</button>
+            </div>
+            <ul id="ciNotifList" style="list-style:none;margin:0;padding:0;max-height:300px;overflow-y:auto;">
+              <li style="padding:20px 12px;text-align:center;font-size:13px;color:#9ca3af;">Chưa có thông báo mới</li>
+            </ul>
+          </div>
+        </div>
         <div class="text-xs font-semibold px-3 py-1 ${isManager ? 'bg-purple-50 text-purple-750' : 'bg-orange-50 text-orange-700'} rounded-lg">
             Vai trò: ${isManager ? "Quản lý" : "Lễ tân trực ca"}
         </div>
@@ -315,6 +342,28 @@
         <jsp:include page="/manager/common/profile_dropdown.jsp" />
     </div>
 </header>
+<script>
+(function(){
+  var isManager = ${isManager};
+  var ctx = '${pageContext.request.contextPath}';
+  var apiUrl = ctx + (isManager ? '/manager/api/notifications' : '/staff/api/notifications');
+  var btn=document.getElementById('ciNotifBtn'),wrap=document.getElementById('ciNotifWrap'),
+      dropdown=document.getElementById('ciNotifDropdown'),badge=document.getElementById('ciNotifBadge'),
+      list=document.getElementById('ciNotifList'),clearBtn=document.getElementById('ciNotifClear');
+  var isOpen=false,lastUnread=-1,items=[];
+  function relTime(ms){if(!ms)return'';var d=Math.floor((Date.now()-ms)/1000);if(d<60)return'Vừa xong';if(d<3600)return Math.floor(d/60)+' phút trước';if(d<86400)return Math.floor(d/3600)+' giờ trước';return Math.floor(d/86400)+' ngày trước';}
+  function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function renderList(){list.innerHTML='';if(!items.length){var li=document.createElement('li');li.style.cssText='padding:20px 12px;text-align:center;font-size:13px;color:#9ca3af;';li.textContent='Chưa có thông báo mới';list.appendChild(li);return;}items.forEach(function(n){var li=document.createElement('li');li.style.cssText='display:flex;gap:9px;padding:9px 12px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .1s;'+(n.daDoc?'':'background:#faf5ff;');li.innerHTML='<div style="font-size:15px;flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">'+(n.loai&&n.loai.indexOf('BOOKING')>=0?'📅':'🔔')+'</div><div style="min-width:0;flex:1;"><p style="font-size:12px;font-weight:700;color:#111827;margin:0 0 2px;">'+escH(n.tieuDe)+'</p>'+(n.noiDung?'<p style="font-size:11px;color:#6b7280;margin:0 0 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(n.noiDung)+'</p>':'')+'<span style="font-size:10px;color:#9ca3af;">'+relTime(n.thoiGian)+'</span></div>';li.addEventListener('click',function(){if(!n.daDoc){n.daDoc=true;fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'action=markRead&id='+n.id}).catch(function(){});renderList();updateBadge();}if(n.duongDan)window.location.href=ctx+n.duongDan;});list.appendChild(li);});}
+  function updateBadge(){var u=items.filter(function(n){return!n.daDoc;}).length;if(u>0){badge.textContent=u>99?'99+':u;badge.style.display='inline-block';}else{badge.style.display='none';}}
+  function showToast(tieuDe,noiDung,duongDan){var accentColor=isManager?'#7c3aed':'#ea580c';var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;max-width:300px;background:#fff;border:1px solid #e5e7eb;border-left:4px solid '+accentColor+';border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:12px 14px;cursor:pointer;';t.innerHTML='<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:3px;">'+escH(tieuDe)+'</div>'+(noiDung?'<div style="font-size:11.5px;color:#6b7280;">'+escH(noiDung)+'</div>':'');if(duongDan)t.addEventListener('click',function(){window.location.href=ctx+duongDan;});document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},5000);}
+  function fetchNotifications(){fetch(apiUrl+'?format=json&limit=8',{headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var newUnread=data.unread||0;if(lastUnread>=0&&newUnread>lastUnread&&data.items&&data.items.length){var n=data.items[0];if(n&&!n.daDoc)showToast(n.tieuDe,n.noiDung,n.duongDan);}lastUnread=newUnread;items=(data.items||[]).map(function(n){return{id:n.id,tieuDe:n.tieuDe,noiDung:n.noiDung,daDoc:n.daDoc,duongDan:n.duongDan,thoiGian:n.thoiGian,loai:n.loai};});updateBadge();if(isOpen)renderList();}).catch(function(){});}
+  function open(){isOpen=true;dropdown.hidden=false;}function close(){isOpen=false;dropdown.hidden=true;}
+  btn.addEventListener('click',function(e){e.stopPropagation();if(isOpen)close();else open();renderList();});
+  document.addEventListener('click',function(e){if(isOpen&&wrap&&!wrap.contains(e.target))close();});
+  if(clearBtn){clearBtn.addEventListener('click',function(){fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'action=markAllRead'}).then(function(){items.forEach(function(n){n.daDoc=true;});updateBadge();renderList();}).catch(function(){});});}
+  fetchNotifications();setInterval(fetchNotifications,30000);
+})();
+</script>
 
 <!-- Main Content Area -->
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-6">

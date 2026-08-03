@@ -5,6 +5,7 @@
 <%@ page import="org.example.model.MonTheThao" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.example.controller.manager.CoSoGalleryServlet" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <%--
     "Có khuyến mãi" là view-only filter: TimKiemServlet chưa có tham số này, nên nó được
@@ -464,11 +465,16 @@
 
                                 String fbImgUrl = ctx2 + "/assets/images/home/hero-sports-facility.webp";
                                 String cardImgUrl = fbImgUrl;
-                                if (csImg.startsWith("http")) {
-                                    cardImgUrl = csImg;
-                                } else if (csImg.contains("/")) {
-                                    String rel = csImg.startsWith("/") ? csImg : "/" + csImg;
-                                    cardImgUrl = ctx2 + rel;
+                                if (!csImg.isEmpty()) {
+                                    List<String> csImgs = CoSoGalleryServlet.parseJson(csImg);
+                                    if (!csImgs.isEmpty()) {
+                                        String first = csImgs.get(0);
+                                        if (first.startsWith("http")) {
+                                            cardImgUrl = first;
+                                        } else {
+                                            cardImgUrl = ctx2 + (first.startsWith("/") ? first : "/" + first);
+                                        }
+                                    }
                                 }
 
                                 // Badge: source of truth is actual courts (San→LoaiSan→MonTheThao).

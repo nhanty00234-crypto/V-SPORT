@@ -17,14 +17,14 @@ public class EmailTemplates {
 
     public static String otpDangKy(String fullName, String otp) {
         return build(
-            "🎉 Mã xác thực đăng ký - V-SPORT",
+            "Mã xác thực đăng ký - V-SPORT",
             BLUE,
-            "Chào mừng bạn đến với V-SPORT!",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Cảm ơn bạn đã lựa chọn V-SPORT! Để hoàn tất quá trình tạo tài khoản, vui lòng sử dụng mã xác thực OTP 6 chữ số dưới đây:",
+            "Mã xác thực",
+            "Chỉ còn một bước nữa để hoàn tất xác thực email cho tài khoản <strong>V-SPORT</strong>.",
             otpBox(otp),
-            "⏱️ Mã xác thực này có hiệu lực trong <strong>10 phút</strong> và chỉ sử dụng được <strong>1 lần</strong>.<br>"
-            + "🔒 Vì lý do an toàn, xin vui lòng không chia sẻ mã này với bất kỳ ai.",
+            "Mã xác thực này sẽ hết hạn sau <strong>10 phút</strong>.<br><br>"
+            + "Để đảm bảo an toàn cho tài khoản, đừng chia sẻ mã này với bất kỳ ai."
+            + " Nếu bạn không gửi yêu cầu này, hãy yên tâm bỏ qua email.",
             null,
             "info"
         );
@@ -34,14 +34,14 @@ public class EmailTemplates {
 
     public static String otpQuenMatKhau(String fullName, String otp) {
         return build(
-            "🔐 Đặt lại mật khẩu - V-SPORT",
+            "Đặt lại mật khẩu - V-SPORT",
             ORANGE,
-            "Yêu cầu đặt lại mật khẩu",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Hệ thống vừa nhận được yêu cầu đặt lại mật khẩu cho tài khoản V-SPORT của bạn. Vui lòng nhập mã xác thực OTP bên dưới để tiến hành khôi phục mật khẩu:",
+            "Đặt lại mật khẩu",
+            "Hệ thống vừa nhận được yêu cầu đặt lại mật khẩu cho tài khoản <strong>V-SPORT</strong> của bạn."
+            + " Vui lòng nhập mã xác thực bên dưới để tiến hành khôi phục:",
             otpBox(otp),
-            "⏱️ Mã OTP có hiệu lực trong <strong>10 phút</strong>.<br>"
-            + "🛡️ Nếu bạn <strong>không thực hiện</strong> yêu cầu này, vui lòng bỏ qua email — tài khoản của bạn luôn được an toàn tuyệt đối.",
+            "Mã xác thực có hiệu lực trong <strong>10 phút</strong>.<br><br>"
+            + "Nếu bạn <strong>không thực hiện</strong> yêu cầu này, vui lòng bỏ qua email — tài khoản của bạn vẫn an toàn.",
             null,
             "warning"
         );
@@ -68,13 +68,14 @@ public class EmailTemplates {
             : "";
 
         return build(
-            "✅ Kích hoạt tài khoản nhân viên - V-SPORT",
+            "Kích hoạt tài khoản nhân viên - V-SPORT",
             NAVY,
             "Tài khoản làm việc đã sẵn sàng",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Tài khoản nhân viên hệ thống V-SPORT của bạn đã được khởi tạo bởi ban quản lý. Vui lòng sử dụng thông tin đăng nhập được cấp dưới đây:",
+            "Tài khoản nhân viên hệ thống <strong>V-SPORT</strong> của bạn đã được khởi tạo bởi ban quản lý."
+            + " Vui lòng sử dụng thông tin đăng nhập được cấp dưới đây:",
             credBox + otpSection,
-            "⚠️ <strong>Lưu ý quan trọng:</strong> Vì mục đích an toàn thông tin, vui lòng <strong>đổi mật khẩu mới ngay lập tức</strong> sau khi đăng nhập lần đầu tiên.",
+            "<strong>Lưu ý quan trọng:</strong> Vì mục đích an toàn thông tin, vui lòng"
+            + " <strong>đổi mật khẩu mới ngay lập tức</strong> sau khi đăng nhập lần đầu tiên.",
             null,
             "warning"
         );
@@ -84,14 +85,14 @@ public class EmailTemplates {
 
     public static String otpDoiEmail(String fullName, String otp) {
         return build(
-            "📧 Xác thực thay đổi Email - V-SPORT",
+            "Xác thực thay đổi Email - V-SPORT",
             BLUE,
-            "Xác thực địa chỉ email mới",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Bạn đã gửi yêu cầu thay đổi địa chỉ email liên kết với tài khoản V-SPORT. Nhập mã OTP xác nhận bên dưới để hoàn tất thay đổi:",
+            "Xác thực email mới",
+            "Bạn đã gửi yêu cầu thay đổi địa chỉ email liên kết với tài khoản <strong>V-SPORT</strong>."
+            + " Nhập mã xác nhận bên dưới để hoàn tất thay đổi:",
             otpBox(otp),
-            "⏱️ Mã có hiệu lực trong <strong>5 phút</strong>.<br>"
-            + "Nếu bạn không thực hiện thay đổi này, hãy liên hệ ngay với đỗi ngũ hỗ trợ V-SPORT.",
+            "Mã có hiệu lực trong <strong>5 phút</strong>.<br><br>"
+            + "Nếu bạn không thực hiện thay đổi này, hãy liên hệ ngay với đội ngũ hỗ trợ V-SPORT.",
             null,
             "info"
         );
@@ -101,14 +102,14 @@ public class EmailTemplates {
 
     public static String otpPayOSConfig(String fullName, String coSoName, String otp) {
         return build(
-            "⚡ Xác thực cấu hình PayOS - V-SPORT",
+            "Xác thực cấu hình PayOS - V-SPORT",
             NAVY,
-            "Xác thực cập nhật cấu hình thanh toán",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Hệ thống ghi nhận thao tác cập nhật cấu hình cổng thanh toán PayOS cho cơ sở <strong>\"" + esc(coSoName) + "\"</strong>. Vui lòng nhập mã OTP xác thực:",
+            "Xác thực cấu hình thanh toán",
+            "Hệ thống ghi nhận thao tác cập nhật cấu hình cổng thanh toán PayOS cho cơ sở"
+            + " <strong>\"" + esc(coSoName) + "\"</strong>. Vui lòng nhập mã xác thực để tiếp tục:",
             otpBox(otp),
-            "⏱️ Mã có hiệu lực trong <strong>5 phút</strong> và chỉ dùng được <strong>1 lần</strong>.<br>"
-            + "🚨 Tuyệt đối không cung cấp mã OTP này cho bất kỳ ai khác.",
+            "Mã có hiệu lực trong <strong>5 phút</strong> và chỉ dùng được <strong>1 lần</strong>.<br><br>"
+            + "Tuyệt đối không cung cấp mã này cho bất kỳ ai khác.",
             null,
             "warning"
         );
@@ -120,16 +121,16 @@ public class EmailTemplates {
         String btn = button("Đăng nhập Cổng Quản Lý ngay ➔", loginUrl != null ? loginUrl : "#");
         String pwDisplay = rawPassword != null && !rawPassword.isBlank() ? esc(rawPassword) : "(liên hệ quản trị viên)";
         return build(
-            "🎊 Phê duyệt đối tác V-SPORT",
+            "Phê duyệt đối tác V-SPORT",
             GREEN,
-            "Cơ sở của bạn đã được duyệt thành công!",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Ban quản trị V-SPORT xin thông báo: Đơn đăng ký tham gia mạng lưới cơ sở thể thao <strong>\"" + esc(fullName) + "\"</strong> đã được <strong style='color:" + GREEN + ";'>PHÊ DUYỆT THÀNH CÔNG</strong>.<br><br>"
-            + "Bạn có thể sử dụng thông tin sau để đăng nhập quản lý cơ sở:<br>"
-            + "• Email đăng nhập: <strong>" + esc(email) + "</strong><br>"
-            + "• Mật khẩu: <strong style='font-family:Consolas,monospace;font-size:15px;color:#0f172a;background:#f1f5f9;padding:2px 10px;border-radius:4px;letter-spacing:1px;'>" + pwDisplay + "</strong>",
+            "Cơ sở đã được duyệt thành công!",
+            "Ban quản trị <strong>V-SPORT</strong> xin thông báo: Đơn đăng ký tham gia mạng lưới cơ sở thể thao"
+            + " đã được <strong>PHÊ DUYỆT THÀNH CÔNG</strong>.<br><br>"
+            + "Thông tin đăng nhập quản lý cơ sở:<br>"
+            + "• Email: <strong>" + esc(email) + "</strong><br>"
+            + "• Mật khẩu: <strong style='font-family:Consolas,monospace;background:#f3f4f6;padding:2px 8px;border-radius:4px;'>" + pwDisplay + "</strong>",
             btn,
-            "⚠️ Hãy <strong>thay đổi mật khẩu ngay</strong> sau lần đăng nhập đầu tiên để bảo mật tài khoản của bạn.",
+            "Hãy <strong>thay đổi mật khẩu ngay</strong> sau lần đăng nhập đầu tiên để bảo mật tài khoản.",
             null,
             "success"
         );
@@ -145,14 +146,15 @@ public class EmailTemplates {
 
     public static String tuChoiDoiTac(String fullName, String coSoName) {
         return build(
-            "📋 Thông báo kết quả đăng ký - V-SPORT",
+            "Thông báo kết quả đăng ký - V-SPORT",
             RED,
             "Thông tin đăng ký cần được cập nhật",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Cảm ơn bạn đã quan tâm đến việc hợp tác cùng V-SPORT. Sau khi xem xét hồ sơ đăng ký cơ sở <strong>\"" + esc(coSoName) + "\"</strong>, ban quản trị rất tiếc chưa thể chấp thuận đơn đăng ký ở thời điểm này.<br><br>"
-            + "Bạn có thể kiểm tra lại thông tin hồ sơ và thực hiện gửi lại đơn đăng ký mới trên hệ thống.",
+            "Cảm ơn bạn đã quan tâm đến việc hợp tác cùng <strong>V-SPORT</strong>."
+            + " Sau khi xem xét hồ sơ đăng ký cơ sở <strong>\"" + esc(coSoName) + "\"</strong>,"
+            + " ban quản trị rất tiếc chưa thể chấp thuận đơn đăng ký ở thời điểm này.<br><br>"
+            + "Bạn có thể kiểm tra lại thông tin hồ sơ và gửi lại đơn đăng ký mới trên hệ thống.",
             null,
-            "Nếu bạn cần thêm thông tin hoặc giải đáp chi tiết, xin vui lòng phản hồi hoặc liên hệ qua bộ phận CSKH của V-SPORT.",
+            "Nếu bạn cần thêm thông tin hoặc giải đáp chi tiết, xin vui lòng liên hệ qua bộ phận CSKH của V-SPORT.",
             null,
             "info"
         );
@@ -162,13 +164,13 @@ public class EmailTemplates {
 
     public static String chaoMungDangKy(String fullName) {
         return build(
-            "🏆 Chào mừng đến với V-SPORT!",
+            "Chào mừng đến với V-SPORT!",
             BLUE,
-            "Tài khoản của bạn đã kích hoạt!",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Chúc mừng bạn đã gia nhập cộng đồng thể thao V-SPORT! Tài khoản của bạn hiện đã sẵn sàng để trải nghiệm dịch vụ đặt sân trực tuyến nhanh chóng, tiện lợi.",
+            "Tài khoản đã được kích hoạt!",
+            "Chúc mừng bạn đã gia nhập cộng đồng thể thao <strong>V-SPORT</strong>!"
+            + " Tài khoản của bạn hiện đã sẵn sàng để trải nghiệm dịch vụ đặt sân trực tuyến nhanh chóng, tiện lợi.",
             featureList(),
-            "Hãy sẵn sàng ra sân và tận hưởng những giờ phút luyện tập thể thao sôi động nhất! ⚽🏸🏀",
+            "Hãy sẵn sàng ra sân và tận hưởng những giờ phút luyện tập thể thao sôi động nhất!",
             null,
             "success"
         );
@@ -187,13 +189,12 @@ public class EmailTemplates {
             + "</td></tr></table>";
 
         return build(
-            "✅ Xác nhận đặt sân thành công - V-SPORT",
+            "Xác nhận đặt sân thành công - V-SPORT",
             GREEN,
-            "Xác nhận đặt sân thành công!",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Yêu cầu đặt sân thể thao của bạn đã được ghi nhận và xác nhận thành công trên hệ thống V-SPORT:",
+            "Đặt sân thành công!",
+            "Yêu cầu đặt sân thể thao của bạn đã được ghi nhận và xác nhận thành công trên hệ thống <strong>V-SPORT</strong>:",
             infoBox,
-            "📌 Vui lòng có mặt đúng giờ trước 10-15 phút. Khi tới sân, bạn chỉ cần đọc tên hoặc giơ thông tin email này cho nhân viên.",
+            "Vui lòng có mặt đúng giờ trước 10–15 phút. Khi tới sân, bạn chỉ cần đọc tên hoặc giơ thông tin email này cho nhân viên.",
             null,
             "success"
         );
@@ -210,11 +211,10 @@ public class EmailTemplates {
             + "</td></tr></table>";
 
         return build(
-            "❌ Thông báo hủy lịch đặt sân - V-SPORT",
+            "Thông báo hủy lịch đặt sân - V-SPORT",
             RED,
-            "Lịch đặt sân đã được hủy thành công",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Hệ thống xác nhận lịch đặt sân dưới đây của bạn đã được hủy thành công:",
+            "Lịch đặt sân đã được hủy",
+            "Hệ thống <strong>V-SPORT</strong> xác nhận lịch đặt sân dưới đây của bạn đã được hủy thành công:",
             infoBox,
             "Nếu bạn có nhu cầu đặt lại sân hoặc cần hỗ trợ về hoàn tiền (nếu có), vui lòng truy cập trang cá nhân hoặc liên hệ bộ phận hỗ trợ.",
             null,
@@ -235,13 +235,13 @@ public class EmailTemplates {
             + "</td></tr></table>";
 
         return build(
-            "💳 Xác nhận thanh toán thành công - V-SPORT",
+            "Xác nhận thanh toán thành công - V-SPORT",
             GREEN,
-            "Thanh toán giao dịch hoàn tất!",
-            "Xin chào <strong>" + esc(fullName) + "</strong>,<br><br>"
-            + "Chúng tôi đã nhận được khoản thanh toán trực tuyến qua cổng PayOS cho dịch vụ của bạn. Dưới đây là chi tiết biên nhận:",
+            "Thanh toán hoàn tất!",
+            "Chúng tôi đã nhận được khoản thanh toán trực tuyến qua cổng PayOS cho dịch vụ của bạn."
+            + " Dưới đây là chi tiết biên nhận:",
             infoBox,
-            "Cảm ơn bạn đã tin dùng V-SPORT. Hẹn gặp lại bạn trên sân tập! 🏃✨",
+            "Cảm ơn bạn đã tin dùng V-SPORT. Hẹn gặp lại bạn trên sân tập!",
             null,
             "success"
         );
@@ -250,25 +250,26 @@ public class EmailTemplates {
     // ── Helpers & Formatting ──────────────────────────────────────────────────
 
     /**
-     * Renders 6 distinct boxes for each digit of the OTP code for high-end visual appearance.
+     * Renders OTP as spaced digits inside a single rounded gray box (Casso-style).
      */
     private static String otpBox(String otp) {
         if (otp == null) otp = "------";
         String cleanOtp = otp.trim();
-        
-        StringBuilder boxesHtml = new StringBuilder();
-        boxesHtml.append("<table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:28px auto;'><tr>");
-        
+
+        StringBuilder spaced = new StringBuilder();
         for (int i = 0; i < cleanOtp.length(); i++) {
-            char digit = cleanOtp.charAt(i);
-            boxesHtml.append("<td style='padding:0 5px;'>")
-                     .append("<div style='width:42px;height:52px;line-height:50px;background:#f8fafc;border:2px solid #3b82f6;border-radius:10px;font-family:Consolas,\"Courier New\",Courier,monospace;font-size:26px;font-weight:800;color:#1d4ed8;text-align:center;box-shadow:0 3px 8px rgba(37,99,235,0.12);'>")
-                     .append(digit)
-                     .append("</div></td>");
+            if (i > 0) spaced.append("  ");
+            spaced.append(cleanOtp.charAt(i));
         }
-        
-        boxesHtml.append("</tr></table>");
-        return boxesHtml.toString();
+
+        return "<table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:24px auto;width:100%;max-width:480px;'>"
+            + "<tr><td align='center'>"
+            + "<div style='background:#f3f4f6;border-radius:12px;padding:24px 32px;display:inline-block;'>"
+            + "<span style='font-family:Consolas,\"Courier New\",Courier,monospace;font-size:36px;font-weight:700;letter-spacing:10px;color:#111827;'>"
+            + esc(spaced.toString())
+            + "</span>"
+            + "</div>"
+            + "</td></tr></table>";
     }
 
     private static String button(String label, String url) {
@@ -314,66 +315,51 @@ public class EmailTemplates {
     private static String build(String browserTitle, String accentColor, String headline,
                                  String intro, String mainContent, String note,
                                  String footer, String noteType) {
-        String noteBg, noteColor, noteBorder, noteIcon;
-        switch (noteType != null ? noteType : "info") {
-            case "success":
-                noteBg = "#f0fdf4"; noteColor = "#15803d"; noteBorder = "#bbf7d0"; noteIcon = "✅"; break;
-            case "warning":
-                noteBg = "#fffbeb"; noteColor = "#b45309"; noteBorder = "#fde68a"; noteIcon = "⚠️"; break;
-            case "danger":
-                noteBg = "#fef2f2"; noteColor = "#b91c1c"; noteBorder = "#fecaca"; noteIcon = "🚨"; break;
-            default:
-                noteBg = "#eff6ff"; noteColor = "#1d4ed8"; noteBorder = "#bfdbfe"; noteIcon = "💡";
+        String headerColor = accentColor != null ? accentColor : "#1d4ed8";
+
+        String noteHtml = "";
+        if (note != null) {
+            noteHtml = "<p style='margin:20px 0 0 0;font-size:13.5px;color:#374151;line-height:1.7;'>"
+                + note + "</p>";
         }
 
         return "<!DOCTYPE html><html lang='vi'><head>"
             + "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>"
             + "<title>" + esc(browserTitle) + "</title></head>"
-            + "<body style='margin:0;padding:0;background-color:#f1f5f9;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;'>"
-            + "<table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f1f5f9;padding:40px 12px;'>"
+            + "<body style='margin:0;padding:0;background-color:#f3f4f6;"
+            + "font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;'>"
+            + "<table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f3f4f6;padding:40px 16px;'>"
             + "<tr><td align='center'>"
 
-            // Outer Card Container
-            + "<table width='600' cellpadding='0' cellspacing='0' style='max-width:600px;width:100%;background:#ffffff;"
-            + "border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.06);border:1px solid #e2e8f0;'>"
+            // Card
+            + "<table width='560' cellpadding='0' cellspacing='0' "
+            + "style='max-width:560px;width:100%;background:#ffffff;border-radius:8px;"
+            + "overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);'>"
 
-            // Header section with dark gradient backdrop
-            + "<tr><td style='background:#0f172a;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 50%,#2563eb 100%);padding:36px 40px;text-align:center;'>"
-            + "<div style='display:inline-block;padding:6px 18px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:999px;color:#ffffff;font-size:12px;font-weight:800;letter-spacing:3px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);'>"
-            + "⚡ V-SPORT"
-            + "</div>"
-            + "<div style='font-size:11px;color:rgba(255,255,255,0.75);letter-spacing:1.5px;font-weight:600;text-transform:uppercase;margin-top:2px;'>"
-            + "Hệ Thống Đặt Sân Thể Thao Thông Minh"
-            + "</div>"
+            // Header — solid color, title only
+            + "<tr><td style='background:" + headerColor + ";padding:22px 32px;'>"
+            + "<p style='margin:0;font-size:18px;font-weight:700;color:#ffffff;letter-spacing:0.2px;'>"
+            + "V-SPORT &mdash; " + headline
+            + "</p>"
             + "</td></tr>"
 
-            // Multi-color accent border
-            + "<tr><td style='height:4px;background:#2563eb;background:linear-gradient(90deg,#2563eb 0%,#06b6d4 50%,#f97316 100%);'></td></tr>"
-
-            // Card Body Content
-            + "<tr><td style='padding:40px 36px;'>"
-            + "<h2 style='margin:0 0 16px 0;font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.4px;line-height:1.3;'>" + headline + "</h2>"
-            + "<p style='margin:0 0 20px 0;font-size:15px;color:#475569;line-height:1.7;'>" + intro + "</p>"
+            // Body
+            + "<tr><td style='padding:32px 32px 24px 32px;'>"
+            + "<p style='margin:0 0 16px 0;font-size:15px;color:#111827;'>Xin ch&#224;o,</p>"
+            + "<p style='margin:0 0 8px 0;font-size:15px;color:#374151;line-height:1.7;'>" + intro + "</p>"
             + (mainContent != null ? mainContent : "")
-            + (note != null
-                ? "<table width='100%' cellpadding='0' cellspacing='0' style='background:" + noteBg + ";border:1px solid " + noteBorder + ";border-left:4px solid " + noteColor + ";border-radius:10px;margin-top:24px;'>"
-                  + "<tr><td style='padding:14px 16px;font-size:13.5px;color:" + noteColor + ";line-height:1.65;'>"
-                  + "<span style='margin-right:6px;'>" + noteIcon + "</span>" + note
-                  + "</td></tr></table>"
-                : "")
+            + noteHtml
             + "</td></tr>"
 
-            // Modern Footer section
-            + "<tr><td style='background:#f8fafc;padding:28px 36px;text-align:center;border-top:1px solid #f1f5f9;'>"
-            + "<div style='font-size:13px;font-weight:800;color:#1e3a8a;letter-spacing:1.5px;margin-bottom:6px;'>V-SPORT PLATFORM</div>"
-            + "<div style='font-size:12px;color:#94a3b8;line-height:1.6;max-width:440px;margin:0 auto;'>"
-            + "Email này được gửi tự động từ hệ thống V-SPORT. Vui lòng không phản hồi trực tiếp email này.<br>"
-            + "Nếu bạn cần trợ giúp, xin vui lòng truy cập trung tâm hỗ trợ của chúng tôi."
-            + (footer != null ? "<br><span style='color:#64748b;font-weight:500;'>" + footer + "</span>" : "")
-            + "</div>"
-            + "<div style='margin-top:16px;padding-top:14px;border-top:1px solid #e2e8f0;font-size:11px;color:#cbd5e1;'>"
-            + "© " + java.time.Year.now().getValue() + " V-SPORT. Tất cả quyền được bảo lưu."
-            + "</div>"
+            // Footer
+            + "<tr><td style='padding:18px 32px 24px 32px;border-top:1px solid #e5e7eb;'>"
+            + "<p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;font-style:italic;'>"
+            + "&#272;&#226;y l&#224; email &#273;&#432;&#7907;c g&#7917;i t&#7921; &#273;&#7897;ng t&#7915; h&#7879; th&#7889;ng V-SPORT."
+            + " Vui l&#242;ng kh&#244;ng ph&#7843;n h&#7891;i tr&#7921;c ti&#7871;p email n&#224;y."
+            + (footer != null ? "<br>" + footer : "")
+            + "<br>N&#7871;u b&#7841;n c&#7847;n tr&#7907; gi&#250;p, xin vui l&#242;ng li&#234;n h&#7879; "
+            + "<a href='mailto:support@vsport.vn' style='color:#6b7280;'>support@vsport.vn</a>."
+            + "</p>"
             + "</td></tr>"
 
             + "</table></td></tr></table></body></html>";

@@ -112,9 +112,8 @@ public class QuanLyDatSanServlet extends HttpServlet {
             int datSanId = Integer.parseInt(idStr);
 
             if ("approve".equals(action)) {
-                boolean confirmPriceChange = "true".equalsIgnoreCase(req.getParameter("confirmPriceChange"));
                 try {
-                    org.example.dto.booking.BookingDecisionResult result = lichDatSanDAO.duyetLichDatSanDecision(datSanId, user.getAccountId(), user.getCoSoId(), confirmPriceChange);
+                    org.example.dto.booking.BookingDecisionResult result = lichDatSanDAO.duyetLichDatSanDecision(datSanId, user.getAccountId(), user.getCoSoId(), true);
                     if (result.isSuccess()) {
                         session.setAttribute("message", "Đã duyệt đơn đặt sân #" + datSanId + " thành công!");
                         LOGGER.info(String.format("NOTIFICATION_EVENT event=BOOKING_CONFIRMED accountId=%d datSanId=%d coSoId=%d",
@@ -130,15 +129,7 @@ public class QuanLyDatSanServlet extends HttpServlet {
                         session.setAttribute("error", "Duyệt đơn đặt sân thất bại.");
                     }
                 } catch (Exception e) {
-                    if (e.getMessage() != null && e.getMessage().startsWith("PRICE_CHANGED:")) {
-                        String[] parts = e.getMessage().split(":");
-                        String oldPrice = parts[1];
-                        String newPrice = parts[2];
-                        session.setAttribute("priceChangeWarning", "Giá sân của đơn #" + datSanId + " đã thay đổi từ lúc đặt: " + Double.parseDouble(oldPrice) + "đ -> " + Double.parseDouble(newPrice) + "đ. Bạn có đồng ý duyệt với giá mới này?");
-                        session.setAttribute("priceChangeId", datSanId);
-                    } else {
-                        session.setAttribute("error", e.getMessage());
-                    }
+                    session.setAttribute("error", e.getMessage());
                 }
             } else if ("reject".equals(action)) {
                 String reason = req.getParameter("reason");

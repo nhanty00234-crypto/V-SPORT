@@ -59,6 +59,9 @@ public interface TaiKhoanDAO {
     List<TaiKhoan> getAccountsByCoSoAndRoleIn(int coSoId, List<Integer> roleIds);
     List<TaiKhoan> getDeletedAccountsByCoSoAndRoleNotIn(int coSoId, List<Integer> excludedRoleIds);
 
+    /** Lấy tất cả tài khoản Admin (roleId = 1). */
+    List<TaiKhoan> getAdminAccounts();
+
     // Dashboard statistics
     long getTotalStaff();
 

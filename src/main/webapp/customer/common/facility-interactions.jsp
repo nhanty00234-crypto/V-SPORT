@@ -201,6 +201,22 @@
         aspect-ratio: 16 / 10;
     }
     .vsfs-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* carousel */
+    .vsfs-carousel { position: relative; width: 100%; height: 100%; }
+    .vsfs-carousel-track { display: flex; width: 100%; height: 100%; transition: transform .5s ease; }
+    .vsfs-carousel-track img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .vsfs-carousel-btn {
+        position: absolute; top: 50%; transform: translateY(-50%);
+        background: rgba(0,0,0,.38); border: none; border-radius: 50%;
+        width: 32px; height: 32px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center;
+        font-size: 18px; z-index: 2; transition: background .2s;
+    }
+    .vsfs-carousel-btn:hover { background: rgba(0,0,0,.62); }
+    .vsfs-carousel-btn.prev { left: 8px; }
+    .vsfs-carousel-btn.next { right: 8px; }
+    .vsfs-carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
+    .vsfs-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.5); cursor: pointer; transition: background .2s; }
+    .vsfs-dot.active { background: #fff; }
     .vsfs-name { font-size: 24px; font-weight: 800; line-height: 1.25; }
     @media (min-width: 1024px) { .vsfs-name { font-size: 28px; } }
     .vsfs-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -517,7 +533,14 @@
             <!-- Loaded content -->
             <div id="fsContent" hidden>
                 <div class="vsfs-cols">
-                    <div class="vsfs-hero"><img id="fsHeroImg" src="" alt=""></div>
+                    <div class="vsfs-hero" id="fsHero">
+                        <div class="vsfs-carousel" id="fsCarousel">
+                            <div class="vsfs-carousel-track" id="fsCarouselTrack"></div>
+                            <button class="vsfs-carousel-btn prev" id="fsPrev" onclick="carouselMove(-1)" hidden>&#8249;</button>
+                            <button class="vsfs-carousel-btn next" id="fsNext" onclick="carouselMove(1)" hidden>&#8250;</button>
+                            <div class="vsfs-carousel-dots" id="fsDots"></div>
+                        </div>
+                    </div>
                     <div style="min-width:0;">
                         <h2 class="vsfs-name" id="fsName"></h2>
                         <div class="vsfs-chips" id="fsChips"></div>
@@ -932,11 +955,13 @@
         const IC_INFO = 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20|M12 16v-4|M12 8h.01';
 
         function renderFacilityDetail(data) {
-            const hero = document.getElementById('fsHeroImg');
-            const heroSrc = resolveImg(data.imageUrl) || fsCardImage;
-            hero.onerror = fsCardImage ? function () { this.onerror = null; this.src = fsCardImage; } : null;
-            hero.src = heroSrc || '';
-            hero.alt = data.tenCoSo || '';
+            // Build carousel from facility.images (falls back to single imageUrl or card image)
+            let carouselImages = (Array.isArray(data.images) ? data.images : []).map(resolveImg).filter(Boolean);
+            if (!carouselImages.length) {
+                const s = resolveImg(data.imageUrl) || fsCardImage;
+                if (s) carouselImages = [s];
+            }
+            carouselInit(carouselImages, data.tenCoSo || '');
 
             document.getElementById('fsName').textContent = data.tenCoSo || '';
 
@@ -1574,5 +1599,53 @@
                 }
             });
         }
+
+        // ---- Hero Carousel --------------------------------------------------
+        let _carouselImages = [], _carouselIdx = 0, _carouselTimer = null;
+
+        function carouselInit(images, alt) {
+            clearInterval(_carouselTimer);
+            _carouselImages = images;
+            _carouselIdx = 0;
+            const track = document.getElementById('fsCarouselTrack');
+            const dots = document.getElementById('fsDots');
+            const prev = document.getElementById('fsPrev');
+            const next = document.getElementById('fsNext');
+            track.innerHTML = '';
+            dots.innerHTML = '';
+            if (!images.length) {
+                const ph = document.createElement('img');
+                ph.src = '';
+                ph.alt = alt;
+                ph.style.background = '#eef4f1';
+                track.appendChild(ph);
+                prev.hidden = next.hidden = true;
+                return;
+            }
+            images.forEach((src, i) => {
+                const img = document.createElement('img');
+                img.loading = i === 0 ? 'eager' : 'lazy';
+                img.alt = alt;
+                img.src = src;
+                img.onerror = function () { this.style.visibility = 'hidden'; };
+                track.appendChild(img);
+                const dot = document.createElement('span');
+                dot.className = 'vsfs-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => carouselGo(i);
+                dots.appendChild(dot);
+            });
+            prev.hidden = next.hidden = images.length < 2;
+            if (images.length > 1) {
+                _carouselTimer = setInterval(() => carouselMove(1), 4500);
+            }
+        }
+
+        function carouselGo(idx) {
+            _carouselIdx = (idx + _carouselImages.length) % _carouselImages.length;
+            document.getElementById('fsCarouselTrack').style.transform = 'translateX(-' + _carouselIdx * 100 + '%)';
+            document.querySelectorAll('#fsDots .vsfs-dot').forEach((d, i) => d.classList.toggle('active', i === _carouselIdx));
+        }
+        window.carouselMove = function(dir) { carouselGo(_carouselIdx + dir); };
+
     })();
 </script>

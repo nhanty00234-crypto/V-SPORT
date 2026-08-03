@@ -1,11 +1,16 @@
 package org.example.service;
 
 import org.example.dao.ThongBaoDAO;
+import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.ThongBaoDAOImpl;
+import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.model.ThongBao;
+import org.example.model.TaiKhoan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,13 +24,19 @@ public class NotificationService {
     private static final int DEFAULT_PAGE_SIZE = 20;
 
     private final ThongBaoDAO dao;
+    private final TaiKhoanDAO taiKhoanDAO;
 
     public NotificationService() {
-        this(new ThongBaoDAOImpl());
+        this(new ThongBaoDAOImpl(), new TaiKhoanDAOImpl());
     }
 
     public NotificationService(ThongBaoDAO dao) {
+        this(dao, new TaiKhoanDAOImpl());
+    }
+
+    public NotificationService(ThongBaoDAO dao, TaiKhoanDAO taiKhoanDAO) {
         this.dao = dao;
+        this.taiKhoanDAO = taiKhoanDAO;
     }
 
     /**
@@ -261,5 +272,71 @@ public class NotificationService {
                 "BILL_SPLIT_COMPLETED",
                 String.valueOf(billSplitId),
                 "/customer/chia-tien-nhom?id=" + billSplitId);
+    }
+
+    // -----------------------------------------------------------------------
+    // Thông báo cho Manager / Staff khi có đặt sân mới
+    // -----------------------------------------------------------------------
+
+    /**
+     * Gửi thông báo đến tất cả manager (roleId=2) và staff (roleId=4,5) của cơ sở khi có đặt sân mới.
+     * Lỗi không làm gãy luồng chính.
+     */
+    public void notifyManagerStaffNewBooking(int coSoId, int datSanId, String tenKhach, String tenSan, String thoiGian) {
+        List<TaiKhoan> recipients;
+        try {
+            recipients = taiKhoanDAO.getAccountsByCoSoAndRoleIn(coSoId, Arrays.asList(2, 4, 5));
+        } catch (Exception e) {
+            logger.warn("notifyManagerStaffNewBooking: cannot fetch recipients coSoId={}: {}", coSoId, e.getMessage());
+            return;
+        }
+        if (recipients == null || recipients.isEmpty()) return;
+
+        String tieuDe = "Đặt sân mới từ khách hàng";
+        String noiDung = "Khách " + (tenKhach != null ? tenKhach : "vãng lai")
+                + " đặt " + (tenSan != null ? tenSan : "sân")
+                + (thoiGian != null && !thoiGian.isEmpty() ? " lúc " + thoiGian : "")
+                + " · Mã #" + datSanId;
+        String duongDan = "/manager/dat-san";
+
+        for (TaiKhoan tk : recipients) {
+            try {
+                sendNotification(tk.getAccountId(), tieuDe, noiDung,
+                        "BOOKING_NEW_FOR_STAFF", String.valueOf(datSanId), duongDan);
+            } catch (Exception e) {
+                logger.warn("notifyManagerStaffNewBooking: failed accountId={}: {}", tk.getAccountId(), e.getMessage());
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Thông báo cho Admin khi có owner đăng ký mới
+    // -----------------------------------------------------------------------
+
+    /**
+     * Gửi thông báo đến tất cả tài khoản Admin (roleId=1) khi có cơ sở mới đăng ký chờ duyệt.
+     */
+    public void notifyAdminNewOwnerRegistration(int coSoId, String tenCoSo) {
+        List<TaiKhoan> admins;
+        try {
+            admins = taiKhoanDAO.getAdminAccounts();
+        } catch (Exception e) {
+            logger.warn("notifyAdminNewOwnerRegistration: cannot fetch admins: {}", e.getMessage());
+            return;
+        }
+        if (admins == null || admins.isEmpty()) return;
+
+        String tieuDe = "Cơ sở mới đăng ký chờ duyệt";
+        String noiDung = "Cơ sở \"" + (tenCoSo != null ? tenCoSo : "Không tên") + "\" (ID: " + coSoId + ") đã đăng ký và đang chờ phê duyệt.";
+        String duongDan = "/admin/chi-nhanh?tab=pending";
+
+        for (TaiKhoan admin : admins) {
+            try {
+                sendNotification(admin.getAccountId(), tieuDe, noiDung,
+                        "OWNER_REGISTERED", String.valueOf(coSoId), duongDan);
+            } catch (Exception e) {
+                logger.warn("notifyAdminNewOwnerRegistration: failed accountId={}: {}", admin.getAccountId(), e.getMessage());
+            }
+        }
     }
 }

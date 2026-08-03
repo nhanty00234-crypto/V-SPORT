@@ -13,26 +13,10 @@
   <jsp:include page="/staff/common/sidebar.jsp" />
 
   <!-- Header -->
-  <header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-orange-100 z-20 flex items-center justify-between px-4 lg:px-6">
-    <div class="flex items-center gap-3">
-      <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-orange-50 text-orange-650">
-        <span class="material-symbols-outlined text-[20px]">menu</span>
-      </button>
-      <div>
-        <h1 class="text-sm font-bold text-orange-950 tracking-tight">Duyệt yêu cầu đặt sân</h1>
-        <p class="text-xs text-orange-500 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[12px]">schedule</span>Chi nhánh cơ sở CS${sessionScope.user.coSoId}
-        </p>
-      </div>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <div class="text-xs font-semibold px-3 py-1 bg-orange-50 text-orange-700 rounded-lg">
-        Vai trò: Lễ tân trực ca
-      </div>
-      <div class="w-px h-6 border-l border-orange-100 mx-1"></div>
-      <jsp:include page="/manager/common/profile_dropdown.jsp" />
-    </div>
-  </header>
+  <jsp:include page="/staff/common/header.jsp">
+    <jsp:param name="pageTitle" value="Duyệt yêu cầu đặt sân"/>
+    <jsp:param name="pageSubtitle" value="Chi nhánh cơ sở CS${sessionScope.user.coSoId}"/>
+  </jsp:include>
 
   <!-- Main Content -->
   <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">

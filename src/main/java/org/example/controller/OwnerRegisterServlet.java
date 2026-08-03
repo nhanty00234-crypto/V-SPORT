@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
+import org.example.service.NotificationService;
 import org.example.util.ValidationUtil;
 import org.example.util.JPAUtil;
 import org.example.model.CoSo;
@@ -391,6 +392,13 @@ public class OwnerRegisterServlet extends HttpServlet {
                 session.removeAttribute("ownerEmailVerified");
                 session.removeAttribute("ownerOtpEmail");
                 session.removeAttribute("ownerOtpTime");
+            }
+
+            // Thông báo cho Admin về cơ sở mới đăng ký
+            try {
+                new NotificationService().notifyAdminNewOwnerRegistration(coSo.getCoSoID(), ownerName);
+            } catch (Exception _ne) {
+                logger.warn("[Owner Registration] notifyAdminNewOwnerRegistration failed: {}", _ne.getMessage());
             }
 
             out.print("{\"success\":true}");

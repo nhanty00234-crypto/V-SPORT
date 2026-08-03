@@ -8,7 +8,7 @@
 <title>Dịch vụ thể thao gần bạn - V-SPORT</title>
 <style>
   /* ─── Layout ─── */
-  .dv-wrap { max-width: var(--container-width); margin: 0 auto; padding: 32px 24px 80px; }
+  .dv-wrap { width: 100%; max-width: 100%; margin: 0; padding: 32px clamp(24px, 4vw, 64px) 80px; box-sizing: border-box; }
 
   /* ─── Header ─── */
   .dv-header { margin-bottom: 4px; }
@@ -51,7 +51,7 @@
   .dv-chip:hover { border-color: var(--navy); color: var(--navy); }
   .dv-chip.active { background: var(--navy); border-color: var(--navy); color: #fff; }
 
-  /* ─── Service grid (2-col feel) ─── */
+  /* ─── Service grid ─── */
   .dv-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
 
   /* ─── Service card ─── */
@@ -77,11 +77,11 @@
   .dv-card-meta { display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color: var(--body-text); }
   .dv-price { font-weight: 800; color: var(--navy); font-size: 14.5px; }
 
-  /* ─── Product grid (3-4 col, tighter cards) ─── */
+  /* ─── Product grid (nhiều cột, lấp đầy chiều ngang) ─── */
   .sp-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
+    gap: 18px;
   }
   .sp-card {
     background: #fff; border: 1px solid #e8ecf0; border-radius: 14px;
@@ -146,19 +146,19 @@
 
   /* ─── Responsive ─── */
   @media (max-width: 900px) {
-    .sp-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
+    .sp-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:14px; }
   }
   @media (max-width: 768px) {
-    .dv-wrap { padding: 24px min(20px, 5vw) 70px; }
+    .dv-wrap { padding: 24px 16px 70px; }
     .dv-header h1 { font-size: 24px; }
     .dv-search { flex-direction: column; }
     .dv-search input[type="text"] { min-width: 0; width: 100%; }
     .dv-gps-btn { width: 100%; justify-content: center; }
-    .dv-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-    .sp-grid { grid-template-columns: repeat(3, 1fr); gap:10px; }
+    .dv-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .sp-grid { grid-template-columns: repeat(3, 1fr); gap:12px; }
   }
   @media (max-width: 480px) {
-    .dv-wrap { padding: 20px min(16px, 4vw) 70px; }
+    .dv-wrap { padding: 20px 12px 70px; }
     .dv-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .dv-card-img { height: 110px; }
     .sp-grid { grid-template-columns: repeat(2, 1fr); gap:10px; }

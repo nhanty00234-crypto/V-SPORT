@@ -130,8 +130,10 @@ public class FacilityDetailApiServlet extends HttpServlet {
                     facility.put("readyCourtCount", rs.getInt("ReadyCourtCount"));
 
                     String hinhAnh = rs.getString("HinhAnh");
-                    facility.put("imageUrl", hinhAnh != null ? hinhAnh.trim() : "");
-                    addImage(images, hinhAnh);
+                    List<String> coSoImages = org.example.controller.manager.CoSoGalleryServlet.parseJson(hinhAnh);
+                    String firstImage = coSoImages.isEmpty() ? "" : coSoImages.get(0);
+                    facility.put("imageUrl", firstImage);
+                    for (String img : coSoImages) addImage(images, img);
 
                     // Tab "Cửa hàng" chỉ tồn tại khi capability bán hàng đã được duyệt
                     // (isApprovedAny tự kiểm tra CoSo còn hoạt động/chưa xóa). Danh sách

@@ -103,20 +103,10 @@
 
 <jsp:include page="/staff/common/sidebar.jsp" />
 
-<header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-orange-100 z-20 flex items-center justify-between px-4 lg:px-6">
-  <div class="flex items-center gap-3">
-    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-orange-50 text-orange-700">
-      <i class="ti ti-menu-2 text-[20px]"></i>
-    </button>
-    <div>
-      <h1 class="text-sm font-bold text-orange-900 tracking-tight">Lịch làm của tôi</h1>
-      <p class="text-xs text-orange-500">Nhân viên · Cơ sở CS${sessionScope.user.coSoId}</p>
-    </div>
-  </div>
-  <div class="flex items-center gap-1.5">
-    <jsp:include page="/manager/common/profile_dropdown.jsp" />
-  </div>
-</header>
+<jsp:include page="/staff/common/header.jsp">
+  <jsp:param name="pageTitle" value="Lịch làm của tôi"/>
+  <jsp:param name="pageSubtitle" value="Nhân viên · Cơ sở CS${sessionScope.user.coSoId}"/>
+</jsp:include>
 
 <main class="lg:ml-[248px] mt-[64px] p-4 lg:p-6 flex flex-col gap-5">
 

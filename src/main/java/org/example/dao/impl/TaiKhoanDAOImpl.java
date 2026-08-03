@@ -538,6 +538,20 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
     }
 
     @Override
+    public List<TaiKhoan> getAdminAccounts() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT a FROM TaiKhoan a WHERE a.roleId = 1 AND (a.isLocked IS NULL OR a.isLocked = false)", TaiKhoan.class)
+                    .getResultList();
+        } catch (Exception e) {
+            logger.error("Lỗi lấy danh sách tài khoản Admin: {}", e.getMessage(), e);
+            return java.util.Collections.emptyList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public long getTotalStaff() {
         return 0;
     }

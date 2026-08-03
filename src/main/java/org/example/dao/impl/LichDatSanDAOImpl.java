@@ -587,13 +587,6 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             BigDecimal currentPriceCalculated = BigDecimal.valueOf(durationHours * hourlyPrice).setScale(0, java.math.RoundingMode.HALF_UP);
 
             String priceWarning = "";
-            if (currentPriceCalculated.compareTo(tongTienDuKien) != 0) {
-                if (!confirmPriceChange) {
-                    throw new Exception("PRICE_CHANGED:" + tongTienDuKien + ":" + currentPriceCalculated);
-                }
-                priceWarning = " [Cảnh báo: Giá sân thay đổi từ lúc đặt: " + tongTienDuKien + "đ -> " + currentPriceCalculated + "đ]";
-                tongTienDuKien = currentPriceCalculated;
-            }
 
             // 4. Kiểm xem có đơn trùng lịch đã được xác nhận/sử dụng không
             String sqlCheckConflict = "SELECT COUNT(*) FROM LichDatSan " +

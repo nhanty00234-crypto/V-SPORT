@@ -73,6 +73,27 @@
     </div>
   </c:if>
 
+  <!-- Ảnh cơ sở Gallery -->
+  <section class="rounded-3xl border border-purple-150 bg-white shadow-sm shadow-purple-100/40 p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-purple-600 text-[22px]">photo_library</span>
+        <h3 class="text-base font-bold text-purple-950">Ảnh cơ sở</h3>
+        <span id="galleryCount" class="text-xs text-zinc-400 font-normal">(0/10)</span>
+      </div>
+      <label class="cursor-pointer flex items-center gap-1.5 h-9 px-4 rounded-xl text-sm font-bold text-white"
+             style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+        <span class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+        Thêm ảnh
+        <input type="file" id="galleryFileInput" accept="image/*" multiple class="hidden" onchange="galleryUpload(this)">
+      </label>
+    </div>
+    <div id="galleryGrid" class="flex flex-wrap gap-3">
+      <p id="galleryEmpty" class="text-sm text-zinc-400 italic">Chưa có ảnh nào. Thêm ảnh để hiển thị trên trang tìm kiếm.</p>
+    </div>
+    <div id="galleryError" class="hidden mt-2 text-xs text-red-600"></div>
+  </section>
+
   <!-- Stats Grid -->
   <section id="statsSection" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
     <div class="card p-4 hover:shadow-md transition-shadow">
@@ -1424,11 +1445,9 @@
     // Time value
     let timeStr = type.lightStart;
     if (timeStr && timeStr.length > 5) timeStr = timeStr.substring(0, 5);
-    document.getElementById('priceConfigLightStart').value = timeStr;
 
     let endTimeStr = type.lightEnd;
     if (endTimeStr && endTimeStr.length > 5) endTimeStr = endTimeStr.substring(0, 5);
-    document.getElementById('priceConfigLightEnd').value = endTimeStr || '22:00';
 
     // List shared courts
     const sharedCourts = mockSan.filter(x => x.typeId === type.id);
@@ -1436,6 +1455,13 @@
     document.getElementById('sharedCourtsList').textContent = sharedNames;
 
     document.getElementById('priceConfigModal').classList.remove('hidden');
+
+    // Set time inputs AFTER modal is visible — Chrome on Windows does not re-render
+    // <input type="time"> correctly when value is set while the element is display:none
+    requestAnimationFrame(() => {
+      document.getElementById('priceConfigLightStart').value = timeStr || '17:30';
+      document.getElementById('priceConfigLightEnd').value = endTimeStr || '22:00';
+    });
   }
 
   function closePriceConfigModal() {
@@ -1456,6 +1482,7 @@
     initCurrencyFormatter('typePriceNoLight');
     initCurrencyFormatter('typePriceWithLight');
     initCurrencyFormatter('priceConfigPriceNoLight');
+    initCurrencyFormatter('priceConfigPriceWithLight');
     populateSportDropdowns();
     switchTab('courts'); // sets default view and triggers rendering
   });
@@ -1466,6 +1493,69 @@
       window.location.reload();
     }
   });
+
+  // ── Gallery ảnh cơ sở ──────────────────────────────────────────────
+  const GALLERY_API = contextPath + '/manager/co-so-gallery';
+
+  function galleryRender(images) {
+    const grid = document.getElementById('galleryGrid');
+    const empty = document.getElementById('galleryEmpty');
+    const count = document.getElementById('galleryCount');
+    count.textContent = '(' + images.length + '/10)';
+    grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
+    empty.style.display = images.length ? 'none' : '';
+    images.forEach(url => {
+      const item = document.createElement('div');
+      item.className = 'gallery-item relative w-24 h-24 rounded-xl overflow-hidden border border-purple-100 group';
+      const src = url.startsWith('/') ? contextPath + url : url;
+      item.innerHTML = `<img src="${src}" class="w-full h-full object-cover" onerror="this.src=''">
+        <button type="button" onclick="galleryDelete('${url}')"
+          class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span class="material-symbols-outlined text-white text-[22px]">delete</span>
+        </button>`;
+      grid.appendChild(item);
+    });
+  }
+
+  async function galleryDelete(url) {
+    if (!confirm('Xóa ảnh này?')) return;
+    const fd = new FormData();
+    fd.append('action', 'delete');
+    fd.append('url', url);
+    try {
+      const r = await fetch(GALLERY_API, { method: 'POST', body: fd });
+      const d = await r.json();
+      if (d.error) { galleryError(d.error); return; }
+      galleryRender(d.images || []);
+    } catch { galleryError('Lỗi kết nối.'); }
+  }
+
+  async function galleryUpload(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    for (const file of files) {
+      const fd = new FormData();
+      fd.append('action', 'upload');
+      fd.append('image', file);
+      try {
+        const r = await fetch(GALLERY_API, { method: 'POST', body: fd });
+        const d = await r.json();
+        if (d.error) { galleryError(d.error); break; }
+        galleryRender(d.images || []);
+      } catch { galleryError('Lỗi tải ảnh lên.'); break; }
+    }
+    input.value = '';
+  }
+
+  function galleryError(msg) {
+    const el = document.getElementById('galleryError');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+  }
+
+  // Load gallery on page init
+  fetch(GALLERY_API).then(r => r.json()).then(d => galleryRender(d.images || [])).catch(() => {});
 </script>
 </body>
 </html>

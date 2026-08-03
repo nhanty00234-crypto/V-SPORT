@@ -812,6 +812,15 @@ public class DatSanServlet extends HttpServlet {
                         LOGGER.warning("notifyBookingCreated failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
                     }
 
+                    // Thông báo cho Manager/Staff của cơ sở
+                    try {
+                        String thoiGianStr = gioBatDau + "-" + gioKetThuc;
+                        notificationService.notifyManagerStaffNewBooking(sanCoSoID, newDatSanId,
+                                user.getFullName(), null, thoiGianStr);
+                    } catch (Exception _ne) {
+                        LOGGER.warning("notifyManagerStaffNewBooking failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
+                    }
+
                     LOGGER.info(String.format(
                             "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s, tổng submit=%dms",
                             user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod, System.currentTimeMillis() - tSubmit0));
