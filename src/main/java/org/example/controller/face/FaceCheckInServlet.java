@@ -23,6 +23,7 @@ import org.example.model.FaceChallengeToken;
 import org.example.model.TaiKhoan;
 import org.example.util.AttendanceWindow;
 import org.example.util.Constants;
+import org.example.util.FaceDescriptorMatcher;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -128,13 +129,19 @@ public class FaceCheckInServlet extends HttpServlet {
             return;
         }
 
-        double[] storedDesc   = gson.fromJson(faceData.getFaceDescriptor(), double[].class);
+        // Nhiều mẫu: lấy khoảng cách tới mẫu gần nhất. parse() nhận cả định dạng cũ một mẫu.
+        double[][] storedSamples = FaceDescriptorMatcher.parse(faceData.getFaceDescriptor());
+        if (storedSamples.length == 0) {
+            resp.getWriter().write("{\"success\":false,\"error\":\"Dữ liệu khuôn mặt đã lưu bị lỗi. Liên hệ quản lý đăng ký lại.\"}");
+            return;
+        }
+
         double[] incomingDesc = new double[128];
         for (int i = 0; i < Math.min(128, descArr.size()); i++) {
             incomingDesc[i] = descArr.get(i).getAsDouble();
         }
 
-        double distance = euclideanDistance(storedDesc, incomingDesc);
+        double distance = FaceDescriptorMatcher.minDistance(storedSamples, incomingDesc);
 
         // Lấy threshold của chi nhánh (nếu có), fallback về default
         double threshold = MATCH_THRESHOLD;
@@ -165,7 +172,8 @@ public class FaceCheckInServlet extends HttpServlet {
         if ("checkout".equals(action)) {
             ok = caLamViecDAO.faceCheckOut(caId, imagePath, confidence);
         } else {
-            ok = caLamViecDAO.faceCheckIn(caId, imagePath, confidence, true);
+            // Luồng một chạm không còn challenge tư thế; hậu kiểm dựa vào ảnh snapshot.
+            ok = caLamViecDAO.faceCheckIn(caId, imagePath, confidence, false);
         }
 
         if (!ok) {
@@ -181,16 +189,6 @@ public class FaceCheckInServlet extends HttpServlet {
     }
 
     // --- Helpers ---
-
-    private double euclideanDistance(double[] a, double[] b) {
-        double sum = 0;
-        int len = Math.min(a.length, b.length);
-        for (int i = 0; i < len; i++) {
-            double diff = a[i] - b[i];
-            sum += diff * diff;
-        }
-        return Math.sqrt(sum);
-    }
 
     private String saveSnapshot(String base64DataUrl, int accountId, int caId, String action) {
         if (base64DataUrl == null || !base64DataUrl.startsWith("data:image")) return null;

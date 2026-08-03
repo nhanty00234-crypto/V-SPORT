@@ -17,6 +17,7 @@ import org.example.model.CoSoFaceConfig;
 import org.example.model.FaceChallengeToken;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
+import org.example.util.FaceDescriptorMatcher;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -25,7 +26,6 @@ import java.util.*;
 @WebServlet("/face/challenge")
 public class FaceChallengeServlet extends HttpServlet {
 
-    private static final String[] ALL_CHALLENGES = {"blink", "turn_left", "turn_right", "smile"};
     private static final int TTL_SECONDS = 180;
     /** Khoảng cách Euclidean coi như hoàn toàn khác người — dùng để quy đổi ra % khớp. */
     private static final double MAX_DISTANCE = 0.8;
@@ -70,10 +70,9 @@ public class FaceChallengeServlet extends HttpServlet {
             return;
         }
 
-        // Random 2 trong 4 challenges, shuffle thứ tự
-        List<String> pool = new ArrayList<>(Arrays.asList(ALL_CHALLENGES));
-        Collections.shuffle(pool);
-        List<String> chosen = pool.subList(0, 2);
+        // Không còn challenge tư thế: luồng điểm danh chỉ bắt khuôn mặt rồi gửi.
+        // Token vẫn được cấp để chống phát lại (replay) ở /face/checkin.
+        List<String> chosen = Collections.emptyList();
 
         FaceChallengeToken token = new FaceChallengeToken();
         token.setTokenId(UUID.randomUUID().toString());
@@ -105,7 +104,8 @@ public class FaceChallengeServlet extends HttpServlet {
         result.put("maxDistance", MAX_DISTANCE);
         result.put("requiredPercent", toPercent(threshold));
         if (faceData != null && faceData.getFaceDescriptor() != null) {
-            result.put("descriptor", gson.fromJson(faceData.getFaceDescriptor(), double[].class));
+            double[][] samples = FaceDescriptorMatcher.parse(faceData.getFaceDescriptor());
+            if (samples.length > 0) result.put("descriptors", samples);
         }
         resp.getWriter().write(gson.toJson(result));
     }
