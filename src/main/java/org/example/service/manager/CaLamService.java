@@ -375,6 +375,12 @@ public class CaLamService {
                 int thuVal = date.getDayOfWeek().getValue() + 1; // Mon is 1 -> 2 in DB logic
                 ca.setThu(thuVal);
 
+                System.out.println("[DEBUG-SHIFT] createShift: accountId=" + ca.getAccountId()
+                        + " ngayLam=" + ca.getNgayLam()
+                        + " trangThai=" + ca.getTrangThai()
+                        + " isPublished=" + ca.isPublished()
+                        + " coSoId=" + ca.getCoSoId());
+
                 shiftsToCreate.add(ca);
             }
         }
@@ -433,7 +439,7 @@ public class CaLamService {
                 tb.setLoaiThongBao("LichLamViec");
                 tb.setDaDoc(false);
                 tb.setThoiGianGui(new java.util.Date());
-                tb.setMaBanGhi("CA_LAM_VIEC");
+                tb.setMaBanGhi(String.valueOf(ca.getCaLamViecId()));
                 tb.setDuongDan("/staff/ca-lam");
                 thongBaoDAO.insert(tb);
             }
@@ -615,7 +621,7 @@ public class CaLamService {
             tb.setLoaiThongBao("LichLamViec");
             tb.setDaDoc(false);
             tb.setThoiGianGui(new java.util.Date());
-            tb.setMaBanGhi("CA_LAM_VIEC");
+            tb.setMaBanGhi(String.valueOf(existing.getCaLamViecId()));
             tb.setDuongDan("/staff/ca-lam");
             thongBaoDAO.insert(tb);
         }
@@ -713,7 +719,7 @@ public class CaLamService {
             tb.setLoaiThongBao("LichLamViec");
             tb.setDaDoc(false);
             tb.setThoiGianGui(new java.util.Date());
-            tb.setMaBanGhi("CA_LAM_VIEC");
+            tb.setMaBanGhi(String.valueOf(ca.getCaLamViecId()));
             tb.setDuongDan("/staff/ca-lam");
             thongBaoDAO.insert(tb);
         }
@@ -1105,7 +1111,7 @@ public class CaLamService {
                     tb.setLoaiThongBao("LichLamViec");
                     tb.setDaDoc(false);
                     tb.setThoiGianGui(new java.util.Date());
-                    tb.setMaBanGhi("CA_LAM_VIEC");
+                    tb.setMaBanGhi(String.valueOf(s.getCaLamViecId()));
                     tb.setDuongDan("/staff/ca-lam");
                     thongBaoDAO.insert(tb);
                 }

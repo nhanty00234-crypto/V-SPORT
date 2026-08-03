@@ -36,14 +36,11 @@ public class FaceEnrollServlet extends HttpServlet {
 
         int targetId = resolveTargetId(req, user);
 
-        // Fix 2: manager cross-branch enrollment guard (read path)
-        if (user.getRoleId() == Constants.ROLE_MANAGER && targetId != user.getAccountId()) {
-            TaiKhoan targetCheck = taiKhoanDAO.getFaceData(targetId);
-            if (targetCheck == null || !Objects.equals(targetCheck.getCoSoId(), user.getCoSoId())) {
-                resp.setStatus(403);
-                resp.getWriter().write("{\"error\":\"Không có quyền xem thông tin khuôn mặt của tài khoản này\"}");
-                return;
-            }
+        // Manager chỉ được xem nhân sự cùng cơ sở (getAccountById mới có CoSoID)
+        if (targetId != user.getAccountId() && !isSameBranch(targetId, user)) {
+            resp.setStatus(403);
+            resp.getWriter().write("{\"error\":\"Không có quyền xem thông tin khuôn mặt của tài khoản này\"}");
+            return;
         }
 
         TaiKhoan faceData = taiKhoanDAO.getFaceData(targetId);
@@ -67,14 +64,11 @@ public class FaceEnrollServlet extends HttpServlet {
 
         int targetId = resolveTargetId(req, user);
 
-        // Fix 2: manager cross-branch enrollment guard
-        if (user.getRoleId() == Constants.ROLE_MANAGER && targetId != user.getAccountId()) {
-            TaiKhoan target = taiKhoanDAO.getFaceData(targetId);
-            if (target == null || !Objects.equals(target.getCoSoId(), user.getCoSoId())) {
-                resp.setStatus(403);
-                resp.getWriter().write("{\"error\":\"Không có quyền đăng ký khuôn mặt cho tài khoản này\"}");
-                return;
-            }
+        // Manager chỉ được đăng ký cho nhân sự cùng cơ sở
+        if (targetId != user.getAccountId() && !isSameBranch(targetId, user)) {
+            resp.setStatus(403);
+            resp.getWriter().write("{\"error\":\"Không có quyền đăng ký khuôn mặt cho tài khoản này\"}");
+            return;
         }
 
         String contentType = req.getContentType();
@@ -130,6 +124,14 @@ public class FaceEnrollServlet extends HttpServlet {
 
     // --- helpers ---
 
+    /** Nhân sự đích phải cùng cơ sở với manager và thuộc role được phân ca. */
+    private boolean isSameBranch(int targetId, TaiKhoan manager) {
+        TaiKhoan target = taiKhoanDAO.getAccountById(targetId);
+        return target != null
+                && Objects.equals(target.getCoSoId(), manager.getCoSoId())
+                && Constants.ALLOWED_SHIFT_ROLES.contains(target.getRoleId());
+    }
+
     private int resolveTargetId(HttpServletRequest req, TaiKhoan user) {
         String targetParam = req.getParameter("targetAccountId");
         if (targetParam != null && user.getRoleId() == Constants.ROLE_MANAGER) {
@@ -163,15 +165,15 @@ public class FaceEnrollServlet extends HttpServlet {
         return "/uploads/face-photos/" + filename;
     }
 
+    /**
+     * Chỉ Manager được đăng ký khuôn mặt — nhân viên không tự đăng ký nữa mà phải
+     * đến gặp quản lý, quản lý đăng ký hộ tại /manager/face-settings.
+     */
     private TaiKhoan getAuthorizedUser(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session == null) return null;
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
         if (user == null) return null;
-        int role = user.getRoleId();
-        if (role == Constants.ROLE_BAO_VE || role == Constants.ROLE_LE_TAN || role == Constants.ROLE_MANAGER) {
-            return user;
-        }
-        return null;
+        return user.getRoleId() == Constants.ROLE_MANAGER ? user : null;
     }
 }

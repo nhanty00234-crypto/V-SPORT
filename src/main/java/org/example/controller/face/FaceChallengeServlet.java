@@ -5,10 +5,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import org.example.dao.CaLamViecDAO;
+import org.example.dao.CoSoFaceConfigDAO;
 import org.example.dao.FaceChallengeTokenDAO;
+import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
+import org.example.dao.impl.CoSoFaceConfigDAOImpl;
 import org.example.dao.impl.FaceChallengeTokenDAOImpl;
+import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.model.CaLamViec;
+import org.example.model.CoSoFaceConfig;
 import org.example.model.FaceChallengeToken;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
@@ -22,8 +27,13 @@ public class FaceChallengeServlet extends HttpServlet {
 
     private static final String[] ALL_CHALLENGES = {"blink", "turn_left", "turn_right", "smile"};
     private static final int TTL_SECONDS = 180;
+    /** Khoảng cách Euclidean coi như hoàn toàn khác người — dùng để quy đổi ra % khớp. */
+    private static final double MAX_DISTANCE = 0.8;
+
     private final FaceChallengeTokenDAO tokenDAO = new FaceChallengeTokenDAOImpl();
     private final CaLamViecDAO caLamViecDAO = new CaLamViecDAOImpl();
+    private final CoSoFaceConfigDAO faceConfigDAO = new CoSoFaceConfigDAOImpl();
+    private final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAOImpl();
     private final Gson gson = new Gson();
 
     @Override
@@ -78,11 +88,32 @@ public class FaceChallengeServlet extends HttpServlet {
         // Xóa token cũ hết hạn (cleanup không quan trọng)
         try { tokenDAO.deleteExpired(); } catch (Exception ignored) {}
 
+        // Descriptor đã đăng ký + ngưỡng của cơ sở: gửi kèm để client hiển thị % khớp
+        // theo thời gian thực. Server vẫn tự chấm lại ở /face/checkin nên đây chỉ là UX.
+        TaiKhoan faceData = taiKhoanDAO.getFaceData(user.getAccountId());
+        double threshold = 0.6;
+        if (user.getCoSoId() != null) {
+            CoSoFaceConfig cfg = faceConfigDAO.findByCoSo(user.getCoSoId());
+            if (cfg != null) threshold = cfg.getConfidenceMin();
+        }
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("token", token.getTokenId());
         result.put("challenges", chosen);
         result.put("ttlSeconds", TTL_SECONDS);
+        result.put("threshold", threshold);
+        result.put("maxDistance", MAX_DISTANCE);
+        result.put("requiredPercent", toPercent(threshold));
+        if (faceData != null && faceData.getFaceDescriptor() != null) {
+            result.put("descriptor", gson.fromJson(faceData.getFaceDescriptor(), double[].class));
+        }
         resp.getWriter().write(gson.toJson(result));
+    }
+
+    /** Quy đổi khoảng cách Euclidean sang % khớp để hiển thị cho người dùng. */
+    private static int toPercent(double distance) {
+        double pct = (1.0 - distance / MAX_DISTANCE) * 100.0;
+        return (int) Math.round(Math.max(0, Math.min(100, pct)));
     }
 
     private TaiKhoan getUser(HttpServletRequest req) {

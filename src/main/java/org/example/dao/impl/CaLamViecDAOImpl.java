@@ -678,4 +678,47 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         }
         return false;
     }
+
+    @Override
+    public List<org.example.model.FaceAttendanceLog> getFaceAttendanceHistory(int coSoId, int limit) {
+        String sql = "SELECT TOP (?) c.CaLamViecID, c.AccountID, c.TenCa, c.NgayLam, c.GioVaoThuc, c.GioRaThuc, " +
+                     "c.FaceConfidence, c.FaceCheckOutConfidence, c.FaceLivenessPassed, " +
+                     "c.FaceCheckInImage, c.FaceCheckOutImage, a.FullName, a.RoleID " +
+                     "FROM CaLamViec c JOIN Accounts a ON a.AccountID = c.AccountID " +
+                     "WHERE c.CoSoID = ? AND c.IsDeleted = 0 AND c.FaceVerified = 1 " +
+                     "ORDER BY c.GioVaoThuc DESC";
+        List<org.example.model.FaceAttendanceLog> list = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, coSoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    org.example.model.FaceAttendanceLog row = new org.example.model.FaceAttendanceLog();
+                    row.setCaLamViecId(rs.getInt("CaLamViecID"));
+                    row.setAccountId(rs.getInt("AccountID"));
+                    row.setFullName(rs.getString("FullName"));
+                    row.setRoleId(rs.getInt("RoleID"));
+                    row.setTenCa(rs.getString("TenCa"));
+                    java.sql.Date ngay = rs.getDate("NgayLam");
+                    if (ngay != null) row.setNgayLam(ngay.toLocalDate());
+                    Timestamp vao = rs.getTimestamp("GioVaoThuc");
+                    if (vao != null) row.setGioVaoThuc(vao.toLocalDateTime());
+                    Timestamp ra = rs.getTimestamp("GioRaThuc");
+                    if (ra != null) row.setGioRaThuc(ra.toLocalDateTime());
+                    double conf = rs.getDouble("FaceConfidence");
+                    if (!rs.wasNull()) row.setFaceConfidence(conf);
+                    double confOut = rs.getDouble("FaceCheckOutConfidence");
+                    if (!rs.wasNull()) row.setFaceCheckOutConfidence(confOut);
+                    row.setFaceLivenessPassed(rs.getBoolean("FaceLivenessPassed"));
+                    row.setFaceCheckInImage(rs.getString("FaceCheckInImage"));
+                    row.setFaceCheckOutImage(rs.getString("FaceCheckOutImage"));
+                    list.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("getFaceAttendanceHistory failed for coSoId={}: {}", coSoId, e.getMessage(), e);
+        }
+        return list;
+    }
 }

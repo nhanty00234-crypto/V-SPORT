@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!-- Staff shared header — use with <jsp:param name="pageTitle"> and <jsp:param name="pageSubtitle"> -->
+<%-- Staff shared header — use with jsp:param name="pageTitle" and jsp:param name="pageSubtitle" --%>
 <header class="h-[64px] fixed top-0 right-0 left-0 lg:left-[248px] bg-white/80 backdrop-blur-lg border-b border-orange-100 z-20 flex items-center justify-between px-4 lg:px-6">
   <div class="flex items-center gap-3">
     <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-orange-50 text-orange-600">

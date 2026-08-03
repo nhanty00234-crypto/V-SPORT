@@ -1,7 +1,6 @@
 'use strict';
 
 window.FaceAttendance = (function () {
-    const MODEL_URL = '/Backend_java/assets/face-models';
     const EAR_THRESHOLD = 0.25;   // Eye Aspect Ratio để detect chớp mắt
     const BLINK_FRAMES = 2;        // Số frame liên tiếp EAR < threshold = chớp mắt
     const TURN_RATIO = 0.20;       // Nose dịch > 20% face width = quay đầu
@@ -19,6 +18,10 @@ window.FaceAttendance = (function () {
     let _capturedDescriptor = null;
     let _capturedSnapshot = null;
     let _modelsLoaded = false;
+    let _enrolledDescriptor = null;  // descriptor đã đăng ký, để tính % khớp tại chỗ
+    let _threshold = 0.6;            // khoảng cách Euclidean tối đa được duyệt
+    let _maxDistance = 0.8;
+    let _requiredPercent = 25;
 
     // ── Utilities ──────────────────────────────────────────────────────────────
 
@@ -45,6 +48,46 @@ window.FaceAttendance = (function () {
         };
         _opts.statusEl.className = colors[type] || 'text-zinc-500';
         _opts.statusEl.textContent = msg;
+    }
+
+    /** Khoảng cách Euclidean giữa 2 descriptor 128 chiều. */
+    function euclidean(a, b) {
+        let sum = 0;
+        for (let i = 0; i < a.length; i++) {
+            const d = a[i] - b[i];
+            sum += d * d;
+        }
+        return Math.sqrt(sum);
+    }
+
+    function toPercent(distance) {
+        const pct = (1 - distance / _maxDistance) * 100;
+        return Math.round(Math.max(0, Math.min(100, pct)));
+    }
+
+    /** Cập nhật thanh % khớp; trả về true nếu khuôn mặt đạt ngưỡng của cơ sở. */
+    function updateMatch(descriptor) {
+        if (!_enrolledDescriptor) return true;   // chưa đăng ký -> để server quyết định
+        const distance = euclidean(_enrolledDescriptor, descriptor);
+        const percent = toPercent(distance);
+        const ok = distance <= _threshold;
+
+        if (_opts.matchEl) {
+            _opts.matchEl.textContent = percent + '%';
+            _opts.matchEl.className = ok
+                ? 'text-green-600 font-black text-lg'
+                : 'text-amber-500 font-black text-lg';
+        }
+        if (_opts.matchBarEl) {
+            _opts.matchBarEl.style.width = percent + '%';
+            _opts.matchBarEl.style.background = ok ? '#16a34a' : '#f59e0b';
+        }
+        if (_opts.matchHintEl) {
+            _opts.matchHintEl.textContent = ok
+                ? 'Đã khớp (cần ≥ ' + _requiredPercent + '%)'
+                : 'Chưa đủ khớp — cần ≥ ' + _requiredPercent + '%';
+        }
+        return ok;
     }
 
     const CHALLENGE_LABELS = {
@@ -103,13 +146,16 @@ window.FaceAttendance = (function () {
         if (!detection) {
             setStatus('Không tìm thấy khuôn mặt. Hãy nhìn thẳng vào camera.', 'info');
             _challengePassedFrames = 0;
+            if (_opts.matchEl) _opts.matchEl.textContent = '--%';
+            if (_opts.matchBarEl) _opts.matchBarEl.style.width = '0%';
             return;
         }
 
         const box = detection.detection.box;
         const landmarks = detection.landmarks;
+        const matched = updateMatch(detection.descriptor);
         const currentChallenge = _challenges[_currentChallengeIdx];
-        const passed = detectChallenge(currentChallenge, landmarks, box);
+        const passed = matched && detectChallenge(currentChallenge, landmarks, box);
 
         if (passed) {
             _challengePassedFrames++;
@@ -132,7 +178,9 @@ window.FaceAttendance = (function () {
             }
         } else {
             _challengePassedFrames = 0;
-            setStatus(CHALLENGE_LABELS[currentChallenge], 'challenge');
+            setStatus(matched
+                ? CHALLENGE_LABELS[currentChallenge]
+                : 'Chưa nhận ra bạn — đưa mặt vào giữa khung, đủ sáng', matched ? 'challenge' : 'info');
         }
     }
 
@@ -183,12 +231,13 @@ window.FaceAttendance = (function () {
     async function init(opts) {
         _opts = opts;
 
+        const modelUrl = (opts.contextPath || '') + '/assets/face-models';
         if (!_modelsLoaded) {
             setStatus('Đang tải model nhận diện...', 'info');
             await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
+                faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelUrl),
+                faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl)
             ]);
             _modelsLoaded = true;
         }
@@ -203,6 +252,17 @@ window.FaceAttendance = (function () {
         _challenges = data.challenges;
         _currentChallengeIdx = 0;
         _challengePassedFrames = 0;
+        _enrolledDescriptor = data.descriptor || null;
+        if (typeof data.threshold === 'number') _threshold = data.threshold;
+        if (typeof data.maxDistance === 'number') _maxDistance = data.maxDistance;
+        if (typeof data.requiredPercent === 'number') _requiredPercent = data.requiredPercent;
+
+        if (!_enrolledDescriptor) {
+            setStatus('Bạn chưa được đăng ký khuôn mặt. Liên hệ quản lý để đăng ký.', 'error');
+            if (_opts.onError) _opts.onError('Chưa đăng ký khuôn mặt');
+            return false;
+        }
+        return true;
     }
 
     async function start() {

@@ -563,7 +563,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
 
     @Override
     public void updateFaceData(int accountId, String descriptorJson, String imagePath) {
-        String sql = "UPDATE TaiKhoan SET FaceDescriptor=?, FaceImagePath=?, FaceEnrolledAt=GETDATE() WHERE AccountID=?";
+        String sql = "UPDATE Accounts SET FaceDescriptor=?, FaceImagePath=?, FaceEnrolledAt=GETDATE() WHERE AccountID=?";
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, descriptorJson);
@@ -578,7 +578,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
 
     @Override
     public TaiKhoan getFaceData(int accountId) {
-        String sql = "SELECT AccountID, FaceDescriptor, FaceImagePath, FaceEnrolledAt FROM TaiKhoan WHERE AccountID=?";
+        String sql = "SELECT AccountID, FaceDescriptor, FaceImagePath, FaceEnrolledAt FROM Accounts WHERE AccountID=?";
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -598,6 +598,19 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             throw new RuntimeException("getFaceData failed", e);
         }
         return null;
+    }
+
+    @Override
+    public void resetFaceData(int accountId) {
+        String sql = "UPDATE Accounts SET FaceDescriptor=NULL, FaceImagePath=NULL, FaceEnrolledAt=NULL WHERE AccountID=?";
+        try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            logger.error("resetFaceData failed for accountId={}: {}", accountId, e.getMessage(), e);
+            throw new RuntimeException("resetFaceData failed", e);
+        }
     }
 }
 

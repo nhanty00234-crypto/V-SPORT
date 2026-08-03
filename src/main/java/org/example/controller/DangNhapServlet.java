@@ -131,6 +131,9 @@ public class DangNhapServlet extends HttpServlet {
         String loginMethod = "phone".equals(req.getParameter("loginMethod")) ? "phone" : "account";
         boolean isPhoneLogin = "phone".equals(loginMethod);
         String usernameOrEmail = req.getParameter("username");
+        if (usernameOrEmail != null) {
+            usernameOrEmail = usernameOrEmail.trim();
+        }
         String rawPhone = req.getParameter("phone");
         String password = req.getParameter("password");
         req.setAttribute("loginMethod", loginMethod);

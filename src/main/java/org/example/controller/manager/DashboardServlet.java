@@ -263,19 +263,12 @@ public class DashboardServlet extends HttpServlet {
         String[] labels = new String[]{"Ca sáng", "Ca chiều", "Ca tối", "Ca đêm", "Khác"};
         int[] data = new int[5];
         
-        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
         try {
             java.time.LocalDate today = java.time.LocalDate.now();
             java.time.LocalDate monday = today.with(java.time.DayOfWeek.MONDAY);
             java.time.LocalDate sunday = today.with(java.time.DayOfWeek.SUNDAY);
             
-            List<org.example.model.CaLamViec> shifts = em.createQuery(
-                "SELECT c FROM CaLamViec c " +
-                "WHERE c.coSoId = :coSoId AND c.ngayLam BETWEEN :start AND :end", org.example.model.CaLamViec.class)
-                .setParameter("coSoId", coSoId)
-                .setParameter("start", monday)
-                .setParameter("end", sunday)
-                .getResultList();
+            List<org.example.model.CaLamViec> shifts = caLamViecDAO.getShiftsByCoSoAndDateRange(coSoId, monday, sunday);
                 
             for (org.example.model.CaLamViec s : shifts) {
                 String name = s.getTenCa();
@@ -295,8 +288,6 @@ public class DashboardServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            em.close();
         }
         
         chartData.put("labels", labels);

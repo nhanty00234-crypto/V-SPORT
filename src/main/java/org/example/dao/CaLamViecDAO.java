@@ -128,4 +128,10 @@ public interface CaLamViecDAO {
 
     /** Ghi giờ ra ca thực tế kèm kết quả nhận diện khuôn mặt */
     boolean faceCheckOut(int caLamViecId, String imagePath, double confidence);
+
+    /**
+     * Lịch sử các ca đã điểm danh thành công bằng khuôn mặt tại một cơ sở,
+     * mới nhất trước, đã join sẵn tên nhân viên.
+     */
+    List<org.example.model.FaceAttendanceLog> getFaceAttendanceHistory(int coSoId, int limit);
 }

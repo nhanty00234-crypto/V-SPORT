@@ -137,11 +137,6 @@
       </div>
     </div>
 
-    <!-- Đăng ký khuôn mặt -->
-    <a href="${pageContext.request.contextPath}/guard/enroll-face"
-       class="nav-link ${gp == 'enroll-face' ? 'active' : ''}">
-      <i class="ti ti-face-id text-[19px]"></i>Đăng ký khuôn mặt
-    </a>
   </nav>
 
   <!-- Logout -->

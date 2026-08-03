@@ -1,11 +1,11 @@
 -- migration_face_attendance.sql
--- Bước 1: Thêm cột face vào TaiKhoan
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('TaiKhoan') AND name='FaceDescriptor')
-    ALTER TABLE TaiKhoan ADD FaceDescriptor NVARCHAR(MAX) NULL;
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('TaiKhoan') AND name='FaceImagePath')
-    ALTER TABLE TaiKhoan ADD FaceImagePath NVARCHAR(500) NULL;
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('TaiKhoan') AND name='FaceEnrolledAt')
-    ALTER TABLE TaiKhoan ADD FaceEnrolledAt DATETIME NULL;
+-- Bước 1: Thêm cột face vào Accounts
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('Accounts') AND name='FaceDescriptor')
+    ALTER TABLE Accounts ADD FaceDescriptor NVARCHAR(MAX) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('Accounts') AND name='FaceImagePath')
+    ALTER TABLE Accounts ADD FaceImagePath NVARCHAR(500) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('Accounts') AND name='FaceEnrolledAt')
+    ALTER TABLE Accounts ADD FaceEnrolledAt DATETIME NULL;
 
 -- Bước 2: Thêm cột face audit vào CaLamViec
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('CaLamViec') AND name='FaceVerified')
@@ -42,5 +42,5 @@ CREATE TABLE FaceChallengeToken (
     CreatedAt  DATETIME      NOT NULL DEFAULT GETDATE(),
     ExpiresAt  DATETIME      NOT NULL,
     UsedAt     DATETIME      NULL,
-    CONSTRAINT FK_FaceToken_TaiKhoan FOREIGN KEY (AccountID) REFERENCES TaiKhoan(AccountID)
+    CONSTRAINT FK_FaceToken_Accounts FOREIGN KEY (AccountID) REFERENCES Accounts(AccountID)
 );
