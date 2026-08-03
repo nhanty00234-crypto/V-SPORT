@@ -23,6 +23,8 @@ public class CaLamViec {
     private Integer deletedBy;
     private boolean isCustomTime;
     private String customTimeReason;
+    private LocalDateTime gioVaoThuc;
+    private LocalDateTime gioRaThuc;
 
     public CaLamViec() {
     }
@@ -208,6 +210,12 @@ public class CaLamViec {
     public void setCustomTimeReason(String customTimeReason) {
         this.customTimeReason = customTimeReason;
     }
+
+    public LocalDateTime getGioVaoThuc() { return gioVaoThuc; }
+    public void setGioVaoThuc(LocalDateTime gioVaoThuc) { this.gioVaoThuc = gioVaoThuc; }
+
+    public LocalDateTime getGioRaThuc() { return gioRaThuc; }
+    public void setGioRaThuc(LocalDateTime gioRaThuc) { this.gioRaThuc = gioRaThuc; }
 
     @Override
     public String toString() {

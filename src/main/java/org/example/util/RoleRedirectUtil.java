@@ -17,8 +17,8 @@ public class RoleRedirectUtil {
         switch (roleId) {
             case ROLE_ADMIN:    return "/admin/tong-quan";
             case ROLE_MANAGER:  return "/manager/dashboard";
-            case ROLE_LETÂN:
-            case ROLE_BAOVE:    return "/staff/dashboard";
+            case ROLE_LETÂN:    return "/staff/dashboard";
+            case ROLE_BAOVE:    return "/guard/dashboard";
             case ROLE_CUSTOMER:
             default:            return "/index.jsp";
         }
@@ -26,6 +26,10 @@ public class RoleRedirectUtil {
 
     public static boolean isStaff(int roleId) {
         return roleId == ROLE_LETÂN || roleId == ROLE_BAOVE;
+    }
+
+    public static boolean isGuard(int roleId) {
+        return roleId == ROLE_BAOVE;
     }
 
     /**

@@ -503,6 +503,12 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         if (!rs.wasNull()) {
             ca.setDeletedBy(deletedBy);
         }
+        try {
+            Timestamp vaoThuc = rs.getTimestamp("GioVaoThuc");
+            if (vaoThuc != null) ca.setGioVaoThuc(vaoThuc.toLocalDateTime());
+            Timestamp raThuc = rs.getTimestamp("GioRaThuc");
+            if (raThuc != null) ca.setGioRaThuc(raThuc.toLocalDateTime());
+        } catch (SQLException ignored) {}
 
         return ca;
     }
@@ -583,5 +589,47 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
             logger.error("Error getting shifts by CoSo and range: {}", e.getMessage(), e);
         }
         return list;
+    }
+
+    @Override
+    public CaLamViec getCaHomNay(int accountId, LocalDate ngay) {
+        String sql = "SELECT * FROM CaLamViec WHERE AccountID=? AND NgayLam=? AND IsDeleted=0 AND IsPublished=1 ORDER BY GioBatDau ASC LIMIT 1";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setDate(2, Date.valueOf(ngay));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapResultSetToCaLamViec(rs);
+            }
+        } catch (SQLException e) {
+            logger.error("getCaHomNay failed", e);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean checkInCa(int caLamViecId) {
+        String sql = "UPDATE CaLamViec SET GioVaoThuc=NOW(), TrangThai='CheckedIn' WHERE CaLamViecID=? AND GioVaoThuc IS NULL";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, caLamViecId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("checkInCa failed", e);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkOutCa(int caLamViecId) {
+        String sql = "UPDATE CaLamViec SET GioRaThuc=NOW(), TrangThai='CheckedOut' WHERE CaLamViecID=? AND GioVaoThuc IS NOT NULL AND GioRaThuc IS NULL";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, caLamViecId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("checkOutCa failed", e);
+        }
+        return false;
     }
 }

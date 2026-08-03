@@ -113,4 +113,13 @@ public interface CaLamViecDAO {
      * @return số dòng đã được update
      */
     int publishDraftShiftsWithConnection(LocalDate startOfWeek, LocalDate endOfWeek, int coSoId, Connection conn) throws SQLException;
+
+    /** Lấy ca hôm nay của nhân viên (dùng cho điểm danh bảo vệ) */
+    CaLamViec getCaHomNay(int accountId, LocalDate ngay);
+
+    /** Ghi giờ vào ca thực tế */
+    boolean checkInCa(int caLamViecId);
+
+    /** Ghi giờ ra ca thực tế */
+    boolean checkOutCa(int caLamViecId);
 }
