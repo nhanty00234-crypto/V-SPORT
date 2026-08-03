@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.dao.TaiKhoanDAO;
+import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.dto.payment.PayOSConfigurationStatus;
 import org.example.dto.payment.PayOSConfigurationUpdateResult;
 import org.example.model.CoSo;
@@ -25,6 +27,7 @@ public class PayOSConfigAdminServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(PayOSConfigAdminServlet.class);
     private final PayOSConfigurationService payOSConfigurationService = new PayOSConfigurationService();
+    private final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -106,7 +109,9 @@ public class PayOSConfigAdminServlet extends HttpServlet {
             return;
         }
 
-        String adminEmail = admin.getEmail();
+        // Lấy TaiKhoan mới nhất từ DB để tránh dùng email cũ đang cached trong session
+        TaiKhoan adminFresh = loadFreshAdmin(admin);
+        String adminEmail = adminFresh.getEmail();
         if (adminEmail == null || adminEmail.trim().isEmpty()) {
             logger.error("Admin AccountID={} không có email, không thể gửi OTP cấu hình PayOS cho CoSoID={}", admin.getAccountId(), coSoId);
             writeJson(resp, 400, errorJson("Tài khoản admin chưa được thiết lập địa chỉ email. Vui lòng cập nhật email cho tài khoản trước khi thực hiện thao tác này."));
@@ -122,7 +127,7 @@ public class PayOSConfigAdminServlet extends HttpServlet {
 
         try {
             logger.info("Gửi OTP cấu hình PayOS CoSoID={} đến email={}", coSoId, maskedEmail);
-            sendOtpEmail(admin, prepared.coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS");
+            sendOtpEmail(adminFresh, prepared.coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS");
             logger.info("Gửi OTP thành công đến {}", maskedEmail);
         } catch (Exception e) {
             logger.error("Lỗi gửi email OTP cấu hình PayOS cho CoSoID={}, email={}: {}", coSoId, maskedEmail, e.getMessage(), e);
@@ -219,7 +224,9 @@ public class PayOSConfigAdminServlet extends HttpServlet {
             return;
         }
 
-        String adminEmail = admin.getEmail();
+        // Lấy TaiKhoan mới nhất từ DB để tránh dùng email cũ đang cached trong session
+        TaiKhoan adminFreshResend = loadFreshAdmin(admin);
+        String adminEmail = adminFreshResend.getEmail();
         if (adminEmail == null || adminEmail.trim().isEmpty()) {
             writeJson(resp, 400, errorJson("Tài khoản admin chưa được thiết lập địa chỉ email."));
             return;
@@ -235,7 +242,7 @@ public class PayOSConfigAdminServlet extends HttpServlet {
         String maskedEmailResend = ResetSecurityUtil.maskEmail(adminEmail);
         try {
             logger.info("Gửi lại OTP cấu hình PayOS CoSoID={} đến email={}", coSoId, maskedEmailResend);
-            sendOtpEmail(admin, coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS (gửi lại)");
+            sendOtpEmail(adminFreshResend, coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS (gửi lại)");
             logger.info("Gửi lại OTP thành công đến {}", maskedEmailResend);
         } catch (Exception e) {
             logger.error("Lỗi gửi lại email OTP PayOS cho CoSoID={}, email={}: {}", coSoId, maskedEmailResend, e.getMessage(), e);
@@ -248,6 +255,30 @@ public class PayOSConfigAdminServlet extends HttpServlet {
         body.addProperty("success", true);
         body.addProperty("resendWaitSeconds", challenge.resendWaitSeconds(now));
         writeJson(resp, 200, body);
+    }
+
+    /**
+     * Lấy TaiKhoan mới nhất từ DB để đảm bảo email là email hiện tại,
+     * tránh dùng email cũ đang cached trong session khi admin/manager đã đổi email.
+     * Fallback về session nếu DB call thất bại.
+     */
+    private TaiKhoan loadFreshAdmin(TaiKhoan sessionAdmin) {
+        try {
+            TaiKhoan fresh = taiKhoanDAO.getAccountById(sessionAdmin.getAccountId());
+            if (fresh != null) {
+                if (!java.util.Objects.equals(fresh.getEmail(), sessionAdmin.getEmail())) {
+                    logger.info("Email admin AccountID={} đã thay đổi từ {} → {}, dùng email mới",
+                            sessionAdmin.getAccountId(),
+                            ResetSecurityUtil.maskEmail(sessionAdmin.getEmail()),
+                            ResetSecurityUtil.maskEmail(fresh.getEmail()));
+                }
+                return fresh;
+            }
+        } catch (Exception e) {
+            logger.warn("Không thể load TaiKhoan mới từ DB cho AccountID={}, dùng session: {}",
+                    sessionAdmin.getAccountId(), e.getMessage());
+        }
+        return sessionAdmin;
     }
 
     private void sendOtpEmail(TaiKhoan admin, CoSo coSo, String otp, String subject) throws Exception {
