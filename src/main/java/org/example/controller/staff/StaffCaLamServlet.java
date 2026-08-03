@@ -10,6 +10,7 @@ import org.example.dao.CaLamViecDAO;
 import org.example.dao.CoSoFaceConfigDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.dao.impl.CoSoFaceConfigDAOImpl;
+import org.example.util.AttendanceWindow;
 import org.example.util.Constants;
 
 import jakarta.servlet.ServletException;
@@ -42,7 +43,7 @@ public class StaffCaLamServlet extends HttpServlet {
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
         if (user == null || (user.getRoleId() != 4 && user.getRoleId() != 5)) {
-            session.setAttribute("error", "Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p trang nÃ y.");
+            session.setAttribute("error", "Bạn không có quyền truy cập trang này.");
             resp.sendRedirect(req.getContextPath() + "/dangnhap");
             return;
         }
@@ -126,64 +127,25 @@ public class StaffCaLamServlet extends HttpServlet {
                 
                 sr.setLyDo(req.getParameter("lyDo"));
                 caLamService.createSwapRequest(sr);
-                session.setAttribute("message", "ÄÃ£ gá»­i yÃªu cáº§u hoÃ¡n Ä‘á»•i ca lÃ m!");
+                session.setAttribute("message", "Đã gửi yêu cầu hoán đổi ca làm!");
             } else if ("respondSwap".equals(action)) {
                 int swapId = Integer.parseInt(req.getParameter("id"));
                 boolean accept = Boolean.parseBoolean(req.getParameter("accept"));
                 caLamService.respondToSwapRequest(swapId, accept, user.getAccountId());
-                session.setAttribute("message", accept ? "ÄÃ£ Ä‘á»“ng Ã½ hoÃ¡n Ä‘á»•i. Chá» quáº£n lÃ½ phÃª duyá»‡t." : "ÄÃ£ tá»« chá»‘i hoÃ¡n Ä‘á»•i.");
-            } else if ("confirmShift".equals(action)) {
-                int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
-                caLamService.confirmShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "ÄÃ£ xÃ¡c nháº­n ca lÃ m viá»‡c thÃ nh cÃ´ng!");
-            } else if ("checkIn".equals(action)) {
-                int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
-                // Server-side validation bắt buộc cho điểm danh
-                CaLamViec ca = caLamViecDAO.getCaById(caLamViecId);
-                if (ca == null) {
-                    throw new IllegalArgumentException("Ca làm việc không tồn tại.");
-                }
-                if (ca.getAccountId() != user.getAccountId()) {
-                    throw new IllegalArgumentException("Ca làm việc này không thuộc về bạn.");
-                }
-                if (ca.isDeleted()) {
-                    throw new IllegalArgumentException("Ca làm việc đã bị xóa.");
-                }
-                if ("Cancelled".equals(ca.getTrangThai())) {
-                    throw new IllegalArgumentException("Ca làm việc đã bị hủy.");
-                }
-                if ("CheckedIn".equals(ca.getTrangThai()) || "CheckedOut".equals(ca.getTrangThai())) {
-                    throw new IllegalArgumentException("Bạn đã điểm danh ca này rồi.");
-                }
-                if (!"Confirmed".equals(ca.getTrangThai())) {
-                    throw new IllegalArgumentException("Vui lòng xác nhận lịch làm trước khi điểm danh.");
-                }
-                if (!LocalDate.now().equals(ca.getNgayLam())) {
-                    throw new IllegalArgumentException("Điểm danh chỉ được thực hiện vào ngày làm việc (" + ca.getNgayLam() + ").");
-                }
-                LocalTime nowTime = LocalTime.now();
-                LocalTime windowOpen = ca.getGioBatDau().minusMinutes(30);
-                LocalTime windowClose = ca.getGioBatDau().plusMinutes(30);
-                if (nowTime.isBefore(windowOpen)) {
-                    throw new IllegalArgumentException("Điểm danh chưa mở. Khung giờ hợp lệ: "
-                        + windowOpen.toString().substring(0, 5) + " - " + windowClose.toString().substring(0, 5) + ".");
-                }
-                if (nowTime.isAfter(windowClose)) {
-                    throw new IllegalArgumentException("Đã quá giờ điểm danh. Khung giờ hợp lệ: "
-                        + windowOpen.toString().substring(0, 5) + " - " + windowClose.toString().substring(0, 5) + ".");
-                }
-                caLamService.checkInShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "Điểm danh ca làm thành công!");
-            } else if ("checkOut".equals(action)) {
-                int caLamViecId = Integer.parseInt(req.getParameter("caLamViecId"));
-                caLamService.checkOutShift(caLamViecId, user.getAccountId());
-                session.setAttribute("message", "Káº¿t thÃºc ca lÃ m thÃ nh cÃ´ng!");
+                session.setAttribute("message", accept ? "Đã đồng ý hoán đổi. Chờ quản lý phê duyệt." : "Đã từ chối hoán đổi.");
+            } else if ("confirmShift".equals(action) || "checkIn".equals(action) || "checkOut".equals(action)) {
+                // Xác nhận lịch và điểm danh thủ công là quyền của Quản lý.
+                // Nhân viên chỉ điểm danh qua nhận diện khuôn mặt (/face/checkin);
+                // khi camera hỏng, quản lý tắt bắt buộc khuôn mặt và bấm hộ nhân viên.
+                throw new IllegalArgumentException(
+                        "Thao tác này do quản lý thực hiện. Vui lòng điểm danh bằng khuôn mặt "
+                        + "hoặc liên hệ quản lý nếu camera gặp sự cố.");
             }
         } catch (IllegalArgumentException e) {
             session.setAttribute("error", e.getMessage());
         } catch (Exception e) {
             logger.error("Error processing staff ca-lam request: {}", e.getMessage(), e);
-            session.setAttribute("error", "Lá»—i xá»­ lÃ½ yÃªu cáº§u.");
+            session.setAttribute("error", "Lỗi xử lý yêu cầu.");
         }
 
         resp.sendRedirect(req.getContextPath() + "/staff/ca-lam");
@@ -218,7 +180,7 @@ public class StaffCaLamServlet extends HttpServlet {
             m.put("accountId", c.getAccountId());
             m.put("username", c.getUsername());
             m.put("fullName", c.getFullName() != null ? c.getFullName() : c.getUsername());
-            m.put("roleName", c.getRoleId() == 4 ? "Lá»… tÃ¢n" : "Báº£o vá»‡");
+            m.put("roleName", c.getRoleId() == 4 ? "Lễ tân" : "Bảo vệ");
             coworkersList.add(m);
         }
         data.put("coworkers", coworkersList);

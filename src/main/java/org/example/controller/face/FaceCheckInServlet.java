@@ -17,9 +17,11 @@ import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.dao.impl.CoSoFaceConfigDAOImpl;
 import org.example.dao.impl.FaceChallengeTokenDAOImpl;
 import org.example.dao.impl.TaiKhoanDAOImpl;
+import org.example.model.CaLamViec;
 import org.example.model.CoSoFaceConfig;
 import org.example.model.FaceChallengeToken;
 import org.example.model.TaiKhoan;
+import org.example.util.AttendanceWindow;
 import org.example.util.Constants;
 
 import java.io.BufferedReader;
@@ -102,6 +104,21 @@ public class FaceCheckInServlet extends HttpServlet {
         if (token.getCaLamViecId() != caId) {
             resp.getWriter().write("{\"success\":false,\"error\":\"Token không khớp ca làm việc\"}");
             return;
+        }
+
+        // --- Ca phải thuộc về người đang đăng nhập; vào ca phải đúng khung giờ ---
+        CaLamViec ca = caLamViecDAO.getCaById(caId);
+        if (ca == null || ca.getAccountId() != user.getAccountId() || ca.isDeleted()) {
+            resp.setStatus(403);
+            resp.getWriter().write("{\"success\":false,\"error\":\"Ca làm việc không hợp lệ\"}");
+            return;
+        }
+        if (!"checkout".equals(action)) {
+            String windowError = AttendanceWindow.validateCheckIn(ca);
+            if (windowError != null) {
+                resp.getWriter().write("{\"success\":false,\"error\":" + gson.toJson(windowError) + "}");
+                return;
+            }
         }
 
         // --- Load stored face descriptor ---

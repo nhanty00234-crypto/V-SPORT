@@ -60,32 +60,11 @@ public class GuardDiemDanhServlet extends HttpServlet {
         TaiKhoan user = getUser(req, resp);
         if (user == null) return;
 
-        // Server-side faceRequired gate — block manual POST if face attendance is mandatory
-        CoSoFaceConfig faceConfig = user.getCoSoId() != null
-            ? faceConfigDAO.findByCoSo(user.getCoSoId())
-            : new CoSoFaceConfig();
-        if (faceConfig.isFaceRequired()) {
-            resp.sendRedirect(req.getContextPath() + "/guard/diem-danh?error=face_required");
-            return;
-        }
-
-        String action = req.getParameter("action");
-        String caIdStr = req.getParameter("caLamViecId");
-        if (caIdStr == null) {
-            resp.sendRedirect(req.getContextPath() + "/guard/diem-danh?error=missing_id");
-            return;
-        }
-
-        int caId = Integer.parseInt(caIdStr);
-        boolean ok;
-        if ("checkin".equals(action)) {
-            ok = caLamViecDAO.checkInCa(caId);
-            req.getSession().setAttribute("flashSuccess", ok ? "Đã vào ca thành công!" : "Không thể vào ca lúc này.");
-        } else if ("checkout".equals(action)) {
-            ok = caLamViecDAO.checkOutCa(caId);
-            req.getSession().setAttribute("flashSuccess", ok ? "Đã kết thúc ca!" : "Không thể kết thúc ca lúc này.");
-        }
-
+        // Bảo vệ chỉ điểm danh bằng khuôn mặt (/face/checkin). Điểm danh thủ công là
+        // quyền của Quản lý — dùng khi camera hỏng hoặc nhân viên tới muộn quá hạn.
+        req.getSession().setAttribute("flashError",
+                "Điểm danh thủ công do quản lý thực hiện. Vui lòng điểm danh bằng khuôn mặt "
+                + "hoặc liên hệ quản lý nếu camera gặp sự cố.");
         resp.sendRedirect(req.getContextPath() + "/guard/diem-danh");
     }
 

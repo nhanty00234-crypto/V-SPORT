@@ -152,6 +152,18 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
                     String notes = req.getParameter("notes");
                     caLamService.rejectSwapRequest(swapId, manager.getAccountId(), notes);
                     successMsg = "Đã từ chối yêu cầu đổi ca!";
+                } else if ("confirmShift".equals(action)) {
+                    int caId = Integer.parseInt(req.getParameter("caLamViecId"));
+                    caLamService.managerConfirmShift(caId, managerCoSoId, manager.getAccountId(), req.getParameter("lyDo"));
+                    successMsg = "Đã xác nhận lịch hộ nhân viên.";
+                } else if ("manualCheckIn".equals(action)) {
+                    int caId = Integer.parseInt(req.getParameter("caLamViecId"));
+                    caLamService.managerCheckIn(caId, managerCoSoId, manager.getAccountId(), req.getParameter("lyDo"));
+                    successMsg = "Đã điểm danh vào ca hộ nhân viên.";
+                } else if ("manualCheckOut".equals(action)) {
+                    int caId = Integer.parseInt(req.getParameter("caLamViecId"));
+                    caLamService.managerCheckOut(caId, managerCoSoId, manager.getAccountId(), req.getParameter("lyDo"));
+                    successMsg = "Đã kết thúc ca hộ nhân viên.";
                 } else {
                     throw new ValidationException("Hành động không hợp lệ: " + action);
                 }

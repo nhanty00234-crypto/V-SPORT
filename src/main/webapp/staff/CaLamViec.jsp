@@ -209,8 +209,9 @@
         <span class="font-bold text-orange-800">Lưu ý</span>
         <ul class="list-disc list-inside space-y-0.5 text-orange-700/90">
           <li>Lịch làm được cấu hình bởi quản lý chi nhánh.</li>
-          <li>Vui lòng xác nhận lịch làm trước ngày làm việc.</li>
-          <li>Điểm danh vào ca trong vòng ±30 phút kể từ giờ bắt đầu ca.</li>
+          <li>Điểm danh vào ca <b>chỉ bằng khuôn mặt</b>. Xác nhận lịch do quản lý thực hiện.</li>
+          <li>Điểm danh vào ca mở <b>trước 15 phút</b> và đóng <b>60 phút</b> sau giờ bắt đầu ca.</li>
+          <li>Quá hạn điểm danh hoặc camera gặp sự cố, liên hệ quản lý để được điểm danh hộ.</li>
           <li>Để đổi ca, hãy dùng tab <strong>Yêu cầu đổi ca</strong>.</li>
           <li>Nếu có vấn đề, liên hệ quản lý trực tiếp.</li>
         </ul>
@@ -314,6 +315,14 @@
 
 </main>
 
+<!-- Cảnh báo chưa tới khung giờ điểm danh -->
+<div id="staffAlert" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[70] max-w-md w-[calc(100%-2rem)]">
+  <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 shadow-lg flex items-start gap-2.5">
+    <i class="ti ti-alert-circle text-[18px] shrink-0 mt-px"></i>
+    <span class="text-sm font-semibold leading-snug"></span>
+  </div>
+</div>
+
 <!-- Face Attendance Modal -->
 <div id="faceModal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
   <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm mx-4 flex flex-col items-center gap-4">
@@ -357,6 +366,9 @@ var _currentCaId = null;
 var _currentAction = null;
 var _myId = ${sessionScope.user.accountId};
 var _faceRequired = ${faceConfig != null ? faceConfig.faceRequired : true};
+// Khung giờ điểm danh vào ca: mở sớm 15 phút, đóng 60 phút sau giờ bắt đầu.
+var CHECKIN_OPEN_BEFORE = 15;
+var CHECKIN_CLOSE_AFTER = 60;
 
 var shifts = [], coworkers = [], swaps = [];
 
@@ -484,67 +496,79 @@ function buildShiftActionBtn(s) {
     return '';
   }
   if (s.trangThai === 'CheckedIn') {
-    var html = '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')"'
+    if (_faceRequired === false) {
+      return '<div class="mt-2 w-full text-[10px] py-1.5 px-2 bg-amber-50 text-amber-700 font-semibold rounded-lg text-center leading-snug">'
+           + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để kết thúc ca</div>';
+    }
+    return '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')"'
          + ' class="mt-2 w-full text-[11px] py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
          + '<i class="ti ti-logout text-[13px]"></i>Kết thúc ca</button>';
-    if (!_faceRequired) {
-      html += '<form method="post" action="' + _ctx + '/staff/ca-lam" style="margin-top:6px"'
-           + ' onsubmit="return confirm(\'Xác nhận kết thúc ca thủ công?\')">'
-           + '<input type="hidden" name="action" value="checkOut">'
-           + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
-           + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
-           + '</form>';
-    }
-    return html;
   }
-  if (s.trangThai === 'Published') {
-    return '<button onclick="doShiftAction(\'confirmShift\',' + s.caLamViecId + ',\'Xác nhận bạn sẽ tham gia ca làm việc này?\')"'
-         + ' class="mt-2 w-full text-[11px] py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
-         + '<i class="ti ti-check text-[13px]"></i>Xác nhận lịch</button>';
-  }
-  if (s.trangThai === 'Confirmed') {
-    if (s.ngayLam !== todayStr) {
-      return '<div class="mt-2 w-full text-[11px] py-1.5 bg-zinc-100 text-zinc-400 font-semibold rounded-lg flex items-center justify-center gap-1 cursor-not-allowed">'
-           + '<i class="ti ti-calendar-off text-[13px]"></i>Chưa đến ngày làm</div>';
+  if (s.trangThai === 'Published' || s.trangThai === 'Confirmed') {
+    // Nhân viên chỉ có một đường: điểm danh bằng khuôn mặt.
+    // Xác nhận lịch và điểm danh thủ công thuộc quyền quản lý.
+    if (_faceRequired === false) {
+      return '<div class="mt-2 w-full text-[10px] py-1.5 px-2 bg-amber-50 text-amber-700 font-semibold rounded-lg text-center leading-snug">'
+           + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh</div>';
     }
-    var startMin = parseMinutes(s.gioBatDau);
-    var now = new Date();
-    var nowMin = now.getHours() * 60 + now.getMinutes();
-    if (nowMin < startMin - 30) {
-      var oh = Math.floor((startMin - 30) / 60), om = (startMin - 30) % 60;
-      var openStr = String(oh).padStart(2, '0') + ':' + String(om).padStart(2, '0');
-      return '<div class="mt-2 w-full text-[11px] py-1.5 bg-zinc-100 text-zinc-400 font-semibold rounded-lg flex items-center justify-center gap-1 cursor-not-allowed" title="Điểm danh mở lúc ' + openStr + '">'
-           + '<i class="ti ti-clock text-[13px]"></i>Chưa đến giờ điểm danh</div>';
-    }
-    if (nowMin > startMin + 30) {
-      return '<div class="mt-2 w-full text-[11px] py-1.5 bg-red-50 text-red-400 font-semibold rounded-lg flex items-center justify-center gap-1 cursor-not-allowed">'
-           + '<i class="ti ti-clock-x text-[13px]"></i>Quá giờ điểm danh</div>';
-    }
-    var html = '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')"'
-         + ' class="mt-2 w-full text-[11px] py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
-         + '<i class="ti ti-login text-[13px]"></i>Điểm danh vào ca</button>';
-    if (!_faceRequired) {
-      html += '<form method="post" action="' + _ctx + '/staff/ca-lam" style="margin-top:6px"'
-           + ' onsubmit="return confirm(\'Xác nhận vào ca thủ công?\')">'
-           + '<input type="hidden" name="action" value="checkIn">'
-           + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
-           + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
-           + '</form>';
-    }
-    return html;
+    var ready = checkInWindow(s).ok;
+    var cls = ready
+      ? 'bg-green-600 hover:bg-green-700 text-white'
+      : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500';
+    return '<button type="button" onclick="tryCheckIn(' + s.caLamViecId + ')"'
+         + ' class="mt-2 w-full text-[11px] py-1.5 font-bold rounded-lg flex items-center justify-center gap-1 ' + cls + '">'
+         + '<i class="ti ti-face-id text-[13px]"></i>Điểm danh</button>';
   }
   return '';
 }
 
-function doShiftAction(action, id, msg) {
-  if (!confirm(msg)) return;
-  var f = document.createElement('form');
-  f.method = 'POST'; f.action = _ctx + '/staff/ca-lam';
-  f.innerHTML = '<input name="action" value="' + action + '" type="hidden">'
-              + '<input name="caLamViecId" value="' + id + '" type="hidden">';
-  document.body.appendChild(f);
-  f.submit();
+/**
+ * Ca có đang trong khung giờ điểm danh không.
+ * Mở trước giờ bắt đầu CHECKIN_OPEN_BEFORE phút, đóng sau CHECKIN_CLOSE_AFTER phút.
+ */
+function checkInWindow(s) {
+  if (s.ngayLam !== todayStr) {
+    var d = s.ngayLam.split('-');
+    return { ok: false, reason: 'Chưa đến ngày làm việc của bạn — ca này vào ngày ' + d[2] + '/' + d[1] + '/' + d[0] + '.' };
+  }
+  var startMin = parseMinutes(s.gioBatDau);
+  var now = new Date();
+  var nowMin = now.getHours() * 60 + now.getMinutes();
+
+  if (nowMin < startMin - CHECKIN_OPEN_BEFORE) {
+    return { ok: false, reason: 'Chưa đến giờ điểm danh — mở lúc ' + fmtMin(startMin - CHECKIN_OPEN_BEFORE)
+             + ' (trước giờ vào ca ' + CHECKIN_OPEN_BEFORE + ' phút).' };
+  }
+  if (nowMin > startMin + CHECKIN_CLOSE_AFTER) {
+    return { ok: false, reason: 'Đã quá giờ điểm danh — hạn cuối là ' + fmtMin(startMin + CHECKIN_CLOSE_AFTER)
+             + '. Liên hệ quản lý để được điểm danh thủ công.' };
+  }
+  return { ok: true };
 }
+
+function fmtMin(total) {
+  var t = ((total % 1440) + 1440) % 1440;
+  return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+}
+
+/** Bấm "Điểm danh" trên thẻ ca: kiểm tra khung giờ trước khi mở camera. */
+function tryCheckIn(caId) {
+  var s = shifts.find(function (x) { return x.caLamViecId === caId; });
+  if (!s) return;
+  var w = checkInWindow(s);
+  if (!w.ok) { showStaffAlert(w.reason); return; }
+  openFaceModal('checkin', caId);
+}
+
+/** Thông báo đỏ nổi góc trên, tự ẩn sau 4s. */
+function showStaffAlert(msg) {
+  var box = document.getElementById('staffAlert');
+  box.querySelector('span').textContent = msg;
+  box.classList.remove('hidden');
+  clearTimeout(box._t);
+  box._t = setTimeout(function () { box.classList.add('hidden'); }, 4000);
+}
+
 
 // ── Today card ──
 function renderTodayCard() {
@@ -581,41 +605,22 @@ function renderTodayCard() {
 
   var btns = document.getElementById('todayActionBtns');
   btns.innerHTML = '';
-  if (s.trangThai === 'Published') {
-    btns.innerHTML = '<button onclick="doShiftAction(\'confirmShift\',' + s.caLamViecId + ',\'Xác nhận ca hôm nay?\')" class="px-4 py-2 bg-white text-orange-700 rounded-lg text-xs font-bold hover:bg-orange-50 transition-all">Xác nhận lịch</button>';
-  } else if (s.trangThai === 'Confirmed') {
-    var startMin = parseMinutes(s.gioBatDau);
-    var now = new Date();
-    var nowMin = now.getHours() * 60 + now.getMinutes();
-    if (nowMin < startMin - 30) {
-      var oh = Math.floor((startMin - 30) / 60), om = (startMin - 30) % 60;
-      var openStr = String(oh).padStart(2, '0') + ':' + String(om).padStart(2, '0');
-      btns.innerHTML = '<div class="px-4 py-2 bg-white/30 text-white/60 rounded-lg text-xs font-bold cursor-not-allowed" title="Điểm danh mở lúc ' + openStr + '">Chưa đến giờ điểm danh</div>';
-    } else if (nowMin > startMin + 30) {
-      btns.innerHTML = '<div class="px-4 py-2 bg-white/30 text-white/60 rounded-lg text-xs font-bold cursor-not-allowed">Quá giờ điểm danh</div>';
+  if (s.trangThai === 'Published' || s.trangThai === 'Confirmed') {
+    if (_faceRequired === false) {
+      btns.innerHTML = '<div class="px-4 py-2 bg-white/20 text-white/90 rounded-lg text-xs font-semibold">'
+                     + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh</div>';
     } else {
-      var html = '<button type="button" onclick="openFaceModal(\'checkin\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-green-700 rounded-lg text-xs font-bold hover:bg-green-50 transition-all">Điểm danh vào ca</button>';
-      if (!_faceRequired) {
-        html += ' <form method="post" action="' + _ctx + '/staff/ca-lam" style="display:inline-block;margin-left:8px"'
-             + ' onsubmit="return confirm(\'Xác nhận vào ca thủ công?\')">'
-             + '<input type="hidden" name="action" value="checkIn">'
-             + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
-             + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
-             + '</form>';
-      }
-      btns.innerHTML = html;
+      var ready = checkInWindow(s).ok;
+      btns.innerHTML = '<button type="button" onclick="tryCheckIn(' + s.caLamViecId + ')"'
+             + ' class="px-4 py-2 rounded-lg text-xs font-bold transition-all '
+             + (ready ? 'bg-white text-green-700 hover:bg-green-50' : 'bg-white/30 text-white/70 hover:bg-white/40')
+             + '">Điểm danh</button>';
     }
   } else if (s.trangThai === 'CheckedIn') {
-    var html = '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
-    if (!_faceRequired) {
-      html += ' <form method="post" action="' + _ctx + '/staff/ca-lam" style="display:inline-block;margin-left:8px"'
-           + ' onsubmit="return confirm(\'Xác nhận kết thúc ca thủ công?\')">'
-           + '<input type="hidden" name="action" value="checkOut">'
-           + '<input type="hidden" name="caLamViecId" value="' + s.caLamViecId + '">'
-           + '<button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>'
-           + '</form>';
-    }
-    btns.innerHTML = html;
+    btns.innerHTML = (_faceRequired === false)
+      ? '<div class="px-4 py-2 bg-white/20 text-white/90 rounded-lg text-xs font-semibold">'
+        + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để kết thúc ca</div>'
+      : '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
   }
 }
 
@@ -766,19 +771,21 @@ function openTodayFaceModal() {
     return s.ngayLam === todayStr && s.trangThai !== 'Cancelled';
   });
   if (todayShifts.length === 0) {
-    alert('Hôm nay bạn không có ca làm việc nào được phân công.');
+    showStaffAlert('Hôm nay bạn không có ca làm việc nào được phân công.');
     return;
   }
   todayShifts.sort(function(a, b) { return (a.gioBatDau || '').localeCompare(b.gioBatDau || ''); });
 
-  // Ưu tiên ca đang mở: chưa vào ca -> checkin; đã vào chưa ra -> checkout
-  var pending = todayShifts.find(function(s) { return !s.gioVaoThuc; });
-  if (pending) { openFaceModal('checkin', pending.caLamViecId); return; }
-
+  // Đang trong ca -> kết thúc ca (không giới hạn khung giờ)
   var inShift = todayShifts.find(function(s) { return s.gioVaoThuc && !s.gioRaThuc; });
   if (inShift) { openFaceModal('checkout', inShift.caLamViecId); return; }
 
-  alert('Bạn đã hoàn thành tất cả ca hôm nay.');
+  var pending = todayShifts.find(function(s) { return !s.gioVaoThuc; });
+  if (!pending) { showStaffAlert('Bạn đã hoàn thành tất cả ca hôm nay.'); return; }
+
+  var w = checkInWindow(pending);
+  if (!w.ok) { showStaffAlert(w.reason); return; }
+  openFaceModal('checkin', pending.caLamViecId);
 }
 
 function closeFaceModal() {

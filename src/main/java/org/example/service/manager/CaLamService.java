@@ -836,6 +836,71 @@ public class CaLamService {
         auditDAO.insert(audit);
     }
 
+    // ==================== QUẢN LÝ THAO TÁC HỘ NHÂN VIÊN ====================
+    // Nhân viên chỉ điểm danh bằng khuôn mặt. Ba hàm dưới là đường thoát cho các
+    // tình huống ngoài luồng: nhân viên tới muộn quá hạn, hoặc camera hỏng.
+
+    /** Quản lý xác nhận lịch hộ nhân viên. */
+    public void managerConfirmShift(int caLamViecId, int managerCoSoId, int managerAccountId, String lyDo) {
+        CaLamViec ca = loadShiftInBranch(caLamViecId, managerCoSoId);
+        if (!"Published".equals(ca.getTrangThai())) {
+            throw new IllegalArgumentException("Chỉ có thể xác nhận ca đã được công bố.");
+        }
+        applyShiftState(ca, "Confirmed", "CONFIRM", managerAccountId,
+                lyDo != null && !lyDo.isBlank() ? lyDo : "Quản lý xác nhận lịch hộ nhân viên");
+    }
+
+    /** Quản lý điểm danh vào ca hộ nhân viên (không ràng buộc khung giờ). */
+    public void managerCheckIn(int caLamViecId, int managerCoSoId, int managerAccountId, String lyDo) {
+        CaLamViec ca = loadShiftInBranch(caLamViecId, managerCoSoId);
+        if (!"Published".equals(ca.getTrangThai()) && !"Confirmed".equals(ca.getTrangThai())) {
+            throw new IllegalArgumentException("Ca này không ở trạng thái có thể điểm danh vào ca.");
+        }
+        applyShiftState(ca, "CheckedIn", "CHECK_IN", managerAccountId,
+                lyDo != null && !lyDo.isBlank() ? lyDo : "Quản lý điểm danh hộ nhân viên");
+    }
+
+    /** Quản lý kết thúc ca hộ nhân viên. */
+    public void managerCheckOut(int caLamViecId, int managerCoSoId, int managerAccountId, String lyDo) {
+        CaLamViec ca = loadShiftInBranch(caLamViecId, managerCoSoId);
+        if (!"CheckedIn".equals(ca.getTrangThai())) {
+            throw new IllegalArgumentException("Chỉ kết thúc được ca đang trong trạng thái đã vào ca.");
+        }
+        applyShiftState(ca, "CheckedOut", "CHECK_OUT", managerAccountId,
+                lyDo != null && !lyDo.isBlank() ? lyDo : "Quản lý kết thúc ca hộ nhân viên");
+    }
+
+    /** Ca phải tồn tại, chưa xóa và thuộc đúng cơ sở của quản lý. */
+    private CaLamViec loadShiftInBranch(int caLamViecId, int managerCoSoId) {
+        CaLamViec ca = caLamViecDAO.getCaById(caLamViecId);
+        if (ca == null || ca.isDeleted()) {
+            throw new IllegalArgumentException("Ca làm việc không tồn tại.");
+        }
+        if (ca.getCoSoId() != managerCoSoId) {
+            throw new IllegalArgumentException("Ca làm việc không thuộc cơ sở của bạn.");
+        }
+        if ("Cancelled".equals(ca.getTrangThai())) {
+            throw new IllegalArgumentException("Ca làm việc đã bị hủy.");
+        }
+        return ca;
+    }
+
+    private void applyShiftState(CaLamViec ca, String newState, String thaoTac, int managerAccountId, String lyDo) {
+        String oldState = ca.getTrangThai();
+        ca.setTrangThai(newState);
+        if (!caLamViecDAO.updateCaLamViec(ca)) {
+            throw new IllegalArgumentException("Cập nhật ca làm việc thất bại.");
+        }
+        CaLamViecAudit audit = new CaLamViecAudit();
+        audit.setCaLamViecId(ca.getCaLamViecId());
+        audit.setThaoTac(thaoTac);
+        audit.setNguoiThucHien(managerAccountId);
+        audit.setGiaTriCu(oldState);
+        audit.setGiaTriMoi(newState);
+        audit.setLyDo(lyDo);
+        auditDAO.insert(audit);
+    }
+
     // ==================== ADVANCED WORKFLOWS ====================
 
     private final org.example.dao.ThongBaoDAO thongBaoDAO = new org.example.dao.impl.ThongBaoDAOImpl();

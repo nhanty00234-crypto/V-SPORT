@@ -1548,6 +1548,42 @@ function formatShiftDate(ngayLam) {
 }
 
 // ===== CANCEL SHIFT =====
+/**
+ * Quản lý thao tác hộ nhân viên trên một ca (xác nhận lịch / điểm danh / kết thúc ca).
+ * Bắt buộc nhập lý do vì đây là đường vòng ngoài luồng điểm danh khuôn mặt — cần
+ * lưu vết để đối chiếu khi rà soát chấm công.
+ */
+async function managerShiftAction(action, id) {
+  closeAllShiftMenus();
+  const LABEL = {
+    confirmShift:   'Xác nhận lịch hộ nhân viên',
+    manualCheckIn:  'Điểm danh vào ca hộ nhân viên',
+    manualCheckOut: 'Kết thúc ca hộ nhân viên'
+  };
+  const s = shiftList.find(x => x.caLamViecId === id);
+  const staff = s ? staffList.find(st => st.id === s.accountId) : null;
+  const who = staff ? staff.fullName : 'nhân viên này';
+
+  const lyDo = prompt(LABEL[action] + ' — ' + who + '\n\nNhập lý do (bắt buộc):\nVD: camera hỏng, nhân viên tới muộn quá hạn...');
+  if (lyDo === null) return;
+  if (!lyDo.trim()) { showToast('error', 'Vui lòng nhập lý do.'); return; }
+
+  const params = new URLSearchParams({ action: action, format: 'json', caLamViecId: id, lyDo: lyDo.trim() });
+  try {
+    const res = await fetch(`\${_ctxPath}/manager/ca-lam`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(r => r.json());
+    if (res.success) {
+      showToast('success', res.message || 'Thao tác thành công.');
+      await loadScheduleData();
+    } else {
+      showToast('error', res.error || 'Thao tác thất bại.');
+    }
+  } catch (e) { showToast('error', 'Lỗi kết nối. Vui lòng thử lại.'); }
+}
+
 function cancelShift(id) {
   closeAllShiftMenus();
   const s = shiftList.find(x => x.caLamViecId === id);
@@ -2001,6 +2037,17 @@ function renderCalendar() {
           menuItems += `<button onclick="editShift(\${s.caLamViecId})" class="flex items-center gap-2 w-full px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"><span class="material-symbols-outlined text-[14px]">edit</span>Sửa ca</button>`;
           menuItems += `<button onclick="editShift(\${s.caLamViecId},true)" class="flex items-center gap-2 w-full px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"><span class="material-symbols-outlined text-[14px]">swap_horiz</span>Đổi nhân viên</button>`;
           menuItems += `<button onclick="cancelShift(\${s.caLamViecId})" class="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors border-t border-zinc-100 mt-1 pt-2"><span class="material-symbols-outlined text-[14px]">event_busy</span>\${isShiftStartingWithin2Hours(s.ngayLam, s.gioBatDau) ? 'Hủy khẩn cấp' : 'Hủy ca'}</button>`;
+        }
+
+        // Thao tác hộ nhân viên: dùng khi nhân viên tới muộn quá hạn hoặc camera hỏng
+        if (s.trangThai === 'Published') {
+          menuItems += `<button onclick="managerShiftAction('confirmShift',\${s.caLamViecId})" class="flex items-center gap-2 w-full px-3 py-2 text-xs text-violet-700 hover:bg-violet-50 rounded-lg transition-colors border-t border-zinc-100 mt-1 pt-2"><span class="material-symbols-outlined text-[14px]">task_alt</span>Xác nhận lịch hộ</button>`;
+        }
+        if (s.trangThai === 'Published' || s.trangThai === 'Confirmed') {
+          menuItems += `<button onclick="managerShiftAction('manualCheckIn',\${s.caLamViecId})" class="flex items-center gap-2 w-full px-3 py-2 text-xs text-green-700 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined text-[14px]">how_to_reg</span>Điểm danh hộ (thủ công)</button>`;
+        }
+        if (isCheckedIn) {
+          menuItems += `<button onclick="managerShiftAction('manualCheckOut',\${s.caLamViecId})" class="flex items-center gap-2 w-full px-3 py-2 text-xs text-orange-700 hover:bg-orange-50 rounded-lg transition-colors border-t border-zinc-100 mt-1 pt-2"><span class="material-symbols-outlined text-[14px]">logout</span>Kết thúc ca hộ</button>`;
         }
 
         const dualBadge = `<div class="flex items-center gap-1 flex-wrap">

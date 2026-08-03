@@ -67,18 +67,11 @@
                     <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">face</span>
                     ĐIỂM DANH KHUÔN MẶT
                   </button>
-                  <%-- Fallback thủ công nếu faceRequired=false --%>
+                  <%-- Camera hỏng: quản lý tắt bắt buộc khuôn mặt rồi điểm danh hộ --%>
                   <c:if test="${!faceConfig.faceRequired}">
-                    <form method="post" action="${pageContext.request.contextPath}/guard/diem-danh"
-                          onsubmit="return confirm('Xác nhận VÀO CA thủ công lúc ' + new Date().toLocaleTimeString('vi-VN') + '?')">
-                      <input type="hidden" name="action" value="checkin">
-                      <input type="hidden" name="caLamViecId" value="${caHomNay.caLamViecId}">
-                      <button type="submit"
-                              class="inline-flex items-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-sm px-4 py-3 rounded-xl transition">
-                        <span class="material-symbols-outlined text-[16px]">login</span>
-                        Thủ công
-                      </button>
-                    </form>
+                    <p class="self-center text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 font-semibold max-w-[220px]">
+                      Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh
+                    </p>
                   </c:if>
                 </c:when>
                 <%-- Đã vào ca, chưa ra --%>
@@ -99,12 +92,9 @@
                       KẾT THÚC CA
                     </button>
                     <c:if test="${!faceConfig.faceRequired}">
-                      <form method="post" action="${pageContext.request.contextPath}/guard/diem-danh" class="inline ml-2"
-                            onsubmit="return confirm('Kết thúc ca thủ công?')">
-                        <input type="hidden" name="action" value="checkout">
-                        <input type="hidden" name="caLamViecId" value="${caHomNay.caLamViecId}">
-                        <button type="submit" class="text-xs text-zinc-400 hover:text-zinc-600 underline">Thủ công</button>
-                      </form>
+                      <p class="text-xs text-amber-600 mt-2">
+                        Điểm danh khuôn mặt đang tắt — liên hệ quản lý để kết thúc ca
+                      </p>
                     </c:if>
                   </div>
                 </c:when>
