@@ -79,12 +79,16 @@ window.Attendance = (function () {
   function el(id) { return document.getElementById(id); }
 
   function resetGauge() {
-    var m = el('faceMatch');
-    if (m) { m.textContent = '--%'; m.className = 'text-zinc-300 font-black text-lg'; }
-    if (el('faceMatchBar')) el('faceMatchBar').style.width = '0%';
-    if (el('faceMatchHint')) el('faceMatchHint').textContent = 'Đưa khuôn mặt vào giữa khung hình';
     if (el('faceProgress')) el('faceProgress').style.width = '0%';
+    if (el('faceRetryBtn')) el('faceRetryBtn').classList.add('hidden');
   }
+
+  function showRetry() {
+    if (el('faceRetryBtn')) el('faceRetryBtn').classList.remove('hidden');
+  }
+
+  var _lastAction = null;
+  var _lastCaId = null;
 
   function openModal(action, caId) {
     var modal = el('faceModal');
@@ -107,13 +111,12 @@ window.Attendance = (function () {
     var statusEl = el('faceStatus');
     var progressEl = el('faceProgress');
     resetGauge();
+    _lastAction = action;
+    _lastCaId = caId;
 
     var ready = await FaceAttendance.init({
       videoEl: el('faceVideo'),
       statusEl: statusEl,
-      matchEl: el('faceMatch'),
-      matchBarEl: el('faceMatchBar'),
-      matchHintEl: el('faceMatchHint'),
       contextPath: _cfg.contextPath,
       caLamViecId: caId,
       action: action,
@@ -126,11 +129,21 @@ window.Attendance = (function () {
       onError: function (msg) {
         statusEl.textContent = '✗ ' + (msg || 'Lỗi nhận diện');
         statusEl.className = 'text-red-600 font-bold text-sm text-center';
+        showRetry();
+      },
+      onTimeout: function () {
+        showRetry();
       }
     });
 
     if (ready === false) return;   // chưa đăng ký khuôn mặt — không mở camera
     await FaceAttendance.start();
+  }
+
+  /** Chạy lại phiên điểm danh hiện tại sau khi hết giờ hoặc lỗi. */
+  function retry() {
+    if (_lastAction === null || _lastCaId === null) return;
+    start(_lastAction, _lastCaId);
   }
 
   /** Bấm "Điểm danh" trên một ca: kiểm tra khung giờ rồi mới mở camera. */
@@ -152,6 +165,7 @@ window.Attendance = (function () {
     initModal: initModal,
     openModal: openModal,
     closeModal: closeModal,
-    tryCheckIn: tryCheckIn
+    tryCheckIn: tryCheckIn,
+    retry: retry
   };
 })();

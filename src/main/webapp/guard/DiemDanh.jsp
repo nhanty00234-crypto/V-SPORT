@@ -165,17 +165,6 @@
       <video id="faceVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay muted playsinline></video>
     </div>
 
-    <div class="w-full">
-      <div class="flex items-baseline justify-between mb-1.5">
-        <span class="text-xs font-semibold text-zinc-500">Độ khớp khuôn mặt</span>
-        <span id="faceMatch" class="text-zinc-300 font-black text-lg">--%</span>
-      </div>
-      <div class="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
-        <div id="faceMatchBar" class="h-2.5 rounded-full transition-all duration-200" style="width:0%;background:#f59e0b"></div>
-      </div>
-      <p id="faceMatchHint" class="text-[11px] text-zinc-400 mt-1">Đưa khuôn mặt vào giữa khung hình</p>
-    </div>
-
     <p id="faceStatus" class="text-zinc-600 text-sm text-center font-medium min-h-[2.5rem]">
       Đang khởi động camera...
     </p>
@@ -183,6 +172,11 @@
     <div class="w-full bg-zinc-100 rounded-full h-2">
       <div id="faceProgress" class="bg-rose-500 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
     </div>
+
+    <button type="button" id="faceRetryBtn" onclick="Attendance.retry()"
+            class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-sm transition hidden">
+      Thử lại
+    </button>
 
     <button onclick="Attendance.closeModal()"
             class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-xl text-sm transition">
