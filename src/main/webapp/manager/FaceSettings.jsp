@@ -418,29 +418,36 @@
 
         <div>
           <p class="text-sm font-bold text-violet-950 mb-1">Ngưỡng nhận diện</p>
-          <p class="text-xs text-zinc-400 mb-3">Khoảng cách Euclidean tối đa giữa khuôn mặt quét và ảnh đã đăng ký — số càng nhỏ càng nghiêm ngặt.</p>
-          <div class="fs-seg">
-            <label>
-              <input type="radio" name="confidenceMin" value="0.4" ${faceConfig.confidenceMin <= 0.45 ? 'checked' : ''}>
-              <span class="opt"><span class="val">0.4</span><span class="lbl">Rất nghiêm ngặt</span></span>
-            </label>
-            <label>
-              <input type="radio" name="confidenceMin" value="0.5" ${faceConfig.confidenceMin > 0.45 and faceConfig.confidenceMin <= 0.55 ? 'checked' : ''}>
-              <span class="opt"><span class="val">0.5</span><span class="lbl">Nghiêm ngặt</span></span>
-            </label>
-            <label>
-              <input type="radio" name="confidenceMin" value="0.6" ${faceConfig.confidenceMin > 0.55 and faceConfig.confidenceMin <= 0.65 ? 'checked' : ''}>
-              <span class="opt"><span class="val">0.6</span><span class="lbl">Khuyến nghị</span></span>
-            </label>
-            <label>
-              <input type="radio" name="confidenceMin" value="0.7" ${faceConfig.confidenceMin > 0.65 ? 'checked' : ''}>
-              <span class="opt"><span class="val">0.7</span><span class="lbl">Thoải mái</span></span>
-            </label>
+          <p class="text-xs text-zinc-400 mb-3">Khoảng cách Euclidean tối đa giữa khuôn mặt quét và mẫu đã đăng ký — số càng nhỏ càng nghiêm ngặt.</p>
+
+          <div class="flex items-center gap-3">
+            <span class="text-[11px] font-semibold text-zinc-400 shrink-0">Chặt</span>
+            <input type="range" id="fsThresholdRange" name="confidenceMin"
+                   min="0.35" max="0.75" step="0.01" value="${faceConfig.confidenceMin}"
+                   class="flex-1 accent-violet-600">
+            <span class="text-[11px] font-semibold text-zinc-400 shrink-0">Dễ</span>
+            <span id="fsThresholdValue" class="w-12 text-right text-sm font-black text-violet-700 shrink-0">0.60</span>
           </div>
-          <p class="text-xs text-zinc-400 mt-2.5 flex items-start gap-1.5">
-            <span class="material-symbols-outlined text-[15px] text-violet-400 mt-px">lightbulb</span>
-            Nên để <b class="text-violet-600">0.6</b> — phù hợp hầu hết điều kiện ánh sáng. Hạ xuống 0.4–0.5 nếu cần bảo mật cao hơn.
-          </p>
+          <p id="fsThresholdLabel" class="text-xs text-zinc-500 mt-2 font-semibold">Cân bằng</p>
+
+          <div class="mt-4 p-3 bg-violet-50/60 border border-violet-100 rounded-xl">
+            <p class="text-xs font-bold text-violet-950 mb-2">Xem trước bằng camera</p>
+            <div class="flex gap-3">
+              <div class="relative w-32 h-32 bg-zinc-900 rounded-lg overflow-hidden shrink-0">
+                <video id="fsPvVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay muted playsinline></video>
+              </div>
+              <div class="flex-1 min-w-0">
+                <select id="fsPvStaff" class="w-full text-xs border border-violet-100 rounded-lg px-2 py-1.5 mb-2">
+                  <option value="">— Chọn nhân viên đã đăng ký —</option>
+                </select>
+                <button type="button" id="fsPvBtn" onclick="fsPvToggle()"
+                        class="text-xs bg-violet-600 hover:bg-violet-700 text-white font-semibold px-3 py-1.5 rounded-lg transition">
+                  Bật camera
+                </button>
+                <p id="fsPvResult" class="text-xs mt-2 font-semibold text-zinc-400">Chưa chạy</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <button type="submit"
@@ -547,10 +554,15 @@
   /* ═══════════ Đăng ký khuôn mặt (manager chụp hộ nhân viên) ═══════════ */
   var FS_CTX = '${pageContext.request.contextPath}';
   var FS_MODEL_URL = FS_CTX + '/assets/face-models';
-  var FS_MAX_DISTANCE = 0.8;
-  var FS_THRESHOLD = ${faceConfig.confidenceMin};
-  // Ngưỡng Euclidean của cơ sở quy đổi sang % — dùng chung thang đo với màn điểm danh
-  var FS_REQUIRED = Math.round(Math.max(0, Math.min(100, (1 - FS_THRESHOLD / FS_MAX_DISTANCE) * 100)));
+
+  /* Nhân sự đã đăng ký khuôn mặt, để xem trước ngưỡng.
+     `daDangKy` là request attribute do FaceSettingsServlet đặt (dòng 63),
+     cũng chính là list đang render bảng ở tab "Nhân sự" (dòng 170). */
+  var FS_ENROLLED = [
+    <c:forEach var="nv" items="${daDangKy}" varStatus="st">
+      { id: ${nv.accountId}, name: '<c:out value="${nv.fullName}"/>' }<c:if test="${!st.last}">,</c:if>
+    </c:forEach>
+  ];
 
   var FS_RECOMMENDED_SAMPLES = 3;
   var FS_MIN_DETECT_SCORE = 0.7;   // điểm tin cậy tối thiểu của bộ phát hiện để chụp
@@ -740,6 +752,123 @@
       document.getElementById('fsBtnSave').disabled = false;
     }
   }
+
+  /* ═══════════ Thanh kéo ngưỡng + xem trước ═══════════ */
+  var _pvStream = null;
+  var _pvLoopId = null;
+  var _pvSamples = [];   // mẫu của nhân viên đang chọn
+
+  function fsThresholdLabel(v) {
+    if (v <= 0.45) return 'Chặt — ít chấp nhận sai, nhân viên có thể phải quét lại';
+    if (v <= 0.62) return 'Cân bằng — khuyến nghị cho hầu hết điều kiện ánh sáng';
+    return 'Dễ — nhận nhanh hơn nhưng rủi ro nhận nhầm cao hơn';
+  }
+
+  function fsOnThresholdChange() {
+    var v = parseFloat(document.getElementById('fsThresholdRange').value);
+    document.getElementById('fsThresholdValue').textContent = v.toFixed(2);
+    document.getElementById('fsThresholdLabel').textContent = fsThresholdLabel(v);
+  }
+
+  document.getElementById('fsThresholdRange').addEventListener('input', fsOnThresholdChange);
+  fsOnThresholdChange();
+
+  (function fsFillPvStaff() {
+    var sel = document.getElementById('fsPvStaff');
+    FS_ENROLLED.forEach(function (nv) {
+      var o = document.createElement('option');
+      o.value = nv.id;
+      o.textContent = nv.name;
+      sel.appendChild(o);
+    });
+  })();
+
+  async function fsPvToggle() {
+    if (_pvStream) { fsPvStop(); return; }
+
+    var accountId = document.getElementById('fsPvStaff').value;
+    if (!accountId) {
+      document.getElementById('fsPvResult').textContent = 'Hãy chọn một nhân viên trước';
+      document.getElementById('fsPvResult').className = 'text-xs mt-2 font-semibold text-amber-600';
+      return;
+    }
+
+    // Mẫu đã đăng ký của nhân viên này
+    var res = await fetch(FS_CTX + '/face/enroll?targetAccountId=' + accountId);
+    var data = await res.json();
+    if (!data.enrolled) {
+      document.getElementById('fsPvResult').textContent = 'Nhân viên này chưa đăng ký khuôn mặt';
+      document.getElementById('fsPvResult').className = 'text-xs mt-2 font-semibold text-amber-600';
+      return;
+    }
+
+    if (!_fsModelsLoaded) {
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(FS_MODEL_URL),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(FS_MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(FS_MODEL_URL)
+      ]);
+      _fsModelsLoaded = true;
+    }
+
+    // Các mẫu đã đăng ký, lấy thẳng từ endpoint enroll (Task 3 trả khoá `descriptors`)
+    _pvSamples = data.descriptors || [];
+    if (!_pvSamples.length) {
+      document.getElementById('fsPvResult').textContent = 'Không đọc được mẫu của nhân viên này';
+      document.getElementById('fsPvResult').className = 'text-xs mt-2 font-semibold text-red-600';
+      return;
+    }
+
+    var video = document.getElementById('fsPvVideo');
+    _pvStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 320, facingMode: 'user' } });
+    video.srcObject = _pvStream;
+    await new Promise(function (r) { video.onloadedmetadata = r; });
+    await video.play();
+
+    document.getElementById('fsPvBtn').textContent = 'Tắt camera';
+    _pvLoopId = setInterval(fsPvLoop, 200);
+  }
+
+  function fsPvStop() {
+    if (_pvLoopId) { clearInterval(_pvLoopId); _pvLoopId = null; }
+    if (_pvStream) { _pvStream.getTracks().forEach(function (t) { t.stop(); }); _pvStream = null; }
+    document.getElementById('fsPvBtn').textContent = 'Bật camera';
+    document.getElementById('fsPvResult').textContent = 'Chưa chạy';
+    document.getElementById('fsPvResult').className = 'text-xs mt-2 font-semibold text-zinc-400';
+  }
+
+  async function fsPvLoop() {
+    var video = document.getElementById('fsPvVideo');
+    var det = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+      .withFaceLandmarks(true)
+      .withFaceDescriptor();
+
+    var out = document.getElementById('fsPvResult');
+    if (!det) {
+      out.textContent = 'Không thấy khuôn mặt';
+      out.className = 'text-xs mt-2 font-semibold text-zinc-400';
+      return;
+    }
+
+    var incoming = Array.from(det.descriptor);
+    var best = Infinity;
+    _pvSamples.forEach(function (s) {
+      var d = fsEuclidean(s, incoming);
+      if (d < best) best = d;
+    });
+
+    var threshold = parseFloat(document.getElementById('fsThresholdRange').value);
+    var ok = best <= threshold;
+    out.textContent = (ok ? '✓ ĐẠT' : '✗ KHÔNG ĐẠT') + ' — khoảng cách ' + best.toFixed(2)
+                    + ' / ngưỡng ' + threshold.toFixed(2);
+    out.className = 'text-xs mt-2 font-semibold ' + (ok ? 'text-green-600' : 'text-amber-600');
+  }
+
+  // Tắt camera xem trước khi rời tab để không giữ webcam
+  document.querySelectorAll('.fs-tab').forEach(function (t) {
+    t.addEventListener('click', function () { if (_pvStream) fsPvStop(); });
+  });
 </script>
 
 </body>

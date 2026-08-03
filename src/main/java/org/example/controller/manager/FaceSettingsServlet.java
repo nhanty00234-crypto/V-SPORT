@@ -81,7 +81,7 @@ public class FaceSettingsServlet extends HttpServlet {
         boolean faceRequired = "on".equals(req.getParameter("faceRequired")) || "true".equals(req.getParameter("faceRequired"));
         double confidenceMin = 0.6;
         try { confidenceMin = Double.parseDouble(req.getParameter("confidenceMin")); } catch (Exception ignored) {}
-        confidenceMin = Math.max(0.4, Math.min(0.9, confidenceMin));
+        confidenceMin = Math.max(0.35, Math.min(0.75, confidenceMin));
 
         CoSoFaceConfig config = new CoSoFaceConfig();
         config.setCoSoId(manager.getCoSoId());
