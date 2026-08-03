@@ -1256,9 +1256,10 @@ var DRAWER_DATA = {};
     body.set('apiKey', document.getElementById('payosApiKey').value);
     body.set('checksumKey', document.getElementById('payosChecksumKey').value);
 
+    const csrfToken = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
     fetch('${pageContext.request.contextPath}/admin/chi-nhanh/payos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfToken },
       body: body.toString()
     })
       .then(r => r.json())
@@ -1371,9 +1372,10 @@ var DRAWER_DATA = {};
     body.set('coSoId', payosCurrentCoSoId);
     body.set('otp', otp);
 
+    const csrfTokenOtp = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
     fetch('${pageContext.request.contextPath}/admin/chi-nhanh/payos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfTokenOtp },
       body: body.toString()
     })
       .then(r => r.json())
@@ -1424,9 +1426,10 @@ var DRAWER_DATA = {};
     body.set('action', 'resend-otp');
     body.set('coSoId', payosCurrentCoSoId);
 
+    const csrfTokenResend = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
     fetch('${pageContext.request.contextPath}/admin/chi-nhanh/payos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfTokenResend },
       body: body.toString()
     })
       .then(r => r.json())

@@ -40,13 +40,17 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="flex border-t border-purple-100 gap-6">
-      <button id="btnTabCourts" onclick="switchTab('courts')" class="pt-3 pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all">
-        <span class="material-symbols-outlined text-[18px]">stadium</span>Danh sách sân thi đấu
+    <!-- Navigation Tabs — Bước 1 trước, Bước 2 sau -->
+    <div class="flex border-t border-purple-100 gap-1 overflow-x-auto">
+      <button id="btnTabTypes" onclick="switchTab('types')"
+              class="pt-3 pb-3 px-1 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all whitespace-nowrap">
+        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-black shrink-0">1</span>
+        <span class="material-symbols-outlined text-[17px]">payments</span>Loại sân & Bảng giá
       </button>
-      <button id="btnTabTypes" onclick="switchTab('types')" class="pt-3 pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all">
-        <span class="material-symbols-outlined text-[18px]">payments</span>Cấu hình loại sân & Bảng giá
+      <button id="btnTabCourts" onclick="switchTab('courts')"
+              class="pt-3 pb-3 px-1 ml-4 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all whitespace-nowrap">
+        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-purple-200 text-purple-700 text-[10px] font-black shrink-0">2</span>
+        <span class="material-symbols-outlined text-[17px]">stadium</span>Danh sách sân thi đấu
       </button>
     </div>
   </section>
@@ -73,6 +77,30 @@
     </div>
   </c:if>
 
+  <!-- Setup Progress Banner — chỉ hiển thị khi thiếu dữ liệu -->
+  <div id="setupBannerNoTypes" class="hidden items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm">
+    <span class="material-symbols-outlined text-[22px] text-amber-500 mt-0.5 shrink-0" style="font-variation-settings:'FILL' 1">warning</span>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-bold text-amber-800">Bắt đầu từ Bước 1: Cấu hình loại sân</p>
+      <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">Bạn cần tạo ít nhất một loại sân (bao gồm bảng giá) trước khi thêm sân thi đấu. Đây là bước bắt buộc.</p>
+    </div>
+    <button onclick="switchTab('types')"
+            class="shrink-0 flex items-center gap-1.5 h-9 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-sm">
+      <span class="material-symbols-outlined text-[15px]">arrow_forward</span>Đi tới Bước 1
+    </button>
+  </div>
+  <div id="setupBannerNoCourts" class="hidden items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 shadow-sm">
+    <span class="material-symbols-outlined text-[22px] text-indigo-500 mt-0.5 shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-bold text-indigo-800">Bước 1 hoàn thành! Giờ hãy thêm sân thi đấu</p>
+      <p class="text-xs text-indigo-700 mt-0.5 leading-relaxed">Bạn đã có loại sân & bảng giá. Tiếp theo hãy sang Bước 2 để tạo sân đầu tiên.</p>
+    </div>
+    <button onclick="switchTab('courts'); setTimeout(openCreateModal, 80)"
+            class="shrink-0 flex items-center gap-1.5 h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm">
+      <span class="material-symbols-outlined text-[15px]">add_circle</span>Thêm sân ngay
+    </button>
+  </div>
+
   <!-- Ảnh cơ sở Gallery -->
   <section class="rounded-3xl border border-purple-150 bg-white shadow-sm shadow-purple-100/40 p-5 sm:p-6">
     <div class="flex items-center justify-between mb-4">
@@ -93,6 +121,14 @@
     </div>
     <div id="galleryError" class="hidden mt-2 text-xs text-red-600"></div>
   </section>
+
+  <!-- Lightbox xem ảnh -->
+  <div id="galleryLightbox" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm" onclick="galleryLightboxClose()">
+    <button class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" onclick="galleryLightboxClose()">
+      <span class="material-symbols-outlined text-white text-[24px]">close</span>
+    </button>
+    <img id="galleryLightboxImg" src="" alt="Xem ảnh" class="max-w-[90vw] max-h-[90vh] rounded-2xl object-contain shadow-2xl" onclick="event.stopPropagation()">
+  </div>
 
   <!-- Stats Grid -->
   <section id="statsSection" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -941,33 +977,66 @@
     document.getElementById('courtForm').submit();
   }
 
+  // Cập nhật setup banner dựa trên trạng thái dữ liệu
+  function updateSetupBanners() {
+    const bannerNoTypes = document.getElementById('setupBannerNoTypes');
+    const bannerNoCourts = document.getElementById('setupBannerNoCourts');
+    const hasTypes = mockLoaiSan.length > 0;
+    const hasCourts = mockSan.length > 0;
+
+    if (!hasTypes) {
+      bannerNoTypes.classList.remove('hidden');
+      bannerNoTypes.classList.add('flex');
+      bannerNoCourts.classList.add('hidden');
+      bannerNoCourts.classList.remove('flex');
+    } else if (hasTypes && !hasCourts) {
+      bannerNoTypes.classList.add('hidden');
+      bannerNoTypes.classList.remove('flex');
+      bannerNoCourts.classList.remove('hidden');
+      bannerNoCourts.classList.add('flex');
+    } else {
+      bannerNoTypes.classList.add('hidden');
+      bannerNoTypes.classList.remove('flex');
+      bannerNoCourts.classList.add('hidden');
+      bannerNoCourts.classList.remove('flex');
+    }
+  }
+
   // TAB SWITCHING
   function switchTab(tab) {
     currentTab = tab;
     const btnTabCourts = document.getElementById('btnTabCourts');
     const btnTabTypes = document.getElementById('btnTabTypes');
     const mainActionBtn = document.getElementById('mainActionBtn');
-    
+
     const toolbar = document.getElementById('toolbarSection');
     const stats = document.getElementById('statsSection');
     const gridContainer = document.getElementById('mainCourtGrid');
     const listContainer = document.getElementById('mainCourtList');
     const pricingView = document.getElementById('pricingTypesView');
 
+    const activeTabClass = 'pt-3 pb-3 px-1 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all whitespace-nowrap';
+    const inactiveTabClass = 'pt-3 pb-3 px-1 ml-4 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all whitespace-nowrap';
+
     if (tab === 'courts') {
-      btnTabCourts.className = 'pt-3 pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
-      btnTabTypes.className = 'pt-3 pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
-      mainActionBtn.innerHTML = `<span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span><span>Thêm sân mới</span><span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>`;
-      mainActionBtn.setAttribute('onclick', 'openCreateModal()');
-      
+      btnTabCourts.className = activeTabClass;
+      btnTabCourts.querySelector('span.rounded-full').className = 'flex items-center justify-center w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-black shrink-0';
+      btnTabTypes.className = inactiveTabClass.replace(' ml-4', '');
+      btnTabTypes.className += '';
+      btnTabTypes.querySelector('span.rounded-full').className = 'flex items-center justify-center w-5 h-5 rounded-full bg-purple-200 text-purple-700 text-[10px] font-black shrink-0';
+      mainActionBtn.innerHTML = `<span class="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span><span class="material-symbols-outlined text-[20px] drop-shadow">add_circle</span><span>Thêm sân mới</span><span class="ml-1 flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[11px] font-black">+</span>`;
+      mainActionBtn.setAttribute('onclick', 'openCreateModalGuarded()');
+
       toolbar.classList.remove('hidden');
       stats.classList.remove('hidden');
       pricingView.classList.add('hidden');
       setViewMode(viewMode);
     } else {
-      btnTabTypes.className = 'pt-3 pb-3 text-sm font-bold border-b-2 border-purple-600 text-purple-600 flex items-center gap-2 transition-all';
-      btnTabCourts.className = 'pt-3 pb-3 text-sm font-medium border-b-2 border-transparent text-purple-500 hover:text-purple-800 flex items-center gap-2 transition-all';
-      mainActionBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">playlist_add</span>Thêm loại sân`;
+      btnTabTypes.className = activeTabClass.replace(' ml-4', '');
+      btnTabTypes.querySelector('span.rounded-full').className = 'flex items-center justify-center w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-black shrink-0';
+      btnTabCourts.className = inactiveTabClass;
+      btnTabCourts.querySelector('span.rounded-full').className = 'flex items-center justify-center w-5 h-5 rounded-full bg-purple-200 text-purple-700 text-[10px] font-black shrink-0';
+      mainActionBtn.innerHTML = `<span class="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span><span class="material-symbols-outlined text-[16px]">playlist_add</span>Thêm loại sân`;
       mainActionBtn.setAttribute('onclick', 'openCreateTypeModal()');
 
       toolbar.classList.add('hidden');
@@ -1141,6 +1210,9 @@
       `;
     }).join('');
 
+    // Update setup banners whenever courts render
+    updateSetupBanners();
+
     // Update stats counters
     document.getElementById('statTotal').textContent = mockSan.length;
     document.getElementById('statReady').textContent = mockSan.filter(s => s.status === 'Sẵn sàng').length;
@@ -1206,6 +1278,16 @@
   }
 
   // COURT MODAL ACTIONS
+  // Guard: nếu chưa có loại sân, chuyển sang tab 1 thay vì mở modal rỗng
+  function openCreateModalGuarded() {
+    if (mockLoaiSan.length === 0) {
+      switchTab('types');
+      showToast('Hãy tạo loại sân & bảng giá trước (Bước 1) rồi mới thêm sân nhé!', 'info');
+      return;
+    }
+    openCreateModal();
+  }
+
   function openCreateModal() {
     document.getElementById('courtForm').reset();
     document.getElementById('existingCourtImage').value = '';
@@ -1484,7 +1566,14 @@
     initCurrencyFormatter('priceConfigPriceNoLight');
     initCurrencyFormatter('priceConfigPriceWithLight');
     populateSportDropdowns();
-    switchTab('courts'); // sets default view and triggers rendering
+    updateSetupBanners();
+    // Mặc định vào Tab Loại sân (Bước 1) nếu chưa có loại sân nào
+    // Mặc định vào Tab Danh sách sân (Bước 2) nếu đã có loại sân (người dùng thường xuyên)
+    if (mockLoaiSan.length === 0) {
+      switchTab('types');
+    } else {
+      switchTab('courts');
+    }
   });
 
   // Reload page when navigated back/forward via bfcache
@@ -1497,6 +1586,14 @@
   // ── Gallery ảnh cơ sở ──────────────────────────────────────────────
   const GALLERY_API = contextPath + '/manager/co-so-gallery';
 
+  function galleryGetSrc(url) {
+    // Normalize legacy /media/courts/ URLs (old upload path) to /uploads/courts/ (static path)
+    if (url.startsWith('/media/courts/')) {
+      url = '/uploads/courts/' + url.substring('/media/courts/'.length);
+    }
+    return url.startsWith('/') ? contextPath + url : url;
+  }
+
   function galleryRender(images) {
     const grid = document.getElementById('galleryGrid');
     const empty = document.getElementById('galleryEmpty');
@@ -1504,30 +1601,58 @@
     count.textContent = '(' + images.length + '/10)';
     grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
     empty.style.display = images.length ? 'none' : '';
-    images.forEach(url => {
+    images.forEach(function(url) {
+      const src = galleryGetSrc(url);
+      // Escape single quotes for safe use in onclick attribute
+      const safeUrl = url.replace(/'/g, '&#39;');
+      const safeSrc = src.replace(/'/g, '&#39;');
       const item = document.createElement('div');
-      item.className = 'gallery-item relative w-24 h-24 rounded-xl overflow-hidden border border-purple-100 group';
-      const src = url.startsWith('/') ? contextPath + url : url;
-      item.innerHTML = `<img src="${src}" class="w-full h-full object-cover" onerror="this.src=''">
-        <button type="button" onclick="galleryDelete('${url}')"
-          class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span class="material-symbols-outlined text-white text-[22px]">delete</span>
-        </button>`;
+      item.className = 'gallery-item relative w-24 h-24 rounded-xl overflow-hidden border border-purple-100 group cursor-pointer';
+      // Use string concatenation to avoid JSP EL interference with JS template literals.
+      item.innerHTML =
+        '<img src="' + src + '" class="w-full h-full object-cover" onerror="this.onerror=null;this.classList.add(\'opacity-30\')">' +
+        '<div class="absolute inset-0 flex items-end justify-center pb-1.5 gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 via-transparent to-transparent">' +
+          '<button type="button" onclick="galleryView(\'' + safeSrc + '\')" title="Xem ảnh" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/40 transition-colors">' +
+            '<span class="material-symbols-outlined text-white text-[16px]">open_in_full</span>' +
+          '</button>' +
+          '<button type="button" onclick="galleryDelete(\'' + safeUrl + '\')" title="X\xf3a ảnh" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-500/70 hover:bg-red-600 transition-colors">' +
+            '<span class="material-symbols-outlined text-white text-[16px]">delete</span>' +
+          '</button>' +
+        '</div>';
       grid.appendChild(item);
     });
   }
 
+  function galleryView(src) {
+    const lb = document.getElementById('galleryLightbox');
+    const img = document.getElementById('galleryLightboxImg');
+    img.src = src;
+    lb.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function galleryLightboxClose() {
+    document.getElementById('galleryLightbox').classList.add('hidden');
+    document.getElementById('galleryLightboxImg').src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') galleryLightboxClose();
+  });
+
   async function galleryDelete(url) {
     if (!confirm('Xóa ảnh này?')) return;
-    const fd = new FormData();
-    fd.append('action', 'delete');
-    fd.append('url', url);
+    // Use URLSearchParams (application/x-www-form-urlencoded) so req.getParameter() works reliably
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('url', url);
     try {
-      const r = await fetch(GALLERY_API, { method: 'POST', body: fd });
+      const r = await fetch(GALLERY_API, { method: 'POST', body: params });
       const d = await r.json();
       if (d.error) { galleryError(d.error); return; }
       galleryRender(d.images || []);
-    } catch { galleryError('Lỗi kết nối.'); }
+    } catch (e) { galleryError('Lỗi kết nối.'); }
   }
 
   async function galleryUpload(input) {

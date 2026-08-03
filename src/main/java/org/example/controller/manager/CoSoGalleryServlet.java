@@ -73,11 +73,12 @@ public class CoSoGalleryServlet extends HttpServlet {
 
         String ext = resolveExt(part.getSubmittedFileName(), ct);
         String fileName = "coso-" + UUID.randomUUID() + ext;
-        File dir = CourtsImageServeServlet.courtsDir();
+        String uploadPath = req.getServletContext().getRealPath("/uploads/courts/");
+        File dir = new File(uploadPath);
         if (!dir.exists()) dir.mkdirs();
         part.write(new File(dir, fileName).getAbsolutePath());
 
-        String url = "/media/courts/" + fileName;
+        String url = "/uploads/courts/" + fileName;
         urls.add(url);
         saveUrls(coSoId, urls);
         writeJson(resp, 200, Map.of("url", url, "images", urls));
