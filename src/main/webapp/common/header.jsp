@@ -69,8 +69,11 @@
     /* ── CENTER NAV ── */
     .nav-links {
         list-style: none; display: flex; gap: 0;
-        margin: 0; padding: 0; align-items: center;
-        flex: 1;
+        margin: 0; padding: 0; align-items: stretch;
+        flex: 1; align-self: stretch;
+    }
+    .nav-links li {
+        display: flex; align-items: center;
     }
     .nav-links a {
         text-decoration: none; color: var(--header-muted);
@@ -80,15 +83,22 @@
         transition: color 0.18s, background 0.18s;
         display: inline-flex; align-items: center; gap: 5px;
         white-space: nowrap;
+        position: relative; align-self: stretch;
     }
     .nav-links a:hover { color: var(--header-text); background: #f5f5f3; }
-    .nav-links a.active { color: var(--primary); font-weight: 600; }
-
-    /* Bản đồ pill */
-    .nav-pill-map {
-        color: var(--primary) !important;
-        font-weight: 600 !important;
+    .nav-links a.active {
+        color: var(--primary); font-weight: 600;
     }
+    .nav-links a.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 14px; right: 14px;
+        height: 2.5px;
+        background: var(--primary);
+        border-radius: 2px 2px 0 0;
+    }
+
+    /* Bản đồ pill — chỉ xanh khi active */
     .nav-pill-map:hover { background: var(--primary-light) !important; }
 
     /* HOT badge */
@@ -392,7 +402,7 @@
                 </a>
             </li>
             <li>
-                <a href="${pageContext.request.contextPath}/customer/ban-do" id="nav-map" class="nav-pill-map">
+                <a href="${pageContext.request.contextPath}/customer/ban-do" id="nav-map">
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
