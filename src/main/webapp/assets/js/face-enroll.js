@@ -5,6 +5,11 @@ let _enrollSnapshot = null;
 let _modelsLoaded = false;
 
 async function startEnroll() {
+    // Stop any existing stream first
+    if (_enrollStream) {
+        _enrollStream.getTracks().forEach(t => t.stop());
+        _enrollStream = null;
+    }
     const statusEl = document.getElementById('enrollStatus');
     const video = document.getElementById('enrollVideo');
     statusEl.textContent = 'Đang tải model nhận diện...';
