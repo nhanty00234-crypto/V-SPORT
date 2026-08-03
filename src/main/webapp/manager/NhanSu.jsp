@@ -348,9 +348,9 @@
             <img id="managerFaceImg" class="w-full h-full object-cover" alt="Face photo"/>
           </div>
           <div class="flex-1">
-            <p class="text-xs text-zinc-400 mb-2">Upload ảnh chân dung rõ mặt (JPG/PNG, tối đa 5MB)</p>
+            <p class="text-xs text-zinc-400 mb-2">Chọn 3 ảnh chân dung ở góc/ánh sáng khác nhau (JPG/PNG, mỗi ảnh tối đa 5MB)</p>
             <div class="flex gap-2">
-              <input type="file" id="managerFaceFile" accept="image/jpeg,image/png" class="hidden"
+              <input type="file" id="managerFaceFile" accept="image/jpeg,image/png" multiple class="hidden"
                      onchange="previewManagerFace(event)"/>
               <button type="button" onclick="document.getElementById('managerFaceFile').click()"
                       class="text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold px-3 py-2 rounded-lg transition">
@@ -521,8 +521,7 @@ function clearFieldErrors() {
 // ==================== FACE ENROLLMENT FUNCTIONS ====================
 
 let _managerTargetId = null;
-let _managerFaceDescriptor = null;
-let _managerFacePhoto = null;
+let _managerFaceDescriptors = [];   // mảng các descriptor 128 chiều
 let _managerModelsLoaded = false;
 const FACE_MODEL_URL = _ctxPath + '/assets/face-models';
 
@@ -534,7 +533,8 @@ async function loadManagerFaceStatus(accountId) {
   const previewEl = document.getElementById('managerFacePreview');
   const imgEl = document.getElementById('managerFaceImg');
   if (data.enrolled) {
-    statusEl.innerHTML = '<span class="text-green-600 font-semibold">✓ Đã đăng ký khuôn mặt</span> — ' + (data.enrolledAt || '');
+    statusEl.innerHTML = '<span class="text-green-600 font-semibold">✓ Đã đăng ký '
+      + (data.sampleCount || 1) + ' mẫu khuôn mặt</span> — ' + (data.enrolledAt || '');
     if (data.imagePath) {
       imgEl.src = _ctxPath + data.imagePath;
       previewEl.classList.remove('hidden');
@@ -545,10 +545,12 @@ async function loadManagerFaceStatus(accountId) {
 }
 
 async function previewManagerFace(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
   const statusEl = document.getElementById('managerFaceUploadStatus');
-  statusEl.textContent = 'Đang phân tích khuôn mặt...';
+  statusEl.textContent = 'Đang phân tích ' + files.length + ' ảnh...';
+  statusEl.className = 'text-xs mt-2 text-zinc-500';
+  document.getElementById('btnManagerSaveFace').disabled = true;
 
   if (!_managerModelsLoaded) {
     await Promise.all([
@@ -559,37 +561,46 @@ async function previewManagerFace(event) {
     _managerModelsLoaded = true;
   }
 
-  const img = await faceapi.bufferToImage(file);
-  const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-    .withFaceLandmarks(true).withFaceDescriptor();
+  _managerFaceDescriptors = [];
+  let skipped = 0;
+  for (const file of files) {
+    const img = await faceapi.bufferToImage(file);
+    const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks(true).withFaceDescriptor();
+    if (detection) {
+      _managerFaceDescriptors.push(Array.from(detection.descriptor));
+    } else {
+      skipped++;
+    }
+  }
 
-  if (!detection) {
-    statusEl.textContent = '✗ Không tìm thấy khuôn mặt trong ảnh. Chọn ảnh khác.';
+  if (!_managerFaceDescriptors.length) {
+    statusEl.textContent = '✗ Không tìm thấy khuôn mặt trong ảnh nào. Chọn ảnh khác.';
     statusEl.className = 'text-xs mt-2 text-red-600';
+    document.getElementById('btnManagerSaveFace').disabled = true;
     return;
   }
 
-  _managerFaceDescriptor = JSON.stringify(Array.from(detection.descriptor));
-  _managerFacePhoto = null; // sẽ upload file gốc
-
-  statusEl.textContent = '✓ Nhận diện thành công. Nhấn "Lưu khuôn mặt".';
+  statusEl.textContent = '✓ Nhận diện được ' + _managerFaceDescriptors.length + ' mẫu'
+    + (skipped ? ' (bỏ qua ' + skipped + ' ảnh không thấy mặt)' : '')
+    + '. Nhấn "Lưu khuôn mặt".';
   statusEl.className = 'text-xs mt-2 text-green-600 font-semibold';
   document.getElementById('btnManagerSaveFace').disabled = false;
 
-  // Preview
-  document.getElementById('managerFaceImg').src = URL.createObjectURL(file);
+  document.getElementById('managerFaceImg').src = URL.createObjectURL(files[0]);
   document.getElementById('managerFacePreview').classList.remove('hidden');
 }
 
 async function saveManagerFace() {
-  if (!_managerFaceDescriptor || !_managerTargetId) return;
+  if (!_managerFaceDescriptors.length || !_managerTargetId) return;
   const statusEl = document.getElementById('managerFaceUploadStatus');
   statusEl.textContent = 'Đang lưu...';
+  document.getElementById('btnManagerSaveFace').disabled = true;
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
   const file = document.getElementById('managerFaceFile').files[0];
   const formData = new FormData();
-  formData.append('descriptor', _managerFaceDescriptor);
+  formData.append('descriptors', JSON.stringify(_managerFaceDescriptors));
   if (file) formData.append('photo', file);
   formData.append('_csrf', csrfToken);
 
@@ -598,12 +609,13 @@ async function saveManagerFace() {
   });
   const data = await res.json();
   if (data.success) {
-    statusEl.textContent = '✓ Đã lưu khuôn mặt thành công!';
+    statusEl.textContent = '✓ Đã lưu ' + _managerFaceDescriptors.length + ' mẫu khuôn mặt!';
     statusEl.className = 'text-xs mt-2 text-green-600 font-bold';
     document.getElementById('btnManagerSaveFace').disabled = true;
   } else {
     statusEl.textContent = '✗ Lỗi: ' + (data.error || 'Không thể lưu');
     statusEl.className = 'text-xs mt-2 text-red-600';
+    document.getElementById('btnManagerSaveFace').disabled = false;
   }
 }
 
@@ -728,8 +740,7 @@ function editStaff(id) {
     document.getElementById('faceEnrollmentSection').classList.remove('hidden');
     document.getElementById('managerFaceFile').value = '';
     document.getElementById('btnManagerSaveFace').disabled = true;
-    _managerFaceDescriptor = null;
-    _managerFacePhoto = null;
+    _managerFaceDescriptors = [];
     document.getElementById('managerFaceUploadStatus').textContent = '';
     loadManagerFaceStatus(s.id);
 
