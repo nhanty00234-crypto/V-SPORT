@@ -176,10 +176,9 @@
       <button onclick="switchTab('swaps')" class="quick-action-btn">
         <i class="ti ti-arrows-exchange"></i>Yêu cầu đổi ca
       </button>
-      <div class="quick-action-btn disabled" title="Tính năng này sẽ ra mắt trong tương lai">
-        <i class="ti ti-face-id"></i>Điểm danh khuôn mặt
-        <span class="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Sắp ra mắt</span>
-      </div>
+      <button onclick="openTodayFaceModal()" class="quick-action-btn" id="btnQuickFace">
+        <i class="ti ti-face-id"></i>Điểm danh
+      </button>
     </div>
 
     <!-- Week navigation -->
@@ -322,6 +321,18 @@
 
     <div class="relative w-full aspect-square bg-zinc-900 rounded-2xl overflow-hidden">
       <video id="faceVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay muted playsinline></video>
+    </div>
+
+    <%-- Mức độ khớp khuôn mặt theo thời gian thực --%>
+    <div class="w-full">
+      <div class="flex items-baseline justify-between mb-1.5">
+        <span class="text-xs font-semibold text-zinc-500">Độ khớp khuôn mặt</span>
+        <span id="faceMatch" class="text-zinc-300 font-black text-lg">--%</span>
+      </div>
+      <div class="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+        <div id="faceMatchBar" class="h-2.5 rounded-full transition-all duration-200" style="width:0%;background:#f59e0b"></div>
+      </div>
+      <p id="faceMatchHint" class="text-[11px] text-zinc-400 mt-1">Đưa khuôn mặt vào giữa khung hình</p>
     </div>
 
     <p id="faceStatus" class="text-zinc-600 text-sm text-center font-medium min-h-[2.5rem]">
@@ -748,18 +759,54 @@ function openFaceModal(action, caId) {
   startFaceAttendance(action, caId);
 }
 
+// Quick action: tự chọn ca hôm nay và hành động phù hợp (vào ca / kết thúc ca)
+function openTodayFaceModal() {
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var todayShifts = shifts.filter(function(s) {
+    return s.ngayLam === todayStr && s.trangThai !== 'Cancelled';
+  });
+  if (todayShifts.length === 0) {
+    alert('Hôm nay bạn không có ca làm việc nào được phân công.');
+    return;
+  }
+  todayShifts.sort(function(a, b) { return (a.gioBatDau || '').localeCompare(b.gioBatDau || ''); });
+
+  // Ưu tiên ca đang mở: chưa vào ca -> checkin; đã vào chưa ra -> checkout
+  var pending = todayShifts.find(function(s) { return !s.gioVaoThuc; });
+  if (pending) { openFaceModal('checkin', pending.caLamViecId); return; }
+
+  var inShift = todayShifts.find(function(s) { return s.gioVaoThuc && !s.gioRaThuc; });
+  if (inShift) { openFaceModal('checkout', inShift.caLamViecId); return; }
+
+  alert('Bạn đã hoàn thành tất cả ca hôm nay.');
+}
+
 function closeFaceModal() {
   FaceAttendance.stop();
   document.getElementById('faceModal').classList.add('hidden');
+  resetFaceMatch();
+}
+
+function resetFaceMatch() {
+  var m = document.getElementById('faceMatch');
+  m.textContent = '--%';
+  m.className = 'text-zinc-300 font-black text-lg';
+  document.getElementById('faceMatchBar').style.width = '0%';
+  document.getElementById('faceMatchHint').textContent = 'Đưa khuôn mặt vào giữa khung hình';
+  document.getElementById('faceProgress').style.width = '0%';
 }
 
 async function startFaceAttendance(action, caId) {
   const statusEl = document.getElementById('faceStatus');
   const progressEl = document.getElementById('faceProgress');
+  resetFaceMatch();
 
-  await FaceAttendance.init({
+  const ready = await FaceAttendance.init({
     videoEl: document.getElementById('faceVideo'),
     statusEl: statusEl,
+    matchEl: document.getElementById('faceMatch'),
+    matchBarEl: document.getElementById('faceMatchBar'),
+    matchHintEl: document.getElementById('faceMatchHint'),
     contextPath: _ctx,
     caLamViecId: caId,
     action: action,
@@ -775,6 +822,7 @@ async function startFaceAttendance(action, caId) {
     }
   });
 
+  if (ready === false) return;   // chưa đăng ký khuôn mặt — không mở camera
   await FaceAttendance.start();
 }
 

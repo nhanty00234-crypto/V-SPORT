@@ -7,6 +7,7 @@
 <head>
   <title>Điểm danh khuôn mặt | Manager V-SPORT</title>
   <jsp:include page="/manager/common/manager_head.jsp"/>
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <style>
     .fs-card { background:#fff; border:1px solid #ede9fe; border-radius:1rem; box-shadow:0 1px 2px rgba(124,58,237,.04); }
     .fs-tab {
@@ -32,15 +33,15 @@
     .fs-switch input:focus-visible + .track { box-shadow:0 0 0 3px rgba(124,58,237,.25); }
     /* Segmented threshold picker */
     .fs-seg { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; }
-    .fs-seg label { cursor:pointer; }
-    .fs-seg input { position:absolute; opacity:0; width:0; height:0; }
+    .fs-seg label { cursor:pointer; display:block; position:relative; }
+    .fs-seg input { position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
     .fs-seg .opt {
-      border:1.5px solid #ede9fe; border-radius:.85rem; padding:.7rem .5rem; text-align:center;
+      display:block; border:1.5px solid #ede9fe; border-radius:.85rem; padding:.7rem .5rem; text-align:center;
       transition:all .15s; background:#fff;
     }
     .fs-seg label:hover .opt { border-color:#ddd6fe; background:#faf5ff; }
     .fs-seg input:checked + .opt { border-color:#7c3aed; background:#f5f3ff; box-shadow:0 0 0 3px rgba(124,58,237,.1); }
-    .fs-seg .opt .val { font-size:1rem; font-weight:800; color:#4c1d95; line-height:1.1; }
+    .fs-seg .opt .val { display:block; font-size:1rem; font-weight:800; color:#4c1d95; line-height:1.1; }
     .fs-seg input:checked + .opt .val { color:#7c3aed; }
     .fs-seg .opt .lbl { font-size:.65rem; font-weight:600; color:#a1a1aa; margin-top:.15rem; display:block; }
     table.fs-table { width:100%; border-collapse:collapse; font-size:.8125rem; }
@@ -150,7 +151,7 @@
           <div class="px-5 py-10 flex flex-col items-center gap-2 text-center">
             <span class="material-symbols-outlined text-[40px] text-violet-200">face_retouching_off</span>
             <p class="text-sm font-semibold text-zinc-500">Chưa có nhân viên nào đăng ký khuôn mặt</p>
-            <p class="text-xs text-zinc-400">Nhân viên tự đăng ký tại portal của họ, hoặc bạn tải ảnh lên trong trang Nhân sự.</p>
+            <p class="text-xs text-zinc-400">Gọi nhân viên đến quầy và bấm <b class="text-violet-600">Đăng ký</b> ở danh sách bên dưới để chụp khuôn mặt.</p>
           </div>
         </c:when>
         <c:otherwise>
@@ -210,14 +211,18 @@
                         <c:otherwise>—</c:otherwise>
                       </c:choose>
                     </td>
-                    <td class="text-right">
+                    <td class="text-right whitespace-nowrap">
+                      <button type="button" onclick="fsOpenEnroll(${nv.accountId}, '${nv.fullName}')"
+                              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 transition mr-1">
+                        <span class="material-symbols-outlined text-[15px]">photo_camera</span>Chụp lại
+                      </button>
                       <form method="post" action="${pageContext.request.contextPath}/manager/face-settings" class="inline"
-                            onsubmit="return confirm('Xóa đăng ký khuôn mặt của ${nv.fullName}? Nhân viên sẽ phải đăng ký lại mới điểm danh được.')">
+                            onsubmit="return confirm('Xóa đăng ký khuôn mặt của ${nv.fullName}? Nhân viên sẽ không điểm danh được cho tới khi đăng ký lại.')">
                         <input type="hidden" name="action" value="reset-face">
                         <input type="hidden" name="accountId" value="${nv.accountId}">
                         <button type="submit"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition">
-                          <span class="material-symbols-outlined text-[15px]">restart_alt</span>Xóa đăng ký
+                          <span class="material-symbols-outlined text-[15px]">delete</span>Xóa
                         </button>
                       </form>
                     </td>
@@ -244,16 +249,22 @@
             <span>Đang bật chế độ <b>bắt buộc</b> — những nhân viên dưới đây sẽ không thể vào ca cho tới khi đăng ký khuôn mặt.</span>
           </div>
         </c:if>
-        <div class="p-5 flex flex-wrap gap-2.5">
+        <div class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <c:forEach var="nv" items="${chuaDangKy}">
-            <div class="flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 bg-zinc-50 border border-zinc-100 rounded-full">
-              <img class="w-7 h-7 rounded-full border border-white object-cover"
+            <div class="flex items-center gap-3 p-3 bg-zinc-50 border border-zinc-100 rounded-xl">
+              <img class="w-9 h-9 rounded-full border border-white object-cover shrink-0"
                    src="<c:choose><c:when test='${not empty nv.avatarUrl}'>${pageContext.request.contextPath}${nv.avatarUrl}</c:when><c:otherwise>https://ui-avatars.com/api/?name=${nv.fullName}&background=a1a1aa&color=fff&size=128&bold=true</c:otherwise></c:choose>"
                    alt="${nv.fullName}">
-              <span class="text-xs font-bold text-zinc-600">${nv.fullName}</span>
-              <span class="text-[10px] font-bold ${nv.roleId == 5 ? 'text-rose-400' : 'text-sky-400'}">
-                ${nv.roleId == 5 ? 'Bảo vệ' : 'Lễ tân'}
-              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-zinc-700 truncate">${nv.fullName}</p>
+                <span class="text-[10px] font-bold ${nv.roleId == 5 ? 'text-rose-400' : 'text-sky-400'}">
+                  ${nv.roleId == 5 ? 'Bảo vệ' : 'Lễ tân'}
+                </span>
+              </div>
+              <button type="button" onclick="fsOpenEnroll(${nv.accountId}, '${nv.fullName}')"
+                      class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 transition">
+                <span class="material-symbols-outlined text-[15px]">photo_camera</span>Đăng ký
+              </button>
             </div>
           </c:forEach>
         </div>
@@ -441,6 +452,58 @@
   </section>
 </main>
 
+<%-- ── Enroll modal: manager chụp khuôn mặt cho nhân viên ── --%>
+<div id="fsEnrollModal" class="fixed inset-0 bg-black/70 z-[60] hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[92vh]">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-violet-50 shrink-0">
+      <div class="min-w-0">
+        <p class="text-sm font-bold text-violet-950">Đăng ký khuôn mặt</p>
+        <p id="fsEnrollName" class="text-xs text-zinc-400 truncate"></p>
+      </div>
+      <button onclick="fsCloseEnroll()" class="p-1.5 rounded-lg hover:bg-violet-50 shrink-0">
+        <span class="material-symbols-outlined text-[18px] text-zinc-500">close</span>
+      </button>
+    </div>
+
+    <div class="p-5 flex flex-col gap-4 overflow-y-auto">
+      <div class="relative w-full aspect-square bg-zinc-900 rounded-xl overflow-hidden">
+        <video id="fsVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay muted playsinline></video>
+        <img id="fsShot" class="hidden absolute inset-0 w-full h-full object-cover scale-x-[-1]" alt="Ảnh đã chụp">
+      </div>
+      <canvas id="fsCanvas" class="hidden"></canvas>
+
+      <%-- Chất lượng khuôn mặt theo thời gian thực --%>
+      <div>
+        <div class="flex items-baseline justify-between mb-1.5">
+          <span class="text-xs font-semibold text-zinc-500">Chất lượng khuôn mặt</span>
+          <span id="fsQuality" class="text-zinc-300 font-black text-lg">--%</span>
+        </div>
+        <div class="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+          <div id="fsQualityBar" class="h-2.5 rounded-full transition-all duration-200" style="width:0%;background:#f59e0b"></div>
+        </div>
+        <p id="fsQualityHint" class="text-[11px] text-zinc-400 mt-1">
+          Cần đạt ≥ <b class="text-violet-600"><span id="fsRequired">70</span>%</b> theo ngưỡng cơ sở đang cấu hình
+        </p>
+      </div>
+
+      <p id="fsEnrollStatus" class="text-sm text-center text-zinc-500 font-medium min-h-[2.5rem]">
+        Nhấn "Mở camera" để bắt đầu
+      </p>
+    </div>
+
+    <div class="px-5 pb-5 flex gap-2 shrink-0">
+      <button type="button" id="fsBtnStart" onclick="fsStartCamera()"
+              class="flex-1 h-11 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">videocam</span>Mở camera
+      </button>
+      <button type="button" id="fsBtnSave" onclick="fsSaveEnroll()" disabled
+              class="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">save</span>Lưu khuôn mặt
+      </button>
+    </div>
+  </div>
+</div>
+
 <%-- ── Image preview modal ── --%>
 <div id="fsPreviewModal" class="fixed inset-0 bg-black/70 z-[60] hidden items-center justify-center p-4" onclick="fsClosePreview()">
   <div class="bg-white rounded-2xl overflow-hidden max-w-sm w-full" onclick="event.stopPropagation()">
@@ -478,6 +541,171 @@
   }
 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fsClosePreview(); });
+
+  /* ═══════════ Đăng ký khuôn mặt (manager chụp hộ nhân viên) ═══════════ */
+  var FS_CTX = '${pageContext.request.contextPath}';
+  var FS_MODEL_URL = FS_CTX + '/assets/face-models';
+  var FS_MAX_DISTANCE = 0.8;
+  var FS_THRESHOLD = ${faceConfig.confidenceMin};
+  // Ngưỡng Euclidean của cơ sở quy đổi sang % — dùng chung thang đo với màn điểm danh
+  var FS_REQUIRED = Math.round(Math.max(0, Math.min(100, (1 - FS_THRESHOLD / FS_MAX_DISTANCE) * 100)));
+
+  var _fsTargetId = null;
+  var _fsStream = null;
+  var _fsLoopId = null;
+  var _fsModelsLoaded = false;
+  var _fsDescriptor = null;
+  var _fsSnapshot = null;
+
+  document.getElementById('fsRequired').textContent = FS_REQUIRED;
+
+  function fsOpenEnroll(accountId, fullName) {
+    _fsTargetId = accountId;
+    _fsDescriptor = null;
+    _fsSnapshot = null;
+    document.getElementById('fsEnrollName').textContent = fullName;
+    document.getElementById('fsShot').classList.add('hidden');
+    document.getElementById('fsBtnSave').disabled = true;
+    fsSetQuality(null);
+    fsStatus('Nhấn "Mở camera" để bắt đầu', 'text-zinc-500');
+    var m = document.getElementById('fsEnrollModal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+  }
+
+  function fsCloseEnroll() {
+    fsStopCamera();
+    var m = document.getElementById('fsEnrollModal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+  }
+
+  function fsStopCamera() {
+    if (_fsLoopId) { clearInterval(_fsLoopId); _fsLoopId = null; }
+    if (_fsStream) { _fsStream.getTracks().forEach(function (t) { t.stop(); }); _fsStream = null; }
+  }
+
+  function fsStatus(msg, cls) {
+    var el = document.getElementById('fsEnrollStatus');
+    el.textContent = msg;
+    el.className = 'text-sm text-center font-medium min-h-[2.5rem] ' + (cls || 'text-zinc-500');
+  }
+
+  function fsSetQuality(percent) {
+    var q = document.getElementById('fsQuality');
+    var bar = document.getElementById('fsQualityBar');
+    if (percent === null) {
+      q.textContent = '--%';
+      q.className = 'text-zinc-300 font-black text-lg';
+      bar.style.width = '0%';
+      return;
+    }
+    var ok = percent >= FS_REQUIRED;
+    q.textContent = percent + '%';
+    q.className = ok ? 'text-green-600 font-black text-lg' : 'text-amber-500 font-black text-lg';
+    bar.style.width = percent + '%';
+    bar.style.background = ok ? '#16a34a' : '#f59e0b';
+  }
+
+  async function fsStartCamera() {
+    fsStopCamera();
+    document.getElementById('fsShot').classList.add('hidden');
+    document.getElementById('fsBtnSave').disabled = true;
+    _fsDescriptor = null;
+
+    try {
+      if (!_fsModelsLoaded) {
+        fsStatus('Đang tải model nhận diện...', 'text-zinc-500');
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(FS_MODEL_URL),
+          faceapi.nets.faceLandmark68TinyNet.loadFromUri(FS_MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(FS_MODEL_URL)
+        ]);
+        _fsModelsLoaded = true;
+      }
+
+      var video = document.getElementById('fsVideo');
+      _fsStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
+      video.srcObject = _fsStream;
+      await new Promise(function (r) { video.onloadedmetadata = r; });
+      await video.play();
+
+      fsStatus('Nhân viên nhìn thẳng vào camera, giữ yên...', 'text-violet-600');
+      _fsLoopId = setInterval(fsDetectLoop, 150);
+    } catch (e) {
+      fsStatus('Không mở được camera: ' + e.message, 'text-red-600');
+    }
+  }
+
+  async function fsDetectLoop() {
+    var video = document.getElementById('fsVideo');
+    var det = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+      .withFaceLandmarks(true)
+      .withFaceDescriptor();
+
+    if (!det) {
+      fsSetQuality(null);
+      fsStatus('Không thấy khuôn mặt — đưa mặt vào giữa khung, đủ sáng', 'text-zinc-500');
+      return;
+    }
+
+    // Điểm tin cậy của bộ phát hiện, quy về % để quản lý biết ảnh đã đủ tốt chưa
+    var percent = Math.round(det.detection.score * 100);
+    fsSetQuality(percent);
+
+    if (percent >= FS_REQUIRED) {
+      _fsDescriptor = Array.from(det.descriptor);
+      _fsSnapshot = fsCapture(video);
+      fsStopCamera();
+
+      var shot = document.getElementById('fsShot');
+      shot.src = _fsSnapshot;
+      shot.classList.remove('hidden');
+      document.getElementById('fsBtnSave').disabled = false;
+      fsStatus('✓ Đã chụp đạt ' + percent + '%. Nhấn "Lưu khuôn mặt" để xác nhận.', 'text-green-600 font-bold');
+    } else {
+      fsStatus('Chưa đủ rõ (' + percent + '%) — cần ≥ ' + FS_REQUIRED + '%', 'text-amber-600');
+    }
+  }
+
+  function fsCapture(video) {
+    var canvas = document.getElementById('fsCanvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  async function fsSaveEnroll() {
+    if (!_fsDescriptor || !_fsTargetId) return;
+    document.getElementById('fsBtnSave').disabled = true;
+    fsStatus('Đang lưu...', 'text-zinc-500');
+
+    var csrf = document.querySelector('meta[name="csrf-token"]');
+    try {
+      var res = await fetch(FS_CTX + '/face/enroll?targetAccountId=' + _fsTargetId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          descriptor: _fsDescriptor,
+          photo: _fsSnapshot,
+          _csrf: csrf ? csrf.content : ''
+        })
+      });
+      var data = await res.json();
+      if (data.success) {
+        fsStatus('✓ Đăng ký thành công! Đang tải lại...', 'text-green-600 font-bold');
+        setTimeout(function () { location.reload(); }, 900);
+      } else {
+        fsStatus('Lỗi: ' + (data.error || 'Không thể lưu'), 'text-red-600 font-bold');
+        document.getElementById('fsBtnSave').disabled = false;
+      }
+    } catch (e) {
+      fsStatus('Lỗi kết nối: ' + e.message, 'text-red-600 font-bold');
+      document.getElementById('fsBtnSave').disabled = false;
+    }
+  }
 </script>
 
 </body>
