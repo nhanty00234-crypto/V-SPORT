@@ -11,6 +11,7 @@ import org.example.dao.TaiKhoanDAO;
 import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
+import org.example.util.FaceDescriptorMatcher;
 
 import java.io.*;
 import java.nio.file.*;
@@ -49,6 +50,13 @@ public class FaceEnrollServlet extends HttpServlet {
         result.put("imagePath", faceData != null ? faceData.getFaceImagePath() : null);
         result.put("enrolledAt", faceData != null && faceData.getFaceEnrolledAt() != null
                 ? faceData.getFaceEnrolledAt().toString() : null);
+        double[][] samples = faceData == null
+                ? new double[0][]
+                : FaceDescriptorMatcher.parse(faceData.getFaceDescriptor());
+        result.put("sampleCount", samples.length);
+        // Manager cần các mẫu để xem trước ngưỡng ở trang cài đặt.
+        // Endpoint này vốn đã giới hạn cho manager cùng cơ sở.
+        if (samples.length > 0) result.put("descriptors", samples);
         resp.getWriter().write(gson.toJson(result));
     }
 
@@ -83,27 +91,38 @@ public class FaceEnrollServlet extends HttpServlet {
                 while ((line = r.readLine()) != null) sb.append(line);
             }
             JsonObject body = gson.fromJson(sb.toString(), JsonObject.class);
-            if (body == null || !body.has("descriptor")) {
-                resp.getWriter().write("{\"success\":false,\"error\":\"Descriptor không hợp lệ (cần 128 số)\"}");
+            JsonArray arr = null;
+            if (body != null && body.has("descriptors")) {
+                arr = body.get("descriptors").getAsJsonArray();
+            } else if (body != null && body.has("descriptor")) {
+                // Client cũ gửi một mẫu phẳng — bọc lại thành danh sách một phần tử
+                JsonArray single = body.get("descriptor").getAsJsonArray();
+                arr = new JsonArray();
+                arr.add(single);
+            }
+
+            descriptorJson = arr == null ? null : normalizeDescriptors(arr.toString());
+            if (descriptorJson == null) {
+                resp.getWriter().write("{\"success\":false,\"error\":\"Descriptor không hợp lệ (mỗi mẫu cần 128 số)\"}");
                 return;
             }
-            JsonArray arr = body.get("descriptor").getAsJsonArray();
-            if (arr == null || arr.size() < 128) {
-                resp.getWriter().write("{\"success\":false,\"error\":\"Descriptor không hợp lệ (cần 128 số)\"}");
-                return;
-            }
-            descriptorJson = arr.toString();
+
             String photo = body.has("photo") ? body.get("photo").getAsString() : null;
             imagePath = savePhotoBase64(photo, targetId);
 
         } else if (contentType != null && contentType.startsWith("multipart/form-data")) {
             // Manager upload: descriptor field + photo file part
-            String descField = req.getParameter("descriptor");
+            String descField = req.getParameter("descriptors");
+            if (descField == null || descField.isEmpty()) descField = req.getParameter("descriptor");
             if (descField == null || descField.isEmpty()) {
                 resp.getWriter().write("{\"success\":false,\"error\":\"Thiếu descriptor\"}");
                 return;
             }
-            descriptorJson = descField;
+            descriptorJson = normalizeDescriptors(descField);
+            if (descriptorJson == null) {
+                resp.getWriter().write("{\"success\":false,\"error\":\"Descriptor không hợp lệ (mỗi mẫu cần 128 số)\"}");
+                return;
+            }
             Part filePart = req.getPart("photo");
             if (filePart != null && filePart.getSize() > 0) {
                 imagePath = savePhotoStream(filePart.getInputStream(), targetId);
@@ -123,6 +142,21 @@ public class FaceEnrollServlet extends HttpServlet {
     }
 
     // --- helpers ---
+
+    /**
+     * Chuẩn hoá payload descriptor về JSON dạng lồng để lưu.
+     * Nhận cả `descriptors` (nhiều mẫu, client mới) và `descriptor` (một mẫu, client cũ).
+     * Trả null nếu không có mẫu hợp lệ nào.
+     */
+    private String normalizeDescriptors(String rawJson) {
+        double[][] samples = FaceDescriptorMatcher.parse(rawJson);
+        java.util.List<double[]> valid = new java.util.ArrayList<>();
+        for (double[] s : samples) {
+            if (s != null && s.length >= 128) valid.add(s);
+        }
+        if (valid.isEmpty()) return null;
+        return FaceDescriptorMatcher.toStorageJson(valid.toArray(new double[0][]));
+    }
 
     /** Nhân sự đích phải cùng cơ sở với manager và thuộc role được phân ca. */
     private boolean isSameBranch(int targetId, TaiKhoan manager) {
