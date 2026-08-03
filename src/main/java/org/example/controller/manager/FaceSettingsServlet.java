@@ -22,6 +22,12 @@ public class FaceSettingsServlet extends HttpServlet {
         if (manager == null) return;
 
         CoSoFaceConfig config = configDAO.findByCoSo(manager.getCoSoId());
+        if (config == null) {
+            config = new CoSoFaceConfig();
+            config.setCoSoId(manager.getCoSoId());
+            config.setFaceRequired(false);
+            config.setConfidenceMin(0.6);
+        }
         req.setAttribute("faceConfig", config);
         req.getRequestDispatcher("/manager/FaceSettings.jsp").forward(req, resp);
     }
