@@ -14,6 +14,7 @@ import org.example.util.Constants;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.Objects;
 import java.util.*;
 
 @WebServlet("/face/enroll")
@@ -34,6 +35,17 @@ public class FaceEnrollServlet extends HttpServlet {
         }
 
         int targetId = resolveTargetId(req, user);
+
+        // Fix 2: manager cross-branch enrollment guard (read path)
+        if (user.getRoleId() == Constants.ROLE_MANAGER && targetId != user.getAccountId()) {
+            TaiKhoan targetCheck = taiKhoanDAO.getFaceData(targetId);
+            if (targetCheck == null || !Objects.equals(targetCheck.getCoSoId(), user.getCoSoId())) {
+                resp.setStatus(403);
+                resp.getWriter().write("{\"error\":\"Không có quyền xem thông tin khuôn mặt của tài khoản này\"}");
+                return;
+            }
+        }
+
         TaiKhoan faceData = taiKhoanDAO.getFaceData(targetId);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("enrolled", faceData != null && faceData.getFaceDescriptor() != null);
@@ -54,6 +66,16 @@ public class FaceEnrollServlet extends HttpServlet {
         }
 
         int targetId = resolveTargetId(req, user);
+
+        // Fix 2: manager cross-branch enrollment guard
+        if (user.getRoleId() == Constants.ROLE_MANAGER && targetId != user.getAccountId()) {
+            TaiKhoan target = taiKhoanDAO.getFaceData(targetId);
+            if (target == null || !Objects.equals(target.getCoSoId(), user.getCoSoId())) {
+                resp.setStatus(403);
+                resp.getWriter().write("{\"error\":\"Không có quyền đăng ký khuôn mặt cho tài khoản này\"}");
+                return;
+            }
+        }
 
         String contentType = req.getContentType();
         String descriptorJson;

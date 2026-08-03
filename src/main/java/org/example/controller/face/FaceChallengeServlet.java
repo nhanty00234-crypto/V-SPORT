@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.example.dao.CaLamViecDAO;
 import org.example.dao.FaceChallengeTokenDAO;
+import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.dao.impl.FaceChallengeTokenDAOImpl;
+import org.example.model.CaLamViec;
 import org.example.model.FaceChallengeToken;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
@@ -20,6 +23,7 @@ public class FaceChallengeServlet extends HttpServlet {
     private static final String[] ALL_CHALLENGES = {"blink", "turn_left", "turn_right", "smile"};
     private static final int TTL_SECONDS = 180;
     private final FaceChallengeTokenDAO tokenDAO = new FaceChallengeTokenDAOImpl();
+    private final CaLamViecDAO caLamViecDAO = new CaLamViecDAOImpl();
     private final Gson gson = new Gson();
 
     @Override
@@ -45,6 +49,14 @@ public class FaceChallengeServlet extends HttpServlet {
         try { caId = Integer.parseInt(caIdStr); } catch (NumberFormatException e) {
             resp.setStatus(400);
             resp.getWriter().write("{\"error\":\"caLamViecId không hợp lệ\"}");
+            return;
+        }
+
+        // Fix 3: shift ownership validation (IDOR guard)
+        CaLamViec ca = caLamViecDAO.getCaById(caId);
+        if (ca == null || ca.getAccountId() != user.getAccountId()) {
+            resp.setStatus(403);
+            resp.getWriter().write("{\"error\":\"Ca làm việc không hợp lệ\"}");
             return;
         }
 

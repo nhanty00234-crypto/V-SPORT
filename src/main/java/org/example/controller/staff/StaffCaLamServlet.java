@@ -100,7 +100,18 @@ public class StaffCaLamServlet extends HttpServlet {
             return;
         }
 
+        // Server-side faceRequired gate — block manual checkin/checkout if face attendance is mandatory
+        CoSoFaceConfig faceConfigPost = user.getCoSoId() != null
+            ? faceConfigDAO.findByCoSo(user.getCoSoId())
+            : new CoSoFaceConfig();
+
         String action = req.getParameter("action");
+        if (faceConfigPost.isFaceRequired() && ("checkIn".equals(action) || "checkOut".equals(action))) {
+            session.setAttribute("error", "Điểm danh bằng khuôn mặt là bắt buộc. Vui lòng sử dụng tính năng nhận diện khuôn mặt.");
+            resp.sendRedirect(req.getContextPath() + "/staff/ca-lam");
+            return;
+        }
+
         try {
             if ("requestSwap".equals(action)) {
                 CaLamViecSwapRequest sr = new CaLamViecSwapRequest();

@@ -60,6 +60,15 @@ public class GuardDiemDanhServlet extends HttpServlet {
         TaiKhoan user = getUser(req, resp);
         if (user == null) return;
 
+        // Server-side faceRequired gate — block manual POST if face attendance is mandatory
+        CoSoFaceConfig faceConfig = user.getCoSoId() != null
+            ? faceConfigDAO.findByCoSo(user.getCoSoId())
+            : new CoSoFaceConfig();
+        if (faceConfig.isFaceRequired()) {
+            resp.sendRedirect(req.getContextPath() + "/guard/diem-danh?error=face_required");
+            return;
+        }
+
         String action = req.getParameter("action");
         String caIdStr = req.getParameter("caLamViecId");
         if (caIdStr == null) {
