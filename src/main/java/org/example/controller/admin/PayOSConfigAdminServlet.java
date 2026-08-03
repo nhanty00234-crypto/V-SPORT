@@ -109,25 +109,30 @@ public class PayOSConfigAdminServlet extends HttpServlet {
             return;
         }
 
-        // Lấy TaiKhoan mới nhất từ DB để tránh dùng email cũ đang cached trong session
-        TaiKhoan adminFresh = loadFreshAdmin(admin);
-        String adminEmail = adminFresh.getEmail();
-        if (adminEmail == null || adminEmail.trim().isEmpty()) {
-            logger.error("Admin AccountID={} không có email, không thể gửi OTP cấu hình PayOS cho CoSoID={}", admin.getAccountId(), coSoId);
-            writeJson(resp, 400, errorJson("Tài khoản admin chưa được thiết lập địa chỉ email. Vui lòng cập nhật email cho tài khoản trước khi thực hiện thao tác này."));
+        // OTP gửi đến manager của cơ sở (AccountID_QuanLy), không phải admin đang đăng nhập.
+        // Lý do: manager mới là người cần xác nhận thay đổi PayOS cho cơ sở của họ.
+        // Nếu cơ sở chưa có manager hoặc manager chưa có email thì fallback về admin.
+        TaiKhoan otpRecipient = loadOtpRecipient(admin, prepared.coSo);
+        String recipientEmail = otpRecipient.getEmail();
+        if (recipientEmail == null || recipientEmail.trim().isEmpty()) {
+            logger.error("Không tìm thấy email người nhận OTP cho CoSoID={} (manager AccountID={}, admin AccountID={})",
+                    coSoId,
+                    prepared.coSo != null ? prepared.coSo.getAccountID_QuanLy() : "N/A",
+                    admin.getAccountId());
+            writeJson(resp, 400, errorJson("Cơ sở chưa được chỉ định quản lý hoặc tài khoản quản lý chưa có email. Vui lòng cập nhật thông tin trước khi thực hiện thao tác này."));
             return;
         }
 
         String otp = ResetSecurityUtil.generateOtp();
-        String maskedEmail = ResetSecurityUtil.maskEmail(adminEmail);
+        String maskedEmail = ResetSecurityUtil.maskEmail(recipientEmail);
         PayOSConfigChallenge challenge = PayOSConfigChallenge.create(
                 coSoId, admin.getAccountId(), maskedEmail,
                 prepared.finalClientId, prepared.finalApiKey, prepared.finalChecksumKey,
                 prepared.fieldsChanged, otp, System.currentTimeMillis());
 
         try {
-            logger.info("Gửi OTP cấu hình PayOS CoSoID={} đến email={}", coSoId, maskedEmail);
-            sendOtpEmail(adminFresh, prepared.coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS");
+            logger.info("Gửi OTP cấu hình PayOS CoSoID={} đến manager email={}", coSoId, maskedEmail);
+            sendOtpEmail(otpRecipient, prepared.coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS");
             logger.info("Gửi OTP thành công đến {}", maskedEmail);
         } catch (Exception e) {
             logger.error("Lỗi gửi email OTP cấu hình PayOS cho CoSoID={}, email={}: {}", coSoId, maskedEmail, e.getMessage(), e);
@@ -224,25 +229,25 @@ public class PayOSConfigAdminServlet extends HttpServlet {
             return;
         }
 
-        // Lấy TaiKhoan mới nhất từ DB để tránh dùng email cũ đang cached trong session
-        TaiKhoan adminFreshResend = loadFreshAdmin(admin);
-        String adminEmail = adminFreshResend.getEmail();
-        if (adminEmail == null || adminEmail.trim().isEmpty()) {
-            writeJson(resp, 400, errorJson("Tài khoản admin chưa được thiết lập địa chỉ email."));
-            return;
-        }
-
         String otp = ResetSecurityUtil.generateOtp();
         CoSo coSo = null;
         try {
             coSo = payOSConfigurationService.prepareUpdate(coSoId, null, null, null).coSo;
         } catch (Exception ignored) {
-            // best-effort chỉ để lấy tên cơ sở cho nội dung email; không chặn resend nếu lỗi
+            // best-effort để lấy tên cơ sở cho email và tìm manager; không chặn resend nếu lỗi
         }
-        String maskedEmailResend = ResetSecurityUtil.maskEmail(adminEmail);
+
+        // Gửi lại đến manager của cơ sở (đồng bộ với handleRequestSave)
+        TaiKhoan otpRecipientResend = loadOtpRecipient(admin, coSo);
+        String recipientEmailResend = otpRecipientResend.getEmail();
+        if (recipientEmailResend == null || recipientEmailResend.trim().isEmpty()) {
+            writeJson(resp, 400, errorJson("Không tìm thấy email người nhận. Vui lòng kiểm tra lại thông tin cơ sở."));
+            return;
+        }
+        String maskedEmailResend = ResetSecurityUtil.maskEmail(recipientEmailResend);
         try {
-            logger.info("Gửi lại OTP cấu hình PayOS CoSoID={} đến email={}", coSoId, maskedEmailResend);
-            sendOtpEmail(adminFreshResend, coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS (gửi lại)");
+            logger.info("Gửi lại OTP cấu hình PayOS CoSoID={} đến manager email={}", coSoId, maskedEmailResend);
+            sendOtpEmail(otpRecipientResend, coSo, otp, "V-SPORT — Mã xác thực cập nhật PayOS (gửi lại)");
             logger.info("Gửi lại OTP thành công đến {}", maskedEmailResend);
         } catch (Exception e) {
             logger.error("Lỗi gửi lại email OTP PayOS cho CoSoID={}, email={}: {}", coSoId, maskedEmailResend, e.getMessage(), e);
@@ -258,22 +263,38 @@ public class PayOSConfigAdminServlet extends HttpServlet {
     }
 
     /**
-     * Lấy TaiKhoan mới nhất từ DB để đảm bảo email là email hiện tại,
-     * tránh dùng email cũ đang cached trong session khi admin/manager đã đổi email.
+     * Xác định người nhận OTP: ưu tiên manager của cơ sở (AccountID_QuanLy).
+     * Nếu cơ sở không có manager hoặc manager chưa có email, fallback về admin đang đăng nhập.
+     * Email manager luôn được đọc fresh từ DB để tránh dùng giá trị cũ.
+     */
+    private TaiKhoan loadOtpRecipient(TaiKhoan fallbackAdmin, CoSo coSo) {
+        if (coSo != null && coSo.getAccountID_QuanLy() != null) {
+            try {
+                TaiKhoan manager = taiKhoanDAO.getAccountById(coSo.getAccountID_QuanLy());
+                if (manager != null && manager.getEmail() != null && !manager.getEmail().trim().isEmpty()) {
+                    logger.info("OTP cho CoSoID={} sẽ gửi đến manager AccountID={} ({})",
+                            coSo.getCoSoID(), manager.getAccountId(),
+                            ResetSecurityUtil.maskEmail(manager.getEmail()));
+                    return manager;
+                }
+                logger.warn("Manager AccountID={} của CoSoID={} chưa có email, fallback về admin",
+                        coSo.getAccountID_QuanLy(), coSo.getCoSoID());
+            } catch (Exception e) {
+                logger.warn("Không thể load manager AccountID={} cho CoSoID={}: {}, fallback về admin",
+                        coSo.getAccountID_QuanLy(), coSo.getCoSoID(), e.getMessage());
+            }
+        }
+        return loadFreshAdmin(fallbackAdmin);
+    }
+
+    /**
+     * Lấy TaiKhoan mới nhất từ DB để đảm bảo email là email hiện tại.
      * Fallback về session nếu DB call thất bại.
      */
     private TaiKhoan loadFreshAdmin(TaiKhoan sessionAdmin) {
         try {
             TaiKhoan fresh = taiKhoanDAO.getAccountById(sessionAdmin.getAccountId());
-            if (fresh != null) {
-                if (!java.util.Objects.equals(fresh.getEmail(), sessionAdmin.getEmail())) {
-                    logger.info("Email admin AccountID={} đã thay đổi từ {} → {}, dùng email mới",
-                            sessionAdmin.getAccountId(),
-                            ResetSecurityUtil.maskEmail(sessionAdmin.getEmail()),
-                            ResetSecurityUtil.maskEmail(fresh.getEmail()));
-                }
-                return fresh;
-            }
+            if (fresh != null) return fresh;
         } catch (Exception e) {
             logger.warn("Không thể load TaiKhoan mới từ DB cho AccountID={}, dùng session: {}",
                     sessionAdmin.getAccountId(), e.getMessage());
