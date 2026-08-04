@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Servlet điều hướng Dashboard cho Staff/Lễ tân (role 4 & 5)
+ * Servlet điều hướng Dashboard cho Lễ tân (role 4)
  */
 @WebServlet("/staff/dashboard")
 public class StaffDashboardServlet extends HttpServlet {
@@ -51,8 +51,8 @@ public class StaffDashboardServlet extends HttpServlet {
             return;
         }
 
-        // Quyền Lễ tân (4) hoặc Bảo vệ (5)
-        if (user.getRoleId() != 4 && user.getRoleId() != 5) {
+        // Quyền Lễ tân (4)
+        if (user.getRoleId() != 4) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này.");
             return;
         }
@@ -69,7 +69,7 @@ public class StaffDashboardServlet extends HttpServlet {
         // Đặt dữ liệu vào request
         req.setAttribute("pageTitle", "Tổng quan Vận hành — V-SPORT");
         req.setAttribute("userFullName", user.getFullName() != null ? user.getFullName() : user.getUsername());
-        req.setAttribute("userRole", user.getRoleId() == 4 ? "Lễ tân chi nhánh" : "Bảo vệ chi nhánh");
+        req.setAttribute("userRole", "Lễ tân chi nhánh");
         req.setAttribute("dashboardData", dashboardData);
         req.setAttribute("currentPage", "dashboard");
 

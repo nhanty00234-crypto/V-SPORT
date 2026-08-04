@@ -183,8 +183,8 @@ public class YeuCauNghiStaffServlet extends HttpServlet {
         }
 
         int roleId = user.getRoleId();
-        // Chỉ Lễ tân (4) và Bảo vệ (5) được truy cập (Admin/Manager có trang riêng)
-        if (roleId != 4 && roleId != 5) {
+        // Chỉ Lễ tân (4) được truy cập (Admin/Manager có trang riêng)
+        if (roleId != 4) {
             logger.warn("Unauthorized access attempt by user ID: {}, role: {}", user.getAccountId(), roleId);
             session.setAttribute("error", "Bạn không có quyền truy cập trang này");
             resp.sendRedirect(req.getContextPath() + "/home");

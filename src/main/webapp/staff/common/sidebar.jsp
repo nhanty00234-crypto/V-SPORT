@@ -171,7 +171,7 @@
     <%-- Tính active group để auto-open --%>
     <c:set var="grpVanHanh"  value="${uri.contains('/staff/checkin') || uri.contains('/CheckIn.jsp') || uri.contains('/staff/dat-san') || uri.contains('/QuanLyDatSan.jsp') || uri.contains('/staff/yeu-cau-qr') || uri.contains('/YeuCauQR.jsp')}" />
     <c:set var="grpTaiChinh" value="${uri.contains('/staff/hoan-tien') || uri.contains('/staff/HoanTien.jsp')}" />
-    <c:set var="grpCaNhan"   value="${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') || uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') || uri.contains('/staff/luong') || uri.contains('/LuongCuaToi')}" />
+    <c:set var="grpCaNhan"   value="${uri.contains('/staff/ca-lam') || uri.contains('/CaLamViec.jsp') || uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_')}" />
 
     <!-- ── Tổng quan (không có group) ── -->
     <a href="${pageContext.request.contextPath}/staff/dashboard"
@@ -232,10 +232,6 @@
         <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi"
           class="nav-link ${uri.contains('/yeu-cau-nghi') || uri.contains('/yeuCauNghi_') ? 'active' : ''}">
           <i class="ti ti-clipboard-list text-[16px]"></i>Đăng ký nghỉ phép
-        </a>
-        <a href="${pageContext.request.contextPath}/staff/luong"
-          class="nav-link ${uri.contains('/staff/luong') || uri.contains('/LuongCuaToi') ? 'active' : ''}">
-          <i class="ti ti-cash text-[16px]"></i>Lương của tôi
         </a>
       </div>
     </div>

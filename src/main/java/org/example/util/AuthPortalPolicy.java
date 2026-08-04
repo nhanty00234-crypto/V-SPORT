@@ -4,7 +4,7 @@ package org.example.util;
  * Chính sách hai cổng đăng nhập V-SPORT.
  * Portal chỉ quyết định NHÓM ROLE ĐƯỢC PHÉP đăng nhập tại trang đó và giao diện;
  * nó tuyệt đối không cấp role — role luôn đọc từ Account sau khi BCrypt verify.
- * Mapping role theo {@link RoleRedirectUtil}: 1=Admin, 2=Manager, 3=Customer, 4/5=Staff.
+ * Mapping role theo {@link RoleRedirectUtil}: 1=Admin, 2=Manager, 3=Customer, 4=Lễ tân.
  */
 public final class AuthPortalPolicy {
 

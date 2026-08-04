@@ -1255,7 +1255,7 @@ public class CaLamService {
             throw new IllegalArgumentException("Chỉ có thể hoán đổi ca làm với đồng nghiệp cùng chi nhánh.");
         }
 
-        // BUG-SWAP-07: yêu cầu cùng vai trò (lễ tân không được đổi ca với bảo vệ)
+        // BUG-SWAP-07: yêu cầu cùng vai trò
         if (guiAcc.getRoleId() != nhanAcc.getRoleId()) {
             throw new ValidationException("Chỉ có thể đổi ca với nhân viên cùng vị trí (vai trò).");
         }

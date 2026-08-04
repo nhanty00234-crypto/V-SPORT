@@ -6,7 +6,6 @@
 <head>
 <title>Lịch làm của tôi — V-SPORT</title>
 <jsp:include page="/staff/common/staff_head.jsp" />
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
   .tab-btn {
     display: flex; align-items: center; gap: 8px;
@@ -155,7 +154,6 @@
           <div id="todayStatusBadge" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold"></div>
         </div>
         <div id="todayShiftNote" class="mt-3 text-xs opacity-75 relative z-10"></div>
-        <div id="todayActionBtns" class="flex gap-2 mt-4 relative z-10"></div>
       </div>
     </div>
 
@@ -175,9 +173,6 @@
       </a>
       <button onclick="switchTab('swaps')" class="quick-action-btn">
         <i class="ti ti-arrows-exchange"></i>Yêu cầu đổi ca
-      </button>
-      <button onclick="openTodayFaceModal()" class="quick-action-btn" id="btnQuickFace">
-        <i class="ti ti-face-id"></i>Điểm danh
       </button>
     </div>
 
@@ -209,9 +204,7 @@
         <span class="font-bold text-orange-800">Lưu ý</span>
         <ul class="list-disc list-inside space-y-0.5 text-orange-700/90">
           <li>Lịch làm được cấu hình bởi quản lý chi nhánh.</li>
-          <li>Điểm danh vào ca <b>chỉ bằng khuôn mặt</b>. Xác nhận lịch do quản lý thực hiện.</li>
-          <li>Điểm danh vào ca mở <b>trước 15 phút</b> và đóng <b>60 phút</b> sau giờ bắt đầu ca.</li>
-          <li>Quá hạn điểm danh hoặc camera gặp sự cố, liên hệ quản lý để được điểm danh hộ.</li>
+          <li>Trạng thái ca do quản lý chi nhánh cập nhật.</li>
           <li>Để đổi ca, hãy dùng tab <strong>Yêu cầu đổi ca</strong>.</li>
           <li>Nếu có vấn đề, liên hệ quản lý trực tiếp.</li>
         </ul>
@@ -315,59 +308,11 @@
 
 </main>
 
-<!-- Cảnh báo chưa tới khung giờ điểm danh -->
-<div id="attendanceAlert" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[70] max-w-md w-[calc(100%-2rem)]">
-  <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 shadow-lg flex items-start gap-2.5">
-    <i class="ti ti-alert-circle text-[18px] shrink-0 mt-px"></i>
-    <span data-alert-text class="text-sm font-semibold leading-snug"></span>
-  </div>
-</div>
-
-<!-- Face Attendance Modal -->
-<div id="faceModal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
-  <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm mx-4 flex flex-col items-center gap-4">
-    <h3 class="font-black text-orange-900 text-lg" id="faceModalTitle">Điểm danh khuôn mặt</h3>
-
-    <div class="relative w-full aspect-square bg-zinc-900 rounded-2xl overflow-hidden">
-      <video id="faceVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay muted playsinline></video>
-    </div>
-
-    <%-- Mức độ khớp khuôn mặt theo thời gian thực --%>
-    <div class="w-full">
-      <div class="flex items-baseline justify-between mb-1.5">
-        <span class="text-xs font-semibold text-zinc-500">Độ khớp khuôn mặt</span>
-        <span id="faceMatch" class="text-zinc-300 font-black text-lg">--%</span>
-      </div>
-      <div class="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
-        <div id="faceMatchBar" class="h-2.5 rounded-full transition-all duration-200" style="width:0%;background:#f59e0b"></div>
-      </div>
-      <p id="faceMatchHint" class="text-[11px] text-zinc-400 mt-1">Đưa khuôn mặt vào giữa khung hình</p>
-    </div>
-
-    <p id="faceStatus" class="text-zinc-600 text-sm text-center font-medium min-h-[2.5rem]">
-      Đang khởi động camera...
-    </p>
-
-    <div class="w-full bg-zinc-100 rounded-full h-2">
-      <div id="faceProgress" class="bg-orange-500 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
-    </div>
-
-    <button onclick="Attendance.closeModal()"
-            class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-xl text-sm transition">
-      Hủy
-    </button>
-  </div>
-</div>
-
-<script src="${pageContext.request.contextPath}/assets/js/face-attendance.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/attendance-shared.js"></script>
 <script>
 var _ctx = '<%=request.getContextPath()%>';
 var _currentCaId = null;
 var _currentAction = null;
 var _myId = ${sessionScope.user.accountId};
-var _faceRequired = ${faceConfig != null ? faceConfig.faceRequired : true};
-Attendance.initModal({ contextPath: _ctx });
 
 var shifts = [], coworkers = [], swaps = [];
 
@@ -473,8 +418,6 @@ function renderCalendar() {
         if (s.tenCa) html += '<p class="text-[10px] text-orange-600 font-semibold mt-0.5">' + s.tenCa + '</p>';
         if (s.viTri) html += '<p class="text-[10px] text-zinc-500">' + s.viTri + '</p>';
         if (s.gioNghi > 0) html += '<p class="text-[9px] text-red-500 font-semibold mt-1">Nghỉ: ' + s.gioNghi + ' phút</p>';
-        // Action buttons
-        html += buildShiftActionBtn(s);
         html += '</div>';
       });
     }
@@ -482,43 +425,6 @@ function renderCalendar() {
   }
 
   grid.innerHTML = html;
-}
-
-function buildShiftActionBtn(s) {
-  if (!s.trangThai || s.trangThai === 'Cancelled' || s.trangThai === 'CheckedOut' || s.trangThai === 'Draft') {
-    return '';
-  }
-  if (s.trangThai === 'CheckedIn') {
-    if (_faceRequired === false) {
-      return '<div class="mt-2 w-full text-[10px] py-1.5 px-2 bg-amber-50 text-amber-700 font-semibold rounded-lg text-center leading-snug">'
-           + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để kết thúc ca</div>';
-    }
-    return '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')"'
-         + ' class="mt-2 w-full text-[11px] py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg flex items-center justify-center gap-1">'
-         + '<i class="ti ti-logout text-[13px]"></i>Kết thúc ca</button>';
-  }
-  if (s.trangThai === 'Published' || s.trangThai === 'Confirmed') {
-    // Nhân viên chỉ có một đường: điểm danh bằng khuôn mặt.
-    // Xác nhận lịch và điểm danh thủ công thuộc quyền quản lý.
-    if (_faceRequired === false) {
-      return '<div class="mt-2 w-full text-[10px] py-1.5 px-2 bg-amber-50 text-amber-700 font-semibold rounded-lg text-center leading-snug">'
-           + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh</div>';
-    }
-    var ready = Attendance.checkInWindow(s).ok;
-    var cls = ready
-      ? 'bg-green-600 hover:bg-green-700 text-white'
-      : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-500';
-    return '<button type="button" onclick="tryCheckIn(' + s.caLamViecId + ')"'
-         + ' class="mt-2 w-full text-[11px] py-1.5 font-bold rounded-lg flex items-center justify-center gap-1 ' + cls + '">'
-         + '<i class="ti ti-face-id text-[13px]"></i>Điểm danh</button>';
-  }
-  return '';
-}
-
-/** Bấm "Điểm danh" trên thẻ ca: kiểm tra khung giờ trước khi mở camera. */
-function tryCheckIn(caId) {
-  var s = shifts.find(function (x) { return x.caLamViecId === caId; });
-  if (s) Attendance.tryCheckIn(s);
 }
 
 
@@ -554,26 +460,6 @@ function renderTodayCard() {
 
   var note = document.getElementById('todayShiftNote');
   note.textContent = s.ghiChu || '';
-
-  var btns = document.getElementById('todayActionBtns');
-  btns.innerHTML = '';
-  if (s.trangThai === 'Published' || s.trangThai === 'Confirmed') {
-    if (_faceRequired === false) {
-      btns.innerHTML = '<div class="px-4 py-2 bg-white/20 text-white/90 rounded-lg text-xs font-semibold">'
-                     + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để điểm danh</div>';
-    } else {
-      var ready = Attendance.checkInWindow(s).ok;
-      btns.innerHTML = '<button type="button" onclick="tryCheckIn(' + s.caLamViecId + ')"'
-             + ' class="px-4 py-2 rounded-lg text-xs font-bold transition-all '
-             + (ready ? 'bg-white text-green-700 hover:bg-green-50' : 'bg-white/30 text-white/70 hover:bg-white/40')
-             + '">Điểm danh</button>';
-    }
-  } else if (s.trangThai === 'CheckedIn') {
-    btns.innerHTML = (_faceRequired === false)
-      ? '<div class="px-4 py-2 bg-white/20 text-white/90 rounded-lg text-xs font-semibold">'
-        + 'Điểm danh khuôn mặt đang tắt — liên hệ quản lý để kết thúc ca</div>'
-      : '<button type="button" onclick="openFaceModal(\'checkout\', ' + s.caLamViecId + ')" class="px-4 py-2 bg-white text-red-700 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Kết thúc ca</button>';
-  }
 }
 
 // ── Load ──
@@ -704,35 +590,6 @@ function switchSwapTab(name) {
         : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 text-zinc-600 hover:bg-zinc-200';
     }
   });
-}
-
-// ── Điểm danh (dùng chung với GUARD qua attendance-shared.js) ──
-function openFaceModal(action, caId) { Attendance.openModal(action, caId); }
-
-// Lối tắt "Điểm danh": tự chọn ca hôm nay và hành động phù hợp
-function openTodayFaceModal() {
-  if (_faceRequired === false) {
-    Attendance.alert('Điểm danh khuôn mặt đang tắt — liên hệ quản lý để được điểm danh hộ.');
-    return;
-  }
-  var today = Attendance.todayStr();
-  var todayShifts = shifts.filter(function(s) {
-    return s.ngayLam === today && s.trangThai !== 'Cancelled';
-  }).sort(function(a, b) { return (a.gioBatDau || '').localeCompare(b.gioBatDau || ''); });
-
-  if (todayShifts.length === 0) {
-    Attendance.alert('Hôm nay bạn không có ca làm việc nào được phân công.');
-    return;
-  }
-
-  // Đang trong ca -> kết thúc ca (không giới hạn khung giờ)
-  var inShift = todayShifts.find(function(s) { return s.trangThai === 'CheckedIn'; });
-  if (inShift) { Attendance.openModal('checkout', inShift.caLamViecId); return; }
-
-  var pending = todayShifts.find(function(s) { return s.trangThai !== 'CheckedOut'; });
-  if (!pending) { Attendance.alert('Bạn đã hoàn thành tất cả ca hôm nay.'); return; }
-
-  Attendance.tryCheckIn(pending);
 }
 
 // ── Init ──

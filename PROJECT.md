@@ -174,9 +174,8 @@ Hệ thống quản lý chặt chẽ theo 5 vai trò tài khoản cốt lõi:
     *   Quản lý trực tiếp các sân (`San`) và phân bổ ca làm việc (`CaLamViec`) cho nhân viên thuộc chi nhánh.
     *   Phê duyệt đơn xin nghỉ phép (`YeuCauNghi`), yêu cầu đổi ca (`CaLamViecSwapRequest`).
     *   Xem biểu đồ thống kê doanh thu, tần suất sử dụng sân, dịch vụ kho hàng của chi nhánh.
-*   **3. Staff (Nhân viên trực ca: Lễ tân, Bảo vệ)**:
-    *   *Lễ tân*: Bán dịch vụ tại quầy, kích hoạt QR hóa đơn, tiếp nhận yêu cầu SOS khẩn cấp.
-    *   *Bảo vệ*: Check-in/check-out xe ra vào bãi đỗ thông qua thẻ xe thông minh.
+*   **3. Staff (Lễ tân trực ca)**:
+    *   Bán dịch vụ tại quầy, kích hoạt QR hóa đơn, tiếp nhận yêu cầu SOS khẩn cấp.
     *   Xem ca làm cá nhân, báo cáo nguyện vọng rảnh, gửi đơn nghỉ phép.
 *   **4. Customer (Khách hàng sử dụng dịch vụ)**:
     *   Tìm kiếm sân trống, đặt lịch chơi, thanh toán trực tuyến qua cổng QR (PayOS).

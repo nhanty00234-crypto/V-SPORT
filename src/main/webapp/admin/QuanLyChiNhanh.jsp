@@ -478,7 +478,7 @@ var DRAWER_DATA = {};
     <h3 class="text-base font-bold text-zinc-900 mb-1">Ngừng hoạt động cơ sở?</h3>
     <p class="text-sm text-zinc-500 mb-6 text-left" id="deleteMsg">Khi xác nhận:
       <ul class="list-disc pl-5 mt-1.5 space-y-1">
-        <li>Quản lý, nhân viên và bảo vệ của cơ sở sẽ không thể đăng nhập.</li>
+        <li>Quản lý và nhân viên của cơ sở sẽ không thể đăng nhập.</li>
         <li>Phiên đăng nhập hiện tại của họ sẽ bị vô hiệu ở lần thao tác tiếp theo.</li>
         <li>Dữ liệu sân, lịch đặt và hóa đơn vẫn được giữ nguyên để khôi phục sau này.</li>
       </ul>

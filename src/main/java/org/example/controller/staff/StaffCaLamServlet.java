@@ -4,12 +4,9 @@ import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;
 import org.example.model.CaLamViecAvailability;
 import org.example.model.CaLamViecSwapRequest;
-import org.example.model.CoSoFaceConfig;
 import org.example.service.manager.CaLamService;
 import org.example.dao.CaLamViecDAO;
-import org.example.dao.CoSoFaceConfigDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
-import org.example.dao.impl.CoSoFaceConfigDAOImpl;
 import org.example.util.AttendanceWindow;
 import org.example.util.Constants;
 
@@ -34,7 +31,6 @@ public class StaffCaLamServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(StaffCaLamServlet.class);
     private final CaLamService caLamService = new CaLamService();
     private final CaLamViecDAO caLamViecDAO = new CaLamViecDAOImpl();
-    private final CoSoFaceConfigDAO faceConfigDAO = new CoSoFaceConfigDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -42,7 +38,7 @@ public class StaffCaLamServlet extends HttpServlet {
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
-        if (user == null || (user.getRoleId() != 4 && user.getRoleId() != 5)) {
+        if (user == null || user.getRoleId() != Constants.ROLE_LE_TAN) {
             session.setAttribute("error", "Bạn không có quyền truy cập trang này.");
             resp.sendRedirect(req.getContextPath() + "/dangnhap");
             return;
@@ -83,10 +79,6 @@ public class StaffCaLamServlet extends HttpServlet {
             return;
         }
 
-        CoSoFaceConfig faceConfig = user.getCoSoId() != null
-            ? faceConfigDAO.findByCoSo(user.getCoSoId())
-            : new CoSoFaceConfig();
-        req.setAttribute("faceConfig", faceConfig);
         req.getRequestDispatcher("/staff/CaLamViec.jsp").forward(req, resp);
     }
 
@@ -96,22 +88,12 @@ public class StaffCaLamServlet extends HttpServlet {
         HttpSession session = req.getSession();
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
 
-        if (user == null || (user.getRoleId() != 4 && user.getRoleId() != 5)) {
+        if (user == null || user.getRoleId() != Constants.ROLE_LE_TAN) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
-        // Server-side faceRequired gate — block manual checkin/checkout if face attendance is mandatory
-        CoSoFaceConfig faceConfigPost = user.getCoSoId() != null
-            ? faceConfigDAO.findByCoSo(user.getCoSoId())
-            : new CoSoFaceConfig();
-
         String action = req.getParameter("action");
-        if (faceConfigPost.isFaceRequired() && ("checkIn".equals(action) || "checkOut".equals(action))) {
-            session.setAttribute("error", "Điểm danh bằng khuôn mặt là bắt buộc. Vui lòng sử dụng tính năng nhận diện khuôn mặt.");
-            resp.sendRedirect(req.getContextPath() + "/staff/ca-lam");
-            return;
-        }
 
         try {
             if ("requestSwap".equals(action)) {
@@ -133,13 +115,6 @@ public class StaffCaLamServlet extends HttpServlet {
                 boolean accept = Boolean.parseBoolean(req.getParameter("accept"));
                 caLamService.respondToSwapRequest(swapId, accept, user.getAccountId());
                 session.setAttribute("message", accept ? "Đã đồng ý hoán đổi. Chờ quản lý phê duyệt." : "Đã từ chối hoán đổi.");
-            } else if ("confirmShift".equals(action) || "checkIn".equals(action) || "checkOut".equals(action)) {
-                // Xác nhận lịch và điểm danh thủ công là quyền của Quản lý.
-                // Nhân viên chỉ điểm danh qua nhận diện khuôn mặt (/face/checkin);
-                // khi camera hỏng, quản lý tắt bắt buộc khuôn mặt và bấm hộ nhân viên.
-                throw new IllegalArgumentException(
-                        "Thao tác này do quản lý thực hiện. Vui lòng điểm danh bằng khuôn mặt "
-                        + "hoặc liên hệ quản lý nếu camera gặp sự cố.");
             }
         } catch (IllegalArgumentException e) {
             session.setAttribute("error", e.getMessage());
@@ -182,7 +157,7 @@ public class StaffCaLamServlet extends HttpServlet {
             m.put("accountId", c.getAccountId());
             m.put("username", c.getUsername());
             m.put("fullName", c.getFullName() != null ? c.getFullName() : c.getUsername());
-            m.put("roleName", c.getRoleId() == 4 ? "Lễ tân" : "Bảo vệ");
+            m.put("roleName", "Lễ tân");
             coworkersList.add(m);
         }
         data.put("coworkers", coworkersList);

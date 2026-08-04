@@ -67,15 +67,6 @@ public interface TaiKhoanDAO {
 
     List<TaiKhoan> findAll();
 
-    /** Cập nhật face descriptor và ảnh khuôn mặt cho tài khoản. */
-    void updateFaceData(int accountId, String descriptorJson, String imagePath);
-
-    /** Lấy face data (chỉ accountId, faceDescriptor, faceImagePath, faceEnrolledAt). */
-    TaiKhoan getFaceData(int accountId);
-
-    /** Xóa đăng ký khuôn mặt của một tài khoản để nhân viên đăng ký lại. */
-    void resetFaceData(int accountId);
-
     /** Nhân viên tự cập nhật ngân hàng nhận lương. Truyền null/blank để xoá thông tin. */
     void updateBankInfo(int accountId, String maNganHang, String soTaiKhoan) throws Exception;
 

@@ -114,31 +114,4 @@ public interface CaLamViecDAO {
      */
     int publishDraftShiftsWithConnection(LocalDate startOfWeek, LocalDate endOfWeek, int coSoId, Connection conn) throws SQLException;
 
-    /** Lấy ca hôm nay của nhân viên (dùng cho điểm danh bảo vệ) */
-    CaLamViec getCaHomNay(int accountId, LocalDate ngay);
-
-    /** Ghi giờ vào ca thực tế */
-    boolean checkInCa(int caLamViecId);
-
-    /** Ghi giờ ra ca thực tế */
-    boolean checkOutCa(int caLamViecId);
-
-    /** Ghi giờ vào ca thực tế kèm kết quả nhận diện khuôn mặt */
-    boolean faceCheckIn(int caLamViecId, String imagePath, double confidence, boolean livenessPassed);
-
-    /** Ghi giờ ra ca thực tế kèm kết quả nhận diện khuôn mặt */
-    boolean faceCheckOut(int caLamViecId, String imagePath, double confidence);
-
-    /**
-     * Lịch sử các ca đã điểm danh thành công bằng khuôn mặt tại một cơ sở,
-     * mới nhất trước, đã join sẵn tên nhân viên.
-     */
-    List<org.example.model.FaceAttendanceLog> getFaceAttendanceHistory(int coSoId, int limit);
-
-    /**
-     * Đếm số ca ĐÃ HOÀN THÀNH của một nhân viên trong khoảng ngày, dùng để tính phụ cấp theo ca.
-     * Chỉ tính trạng thái 'CheckedOut' và 'Confirmed'; bỏ qua ca đã xoá mềm.
-     * Khoảng ngày là inclusive hai đầu.
-     */
-    int countCaHoanThanh(int accountId, int coSoId, LocalDate tuNgay, LocalDate denNgay) throws Exception;
 }

@@ -115,7 +115,7 @@ body{font-family:'Inter',sans-serif}
         </div>
         <span class="badge badge-amber kpi-badge">Nhân viên</span>
       </div>
-      <p class="text-xs text-slate-500 font-medium">Lễ tân / Bảo vệ</p>
+      <p class="text-xs text-slate-500 font-medium">Lễ tân</p>
       <p class="text-3xl font-black text-slate-900 mt-0.5 num-anim" data-count-to="${totalStaff}">${totalStaff}</p>
       <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
         <p class="text-[11px] text-slate-400">Trên toàn hệ thống</p>
@@ -304,7 +304,6 @@ body{font-family:'Inter',sans-serif}
                 <c:when test="${acc.roleId == 2}"><span class="badge badge-purple text-[10px]">QL</span></c:when>
                 <c:when test="${acc.roleId == 3}"><span class="badge badge-green text-[10px]">KH</span></c:when>
                 <c:when test="${acc.roleId == 4}"><span class="badge badge-amber text-[10px]">LT</span></c:when>
-                <c:when test="${acc.roleId == 5}"><span class="badge badge-zinc text-[10px]">BV</span></c:when>
                 <c:when test="${acc.roleId == 6}"><span class="badge badge-blue text-[10px]">Owner</span></c:when>
               </c:choose>
             </div>

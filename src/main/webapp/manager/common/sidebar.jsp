@@ -377,7 +377,7 @@
     <c:set var="grpVanHanh"   value="${uri.contains('/quan-ly-san') || uri.contains('/QuanLySan') || uri.contains('/ma-qr-san') || uri.contains('/MaQrSan') || uri.contains('/staff/checkin') || uri.contains('/CheckIn') || uri.contains('/dat-san') || uri.contains('/QuanLyDatSan')}" />
     <c:set var="grpTaiChinh"  value="${uri.contains('/hoa-don') || uri.contains('/QuanLyHoaDon') || uri.contains('/hoan-tien') || uri.contains('/HoanTien') || uri.contains('/khuyen-mai') || uri.contains('/KhuyenMai')}" />
     <c:set var="grpCuaHang"   value="${uri.contains('/kho-dich-vu') || uri.contains('/KhoDichVu') || uri.contains('/manager/dich-vu') || uri.contains('/DichVu') || uri.contains('/yeu-cau-dich-vu') || uri.contains('/YeuCauDichVu')}" />
-    <c:set var="grpNhanSu"    value="${uri.contains('/nhan-su') || uri.contains('/NhanSu') || uri.contains('/ca-lam') || uri.contains('/CaLamViec') || uri.contains('/face-settings') || uri.contains('/FaceSettings') || uri.contains('/manager/luong') || uri.contains('/Luong') || uri.contains('/CauHinhLuong') || uri.contains('/PhatLuong') || uri.contains('/DuyetUngLuong')}" />
+    <c:set var="grpNhanSu"    value="${uri.contains('/nhan-su') || uri.contains('/NhanSu') || uri.contains('/ca-lam') || uri.contains('/CaLamViec')}" />
     <c:set var="grpKhachHang" value="${uri.contains('/khach-hang') || uri.contains('/KhachHang') || uri.contains('/danh-gia') || uri.contains('/DanhGia')}" />
     <c:set var="grpHeThong"   value="${uri.contains('/thung-rac') || uri.contains('/ThungRac') || uri.contains('/audit-log') || uri.contains('/AuditLog')}" />
 
@@ -477,14 +477,6 @@
         <a href="${pageContext.request.contextPath}/manager/ca-lam"
           class="nav-link ${uri.contains('/manager/ca-lam') || uri.contains('/CaLamViec') ? 'active' : ''}">
           <i class="ti ti-calendar-time text-[16px]"></i>Ca làm việc
-        </a>
-        <a href="${pageContext.request.contextPath}/manager/face-settings"
-          class="nav-link ${uri.contains('/manager/face-settings') || uri.contains('/FaceSettings') ? 'active' : ''}">
-          <i class="ti ti-face-id text-[16px]"></i>Cài đặt khuôn mặt
-        </a>
-        <a href="${pageContext.request.contextPath}/manager/luong"
-          class="nav-link ${uri.contains('/manager/luong') || uri.contains('/Luong') || uri.contains('/CauHinhLuong') || uri.contains('/PhatLuong') || uri.contains('/DuyetUngLuong') ? 'active' : ''}">
-          <i class="ti ti-cash text-[16px]"></i>Quản lý lương
         </a>
       </div>
     </div>

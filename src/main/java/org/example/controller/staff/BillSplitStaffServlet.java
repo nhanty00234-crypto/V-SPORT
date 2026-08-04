@@ -91,7 +91,7 @@ public class BillSplitStaffServlet extends HttpServlet {
             sendJsonError(resp, HttpServletResponse.SC_UNAUTHORIZED, "Vui lòng đăng nhập.");
             return null;
         }
-        if (user.getRoleId() != Constants.ROLE_LE_TAN && user.getRoleId() != Constants.ROLE_BAO_VE) {
+        if (user.getRoleId() != Constants.ROLE_LE_TAN) {
             sendJsonError(resp, HttpServletResponse.SC_FORBIDDEN, "Không có quyền truy cập.");
             return null;
         }

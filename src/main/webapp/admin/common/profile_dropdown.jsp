@@ -30,7 +30,6 @@
           <c:when test="${sessionScope.user.roleId == 1}">Quản trị viên</c:when>
           <c:when test="${sessionScope.user.roleId == 2}">Quản lý</c:when>
           <c:when test="${sessionScope.user.roleId == 4}">Lễ tân</c:when>
-          <c:when test="${sessionScope.user.roleId == 5}">Bảo vệ</c:when>
           <c:otherwise>Nhân viên</c:otherwise>
         </c:choose>
         <c:if test="${not empty sessionScope.user.coSoId}">
@@ -60,8 +59,7 @@
                 <c:when test="${sessionScope.user.roleId == 1}">Quản trị viên</c:when>
                 <c:when test="${sessionScope.user.roleId == 2}">Quản lý</c:when>
                 <c:when test="${sessionScope.user.roleId == 4}">Lễ tân</c:when>
-                <c:when test="${sessionScope.user.roleId == 5}">Bảo vệ</c:when>
-                <c:otherwise>Nhân viên</c:otherwise>
+                      <c:otherwise>Nhân viên</c:otherwise>
               </c:choose>
             </span>
             <span class="inline-flex items-center gap-1 text-[11px] font-medium text-[#05cd99] bg-[#e6fcf5] px-2 py-0.5 rounded-full whitespace-nowrap">

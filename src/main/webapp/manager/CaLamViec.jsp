@@ -263,7 +263,6 @@
       <select id="filterRole" onchange="filterShifts()" class="h-9 px-3 rounded-lg border border-purple-100 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white">
         <option value="">Tất cả vai trò</option>
         <option value="4">Lễ tân</option>
-        <option value="5">Bảo vệ</option>
       </select>
 
       <select id="filterDateOpt" onchange="toggleDateInputs(); filterShifts();" class="h-9 px-3 rounded-lg border border-purple-100 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white">
@@ -706,7 +705,7 @@ let staffList = [
       username: '${staff.username}',
       fullName: '<c:out value="${staff.fullName != null && !staff.fullName.trim().isEmpty() ? staff.fullName : staff.username}" />',
       roleId: ${staff.roleId},
-      roleName: '${staff.roleId == 4 ? "Lễ tân" : (staff.roleId == 5 ? "Bảo vệ" : "Nhân viên")}'
+      roleName: '${staff.roleId == 4 ? "Lễ tân" : "Nhân viên"}'
     }${!loop.last ? ',' : ''}
   </c:forEach>
 ];
@@ -2024,7 +2023,6 @@ function renderCalendar() {
         const timeStatus = getShiftStatus(s.ngayLam, s.gioBatDau, s.gioKetThuc);
         let roleColor = ''; let bgColor = '';
         if (staff.roleId === 4) { roleColor = 'text-green-600'; bgColor = 'bg-green-50 border-green-200'; }
-        else if (staff.roleId === 5) { roleColor = 'text-orange-600'; bgColor = 'bg-orange-50 border-orange-200'; }
         else { roleColor = 'text-blue-600'; bgColor = 'bg-blue-50 border-blue-200'; }
 
         const isTerminal = s.trangThai === 'CheckedOut' || s.trangThai === 'Completed' || s.trangThai === 'Cancelled';

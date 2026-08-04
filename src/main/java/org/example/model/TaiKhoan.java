@@ -117,23 +117,6 @@ public class TaiKhoan {
     @Column(name = "DeletedBy")
     private Integer deletedBy;
 
-    @Column(name = "FaceDescriptor", columnDefinition = "NVARCHAR(MAX)")
-    private String faceDescriptor;  // JSON array 128 floats
-
-    @Column(name = "FaceImagePath")
-    private String faceImagePath;
-
-    @Column(name = "FaceEnrolledAt")
-    private java.time.LocalDateTime faceEnrolledAt;
-
-    public String getFaceDescriptor() { return faceDescriptor; }
-    public void setFaceDescriptor(String faceDescriptor) { this.faceDescriptor = faceDescriptor; }
-    public String getFaceImagePath() { return faceImagePath; }
-    public void setFaceImagePath(String faceImagePath) { this.faceImagePath = faceImagePath; }
-    public java.time.LocalDateTime getFaceEnrolledAt() { return faceEnrolledAt; }
-    public void setFaceEnrolledAt(java.time.LocalDateTime faceEnrolledAt) { this.faceEnrolledAt = faceEnrolledAt; }
-    public boolean isFaceEnrolled() { return faceDescriptor != null && !faceDescriptor.isEmpty(); }
-
     public Boolean isDeleted() {
         return isDeleted != null && isDeleted;
     }

@@ -196,7 +196,6 @@ body { font-family: 'Inter', sans-serif; }
                 <option value="2">Quản lý</option>
                 <option value="3">Khách hàng</option>
                 <option value="4">Lễ tân</option>
-                <option value="5">Bảo vệ</option>
               </select>
             </div>
             <div id="staffCoSoContainer" class="flex flex-col gap-1.5 hidden">
@@ -299,7 +298,7 @@ let staffList = [
       id: '${acc.accountId}',
       username: '${acc.username}',
       name: '<c:out value="${acc.fullName != null && !acc.fullName.trim().isEmpty() ? acc.fullName : acc.username}" />',
-      VaiTro: '<c:choose><c:when test="${acc.roleId == 1}">Quản trị viên</c:when><c:when test="${acc.roleId == 2}">Quản lý</c:when><c:when test="${acc.roleId == 3}">Khách hàng</c:when><c:when test="${acc.roleId == 4}">Lễ tân</c:when><c:when test="${acc.roleId == 5}">Bảo vệ</c:when><c:otherwise>Nhân viên</c:otherwise></c:choose>',
+      VaiTro: '<c:choose><c:when test="${acc.roleId == 1}">Quản trị viên</c:when><c:when test="${acc.roleId == 2}">Quản lý</c:when><c:when test="${acc.roleId == 3}">Khách hàng</c:when><c:when test="${acc.roleId == 4}">Lễ tân</c:when><c:otherwise>Nhân viên</c:otherwise></c:choose>',
       roleId: ${acc.roleId},
       phone: '${acc.phoneNumber != null ? acc.phoneNumber : "Chưa có"}',
       status: '${acc.isLocked ? "Bị khóa" : "Đang làm"}',
@@ -318,7 +317,7 @@ let deletedList = [
       id: '${acc.accountId}',
       username: '${acc.username}',
       name: '<c:out value="${acc.fullName != null && !acc.fullName.trim().isEmpty() ? acc.fullName : acc.username}" />',
-      VaiTro: '<c:choose><c:when test="${acc.roleId == 1}">Quản trị viên</c:when><c:when test="${acc.roleId == 2}">Quản lý</c:when><c:when test="${acc.roleId == 3}">Khách hàng</c:when><c:when test="${acc.roleId == 4}">Lễ tân</c:when><c:when test="${acc.roleId == 5}">Bảo vệ</c:when><c:otherwise>Nhân viên</c:otherwise></c:choose>',
+      VaiTro: '<c:choose><c:when test="${acc.roleId == 1}">Quản trị viên</c:when><c:when test="${acc.roleId == 2}">Quản lý</c:when><c:when test="${acc.roleId == 3}">Khách hàng</c:when><c:when test="${acc.roleId == 4}">Lễ tân</c:when><c:otherwise>Nhân viên</c:otherwise></c:choose>',
       email: '${acc.email}',
       initial: '${(acc.fullName != null && acc.fullName.length() > 0) ? acc.fullName.substring(0, 1).toUpperCase() : acc.username.substring(0, 1).toUpperCase()}'
     }${!loop.last ? ',' : ''}
@@ -457,7 +456,6 @@ function renderStaff() {
     else if (s.roleId === 2) dept = 'Quản lý';
     else if (s.roleId === 3) dept = 'Khách hàng';
     else if (s.roleId === 4) dept = 'Lễ tân';
-    else if (s.roleId === 5) dept = 'Bảo vệ';
 
     let branchText = s.coSoId ? `CS\${s.coSoId}` : 'Trụ sở';
     let avatarUrl = s.avatarUrl
@@ -561,7 +559,7 @@ function updateRoleDropdown(isEdit, currentRoleId) {
       { id: 2, name: 'Quản lý' },
       { id: 3, name: 'Khách hàng' },
       { id: 4, name: 'Lễ tân' },
-      { id: 5, name: 'Bảo vệ' }
+
     ];
     
     allowedRoles.forEach(role => {

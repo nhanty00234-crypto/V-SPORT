@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * GET  /staff/hoan-tien        — danh sách yêu cầu hoàn tiền của cơ sở (Lễ tân/Bảo vệ)
+ * GET  /staff/hoan-tien        — danh sách yêu cầu hoàn tiền của cơ sở (Lễ tân)
  * POST /staff/hoan-tien?action= — approve | reject | start-processing | complete | request-more-info
  *
  * CoSoID luôn lấy từ TaiKhoan đã đăng nhập (giống StaffDashboardServlet), không tin request parameter.
@@ -58,7 +58,7 @@ public class StaffRefundServlet extends HttpServlet {
         req.setAttribute("page", page);
         req.setAttribute("coSoId", coSoId);
         req.setAttribute("trangThaiFilter", validFilter ? trangThaiFilter : "");
-        req.setAttribute("userRole", staff.getRoleId() == 4 ? "Lễ tân trực ca" : "Bảo vệ trực ca");
+        req.setAttribute("userRole", "Lễ tân trực ca");
         req.getRequestDispatcher("/staff/HoanTien.jsp").forward(req, resp);
     }
 
@@ -158,8 +158,8 @@ public class StaffRefundServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/he-thong/dang-nhap");
             return null;
         }
-        // Quyền Lễ tân (4) hoặc Bảo vệ (5)
-        if (user.getRoleId() != 4 && user.getRoleId() != 5) {
+        // Quyền Lễ tân (4)
+        if (user.getRoleId() != 4) {
             try { resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này."); } catch (Exception ignored) {}
             return null;
         }

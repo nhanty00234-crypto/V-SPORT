@@ -11,7 +11,6 @@ public final class Constants {
     public static final int ROLE_MANAGER = 2;
     public static final int ROLE_KHACH_HANG = 3;
     public static final int ROLE_LE_TAN = 4;
-    public static final int ROLE_BAO_VE = 5;
 
     // ========== BOOKING (LichDatSan) STATUS ==========
     public static final String TRANG_THAI_DAT_SAN_CHO_XAC_NHAN = "Chờ xác nhận";
@@ -248,7 +247,7 @@ public final class Constants {
     public static final String SHIFT_STATUS_COMPLETED = "Completed";
     public static final String SHIFT_STATUS_CANCELLED = "Cancelled";
 
-    public static final java.util.List<Integer> ALLOWED_SHIFT_ROLES = java.util.List.of(ROLE_LE_TAN, ROLE_BAO_VE);
+    public static final java.util.List<Integer> ALLOWED_SHIFT_ROLES = java.util.List.of(ROLE_LE_TAN);
 
     public static boolean isTerminalStatus(String status) {
         return SHIFT_STATUS_CHECKED_OUT.equalsIgnoreCase(status) 
