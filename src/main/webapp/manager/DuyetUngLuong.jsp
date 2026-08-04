@@ -60,7 +60,7 @@
             </td>
             <td class="px-5 py-3 text-slate-600">${yc.lyDo}</td>
             <td class="px-5 py-3 text-slate-500">
-              <fmt:formatDate value="${yc.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+              ${yc.createdAtFormatted}
             </td>
             <td class="px-5 py-3" id="tt-${yc.yeuCauUngLuongId}">
               <c:choose>

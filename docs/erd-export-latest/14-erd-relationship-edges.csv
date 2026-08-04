@@ -1,0 +1,138 @@
+﻿GroupID,EdgeOrder,FromTable,FromColumn,ToTable,ToColumn,ConstraintName,FromCardinality,ToCardinality,RelationshipType,IsPhysicalFK,IsOptional,LineLabel,PreferredLineDirection,CrossGroupRelation,Notes
+G01,1,Accounts,CoSoID,CoSo,CoSoID,FK_Acc_CoSo,0..N,0..1,ONE_TO_MANY,TRUE,YES,Cơ sở thể thao 1–N Tài khoản,RIGHT_TO_LEFT,YES,
+G01,2,Accounts,RoleID,Roles,RoleID,FK_Acc_Role,0..N,0..1,ONE_TO_MANY,TRUE,YES,Vai trò 1–N Tài khoản,AUTO,NO,
+G01,3,Accounts,MonTheThaoYeuThichID,MonTheThao,MonTheThaoID,FK_Accounts_MonTheThaoYeuThich,0..N,0..1,ONE_TO_MANY,TRUE,YES,Môn thể thao 1–N Tài khoản,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G01,4,MonTheThaoYeuThich,AccountID,Accounts,AccountID,FK_MTTYT_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Môn thể thao yêu thích,AUTO,NO,
+G01,5,MonTheThaoYeuThich,MonTheThaoID,MonTheThao,MonTheThaoID,FK_MTTYT_Mon,1..N,1,ONE_TO_MANY,TRUE,NO,Môn thể thao 1–N Môn thể thao yêu thích,RIGHT_TO_LEFT,YES,
+G04,1,CoSo,AccountID_QuanLy,Accounts,AccountID,FK_CoSo_QuanLy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Cơ sở thể thao,RIGHT_TO_LEFT,YES,
+G04,2,CoSoCapability,ApprovedBy,Accounts,AccountID,FK_CoSoCapability_ApprovedBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Năng lực cơ sở,RIGHT_TO_LEFT,YES,
+G04,3,CoSoCapability,CoSoID,CoSo,CoSoID,FK_CoSoCapability_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Năng lực cơ sở,AUTO,NO,
+G04,4,CoSoNganHang,CoSoID,CoSo,CoSoID,FK_CoSoNganHang_CoSo,1,1,ONE_TO_ONE,TRUE,NO,Cơ sở thể thao 1–1 Tài khoản ngân hàng cơ sở,AUTO,NO,
+G05,1,LoaiSan,CoSoID,CoSo,CoSoID,FK_LoaiSan_CoSo,0..N,0..1,ONE_TO_MANY,TRUE,YES,Cơ sở thể thao 1–N Loại sân,RIGHT_TO_LEFT,YES,
+G05,2,LoaiSan,MonTheThaoID,MonTheThao,MonTheThaoID,FK_LoaiSan_Mon,1..N,1,ONE_TO_MANY,TRUE,NO,Môn thể thao 1–N Loại sân,RIGHT_TO_LEFT,YES,
+G05,3,San,CoSoID,CoSo,CoSoID,FK_San_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Sân,RIGHT_TO_LEFT,YES,
+G05,4,San,LoaiSanID,LoaiSan,LoaiSanID,FK_San_LoaiSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Loại sân 1–N Sân,AUTO,NO,
+G06,1,BookingExtension,DatSanID,LichDatSan,DatSanID,FK_BookingExtension_LichDatSan,1..N,1,ONE_TO_MANY,TRUE,NO,Lịch đặt sân 1–N Gia hạn đặt sân,AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G06,2,BookingExtension,OperatorAccountID,Accounts,AccountID,FK_BookingExtension_Operator,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Gia hạn đặt sân,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G06,3,LichDatSan,AccountID,Accounts,AccountID,FK_DatSan_Account,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch đặt sân,RIGHT_TO_LEFT,YES,
+G06,4,LichDatSan,SanID,San,SanID,FK_DatSan_San,0..N,0..1,ONE_TO_MANY,TRUE,YES,Sân 1–N Lịch đặt sân,RIGHT_TO_LEFT,YES,
+G06,5,LichDatSan,CancelledBy,Accounts,AccountID,FK_LichDatSan_CancelledBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch đặt sân,RIGHT_TO_LEFT,YES,
+G06,6,LichDatSan,ConfirmedBy,Accounts,AccountID,FK_LichDatSan_ConfirmedBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch đặt sân,RIGHT_TO_LEFT,YES,
+G06,7,LichDatSan_DichVu,DatSanID,LichDatSan,DatSanID,FK_LDSDV_DatSan,1..N,1,ONE_TO_MANY,TRUE,NO,Lịch đặt sân 1–N Dịch vụ đặt trước,AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G06,8,LichDatSan_DichVu,DeliveredBy,Accounts,AccountID,FK_LDSDV_DeliveredBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Dịch vụ đặt trước,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G06,9,LichDatSan_DichVu,SanPhamID,SanPham_DichVu,SanPhamID,FK_LDSDV_SanPham,1..N,1,ONE_TO_MANY,TRUE,NO,Sản phẩm & dịch vụ 1–N Dịch vụ đặt trước,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G06,10,SoftHold,AccountID,Accounts,AccountID,FK_SoftHold_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Giữ chỗ tạm thời,RIGHT_TO_LEFT,YES,
+G06,11,SoftHold,SanID,San,SanID,FK_SoftHold_San,1..N,1,ONE_TO_MANY,TRUE,NO,Sân 1–N Giữ chỗ tạm thời,RIGHT_TO_LEFT,YES,
+G07,1,CourtChargeSegment,HoaDonID,HoaDon,HoaDonID,FK_CourtChargeSegment_HoaDon,1..N,1,ONE_TO_MANY,TRUE,NO,Hóa đơn 1–N Đoạn tính tiền sân,RIGHT_TO_LEFT,YES,
+G07,2,CourtChargeSegment,DatSanID,LichDatSan,DatSanID,FK_CourtChargeSegment_LichDatSan,1..N,1,ONE_TO_MANY,TRUE,NO,Lịch đặt sân 1–N Đoạn tính tiền sân,RIGHT_TO_LEFT,YES,
+G08,1,ChiTietHoaDon,HoaDonID,HoaDon,HoaDonID,FK_CTHD_HoaDon,0..N,0..1,ONE_TO_MANY,TRUE,YES,Hóa đơn 1–N Chi tiết hóa đơn,AUTO,NO,
+G08,2,ChiTietHoaDon,SanPhamID,SanPham_DichVu,SanPhamID,FK_CTHD_SP,0..N,0..1,ONE_TO_MANY,TRUE,YES,Sản phẩm & dịch vụ 1–N Chi tiết hóa đơn,RIGHT_TO_LEFT,YES,
+G08,3,HoaDon,DatSanID,LichDatSan,DatSanID,FK_HD_DatSan,0..1,0..1,ONE_TO_ONE,TRUE,YES,Lịch đặt sân 1–1 Hóa đơn,RIGHT_TO_LEFT,YES,
+G08,4,HoaDon,AccountID_KhachHang,Accounts,AccountID,FK_HD_Khach,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Hóa đơn,RIGHT_TO_LEFT,YES,
+G08,5,HoaDon,KhuyenMaiID,KhuyenMai,KhuyenMaiID,FK_HD_KhuyenMai,0..N,0..1,ONE_TO_MANY,TRUE,YES,Khuyến mãi 1–N Hóa đơn,RIGHT_TO_LEFT,YES,
+G08,6,HoaDon,AccountID_NhanVien,Accounts,AccountID,FK_HD_NhanVien,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Hóa đơn,RIGHT_TO_LEFT,YES,
+G08,7,HoaDon,ParentHoaDonID,HoaDon,HoaDonID,FK_HoaDon_Parent,0..N,0..1,ONE_TO_MANY,TRUE,YES,Hóa đơn 1–N Hóa đơn,AUTO,NO,
+G08,8,PayOSPaymentAttempt,CoSoID,CoSo,CoSoID,FK_PayOSPaymentAttempt_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Lượt thanh toán PayOS,RIGHT_TO_LEFT,YES,
+G08,9,PayOSPaymentAttempt,HoaDonID,HoaDon,HoaDonID,FK_PayOSPaymentAttempt_HoaDon,1,1,ONE_TO_ONE,TRUE,NO,Hóa đơn 1–1 Lượt thanh toán PayOS,AUTO,NO,
+G08,10,PayOSPaymentAttempt,DatSanID,LichDatSan,DatSanID,FK_PayOSPaymentAttempt_LichDatSan,1..N,1,ONE_TO_MANY,TRUE,NO,Lịch đặt sân 1–N Lượt thanh toán PayOS,RIGHT_TO_LEFT,YES,
+G09,1,HoanTien,AccountID,Accounts,AccountID,FK_HoanTien_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Hoàn tiền,RIGHT_TO_LEFT,YES,
+G09,2,HoanTien,HoaDonID,HoaDon,HoaDonID,FK_HoanTien_HoaDon,1..N,1,ONE_TO_MANY,TRUE,NO,Hóa đơn 1–N Hoàn tiền,RIGHT_TO_LEFT,YES,
+G10,1,SanPham_DichVu,CoSoID,CoSo,CoSoID,FK_SP_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Sản phẩm & dịch vụ,RIGHT_TO_LEFT,YES,
+G10,2,SanPham_DichVu,DanhMucID,DanhMucSanPham,DanhMucID,FK_SP_DanhMuc,1..N,1,ONE_TO_MANY,TRUE,NO,Danh mục sản phẩm 1–N Sản phẩm & dịch vụ,AUTO,NO,
+G10,3,ServiceMaterial,CoSoID,CoSo,CoSoID,FK_ServiceMaterial_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Vật tư dịch vụ,RIGHT_TO_LEFT,YES,
+G11,1,RacketStringingConfig,ServiceID,SportService,ServiceID,FK_RacketCfg_Service,1,1,ONE_TO_ONE,TRUE,NO,Dịch vụ thể thao 1–1 Cấu hình căng vợt,AUTO,NO,
+G11,2,RacketStringingOrderDetail,MaterialID,ServiceMaterial,MaterialID,FK_RSOD_Material,0..N,0..1,ONE_TO_MANY,TRUE,YES,Vật tư dịch vụ 1–N Chi tiết đơn căng vợt,RIGHT_TO_LEFT,YES,
+G11,3,RacketStringingOrderDetail,OrderID,ServiceOrder,OrderID,FK_RSOD_Order,1,1,ONE_TO_ONE,TRUE,NO,Đơn dịch vụ 1–1 Chi tiết đơn căng vợt,AUTO,NO,
+G11,4,ServiceOrder,BookingID,LichDatSan,DatSanID,FK_ServiceOrder_Booking,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Đơn dịch vụ,RIGHT_TO_LEFT,YES,
+G11,5,ServiceOrder,CoSoID,CoSo,CoSoID,FK_ServiceOrder_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Đơn dịch vụ,RIGHT_TO_LEFT,YES,
+G11,6,ServiceOrder,CustomerID,Accounts,AccountID,FK_ServiceOrder_Customer,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Đơn dịch vụ,RIGHT_TO_LEFT,YES,
+G11,7,ServiceOrder,ServiceID,SportService,ServiceID,FK_ServiceOrder_Service,1..N,1,ONE_TO_MANY,TRUE,NO,Dịch vụ thể thao 1–N Đơn dịch vụ,AUTO,NO,
+G11,8,ServiceOrderStatusHistory,ChangedBy,Accounts,AccountID,FK_SOSH_ChangedBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch sử trạng thái đơn dịch vụ,RIGHT_TO_LEFT,YES,
+G11,9,ServiceOrderStatusHistory,OrderID,ServiceOrder,OrderID,FK_SOSH_Order,1..N,1,ONE_TO_MANY,TRUE,NO,Đơn dịch vụ 1–N Lịch sử trạng thái đơn dịch vụ,AUTO,NO,
+G11,10,SportService,CoSoID,CoSo,CoSoID,FK_SportService_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Dịch vụ thể thao,RIGHT_TO_LEFT,YES,
+G12,1,KhuyenMai,CoSoID,CoSo,CoSoID,FK_KM_CoSo,0..N,0..1,ONE_TO_MANY,TRUE,YES,Cơ sở thể thao 1–N Khuyến mãi,RIGHT_TO_LEFT,YES,
+G12,2,KhuyenMaiHinhAnh,KhuyenMaiID,KhuyenMai,KhuyenMaiID,FK_KhuyenMaiHinhAnh_KhuyenMai,1,1,ONE_TO_ONE,TRUE,NO,Khuyến mãi 1–1 Hình ảnh khuyến mãi,AUTO,NO,
+G12,3,LichSuKhuyenMai,AccountID,Accounts,AccountID,FK_LichSuKM_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Lịch sử dùng khuyến mãi,RIGHT_TO_LEFT,YES,
+G12,4,LichSuKhuyenMai,KhuyenMaiID,KhuyenMai,KhuyenMaiID,FK_LichSuKM_KhuyenMai,1..N,1,ONE_TO_MANY,TRUE,NO,Khuyến mãi 1–N Lịch sử dùng khuyến mãi,AUTO,NO,
+G13,1,ChiTietGhepKeo,AccountID_NguoiThamGia,Accounts,AccountID,FK_CTGK_Account,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Người tham gia kèo,RIGHT_TO_LEFT,YES,
+G13,2,ChiTietGhepKeo,KeoID,GhepKeo,KeoID,FK_CTGK_Keo,0..N,0..1,ONE_TO_MANY,TRUE,YES,Ghép kèo 1–N Người tham gia kèo,AUTO,NO,
+G13,3,ChiTietGhepKeo,TeamIDNguoiThamGia,Teams,TeamID,FK_ChiTietGhepKeo_TeamNguoiThamGia,0..N,0..1,ONE_TO_MANY,TRUE,YES,Đội nhóm 1–N Người tham gia kèo,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G13,4,GhepKeo,AccountID_NguoiTao,Accounts,AccountID,FK_GhepKeo_Account,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Ghép kèo,RIGHT_TO_LEFT,YES,
+G13,5,GhepKeo,DatSanID,LichDatSan,DatSanID,FK_GhepKeo_DatSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Ghép kèo,RIGHT_TO_LEFT,YES,
+G13,6,GhepKeo,MonTheThaoID,MonTheThao,MonTheThaoID,FK_GhepKeo_Mon,0..N,0..1,ONE_TO_MANY,TRUE,YES,Môn thể thao 1–N Ghép kèo,RIGHT_TO_LEFT,YES,
+G13,7,GhepKeo,TeamIDNguoiTao,Teams,TeamID,FK_GhepKeo_TeamNguoiTao,0..N,0..1,ONE_TO_MANY,TRUE,YES,Đội nhóm 1–N Ghép kèo,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,1,TeamInvitations,InvitedAccountID,Accounts,AccountID,FK_TeamInvitations_Invited,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Lời mời vào đội,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,2,TeamInvitations,InvitedByAccountID,Accounts,AccountID,FK_TeamInvitations_InvitedBy,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Lời mời vào đội,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,3,TeamInvitations,TeamID,Teams,TeamID,FK_TeamInvitations_Team,1..N,1,ONE_TO_MANY,TRUE,NO,Đội nhóm 1–N Lời mời vào đội,AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,4,TeamJoinRequests,RequesterAccountID,Accounts,AccountID,FK_TeamJoinRequests_Requester,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Yêu cầu xin vào đội,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,5,TeamJoinRequests,ReviewedByAccountID,Accounts,AccountID,FK_TeamJoinRequests_Reviewer,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Yêu cầu xin vào đội,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,6,TeamJoinRequests,TeamID,Teams,TeamID,FK_TeamJoinRequests_Team,1..N,1,ONE_TO_MANY,TRUE,NO,Đội nhóm 1–N Yêu cầu xin vào đội,AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,7,TeamMembers,AccountID,Accounts,AccountID,FK_TeamMembers_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Thành viên đội,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,8,TeamMembers,TeamID,Teams,TeamID,FK_TeamMembers_Team,1..N,1,ONE_TO_MANY,TRUE,NO,Đội nhóm 1–N Thành viên đội,AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,9,Teams,CaptainAccountID,Accounts,AccountID,FK_Teams_Captain,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Đội nhóm,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G14,10,Teams,SportID,MonTheThao,MonTheThaoID,FK_Teams_Sport,1..N,1,ONE_TO_MANY,TRUE,NO,Môn thể thao 1–N Đội nhóm,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G15,1,NhatKyChat,AccountID,Accounts,AccountID,FK_Chat_Account,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Nhật ký chat,RIGHT_TO_LEFT,YES,
+G15,2,ThongBao,AccountID,Accounts,AccountID,FK_TB_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Thông báo,RIGHT_TO_LEFT,YES,
+G16,1,NhatKySOSGui,AccountID_NhanGui,Accounts,AccountID,FK_SOSGui_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Nhật ký gửi SOS,RIGHT_TO_LEFT,YES,
+G16,2,NhatKySOSGui,YeuCauSOSID,YeuCauSOS,YeuCauSOSID,FK_SOSGui_YeuCau,1..N,1,ONE_TO_MANY,TRUE,NO,Yêu cầu SOS 1–N Nhật ký gửi SOS,AUTO,NO,
+G16,3,YeuCauSOS,AccountID_Tao,Accounts,AccountID,FK_SOS_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Yêu cầu SOS,RIGHT_TO_LEFT,YES,
+G16,4,YeuCauSOS,DatSanID,LichDatSan,DatSanID,FK_SOS_DatSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Yêu cầu SOS,RIGHT_TO_LEFT,YES,
+G16,5,YeuCauSOS,MonTheThaoID,MonTheThao,MonTheThaoID,FK_SOS_Mon,0..N,0..1,ONE_TO_MANY,TRUE,YES,Môn thể thao 1–N Yêu cầu SOS,RIGHT_TO_LEFT,YES,
+G17,1,CaLamViec,AccountID,Accounts,AccountID,FK_Ca_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Ca làm việc,RIGHT_TO_LEFT,YES,
+G17,2,CaLamViec,CoSoID,CoSo,CoSoID,FK_Ca_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Ca làm việc,RIGHT_TO_LEFT,YES,
+G17,3,CaLamViec_Audit,NguoiThucHien,Accounts,AccountID,FK__CaLamViec__Nguoi__5CA1C101,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Nhật ký ca làm việc,RIGHT_TO_LEFT,YES,
+G17,4,CaLamViec_Availability,AccountID,Accounts,AccountID,FK__CaLamViec__Accou__4F47C5E3,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Thời gian rảnh nhân viên,RIGHT_TO_LEFT,YES,
+G17,5,CaLamViec_Availability,CoSoID,CoSo,CoSoID,FK__CaLamViec__CoSoI__503BEA1C,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Thời gian rảnh nhân viên,RIGHT_TO_LEFT,YES,
+G17,6,CaLamViec_SwapRequest,AccountID_Gui,Accounts,AccountID,FK__CaLamViec__Accou__55009F39,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Yêu cầu đổi ca,RIGHT_TO_LEFT,YES,
+G17,7,CaLamViec_SwapRequest,AccountID_Nhan,Accounts,AccountID,FK__CaLamViec__Accou__55F4C372,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Yêu cầu đổi ca,RIGHT_TO_LEFT,YES,
+G17,8,CaLamViec_SwapRequest,CaLamViecID_Gui,CaLamViec,CaLamViecID,FK__CaLamViec__CaLam__56E8E7AB,1..N,1,ONE_TO_MANY,TRUE,NO,Ca làm việc 1–N Yêu cầu đổi ca,AUTO,NO,
+G17,9,CaLamViec_SwapRequest,CaLamViecID_Nhan,CaLamViec,CaLamViecID,FK__CaLamViec__CaLam__57DD0BE4,0..N,0..1,ONE_TO_MANY,TRUE,YES,Ca làm việc 1–N Yêu cầu đổi ca,AUTO,NO,
+G17,10,CaLamViec_SwapRequest,NguoiDuyet,Accounts,AccountID,FK__CaLamViec__Nguoi__58D1301D,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Yêu cầu đổi ca,RIGHT_TO_LEFT,YES,
+G18,1,YeuCauNghi,AccountID,Accounts,AccountID,FK__YeuCauNgh__Accou__3E1D39E1,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Yêu cầu nghỉ phép,RIGHT_TO_LEFT,YES,
+G18,2,YeuCauNghi,CoSoID,CoSo,CoSoID,FK__YeuCauNgh__CoSoI__3F115E1A,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Yêu cầu nghỉ phép,RIGHT_TO_LEFT,YES,
+G18,3,YeuCauNghi,XuLyBy,Accounts,AccountID,FK__YeuCauNgh__XuLyB__40058253,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Yêu cầu nghỉ phép,RIGHT_TO_LEFT,YES,
+G18,4,YeuCauNghi_Audit,NguoiThucHien,Accounts,AccountID,FK__YeuCauNgh__Nguoi__44CA3770,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Nhật ký nghỉ phép,RIGHT_TO_LEFT,YES,
+G18,5,YeuCauNghi_Audit,YeuCauNghiID,YeuCauNghi,YeuCauNghiID,FK__YeuCauNgh__YeuCa__43D61337,1..N,1,ONE_TO_MANY,TRUE,NO,Yêu cầu nghỉ phép 1–N Nhật ký nghỉ phép,AUTO,NO,
+G19,1,QRRequest,CoSoID,CoSo,CoSoID,FK_QRRequest_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Yêu cầu từ QR,RIGHT_TO_LEFT,YES,
+G19,2,QRRequest,SanID,San,SanID,FK_QRRequest_San,1..N,1,ONE_TO_MANY,TRUE,NO,Sân 1–N Yêu cầu từ QR,RIGHT_TO_LEFT,YES,
+G19,3,SanQR,CreatedBy,Accounts,AccountID,FK_SanQR_CreatedBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Mã QR sân,RIGHT_TO_LEFT,YES,
+G19,4,SanQR,SanID,San,SanID,FK_SanQR_San,1,1,ONE_TO_ONE,TRUE,NO,Sân 1–1 Mã QR sân,RIGHT_TO_LEFT,YES,
+G19,5,SanQR,UpdatedBy,Accounts,AccountID,FK_SanQR_UpdatedBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Mã QR sân,RIGHT_TO_LEFT,YES,
+G19,6,SanQRTokenHistory,RevokedBy,Accounts,AccountID,FK_SanQRTokenHistory_RevokedBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch sử token QR,RIGHT_TO_LEFT,YES,
+G19,7,SanQRTokenHistory,SanID,San,SanID,FK_SanQRTokenHistory_San,1..N,1,ONE_TO_MANY,TRUE,NO,Sân 1–N Lịch sử token QR,RIGHT_TO_LEFT,YES,
+G19,8,SanQRTokenHistory,SanQRID,SanQR,SanQRID,FK_SanQRTokenHistory_SanQR,1..N,1,ONE_TO_MANY,TRUE,NO,Mã QR sân 1–N Lịch sử token QR,AUTO,NO,
+G20,1,CustomerReputationHistory,AccountID,Accounts,AccountID,FK_ReputationHistory_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Lịch sử điểm uy tín,RIGHT_TO_LEFT,YES,
+G20,2,CustomerReputationHistory,CreatedBy,Accounts,AccountID,FK_ReputationHistory_Actor,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch sử điểm uy tín,RIGHT_TO_LEFT,YES,
+G20,3,CustomerReputationHistory,DatSanID,LichDatSan,DatSanID,FK_ReputationHistory_DatSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Lịch sử điểm uy tín,RIGHT_TO_LEFT,YES,
+G20,4,DanhGia,DatSanID,LichDatSan,DatSanID,FK_DanhGia_DatSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Đánh giá,RIGHT_TO_LEFT,YES,
+G20,5,DanhGia,AccountID_NguoiBiDanhGia,Accounts,AccountID,FK_DanhGia_NguoiBiDanhGia,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Đánh giá,RIGHT_TO_LEFT,YES,
+G20,6,DanhGia,AccountID_NguoiDanhGia,Accounts,AccountID,FK_DanhGia_NguoiDanhGia,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Đánh giá,RIGHT_TO_LEFT,YES,
+G20,7,LichSuELO,AccountID,Accounts,AccountID,FK_LichSuELO_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Lịch sử điểm ELO,RIGHT_TO_LEFT,YES,
+G20,8,LichSuELO,DatSanID,LichDatSan,DatSanID,FK_LichSuELO_DatSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Lịch sử điểm ELO,RIGHT_TO_LEFT,YES,
+G21,1,LichXeRaVao,DatSanID,LichDatSan,DatSanID,FK_Xe_DatSan,0..N,0..1,ONE_TO_MANY,TRUE,YES,Lịch đặt sân 1–N Lịch xe ra vào,RIGHT_TO_LEFT,YES,
+G21,2,LichXeRaVao,AccountID_NhanVien,Accounts,AccountID,FK_Xe_NhanVien,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Lịch xe ra vào,RIGHT_TO_LEFT,YES,
+G21,3,LichXeRaVao,TheID,TheGiuXe,TheID,FK_Xe_The,0..N,0..1,ONE_TO_MANY,TRUE,YES,Thẻ giữ xe 1–N Lịch xe ra vào,AUTO,NO,
+G21,4,TheGiuXe,CoSoID,CoSo,CoSoID,FK_TheGiuXe_CoSo,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Thẻ giữ xe,RIGHT_TO_LEFT,YES,
+G22,1,ChiaHoaDon,AccountID,Accounts,AccountID,FK_Chia_Account,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Chia hóa đơn (cũ),RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G22,2,ChiaHoaDon,HoaDonID,HoaDon,HoaDonID,FK_Chia_HoaDon,1..N,1,ONE_TO_MANY,TRUE,NO,Hóa đơn 1–N Chia hóa đơn (cũ),RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G22,3,MaQR,ChiaHoaDonID,ChiaHoaDon,ChiaHoaDonID,FK_QR_Chia,1..N,1,ONE_TO_MANY,TRUE,NO,Chia hóa đơn (cũ) 1–N Mã QR chia tiền (cũ),AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G22,4,NhomChiaTien,CreatedByAccountID,Accounts,AccountID,FK_NhomChiaTien_Creator,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Nhóm chia hóa đơn,RIGHT_TO_LEFT,YES,
+G22,5,NhomChiaTien,DatSanID,LichDatSan,DatSanID,FK_NhomChiaTien_DatSan,1..N,1,ONE_TO_MANY,TRUE,NO,Lịch đặt sân 1–N Nhóm chia hóa đơn,RIGHT_TO_LEFT,YES,
+G22,6,NhomChiaTien,HoaDonID,HoaDon,HoaDonID,FK_NhomChiaTien_HoaDon,1,1,ONE_TO_ONE,TRUE,NO,Hóa đơn 1–1 Nhóm chia hóa đơn,RIGHT_TO_LEFT,YES,
+G22,7,NhomChiaTienChiTiet,AccountID,Accounts,AccountID,FK_NhomChiaTienChiTiet_Account,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Phần chia của từng người,RIGHT_TO_LEFT,YES,
+G22,8,NhomChiaTienChiTiet,NhomChiaTienID,NhomChiaTien,NhomChiaTienID,FK_NhomChiaTienChiTiet_Nhom,1..N,1,ONE_TO_MANY,TRUE,NO,Nhóm chia hóa đơn 1–N Phần chia của từng người,AUTO,NO,
+G22,9,NhomChiaTienChiTiet,PayerAccountID,Accounts,AccountID,FK_NhomChiaTienChiTiet_Payer,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Phần chia của từng người,RIGHT_TO_LEFT,YES,
+G22,10,NhomChiaTienChiTiet,ConfirmedByStaffID,Accounts,AccountID,FK_NhomChiaTienChiTiet_Staff,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Phần chia của từng người,RIGHT_TO_LEFT,YES,
+G23,1,BangLuong,AccountID,Accounts,AccountID,FK_BangLuong_AccountID,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Bảng lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,2,BangLuong,KyLuongID,KyLuong,KyLuongID,FK_BangLuong_KyLuongID,1..N,1,ONE_TO_MANY,TRUE,NO,Kỳ lương 1–N Bảng lương,AUTO,NO,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,3,CauHinhLuong,AccountID,Accounts,AccountID,FK_CauHinhLuong_AccountID,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Cấu hình lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,4,CauHinhLuong,CoSoID,CoSo,CoSoID,FK_CauHinhLuong_CoSoID,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Cấu hình lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,5,KyLuong,CoSoID,CoSo,CoSoID,FK_KyLuong_CoSoID,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Kỳ lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,6,KyLuong,CreatedBy,Accounts,AccountID,FK_KyLuong_CreatedBy,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Kỳ lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,7,YeuCauUngLuong,AccountID,Accounts,AccountID,FK_YeuCauUngLuong_AccountID,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Yêu cầu ứng lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,8,YeuCauUngLuong,CoSoID,CoSo,CoSoID,FK_YeuCauUngLuong_CoSoID,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Yêu cầu ứng lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G23,9,YeuCauUngLuong,XuLyBy,Accounts,AccountID,FK_YeuCauUngLuong_XuLyBy,0..N,0..1,ONE_TO_MANY,TRUE,YES,Tài khoản 1–N Yêu cầu ứng lương,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G24,1,CoSoFaceConfig,CoSoID,CoSo,CoSoID,FK_FaceConfig_CoSo,0..1,0..1,ONE_TO_ONE,TRUE,YES,Cơ sở thể thao 1–1 Cấu hình khuôn mặt cơ sở,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G24,2,FaceChallengeToken,AccountID,Accounts,AccountID,FK_FaceToken_Accounts,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Token thử thách khuôn mặt,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G25,1,SuCo,BaoVeID,Accounts,AccountID,fk_suco_baove,1..N,1,ONE_TO_MANY,TRUE,NO,Tài khoản 1–N Sự cố,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"
+G25,2,SuCo,CoSoID,CoSo,CoSoID,fk_suco_coso,1..N,1,ONE_TO_MANY,TRUE,NO,Cơ sở thể thao 1–N Sự cố,RIGHT_TO_LEFT,YES,"FK chỉ có trong migration SQL, chưa xác minh trên DB thật"

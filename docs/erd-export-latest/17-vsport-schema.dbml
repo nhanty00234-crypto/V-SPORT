@@ -1,0 +1,1198 @@
+// 17-vsport-schema.dbml — V-SPORT / QuanLiSport
+// Nguồn: snapshot DB thật 2026-08-02 + migration SQL. Chỉ là dữ liệu schema, không phải ảnh ERD.
+// Ref chỉ được sinh cho FK VẬT LÝ. Quan hệ suy luận nằm ở 10-inferred-relations.md.
+
+Table Accounts {
+  "AccountID" INT [pk, increment, not null, note: 'Mã tài khoản']
+  "Username" VARCHAR(50) [unique, note: 'Tên đăng nhập']
+  "Password" VARCHAR(MAX) [not null, note: 'Mật khẩu (đã băm)']
+  "FailedLoginCount" INT [note: 'Số lần đăng nhập sai']
+  "IsLocked" BIT [note: 'Đã khóa']
+  "LastLogin" DATETIME [note: 'Lần đăng nhập cuối']
+  "GoogleID" VARCHAR(100) [unique, note: 'ID Google']
+  "FacebookID" VARCHAR(100) [unique, note: 'ID Facebook']
+  "FullName" NVARCHAR(100) [note: 'Họ và tên']
+  "PhoneNumber" VARCHAR(15) [note: 'Số điện thoại']
+  "Email" VARCHAR(100) [unique, note: 'Email']
+  "RoleID" INT [note: 'Mã vai trò']
+  "ZaloID" VARCHAR(100) [note: 'ID Zalo']
+  "MessengerID" VARCHAR(100) [note: 'ID Messenger']
+  "DiemUyTin" INT [note: 'Điểm uy tín']
+  "DiemTrinhDo" INT [note: 'Điểm trình độ (ELO)']
+  "MaNganHang" VARCHAR(20) [note: 'Mã ngân hàng']
+  "SoTaiKhoan" VARCHAR(50) [note: 'Số tài khoản ngân hàng']
+  "ViTriSoTruong" NVARCHAR(50) [note: 'ViTriSoTruong']
+  "NhanThongBaoSOS" BIT [note: 'NhanThongBaoSOS']
+  "NgaySinh" DATE [note: 'Ngày sinh']
+  "GioiTinh" NVARCHAR(10) [note: 'Giới tính']
+  "CreatedAt" DATETIME [note: 'Thời điểm tạo']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "CoSoID" INT [note: 'Mã cơ sở']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  "AvatarUrl" NVARCHAR(255) [note: 'Ảnh đại diện']
+  "CompletedBookingCount" INT [not null, note: 'CompletedBookingCount']
+  "LateCancelCount" INT [not null, note: 'LateCancelCount']
+  "NoShowCount" INT [not null, note: 'NoShowCount']
+  "NhanThongBaoMarketing" BIT [not null, note: 'NhanThongBaoMarketing']
+  "FaceDescriptor" NVARCHAR(MAX) [note: 'Vector đặc trưng khuôn mặt [chỉ có trong migration]']
+  "FaceImagePath" NVARCHAR(500) [note: 'Đường dẫn ảnh khuôn mặt [chỉ có trong migration]']
+  "FaceEnrolledAt" DATETIME [note: 'Thời điểm đăng ký khuôn mặt [chỉ có trong migration]']
+  "CoverImageUrl" NVARCHAR(500) [note: 'Ảnh bìa [chỉ có trong migration]']
+  "ChieuCaoCm" INT [note: 'ChieuCaoCm [chỉ có trong migration]']
+  "CanNangKg" INT [note: 'CanNangKg [chỉ có trong migration]']
+  "GhiChuDacBiet" NVARCHAR(500) [note: 'ghi chú DacBiet [chỉ có trong migration]']
+  "ViTriYeuThich" NVARCHAR(255) [note: 'ViTriYeuThich [chỉ có trong migration]']
+  "MonTheThaoYeuThichID" INT [note: 'mã MonTheThaoYeuThich [chỉ có trong migration]']
+  "TrinhDoChoi" VARCHAR(30) [note: 'TrinhDoChoi [chỉ có trong migration]']
+  "MucTieuChoi" NVARCHAR(255) [note: 'MucTieuChoi [chỉ có trong migration]']
+  "TanSuatChoi" VARCHAR(30) [note: 'TanSuatChoi [chỉ có trong migration]']
+  "QrImagePath" NVARCHAR(500) [note: 'Ảnh QR nhận lương [chỉ có trong migration]']
+  Note: 'Tài khoản — Tài khoản người dùng cho mọi vai trò: khách hàng, nhân viên, bảo vệ, quản lý, admin. Chứa cả hồ sơ, điểm uy tín, điểm ELO và dữ liệu khuôn mặt.'
+}
+
+Table AdminTrash {
+  "TrashID" INT [pk, increment, not null, note: 'Mã bản ghi thùng rác']
+  "EntityType" NVARCHAR(100) [not null, note: 'EntityType']
+  "EntityID" INT [not null, note: 'mã Entity']
+  "DisplayName" NVARCHAR(255) [note: 'DisplayName']
+  "SourceTable" NVARCHAR(100) [not null, note: 'SourceTable']
+  "OldStatus" NVARCHAR(100) [note: 'OldStatus']
+  "DeletedBy" INT [note: 'Người xóa']
+  "DeletedAt" DATETIME2 [not null, note: 'Thời điểm xóa']
+  "Reason" NVARCHAR(500) [note: 'Reason']
+  "IsRestored" BIT [not null, note: 'cờ Restored']
+  "RestoredBy" INT [note: 'RestoredBy']
+  "RestoredAt" DATETIME2 [note: 'RestoredAt']
+  Note: 'Thùng rác quản trị — Bản ghi các thực thể đã xóa mềm, cho phép admin khôi phục hoặc xóa vĩnh viễn.'
+}
+
+Table AuditLog {
+  "AuditLogID" BIGINT [pk, increment, not null, note: 'mã AuditLog']
+  "ActorAccountID" INT [note: 'mã ActorAccount']
+  "ActorName" NVARCHAR(255) [not null, note: 'ActorName']
+  "ActorRole" INT [not null, note: 'ActorRole']
+  "CoSoID" INT [note: 'Mã cơ sở']
+  "Action" NVARCHAR(100) [not null, note: 'Hành động (checkin/checkout)']
+  "EntityType" NVARCHAR(100) [not null, note: 'EntityType']
+  "EntityID" NVARCHAR(50) [note: 'mã Entity']
+  "EntityName" NVARCHAR(500) [note: 'EntityName']
+  "Details" NVARCHAR(MAX) [note: 'Details']
+  "IpAddress" NVARCHAR(50) [note: 'IpAddress']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  Note: 'Nhật ký kiểm toán — Ghi lại mọi thao tác thêm/sửa/xóa quan trọng trên hệ thống kèm người thực hiện và cơ sở.'
+}
+
+Table BangLuong {
+  "BangLuongID" INT [pk, increment, note: 'Mã bảng lương [chỉ có trong migration]']
+  "KyLuongID" INT [not null, note: 'Mã kỳ lương [chỉ có trong migration]']
+  "AccountID" INT [not null, note: 'Mã tài khoản [chỉ có trong migration]']
+  "LuongCoBan" DECIMAL(18,0) [not null, note: 'Lương cơ bản [chỉ có trong migration]']
+  "TongPhuCap" DECIMAL(18,0) [not null, note: 'Tổng phụ cấp [chỉ có trong migration]']
+  "TongKhauTru" DECIMAL(18,0) [not null, note: 'Tổng khấu trừ [chỉ có trong migration]']
+  "TongLuongThuc" DECIMAL(18,0) [not null, note: 'Tổng lương thực nhận [chỉ có trong migration]']
+  "SoCaLamViec" INT [not null, note: 'Số ca làm việc [chỉ có trong migration]']
+  "TrangThai" VARCHAR(30) [not null, note: 'Trạng thái [chỉ có trong migration]']
+  "GhiChu" NVARCHAR(500) [note: 'Ghi chú [chỉ có trong migration]']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  Note: 'Bảng lương — Kết quả tính lương của một nhân viên trong một kỳ lương.'
+}
+
+Table BookingExtension {
+  "ExtensionID" INT [pk, increment, not null, note: 'mã Extension [chỉ có trong migration]']
+  "DatSanID" INT [not null, note: 'Mã đặt sân [chỉ có trong migration]']
+  "OldGioKetThuc" TIME [not null, note: 'OldGioKetThuc [chỉ có trong migration]']
+  "NewGioKetThuc" TIME [not null, note: 'NewGioKetThuc [chỉ có trong migration]']
+  "OldGioKetThucDateTime" DATETIME2 [note: 'OldGioKetThucDateTime [chỉ có trong migration]']
+  "NewGioKetThucDateTime" DATETIME2 [note: 'NewGioKetThucDateTime [chỉ có trong migration]']
+  "AdditionalAmount" DECIMAL(18,2) [not null, note: 'AdditionalAmount [chỉ có trong migration]']
+  "OperatorAccountID" INT [not null, note: 'mã OperatorAccount [chỉ có trong migration]']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  Note: 'Gia hạn đặt sân — Yêu cầu gia hạn thời gian chơi của một lượt đặt sân.'
+}
+
+Table CaLamViec {
+  "CaLamViecID" INT [pk, increment, not null, note: 'Mã ca làm việc']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "NgayLam" DATE [not null, note: 'Ngày làm']
+  "GioBatDau" TIME [not null, note: 'Giờ bắt đầu']
+  "GioKetThuc" TIME [not null, note: 'Giờ kết thúc']
+  "GhiChu" NVARCHAR(255) [note: 'Ghi chú']
+  "Thu" INT [note: 'Thứ trong tuần']
+  "IsPublished" BIT [not null, note: 'Đã công bố']
+  "TenCa" NVARCHAR(50) [note: 'Tên ca']
+  "ViTri" NVARCHAR(50) [note: 'Vị trí']
+  "TrangThai" VARCHAR(30) [not null, note: 'Trạng thái']
+  "GioNghi" INT [not null, note: 'Giờ nghỉ giữa ca (phút)']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  "IsCustomTime" BIT [not null, note: 'Ca giờ tùy chỉnh']
+  "CustomTimeReason" NVARCHAR(255) [note: 'Lý do giờ tùy chỉnh']
+  "FaceVerified" BIT [not null, note: 'Đã xác thực khuôn mặt [chỉ có trong migration]']
+  "FaceCheckInImage" NVARCHAR(500) [note: 'Ảnh check-in [chỉ có trong migration]']
+  "FaceConfidence" FLOAT [note: 'Độ tin cậy khi check-in [chỉ có trong migration]']
+  "FaceLivenessPassed" BIT [not null, note: 'Đạt kiểm tra liveness [chỉ có trong migration]']
+  "FaceCheckOutImage" NVARCHAR(500) [note: 'Ảnh check-out [chỉ có trong migration]']
+  "FaceCheckOutConfidence" FLOAT [note: 'Độ tin cậy khi check-out [chỉ có trong migration]']
+  "GioVaoThuc" DATETIME [note: 'Giờ vào thực tế [chỉ có trong migration]']
+  "GioRaThuc" DATETIME [note: 'Giờ ra thực tế [chỉ có trong migration]']
+  Note: 'Ca làm việc — Ca làm của nhân viên/bảo vệ tại cơ sở, kèm điểm danh bằng khuôn mặt.'
+}
+
+Table CaLamViec_Audit {
+  "AuditID" INT [pk, not null, note: 'mã Audit']
+  "CaLamViecID" INT [not null, note: 'Mã ca làm việc']
+  "ThaoTac" VARCHAR(50) [not null, note: 'ThaoTac']
+  "NguoiThucHien" INT [not null, note: 'NguoiThucHien']
+  "ThoiGian" DATETIME [note: 'ThoiGian']
+  "GiaTriCu" NVARCHAR(MAX) [note: 'GiaTriCu']
+  "GiaTriMoi" NVARCHAR(MAX) [note: 'GiaTriMoi']
+  "LyDo" NVARCHAR(255) [note: 'Lý do']
+  Note: 'Nhật ký ca làm việc — Nhật ký thay đổi trên ca làm việc kèm người thực hiện.'
+}
+
+Table CaLamViec_Availability {
+  "AvailabilityID" INT [pk, not null, note: 'mã Availability']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "Ngay" DATE [not null, note: 'Ngay']
+  "GioBatDau" TIME [not null, note: 'Giờ bắt đầu']
+  "GioKetThuc" TIME [not null, note: 'Giờ kết thúc']
+  "TrangThai" VARCHAR(20) [not null, note: 'Trạng thái']
+  "GhiChu" NVARCHAR(255) [note: 'Ghi chú']
+  "CreatedAt" DATETIME [note: 'Thời điểm tạo']
+  "DuyetTrangThai" VARCHAR(20) [note: 'trạng thái Duyet']
+  "PhanHoi" NVARCHAR(255) [note: 'PhanHoi']
+  Note: 'Thời gian rảnh nhân viên — Khai báo thời gian nhân viên sẵn sàng nhận ca.'
+}
+
+Table CaLamViec_SwapRequest {
+  "SwapRequestID" INT [pk, not null, note: 'mã SwapRequest']
+  "AccountID_Gui" INT [not null, note: 'AccountID_Gui']
+  "CaLamViecID_Gui" INT [not null, note: 'CaLamViecID_Gui']
+  "AccountID_Nhan" INT [not null, note: 'AccountID_Nhan']
+  "CaLamViecID_Nhan" INT [note: 'CaLamViecID_Nhan']
+  "LyDo" NVARCHAR(255) [note: 'Lý do']
+  "TrangThai" VARCHAR(30) [not null, note: 'Trạng thái']
+  "NguoiDuyet" INT [note: 'NguoiDuyet']
+  "NgayGui" DATETIME [note: 'ngày Gui']
+  "NgayDuyet" DATETIME [note: 'ngày Duyet']
+  "GhiChuQuanLy" NVARCHAR(255) [note: 'Ghi chú của quản lý']
+  Note: 'Yêu cầu đổi ca — Yêu cầu hoán đổi ca giữa hai nhân viên, có người duyệt.'
+}
+
+Table CauHinhLuong {
+  "CauHinhLuongID" INT [pk, increment, note: 'Mã cấu hình lương [chỉ có trong migration]']
+  "AccountID" INT [not null, note: 'Mã tài khoản [chỉ có trong migration]']
+  "CoSoID" INT [not null, note: 'Mã cơ sở [chỉ có trong migration]']
+  "LuongCoBan" DECIMAL(18,0) [not null, note: 'Lương cơ bản [chỉ có trong migration]']
+  "PhuCapMoiCa" DECIMAL(18,0) [not null, note: 'Phụ cấp mỗi ca [chỉ có trong migration]']
+  "HanMucUng" DECIMAL(18,0) [not null, note: 'Hạn mức ứng [chỉ có trong migration]']
+  "GhiChu" NVARCHAR(500) [note: 'Ghi chú [chỉ có trong migration]']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "UpdatedAt" DATETIME [not null, note: 'Thời điểm cập nhật [chỉ có trong migration]']
+  Note: 'Cấu hình lương — Lương cơ bản, phụ cấp mỗi ca và hạn mức ứng của từng nhân viên tại một cơ sở.'
+}
+
+Table ChiaHoaDon {
+  "ChiaHoaDonID" INT [pk, increment, note: 'mã ChiaHoaDon [chỉ có trong migration]']
+  "HoaDonID" INT [not null, note: 'Mã hóa đơn [chỉ có trong migration]']
+  "AccountID" INT [not null, note: 'Mã tài khoản [chỉ có trong migration]']
+  "SoTienPhanBo" DECIMAL(18,2) [not null, note: 'số tiền PhanBo [chỉ có trong migration]']
+  "DaTra" BIT [note: 'DaTra [chỉ có trong migration]']
+  "ThoiGianTra" DATETIME [note: 'thời gian Tra [chỉ có trong migration]']
+  "GhiChu" NVARCHAR(255) [note: 'Ghi chú [chỉ có trong migration]']
+  Note: 'Chia hóa đơn (cũ) — Cơ chế chia hóa đơn đời cũ theo tên người, đã bị NhomChiaTien thay thế.'
+}
+
+Table ChiTietGhepKeo {
+  "ChiTietKeoID" INT [pk, increment, not null, note: 'mã ChiTietKeo']
+  "KeoID" INT [note: 'Mã kèo']
+  "AccountID_NguoiThamGia" INT [note: 'AccountID_NguoiThamGia']
+  "TrangThaiThamGia" NVARCHAR(50) [note: 'trạng thái ThamGia']
+  "ViTriThamGia" NVARCHAR(50) [note: 'ViTriThamGia']
+  "TeamIDNguoiThamGia" INT [note: 'TeamIDNguoiThamGia [chỉ có trong migration]']
+  Note: 'Người tham gia kèo — Danh sách người tham gia/đăng ký vào một kèo.'
+}
+
+Table ChiTietHoaDon {
+  "ChiTietID" INT [pk, increment, not null, note: 'mã ChiTiet']
+  "HoaDonID" INT [note: 'Mã hóa đơn']
+  "SanPhamID" INT [note: 'Mã sản phẩm']
+  "SoLuong" INT [not null, note: 'SoLuong']
+  "DonGiaTaiThoiDiemBan" FLOAT [note: 'đơn giá TaiThoiDiemBan']
+  "ThanhTien" FLOAT [note: 'ThanhTien']
+  Note: 'Chi tiết hóa đơn — Từng dòng sản phẩm/dịch vụ trong hóa đơn.'
+}
+
+Table CoSo {
+  "CoSoID" INT [pk, increment, not null, note: 'Mã cơ sở']
+  "TenCoSo" NVARCHAR(100) [not null, note: 'tên CoSo']
+  "DiaChi" NVARCHAR(255) [note: 'DiaChi']
+  "SoDienThoai" VARCHAR(15) [note: 'SoDienThoai']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "GioMoCua" TIME [note: 'giờ MoCua']
+  "GioDongCua" TIME [note: 'giờ DongCua']
+  "HinhAnh" NVARCHAR(500) [note: 'HinhAnh']
+  "MoTa" NVARCHAR(MAX) [note: 'Mô tả']
+  "LoaiHinhKinhDoanh" NVARCHAR(255) [note: 'loại HinhKinhDoanh']
+  "SoLuongSanDuKien" INT [note: 'số lượng SanDuKien']
+  "AccountID_QuanLy" INT [note: 'AccountID_QuanLy']
+  "PayOS_ClientID" VARCHAR(255) [note: 'mã PayOS_Client']
+  "PayOS_ApiKey" VARCHAR(255) [note: 'PayOS_ApiKey']
+  "PayOS_ChecksumKey" VARCHAR(255) [note: 'PayOS_ChecksumKey']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  "ViDo" DECIMAL(10,7) [note: 'ViDo']
+  "KinhDo" DECIMAL(10,7) [note: 'KinhDo']
+  Note: 'Cơ sở thể thao — Cơ sở/chi nhánh sân thể thao: địa chỉ, tọa độ, giờ mở cửa, quản lý phụ trách.'
+}
+
+Table CoSoCapability {
+  "CapabilityID" INT [pk, increment, not null, note: 'mã Capability']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "CapabilityType" NVARCHAR(50) [not null, note: 'CapabilityType']
+  "TrangThai" NVARCHAR(20) [not null, note: 'Trạng thái']
+  "RequestedAt" DATETIME2 [not null, note: 'RequestedAt']
+  "ApprovedBy" INT [note: 'ApprovedBy']
+  "ApprovedAt" DATETIME2 [note: 'ApprovedAt']
+  "RejectReason" NVARCHAR(500) [note: 'RejectReason']
+  "Note" NVARCHAR(500) [note: 'Note']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  Note: 'Năng lực cơ sở — Các dịch vụ/năng lực mà cơ sở đăng ký cung cấp, kèm trạng thái duyệt.'
+}
+
+Table CoSoFaceConfig {
+  "CoSoID" INT [pk, note: 'Mã cơ sở [chỉ có trong migration]']
+  "FaceRequired" BIT [not null, note: 'Bắt buộc điểm danh khuôn mặt [chỉ có trong migration]']
+  "ConfidenceMin" FLOAT [not null, note: 'Ngưỡng tin cậy tối thiểu [chỉ có trong migration]']
+  "UpdatedAt" DATETIME [note: 'Thời điểm cập nhật [chỉ có trong migration]']
+  Note: 'Cấu hình khuôn mặt cơ sở — Bật/tắt bắt buộc điểm danh khuôn mặt và ngưỡng tin cậy cho từng cơ sở (1-1 với cơ sở).'
+}
+
+Table CoSoNganHang {
+  "CoSoID" INT [pk, not null, note: 'Mã cơ sở']
+  "BankName" NVARCHAR(100) [not null, note: 'BankName']
+  "BankShortCode" VARCHAR(20) [not null, note: 'BankShortCode']
+  "AccountName" NVARCHAR(100) [not null, note: 'AccountName']
+  "AccountNumber" VARCHAR(50) [not null, note: 'AccountNumber']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  Note: 'Tài khoản ngân hàng cơ sở — Thông tin ngân hàng nhận chuyển khoản của từng cơ sở.'
+}
+
+Table CourtChargeSegment {
+  "SegmentID" INT [pk, increment, not null, note: 'mã Segment']
+  "HoaDonID" INT [not null, note: 'Mã hóa đơn']
+  "DatSanID" INT [not null, note: 'Mã đặt sân']
+  "SegmentOrder" INT [not null, note: 'SegmentOrder']
+  "StartAt" DATETIME2 [not null, note: 'StartAt']
+  "EndAt" DATETIME2 [not null, note: 'EndAt']
+  "DurationMinutes" INT [not null, note: 'DurationMinutes']
+  "RateType" NVARCHAR(30) [not null, note: 'RateType']
+  "HourlyRate" DECIMAL(18,2) [not null, note: 'HourlyRate']
+  "Amount" DECIMAL(18,2) [not null, note: 'Amount']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  Note: 'Đoạn tính tiền sân — Chia lượt chơi thành các đoạn giá (có đèn / không đèn) để tính tiền khi kết thúc phiên.'
+}
+
+Table CustomerReputationHistory {
+  "ReputationHistoryID" BIGINT [pk, increment, not null, note: 'mã ReputationHistory']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "ActionType" NVARCHAR(30) [not null, note: 'ActionType']
+  "ScoreDelta" INT [not null, note: 'ScoreDelta']
+  "ScoreBefore" INT [not null, note: 'ScoreBefore']
+  "ScoreAfter" INT [not null, note: 'ScoreAfter']
+  "Reason" NVARCHAR(255) [note: 'Reason']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "CreatedBy" INT [note: 'Người tạo']
+  "IpAddress" NVARCHAR(50) [note: 'IpAddress']
+  Note: 'Lịch sử điểm uy tín — Biến động điểm uy tín khách hàng (hủy muộn, không đến, hoàn thành).'
+}
+
+Table DanhGia {
+  "DanhGiaID" INT [pk, increment, not null, note: 'mã DanhGia']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "AccountID_NguoiDanhGia" INT [note: 'AccountID_NguoiDanhGia']
+  "AccountID_NguoiBiDanhGia" INT [note: 'AccountID_NguoiBiDanhGia']
+  "SoSao" INT [note: 'Số sao']
+  "BinhLuan" NVARCHAR(MAX) [note: 'BinhLuan']
+  "NgayDanhGia" DATETIME [note: 'ngày DanhGia']
+  Note: 'Đánh giá — Đánh giá sao và nhận xét sau lượt đặt sân, giữa người chơi với nhau.'
+}
+
+Table DanhMucSanPham {
+  "DanhMucID" INT [pk, increment, not null, note: 'Mã danh mục']
+  "TenDanhMuc" NVARCHAR(100) [not null, note: 'tên DanhMuc']
+  Note: 'Danh mục sản phẩm — Nhóm phân loại sản phẩm/dịch vụ bán lẻ.'
+}
+
+Table FaceChallengeToken {
+  "TokenID" VARCHAR(64) [pk, note: 'Mã token [chỉ có trong migration]']
+  "AccountID" INT [not null, note: 'Mã tài khoản [chỉ có trong migration]']
+  "CaLamViecID" INT [not null, note: 'Mã ca làm việc [chỉ có trong migration]']
+  "Action" VARCHAR(10) [not null, note: 'Hành động (checkin/checkout) [chỉ có trong migration]']
+  "Challenges" NVARCHAR(200) [not null, note: 'Danh sách thử thách (JSON) [chỉ có trong migration]']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "ExpiresAt" DATETIME [not null, note: 'Thời điểm hết hạn [chỉ có trong migration]']
+  "UsedAt" DATETIME [note: 'Thời điểm đã dùng [chỉ có trong migration]']
+  Note: 'Token thử thách khuôn mặt — Token một lần chứa chuỗi thử thách liveness cho một lần điểm danh.'
+}
+
+Table GhepKeo {
+  "KeoID" INT [pk, increment, not null, note: 'Mã kèo']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "AccountID_NguoiTao" INT [note: 'AccountID_NguoiTao']
+  "MonTheThaoID" INT [note: 'Mã môn thể thao']
+  "MoTa" NVARCHAR(MAX) [note: 'Mô tả']
+  "TrinhDo" NVARCHAR(50) [note: 'TrinhDo']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "SoNguoiCanTim" INT [note: 'SoNguoiCanTim [chỉ có trong migration]']
+  "HinhThucDuyet" NVARCHAR(20) [note: 'HinhThucDuyet [chỉ có trong migration]']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "TeamIDNguoiTao" INT [note: 'TeamIDNguoiTao [chỉ có trong migration]']
+  Note: 'Ghép kèo — Bài đăng tìm người chơi cùng gắn với một lượt đặt sân.'
+}
+
+Table HoaDon {
+  "HoaDonID" INT [pk, increment, not null, note: 'Mã hóa đơn']
+  "DatSanID" INT [unique, note: 'Mã đặt sân']
+  "AccountID_KhachHang" INT [note: 'AccountID_KhachHang']
+  "AccountID_NhanVien" INT [note: 'AccountID_NhanVien']
+  "NgayLap" DATETIME [note: 'ngày Lap']
+  "TongTienSan" DECIMAL(18,2) [note: 'tổng tiền San']
+  "TongTienDichVu" DECIMAL(18,2) [note: 'tổng tiền DichVu']
+  "PhiGuiXe" DECIMAL(18,2) [note: 'PhiGuiXe']
+  "KhuyenMaiID" INT [note: 'Mã khuyến mãi']
+  "GiamGia" DECIMAL(18,2) [note: 'GiamGia']
+  "TongThanhToan" FLOAT [note: 'TongThanhToan']
+  "PhuongThucThanhToan" NVARCHAR(50) [note: 'PhuongThucThanhToan']
+  "TrangThaiThanhToan" NVARCHAR(50) [note: 'trạng thái ThanhToan']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "GhiChu" NVARCHAR(500) [note: 'Ghi chú']
+  "LoaiHoaDon" NVARCHAR(50) [note: 'loại HoaDon']
+  "ParentHoaDonID" INT [note: 'Mã hóa đơn cha']
+  "PaymentReference" NVARCHAR(50) [note: 'PaymentReference']
+  Note: 'Hóa đơn — Hóa đơn thanh toán cho lượt đặt sân hoặc dịch vụ; hỗ trợ hóa đơn con qua ParentHoaDonID.'
+}
+
+Table HoanTien {
+  "HoanTienID" INT [pk, increment, not null, note: 'mã HoanTien']
+  "HoaDonID" INT [not null, note: 'Mã hóa đơn']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "SoTienHoan" NUMERIC(38,2) [note: 'số tiền Hoan']
+  "LyDo" NVARCHAR(255) [note: 'Lý do']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "ThoiGianYeuCau" DATETIME [note: 'thời gian YeuCau']
+  "ThoiGianHoan" DATETIME [note: 'thời gian Hoan']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "NguoiDuyetID" INT [note: 'người duyệt ID']
+  "GhiChu" NVARCHAR(255) [note: 'Ghi chú']
+  "SoTienDaThanhToan" DECIMAL(18,2) [note: 'số tiền DaThanhToan']
+  "SoTienDeNghiHoan" DECIMAL(18,2) [note: 'số tiền DeNghiHoan']
+  "SoTienDuocDuyet" DECIMAL(18,2) [note: 'số tiền DuocDuyet']
+  "CoSoID" INT [note: 'Mã cơ sở']
+  "QrNhanTienPath" NVARCHAR(500) [note: 'QrNhanTienPath']
+  "GhiChuKhachHang" NVARCHAR(500) [note: 'ghi chú KhachHang']
+  "LyDoTuChoi" NVARCHAR(500) [note: 'LyDoTuChoi']
+  "ApprovedAt" DATETIME2 [note: 'ApprovedAt']
+  "CompletedAt" DATETIME2 [note: 'CompletedAt']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  "AccountID_NguoiXuLy" INT [note: 'AccountID_NguoiXuLy']
+  "GhiChuXuLy" NVARCHAR(500) [note: 'Ghi chú xử lý']
+  "MaGiaoDichHoan" NVARCHAR(100) [note: 'mã GiaoDichHoan']
+  "ThoiGianXuLy" DATETIME [note: 'Thời gian xử lý']
+  "NganHangNhan" NVARCHAR(100) [note: 'NganHangNhan']
+  "SoTaiKhoanNhan" NVARCHAR(30) [note: 'SoTaiKhoanNhan']
+  "ChuTaiKhoanNhan" NVARCHAR(100) [note: 'ChuTaiKhoanNhan']
+  Note: 'Hoàn tiền — Yêu cầu và tiến trình hoàn tiền cho khách sau khi hủy đặt sân hoặc hóa đơn.'
+}
+
+Table KhuyenMai {
+  "KhuyenMaiID" INT [pk, increment, not null, note: 'Mã khuyến mãi']
+  "MaCode" VARCHAR(50) [not null, unique, note: 'Mã code khuyến mãi']
+  "MoTa" NVARCHAR(255) [note: 'Mô tả']
+  "LoaiGiam" NVARCHAR(20) [not null, note: 'loại Giam']
+  "GiaTriGiam" FLOAT [note: 'GiaTriGiam']
+  "NgayBatDau" DATE [not null, note: 'Ngày bắt đầu']
+  "NgayKetThuc" DATE [not null, note: 'Ngày kết thúc']
+  "SoLanToiDa" INT [note: 'SoLanToiDa']
+  "SoLanDaDung" INT [note: 'SoLanDaDung']
+  "CoSoID" INT [note: 'Mã cơ sở']
+  "TrangThai" NVARCHAR(20) [note: 'Trạng thái']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "GiaTriToiThieu" DECIMAL(18,2) [note: 'GiaTriToiThieu']
+  "GiamToiDa" DECIMAL(18,2) [note: 'GiamToiDa']
+  "HienThiCongKhai" BIT [not null, note: 'HienThiCongKhai']
+  Note: 'Khuyến mãi — Mã giảm giá/chương trình khuyến mãi theo cơ sở.'
+}
+
+Table KhuyenMaiHinhAnh {
+  "HinhAnhID" INT [pk, increment, not null, note: 'hình ảnh ID']
+  "KhuyenMaiID" INT [not null, unique, note: 'Mã khuyến mãi']
+  "DuongDan" NVARCHAR(500) [not null, note: 'DuongDan']
+  "TenFileGoc" NVARCHAR(255) [note: 'tên FileGoc']
+  "MimeType" NVARCHAR(100) [note: 'MimeType']
+  "DungLuong" BIGINT [note: 'DungLuong']
+  "ChieuRong" INT [note: 'ChieuRong']
+  "ChieuCao" INT [note: 'ChieuCao']
+  "ThuTu" INT [not null, note: 'ThuTu']
+  "LaAnhBia" BIT [not null, note: 'LaAnhBia']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME2 [note: 'Thời điểm cập nhật']
+  Note: 'Hình ảnh khuyến mãi — Ảnh minh họa và ảnh bìa của chương trình khuyến mãi.'
+}
+
+Table KyLuong {
+  "KyLuongID" INT [pk, increment, note: 'Mã kỳ lương [chỉ có trong migration]']
+  "CoSoID" INT [not null, note: 'Mã cơ sở [chỉ có trong migration]']
+  "TenKy" NVARCHAR(100) [not null, note: 'Tên kỳ lương [chỉ có trong migration]']
+  "NgayBatDau" DATE [not null, note: 'Ngày bắt đầu [chỉ có trong migration]']
+  "NgayKetThuc" DATE [not null, note: 'Ngày kết thúc [chỉ có trong migration]']
+  "NgayPhatLuong" DATE [not null, note: 'Ngày phát lương [chỉ có trong migration]']
+  "TrangThai" VARCHAR(20) [not null, note: 'Trạng thái [chỉ có trong migration]']
+  "CreatedBy" INT [not null, note: 'Người tạo [chỉ có trong migration]']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  Note: 'Kỳ lương — Kỳ tính lương theo cơ sở với ngày bắt đầu/kết thúc và ngày phát lương.'
+}
+
+Table LichDatSan {
+  "DatSanID" INT [pk, increment, not null, note: 'Mã đặt sân']
+  "AccountID" INT [note: 'Mã tài khoản']
+  "SanID" INT [note: 'Mã sân']
+  "NgayDat" DATE [not null, note: 'ngày Dat']
+  "GioBatDau" TIME [not null, note: 'Giờ bắt đầu']
+  "GioKetThuc" TIME [not null, note: 'Giờ kết thúc']
+  "ApDungGiaCoDen" BIT [note: 'ApDungGiaCoDen']
+  "TongTienDuKien" NUMERIC(38,2) [note: 'tổng tiền DuKien']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "GhiChu" NVARCHAR(255) [note: 'Ghi chú']
+  "NguonDatSan" NVARCHAR(50) [note: 'NguonDatSan']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "CreatedTime" DATETIME [note: 'Thời điểm tạo']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  "actual_start_time" TIME [note: 'actual_start_time']
+  "TimeMode" NVARCHAR(30) [note: 'TimeMode']
+  "ReservedDurationMinutes" INT [note: 'ReservedDurationMinutes']
+  "actual_end_time" TIME [note: 'actual_end_time']
+  "EarlyCheckoutReason" NVARCHAR(255) [note: 'EarlyCheckoutReason']
+  "EarlyCheckoutDiscount" DECIMAL(18,2) [note: 'EarlyCheckoutDiscount']
+  "HoldExpiresAt" DATETIME2 [note: 'HoldExpiresAt']
+  "DepositAmount" DECIMAL(18,2) [note: 'DepositAmount']
+  "PaymentMethodConfirmed" NVARCHAR(50) [note: 'PaymentMethodConfirmed']
+  "TransactionCode" NVARCHAR(100) [note: 'TransactionCode']
+  "ConfirmedAt" DATETIME2 [note: 'ConfirmedAt']
+  "ConfirmedBy" INT [note: 'ConfirmedBy']
+  "ConfirmSource" NVARCHAR(20) [note: 'ConfirmSource']
+  "NoShowAt" DATETIME2 [note: 'NoShowAt']
+  "ActualStartAt" DATETIME2 [note: 'ActualStartAt']
+  "ActualEndAt" DATETIME2 [note: 'ActualEndAt']
+  "PricingFinalizedAt" DATETIME2 [note: 'PricingFinalizedAt']
+  "CancelType" NVARCHAR(20) [note: 'CancelType']
+  "CancelReason" NVARCHAR(255) [note: 'CancelReason']
+  "CancelledAt" DATETIME2 [note: 'CancelledAt']
+  "CancelledBy" INT [note: 'CancelledBy']
+  "RequiresRefundReview" BIT [not null, note: 'RequiresRefundReview']
+  "PayosOrderCode" BIGINT [note: 'PayosOrderCode']
+  "PayosPaymentLinkId" VARCHAR(255) [note: 'PayosPaymentLinkId']
+  "PayosQrPayload" NVARCHAR(MAX) [note: 'PayosQrPayload']
+  "PayosCheckoutUrl" NVARCHAR(1024) [note: 'PayosCheckoutUrl']
+  "PayosBin" VARCHAR(20) [note: 'PayosBin']
+  "PayosAccountNumber" VARCHAR(64) [note: 'PayosAccountNumber']
+  "PayosAccountName" NVARCHAR(255) [note: 'PayosAccountName']
+  "PayosAmount" DECIMAL(18,2) [note: 'PayosAmount']
+  "PayosDescription" NVARCHAR(255) [note: 'PayosDescription']
+  "PayosExpiresAt" DATETIME2 [note: 'PayosExpiresAt']
+  Note: 'Lịch đặt sân — Bản ghi đặt sân trung tâm: khách, sân, ngày giờ, trạng thái, thanh toán, check-in.'
+}
+
+Table LichDatSan_DichVu {
+  "Id" INT [pk, increment, note: 'Id [chỉ có trong migration]']
+  "DatSanID" INT [not null, note: 'Mã đặt sân [chỉ có trong migration]']
+  "SanPhamID" INT [not null, note: 'Mã sản phẩm [chỉ có trong migration]']
+  "Quantity" INT [not null, note: 'Quantity [chỉ có trong migration]']
+  "UnitPrice" DECIMAL(18,2) [not null, note: 'UnitPrice [chỉ có trong migration]']
+  "TotalPrice" DECIMAL(18,2) [not null, note: 'TotalPrice [chỉ có trong migration]']
+  "Status" NVARCHAR(50) [not null, note: 'Status [chỉ có trong migration]']
+  "Note" NVARCHAR(255) [note: 'Note [chỉ có trong migration]']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "DeliveredAt" DATETIME2 [note: 'DeliveredAt [chỉ có trong migration]']
+  "DeliveredBy" INT [note: 'DeliveredBy [chỉ có trong migration]']
+  Note: 'Dịch vụ đặt trước — Sản phẩm/dịch vụ khách đặt kèm trước cho một lượt đặt sân.'
+}
+
+Table LichSuELO {
+  "LichSuELOID" INT [pk, increment, not null, note: 'mã LichSuELO']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "DiemTruoc" INT [not null, note: 'DiemTruoc']
+  "DiemSau" INT [not null, note: 'DiemSau']
+  "ThayDoi" INT [not null, note: 'ThayDoi']
+  "LyDo" NVARCHAR(255) [note: 'Lý do']
+  "ThoiGian" DATETIME [note: 'ThoiGian']
+  Note: 'Lịch sử điểm ELO — Biến động điểm trình độ ELO của tài khoản theo từng trận.'
+}
+
+Table LichSuKhuyenMai {
+  "HistoryID" INT [pk, increment, not null, note: 'mã History']
+  "KhuyenMaiID" INT [not null, note: 'Mã khuyến mãi']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "DiscountAmount" DECIMAL(18,2) [not null, note: 'DiscountAmount']
+  "UsedAt" DATETIME [not null, note: 'Thời điểm đã dùng']
+  Note: 'Lịch sử dùng khuyến mãi — Ghi nhận mỗi lần một tài khoản sử dụng mã khuyến mãi.'
+}
+
+Table LichXeRaVao {
+  "LichXeID" INT [pk, increment, not null, note: 'mã LichXe']
+  "TheID" INT [note: 'Mã thẻ xe']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "BienSoXe" VARCHAR(20) [note: 'BienSoXe']
+  "KieuGuiXe" NVARCHAR(20) [note: 'KieuGuiXe']
+  "GioVao" DATETIME [note: 'giờ Vao']
+  "GioRa" DATETIME [note: 'giờ Ra']
+  "PhiGuiXe" DECIMAL(18,2) [note: 'PhiGuiXe']
+  "AccountID_NhanVien" INT [note: 'AccountID_NhanVien']
+  Note: 'Lịch xe ra vào — Nhật ký xe vào/ra bãi gắn với thẻ giữ xe và lượt đặt sân.'
+}
+
+Table LoaiSan {
+  "LoaiSanID" INT [pk, increment, not null, note: 'Mã loại sân']
+  "MonTheThaoID" INT [not null, note: 'Mã môn thể thao']
+  "TenLoai" NVARCHAR(50) [not null, note: 'tên Loai']
+  "GiaKhongDen" FLOAT [note: 'GiaKhongDen']
+  "GiaCoDen" DECIMAL(18,2) [note: 'GiaCoDen']
+  "GioBatDauLenDen" TIME [note: 'giờ BatDauLenDen']
+  "CoSoID" INT [note: 'Mã cơ sở']
+  "GioKetThucLenDen" TIME [note: 'giờ KetThucLenDen']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  Note: 'Loại sân — Loại sân theo môn thể thao, khung giờ và bảng giá (có/không đèn).'
+}
+
+Table LoaiSan_KhungGioDen_Backup {
+  "KhungGioDenID" INT [not null, note: 'mã KhungGioDen']
+  "LoaiSanID" INT [not null, note: 'Mã loại sân']
+  "GioBatDau" TIME [not null, note: 'Giờ bắt đầu']
+  "GioKetThuc" TIME [not null, note: 'Giờ kết thúc']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME2 [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME2 [note: 'Thời điểm cập nhật']
+  Note: 'Sao lưu khung giờ đèn — Bảng sao lưu dữ liệu khung giờ bật đèn của loại sân trước khi migration.'
+}
+
+Table MaQR {
+  "MaQRID" INT [pk, increment, note: 'mã QRID [chỉ có trong migration]']
+  "ChiaHoaDonID" INT [not null, note: 'mã ChiaHoaDon [chỉ có trong migration]']
+  "NoiDungQR" NVARCHAR(500) [not null, note: 'NoiDungQR [chỉ có trong migration]']
+  "NgayTao" DATETIME [note: 'ngày Tao [chỉ có trong migration]']
+  "NgayHetHan" DATETIME [note: 'ngày HetHan [chỉ có trong migration]']
+  "DaQuet" BIT [note: 'DaQuet [chỉ có trong migration]']
+  Note: 'Mã QR chia tiền (cũ) — Mã QR thanh toán gắn với bản ghi chia hóa đơn đời cũ.'
+}
+
+Table MonTheThao {
+  "MonTheThaoID" INT [pk, increment, not null, note: 'Mã môn thể thao']
+  "TenMon" NVARCHAR(50) [not null, note: 'tên Mon']
+  Note: 'Môn thể thao — Danh mục môn thể thao (bóng đá, cầu lông, tennis, pickleball...).'
+}
+
+Table MonTheThaoYeuThich {
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "MonTheThaoID" INT [not null, note: 'Mã môn thể thao']
+  "NgayThêm" DATETIME [note: 'ngày Thêm']
+  indexes {
+    ("AccountID", "MonTheThaoID") [pk]
+  }
+  Note: 'Môn thể thao yêu thích — Bảng trung gian N-N giữa tài khoản và môn thể thao yêu thích.'
+}
+
+Table NhatKyChat {
+  "NhatKyChatID" INT [pk, increment, not null, note: 'mã NhatKyChat']
+  "AccountID" INT [note: 'Mã tài khoản']
+  "Kenh" NVARCHAR(20) [not null, note: 'Kenh']
+  "TurnSo" INT [not null, note: 'TurnSo']
+  "VaiTro" NVARCHAR(10) [not null, note: 'VaiTro']
+  "NoiDung" NVARCHAR(MAX) [not null, note: 'Nội dung']
+  "TrangThaiBot" NVARCHAR(50) [note: 'trạng thái Bot']
+  "ThoiGian" DATETIME [note: 'ThoiGian']
+  Note: 'Nhật ký chat — Lịch sử hội thoại chatbot/trợ lý của tài khoản.'
+}
+
+Table NhatKySOSGui {
+  "NhatKySOSGuiID" INT [pk, increment, not null, note: 'mã NhatKySOSGui']
+  "YeuCauSOSID" INT [not null, note: 'Mã yêu cầu SOS']
+  "AccountID_NhanGui" INT [not null, note: 'AccountID_NhanGui']
+  "ThoiGianGui" DATETIME [note: 'Thời gian gửi']
+  "DaXem" BIT [note: 'DaXem']
+  "PhanHoi" NVARCHAR(50) [note: 'PhanHoi']
+  Note: 'Nhật ký gửi SOS — Ghi nhận từng lượt gửi thông báo SOS tới người nhận.'
+}
+
+Table NhomChiaTien {
+  "NhomChiaTienID" INT [pk, increment, not null, note: 'Mã nhóm chia tiền']
+  "HoaDonID" INT [not null, unique, note: 'Mã hóa đơn']
+  "DatSanID" INT [not null, note: 'Mã đặt sân']
+  "CreatedByAccountID" INT [not null, note: 'mã CreatedByAccount']
+  "SplitType" NVARCHAR(20) [not null, note: 'SplitType']
+  "TongTien" DECIMAL(18,2) [not null, note: 'TongTien']
+  "TrangThai" NVARCHAR(20) [not null, note: 'Trạng thái']
+  "ExpiresAt" DATETIME [note: 'Thời điểm hết hạn']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME [not null, note: 'Thời điểm cập nhật']
+  Note: 'Nhóm chia hóa đơn — Nhóm chia tiền cho một hóa đơn theo nhiều hình thức chia.'
+}
+
+Table NhomChiaTienChiTiet {
+  "ChiTietID" INT [pk, increment, not null, note: 'mã ChiTiet']
+  "NhomChiaTienID" INT [not null, note: 'Mã nhóm chia tiền']
+  "AccountID" INT [note: 'Mã tài khoản']
+  "DisplayName" NVARCHAR(100) [not null, note: 'DisplayName']
+  "ShareToken" CHAR(43) [not null, unique, note: 'ShareToken']
+  "SoTien" DECIMAL(18,2) [not null, note: 'SoTien']
+  "TrangThai" NVARCHAR(20) [not null, note: 'Trạng thái']
+  "PaymentMethod" NVARCHAR(30) [note: 'PaymentMethod']
+  "PaymentTransactionID" NVARCHAR(100) [note: 'mã PaymentTransaction']
+  "PayerAccountID" INT [note: 'mã PayerAccount']
+  "PaidAt" DATETIME [note: 'PaidAt']
+  "ConfirmedByStaffID" INT [note: 'mã ConfirmedByStaff']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME [not null, note: 'Thời điểm cập nhật']
+  Note: 'Phần chia của từng người — Phần tiền và trạng thái thanh toán của từng người trong nhóm chia.'
+}
+
+Table PayOSPaymentAttempt {
+  "AttemptID" BIGINT [pk, increment, not null, note: 'mã Attempt']
+  "HoaDonID" INT [not null, unique, note: 'Mã hóa đơn']
+  "DatSanID" INT [not null, note: 'Mã đặt sân']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "OrderCode" BIGINT [not null, unique, note: 'OrderCode']
+  "PaymentLinkID" NVARCHAR(100) [note: 'mã PaymentLink']
+  "CheckoutUrl" NVARCHAR(1000) [note: 'CheckoutUrl']
+  "QrCode" NVARCHAR(MAX) [note: 'QrCode']
+  "Status" NVARCHAR(30) [not null, note: 'Status']
+  "Amount" DECIMAL(18,2) [not null, note: 'Amount']
+  "Description" NVARCHAR(100) [not null, note: 'Description']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "PaidAt" DATETIME2 [note: 'PaidAt']
+  "CancelledAt" DATETIME2 [note: 'CancelledAt']
+  "LastCheckedAt" DATETIME2 [note: 'LastCheckedAt']
+  "FailureReason" NVARCHAR(500) [note: 'FailureReason']
+  Note: 'Lượt thanh toán PayOS — Mỗi lần tạo link thanh toán PayOS cho hóa đơn/đặt sân, kèm mã đơn và trạng thái.'
+}
+
+Table QRRequest {
+  "RequestID" INT [pk, increment, not null, note: 'mã Request']
+  "SanID" INT [not null, note: 'Mã sân']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "GuestToken" VARCHAR(64) [not null, note: 'GuestToken']
+  "CustomerID" INT [note: 'mã Customer']
+  "RequestType" VARCHAR(20) [not null, note: 'RequestType']
+  "ItemsJson" NVARCHAR(MAX) [note: 'ItemsJson']
+  "Note" NVARCHAR(255) [note: 'Note']
+  "Status" VARCHAR(20) [not null, note: 'Status']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  "HandledByStaffID" INT [note: 'mã HandledByStaff']
+  Note: 'Yêu cầu từ QR — Yêu cầu khách gửi sau khi quét QR tại sân (gọi nhân viên, gọi món...).'
+}
+
+Table RacketStringingConfig {
+  "ConfigID" INT [pk, increment, not null, note: 'mã Config']
+  "ServiceID" INT [not null, unique, note: 'Mã dịch vụ']
+  "RacketTypes" NVARCHAR(300) [note: 'RacketTypes']
+  "StringingPrice" DECIMAL(12,2) [not null, note: 'StringingPrice']
+  "MinTension" DECIMAL(5,2) [not null, note: 'MinTension']
+  "MaxTension" DECIMAL(5,2) [not null, note: 'mã xTension']
+  "TensionUnit" NVARCHAR(5) [not null, note: 'tên sionUnit']
+  "AllowCustomerString" BIT [not null, note: 'AllowCustomerString']
+  "SellsString" BIT [not null, note: 'SellsString']
+  "AvgCompletionMinutes" INT [not null, note: 'AvgCompletionMinutes']
+  "MaxRacketsPerOrder" INT [not null, note: 'mã xRacketsPerOrder']
+  "OldRacketPolicy" NVARCHAR(500) [note: 'OldRacketPolicy']
+  "StringBreakPolicy" NVARCHAR(500) [note: 'StringBreakPolicy']
+  Note: 'Cấu hình căng vợt — Thông số cấu hình mặc định cho dịch vụ căng vợt (1-1 với dịch vụ).'
+}
+
+Table RacketStringingOrderDetail {
+  "DetailID" INT [pk, increment, not null, note: 'mã Detail']
+  "OrderID" INT [not null, unique, note: 'Mã đơn dịch vụ']
+  "RacketType" NVARCHAR(50) [note: 'RacketType']
+  "RacketBrand" NVARCHAR(100) [note: 'RacketBrand']
+  "RacketModel" NVARCHAR(100) [note: 'RacketModel']
+  "MaterialID" INT [note: 'Mã vật tư']
+  "CustomerBringsString" BIT [not null, note: 'CustomerBringsString']
+  "TensionValue" DECIMAL(5,2) [not null, note: 'tên sionValue']
+  "TensionUnit" NVARCHAR(5) [not null, note: 'tên sionUnit']
+  "StringColor" NVARCHAR(50) [note: 'StringColor']
+  "Quantity" INT [not null, note: 'Quantity']
+  "TechnicalNote" NVARCHAR(500) [note: 'TechnicalNote']
+  Note: 'Chi tiết đơn căng vợt — Thông số căng vợt cụ thể của một đơn dịch vụ (1-1 với đơn).'
+}
+
+Table Roles {
+  "RoleID" INT [pk, increment, not null, note: 'Mã vai trò']
+  "RoleName" NVARCHAR(50) [not null, note: 'Tên vai trò']
+  Note: 'Vai trò — Danh mục vai trò hệ thống (Admin, Quản lý, Nhân viên, Bảo vệ, Khách hàng).'
+}
+
+Table San {
+  "SanID" INT [pk, increment, not null, note: 'Mã sân']
+  "TenSan" NVARCHAR(50) [not null, note: 'tên San']
+  "LoaiSanID" INT [note: 'Mã loại sân']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "MoTa" NVARCHAR(MAX) [note: 'Mô tả']
+  "HinhAnh" NVARCHAR(500) [note: 'HinhAnh']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  Note: 'Sân — Sân thi đấu cụ thể thuộc một cơ sở và một loại sân.'
+}
+
+Table SanPham_DichVu {
+  "SanPhamID" INT [pk, increment, not null, note: 'Mã sản phẩm']
+  "DanhMucID" INT [not null, note: 'Mã danh mục']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "TenSanPham" NVARCHAR(100) [not null, note: 'tên SanPham']
+  "DonGia" FLOAT [note: 'DonGia']
+  "DonViTinh" NVARCHAR(20) [note: 'DonViTinh']
+  "SoLuongTon" INT [note: 'số lượng Ton']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "SkuCode" NVARCHAR(50) [note: 'SkuCode']
+  "GiaNhap" FLOAT [note: 'GiaNhap']
+  "MoTa" NVARCHAR(255) [note: 'Mô tả']
+  "IsDeleted" BIT [note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  "HinhAnh" NVARCHAR(500) [note: 'HinhAnh']
+  Note: 'Sản phẩm & dịch vụ — Sản phẩm, đồ uống, dịch vụ bán kèm tại cơ sở kèm tồn kho.'
+}
+
+Table SanQR {
+  "SanQRID" INT [pk, increment, not null, note: 'Mã QR sân']
+  "SanID" INT [not null, unique, note: 'Mã sân']
+  "Token" UNIQUEIDENTIFIER [not null, unique, note: 'Token']
+  "TrangThai" NVARCHAR(20) [not null, note: 'Trạng thái']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "CreatedBy" INT [note: 'Người tạo']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  "UpdatedBy" INT [note: 'Người cập nhật']
+  "RegenerateCount" INT [not null, note: 'RegenerateCount']
+  "ShortCode" NVARCHAR(12) [unique, note: 'ShortCode']
+  Note: 'Mã QR sân — Mã QR gắn cho từng sân (1-1) để khách quét gọi nhân viên/đặt món.'
+}
+
+Table SanQRTokenHistory {
+  "HistoryID" INT [pk, increment, not null, note: 'mã History']
+  "SanQRID" INT [not null, note: 'Mã QR sân']
+  "SanID" INT [not null, note: 'Mã sân']
+  "Token" UNIQUEIDENTIFIER [unique, note: 'Token']
+  "TrangThai" NVARCHAR(20) [not null, note: 'Trạng thái']
+  "IssuedAt" DATETIME2 [not null, note: 'cờ suedAt']
+  "RevokedAt" DATETIME2 [note: 'RevokedAt']
+  "RevokedBy" INT [note: 'RevokedBy']
+  "RevokeReason" NVARCHAR(200) [note: 'RevokeReason']
+  "TokenHash" NVARCHAR(64) [note: 'TokenHash']
+  "ShortCode" NVARCHAR(12) [note: 'ShortCode']
+  Note: 'Lịch sử token QR — Lịch sử token QR đã cấp và thu hồi cho sân.'
+}
+
+Table ServiceMaterial {
+  "MaterialID" INT [pk, increment, not null, note: 'Mã vật tư']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "Name" NVARCHAR(150) [not null, note: 'Name']
+  "Brand" NVARCHAR(100) [note: 'Brand']
+  "Code" NVARCHAR(50) [note: 'Code']
+  "Color" NVARCHAR(50) [note: 'Color']
+  "SportType" NVARCHAR(50) [note: 'SportType']
+  "Price" DECIMAL(12,2) [not null, note: 'Price']
+  "ExtraFee" DECIMAL(12,2) [not null, note: 'ExtraFee']
+  "Status" NVARCHAR(20) [not null, note: 'Status']
+  "Description" NVARCHAR(500) [note: 'Description']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  Note: 'Vật tư dịch vụ — Vật tư/kho dùng cho dịch vụ thể thao (dây cước, quấn cán...).'
+}
+
+Table ServiceOrder {
+  "OrderID" INT [pk, increment, not null, note: 'Mã đơn dịch vụ']
+  "CustomerID" INT [not null, note: 'mã Customer']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "ServiceID" INT [not null, note: 'Mã dịch vụ']
+  "BookingID" INT [note: 'mã Booking']
+  "Status" NVARCHAR(30) [not null, note: 'Status']
+  "RequestedAt" DATETIME2 [not null, note: 'RequestedAt']
+  "AppointmentDate" DATE [not null, note: 'AppointmentDate']
+  "DropOffTime" NVARCHAR(20) [note: 'DropOffTime']
+  "ExpectedPickupTime" DATETIME2 [note: 'ExpectedPickupTime']
+  "ActualReceivedTime" DATETIME2 [note: 'ActualReceivedTime']
+  "CompletedTime" DATETIME2 [note: 'CompletedTime']
+  "DeliveredTime" DATETIME2 [note: 'DeliveredTime']
+  "CancelledTime" DATETIME2 [note: 'CancelledTime']
+  "CustomerNote" NVARCHAR(500) [note: 'CustomerNote']
+  "ManagerNote" NVARCHAR(500) [note: 'mã nagerNote']
+  "EstimatedPrice" DECIMAL(12,2) [not null, note: 'EstimatedPrice']
+  "ConfirmedPrice" DECIMAL(12,2) [note: 'ConfirmedPrice']
+  "CancellationReason" NVARCHAR(500) [note: 'CancellationReason']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  Note: 'Đơn dịch vụ — Đơn đặt dịch vụ thể thao của khách, có vòng đời trạng thái riêng.'
+}
+
+Table ServiceOrderStatusHistory {
+  "HistoryID" INT [pk, increment, not null, note: 'mã History']
+  "OrderID" INT [not null, note: 'Mã đơn dịch vụ']
+  "FromStatus" NVARCHAR(30) [note: 'FromStatus']
+  "ToStatus" NVARCHAR(30) [not null, note: 'ToStatus']
+  "ChangedBy" INT [note: 'ChangedBy']
+  "ChangedAt" DATETIME2 [not null, note: 'ChangedAt']
+  "Note" NVARCHAR(500) [note: 'Note']
+  Note: 'Lịch sử trạng thái đơn dịch vụ — Nhật ký chuyển trạng thái của đơn dịch vụ kèm người thay đổi.'
+}
+
+Table SoftHold {
+  "SoftHoldID" INT [pk, not null, note: 'mã SoftHold']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "SanID" INT [not null, note: 'Mã sân']
+  "NgayDat" DATE [not null, note: 'ngày Dat']
+  "GioBatDau" TIME [not null, note: 'Giờ bắt đầu']
+  "GioKetThuc" TIME [not null, note: 'Giờ kết thúc']
+  "CreatedTime" DATETIME [not null, note: 'Thời điểm tạo']
+  Note: 'Giữ chỗ tạm thời — Giữ khung giờ tạm trong vài phút khi khách đang thao tác đặt sân.'
+}
+
+Table SportService {
+  "ServiceID" INT [pk, increment, not null, note: 'Mã dịch vụ']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "ServiceType" NVARCHAR(30) [not null, note: 'ServiceType']
+  "ServiceName" NVARCHAR(150) [not null, note: 'ServiceName']
+  "SportType" NVARCHAR(50) [note: 'SportType']
+  "Description" NVARCHAR(1000) [note: 'Description']
+  "BasePrice" DECIMAL(12,2) [not null, note: 'BasePrice']
+  "Unit" NVARCHAR(30) [note: 'Unit']
+  "EstimatedMinutes" INT [not null, note: 'EstimatedMinutes']
+  "MaxRequestsPerDay" INT [note: 'mã xRequestsPerDay']
+  "ReceiveTimeStart" TIME [note: 'ReceiveTimeStart']
+  "ReceiveTimeEnd" TIME [note: 'ReceiveTimeEnd']
+  "ImageUrl" NVARCHAR(300) [note: 'ImageUrl']
+  "IsAcceptingRequests" BIT [not null, note: 'cờ AcceptingRequests']
+  "Policy" NVARCHAR(1000) [note: 'Policy']
+  "CustomerNote" NVARCHAR(500) [note: 'CustomerNote']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME2 [not null, note: 'Thời điểm cập nhật']
+  Note: 'Dịch vụ thể thao — Dịch vụ chuyên biệt: căng lưới, thay quấn cán, sửa vợt, huấn luyện viên...'
+}
+
+Table SuCo {
+  "SuCoID" INT [pk, note: 'Mã sự cố [chỉ có trong migration]']
+  "CoSoID" INT [not null, note: 'Mã cơ sở [chỉ có trong migration]']
+  "SanID" INT [note: 'Mã sân [chỉ có trong migration]']
+  "BaoVeID" INT [not null, note: 'Mã bảo vệ [chỉ có trong migration]']
+  "LoaiSuCo" ENUM [not null, note: 'Loại sự cố [chỉ có trong migration]']
+  "MucDo" ENUM [not null, note: 'Mức độ [chỉ có trong migration]']
+  "MoTa" TEXT [not null, note: 'Mô tả [chỉ có trong migration]']
+  "AnhUrl" VARCHAR(500) [note: 'Ảnh minh chứng [chỉ có trong migration]']
+  "TrangThai" ENUM [not null, note: 'Trạng thái [chỉ có trong migration]']
+  "GhiChuXuLy" TEXT [note: 'Ghi chú xử lý [chỉ có trong migration]']
+  "ThoiGianTao" DATETIME [not null, note: 'Thời gian tạo [chỉ có trong migration]']
+  "ThoiGianXuLy" DATETIME [note: 'Thời gian xử lý [chỉ có trong migration]']
+  "XuLyBoi" INT [note: 'Người xử lý [chỉ có trong migration]']
+  Note: 'Sự cố — Báo cáo sự cố do bảo vệ ghi nhận tại cơ sở/sân, có quy trình xử lý.'
+}
+
+Table TeamInvitations {
+  "InvitationID" INT [pk, increment, not null, note: 'mã Invitation [chỉ có trong migration]']
+  "TeamID" INT [not null, note: 'mã Team [chỉ có trong migration]']
+  "InvitedAccountID" INT [not null, note: 'mã InvitedAccount [chỉ có trong migration]']
+  "InvitedByAccountID" INT [not null, note: 'mã InvitedByAccount [chỉ có trong migration]']
+  "ProposedRole" VARCHAR(30) [not null, note: 'ProposedRole [chỉ có trong migration]']
+  "Status" VARCHAR(30) [not null, note: 'Status [chỉ có trong migration]']
+  "Message" NVARCHAR(255) [note: 'Message [chỉ có trong migration]']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "ExpiresAt" DATETIME2 [note: 'Thời điểm hết hạn [chỉ có trong migration]']
+  "RespondedAt" DATETIME2 [note: 'RespondedAt [chỉ có trong migration]']
+  Note: 'Lời mời vào đội — Lời mời do đội trưởng gửi cho tài khoản khác.'
+}
+
+Table TeamJoinRequests {
+  "JoinRequestID" INT [pk, increment, not null, note: 'mã JoinRequest [chỉ có trong migration]']
+  "TeamID" INT [not null, note: 'mã Team [chỉ có trong migration]']
+  "RequesterAccountID" INT [not null, note: 'mã RequesterAccount [chỉ có trong migration]']
+  "Message" NVARCHAR(255) [note: 'Message [chỉ có trong migration]']
+  "Status" VARCHAR(30) [not null, note: 'Status [chỉ có trong migration]']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "ReviewedAt" DATETIME2 [note: 'ReviewedAt [chỉ có trong migration]']
+  "ReviewedByAccountID" INT [note: 'mã ReviewedByAccount [chỉ có trong migration]']
+  Note: 'Yêu cầu xin vào đội — Yêu cầu do người chơi gửi xin gia nhập một đội.'
+}
+
+Table TeamMembers {
+  "TeamMemberID" INT [pk, increment, not null, note: 'mã TeamMember [chỉ có trong migration]']
+  "TeamID" INT [not null, note: 'mã Team [chỉ có trong migration]']
+  "AccountID" INT [not null, note: 'Mã tài khoản [chỉ có trong migration]']
+  "MemberRole" VARCHAR(30) [not null, note: 'MemberRole [chỉ có trong migration]']
+  "MemberStatus" VARCHAR(30) [not null, note: 'MemberStatus [chỉ có trong migration]']
+  "JoinedAt" DATETIME2 [not null, note: 'JoinedAt [chỉ có trong migration]']
+  "LeftAt" DATETIME2 [note: 'LeftAt [chỉ có trong migration]']
+  "AddedBy" INT [note: 'AddedBy [chỉ có trong migration]']
+  Note: 'Thành viên đội — Bảng trung gian N-N giữa đội và tài khoản kèm vai trò trong đội.'
+}
+
+Table Teams {
+  "TeamID" INT [pk, increment, not null, note: 'mã Team [chỉ có trong migration]']
+  "TeamName" NVARCHAR(50) [not null, note: 'TeamName [chỉ có trong migration]']
+  "Description" NVARCHAR(225) [note: 'Description [chỉ có trong migration]']
+  "SportID" INT [not null, note: 'mã Sport [chỉ có trong migration]']
+  "CaptainAccountID" INT [not null, note: 'mã CaptainAccount [chỉ có trong migration]']
+  "LocationText" NVARCHAR(255) [note: 'LocationText [chỉ có trong migration]']
+  "AvatarPath" NVARCHAR(500) [note: 'AvatarPath [chỉ có trong migration]']
+  "CoverImagePath" NVARCHAR(500) [note: 'CoverImagePath [chỉ có trong migration]']
+  "MaxMembers" INT [not null, note: 'mã xMembers [chỉ có trong migration]']
+  "Status" VARCHAR(30) [not null, note: 'Status [chỉ có trong migration]']
+  "CreatedAt" DATETIME2 [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  "UpdatedAt" DATETIME2 [note: 'Thời điểm cập nhật [chỉ có trong migration]']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm [chỉ có trong migration]']
+  "DeletedAt" DATETIME2 [note: 'Thời điểm xóa [chỉ có trong migration]']
+  "DeletedBy" INT [note: 'Người xóa [chỉ có trong migration]']
+  Note: 'Đội nhóm — Đội/nhóm người chơi do khách hàng tạo và quản lý.'
+}
+
+Table TheGiuXe {
+  "TheID" INT [pk, increment, not null, note: 'Mã thẻ xe']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "MaSoThe" VARCHAR(20) [not null, note: 'mã SoThe']
+  "LoaiXe" NVARCHAR(20) [note: 'loại Xe']
+  "TrangThai" NVARCHAR(20) [note: 'Trạng thái']
+  "SucChua" INT [note: 'SucChua']
+  "GiaVeTheoLuot" DECIMAL(18,2) [note: 'GiaVeTheoLuot']
+  Note: 'Thẻ giữ xe — Thẻ/chỗ giữ xe phát hành tại cơ sở.'
+}
+
+Table ThongBao {
+  "ThongBaoID" INT [pk, increment, not null, note: 'mã ThongBao']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "TieuDe" NVARCHAR(200) [not null, note: 'Tiêu đề']
+  "NoiDung" NVARCHAR(MAX) [note: 'Nội dung']
+  "LoaiThongBao" NVARCHAR(50) [note: 'Loại thông báo']
+  "DaDoc" BIT [note: 'Đã đọc']
+  "ThoiGianGui" DATETIME [note: 'Thời gian gửi']
+  "MaBanGhi" INT [note: 'Mã bản ghi liên quan']
+  "DuongDan" VARCHAR(500) [note: 'DuongDan']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  Note: 'Thông báo — Thông báo hệ thống gửi tới từng tài khoản, có chống trùng theo loại + mã bản ghi.'
+}
+
+Table YeuCauNghi {
+  "YeuCauNghiID" INT [pk, not null, note: 'Mã yêu cầu nghỉ']
+  "AccountID" INT [not null, note: 'Mã tài khoản']
+  "CoSoID" INT [not null, note: 'Mã cơ sở']
+  "NgayNghi" DATE [not null, note: 'ngày Nghi']
+  "LoaiNghi" VARCHAR(50) [not null, note: 'loại Nghi']
+  "LyDo" NVARCHAR(500) [note: 'Lý do']
+  "MucDoKhanCap" BIT [note: 'MucDoKhanCap']
+  "TrangThai" VARCHAR(20) [not null, note: 'Trạng thái']
+  "GhiChuQuanLy" NVARCHAR(500) [note: 'Ghi chú của quản lý']
+  "NgayXuLy" DATETIME [note: 'Ngày xử lý']
+  "XuLyBy" INT [note: 'Người xử lý']
+  "NgayGui" DATETIME [note: 'ngày Gui']
+  "CreatedAt" DATETIME [note: 'Thời điểm tạo']
+  "UpdatedAt" DATETIME [note: 'Thời điểm cập nhật']
+  "QuanLyXuLy" VARCHAR(255) [note: 'QuanLyXuLy']
+  "RoleName" VARCHAR(255) [note: 'Tên vai trò']
+  "SoCaBiAnhHuong" INT [note: 'SoCaBiAnhHuong']
+  "TenCoSo" VARCHAR(255) [note: 'tên CoSo']
+  "TenNhanVien" VARCHAR(255) [note: 'tên NhanVien']
+  "username" VARCHAR(255) [note: 'username']
+  "IsDeleted" BIT [not null, note: 'Đã xóa mềm']
+  "DeletedAt" DATETIME [note: 'Thời điểm xóa']
+  "DeletedBy" INT [note: 'Người xóa']
+  Note: 'Yêu cầu nghỉ phép — Đơn xin nghỉ của nhân viên, có quy trình duyệt.'
+}
+
+Table YeuCauNghi_Audit {
+  "AuditID" INT [pk, not null, note: 'mã Audit']
+  "YeuCauNghiID" INT [not null, note: 'Mã yêu cầu nghỉ']
+  "ThaoTac" VARCHAR(50) [not null, note: 'ThaoTac']
+  "NguoiThucHien" INT [not null, note: 'NguoiThucHien']
+  "ThoiGian" DATETIME [note: 'ThoiGian']
+  "GiaTriCu" NVARCHAR(MAX) [note: 'GiaTriCu']
+  "GiaTriMoi" NVARCHAR(MAX) [note: 'GiaTriMoi']
+  Note: 'Nhật ký nghỉ phép — Nhật ký thao tác trên đơn nghỉ phép.'
+}
+
+Table YeuCauSOS {
+  "YeuCauSOSID" INT [pk, increment, not null, note: 'Mã yêu cầu SOS']
+  "AccountID_Tao" INT [not null, note: 'AccountID_Tao']
+  "DatSanID" INT [note: 'Mã đặt sân']
+  "MonTheThaoID" INT [note: 'Mã môn thể thao']
+  "SoNguoiCanTuyen" INT [not null, note: 'SoNguoiCanTuyen']
+  "ViTriCanTuyen" NVARCHAR(100) [note: 'ViTriCanTuyen']
+  "GhiChu" NVARCHAR(MAX) [note: 'Ghi chú']
+  "TrangThai" NVARCHAR(50) [note: 'Trạng thái']
+  "ThoiGianTao" DATETIME [note: 'Thời gian tạo']
+  Note: 'Yêu cầu SOS — Yêu cầu khẩn tìm người chơi thay cho một lượt đặt sân.'
+}
+
+Table YeuCauUngLuong {
+  "YeuCauUngLuongID" INT [pk, increment, note: 'Mã yêu cầu ứng lương [chỉ có trong migration]']
+  "AccountID" INT [not null, note: 'Mã tài khoản [chỉ có trong migration]']
+  "CoSoID" INT [not null, note: 'Mã cơ sở [chỉ có trong migration]']
+  "SoTienUng" DECIMAL(18,0) [not null, note: 'Số tiền ứng [chỉ có trong migration]']
+  "LyDo" NVARCHAR(500) [note: 'Lý do [chỉ có trong migration]']
+  "TrangThai" VARCHAR(20) [not null, note: 'Trạng thái [chỉ có trong migration]']
+  "GhiChuQuanLy" NVARCHAR(500) [note: 'Ghi chú của quản lý [chỉ có trong migration]']
+  "XuLyBy" INT [note: 'Người xử lý [chỉ có trong migration]']
+  "NgayXuLy" DATETIME [note: 'Ngày xử lý [chỉ có trong migration]']
+  "CreatedAt" DATETIME [not null, note: 'Thời điểm tạo [chỉ có trong migration]']
+  Note: 'Yêu cầu ứng lương — Đơn xin ứng lương của nhân viên, có quy trình duyệt.'
+}
+
+Ref FK_Acc_CoSo: Accounts."CoSoID" > CoSo."CoSoID"
+Ref FK_Acc_Role: Accounts."RoleID" > Roles."RoleID"
+Ref FK_Ca_Account: CaLamViec."AccountID" > Accounts."AccountID"
+Ref FK_Ca_CoSo: CaLamViec."CoSoID" > CoSo."CoSoID"
+Ref FK__CaLamViec__Nguoi__5CA1C101: CaLamViec_Audit."NguoiThucHien" > Accounts."AccountID"
+Ref FK__CaLamViec__Accou__4F47C5E3: CaLamViec_Availability."AccountID" > Accounts."AccountID"
+Ref FK__CaLamViec__CoSoI__503BEA1C: CaLamViec_Availability."CoSoID" > CoSo."CoSoID"
+Ref FK__CaLamViec__Accou__55009F39: CaLamViec_SwapRequest."AccountID_Gui" > Accounts."AccountID"
+Ref FK__CaLamViec__Accou__55F4C372: CaLamViec_SwapRequest."AccountID_Nhan" > Accounts."AccountID"
+Ref FK__CaLamViec__CaLam__56E8E7AB: CaLamViec_SwapRequest."CaLamViecID_Gui" > CaLamViec."CaLamViecID"
+Ref FK__CaLamViec__CaLam__57DD0BE4: CaLamViec_SwapRequest."CaLamViecID_Nhan" > CaLamViec."CaLamViecID"
+Ref FK__CaLamViec__Nguoi__58D1301D: CaLamViec_SwapRequest."NguoiDuyet" > Accounts."AccountID"
+Ref FK_CTGK_Account: ChiTietGhepKeo."AccountID_NguoiThamGia" > Accounts."AccountID"
+Ref FK_CTGK_Keo: ChiTietGhepKeo."KeoID" > GhepKeo."KeoID"
+Ref FK_CTHD_HoaDon: ChiTietHoaDon."HoaDonID" > HoaDon."HoaDonID"
+Ref FK_CTHD_SP: ChiTietHoaDon."SanPhamID" > SanPham_DichVu."SanPhamID"
+Ref FK_CoSo_QuanLy: CoSo."AccountID_QuanLy" > Accounts."AccountID"
+Ref FK_CoSoCapability_ApprovedBy: CoSoCapability."ApprovedBy" > Accounts."AccountID"
+Ref FK_CoSoCapability_CoSo: CoSoCapability."CoSoID" > CoSo."CoSoID"
+Ref FK_CoSoNganHang_CoSo: CoSoNganHang."CoSoID" - CoSo."CoSoID"
+Ref FK_CourtChargeSegment_HoaDon: CourtChargeSegment."HoaDonID" > HoaDon."HoaDonID"
+Ref FK_CourtChargeSegment_LichDatSan: CourtChargeSegment."DatSanID" > LichDatSan."DatSanID"
+Ref FK_ReputationHistory_Account: CustomerReputationHistory."AccountID" > Accounts."AccountID"
+Ref FK_ReputationHistory_Actor: CustomerReputationHistory."CreatedBy" > Accounts."AccountID"
+Ref FK_ReputationHistory_DatSan: CustomerReputationHistory."DatSanID" > LichDatSan."DatSanID"
+Ref FK_DanhGia_DatSan: DanhGia."DatSanID" > LichDatSan."DatSanID"
+Ref FK_DanhGia_NguoiBiDanhGia: DanhGia."AccountID_NguoiBiDanhGia" > Accounts."AccountID"
+Ref FK_DanhGia_NguoiDanhGia: DanhGia."AccountID_NguoiDanhGia" > Accounts."AccountID"
+Ref FK_GhepKeo_Account: GhepKeo."AccountID_NguoiTao" > Accounts."AccountID"
+Ref FK_GhepKeo_DatSan: GhepKeo."DatSanID" > LichDatSan."DatSanID"
+Ref FK_GhepKeo_Mon: GhepKeo."MonTheThaoID" > MonTheThao."MonTheThaoID"
+Ref FK_HD_DatSan: HoaDon."DatSanID" - LichDatSan."DatSanID"
+Ref FK_HD_Khach: HoaDon."AccountID_KhachHang" > Accounts."AccountID"
+Ref FK_HD_KhuyenMai: HoaDon."KhuyenMaiID" > KhuyenMai."KhuyenMaiID"
+Ref FK_HD_NhanVien: HoaDon."AccountID_NhanVien" > Accounts."AccountID"
+Ref FK_HoaDon_Parent: HoaDon."ParentHoaDonID" > HoaDon."HoaDonID"
+Ref FK_HoanTien_Account: HoanTien."AccountID" > Accounts."AccountID"
+Ref FK_HoanTien_HoaDon: HoanTien."HoaDonID" > HoaDon."HoaDonID"
+Ref FK_KM_CoSo: KhuyenMai."CoSoID" > CoSo."CoSoID"
+Ref FK_KhuyenMaiHinhAnh_KhuyenMai: KhuyenMaiHinhAnh."KhuyenMaiID" - KhuyenMai."KhuyenMaiID"
+Ref FK_DatSan_Account: LichDatSan."AccountID" > Accounts."AccountID"
+Ref FK_DatSan_San: LichDatSan."SanID" > San."SanID"
+Ref FK_LichDatSan_CancelledBy: LichDatSan."CancelledBy" > Accounts."AccountID"
+Ref FK_LichDatSan_ConfirmedBy: LichDatSan."ConfirmedBy" > Accounts."AccountID"
+Ref FK_LichSuELO_Account: LichSuELO."AccountID" > Accounts."AccountID"
+Ref FK_LichSuELO_DatSan: LichSuELO."DatSanID" > LichDatSan."DatSanID"
+Ref FK_LichSuKM_Account: LichSuKhuyenMai."AccountID" > Accounts."AccountID"
+Ref FK_LichSuKM_KhuyenMai: LichSuKhuyenMai."KhuyenMaiID" > KhuyenMai."KhuyenMaiID"
+Ref FK_Xe_DatSan: LichXeRaVao."DatSanID" > LichDatSan."DatSanID"
+Ref FK_Xe_NhanVien: LichXeRaVao."AccountID_NhanVien" > Accounts."AccountID"
+Ref FK_Xe_The: LichXeRaVao."TheID" > TheGiuXe."TheID"
+Ref FK_LoaiSan_CoSo: LoaiSan."CoSoID" > CoSo."CoSoID"
+Ref FK_LoaiSan_Mon: LoaiSan."MonTheThaoID" > MonTheThao."MonTheThaoID"
+Ref FK_MTTYT_Account: MonTheThaoYeuThich."AccountID" > Accounts."AccountID"
+Ref FK_MTTYT_Mon: MonTheThaoYeuThich."MonTheThaoID" > MonTheThao."MonTheThaoID"
+Ref FK_Chat_Account: NhatKyChat."AccountID" > Accounts."AccountID"
+Ref FK_SOSGui_Account: NhatKySOSGui."AccountID_NhanGui" > Accounts."AccountID"
+Ref FK_SOSGui_YeuCau: NhatKySOSGui."YeuCauSOSID" > YeuCauSOS."YeuCauSOSID"
+Ref FK_NhomChiaTien_Creator: NhomChiaTien."CreatedByAccountID" > Accounts."AccountID"
+Ref FK_NhomChiaTien_DatSan: NhomChiaTien."DatSanID" > LichDatSan."DatSanID"
+Ref FK_NhomChiaTien_HoaDon: NhomChiaTien."HoaDonID" - HoaDon."HoaDonID"
+Ref FK_NhomChiaTienChiTiet_Account: NhomChiaTienChiTiet."AccountID" > Accounts."AccountID"
+Ref FK_NhomChiaTienChiTiet_Nhom: NhomChiaTienChiTiet."NhomChiaTienID" > NhomChiaTien."NhomChiaTienID"
+Ref FK_NhomChiaTienChiTiet_Payer: NhomChiaTienChiTiet."PayerAccountID" > Accounts."AccountID"
+Ref FK_NhomChiaTienChiTiet_Staff: NhomChiaTienChiTiet."ConfirmedByStaffID" > Accounts."AccountID"
+Ref FK_PayOSPaymentAttempt_CoSo: PayOSPaymentAttempt."CoSoID" > CoSo."CoSoID"
+Ref FK_PayOSPaymentAttempt_HoaDon: PayOSPaymentAttempt."HoaDonID" - HoaDon."HoaDonID"
+Ref FK_PayOSPaymentAttempt_LichDatSan: PayOSPaymentAttempt."DatSanID" > LichDatSan."DatSanID"
+Ref FK_QRRequest_CoSo: QRRequest."CoSoID" > CoSo."CoSoID"
+Ref FK_QRRequest_San: QRRequest."SanID" > San."SanID"
+Ref FK_RacketCfg_Service: RacketStringingConfig."ServiceID" - SportService."ServiceID"
+Ref FK_RSOD_Material: RacketStringingOrderDetail."MaterialID" > ServiceMaterial."MaterialID"
+Ref FK_RSOD_Order: RacketStringingOrderDetail."OrderID" - ServiceOrder."OrderID"
+Ref FK_San_CoSo: San."CoSoID" > CoSo."CoSoID"
+Ref FK_San_LoaiSan: San."LoaiSanID" > LoaiSan."LoaiSanID"
+Ref FK_SP_CoSo: SanPham_DichVu."CoSoID" > CoSo."CoSoID"
+Ref FK_SP_DanhMuc: SanPham_DichVu."DanhMucID" > DanhMucSanPham."DanhMucID"
+Ref FK_SanQR_CreatedBy: SanQR."CreatedBy" > Accounts."AccountID"
+Ref FK_SanQR_San: SanQR."SanID" - San."SanID"
+Ref FK_SanQR_UpdatedBy: SanQR."UpdatedBy" > Accounts."AccountID"
+Ref FK_SanQRTokenHistory_RevokedBy: SanQRTokenHistory."RevokedBy" > Accounts."AccountID"
+Ref FK_SanQRTokenHistory_San: SanQRTokenHistory."SanID" > San."SanID"
+Ref FK_SanQRTokenHistory_SanQR: SanQRTokenHistory."SanQRID" > SanQR."SanQRID"
+Ref FK_ServiceMaterial_CoSo: ServiceMaterial."CoSoID" > CoSo."CoSoID"
+Ref FK_ServiceOrder_Booking: ServiceOrder."BookingID" > LichDatSan."DatSanID"
+Ref FK_ServiceOrder_CoSo: ServiceOrder."CoSoID" > CoSo."CoSoID"
+Ref FK_ServiceOrder_Customer: ServiceOrder."CustomerID" > Accounts."AccountID"
+Ref FK_ServiceOrder_Service: ServiceOrder."ServiceID" > SportService."ServiceID"
+Ref FK_SOSH_ChangedBy: ServiceOrderStatusHistory."ChangedBy" > Accounts."AccountID"
+Ref FK_SOSH_Order: ServiceOrderStatusHistory."OrderID" > ServiceOrder."OrderID"
+Ref FK_SoftHold_Account: SoftHold."AccountID" > Accounts."AccountID"
+Ref FK_SoftHold_San: SoftHold."SanID" > San."SanID"
+Ref FK_SportService_CoSo: SportService."CoSoID" > CoSo."CoSoID"
+Ref FK_TheGiuXe_CoSo: TheGiuXe."CoSoID" > CoSo."CoSoID"
+Ref FK_TB_Account: ThongBao."AccountID" > Accounts."AccountID"
+Ref FK__YeuCauNgh__Accou__3E1D39E1: YeuCauNghi."AccountID" > Accounts."AccountID"
+Ref FK__YeuCauNgh__CoSoI__3F115E1A: YeuCauNghi."CoSoID" > CoSo."CoSoID"
+Ref FK__YeuCauNgh__XuLyB__40058253: YeuCauNghi."XuLyBy" > Accounts."AccountID"
+Ref FK__YeuCauNgh__Nguoi__44CA3770: YeuCauNghi_Audit."NguoiThucHien" > Accounts."AccountID"
+Ref FK__YeuCauNgh__YeuCa__43D61337: YeuCauNghi_Audit."YeuCauNghiID" > YeuCauNghi."YeuCauNghiID"
+Ref FK_SOS_Account: YeuCauSOS."AccountID_Tao" > Accounts."AccountID"
+Ref FK_SOS_DatSan: YeuCauSOS."DatSanID" > LichDatSan."DatSanID"
+Ref FK_SOS_Mon: YeuCauSOS."MonTheThaoID" > MonTheThao."MonTheThaoID"
+Ref FK_Chia_HoaDon: ChiaHoaDon."HoaDonID" > HoaDon."HoaDonID"
+Ref FK_Chia_Account: ChiaHoaDon."AccountID" > Accounts."AccountID"
+Ref FK_QR_Chia: MaQR."ChiaHoaDonID" > ChiaHoaDon."ChiaHoaDonID"
+Ref FK_FaceConfig_CoSo: CoSoFaceConfig."CoSoID" - CoSo."CoSoID"
+Ref FK_FaceToken_Accounts: FaceChallengeToken."AccountID" > Accounts."AccountID"
+Ref FK_BookingExtension_LichDatSan: BookingExtension."DatSanID" > LichDatSan."DatSanID"
+Ref FK_BookingExtension_Operator: BookingExtension."OperatorAccountID" > Accounts."AccountID"
+Ref FK_LDSDV_DatSan: LichDatSan_DichVu."DatSanID" > LichDatSan."DatSanID"
+Ref FK_LDSDV_SanPham: LichDatSan_DichVu."SanPhamID" > SanPham_DichVu."SanPhamID"
+Ref FK_LDSDV_DeliveredBy: LichDatSan_DichVu."DeliveredBy" > Accounts."AccountID"
+Ref fk_suco_coso: SuCo."CoSoID" > CoSo."CoSoID"
+Ref fk_suco_baove: SuCo."BaoVeID" > Accounts."AccountID"
+Ref FK_CauHinhLuong_AccountID: CauHinhLuong."AccountID" > Accounts."AccountID"
+Ref FK_CauHinhLuong_CoSoID: CauHinhLuong."CoSoID" > CoSo."CoSoID"
+Ref FK_KyLuong_CoSoID: KyLuong."CoSoID" > CoSo."CoSoID"
+Ref FK_KyLuong_CreatedBy: KyLuong."CreatedBy" > Accounts."AccountID"
+Ref FK_BangLuong_KyLuongID: BangLuong."KyLuongID" > KyLuong."KyLuongID"
+Ref FK_BangLuong_AccountID: BangLuong."AccountID" > Accounts."AccountID"
+Ref FK_YeuCauUngLuong_AccountID: YeuCauUngLuong."AccountID" > Accounts."AccountID"
+Ref FK_YeuCauUngLuong_CoSoID: YeuCauUngLuong."CoSoID" > CoSo."CoSoID"
+Ref FK_YeuCauUngLuong_XuLyBy: YeuCauUngLuong."XuLyBy" > Accounts."AccountID"
+Ref FK_Teams_Sport: Teams."SportID" > MonTheThao."MonTheThaoID"
+Ref FK_Teams_Captain: Teams."CaptainAccountID" > Accounts."AccountID"
+Ref FK_TeamMembers_Team: TeamMembers."TeamID" > Teams."TeamID"
+Ref FK_TeamMembers_Account: TeamMembers."AccountID" > Accounts."AccountID"
+Ref FK_TeamInvitations_Team: TeamInvitations."TeamID" > Teams."TeamID"
+Ref FK_TeamInvitations_Invited: TeamInvitations."InvitedAccountID" > Accounts."AccountID"
+Ref FK_TeamInvitations_InvitedBy: TeamInvitations."InvitedByAccountID" > Accounts."AccountID"
+Ref FK_TeamJoinRequests_Team: TeamJoinRequests."TeamID" > Teams."TeamID"
+Ref FK_TeamJoinRequests_Requester: TeamJoinRequests."RequesterAccountID" > Accounts."AccountID"
+Ref FK_TeamJoinRequests_Reviewer: TeamJoinRequests."ReviewedByAccountID" > Accounts."AccountID"
+Ref FK_Accounts_MonTheThaoYeuThich: Accounts."MonTheThaoYeuThichID" > MonTheThao."MonTheThaoID"
+Ref FK_GhepKeo_TeamNguoiTao: GhepKeo."TeamIDNguoiTao" > Teams."TeamID"
+Ref FK_ChiTietGhepKeo_TeamNguoiThamGia: ChiTietGhepKeo."TeamIDNguoiThamGia" > Teams."TeamID"

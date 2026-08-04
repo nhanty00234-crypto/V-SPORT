@@ -175,7 +175,7 @@
                   <fmt:formatNumber value="${yc.soTienUng}" type="number" maxFractionDigits="0"/> đ
                 </div>
                 <div class="text-xs text-slate-500">
-                  <fmt:formatDate value="${yc.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                  ${yc.createdAtFormatted}
                   <c:if test="${not empty yc.lyDo}"> · ${yc.lyDo}</c:if>
                 </div>
                 <c:if test="${not empty yc.ghiChuQuanLy}">

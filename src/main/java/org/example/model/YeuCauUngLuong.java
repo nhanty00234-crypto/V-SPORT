@@ -2,6 +2,7 @@ package org.example.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /** Yêu cầu ứng lương của nhân viên (bảng YeuCauUngLuong). */
 public class YeuCauUngLuong {
@@ -52,4 +53,12 @@ public class YeuCauUngLuong {
 
     /** Chỉ yêu cầu đang chờ duyệt mới được nhân viên tự huỷ hoặc manager xử lý. */
     public boolean isChoDuyet() { return CHO_DUYET.equals(trangThai); }
+
+    public String getCreatedAtFormatted() {
+        return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
+
+    public String getNgayXuLyFormatted() {
+        return ngayXuLy == null ? "" : ngayXuLy.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
 }

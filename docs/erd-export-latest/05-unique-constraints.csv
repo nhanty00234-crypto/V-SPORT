@@ -1,0 +1,47 @@
+﻿SchemaName,TableName,ConstraintOrIndexName,ColumnName,ColumnOrder,IsComposite,IsFiltered,FilterDefinition
+dbo,Accounts,UQ_Accounts_Email,Email,1,NO,NO,
+dbo,Accounts,UQ_Accounts_Facebook,FacebookID,1,NO,NO,
+dbo,Accounts,UQ_Accounts_FacebookID,FacebookID,1,NO,NO,
+dbo,Accounts,UQ_Accounts_Google,GoogleID,1,NO,NO,
+dbo,Accounts,UQ_Accounts_GoogleID,GoogleID,1,NO,NO,
+dbo,Accounts,UQ_Accounts_Username,Username,1,NO,NO,
+dbo,BangLuong,UQ_BangLuong_Ky_Account,KyLuongID,1,YES,NO,
+dbo,BangLuong,UQ_BangLuong_Ky_Account,AccountID,2,YES,NO,
+dbo,CauHinhLuong,UQ_CauHinhLuong_Account_CoSo,AccountID,1,YES,NO,
+dbo,CauHinhLuong,UQ_CauHinhLuong_Account_CoSo,CoSoID,2,YES,NO,
+dbo,ChiTietGhepKeo,UX_ChiTietGhepKeo_Active_Keo_Account,KeoID,1,YES,YES,"TrangThaiThamGia IN (N'Chờ duyệt', N'Đã tham gia')"
+dbo,ChiTietGhepKeo,UX_ChiTietGhepKeo_Active_Keo_Account,AccountIDNguoiThamGia,2,YES,YES,"TrangThaiThamGia IN (N'Chờ duyệt', N'Đã tham gia')"
+dbo,CoSoCapability,UQ_CoSoCapability_CoSo_Type,CoSoID,1,YES,NO,
+dbo,CoSoCapability,UQ_CoSoCapability_CoSo_Type,CapabilityType,2,YES,NO,
+dbo,CourtChargeSegment,UX_CourtChargeSegment_InvoiceOrder,HoaDonID,1,YES,NO,
+dbo,CourtChargeSegment,UX_CourtChargeSegment_InvoiceOrder,SegmentOrder,2,YES,NO,
+dbo,CustomerReputationHistory,UQ_ReputationHistory_Account_DatSan_Action,AccountID,1,YES,NO,
+dbo,CustomerReputationHistory,UQ_ReputationHistory_Account_DatSan_Action,DatSanID,2,YES,NO,
+dbo,CustomerReputationHistory,UQ_ReputationHistory_Account_DatSan_Action,ActionType,3,YES,NO,
+dbo,DanhGia,UQ_DanhGia_DatSan_Account,DatSanID,1,YES,NO,
+dbo,DanhGia,UQ_DanhGia_DatSan_Account,AccountID_NguoiDanhGia,2,YES,NO,
+dbo,HoaDon,UX_HoaDon_OneMainPerBooking,DatSanID,1,NO,NO,
+dbo,KhuyenMai,UQ_KhuyenMai_MaCode,MaCode,1,NO,NO,
+dbo,KhuyenMai,UQ__KhuyenMa__152C7C5C7613DE24,MaCode,1,NO,NO,
+dbo,KhuyenMaiHinhAnh,UQ_KhuyenMaiHinhAnh_MotAnhBia,KhuyenMaiID,1,NO,NO,
+dbo,NhomChiaTien,UX_NhomChiaTien_HoaDon_Active,HoaDonID,1,NO,NO,
+dbo,NhomChiaTienChiTiet,UX_NhomChiaTienChiTiet_ShareToken,ShareToken,1,NO,NO,
+dbo,PayOSPaymentAttempt,UQ_PayOSPaymentAttempt_OneActivePerInvoice,HoaDonID,1,NO,NO,
+dbo,PayOSPaymentAttempt,UQ_PayOSPaymentAttempt_OrderCode,OrderCode,1,NO,NO,
+dbo,RacketStringingConfig,UQ_RacketCfg_ServiceID,ServiceID,1,NO,NO,
+dbo,RacketStringingOrderDetail,UQ_RSOD_OrderID,OrderID,1,NO,NO,
+dbo,SanQR,UQ_SanQR_SanID,SanID,1,NO,NO,
+dbo,SanQR,UQ_SanQR_ShortCode,ShortCode,1,NO,NO,
+dbo,SanQR,UQ_SanQR_Token,Token,1,NO,NO,
+dbo,SanQRTokenHistory,UQ_SanQRTokenHistory_Token,Token,1,NO,NO,
+dbo,sysdiagrams,UK_principal_name,principal_id,1,YES,NO,
+dbo,sysdiagrams,UK_principal_name,name,2,YES,NO,
+dbo,TeamInvitations,UX_TeamInvitations_Pending_Team_Account,TeamID,1,YES,YES,Status = N'PENDING'
+dbo,TeamInvitations,UX_TeamInvitations_Pending_Team_Account,InvitedAccountID,2,YES,YES,Status = N'PENDING'
+dbo,TeamJoinRequests,UX_TeamJoinRequests_Pending_Team_Account,TeamID,1,YES,YES,Status = N'PENDING'
+dbo,TeamJoinRequests,UX_TeamJoinRequests_Pending_Team_Account,RequesterAccountID,2,YES,YES,Status = N'PENDING'
+dbo,TeamMembers,UX_TeamMembers_Active_Team_Account,TeamID,1,YES,YES,MemberStatus = N'ACTIVE'
+dbo,TeamMembers,UX_TeamMembers_Active_Team_Account,AccountID,2,YES,YES,MemberStatus = N'ACTIVE'
+dbo,ThongBao,UQ_ThongBao_Account_Loai_MaBanGhi,AccountID,1,YES,NO,
+dbo,ThongBao,UQ_ThongBao_Account_Loai_MaBanGhi,LoaiThongBao,2,YES,NO,
+dbo,ThongBao,UQ_ThongBao_Account_Loai_MaBanGhi,MaBanGhi,3,YES,NO,

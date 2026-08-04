@@ -1,0 +1,40 @@
+﻿SchemaName,TableName,ConstraintName,ColumnName,Definition,IsDisabled
+dbo,Accounts,CK_Accounts_CanNangKg,,(CanNangKg IS NULL OR CanNangKg BETWEEN 20 AND 300),NO
+dbo,Accounts,CK_Accounts_ChieuCaoCm,,(ChieuCaoCm IS NULL OR ChieuCaoCm BETWEEN 50 AND 260),NO
+dbo,Accounts,CK_Accounts_TanSuatChoi,,"(TanSuatChoi IS NULL OR TanSuatChoi IN (N'1 lần/tuần', N'2-3 lần/tuần', N'4+ lần/tuần', N'Không cố định'))",NO
+dbo,Accounts,CK_Accounts_TrinhDoChoi,,"(TrinhDoChoi IS NULL OR TrinhDoChoi IN (N'Mới chơi', N'Cơ bản', N'Trung bình', N'Khá', N'Nâng cao'))",NO
+dbo,CourtChargeSegment,CK_CourtChargeSegment_Amounts,,(HourlyRate >= 0 AND Amount >= 0),NO
+dbo,CourtChargeSegment,CK_CourtChargeSegment_Duration,,(DurationMinutes > 0),NO
+dbo,CourtChargeSegment,CK_CourtChargeSegment_RateType,,"(RateType IN (N'WITHOUT_LIGHT', N'WITH_LIGHT'))",NO
+dbo,DanhGia,(chưa đặt tên),SoSao,(SoSao BETWEEN 1 AND 5),NO
+dbo,LichDatSan_DichVu,CK_LDSDV_Quantity,,(Quantity > 0),NO
+dbo,LichDatSan_DichVu,CK_LDSDV_Status,,"(Status IN (N'Chờ chuẩn bị', N'Đã giao', N'Đã hủy'))",NO
+dbo,NhomChiaTien,CK_NhomChiaTien_SplitType,,"(SplitType IN (N'EQUAL', N'CUSTOM', N'ITEMIZED'))",NO
+dbo,NhomChiaTien,CK_NhomChiaTien_TrangThai,,"(TrangThai IN (N'DRAFT', N'ACTIVE', N'PARTIALLY_PAID', N'PAID', N'CANCELLED', N'EXPIRED'))",NO
+dbo,NhomChiaTienChiTiet,CK_NhomChiaTienChiTiet_SoTien,,(SoTien > 0),NO
+dbo,NhomChiaTienChiTiet,CK_NhomChiaTienChiTiet_TrangThai,,"(TrangThai IN (N'PENDING', N'PROCESSING', N'PAID', N'CANCELLED', N'EXPIRED'))",NO
+dbo,PayOSPaymentAttempt,(chưa đặt tên),,CheckoutUrl     NVARCHAR(1000) NULL,NO
+dbo,QRRequest,CK_QRRequest_Status,,"(Status IN ('NEW','IN_PROGRESS','DONE','CANCELLED'))",NO
+dbo,QRRequest,CK_QRRequest_Type,,"(RequestType IN ('CALL_STAFF','ORDER_ITEM','SERVICE_REQUEST'))",NO
+dbo,RacketStringingConfig,CK_RacketCfg_MaxRackets,,(MaxRacketsPerOrder > 0),NO
+dbo,RacketStringingConfig,CK_RacketCfg_StringingPrice,,(StringingPrice >= 0),NO
+dbo,RacketStringingConfig,CK_RacketCfg_Tension,,(MinTension > 0 AND MaxTension >= MinTension),NO
+dbo,RacketStringingConfig,CK_RacketCfg_TensionUnit,,"(TensionUnit IN (N'kg', N'lbs'))",NO
+dbo,RacketStringingOrderDetail,CK_RSOD_Quantity,,(Quantity > 0),NO
+dbo,RacketStringingOrderDetail,CK_RSOD_Tension,,(TensionValue > 0),NO
+dbo,RacketStringingOrderDetail,CK_RSOD_TensionUnit,,"(TensionUnit IN (N'kg', N'lbs'))",NO
+dbo,ServiceMaterial,CK_ServiceMaterial_Price,,(Price >= 0 AND ExtraFee >= 0),NO
+dbo,ServiceMaterial,CK_ServiceMaterial_Status,,"(Status IN (N'DANG_CO', N'TAM_HET', N'NGUNG_SU_DUNG'))",NO
+dbo,ServiceOrder,CK_ServiceOrder_ConfirmedPrice,,(ConfirmedPrice IS NULL OR ConfirmedPrice >= 0),NO
+dbo,ServiceOrder,CK_ServiceOrder_EstPrice,,(EstimatedPrice >= 0),NO
+dbo,ServiceOrder,CK_ServiceOrder_Status,,"(Status IN (N'PENDING_CONFIRMATION', N'CONFIRMED', N'ITEM_RECEIVED', N'IN_PROGRESS', N'READY_FOR_PICKUP', N'COMPLETED', N'CANCELLED', N'REJECTED'))",NO
+dbo,SportService,CK_SportService_BasePrice,,(BasePrice >= 0),NO
+dbo,SportService,CK_SportService_EstMinutes,,(EstimatedMinutes > 0),NO
+dbo,SportService,CK_SportService_ServiceType,,"(ServiceType IN (N'CANG_LUOI', N'THAY_QUAN_CAN', N'SUA_VOT', N'BAO_DUONG', N'HUAN_LUYEN_VIEN', N'KHAC'))",NO
+dbo,TeamInvitations,CK_TeamInvitations_Role,,"(ProposedRole IN (N'CO_CAPTAIN', N'MEMBER'))",NO
+dbo,TeamInvitations,CK_TeamInvitations_Status,,"(Status IN (N'PENDING', N'ACCEPTED', N'REJECTED', N'CANCELLED', N'EXPIRED'))",NO
+dbo,TeamJoinRequests,CK_TeamJoinRequests_Status,,"(Status IN (N'PENDING', N'APPROVED', N'REJECTED', N'CANCELLED'))",NO
+dbo,TeamMembers,CK_TeamMembers_Role,,"(MemberRole IN (N'CAPTAIN', N'CO_CAPTAIN', N'MEMBER'))",NO
+dbo,TeamMembers,CK_TeamMembers_Status,,"(MemberStatus IN (N'ACTIVE', N'LEFT', N'REMOVED'))",NO
+dbo,Teams,CK_Teams_MaxMembers,,(MaxMembers BETWEEN 2 AND 30),NO
+dbo,Teams,CK_Teams_Status,,"(Status IN (N'ACTIVE', N'INACTIVE', N'DISBANDED', N'SUSPENDED'))",NO
