@@ -61,6 +61,8 @@ Rủi ro được chấp nhận có ý thức: **giơ ảnh in hoặc màn hình
 
 Lớp phòng thủ thay thế là hậu kiểm. Bảng log trong FaceSettings đã lưu ảnh snapshot và `FaceConfidence` cho từng lần điểm danh; manager soi lại khi có nghi ngờ. Không xây thêm gì cho phần này.
 
+Lưu ý về giới hạn của snapshot: ảnh và descriptor đều do client gửi lên (`/face/challenge` trả về chính descriptor đã đăng ký của người gọi, `/face/checkin` nhận descriptor và ảnh do client cung cấp). Một nhân viên rành devtools có thể tự soạn descriptor khớp cùng một ảnh JPEG bất kỳ trông giống người thật rồi POST thẳng, tức là điểm danh từ xa với ảnh không do camera thực chụp. Vấn đề này có từ trước nhánh này, nhưng nhánh này bỏ challenge tư thế từng đứng chắn trước nó. Vì vậy snapshot + confidence là công cụ **răn đe và hỗ trợ hậu kiểm**, không phải bằng chứng chống giả mạo — manager cần hiểu rõ giới hạn này khi soi log.
+
 Nếu sau này cần siết, hướng đi là liveness ẩn — quan sát vi chuyển động và chớp mắt tự nhiên trong 2–3 giây mà không ra lệnh cho người dùng. Đó là thay đổi cục bộ bên trong `detectionLoop`, không phá kiến trúc mô tả ở đây.
 
 ## Phạm vi không đụng tới

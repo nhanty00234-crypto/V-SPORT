@@ -37,7 +37,10 @@ import java.util.Map;
 @WebServlet("/face/checkin")
 public class FaceCheckInServlet extends HttpServlet {
 
-    private static final double MATCH_THRESHOLD = 0.6;
+    private static final double MATCH_THRESHOLD = 0.6; // default threshold khi chi nhánh chưa cấu hình
+    // Mẫu số quy đổi khoảng cách -> phần trăm, đồng bộ với FaceChallengeServlet để hai endpoint
+    // báo cùng một thang điểm bất kể threshold của chi nhánh (slider có thể lên tới 0.75).
+    private static final double MAX_DISTANCE = 0.8;
 
     private final FaceChallengeTokenDAO tokenDAO = new FaceChallengeTokenDAOImpl();
     private final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAOImpl();
@@ -80,6 +83,10 @@ public class FaceCheckInServlet extends HttpServlet {
 
         if (tokenId == null || caId == 0 || descArr == null) {
             resp.getWriter().write("{\"success\":false,\"error\":\"Thiếu dữ liệu bắt buộc (token, caLamViecId, descriptor)\"}");
+            return;
+        }
+        if (descArr.size() < 128) {
+            resp.getWriter().write("{\"success\":false,\"error\":\"Descriptor khuôn mặt không hợp lệ\"}");
             return;
         }
 
@@ -152,7 +159,7 @@ public class FaceCheckInServlet extends HttpServlet {
             } catch (Exception ignored) { /* dùng default */ }
         }
 
-        double confidence = Math.max(0, Math.min(100, (1 - distance / MATCH_THRESHOLD) * 100));
+        double confidence = Math.max(0, Math.min(100, (1 - distance / MAX_DISTANCE) * 100));
 
         if (distance > threshold) {
             resp.getWriter().write(String.format(

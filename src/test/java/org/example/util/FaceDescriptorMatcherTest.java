@@ -68,6 +68,23 @@ class FaceDescriptorMatcherTest {
     }
 
     @Test
+    void minDistanceBoQuaMauQuaNgan() {
+        // Mẫu ngắn (3 chiều) khớp gần tuyệt đối với bất kỳ incoming nào nếu không bị loại,
+        // nhưng phải bị bỏ qua để mẫu 128 chiều hợp lệ mới là mẫu quyết định.
+        double[] mauNgan = { 0.1, 0.1, 0.1 };
+        double[][] samples = { mauNgan, flat(0.5) };
+        double[] incoming = flat(0.5);
+        assertEquals(0.0, FaceDescriptorMatcher.minDistance(samples, incoming), 1e-9);
+    }
+
+    @Test
+    void minDistanceChiCoMauQuaNganTraVeMaxValue() {
+        double[][] samples = { { 0.1, 0.1, 0.1 }, {} };
+        assertEquals(Double.MAX_VALUE,
+                FaceDescriptorMatcher.minDistance(samples, flat(0.1)), 0.0);
+    }
+
+    @Test
     void toStorageJsonLuonSinhDangLong() {
         String json = FaceDescriptorMatcher.toStorageJson(new double[][]{ {1.0, 2.0} });
         assertTrue(json.startsWith("[["), "Phải là mảng lồng, nhận được: " + json);

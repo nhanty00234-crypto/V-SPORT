@@ -13,6 +13,7 @@ import org.example.model.CoSoFaceConfig;
 import org.example.model.FaceAttendanceLog;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
+import org.example.util.FaceDescriptorMatcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +51,10 @@ public class FaceSettingsServlet extends HttpServlet {
         List<TaiKhoan> daDangKy = new ArrayList<>();
         List<TaiKhoan> chuaDangKy = new ArrayList<>();
         for (TaiKhoan tk : nhanSu) {
-            if (tk.getFaceDescriptor() != null && !tk.getFaceDescriptor().isBlank()) {
+            // Đồng bộ tiêu chí "đã đăng ký" với FaceCheckInServlet: chuỗi không rỗng nhưng
+            // parse() ra 0 mẫu (dữ liệu hỏng) không được tính là đã đăng ký, kẻo dashboard
+            // hiện xanh trong khi nhân viên bị từ chối ở cổng.
+            if (FaceDescriptorMatcher.parse(tk.getFaceDescriptor()).length > 0) {
                 daDangKy.add(tk);
             } else {
                 chuaDangKy.add(tk);

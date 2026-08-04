@@ -147,10 +147,12 @@ window.FaceAttendance = (function () {
                 stopCamera();
                 if (_opts.onSuccess) _opts.onSuccess(data);
             } else {
+                stopCamera();
                 setStatus('Lỗi: ' + (data.error || 'Nhận diện thất bại'), 'error');
                 if (_opts.onError) _opts.onError(data.error);
             }
         } catch (e) {
+            stopCamera();
             setStatus('Lỗi kết nối. Thử lại.', 'error');
             if (_opts.onError) _opts.onError(e.message);
         }
@@ -191,15 +193,21 @@ window.FaceAttendance = (function () {
     }
 
     async function start() {
-        stopLoop();   // dọn timer của lần chạy trước (vd. bấm "Thử lại") trước khi hẹn lại
+        stopCamera();   // dọn stream + timer của lần chạy trước (vd. bấm "Thử lại") trước khi mở lại
 
         _streak = 0;
         _bestDistance = Infinity;
         _bestDetection = null;
 
-        _stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: 640, height: 480, facingMode: 'user' }
-        });
+        try {
+            _stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480, facingMode: 'user' }
+            });
+        } catch (e) {
+            setStatus('Không thể mở camera. Kiểm tra quyền truy cập camera và thử lại.', 'error');
+            if (_opts.onError) _opts.onError(e.message);
+            return;
+        }
         _opts.videoEl.srcObject = _stream;
         await new Promise(function (resolve) { _opts.videoEl.onloadedmetadata = resolve; });
         await _opts.videoEl.play();

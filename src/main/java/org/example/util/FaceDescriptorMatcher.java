@@ -54,11 +54,19 @@ public final class FaceDescriptorMatcher {
         return Math.sqrt(sum);
     }
 
-    /** Khoảng cách tới mẫu gần nhất. Không có mẫu nào → Double.MAX_VALUE. */
+    /** Độ dài tối thiểu của một mẫu hợp lệ (descriptor face-api chuẩn có 128 chiều). */
+    private static final int MIN_SAMPLE_LENGTH = 128;
+
+    /**
+     * Khoảng cách tới mẫu gần nhất. Bỏ qua các mẫu ngắn hơn MIN_SAMPLE_LENGTH — mẫu quá ngắn
+     * (dữ liệu hỏng, sửa tay trong DB) so trên min(a.length, b.length) sẽ khớp gần như bất kỳ ai.
+     * Không còn mẫu hợp lệ nào (kể cả khi input rỗng) → Double.MAX_VALUE.
+     */
     public static double minDistance(double[][] samples, double[] incoming) {
         if (samples == null || samples.length == 0) return Double.MAX_VALUE;
         double best = Double.MAX_VALUE;
         for (double[] sample : samples) {
+            if (sample == null || sample.length < MIN_SAMPLE_LENGTH) continue;
             double d = distance(sample, incoming);
             if (d < best) best = d;
         }
