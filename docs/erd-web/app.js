@@ -1,12 +1,14 @@
 /* V-SPORT ERD — rendering engine. Pure vanilla JS, no dependencies.
  * Reads structured data from erd-data.js (ERD_ENTITIES, ERD_VIEWS) and
  * renders entity cards + orthogonal SVG connectors, derived purely from
- * field-level FK metadata.
+ * field-level FK metadata (thamChieu). No manual edge list exists anywhere
+ * in this file — this is required to keep the data and the diagram from
+ * ever contradicting each other.
  */
 (function () {
   'use strict';
 
-  const entityByName = new Map(ERD_ENTITIES.map((e) => [e.name, e]));
+  var entityBySlug = new Map(ERD_ENTITIES.map((e) => [e.slug, e]));
 
   // ---------------------------------------------------------------------
   // Derive all relationships once from field metadata (single source).
@@ -15,22 +17,23 @@
     const rels = [];
     ERD_ENTITIES.forEach((entity) => {
       entity.fields.forEach((field) => {
-        if (!field.fk) return;
-        const [targetEntity, targetField] = field.fk.split('.');
-        if (!entityByName.has(targetEntity)) return;
+        if (!field.fk || !field.thamChieu) return;
+        const parts = field.thamChieu.split('.');
+        const targetSlug = parts[0];
+        const targetFieldId = parts[1];
+        if (!entityBySlug.has(targetSlug)) return;
 
-        const isIdentifying = !!field.pk; // PK + FK => identifying one-to-one/junction
-        const isOneToOne = isIdentifying || !!field.unique;
-        const selfRef = targetEntity === entity.name && targetField !== field.name;
+        const isOneToOne = !!field.pk || !!field.unique;
+        const selfRef = targetSlug === entity.slug && targetFieldId !== field.id;
 
         rels.push({
-          fromEntity: entity.name,
-          fromField: field.name,
-          toEntity: targetEntity,
-          toField: targetField,
+          fromEntity: entity.slug,
+          fromField: field.id,
+          toEntity: targetSlug,
+          toField: targetFieldId,
           oneToOne: isOneToOne,
           nullable: !!field.nullable,
-          selfRef,
+          selfRef: selfRef,
         });
       });
     });
@@ -71,7 +74,7 @@
       const btn = document.createElement('button');
       btn.className = 'nav-item';
       btn.dataset.view = v.id;
-      btn.innerHTML = '<span class="nav-code">' + v.code + '</span>' + v.title;
+      btn.innerHTML = '<span class="nav-code">Nhóm ' + v.code + '</span>' + v.title;
       btn.addEventListener('click', () => setView(v.id));
       li.appendChild(btn);
       els.navList.appendChild(li);
@@ -124,13 +127,13 @@
   function render() {
     if (state.viewId === 'overview') {
       renderOverview();
-      els.groupTitle.textContent = 'OVERVIEW';
-      els.ssGroupTitle.textContent = 'OVERVIEW';
+      els.groupTitle.textContent = 'TỔNG QUAN';
+      els.ssGroupTitle.textContent = 'TỔNG QUAN';
     } else {
       const view = ERD_VIEWS.find((v) => v.id === state.viewId);
       renderGroupView(view);
-      els.groupTitle.textContent = view.code + ' — ' + view.title;
-      els.ssGroupTitle.textContent = view.code + ' — ' + view.title;
+      els.groupTitle.textContent = 'Nhóm ' + view.code + ' — ' + view.title;
+      els.ssGroupTitle.textContent = 'Nhóm ' + view.code + ' — ' + view.title;
     }
   }
 
@@ -143,10 +146,11 @@
     ERD_VIEWS.forEach((v) => {
       const tile = document.createElement('button');
       tile.className = 'overview-tile';
+      const entityNames = v.entities.map((slug) => entityBySlug.get(slug).ten);
       tile.innerHTML =
-        '<div class="tile-code">' + v.code + '</div>' +
+        '<div class="tile-code">NHÓM ' + v.code + '</div>' +
         '<div class="tile-title">' + v.title + '</div>' +
-        '<div class="tile-entities">' + v.entities.join(' · ') + '</div>';
+        '<div class="tile-entities">' + entityNames.join(' · ') + '</div>';
       tile.addEventListener('click', () => setView(v.id));
       grid.appendChild(tile);
     });
@@ -163,17 +167,13 @@
     return out;
   }
 
-  function isFieldRelevantCompact(entityName, field, viewEntitySet) {
-    if (field.pk) return true;
-    if (field.fk) {
-      const [target] = field.fk.split('.');
-      if (viewEntitySet.has(target)) return true;
-    }
-    // referenced by another entity in this view
-    const referenced = ALL_RELATIONSHIPS.some(
-      (r) => r.toEntity === entityName && r.toField === field.name && viewEntitySet.has(r.fromEntity)
-    );
-    return referenced;
+  function fkTargetLabel(field) {
+    if (!field.fk || !field.thamChieu) return '';
+    const parts = field.thamChieu.split('.');
+    const targetEntity = entityBySlug.get(parts[0]);
+    if (!targetEntity) return '';
+    const targetField = targetEntity.fields.find((f) => f.id === parts[1]);
+    return targetEntity.ten + '.' + (targetField ? targetField.ten : parts[1]);
   }
 
   // ---------------------------------------------------------------------
@@ -192,9 +192,9 @@
     }
   }
 
-  function saveLayoutOverride(viewId, entityName, x, y) {
+  function saveLayoutOverride(viewId, entitySlug, x, y) {
     const overrides = loadLayoutOverrides(viewId);
-    overrides[entityName] = { x: x, y: y };
+    overrides[entitySlug] = { x: x, y: y };
     try {
       localStorage.setItem(layoutStorageKey(viewId), JSON.stringify(overrides));
     } catch (e) {
@@ -210,7 +210,7 @@
     }
   }
 
-  function makeCardDraggable(card, view, entityName) {
+  function makeCardDraggable(card, view, entitySlug) {
     const header = card.querySelector('.entity-header');
     header.classList.add('draggable-handle');
     let dragging = false;
@@ -244,7 +244,7 @@
       card.classList.remove('dragging');
       const x = parseFloat(card.style.left) || 0;
       const y = parseFloat(card.style.top) || 0;
-      saveLayoutOverride(view.id, entityName, x, y);
+      saveLayoutOverride(view.id, entitySlug, x, y);
       recomputeConnectors();
     }
     header.addEventListener('pointerup', endDrag);
@@ -283,47 +283,43 @@
 
     els.canvasStage.appendChild(svg);
 
-    // Render entity cards
+    // Render entity cards — always show every defined column (no truncation).
     const cardEls = {};
-    view.entities.forEach((entityName) => {
-      const entity = entityByName.get(entityName);
-      const basePos = view.layout[entityName] || { x: 40, y: 40 };
-      const override = layoutOverrides[entityName];
-      const pos = override ? { x: override.x, y: override.y, compact: basePos.compact } : basePos;
-      const compact = !!pos.compact;
+    view.entities.forEach((entitySlug) => {
+      const entity = entityBySlug.get(entitySlug);
+      const basePos = view.layout[entitySlug] || { x: 40, y: 40 };
+      const override = layoutOverrides[entitySlug];
+      const pos = override ? { x: override.x, y: override.y } : basePos;
 
       const card = document.createElement('div');
-      card.className = 'entity-card' + (compact ? ' compact' : '');
+      card.className = 'entity-card';
       card.style.left = pos.x + 'px';
       card.style.top = pos.y + 'px';
-      card.dataset.entity = entityName;
+      card.dataset.entity = entitySlug;
 
       const header = document.createElement('div');
       header.className = 'entity-header';
       header.innerHTML =
-        '<span>' + entityName + '</span><span class="entity-badge">' + entity.fields.length + ' fields</span>';
+        '<span>' + entity.ten + '</span><span class="entity-badge">' + entity.fields.length + ' cột</span>';
       card.appendChild(header);
 
-      const fields = compact
-        ? entity.fields.filter((f) => isFieldRelevantCompact(entityName, f, viewEntitySet))
-        : entity.fields;
-
-      fields.forEach((field) => {
+      entity.fields.forEach((field) => {
         const row = document.createElement('div');
         row.className = 'field-row' + (field.fk ? ' fk-row' : '');
-        row.dataset.field = field.name;
-        row.dataset.entity = entityName;
+        row.dataset.field = field.id;
+        row.dataset.entity = entitySlug;
         row.tabIndex = 0;
         row.setAttribute('role', 'button');
+        const target = fkTargetLabel(field);
         row.setAttribute(
           'aria-label',
-          field.name + ' ' + field.type + (field.fk ? ' foreign key referencing ' + field.fk : '')
+          field.ten + ' ' + field.kieu + (field.fk ? ' — khóa ngoại tham chiếu tới ' + target : '')
         );
         row.innerHTML =
-          '<span class="field-name">' + field.name + '</span>' +
-          '<span class="field-meta">' + badgeHtml(field) + '<span class="field-type">' + field.type + '</span></span>';
+          '<span class="field-name">' + field.ten + '</span>' +
+          '<span class="field-meta">' + badgeHtml(field) + '<span class="field-type">' + field.kieu + '</span></span>';
         row.addEventListener('mouseenter', () => {
-          state.hoverField = { entity: entityName, field: field.name };
+          state.hoverField = { entity: entitySlug, field: field.id };
           state.hoverEntity = null;
           applyHighlight(view);
         });
@@ -332,7 +328,7 @@
           applyHighlight(view);
         });
         row.addEventListener('focus', () => {
-          state.hoverField = { entity: entityName, field: field.name };
+          state.hoverField = { entity: entitySlug, field: field.id };
           applyHighlight(view);
         });
         row.addEventListener('blur', () => {
@@ -344,7 +340,7 @@
 
       card.addEventListener('mouseenter', () => {
         if (!state.hoverField) {
-          state.hoverEntity = entityName;
+          state.hoverEntity = entitySlug;
           applyHighlight(view);
         }
       });
@@ -354,11 +350,11 @@
       });
 
       els.canvasStage.appendChild(card);
-      cardEls[entityName] = card;
-      makeCardDraggable(card, view, entityName);
+      cardEls[entitySlug] = card;
+      makeCardDraggable(card, view, entitySlug);
     });
 
-    // Compute relationships relevant to this view
+    // Compute relationships relevant to this view only (both ends present).
     const viewRels = ALL_RELATIONSHIPS.filter(
       (r) => viewEntitySet.has(r.fromEntity) && viewEntitySet.has(r.toEntity)
     );
@@ -371,8 +367,8 @@
     els.canvasStage._lastSvg = svg;
   }
 
-  function fieldRowCenter(cardEl, fieldName, stageRect) {
-    const row = cardEl.querySelector('.field-row[data-field="' + CSS.escape(fieldName) + '"]');
+  function fieldRowCenter(cardEl, fieldId, stageRect) {
+    const row = cardEl.querySelector('.field-row[data-field="' + CSS.escape(fieldId) + '"]');
     const target = row || cardEl.querySelector('.entity-header');
     const r = target.getBoundingClientRect();
     return {
@@ -398,7 +394,7 @@
     const stageRect = els.canvasStage.getBoundingClientRect();
     const svgNS = 'http://www.w3.org/2000/svg';
 
-    viewRels.forEach((rel, idx) => {
+    viewRels.forEach((rel) => {
       const srcCard = cardEls[rel.fromEntity];
       const dstCard = cardEls[rel.toEntity];
       if (!srcCard || !dstCard) return;
@@ -429,7 +425,7 @@
         label.setAttribute('class', 'relation-label');
         label.dataset.from = rel.fromEntity;
         label.dataset.to = rel.toEntity;
-        label.textContent = 'self 0..1 : 1';
+        label.textContent = 'tự tham chiếu 0..1 : 1';
         svg.appendChild(label);
         return;
       }
@@ -576,7 +572,7 @@
     state.searchTerm = term.trim().toLowerCase();
     if (!state.searchTerm) return;
     const match = ERD_VIEWS.find((v) =>
-      v.entities.some((en) => en.toLowerCase().includes(state.searchTerm))
+      v.entities.some((slug) => entityBySlug.get(slug).ten.toLowerCase().includes(state.searchTerm))
     );
     if (match) setView(match.id);
   }

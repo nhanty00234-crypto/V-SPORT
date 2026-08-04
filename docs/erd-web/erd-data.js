@@ -1,992 +1,562 @@
-/* V-SPORT Entity-Relationship Diagram — structured data source
- * Exactly 46 entities. All relationship lines are DERIVED from field-level
- * `fk` metadata at render time (see app.js buildRelationships()). Do not add
- * a separate manual edge list.
+/* V-SPORT ERD (tinh gọn, tiếng Việt) — dữ liệu nguồn duy nhất.
+ * 29 thực thể logic, 17 nhóm màn hình. Toàn bộ đường quan hệ được suy ra
+ * (derive) từ metadata FK (thamChieu) khai báo trong từng cột — không có
+ * danh sách cạnh thủ công nào khác trong app.js.
  *
- * Field shape: { name, type, pk, fk: 'Entity.Field'|null, unique, nullable }
+ * Mỗi cột: { id, ten, kieu, pk, fk, unique, nullable, thamChieu }
+ *   id        slug nội bộ không dấu, dùng làm khóa tra cứu trong JS.
+ *   ten       tên cột hiển thị trên UI (tiếng Việt có dấu).
+ *   kieu      kiểu SQL hiển thị (INT, NVARCHAR(n), DATE, ...).
+ *   pk/fk/unique/nullable  cờ ràng buộc.
+ *   thamChieu "slugBangDich.idCotDich" — chỉ có khi fk = true.
  */
+(function (global) {
+  'use strict';
 
-const ERD_ENTITIES = [
-  {
-    name: 'Role',
-    fields: [
-      { name: 'RoleID', type: 'INT', pk: true },
-      { name: 'RoleName', type: 'VARCHAR(30)', unique: true },
-    ],
-  },
-  {
-    name: 'Account',
-    fields: [
-      { name: 'AccountID', type: 'INT', pk: true },
-      { name: 'RoleID', type: 'INT', fk: 'Role.RoleID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID', nullable: true },
-      { name: 'FullName', type: 'NVARCHAR(100)' },
-      { name: 'Email', type: 'VARCHAR(100)', unique: true },
-      { name: 'PhoneNumber', type: 'VARCHAR(15)', unique: true, nullable: true },
-      { name: 'PasswordHash', type: 'VARCHAR(255)' },
-      { name: 'AvatarUrl', type: 'NVARCHAR(255)', nullable: true },
-      { name: 'ReputationScore', type: 'INT', default: '100' },
-      { name: 'SkillRating', type: 'INT', default: '1000' },
-      { name: 'AccountStatus', type: 'VARCHAR(30)' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'AccountFavoriteSport',
-    fields: [
-      { name: 'AccountID', type: 'INT', pk: true, fk: 'Account.AccountID' },
-      { name: 'SportID', type: 'INT', pk: true, fk: 'Sport.SportID' },
-      { name: 'AddedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'Sport',
-    fields: [
-      { name: 'SportID', type: 'INT', pk: true },
-      { name: 'SportName', type: 'NVARCHAR(60)', unique: true },
-    ],
-  },
-  {
-    name: 'Facility',
-    fields: [
-      { name: 'FacilityID', type: 'INT', pk: true },
-      { name: 'FacilityName', type: 'NVARCHAR(100)' },
-      { name: 'Address', type: 'NVARCHAR(255)' },
-      { name: 'PhoneNumber', type: 'VARCHAR(15)', nullable: true },
-      { name: 'OpenTime', type: 'TIME' },
-      { name: 'CloseTime', type: 'TIME' },
-      { name: 'Latitude', type: 'DECIMAL(10,7)', nullable: true },
-      { name: 'Longitude', type: 'DECIMAL(10,7)', nullable: true },
-      { name: 'Description', type: 'NVARCHAR(1000)', nullable: true },
-      { name: 'ImageUrl', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'FacilityStatus', type: 'VARCHAR(30)' },
-    ],
-  },
-  {
-    name: 'FacilityCapability',
-    fields: [
-      { name: 'CapabilityID', type: 'INT', pk: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'CapabilityType', type: 'VARCHAR(50)' },
-      { name: 'ApprovalStatus', type: 'VARCHAR(30)' },
-      { name: 'RequestedAt', type: 'DATETIME2' },
-      { name: 'ReviewedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'ReviewedAt', type: 'DATETIME2', nullable: true },
-      { name: 'RejectionReason', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'Note', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'FacilityBankAccount',
-    fields: [
-      { name: 'FacilityID', type: 'INT', pk: true, fk: 'Facility.FacilityID' },
-      { name: 'BankName', type: 'NVARCHAR(100)' },
-      { name: 'BankCode', type: 'VARCHAR(20)', nullable: true },
-      { name: 'AccountName', type: 'NVARCHAR(100)' },
-      { name: 'AccountNumber', type: 'VARCHAR(50)' },
-      { name: 'UpdatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'CourtType',
-    fields: [
-      { name: 'CourtTypeID', type: 'INT', pk: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'SportID', type: 'INT', fk: 'Sport.SportID' },
-      { name: 'TypeName', type: 'NVARCHAR(100)' },
-      { name: 'BaseHourlyRate', type: 'DECIMAL(18,2)' },
-      { name: 'LightHourlyRate', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'LightStartTime', type: 'TIME', nullable: true },
-      { name: 'LightEndTime', type: 'TIME', nullable: true },
-      { name: 'CourtTypeStatus', type: 'VARCHAR(30)' },
-    ],
-  },
-  {
-    name: 'Court',
-    fields: [
-      { name: 'CourtID', type: 'INT', pk: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'CourtTypeID', type: 'INT', fk: 'CourtType.CourtTypeID' },
-      { name: 'CourtName', type: 'NVARCHAR(100)' },
-      { name: 'CourtStatus', type: 'VARCHAR(30)' },
-      { name: 'Description', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'ImageUrl', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'Booking',
-    fields: [
-      { name: 'BookingID', type: 'INT', pk: true },
-      { name: 'CustomerAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'CourtID', type: 'INT', fk: 'Court.CourtID' },
-      { name: 'BookingDate', type: 'DATE' },
-      { name: 'StartTime', type: 'TIME' },
-      { name: 'EndTime', type: 'TIME' },
-      { name: 'TimeMode', type: 'VARCHAR(20)' },
-      { name: 'BookingStatus', type: 'VARCHAR(30)' },
-      { name: 'EstimatedTotal', type: 'DECIMAL(18,2)' },
-      { name: 'DepositAmount', type: 'DECIMAL(18,2)', default: '0' },
-      { name: 'ActualStartAt', type: 'DATETIME2', nullable: true },
-      { name: 'ActualEndAt', type: 'DATETIME2', nullable: true },
-      { name: 'CancelReason', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'TemporaryHold',
-    fields: [
-      { name: 'HoldID', type: 'INT', pk: true },
-      { name: 'AccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'CourtID', type: 'INT', fk: 'Court.CourtID' },
-      { name: 'BookingDate', type: 'DATE' },
-      { name: 'StartTime', type: 'TIME' },
-      { name: 'EndTime', type: 'TIME' },
-      { name: 'ExpiresAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'BookingExtension',
-    fields: [
-      { name: 'ExtensionID', type: 'INT', pk: true },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'PreviousEndAt', type: 'DATETIME2' },
-      { name: 'NewEndAt', type: 'DATETIME2' },
-      { name: 'AdditionalAmount', type: 'DECIMAL(18,2)' },
-      { name: 'OperatorAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'BookingService',
-    fields: [
-      { name: 'BookingServiceID', type: 'INT', pk: true },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'ProductServiceID', type: 'INT', fk: 'ProductService.ProductServiceID' },
-      { name: 'Quantity', type: 'INT' },
-      { name: 'UnitPrice', type: 'DECIMAL(18,2)' },
-      { name: 'TotalPrice', type: 'DECIMAL(18,2)' },
-      { name: 'DeliveryStatus', type: 'VARCHAR(30)' },
-      { name: 'DeliveredByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'DeliveredAt', type: 'DATETIME2', nullable: true },
-      { name: 'Note', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'UsageChargeSegment',
-    fields: [
-      { name: 'SegmentID', type: 'INT', pk: true },
-      { name: 'InvoiceID', type: 'INT', fk: 'Invoice.InvoiceID' },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'SegmentOrder', type: 'INT' },
-      { name: 'StartAt', type: 'DATETIME2' },
-      { name: 'EndAt', type: 'DATETIME2' },
-      { name: 'RateType', type: 'VARCHAR(30)' },
-      { name: 'HourlyRate', type: 'DECIMAL(18,2)' },
-      { name: 'Amount', type: 'DECIMAL(18,2)' },
-    ],
-  },
-  {
-    name: 'Invoice',
-    fields: [
-      { name: 'InvoiceID', type: 'INT', pk: true },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID', nullable: true },
-      { name: 'CustomerAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'StaffAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'PromotionID', type: 'INT', fk: 'Promotion.PromotionID', nullable: true },
-      { name: 'ParentInvoiceID', type: 'INT', fk: 'Invoice.InvoiceID', nullable: true },
-      { name: 'InvoiceType', type: 'VARCHAR(30)' },
-      { name: 'CourtAmount', type: 'DECIMAL(18,2)', default: '0' },
-      { name: 'ServiceAmount', type: 'DECIMAL(18,2)', default: '0' },
-      { name: 'DiscountAmount', type: 'DECIMAL(18,2)', default: '0' },
-      { name: 'TotalAmount', type: 'DECIMAL(18,2)' },
-      { name: 'PaymentStatus', type: 'VARCHAR(30)' },
-      { name: 'IssuedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'InvoiceItem',
-    fields: [
-      { name: 'InvoiceItemID', type: 'INT', pk: true },
-      { name: 'InvoiceID', type: 'INT', fk: 'Invoice.InvoiceID' },
-      { name: 'ProductServiceID', type: 'INT', fk: 'ProductService.ProductServiceID' },
-      { name: 'Quantity', type: 'INT' },
-      { name: 'UnitPrice', type: 'DECIMAL(18,2)' },
-      { name: 'LineTotal', type: 'DECIMAL(18,2)' },
-    ],
-  },
-  {
-    name: 'PaymentTransaction',
-    fields: [
-      { name: 'TransactionID', type: 'INT', pk: true },
-      { name: 'InvoiceID', type: 'INT', fk: 'Invoice.InvoiceID' },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'ProviderOrderCode', type: 'BIGINT', unique: true },
-      { name: 'PaymentLinkID', type: 'VARCHAR(100)', nullable: true },
-      { name: 'Amount', type: 'DECIMAL(18,2)' },
-      { name: 'TransactionStatus', type: 'VARCHAR(30)' },
-      { name: 'CheckoutUrl', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'QrPayload', type: 'NVARCHAR(MAX)', nullable: true },
-      { name: 'PaidAt', type: 'DATETIME2', nullable: true },
-      { name: 'FailureReason', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'ProductCategory',
-    fields: [
-      { name: 'CategoryID', type: 'INT', pk: true },
-      { name: 'CategoryName', type: 'NVARCHAR(100)', unique: true },
-    ],
-  },
-  {
-    name: 'ProductService',
-    fields: [
-      { name: 'ProductServiceID', type: 'INT', pk: true },
-      { name: 'CategoryID', type: 'INT', fk: 'ProductCategory.CategoryID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'ItemName', type: 'NVARCHAR(150)' },
-      { name: 'ItemType', type: 'VARCHAR(20)' },
-      { name: 'SkuCode', type: 'VARCHAR(50)', nullable: true },
-      { name: 'UnitPrice', type: 'DECIMAL(18,2)' },
-      { name: 'CostPrice', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'Unit', type: 'NVARCHAR(30)' },
-      { name: 'StockQuantity', type: 'INT', default: '0' },
-      { name: 'ItemStatus', type: 'VARCHAR(30)' },
-      { name: 'ImageUrl', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'Promotion',
-    fields: [
-      { name: 'PromotionID', type: 'INT', pk: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'PromotionCode', type: 'VARCHAR(50)', unique: true },
-      { name: 'Description', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'DiscountType', type: 'VARCHAR(20)' },
-      { name: 'DiscountValue', type: 'DECIMAL(18,2)' },
-      { name: 'MinimumOrderValue', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'MaximumDiscount', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'StartDate', type: 'DATETIME2' },
-      { name: 'EndDate', type: 'DATETIME2' },
-      { name: 'UsageLimit', type: 'INT', nullable: true },
-      { name: 'UsedCount', type: 'INT', default: '0' },
-      { name: 'IsPublic', type: 'BIT', default: '1' },
-      { name: 'PromotionStatus', type: 'VARCHAR(30)' },
-    ],
-  },
-  {
-    name: 'PromotionImage',
-    fields: [
-      { name: 'PromotionImageID', type: 'INT', pk: true },
-      { name: 'PromotionID', type: 'INT', fk: 'Promotion.PromotionID' },
-      { name: 'ImagePath', type: 'NVARCHAR(500)' },
-      { name: 'SortOrder', type: 'INT' },
-      { name: 'IsCover', type: 'BIT', default: '0' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'Refund',
-    fields: [
-      { name: 'RefundID', type: 'INT', pk: true },
-      { name: 'InvoiceID', type: 'INT', fk: 'Invoice.InvoiceID' },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'CustomerAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'ProcessedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'RequestedAmount', type: 'DECIMAL(18,2)' },
-      { name: 'ApprovedAmount', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'Reason', type: 'NVARCHAR(500)' },
-      { name: 'BankAccountInfo', type: 'NVARCHAR(250)', nullable: true },
-      { name: 'ReceiveQrPath', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'ProcessingNote', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'RefundTransactionCode', type: 'VARCHAR(100)', nullable: true },
-      { name: 'RefundStatus', type: 'VARCHAR(30)' },
-      { name: 'RequestedAt', type: 'DATETIME2' },
-      { name: 'ProcessedAt', type: 'DATETIME2', nullable: true },
-    ],
-  },
-  {
-    name: 'BillSplitGroup',
-    fields: [
-      { name: 'SplitGroupID', type: 'INT', pk: true },
-      { name: 'InvoiceID', type: 'INT', fk: 'Invoice.InvoiceID' },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'CreatedByAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'SplitType', type: 'VARCHAR(30)' },
-      { name: 'TotalAmount', type: 'DECIMAL(18,2)' },
-      { name: 'SplitStatus', type: 'VARCHAR(30)' },
-      { name: 'ExpiresAt', type: 'DATETIME2', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'BillSplitParticipant',
-    fields: [
-      { name: 'ParticipantID', type: 'INT', pk: true },
-      { name: 'SplitGroupID', type: 'INT', fk: 'BillSplitGroup.SplitGroupID' },
-      { name: 'AccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'DisplayName', type: 'NVARCHAR(100)' },
-      { name: 'ShareToken', type: 'VARCHAR(100)', unique: true },
-      { name: 'ShareAmount', type: 'DECIMAL(18,2)' },
-      { name: 'PaymentMethod', type: 'VARCHAR(30)', nullable: true },
-      { name: 'PaymentTransactionID', type: 'INT', fk: 'PaymentTransaction.TransactionID', nullable: true },
-      { name: 'PayerAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'ParticipantStatus', type: 'VARCHAR(30)' },
-      { name: 'PaidAt', type: 'DATETIME2', nullable: true },
-    ],
-  },
-  {
-    name: 'CourtQRCode',
-    fields: [
-      { name: 'CourtQRCodeID', type: 'INT', pk: true },
-      { name: 'CourtID', type: 'INT', fk: 'Court.CourtID', unique: true },
-      { name: 'Token', type: 'VARCHAR(100)', unique: true },
-      { name: 'ShortCode', type: 'VARCHAR(20)', unique: true },
-      { name: 'QrStatus', type: 'VARCHAR(30)' },
-      { name: 'RegenerateCount', type: 'INT', default: '0' },
-      { name: 'CreatedByAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-      { name: 'UpdatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'QRRequest',
-    fields: [
-      { name: 'QRRequestID', type: 'INT', pk: true },
-      { name: 'CourtID', type: 'INT', fk: 'Court.CourtID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'CustomerAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'GuestToken', type: 'VARCHAR(100)', nullable: true },
-      { name: 'RequestType', type: 'VARCHAR(30)' },
-      { name: 'ItemsJson', type: 'NVARCHAR(MAX)', nullable: true },
-      { name: 'Note', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'RequestStatus', type: 'VARCHAR(30)' },
-      { name: 'HandledByStaffAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-      { name: 'UpdatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'Shift',
-    fields: [
-      { name: 'ShiftID', type: 'INT', pk: true },
-      { name: 'StaffAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'WorkDate', type: 'DATE' },
-      { name: 'StartTime', type: 'TIME' },
-      { name: 'EndTime', type: 'TIME' },
-      { name: 'ShiftName', type: 'NVARCHAR(50)', nullable: true },
-      { name: 'Position', type: 'NVARCHAR(50)', nullable: true },
-      { name: 'BreakMinutes', type: 'INT', default: '0' },
-      { name: 'IsCustomTime', type: 'BIT', default: '0' },
-      { name: 'CustomTimeReason', type: 'NVARCHAR(255)', nullable: true },
-      { name: 'IsPublished', type: 'BIT', default: '0' },
-      { name: 'ShiftStatus', type: 'VARCHAR(30)' },
-      { name: 'Note', type: 'NVARCHAR(255)', nullable: true },
-    ],
-  },
-  {
-    name: 'ShiftAvailability',
-    fields: [
-      { name: 'AvailabilityID', type: 'INT', pk: true },
-      { name: 'StaffAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'AvailableDate', type: 'DATE' },
-      { name: 'StartTime', type: 'TIME' },
-      { name: 'EndTime', type: 'TIME' },
-      { name: 'AvailabilityStatus', type: 'VARCHAR(30)' },
-      { name: 'Note', type: 'NVARCHAR(255)', nullable: true },
-      { name: 'ManagerResponse', type: 'NVARCHAR(255)', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'ShiftSwapRequest',
-    fields: [
-      { name: 'SwapRequestID', type: 'INT', pk: true },
-      { name: 'RequesterAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'RequesterShiftID', type: 'INT', fk: 'Shift.ShiftID' },
-      { name: 'TargetAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'TargetShiftID', type: 'INT', fk: 'Shift.ShiftID' },
-      { name: 'Reason', type: 'NVARCHAR(500)' },
-      { name: 'SwapStatus', type: 'VARCHAR(30)' },
-      { name: 'ApprovedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'RequestedAt', type: 'DATETIME2' },
-      { name: 'ReviewedAt', type: 'DATETIME2', nullable: true },
-      { name: 'ManagerNote', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'LeaveRequest',
-    fields: [
-      { name: 'LeaveRequestID', type: 'INT', pk: true },
-      { name: 'StaffAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'LeaveDate', type: 'DATE' },
-      { name: 'LeaveType', type: 'VARCHAR(30)' },
-      { name: 'Reason', type: 'NVARCHAR(500)' },
-      { name: 'UrgencyLevel', type: 'VARCHAR(20)', nullable: true },
-      { name: 'AffectedShiftCount', type: 'INT', default: '0' },
-      { name: 'LeaveStatus', type: 'VARCHAR(30)' },
-      { name: 'ManagerNote', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'ReviewedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'RequestedAt', type: 'DATETIME2' },
-      { name: 'ReviewedAt', type: 'DATETIME2', nullable: true },
-    ],
-  },
-  {
-    name: 'Review',
-    fields: [
-      { name: 'ReviewID', type: 'INT', pk: true },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'ReviewerAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'Rating', type: 'TINYINT' },
-      { name: 'Comment', type: 'NVARCHAR(1000)', nullable: true },
-      { name: 'ReviewedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'ReputationHistory',
-    fields: [
-      { name: 'ReputationHistoryID', type: 'INT', pk: true },
-      { name: 'AccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID', nullable: true },
-      { name: 'ActionType', type: 'VARCHAR(50)' },
-      { name: 'ScoreDelta', type: 'INT' },
-      { name: 'ScoreBefore', type: 'INT' },
-      { name: 'ScoreAfter', type: 'INT' },
-      { name: 'Reason', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'CreatedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'MatchPost',
-    fields: [
-      { name: 'MatchPostID', type: 'INT', pk: true },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID' },
-      { name: 'CreatorAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'SportID', type: 'INT', fk: 'Sport.SportID' },
-      { name: 'CreatorTeamID', type: 'INT', fk: 'Team.TeamID', nullable: true },
-      { name: 'Description', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'SkillLevel', type: 'VARCHAR(30)', nullable: true },
-      { name: 'NeededPlayers', type: 'INT' },
-      { name: 'ApprovalMode', type: 'VARCHAR(30)' },
-      { name: 'MatchStatus', type: 'VARCHAR(30)' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'MatchParticipant',
-    fields: [
-      { name: 'MatchParticipantID', type: 'INT', pk: true },
-      { name: 'MatchPostID', type: 'INT', fk: 'MatchPost.MatchPostID' },
-      { name: 'AccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'TeamID', type: 'INT', fk: 'Team.TeamID', nullable: true },
-      { name: 'ParticipationStatus', type: 'VARCHAR(30)' },
-      { name: 'Position', type: 'NVARCHAR(50)', nullable: true },
-      { name: 'JoinedAt', type: 'DATETIME2', nullable: true },
-    ],
-  },
-  {
-    name: 'Team',
-    fields: [
-      { name: 'TeamID', type: 'INT', pk: true },
-      { name: 'SportID', type: 'INT', fk: 'Sport.SportID' },
-      { name: 'CaptainAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'TeamName', type: 'NVARCHAR(100)' },
-      { name: 'Description', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'LocationText', type: 'NVARCHAR(255)', nullable: true },
-      { name: 'AvatarUrl', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'CoverImageUrl', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'MaxMembers', type: 'INT' },
-      { name: 'TeamStatus', type: 'VARCHAR(30)' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'TeamMember',
-    fields: [
-      { name: 'TeamMemberID', type: 'INT', pk: true },
-      { name: 'TeamID', type: 'INT', fk: 'Team.TeamID' },
-      { name: 'AccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'MemberRole', type: 'VARCHAR(30)' },
-      { name: 'MemberStatus', type: 'VARCHAR(30)' },
-      { name: 'JoinedAt', type: 'DATETIME2' },
-      { name: 'LeftAt', type: 'DATETIME2', nullable: true },
-      { name: 'AddedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-    ],
-  },
-  {
-    name: 'TeamInvitation',
-    fields: [
-      { name: 'InvitationID', type: 'INT', pk: true },
-      { name: 'TeamID', type: 'INT', fk: 'Team.TeamID' },
-      { name: 'InvitedAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'InvitedByAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'ProposedRole', type: 'VARCHAR(30)', nullable: true },
-      { name: 'InvitationStatus', type: 'VARCHAR(30)' },
-      { name: 'Message', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-      { name: 'ExpiresAt', type: 'DATETIME2', nullable: true },
-      { name: 'RespondedAt', type: 'DATETIME2', nullable: true },
-    ],
-  },
-  {
-    name: 'TeamJoinRequest',
-    fields: [
-      { name: 'JoinRequestID', type: 'INT', pk: true },
-      { name: 'TeamID', type: 'INT', fk: 'Team.TeamID' },
-      { name: 'RequesterAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'Message', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'RequestStatus', type: 'VARCHAR(30)' },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-      { name: 'ReviewedAt', type: 'DATETIME2', nullable: true },
-      { name: 'ReviewedByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-    ],
-  },
-  {
-    name: 'SportService',
-    fields: [
-      { name: 'SportServiceID', type: 'INT', pk: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'ServiceType', type: 'VARCHAR(50)' },
-      { name: 'ServiceName', type: 'NVARCHAR(150)' },
-      { name: 'SportType', type: 'VARCHAR(50)', nullable: true },
-      { name: 'Description', type: 'NVARCHAR(1000)', nullable: true },
-      { name: 'BasePrice', type: 'DECIMAL(18,2)' },
-      { name: 'Unit', type: 'NVARCHAR(30)' },
-      { name: 'EstimatedMinutes', type: 'INT', nullable: true },
-      { name: 'DailyRequestLimit', type: 'INT', nullable: true },
-      { name: 'ImageUrl', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'AcceptingRequests', type: 'BIT' },
-      { name: 'ServiceStatus', type: 'VARCHAR(30)' },
-    ],
-  },
-  {
-    name: 'ServiceOrder',
-    fields: [
-      { name: 'ServiceOrderID', type: 'INT', pk: true },
-      { name: 'CustomerAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'SportServiceID', type: 'INT', fk: 'SportService.SportServiceID' },
-      { name: 'BookingID', type: 'INT', fk: 'Booking.BookingID', nullable: true },
-      { name: 'OrderStatus', type: 'VARCHAR(30)' },
-      { name: 'RequestedAt', type: 'DATETIME2' },
-      { name: 'AppointmentDate', type: 'DATE', nullable: true },
-      { name: 'ExpectedPickupAt', type: 'DATETIME2', nullable: true },
-      { name: 'CustomerNote', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'ManagerNote', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'EstimatedPrice', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'ConfirmedPrice', type: 'DECIMAL(18,2)', nullable: true },
-      { name: 'UpdatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'ServiceMaterial',
-    fields: [
-      { name: 'ServiceMaterialID', type: 'INT', pk: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID' },
-      { name: 'MaterialName', type: 'NVARCHAR(150)' },
-      { name: 'Brand', type: 'NVARCHAR(100)', nullable: true },
-      { name: 'MaterialCode', type: 'VARCHAR(50)', nullable: true },
-      { name: 'Color', type: 'NVARCHAR(50)', nullable: true },
-      { name: 'SportType', type: 'VARCHAR(50)', nullable: true },
-      { name: 'Price', type: 'DECIMAL(18,2)' },
-      { name: 'ExtraFee', type: 'DECIMAL(18,2)', default: '0' },
-      { name: 'MaterialStatus', type: 'VARCHAR(30)' },
-      { name: 'Description', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'RacketStringingConfig',
-    fields: [
-      { name: 'StringingConfigID', type: 'INT', pk: true },
-      { name: 'SportServiceID', type: 'INT', fk: 'SportService.SportServiceID', unique: true },
-      { name: 'SupportedRacketTypes', type: 'NVARCHAR(255)', nullable: true },
-      { name: 'StringingPrice', type: 'DECIMAL(18,2)' },
-      { name: 'MinimumTension', type: 'DECIMAL(8,2)', nullable: true },
-      { name: 'MaximumTension', type: 'DECIMAL(8,2)', nullable: true },
-      { name: 'TensionUnit', type: 'VARCHAR(10)' },
-      { name: 'AllowCustomerString', type: 'BIT' },
-      { name: 'SellsString', type: 'BIT' },
-      { name: 'AverageCompletionMinutes', type: 'INT', nullable: true },
-      { name: 'MaxRacketsPerOrder', type: 'INT', nullable: true },
-    ],
-  },
-  {
-    name: 'RacketStringingDetail',
-    fields: [
-      { name: 'StringingDetailID', type: 'INT', pk: true },
-      { name: 'ServiceOrderID', type: 'INT', fk: 'ServiceOrder.ServiceOrderID', unique: true },
-      { name: 'RacketType', type: 'VARCHAR(50)' },
-      { name: 'RacketBrand', type: 'NVARCHAR(100)', nullable: true },
-      { name: 'RacketModel', type: 'NVARCHAR(100)', nullable: true },
-      { name: 'ServiceMaterialID', type: 'INT', fk: 'ServiceMaterial.ServiceMaterialID', nullable: true },
-      { name: 'CustomerBringsString', type: 'BIT' },
-      { name: 'TensionValue', type: 'DECIMAL(8,2)', nullable: true },
-      { name: 'TensionUnit', type: 'VARCHAR(10)', nullable: true },
-      { name: 'StringColor', type: 'NVARCHAR(50)', nullable: true },
-      { name: 'Quantity', type: 'INT' },
-      { name: 'TechnicalNote', type: 'NVARCHAR(500)', nullable: true },
-    ],
-  },
-  {
-    name: 'Notification',
-    fields: [
-      { name: 'NotificationID', type: 'INT', pk: true },
-      { name: 'AccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'Title', type: 'NVARCHAR(200)' },
-      { name: 'Content', type: 'NVARCHAR(1000)' },
-      { name: 'NotificationType', type: 'VARCHAR(50)' },
-      { name: 'ReferenceCode', type: 'VARCHAR(100)', nullable: true },
-      { name: 'TargetUrl', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'IsRead', type: 'BIT', default: '0' },
-      { name: 'SentAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'AuditLog',
-    fields: [
-      { name: 'AuditLogID', type: 'BIGINT', pk: true },
-      { name: 'ActorAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'FacilityID', type: 'INT', fk: 'Facility.FacilityID', nullable: true },
-      { name: 'Action', type: 'VARCHAR(50)' },
-      { name: 'EntityType', type: 'VARCHAR(80)' },
-      { name: 'EntityID', type: 'VARCHAR(80)', nullable: true, polymorphic: true },
-      { name: 'EntityName', type: 'NVARCHAR(200)', nullable: true },
-      { name: 'Details', type: 'NVARCHAR(MAX)', nullable: true },
-      { name: 'IpAddress', type: 'VARCHAR(45)', nullable: true },
-      { name: 'CreatedAt', type: 'DATETIME2' },
-    ],
-  },
-  {
-    name: 'TrashRecord',
-    fields: [
-      { name: 'TrashRecordID', type: 'BIGINT', pk: true },
-      { name: 'EntityType', type: 'VARCHAR(80)' },
-      { name: 'EntityID', type: 'VARCHAR(80)', polymorphic: true },
-      { name: 'DisplayName', type: 'NVARCHAR(200)', nullable: true },
-      { name: 'SourceTable', type: 'VARCHAR(100)' },
-      { name: 'PreviousStatus', type: 'VARCHAR(50)', nullable: true },
-      { name: 'DeletedByAccountID', type: 'INT', fk: 'Account.AccountID' },
-      { name: 'DeletedAt', type: 'DATETIME2' },
-      { name: 'Reason', type: 'NVARCHAR(500)', nullable: true },
-      { name: 'IsRestored', type: 'BIT', default: '0' },
-      { name: 'RestoredByAccountID', type: 'INT', fk: 'Account.AccountID', nullable: true },
-      { name: 'RestoredAt', type: 'DATETIME2', nullable: true },
-    ],
-  },
-];
+  var ERD_ENTITIES = [
+    // 5.1 ------------------------------------------------------------
+    {
+      slug: 'vai-tro',
+      ten: 'VAI TRÒ',
+      fields: [
+        { id: 'ma_vai_tro', ten: 'Mã vai trò', kieu: 'INT', pk: true },
+        { id: 'ten_vai_tro', ten: 'Tên vai trò', kieu: 'NVARCHAR(30)', unique: true }
+      ]
+    },
+    // 5.2 ------------------------------------------------------------
+    {
+      slug: 'tai-khoan',
+      ten: 'TÀI KHOẢN',
+      fields: [
+        { id: 'ma_tai_khoan', ten: 'Mã tài khoản', kieu: 'INT', pk: true },
+        { id: 'ma_vai_tro', ten: 'Mã vai trò', kieu: 'INT', fk: true, thamChieu: 'vai-tro.ma_vai_tro' },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, nullable: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'ho_ten', ten: 'Họ và tên', kieu: 'NVARCHAR(100)' },
+        { id: 'email', ten: 'Email', kieu: 'VARCHAR(100)', unique: true },
+        { id: 'so_dien_thoai', ten: 'Số điện thoại', kieu: 'VARCHAR(15)', unique: true, nullable: true },
+        { id: 'mat_khau', ten: 'Mật khẩu', kieu: 'VARCHAR(255)' },
+        { id: 'diem_uy_tin', ten: 'Điểm uy tín', kieu: 'INT' }
+      ]
+    },
+    // 5.3 ------------------------------------------------------------
+    {
+      slug: 'co-so',
+      ten: 'CƠ SỞ',
+      fields: [
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', pk: true },
+        { id: 'ten_co_so', ten: 'Tên cơ sở', kieu: 'NVARCHAR(100)' },
+        { id: 'dia_chi', ten: 'Địa chỉ', kieu: 'NVARCHAR(255)' },
+        { id: 'so_dien_thoai', ten: 'Số điện thoại', kieu: 'VARCHAR(15)', nullable: true },
+        { id: 'gio_mo_cua', ten: 'Giờ mở cửa', kieu: 'TIME' },
+        { id: 'gio_dong_cua', ten: 'Giờ đóng cửa', kieu: 'TIME' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.4 ------------------------------------------------------------
+    {
+      slug: 'mon-the-thao',
+      ten: 'MÔN THỂ THAO',
+      fields: [
+        { id: 'ma_mon_the_thao', ten: 'Mã môn thể thao', kieu: 'INT', pk: true },
+        { id: 'ten_mon_the_thao', ten: 'Tên môn thể thao', kieu: 'NVARCHAR(60)', unique: true }
+      ]
+    },
+    // 5.5 ------------------------------------------------------------
+    {
+      slug: 'loai-san',
+      ten: 'LOẠI SÂN',
+      fields: [
+        { id: 'ma_loai_san', ten: 'Mã loại sân', kieu: 'INT', pk: true },
+        { id: 'ma_mon_the_thao', ten: 'Mã môn thể thao', kieu: 'INT', fk: true, thamChieu: 'mon-the-thao.ma_mon_the_thao' },
+        { id: 'ten_loai_san', ten: 'Tên loại sân', kieu: 'NVARCHAR(100)' },
+        { id: 'gia_khong_den', ten: 'Giá không đèn', kieu: 'DECIMAL(18,2)' },
+        { id: 'gia_co_den', ten: 'Giá có đèn', kieu: 'DECIMAL(18,2)', nullable: true },
+        { id: 'gio_bat_dau_co_den', ten: 'Giờ bắt đầu có đèn', kieu: 'TIME', nullable: true },
+        { id: 'gio_ket_thuc_co_den', ten: 'Giờ kết thúc có đèn', kieu: 'TIME', nullable: true }
+      ]
+    },
+    // 5.6 ------------------------------------------------------------
+    {
+      slug: 'san',
+      ten: 'SÂN',
+      fields: [
+        { id: 'ma_san', ten: 'Mã sân', kieu: 'INT', pk: true },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'ma_loai_san', ten: 'Mã loại sân', kieu: 'INT', fk: true, thamChieu: 'loai-san.ma_loai_san' },
+        { id: 'ten_san', ten: 'Tên sân', kieu: 'NVARCHAR(100)' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.7 ------------------------------------------------------------
+    {
+      slug: 'lich-dat-san',
+      ten: 'LỊCH ĐẶT SÂN',
+      fields: [
+        { id: 'ma_dat_san', ten: 'Mã đặt sân', kieu: 'INT', pk: true },
+        { id: 'ma_khach_hang', ten: 'Mã khách hàng', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_san', ten: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'san.ma_san' },
+        { id: 'bat_dau_du_kien', ten: 'Bắt đầu dự kiến', kieu: 'DATETIME2' },
+        { id: 'ket_thuc_du_kien', ten: 'Kết thúc dự kiến', kieu: 'DATETIME2' },
+        { id: 'bat_dau_thuc_te', ten: 'Bắt đầu thực tế', kieu: 'DATETIME2', nullable: true },
+        { id: 'ket_thuc_thuc_te', ten: 'Kết thúc thực tế', kieu: 'DATETIME2', nullable: true },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.8 ------------------------------------------------------------
+    {
+      slug: 'giu-cho-tam-thoi',
+      ten: 'GIỮ CHỖ TẠM THỜI',
+      fields: [
+        { id: 'ma_giu_cho', ten: 'Mã giữ chỗ', kieu: 'INT', pk: true },
+        { id: 'ma_tai_khoan', ten: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_san', ten: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'san.ma_san' },
+        { id: 'thoi_gian_bat_dau', ten: 'Thời gian bắt đầu', kieu: 'DATETIME2' },
+        { id: 'thoi_gian_ket_thuc', ten: 'Thời gian kết thúc', kieu: 'DATETIME2' },
+        { id: 'thoi_gian_het_han', ten: 'Thời gian hết hạn', kieu: 'DATETIME2' }
+      ]
+    },
+    // 5.9 ------------------------------------------------------------
+    {
+      slug: 'danh-muc-san-pham',
+      ten: 'DANH MỤC SẢN PHẨM',
+      fields: [
+        { id: 'ma_danh_muc', ten: 'Mã danh mục', kieu: 'INT', pk: true },
+        { id: 'ten_danh_muc', ten: 'Tên danh mục', kieu: 'NVARCHAR(100)', unique: true }
+      ]
+    },
+    // 5.10 -----------------------------------------------------------
+    {
+      slug: 'san-pham-dich-vu',
+      ten: 'SẢN PHẨM DỊCH VỤ',
+      fields: [
+        { id: 'ma_san_pham', ten: 'Mã sản phẩm', kieu: 'INT', pk: true },
+        { id: 'ma_danh_muc', ten: 'Mã danh mục', kieu: 'INT', fk: true, thamChieu: 'danh-muc-san-pham.ma_danh_muc' },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'ten_san_pham', ten: 'Tên sản phẩm', kieu: 'NVARCHAR(150)' },
+        { id: 'don_gia', ten: 'Đơn giá', kieu: 'DECIMAL(18,2)' },
+        { id: 'so_luong_ton', ten: 'Số lượng tồn', kieu: 'INT' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.11 -----------------------------------------------------------
+    {
+      slug: 'dich-vu-dat-san',
+      ten: 'DỊCH VỤ ĐẶT SÂN',
+      fields: [
+        { id: 'ma_dich_vu_dat', ten: 'Mã dịch vụ đặt', kieu: 'INT', pk: true },
+        { id: 'ma_dat_san', ten: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'lich-dat-san.ma_dat_san' },
+        { id: 'ma_san_pham', ten: 'Mã sản phẩm', kieu: 'INT', fk: true, thamChieu: 'san-pham-dich-vu.ma_san_pham' },
+        { id: 'so_luong', ten: 'Số lượng', kieu: 'INT' },
+        { id: 'don_gia', ten: 'Đơn giá', kieu: 'DECIMAL(18,2)' },
+        { id: 'trang_thai_giao', ten: 'Trạng thái giao', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.12 -----------------------------------------------------------
+    {
+      slug: 'hoa-don',
+      ten: 'HÓA ĐƠN',
+      fields: [
+        { id: 'ma_hoa_don', ten: 'Mã hóa đơn', kieu: 'INT', pk: true },
+        { id: 'ma_dat_san', ten: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'lich-dat-san.ma_dat_san' },
+        { id: 'ma_khuyen_mai', ten: 'Mã khuyến mãi', kieu: 'INT', fk: true, nullable: true, thamChieu: 'khuyen-mai.ma_khuyen_mai' },
+        { id: 'ma_hoa_don_cha', ten: 'Mã hóa đơn cha', kieu: 'INT', fk: true, nullable: true, thamChieu: 'hoa-don.ma_hoa_don' },
+        { id: 'loai_hoa_don', ten: 'Loại hóa đơn', kieu: 'NVARCHAR(20)' },
+        { id: 'tong_thanh_toan', ten: 'Tổng thanh toán', kieu: 'DECIMAL(18,2)' },
+        { id: 'phuong_thuc_thanh_toan', ten: 'Phương thức thanh toán', kieu: 'NVARCHAR(30)' },
+        { id: 'trang_thai_thanh_toan', ten: 'Trạng thái thanh toán', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.13 -----------------------------------------------------------
+    {
+      slug: 'chi-tiet-hoa-don',
+      ten: 'CHI TIẾT HÓA ĐƠN',
+      fields: [
+        { id: 'ma_chi_tiet', ten: 'Mã chi tiết', kieu: 'INT', pk: true },
+        { id: 'ma_hoa_don', ten: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'hoa-don.ma_hoa_don' },
+        { id: 'ma_san_pham', ten: 'Mã sản phẩm', kieu: 'INT', fk: true, thamChieu: 'san-pham-dich-vu.ma_san_pham' },
+        { id: 'so_luong', ten: 'Số lượng', kieu: 'INT' },
+        { id: 'don_gia', ten: 'Đơn giá', kieu: 'DECIMAL(18,2)' },
+        { id: 'thanh_tien', ten: 'Thành tiền', kieu: 'DECIMAL(18,2)' }
+      ]
+    },
+    // 5.14 -----------------------------------------------------------
+    {
+      slug: 'giao-dich-payos',
+      ten: 'GIAO DỊCH PAYOS',
+      fields: [
+        { id: 'ma_giao_dich', ten: 'Mã giao dịch', kieu: 'INT', pk: true },
+        { id: 'ma_hoa_don', ten: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'hoa-don.ma_hoa_don' },
+        { id: 'ma_don_hang_payos', ten: 'Mã đơn hàng PayOS', kieu: 'BIGINT', unique: true },
+        { id: 'so_tien', ten: 'Số tiền', kieu: 'DECIMAL(18,2)' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' },
+        { id: 'thoi_gian_thanh_toan', ten: 'Thời gian thanh toán', kieu: 'DATETIME2', nullable: true }
+      ]
+    },
+    // 5.15 -----------------------------------------------------------
+    {
+      slug: 'khuyen-mai',
+      ten: 'KHUYẾN MÃI',
+      fields: [
+        { id: 'ma_khuyen_mai', ten: 'Mã khuyến mãi', kieu: 'INT', pk: true },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'ma_giam_gia', ten: 'Mã giảm giá', kieu: 'VARCHAR(30)', unique: true },
+        { id: 'loai_giam', ten: 'Loại giảm', kieu: 'NVARCHAR(20)' },
+        { id: 'gia_tri_giam', ten: 'Giá trị giảm', kieu: 'DECIMAL(18,2)' },
+        { id: 'ngay_bat_dau', ten: 'Ngày bắt đầu', kieu: 'DATETIME2' },
+        { id: 'ngay_ket_thuc', ten: 'Ngày kết thúc', kieu: 'DATETIME2' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.16 -----------------------------------------------------------
+    {
+      slug: 'hoan-tien',
+      ten: 'HOÀN TIỀN',
+      fields: [
+        { id: 'ma_hoan_tien', ten: 'Mã hoàn tiền', kieu: 'INT', pk: true },
+        { id: 'ma_hoa_don', ten: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'hoa-don.ma_hoa_don' },
+        { id: 'ma_khach_hang', ten: 'Mã khách hàng', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'so_tien_de_nghi', ten: 'Số tiền đề nghị', kieu: 'DECIMAL(18,2)' },
+        { id: 'so_tien_duoc_duyet', ten: 'Số tiền được duyệt', kieu: 'DECIMAL(18,2)', nullable: true },
+        { id: 'ly_do', ten: 'Lý do', kieu: 'NVARCHAR(500)' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' },
+        { id: 'ma_nguoi_duyet', ten: 'Mã người duyệt', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' }
+      ]
+    },
+    // 5.17 -----------------------------------------------------------
+    {
+      slug: 'ma-qr-san',
+      ten: 'MÃ QR SÂN',
+      fields: [
+        { id: 'ma_qr', ten: 'Mã QR', kieu: 'INT', pk: true },
+        { id: 'ma_san', ten: 'Mã sân', kieu: 'INT', fk: true, unique: true, thamChieu: 'san.ma_san' },
+        { id: 'token', ten: 'Token', kieu: 'VARCHAR(100)', unique: true },
+        { id: 'ma_rut_gon', ten: 'Mã rút gọn', kieu: 'VARCHAR(20)', unique: true },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.18 -----------------------------------------------------------
+    {
+      slug: 'yeu-cau-qr-san',
+      ten: 'YÊU CẦU QR SÂN',
+      fields: [
+        { id: 'ma_yeu_cau', ten: 'Mã yêu cầu', kieu: 'INT', pk: true },
+        { id: 'ma_san', ten: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'san.ma_san' },
+        { id: 'ma_khach_hang', ten: 'Mã khách hàng', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'loai_yeu_cau', ten: 'Loại yêu cầu', kieu: 'NVARCHAR(30)' },
+        { id: 'noi_dung_yeu_cau', ten: 'Nội dung yêu cầu', kieu: 'NVARCHAR(500)', nullable: true },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' },
+        { id: 'ma_nhan_vien_xu_ly', ten: 'Mã nhân viên xử lý', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' }
+      ]
+    },
+    // 5.19 -----------------------------------------------------------
+    {
+      slug: 'ca-lam-viec',
+      ten: 'CA LÀM VIỆC',
+      fields: [
+        { id: 'ma_ca_lam', ten: 'Mã ca làm', kieu: 'INT', pk: true },
+        { id: 'ma_nhan_vien', ten: 'Mã nhân viên', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'ngay_lam', ten: 'Ngày làm', kieu: 'DATE' },
+        { id: 'gio_bat_dau', ten: 'Giờ bắt đầu', kieu: 'TIME' },
+        { id: 'gio_ket_thuc', ten: 'Giờ kết thúc', kieu: 'TIME' }
+      ]
+    },
+    // 5.20 -----------------------------------------------------------
+    {
+      slug: 'yeu-cau-nghi',
+      ten: 'YÊU CẦU NGHỈ',
+      fields: [
+        { id: 'ma_yeu_cau_nghi', ten: 'Mã yêu cầu nghỉ', kieu: 'INT', pk: true },
+        { id: 'ma_nhan_vien', ten: 'Mã nhân viên', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'ngay_nghi', ten: 'Ngày nghỉ', kieu: 'DATE' },
+        { id: 'loai_nghi', ten: 'Loại nghỉ', kieu: 'NVARCHAR(30)' },
+        { id: 'ly_do', ten: 'Lý do', kieu: 'NVARCHAR(500)' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' },
+        { id: 'ma_nguoi_xu_ly', ten: 'Mã người xử lý', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' }
+      ]
+    },
+    // 5.21 -----------------------------------------------------------
+    {
+      slug: 'danh-gia',
+      ten: 'ĐÁNH GIÁ',
+      fields: [
+        { id: 'ma_danh_gia', ten: 'Mã đánh giá', kieu: 'INT', pk: true },
+        { id: 'ma_dat_san', ten: 'Mã đặt sân', kieu: 'INT', fk: true, unique: true, thamChieu: 'lich-dat-san.ma_dat_san' },
+        { id: 'ma_nguoi_danh_gia', ten: 'Mã người đánh giá', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'so_sao', ten: 'Số sao', kieu: 'TINYINT' },
+        { id: 'binh_luan', ten: 'Bình luận', kieu: 'NVARCHAR(1000)', nullable: true },
+        { id: 'ngay_danh_gia', ten: 'Ngày đánh giá', kieu: 'DATETIME2' }
+      ]
+    },
+    // 5.22 -----------------------------------------------------------
+    {
+      slug: 'lich-su-diem-uy-tin',
+      ten: 'LỊCH SỬ ĐIỂM UY TÍN',
+      fields: [
+        { id: 'ma_lich_su', ten: 'Mã lịch sử', kieu: 'INT', pk: true },
+        { id: 'ma_tai_khoan', ten: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_dat_san', ten: 'Mã đặt sân', kieu: 'INT', fk: true, nullable: true, thamChieu: 'lich-dat-san.ma_dat_san' },
+        { id: 'loai_thay_doi', ten: 'Loại thay đổi', kieu: 'NVARCHAR(30)' },
+        { id: 'so_diem_thay_doi', ten: 'Số điểm thay đổi', kieu: 'INT' },
+        { id: 'diem_sau_thay_doi', ten: 'Điểm sau thay đổi', kieu: 'INT' },
+        { id: 'ly_do', ten: 'Lý do', kieu: 'NVARCHAR(500)' }
+      ]
+    },
+    // 5.23 -----------------------------------------------------------
+    {
+      slug: 'ghep-keo',
+      ten: 'GHÉP KÈO',
+      fields: [
+        { id: 'ma_keo', ten: 'Mã kèo', kieu: 'INT', pk: true },
+        { id: 'ma_dat_san', ten: 'Mã đặt sân', kieu: 'INT', fk: true, unique: true, thamChieu: 'lich-dat-san.ma_dat_san' },
+        { id: 'ma_nguoi_tao', ten: 'Mã người tạo', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_mon_the_thao', ten: 'Mã môn thể thao', kieu: 'INT', fk: true, thamChieu: 'mon-the-thao.ma_mon_the_thao' },
+        { id: 'trinh_do_yeu_cau', ten: 'Trình độ yêu cầu', kieu: 'NVARCHAR(30)', nullable: true },
+        { id: 'so_nguoi_can_tim', ten: 'Số người cần tìm', kieu: 'INT' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.24 -----------------------------------------------------------
+    {
+      slug: 'thanh-vien-ghep-keo',
+      ten: 'THÀNH VIÊN GHÉP KÈO',
+      fields: [
+        { id: 'ma_tham_gia', ten: 'Mã tham gia', kieu: 'INT', pk: true },
+        { id: 'ma_keo', ten: 'Mã kèo', kieu: 'INT', fk: true, thamChieu: 'ghep-keo.ma_keo' },
+        { id: 'ma_nguoi_tham_gia', ten: 'Mã người tham gia', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'trang_thai_tham_gia', ten: 'Trạng thái tham gia', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.25 -----------------------------------------------------------
+    {
+      slug: 'nhom-chia-tien',
+      ten: 'NHÓM CHIA TIỀN',
+      fields: [
+        { id: 'ma_nhom_chia', ten: 'Mã nhóm chia', kieu: 'INT', pk: true },
+        { id: 'ma_hoa_don', ten: 'Mã hóa đơn', kieu: 'INT', fk: true, unique: true, thamChieu: 'hoa-don.ma_hoa_don' },
+        { id: 'ma_nguoi_tao', ten: 'Mã người tạo', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'hinh_thuc_chia', ten: 'Hình thức chia', kieu: 'NVARCHAR(20)' },
+        { id: 'tong_tien', ten: 'Tổng tiền', kieu: 'DECIMAL(18,2)' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.26 -----------------------------------------------------------
+    {
+      slug: 'chi-tiet-chia-tien',
+      ten: 'CHI TIẾT CHIA TIỀN',
+      fields: [
+        { id: 'ma_chi_tiet_chia', ten: 'Mã chi tiết chia', kieu: 'INT', pk: true },
+        { id: 'ma_nhom_chia', ten: 'Mã nhóm chia', kieu: 'INT', fk: true, thamChieu: 'nhom-chia-tien.ma_nhom_chia' },
+        { id: 'ma_tai_khoan', ten: 'Mã tài khoản', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ten_nguoi_tra', ten: 'Tên người trả', kieu: 'NVARCHAR(100)' },
+        { id: 'so_tien', ten: 'Số tiền', kieu: 'DECIMAL(18,2)' },
+        { id: 'trang_thai', ten: 'Trạng thái', kieu: 'NVARCHAR(30)' }
+      ]
+    },
+    // 5.27 -----------------------------------------------------------
+    {
+      slug: 'thong-bao',
+      ten: 'THÔNG BÁO',
+      fields: [
+        { id: 'ma_thong_bao', ten: 'Mã thông báo', kieu: 'INT', pk: true },
+        { id: 'ma_tai_khoan', ten: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'tieu_de', ten: 'Tiêu đề', kieu: 'NVARCHAR(200)' },
+        { id: 'loai_thong_bao', ten: 'Loại thông báo', kieu: 'NVARCHAR(30)' },
+        { id: 'da_doc', ten: 'Đã đọc', kieu: 'BIT' },
+        { id: 'thoi_gian_gui', ten: 'Thời gian gửi', kieu: 'DATETIME2' }
+      ]
+    },
+    // 5.28 -----------------------------------------------------------
+    {
+      slug: 'nhat-ky-he-thong',
+      ten: 'NHẬT KÝ HỆ THỐNG',
+      fields: [
+        { id: 'ma_nhat_ky', ten: 'Mã nhật ký', kieu: 'BIGINT', pk: true },
+        { id: 'ma_nguoi_thuc_hien', ten: 'Mã người thực hiện', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'ma_co_so', ten: 'Mã cơ sở', kieu: 'INT', fk: true, nullable: true, thamChieu: 'co-so.ma_co_so' },
+        { id: 'hanh_dong', ten: 'Hành động', kieu: 'NVARCHAR(100)' },
+        { id: 'loai_doi_tuong', ten: 'Loại đối tượng', kieu: 'NVARCHAR(100)' },
+        { id: 'dia_chi_ip', ten: 'Địa chỉ IP', kieu: 'VARCHAR(50)', nullable: true },
+        { id: 'thoi_gian', ten: 'Thời gian', kieu: 'DATETIME2' }
+      ]
+    },
+    // 5.29 -----------------------------------------------------------
+    {
+      slug: 'thung-rac',
+      ten: 'THÙNG RÁC',
+      fields: [
+        { id: 'ma_ban_ghi_xoa', ten: 'Mã bản ghi xóa', kieu: 'INT', pk: true },
+        { id: 'ma_nguoi_xoa', ten: 'Mã người xóa', kieu: 'INT', fk: true, nullable: true, thamChieu: 'tai-khoan.ma_tai_khoan' },
+        { id: 'loai_doi_tuong', ten: 'Loại đối tượng', kieu: 'NVARCHAR(100)' },
+        { id: 'ma_doi_tuong', ten: 'Mã đối tượng', kieu: 'INT' },
+        { id: 'ten_hien_thi', ten: 'Tên hiển thị', kieu: 'NVARCHAR(255)', nullable: true },
+        { id: 'thoi_gian_xoa', ten: 'Thời gian xóa', kieu: 'DATETIME2' },
+        { id: 'da_khoi_phuc', ten: 'Đã khôi phục', kieu: 'BIT' }
+      ]
+    }
+  ];
 
-/* 23 group views. `layout` positions are deterministic grid coordinates in an
- * abstract unit (x,y = top-left of card, in px at 1x canvas scale). `note` is
- * optional guidance text (not necessarily rendered).
- */
-const ERD_VIEWS = [
-  {
-    id: 'erd01',
-    code: 'ERD 01',
-    title: 'IDENTITY AND ACCESS',
-    entities: ['Role', 'Account', 'AccountFavoriteSport', 'Sport'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Account: { x: 620, y: 320 },
-      Role: { x: 120, y: 340 },
-      AccountFavoriteSport: { x: 1120, y: 460 },
-      Sport: { x: 1120, y: 140 },
-    },
-  },
-  {
-    id: 'erd02',
-    code: 'ERD 02',
-    title: 'FACILITY REGISTRATION AND BANKING',
-    entities: ['Facility', 'FacilityCapability', 'FacilityBankAccount', 'Account'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Facility: { x: 620, y: 340 },
-      FacilityCapability: { x: 1100, y: 140 },
-      FacilityBankAccount: { x: 1100, y: 560 },
-      Account: { x: 120, y: 340, compact: true },
-    },
-  },
-  {
-    id: 'erd03',
-    code: 'ERD 03',
-    title: 'COURT CATALOG AND PRICING',
-    entities: ['Sport', 'Facility', 'CourtType', 'Court'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      CourtType: { x: 620, y: 320 },
-      Sport: { x: 120, y: 160 },
-      Facility: { x: 120, y: 500 },
-      Court: { x: 1120, y: 320 },
-    },
-  },
-  {
-    id: 'erd04',
-    code: 'ERD 04',
-    title: 'BOOKING AND TEMPORARY HOLD',
-    entities: ['Account', 'Court', 'Booking', 'TemporaryHold'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Booking: { x: 620, y: 220 },
-      Account: { x: 120, y: 220 },
-      Court: { x: 1120, y: 220 },
-      TemporaryHold: { x: 620, y: 580 },
-    },
-  },
-  {
-    id: 'erd05',
-    code: 'ERD 05',
-    title: 'BOOKING EXTENSION AND SERVICES',
-    entities: ['Booking', 'BookingExtension', 'BookingService', 'ProductService'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Booking: { x: 560, y: 320 },
-      BookingExtension: { x: 120, y: 320 },
-      BookingService: { x: 1000, y: 320 },
-      ProductService: { x: 1360, y: 320, compact: true },
-    },
-  },
-  {
-    id: 'erd06',
-    code: 'ERD 06',
-    title: 'INVOICE AND PAYMENT',
-    entities: ['Booking', 'Invoice', 'InvoiceItem', 'PaymentTransaction'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Invoice: { x: 620, y: 340 },
-      Booking: { x: 120, y: 340 },
-      InvoiceItem: { x: 1100, y: 600 },
-      PaymentTransaction: { x: 1100, y: 100 },
-    },
-  },
-  {
-    id: 'erd07',
-    code: 'ERD 07',
-    title: 'USAGE CHARGE SEGMENTS',
-    entities: ['Booking', 'Invoice', 'UsageChargeSegment'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      UsageChargeSegment: { x: 620, y: 340 },
-      Booking: { x: 120, y: 340, compact: true },
-      Invoice: { x: 1160, y: 340, compact: true },
-    },
-  },
-  {
-    id: 'erd08',
-    code: 'ERD 08',
-    title: 'PRODUCT AND INVENTORY',
-    entities: ['Facility', 'ProductCategory', 'ProductService'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      ProductService: { x: 620, y: 380 },
-      Facility: { x: 120, y: 380 },
-      ProductCategory: { x: 1120, y: 140 },
-    },
-  },
-  {
-    id: 'erd09',
-    code: 'ERD 09',
-    title: 'PROMOTION MANAGEMENT',
-    entities: ['Facility', 'Promotion', 'PromotionImage', 'Invoice'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Promotion: { x: 620, y: 260 },
-      PromotionImage: { x: 1120, y: 260 },
-      Facility: { x: 120, y: 260 },
-      Invoice: { x: 620, y: 620, compact: true },
-    },
-  },
-  {
-    id: 'erd10',
-    code: 'ERD 10',
-    title: 'REFUND WORKFLOW',
-    entities: ['Refund', 'Invoice', 'Booking', 'Account'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Refund: { x: 620, y: 320 },
-      Invoice: { x: 120, y: 160 },
-      Booking: { x: 120, y: 520 },
-      Account: { x: 1160, y: 320 },
-    },
-  },
-  {
-    id: 'erd11',
-    code: 'ERD 11',
-    title: 'BILL SPLITTING',
-    entities: ['BillSplitGroup', 'BillSplitParticipant', 'Invoice', 'Account'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      BillSplitGroup: { x: 620, y: 260 },
-      BillSplitParticipant: { x: 1120, y: 260 },
-      Invoice: { x: 120, y: 260 },
-      Account: { x: 620, y: 620, compact: true },
-    },
-  },
-  {
-    id: 'erd12',
-    code: 'ERD 12',
-    title: 'COURT QR REQUESTS',
-    entities: ['Facility', 'Court', 'CourtQRCode', 'QRRequest'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Court: { x: 620, y: 260 },
-      Facility: { x: 120, y: 260 },
-      CourtQRCode: { x: 620, y: 600 },
-      QRRequest: { x: 1120, y: 260 },
-    },
-  },
-  {
-    id: 'erd13',
-    code: 'ERD 13',
-    title: 'STAFF SHIFT PLANNING',
-    entities: ['Account', 'Facility', 'Shift', 'ShiftAvailability'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Shift: { x: 620, y: 260 },
-      Account: { x: 120, y: 260 },
-      Facility: { x: 1120, y: 260 },
-      ShiftAvailability: { x: 620, y: 620 },
-    },
-  },
-  {
-    id: 'erd14',
-    code: 'ERD 14',
-    title: 'SHIFT CHANGES AND LEAVE',
-    entities: ['Shift', 'ShiftSwapRequest', 'LeaveRequest', 'Account'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Account: { x: 620, y: 400, compact: true },
-      Shift: { x: 620, y: 100, compact: true },
-      ShiftSwapRequest: { x: 160, y: 640 },
-      LeaveRequest: { x: 1080, y: 640 },
-    },
-  },
-  {
-    id: 'erd15',
-    code: 'ERD 15',
-    title: 'REVIEW AND REPUTATION',
-    entities: ['Booking', 'Account', 'Review', 'ReputationHistory'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Booking: { x: 120, y: 200 },
-      Account: { x: 120, y: 560 },
-      Review: { x: 900, y: 200 },
-      ReputationHistory: { x: 900, y: 560 },
-    },
-  },
-  {
-    id: 'erd16',
-    code: 'ERD 16',
-    title: 'MATCHMAKING',
-    entities: ['Booking', 'Sport', 'MatchPost', 'MatchParticipant'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      MatchPost: { x: 620, y: 320 },
-      Booking: { x: 120, y: 160 },
-      Sport: { x: 120, y: 520 },
-      MatchParticipant: { x: 1120, y: 320 },
-    },
-  },
-  {
-    id: 'erd17',
-    code: 'ERD 17',
-    title: 'TEAM STRUCTURE',
-    entities: ['Sport', 'Account', 'Team', 'TeamMember'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Team: { x: 620, y: 320 },
-      Sport: { x: 120, y: 320 },
-      Account: { x: 1120, y: 140 },
-      TeamMember: { x: 1120, y: 540 },
-    },
-  },
-  {
-    id: 'erd18',
-    code: 'ERD 18',
-    title: 'TEAM REQUESTS',
-    entities: ['Team', 'Account', 'TeamInvitation', 'TeamJoinRequest'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Team: { x: 620, y: 100, compact: true },
-      Account: { x: 620, y: 400, compact: true },
-      TeamInvitation: { x: 160, y: 640 },
-      TeamJoinRequest: { x: 1080, y: 640 },
-    },
-  },
-  {
-    id: 'erd19',
-    code: 'ERD 19',
-    title: 'SPORT SERVICE ORDERS',
-    entities: ['Facility', 'Account', 'SportService', 'ServiceOrder'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      SportService: { x: 620, y: 280 },
-      Facility: { x: 120, y: 280 },
-      ServiceOrder: { x: 1120, y: 280 },
-      Account: { x: 1120, y: 620 },
-    },
-  },
-  {
-    id: 'erd20',
-    code: 'ERD 20',
-    title: 'SERVICE MATERIALS',
-    entities: ['Facility', 'SportService', 'ServiceMaterial', 'ServiceOrder'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Facility: { x: 620, y: 100, compact: true },
-      SportService: { x: 140, y: 420 },
-      ServiceMaterial: { x: 620, y: 420 },
-      ServiceOrder: { x: 1100, y: 420 },
-    },
-  },
-  {
-    id: 'erd21',
-    code: 'ERD 21',
-    title: 'RACKET STRINGING DETAILS',
-    entities: ['SportService', 'ServiceOrder', 'RacketStringingConfig', 'RacketStringingDetail', 'ServiceMaterial'],
-    canvas: { w: 1920, h: 1080 },
-    layout: {
-      SportService: { x: 200, y: 160 },
-      ServiceOrder: { x: 800, y: 160 },
-      RacketStringingConfig: { x: 200, y: 560 },
-      RacketStringingDetail: { x: 800, y: 560 },
-      ServiceMaterial: { x: 1440, y: 400 },
-    },
-  },
-  {
-    id: 'erd22',
-    code: 'ERD 22',
-    title: 'NOTIFICATIONS AND AUDIT',
-    entities: ['Account', 'Facility', 'Notification', 'AuditLog'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      Account: { x: 120, y: 200, compact: true },
-      Facility: { x: 120, y: 560, compact: true },
-      Notification: { x: 900, y: 200 },
-      AuditLog: { x: 900, y: 560 },
-    },
-  },
-  {
-    id: 'erd23',
-    code: 'ERD 23',
-    title: 'TRASH RECOVERY',
-    entities: ['Account', 'TrashRecord', 'AuditLog'],
-    canvas: { w: 1600, h: 900 },
-    layout: {
-      TrashRecord: { x: 620, y: 320 },
-      Account: { x: 120, y: 320 },
-      AuditLog: { x: 1120, y: 320 },
-    },
-  },
-];
+  // -----------------------------------------------------------------
+  // 17 nhóm màn hình. Mỗi nhóm tối đa 3 bảng, canvas 16:9 (1600x900).
+  // layout: vị trí mặc định {x,y} góc trên-trái của từng card trong nhóm.
+  // -----------------------------------------------------------------
+  var CANVAS = { w: 1600, h: 900 };
 
-// Example enum values shown only as UI reference text (not schema rows).
-const ROLE_EXAMPLE_VALUES = ['ADMIN', 'MANAGER', 'STAFF', 'CUSTOMER'];
+  function layout2(a, b) {
+    var l = {};
+    l[a] = { x: 220, y: 300 };
+    l[b] = { x: 980, y: 300 };
+    return l;
+  }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { ERD_ENTITIES, ERD_VIEWS, ROLE_EXAMPLE_VALUES };
-}
+  function layout3(a, b, c) {
+    var l = {};
+    l[a] = { x: 90, y: 160 };
+    l[b] = { x: 660, y: 160 };
+    l[c] = { x: 1230, y: 160 };
+    return l;
+  }
+
+  var ERD_VIEWS = [
+    {
+      id: 'tai-khoan-phan-quyen',
+      code: '01',
+      title: 'Tài khoản và phân quyền',
+      entities: ['vai-tro', 'tai-khoan'],
+      canvas: CANVAS,
+      layout: layout2('vai-tro', 'tai-khoan')
+    },
+    {
+      id: 'co-so-mon-the-thao',
+      code: '02',
+      title: 'Cơ sở và môn thể thao',
+      entities: ['co-so', 'mon-the-thao'],
+      canvas: CANVAS,
+      layout: layout2('co-so', 'mon-the-thao')
+    },
+    {
+      id: 'loai-san-va-san',
+      code: '03',
+      title: 'Loại sân và sân',
+      entities: ['mon-the-thao', 'loai-san', 'san'],
+      canvas: CANVAS,
+      layout: layout3('mon-the-thao', 'loai-san', 'san')
+    },
+    {
+      id: 'dat-san',
+      code: '04',
+      title: 'Đặt sân',
+      entities: ['tai-khoan', 'san', 'lich-dat-san'],
+      canvas: CANVAS,
+      layout: layout3('tai-khoan', 'san', 'lich-dat-san')
+    },
+    {
+      id: 'giu-cho-tam-thoi',
+      code: '05',
+      title: 'Giữ chỗ tạm thời',
+      entities: ['tai-khoan', 'san', 'giu-cho-tam-thoi'],
+      canvas: CANVAS,
+      layout: layout3('tai-khoan', 'san', 'giu-cho-tam-thoi')
+    },
+    {
+      id: 'kho-san-pham-dich-vu',
+      code: '06',
+      title: 'Kho sản phẩm dịch vụ',
+      entities: ['co-so', 'danh-muc-san-pham', 'san-pham-dich-vu'],
+      canvas: CANVAS,
+      layout: layout3('co-so', 'danh-muc-san-pham', 'san-pham-dich-vu')
+    },
+    {
+      id: 'dich-vu-kem-lich-dat',
+      code: '07',
+      title: 'Dịch vụ kèm lịch đặt',
+      entities: ['lich-dat-san', 'san-pham-dich-vu', 'dich-vu-dat-san'],
+      canvas: CANVAS,
+      layout: layout3('lich-dat-san', 'san-pham-dich-vu', 'dich-vu-dat-san')
+    },
+    {
+      id: 'hoa-don',
+      code: '08',
+      title: 'Hóa đơn',
+      entities: ['lich-dat-san', 'hoa-don', 'chi-tiet-hoa-don'],
+      canvas: CANVAS,
+      layout: layout3('lich-dat-san', 'hoa-don', 'chi-tiet-hoa-don')
+    },
+    {
+      id: 'thanh-toan-payos',
+      code: '09',
+      title: 'Thanh toán PayOS',
+      entities: ['hoa-don', 'giao-dich-payos'],
+      canvas: CANVAS,
+      layout: layout2('hoa-don', 'giao-dich-payos')
+    },
+    {
+      id: 'ma-qr-tai-san',
+      code: '10',
+      title: 'Mã QR tại sân',
+      entities: ['san', 'ma-qr-san', 'yeu-cau-qr-san'],
+      canvas: CANVAS,
+      layout: layout3('san', 'ma-qr-san', 'yeu-cau-qr-san')
+    },
+    {
+      id: 'ca-lam-va-nghi-phep',
+      code: '11',
+      title: 'Ca làm và nghỉ phép',
+      entities: ['tai-khoan', 'ca-lam-viec', 'yeu-cau-nghi'],
+      canvas: CANVAS,
+      layout: layout3('tai-khoan', 'ca-lam-viec', 'yeu-cau-nghi')
+    },
+    {
+      id: 'khuyen-mai-va-hoan-tien',
+      code: '12',
+      title: 'Khuyến mãi và hoàn tiền',
+      entities: ['khuyen-mai', 'hoa-don', 'hoan-tien'],
+      canvas: CANVAS,
+      layout: layout3('khuyen-mai', 'hoa-don', 'hoan-tien')
+    },
+    {
+      id: 'danh-gia-va-diem-uy-tin',
+      code: '13',
+      title: 'Đánh giá và điểm uy tín',
+      entities: ['tai-khoan', 'danh-gia', 'lich-su-diem-uy-tin'],
+      canvas: CANVAS,
+      layout: layout3('tai-khoan', 'danh-gia', 'lich-su-diem-uy-tin')
+    },
+    {
+      id: 'ghep-keo',
+      code: '14',
+      title: 'Ghép kèo',
+      entities: ['tai-khoan', 'ghep-keo', 'thanh-vien-ghep-keo'],
+      canvas: CANVAS,
+      layout: layout3('tai-khoan', 'ghep-keo', 'thanh-vien-ghep-keo')
+    },
+    {
+      id: 'chia-tien-hoa-don',
+      code: '15',
+      title: 'Chia tiền hóa đơn',
+      entities: ['hoa-don', 'nhom-chia-tien', 'chi-tiet-chia-tien'],
+      canvas: CANVAS,
+      layout: layout3('hoa-don', 'nhom-chia-tien', 'chi-tiet-chia-tien')
+    },
+    {
+      id: 'thong-bao',
+      code: '16',
+      title: 'Thông báo',
+      entities: ['tai-khoan', 'thong-bao'],
+      canvas: CANVAS,
+      layout: layout2('tai-khoan', 'thong-bao')
+    },
+    {
+      id: 'kiem-toan-va-khoi-phuc',
+      code: '17',
+      title: 'Kiểm toán và khôi phục',
+      entities: ['tai-khoan', 'nhat-ky-he-thong', 'thung-rac'],
+      canvas: CANVAS,
+      layout: layout3('tai-khoan', 'nhat-ky-he-thong', 'thung-rac')
+    }
+  ];
+
+  global.ERD_ENTITIES = ERD_ENTITIES;
+  global.ERD_VIEWS = ERD_VIEWS;
+})(window);
