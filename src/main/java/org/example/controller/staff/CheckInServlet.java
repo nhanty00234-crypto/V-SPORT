@@ -396,6 +396,24 @@ public class CheckInServlet extends HttpServlet {
                 int datSanId = Integer.parseInt(datSanIdStr);
                 double discountAmount = Double.parseDouble(discountAmountStr);
 
+                // Chặn giảm trừ sớm cho khách đặt trước (FIXED_BOOKING): họ phải trả đủ khung giờ đã đặt
+                // vì sân đã được giữ chỗ cho họ. Chỉ walk-in mới được áp dụng giảm trừ trả sớm.
+                try (java.sql.Connection connCheck = org.example.util.DBUtil.getConnection();
+                     java.sql.PreparedStatement psCheck = connCheck.prepareStatement(
+                             "SELECT TimeMode FROM LichDatSan WHERE DatSanID = ?")) {
+                    psCheck.setInt(1, datSanId);
+                    try (java.sql.ResultSet rsCheck = psCheck.executeQuery()) {
+                        if (rsCheck.next()) {
+                            String timeMode = rsCheck.getNString("TimeMode");
+                            if ("FIXED_BOOKING".equals(timeMode)) {
+                                throw new CheckInException(
+                                        "Không thể áp dụng giảm trừ trả sân sớm cho khách đặt trước. " +
+                                        "Khách đặt trước phải thanh toán theo toàn bộ khung giờ đã đặt vì sân đã được giữ chỗ.");
+                            }
+                        }
+                    }
+                }
+
                 checkInDAO.applyEarlyCheckoutAdjustment(datSanId, discountAmount, reason, user.getAccountId(), user.getCoSoId());
                 
                 // Write Audit Log
@@ -1125,6 +1143,9 @@ public class CheckInServlet extends HttpServlet {
             long minutesOver = 0;
             boolean isEarly = false;
             long minutesEarly = 0;
+            // Khách đặt trước (FIXED_BOOKING): tính phí theo toàn bộ khung giờ đã đặt, không phụ thuộc
+            // thời điểm thực tế kết thúc. Khách vãng lai OPEN_ENDED: tính đến thời điểm hiện tại.
+            boolean isFixedBooking = "FIXED_BOOKING".equals(lich.getTimeMode());
 
             if ("OPEN_ENDED".equals(lich.getTimeMode())) {
                 if ("Đang sử dụng".equals(lich.getTrangThai())) {
@@ -1140,7 +1161,7 @@ public class CheckInServlet extends HttpServlet {
                     tongTienSan = (elapsedMins / 60.0) * donGiaGio;
                 }
             } else {
-                // FIXED_DURATION or FIXED_BOOKING or fallback
+                // FIXED_DURATION hoặc FIXED_BOOKING: luôn tính đến GioKetThuc đã đặt
                 if ("Đang sử dụng".equals(lich.getTrangThai()) && lich.getNgayDat() != null && lich.getGioKetThuc() != null) {
                     java.time.LocalDateTime plannedEnd = java.time.LocalDateTime.of(lich.getNgayDat(), lich.getGioKetThuc());
                     java.time.LocalDateTime now = java.time.LocalDateTime.now();
@@ -1150,7 +1171,9 @@ public class CheckInServlet extends HttpServlet {
                             long overMinutes = minutesOver - 10;
                             phuThuQuaGio = overMinutes * (donGiaGio / 60.0);
                         }
-                    } else if (now.isBefore(plannedEnd)) {
+                    } else if (now.isBefore(plannedEnd) && !isFixedBooking) {
+                        // Chỉ đánh dấu "trả sớm" cho walk-in FIXED_DURATION, KHÔNG cho khách đặt trước.
+                        // Khách đặt trước luôn trả theo khung giờ đã đặt - không có khái niệm "trả sớm".
                         isEarly = true;
                         minutesEarly = java.time.Duration.between(now, plannedEnd).toMinutes();
                     }
@@ -1161,8 +1184,9 @@ public class CheckInServlet extends HttpServlet {
             double finalTongTienSan = tongTienSan + phuThuQuaGio;
             double finalTongThanhToan = finalTongTienSan + tongTienDichVu;
 
+            // proposedEarlyDiscount chỉ áp dụng cho walk-in FIXED_DURATION, không áp dụng cho khách đặt trước
             double proposedEarlyDiscount = 0.0;
-            if (isEarly && minutesEarly > 0) {
+            if (isEarly && minutesEarly > 0 && !isFixedBooking) {
                 proposedEarlyDiscount = (minutesEarly / 60.0) * donGiaGio;
                 proposedEarlyDiscount = Math.round(proposedEarlyDiscount / 1000.0) * 1000.0;
                 if (proposedEarlyDiscount > finalTongTienSan) {
@@ -1236,6 +1260,7 @@ public class CheckInServlet extends HttpServlet {
                 data.put("gioKetThuc", lich.getGioKetThuc() != null ? lich.getGioKetThuc().toString().substring(0, 5) : "00:00");
             }
             data.put("timeMode", lich.getTimeMode());
+            data.put("isFixedBooking", isFixedBooking);
             data.put("isEarly", isEarly);
             data.put("minutesEarly", minutesEarly);
             data.put("earlyCheckoutDiscount", lich.getEarlyCheckoutDiscount() != null ? lich.getEarlyCheckoutDiscount().doubleValue() : 0.0);

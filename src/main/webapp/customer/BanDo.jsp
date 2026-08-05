@@ -84,8 +84,6 @@
         }
         .vsm-command > * { pointer-events: auto; }
         @media (min-width: 1024px) {
-            /* Desktop: search bar and sport chips share one horizontal row
-               (matches reference layout) instead of stacking in a narrow column. */
             .vsm-command { left: 20px; right: 82px; top: 20px; width: auto; flex-direction: row; align-items: center; gap: 16px; }
             .vsm-searchbar { width: 460px; flex: 0 0 460px; height: 50px; border-radius: 24px; }
             .vsm-chiprow { flex: 1 1 auto; min-width: 0; padding: 3px 2px; }
@@ -328,57 +326,37 @@
                 transition-delay: 0s;
             }
         }
-        .vsm-sheet-handle-wrap { padding: 10px 0 4px; display: flex; justify-content: center; flex-shrink: 0; cursor: grab; touch-action: none; }
-        @media (min-width: 1024px) { .vsm-sheet-handle-wrap { display: none; } }
+        .vsm-sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 4px 16px; flex-shrink: 0; }
+        .vsm-sheet-handle-wrap { flex: 1; display: flex; justify-content: center; cursor: grab; touch-action: none; }
+        @media (min-width: 1024px) {
+            .vsm-sheet-header { padding: 8px 8px 4px 8px; }
+            .vsm-sheet-handle-wrap { display: none; }
+        }
         .vsm-sheet-handle { width: 42px; height: 5px; border-radius: 9999px; background: #D8E0EA; }
+
         .vsm-sheet-close {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            z-index: 50;
-
-            width: 38px;
-            height: 38px;
-
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(11, 46, 89, 0.15);
+            color: var(--vsm-navy);
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            border: none;
-            border-radius: 50%;
-
-            background: rgba(255,255,255,.95);
-            backdrop-filter: blur(12px);
-
-            color: var(--vsm-navy);
-
-            cursor: pointer;
-
-            box-shadow:
-                0 8px 20px rgba(0,0,0,.12);
-
-            transition:
-                transform .25s ease,
-                background .25s ease,
-                box-shadow .25s ease;
+            transition: all .2s ease;
         }
-
-        .vsm-sheet-close:hover{
-            background:#fff;
-            transform:scale(1.08) rotate(90deg);
-            box-shadow:
-                0 12px 28px rgba(0,0,0,.18);
+        .vsm-sheet-close:hover {
+            background: #FFFFFF;
+            color: var(--vsm-danger);
+            transform: scale(1.1);
         }
+        .vsm-sheet-close svg { width: 18px; height: 18px; }
 
-        .vsm-sheet-close:active{
-            transform:scale(.95);
-        }
-
-        .vsm-sheet-close svg{
-            width:18px;
-            height:18px;
-        }
-        .vsm-sheet-scroll { overflow-y: auto; min-height: 0; flex: 1; }
+        .vsm-sheet-scroll { overflow-y: auto; min-height: 0; flex: 1; position: relative; }
         .vsm-sheet-hero { position: relative; width: 100%; height: 84px; background: var(--vsm-cyan-light); overflow: hidden; }
         .vsm-sheet-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .vsm-sheet-hero img[src$=".svg"] { object-fit: contain; padding: 14px; box-sizing: border-box; }
@@ -531,7 +509,7 @@
                 <c:forEach var="mon" items="${dsMon}">
                     <button type="button" class="vsm-chip" data-sport-id="${mon.monTheThaoID}" role="tab" aria-selected="false">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-                        ${mon.tenMon}
+                            ${mon.tenMon}
                     </button>
                 </c:forEach>
             </div>
@@ -592,10 +570,14 @@
 <!-- Detail bottom sheet -->
 <div id="vsmBackdrop" class="vsm-backdrop"></div>
 <section id="vsmSheet" class="vsm-sheet" role="dialog" aria-modal="true" aria-labelledby="vsmSheetTitle" aria-hidden="true">
-    <div class="vsm-sheet-handle-wrap" id="vsmSheetHandle"><span class="vsm-sheet-handle"></span></div>
-    <button type="button" id="vsmSheetClose" class="vsm-sheet-close" aria-label="Đóng">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-    </button>
+
+    <div class="vsm-sheet-header">
+        <div class="vsm-sheet-handle-wrap" id="vsmSheetHandle"><span class="vsm-sheet-handle"></span></div>
+        <button type="button" id="vsmSheetClose" class="vsm-sheet-close" aria-label="Đóng">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+    </div>
+
     <div class="vsm-sheet-scroll">
         <div class="vsm-sheet-hero">
             <img id="vsmSheetImg" src="" alt="" />
@@ -661,7 +643,7 @@
     <div class="vsm-sheet-handle-wrap" id="vsmListHandle"><span class="vsm-sheet-handle"></span></div>
     <div class="vsm-list-head">
         <h2 id="vsmListTitle" class="vsm-list-title">Danh sách cơ sở</h2>
-        <button type="button" id="vsmListClose" class="vsm-sheet-close" style="position:static;" aria-label="Đóng danh sách">
+        <button type="button" id="vsmListClose" class="vsm-sheet-close" style="position:static; width: 32px; height: 32px;" aria-label="Đóng danh sách">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
     </div>
@@ -670,677 +652,678 @@
 
 <div id="vsmToast" class="vsm-toast" role="status" aria-live="polite"></div>
 
-
-
 <script>
-(function () {
-    'use strict';
-    const CTX = "${ctx}";
-    const MAPTILER_KEY = "${maptilerApiKey != null ? maptilerApiKey : ''}";
-    const INITIAL_FACILITY_ID = "${not empty param.facilityId ? param.facilityId : ''}";
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    (function () {
+        'use strict';
+        const CTX = "${ctx}";
+        const MAPTILER_KEY = "${maptilerApiKey != null ? maptilerApiKey : ''}";
+        const INITIAL_FACILITY_ID = "${not empty param.facilityId ? param.facilityId : ''}";
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const DEFAULT_CENTER = [10.772561, 106.698021];
-    const DEFAULT_ZOOM = 12;
+        const DEFAULT_CENTER = [10.772561, 106.698021];
+        const DEFAULT_ZOOM = 12;
 
-    let map;
-    let markerLayer;         // L.layerGroup holding facility markers
-    let selfMarker = null;
-    let userLocation = null; // {lat, lon}
-    let currentSportId = '';
-    let currentRadiusKm = '';
-    let currentOpenNow = false;
-    let currentKeyword = '';
-    let facilitiesCache = []; // last successful fetch result
-    let markerById = new Map();
-    let focusedFacilityId = null;
-    let fetchAbort = null;
-    let searchDebounceTimer = null;
-    let usingOsmTiles = false;
+        let map;
+        let markerLayer;         // L.layerGroup holding facility markers
+        let selfMarker = null;
+        let userLocation = null; // {lat, lon}
+        let currentSportId = '';
+        let currentRadiusKm = '';
+        let currentOpenNow = false;
+        let currentKeyword = '';
+        let facilitiesCache = []; // last successful fetch result
+        let markerById = new Map();
+        let focusedFacilityId = null;
+        let fetchAbort = null;
+        let searchDebounceTimer = null;
+        let usingOsmTiles = false;
 
-    // ================= Map init =================
-    function initMap() {
-        map = L.map('vsmMap', { zoomControl: false, attributionControl: true });
-        map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
-        L.control.zoom({ position: 'bottomleft' }).addTo(map);
-        markerLayer = L.layerGroup().addTo(map);
+        // ================= Map init =================
+        function initMap() {
+            map = L.map('vsmMap', { zoomControl: false, attributionControl: true });
+            map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+            L.control.zoom({ position: 'bottomleft' }).addTo(map);
+            markerLayer = L.layerGroup().addTo(map);
 
-        addTileLayer(!!MAPTILER_KEY);
+            addTileLayer(!!MAPTILER_KEY);
 
-        map.on('click', () => {
-            closeSheet();
-        });
-
-        // Reveal map once first tiles start loading — never leave a blank white page.
-        setTimeout(() => document.getElementById('vsmLoadingVeil').classList.add('is-hidden'), 260);
-    }
-
-    function addTileLayer(preferMapTiler) {
-        if (window.vsmActiveTileLayer) {
-            map.removeLayer(window.vsmActiveTileLayer);
-        }
-        let url, attribution;
-        if (preferMapTiler && MAPTILER_KEY) {
-            url = 'https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=' + MAPTILER_KEY;
-            attribution = '&copy; <a href="https://www.maptiler.com/" target="_blank" rel="noopener">MapTiler</a> &copy; OpenStreetMap';
-            usingOsmTiles = false;
-        } else {
-            url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            attribution = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
-            usingOsmTiles = true;
-        }
-        const layer = L.tileLayer(url, { maxZoom: 19, attribution: attribution });
-        // Fallback to OSM automatically if MapTiler tiles fail (bad/missing key) —
-        // never leave a blank page just because a key is absent or invalid.
-        let tileErrorCount = 0;
-        layer.on('tileerror', function () {
-            if (usingOsmTiles) return;
-            tileErrorCount++;
-            if (tileErrorCount > 3) {
-                addTileLayer(false);
-            }
-        });
-        layer.addTo(map);
-        window.vsmActiveTileLayer = layer;
-    }
-
-    document.getElementById('vsmLayersBtn').addEventListener('click', function () {
-        addTileLayer(usingOsmTiles); // toggle: if currently OSM, try MapTiler (and vice versa)
-        showToast(usingOsmTiles ? 'Đã chuyển sang bản đồ OpenStreetMap' : 'Đã chuyển sang bản đồ MapTiler');
-    });
-
-    // ================= Toast =================
-    let toastTimer = null;
-    function showToast(msg) {
-        const el = document.getElementById('vsmToast');
-        el.textContent = msg;
-        el.classList.add('is-visible');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => el.classList.remove('is-visible'), 2600);
-    }
-
-    // ================= Fetch facilities =================
-    function buildUrl(extra) {
-        const params = new URLSearchParams();
-        if (currentSportId) params.set('sportId', currentSportId);
-        if (currentOpenNow) params.set('openNow', 'true');
-        if (currentKeyword) params.set('keyword', currentKeyword);
-        if (userLocation) {
-            params.set('lat', userLocation.lat);
-            params.set('lng', userLocation.lon);
-            if (currentRadiusKm) params.set('radiusKm', currentRadiusKm);
-        }
-        if (extra && extra.facilityId) params.set('facilityId', extra.facilityId);
-        return CTX + '/api/customer/facilities/map?' + params.toString();
-    }
-
-    function fetchFacilities(extra) {
-        if (fetchAbort) fetchAbort.abort();
-        fetchAbort = new AbortController();
-        const url = buildUrl(extra);
-
-        return fetch(url, { signal: fetchAbort.signal, headers: { 'Accept': 'application/json' } })
-            .then(function (r) {
-                return r.json().then(function (data) { return { ok: r.ok, status: r.status, data: data }; });
-            })
-            .then(function (res) {
-                // JSON contract: success -> flat array. Error -> object {success:false,...}.
-                if (!res.ok || !Array.isArray(res.data)) {
-                    const msg = (res.data && (res.data.message || res.data.error)) || 'Không thể tải dữ liệu bản đồ.';
-                    throw new Error(msg);
-                }
-                return res.data;
-            })
-            .catch(function (err) {
-                if (err && err.name === 'AbortError') return null;
-                console.error('Fetch facilities error:', err);
-                showToast('Không thể tải dữ liệu bản đồ. Vui lòng thử lại.');
-                return null;
+            map.on('click', () => {
+                closeSheet();
             });
-    }
 
-    function refreshFacilities(opts) {
-        opts = opts || {};
-        fetchFacilities().then(function (data) {
-            if (data === null) return; // aborted or errored (toast already shown)
-            facilitiesCache = data;
-            renderMarkers(data);
-            updateResultsPill(data.length);
-            toggleEmptyState(data.length === 0);
-            if (opts.fitBounds !== false && data.length > 0) {
-                fitToMarkers(data);
+            // Reveal map once first tiles start loading — never leave a blank white page.
+            setTimeout(() => document.getElementById('vsmLoadingVeil').classList.add('is-hidden'), 260);
+        }
+
+        function addTileLayer(preferMapTiler) {
+            if (window.vsmActiveTileLayer) {
+                map.removeLayer(window.vsmActiveTileLayer);
             }
-        });
-    }
-
-    let resultsPillTimer = null;
-    function updateResultsPill(count) {
-        const pill = document.getElementById('vsmResultsPill');
-        pill.textContent = count === 0 ? 'Không có cơ sở nào' : ('Tìm thấy ' + count + ' cơ sở');
-        pill.classList.add('is-visible');
-        clearTimeout(resultsPillTimer);
-        resultsPillTimer = setTimeout(() => pill.classList.remove('is-visible'), 2200);
-    }
-
-    function toggleEmptyState(show) {
-        document.getElementById('vsmEmptyState').classList.toggle('is-visible', !!show);
-    }
-
-    // ================= Markers =================
-    const SPORT_ICON_PATH = '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>';
-
-    function buildMarkerIcon(fac, isFocused) {
-        const isOpen = !!fac.moCuaHienTai;
-        const cls = 'vsm-marker' + (isOpen ? '' : ' is-closed') + (isFocused ? ' is-focused' : '');
-        const html = '<div class="' + cls + '">' +
-            '<div class="vsm-marker-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + SPORT_ICON_PATH + '</svg></div>' +
-            '<span class="vsm-marker-dot" aria-hidden="true"></span>' +
-            '</div>';
-        return L.divIcon({ className: '', html: html, iconSize: [38, 38], iconAnchor: [19, 34], popupAnchor: [0, -30] });
-    }
-
-    function renderMarkers(list) {
-        markerLayer.clearLayers();
-        markerById = new Map();
-
-        list.forEach(function (fac) {
-            if (typeof fac.viDo !== 'number' || typeof fac.kinhDo !== 'number') return;
-            const marker = L.marker([fac.viDo, fac.kinhDo], {
-                icon: buildMarkerIcon(fac, fac.coSoId === focusedFacilityId),
-                keyboard: true,
-                alt: fac.tenCoSo || ''
+            let url, attribution;
+            if (preferMapTiler && MAPTILER_KEY) {
+                url = 'https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=' + MAPTILER_KEY;
+                attribution = '&copy; <a href="https://www.maptiler.com/" target="_blank" rel="noopener">MapTiler</a> &copy; OpenStreetMap';
+                usingOsmTiles = false;
+            } else {
+                url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                attribution = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+                usingOsmTiles = true;
+            }
+            const layer = L.tileLayer(url, { maxZoom: 19, attribution: attribution });
+            let tileErrorCount = 0;
+            layer.on('tileerror', function () {
+                if (usingOsmTiles) return;
+                tileErrorCount++;
+                if (tileErrorCount > 3) {
+                    addTileLayer(false);
+                }
             });
-           marker.on('click', function () {
-               openDetailSheet(fac);
-           });
-            marker.addTo(markerLayer);
-            markerById.set(fac.coSoId, { marker: marker, fac: fac });
+            layer.addTo(map);
+            window.vsmActiveTileLayer = layer;
+        }
+
+        document.getElementById('vsmLayersBtn').addEventListener('click', function () {
+            addTileLayer(usingOsmTiles);
+            showToast(usingOsmTiles ? 'Đã chuyển sang bản đồ OpenStreetMap' : 'Đã chuyển sang bản đồ MapTiler');
         });
-    }
 
-    function focusMarker(coSoId, opts) {
-        opts = opts || {};
-        focusedFacilityId = coSoId;
-        markerById.forEach(function (entry, id) {
-            entry.marker.setIcon(buildMarkerIcon(entry.fac, id === coSoId));
-        });
-        const entry = markerById.get(coSoId);
-        if (entry && opts.pan) {
-            // Pan so the marker stays clear of the bottom sheet (sheet covers
-            // bottom ~78dvh on mobile, left column on desktop).
-            const isDesktop = window.innerWidth >= 1024;
-            const offsetY = isDesktop ? 0 : -140;
-            const offsetX = isDesktop ? -160 : 0;
-            const targetPoint = map.project(entry.marker.getLatLng(), map.getZoom()).add([offsetX, offsetY]);
-            const targetLatLng = map.unproject(targetPoint, map.getZoom());
-            map.setView(targetLatLng, Math.max(map.getZoom(), 15), { animate: !reduceMotion });
+        // ================= Toast =================
+        let toastTimer = null;
+        function showToast(msg) {
+            const el = document.getElementById('vsmToast');
+            el.textContent = msg;
+            el.classList.add('is-visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('is-visible'), 2600);
         }
-    }
 
-    function fitToMarkers(list) {
-        const pts = list.filter(function (f) { return typeof f.viDo === 'number' && typeof f.kinhDo === 'number'; })
-            .map(function (f) { return [f.viDo, f.kinhDo]; });
-        if (userLocation) pts.push([userLocation.lat, userLocation.lon]);
-        if (!pts.length) return;
-        if (pts.length === 1) {
-            map.setView(pts[0], 15, { animate: !reduceMotion });
-            return;
+        // ================= Fetch facilities =================
+        function buildUrl(extra) {
+            const params = new URLSearchParams();
+            if (currentSportId) params.set('sportId', currentSportId);
+            if (currentOpenNow) params.set('openNow', 'true');
+            if (currentKeyword) params.set('keyword', currentKeyword);
+            if (userLocation) {
+                params.set('lat', userLocation.lat);
+                params.set('lng', userLocation.lon);
+                if (currentRadiusKm) params.set('radiusKm', currentRadiusKm);
+            }
+            if (extra && extra.facilityId) params.set('facilityId', extra.facilityId);
+            return CTX + '/api/customer/facilities/map?' + params.toString();
         }
-        map.fitBounds(L.latLngBounds(pts), { padding: [64, 64], maxZoom: 16, animate: !reduceMotion });
-    }
 
-    // ================= Search =================
-    const searchInput = document.getElementById('vsmSearchInput');
-    const searchClear = document.getElementById('vsmSearchClear');
+        function fetchFacilities(extra) {
+            if (fetchAbort) fetchAbort.abort();
+            fetchAbort = new AbortController();
+            const url = buildUrl(extra);
 
-    function runSearch() {
-        currentKeyword = searchInput.value.trim();
-        searchClear.classList.toggle('is-visible', currentKeyword.length > 0);
-        refreshFacilities();
-    }
-    searchInput.addEventListener('input', function () {
-        searchClear.classList.toggle('is-visible', searchInput.value.trim().length > 0);
-        clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(runSearch, 400);
-    });
-    searchInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            clearTimeout(searchDebounceTimer);
-            runSearch();
+            return fetch(url, { signal: fetchAbort.signal, headers: { 'Accept': 'application/json' } })
+                .then(function (r) {
+                    return r.json().then(function (data) { return { ok: r.ok, status: r.status, data: data }; });
+                })
+                .then(function (res) {
+                    if (!res.ok || !Array.isArray(res.data)) {
+                        const msg = (res.data && (res.data.message || res.data.error)) || 'Không thể tải dữ liệu bản đồ.';
+                        throw new Error(msg);
+                    }
+                    return res.data;
+                })
+                .catch(function (err) {
+                    if (err && err.name === 'AbortError') return null;
+                    console.error('Fetch facilities error:', err);
+                    showToast('Không thể tải dữ liệu bản đồ. Vui lòng thử lại.');
+                    return null;
+                });
         }
-    });
-    document.querySelector('.vsm-search-btn').addEventListener('click', function () {
-        clearTimeout(searchDebounceTimer);
-        runSearch();
-    });
-    searchClear.addEventListener('click', function () {
-        searchInput.value = '';
-        searchClear.classList.remove('is-visible');
-        currentKeyword = '';
-        refreshFacilities();
-        searchInput.focus();
-    });
 
-    // ================= Sport chips =================
-    document.getElementById('vsmChipRow').addEventListener('click', function (e) {
-        const chip = e.target.closest('.vsm-chip');
-        if (!chip) return;
-        document.querySelectorAll('#vsmChipRow .vsm-chip').forEach(function (c) {
-            c.classList.remove('is-active');
-            c.setAttribute('aria-selected', 'false');
-        });
-        chip.classList.add('is-active');
-        chip.setAttribute('aria-selected', 'true');
-        currentSportId = chip.getAttribute('data-sport-id') || '';
-        refreshFacilities();
-    });
-
-    // ================= Advanced filter panel =================
-    const filterToggle = document.getElementById('vsmFilterToggle');
-    const filterPanel = document.getElementById('vsmFilterPanel');
-    let filterOpen = false;
-    function setFilterOpen(open) {
-        filterOpen = open;
-        filterPanel.classList.toggle('is-open', open);
-        filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    }
-    filterToggle.addEventListener('click', function () { setFilterOpen(!filterOpen); });
-    document.addEventListener('click', function (e) {
-        if (!filterOpen) return;
-        if (filterPanel.contains(e.target) || filterToggle.contains(e.target)) return;
-        setFilterOpen(false);
-    });
-
-    document.getElementById('vsmRadiusGrid').addEventListener('click', function (e) {
-        const opt = e.target.closest('.vsm-radius-opt');
-        if (!opt) return;
-        document.querySelectorAll('.vsm-radius-opt').forEach(function (o) { o.classList.remove('is-active'); });
-        opt.classList.add('is-active');
-    });
-    document.querySelector('.vsm-radius-opt[data-radius=""]').classList.add('is-active');
-
-    document.getElementById('vsmFilterApply').addEventListener('click', function () {
-        const activeRadius = document.querySelector('.vsm-radius-opt.is-active');
-        currentRadiusKm = activeRadius ? activeRadius.getAttribute('data-radius') : '';
-        currentOpenNow = document.getElementById('vsmOpenNowCheck').checked;
-        setFilterOpen(false);
-        if (currentRadiusKm && !userLocation) {
-            showToast('Hãy bật định vị (GPS) để lọc theo bán kính.');
-        }
-        refreshFacilities();
-    });
-    document.getElementById('vsmFilterReset').addEventListener('click', resetAllFilters);
-    document.getElementById('vsmEmptyReset').addEventListener('click', resetAllFilters);
-
-    function resetAllFilters() {
-        currentSportId = ''; currentRadiusKm = ''; currentOpenNow = false; currentKeyword = '';
-        searchInput.value = ''; searchClear.classList.remove('is-visible');
-        document.querySelectorAll('#vsmChipRow .vsm-chip').forEach(function (c, i) {
-            c.classList.toggle('is-active', i === 0);
-            c.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-        });
-        document.querySelectorAll('.vsm-radius-opt').forEach(function (o) {
-            o.classList.toggle('is-active', o.getAttribute('data-radius') === '');
-        });
-        document.getElementById('vsmOpenNowCheck').checked = false;
-        setFilterOpen(false);
-        refreshFacilities();
-    }
-
-    // ================= GPS =================
-    const gpsBtn = document.getElementById('vsmGpsBtn');
-    function setGpsLoading(loading) {
-        gpsBtn.innerHTML = loading
-            ? '<span class="vsm-spinner-ring"></span>'
-            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/></svg>';
-    }
-    gpsBtn.addEventListener('click', function () {
-        if (userLocation) {
-            userLocation = null;
-            gpsBtn.classList.remove('is-active');
-            if (selfMarker) { map.removeLayer(selfMarker); selfMarker = null; }
-            refreshFacilities();
-            return;
-        }
-        if (!navigator.geolocation) {
-            showToast('Trình duyệt không hỗ trợ định vị GPS.');
-            return;
-        }
-        setGpsLoading(true);
-        navigator.geolocation.getCurrentPosition(
-            function (pos) {
-                setGpsLoading(false);
-                gpsBtn.classList.add('is-active');
-                userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-                placeSelfMarker(userLocation.lat, userLocation.lon);
-                map.setView([userLocation.lat, userLocation.lon], 14, { animate: !reduceMotion });
-                refreshFacilities({ fitBounds: false });
-            },
-            function (err) {
-                setGpsLoading(false);
-                if (err && err.code === err.PERMISSION_DENIED) {
-                    showToast('Bạn đã từ chối quyền định vị. Bản đồ vẫn hoạt động bình thường.');
-                } else if (err && err.code === err.TIMEOUT) {
-                    showToast('Định vị quá thời gian chờ. Vui lòng thử lại.');
-                } else {
-                    showToast('Không thể lấy vị trí của bạn. Vui lòng thử lại.');
+        function refreshFacilities(opts) {
+            opts = opts || {};
+            fetchFacilities().then(function (data) {
+                if (data === null) return;
+                facilitiesCache = data;
+                renderMarkers(data);
+                updateResultsPill(data.length);
+                toggleEmptyState(data.length === 0);
+                if (opts.fitBounds !== false && data.length > 0) {
+                    fitToMarkers(data);
                 }
-            },
-            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-        );
-    });
-
-    function placeSelfMarker(lat, lon) {
-        const html = '<div class="vsm-self-marker" aria-hidden="true"></div>';
-        const icon = L.divIcon({ className: '', html: html, iconSize: [22, 22], iconAnchor: [11, 11] });
-        if (selfMarker) {
-            selfMarker.setLatLng([lat, lon]);
-        } else {
-            selfMarker = L.marker([lat, lon], { icon: icon, keyboard: false, zIndexOffset: -100, alt: 'Vị trí của bạn' }).addTo(map);
-        }
-    }
-
-    // ================= Detail sheet =================
-    const sheet = document.getElementById('vsmSheet');
-    const backdrop = document.getElementById('vsmBackdrop');
-    const listSheet = document.getElementById('vsmListSheet');
-    let sheetOpen = false;
-    let listSheetOpen = false;
-    let sheetReturnFocus = null;
-
-    function fmtVnd(n) {
-        if (typeof n !== 'number' || !isFinite(n) || n <= 0) return null;
-        return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + 'đ/giờ';
-    }
-
-    function openDetailSheet(fac) {
-        if (listSheetOpen) closeListSheet();
-        sheetReturnFocus = document.activeElement;
-
-        document.getElementById('vsmSheetTitle').textContent = fac.tenCoSo || '';
-        document.getElementById('vsmSheetAddr').textContent = fac.diaChi || fac.address || 'Chưa cập nhật địa chỉ';
-
-        const distRow = document.getElementById('vsmSheetDistanceRow');
-        if (typeof fac.distanceKm === 'number') {
-            distRow.hidden = false;
-            document.getElementById('vsmSheetDistance').textContent = fac.distanceKm.toFixed(1) + ' km từ vị trí của bạn';
-        } else {
-            distRow.hidden = true;
+            });
         }
 
-        const gioMo = fac.gioMoCua || '--:--';
-        const gioDong = fac.gioDongCua || '--:--';
-        document.getElementById('vsmSheetHours').textContent = gioMo + ' - ' + gioDong;
-
-        const phoneRow = document.getElementById('vsmSheetPhoneRow');
-        if (fac.soDienThoai) {
-            phoneRow.hidden = false;
-            document.getElementById('vsmSheetPhone').textContent = fac.soDienThoai;
-        } else {
-            phoneRow.hidden = true;
+        let resultsPillTimer = null;
+        function updateResultsPill(count) {
+            const pill = document.getElementById('vsmResultsPill');
+            pill.textContent = count === 0 ? 'Không có cơ sở nào' : ('Tìm thấy ' + count + ' cơ sở');
+            pill.classList.add('is-visible');
+            clearTimeout(resultsPillTimer);
+            resultsPillTimer = setTimeout(() => pill.classList.remove('is-visible'), 2200);
         }
 
-        const statusEl = document.getElementById('vsmSheetStatus');
-        const statusText = document.getElementById('vsmSheetStatusText');
-        const isOpen = !!fac.moCuaHienTai;
-        statusEl.classList.toggle('is-closed', !isOpen);
-        statusText.textContent = isOpen ? 'Đang mở' : 'Đã đóng';
-
-        const sportsEl = document.getElementById('vsmSheetSports');
-        sportsEl.innerHTML = '';
-        (Array.isArray(fac.sports) ? fac.sports : []).forEach(function (s) {
-            const chip = document.createElement('span');
-            chip.className = 'vsm-sheet-chip';
-            chip.textContent = s;
-            sportsEl.appendChild(chip);
-        });
-
-        const price = fmtVnd(fac.minPrice);
-        document.getElementById('vsmSheetPrice').textContent = price || 'Liên hệ';
-        document.getElementById('vsmSheetCourts').textContent = (fac.readyCourtCount || 0) + ' sân sẵn sàng';
-
-        const img = document.getElementById('vsmSheetImg');
-        img.onerror = function () { this.onerror = null; this.src = CTX + '/assets/images/vsport-fallback.svg'; };
-        img.src = fac.hinhAnh || (CTX + '/assets/images/vsport-fallback.svg');
-        img.alt = fac.tenCoSo || '';
-
-        document.getElementById('vsmCtaBook').href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(fac.coSoId);
-        document.getElementById('vsmCtaView').href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(fac.coSoId);
-
-        const callBtn = document.getElementById('vsmCtaCall');
-        if (fac.soDienThoai) {
-            callBtn.href = 'tel:' + String(fac.soDienThoai).replace(/[^+\d]/g, '');
-            callBtn.removeAttribute('aria-disabled');
-            callBtn.style.pointerEvents = '';
-            callBtn.style.opacity = '';
-        } else {
-            callBtn.href = '#';
-            callBtn.setAttribute('aria-disabled', 'true');
-            callBtn.style.pointerEvents = 'none';
-            callBtn.style.opacity = '.5';
+        function toggleEmptyState(show) {
+            document.getElementById('vsmEmptyState').classList.toggle('is-visible', !!show);
         }
 
-        const dirBtn = document.getElementById('vsmCtaDirections');
-        if (typeof fac.viDo === 'number' && typeof fac.kinhDo === 'number') {
-            dirBtn.href = 'https://www.google.com/maps/dir/?api=1&destination=' + fac.viDo + ',' + fac.kinhDo;
-            dirBtn.removeAttribute('aria-disabled');
-            dirBtn.style.pointerEvents = '';
-            dirBtn.style.opacity = '';
-        } else {
-            dirBtn.href = '#';
-            dirBtn.setAttribute('aria-disabled', 'true');
-            dirBtn.style.pointerEvents = 'none';
-            dirBtn.style.opacity = '.5';
+        // ================= Markers =================
+        const SPORT_ICON_PATH = '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>';
+
+        function buildMarkerIcon(fac, isFocused) {
+            const isOpen = !!fac.moCuaHienTai;
+            const cls = 'vsm-marker' + (isOpen ? '' : ' is-closed') + (isFocused ? ' is-focused' : '');
+            const html = '<div class="' + cls + '">' +
+                '<div class="vsm-marker-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + SPORT_ICON_PATH + '</svg></div>' +
+                '<span class="vsm-marker-dot" aria-hidden="true"></span>' +
+                '</div>';
+            return L.divIcon({ className: '', html: html, iconSize: [38, 38], iconAnchor: [19, 34], popupAnchor: [0, -30] });
         }
 
-        sheet.classList.add('is-open');
-        sheet.setAttribute('aria-hidden', 'false');
-        backdrop.classList.add('is-open');
-        sheetOpen = true;
-        lockScroll();
-        document.getElementById('vsmSheetClose').focus();
-    }
+        function renderMarkers(list) {
+            markerLayer.clearLayers();
+            markerById = new Map();
 
-    function closeSheet() {
-        if (!sheetOpen) return;
-        sheetOpen = false;
-        sheet.classList.remove('is-open');
-        sheet.setAttribute('aria-hidden', 'true');
-        if (!listSheetOpen) backdrop.classList.remove('is-open');
-        unlockScroll();
-        if (sheetReturnFocus && document.contains(sheetReturnFocus)) sheetReturnFocus.focus();
-        sheetReturnFocus = null;
-    }
-    document.getElementById('vsmSheetClose').addEventListener('click', closeSheet);
-    document.getElementById('vsmSheetHandle').addEventListener('click', closeSheet);
-    backdrop.addEventListener('click', function () { closeSheet(); closeListSheet(); });
-    sheet.addEventListener('keydown', function (e) { trapTab(sheet, e); });
-
-    // ================= List sheet =================
-    function openListSheet() {
-        if (sheetOpen) closeSheet();
-        sheetReturnFocus = document.activeElement;
-        const scroll = document.getElementById('vsmListScroll');
-        scroll.innerHTML = '';
-
-        const items = facilitiesCache.slice(0, 30);
-        if (!items.length) {
-            const empty = document.createElement('p');
-            empty.style.cssText = 'padding:24px 8px;text-align:center;color:var(--vsm-text-secondary);font-size:13.5px;';
-            empty.textContent = 'Không có cơ sở nào trong khu vực hiện tại.';
-            scroll.appendChild(empty);
-        } else {
-            items.forEach(function (fac) {
-                const card = document.createElement('div');
-                card.className = 'vsm-list-card';
-                card.setAttribute('role', 'button');
-                card.setAttribute('tabindex', '0');
-                card.setAttribute('aria-label', 'Xem ' + (fac.tenCoSo || '') + ' trên bản đồ');
-
-                const img = document.createElement('img');
-                img.className = 'vsm-list-card-img';
-                img.loading = 'lazy';
-                img.alt = '';
-                img.src = fac.hinhAnh || (CTX + '/assets/images/vsport-fallback.svg');
-                img.onerror = function () { this.onerror = null; this.src = CTX + '/assets/images/vsport-fallback.svg'; };
-                card.appendChild(img);
-
-                const info = document.createElement('div');
-                info.style.cssText = 'min-width:0;flex:1;';
-                const name = document.createElement('div');
-                name.className = 'vsm-list-card-name';
-                name.textContent = fac.tenCoSo || '';
-                info.appendChild(name);
-                const addr = document.createElement('div');
-                addr.className = 'vsm-list-card-addr';
-                addr.textContent = fac.diaChi || fac.address || '';
-                info.appendChild(addr);
-
-                const meta = document.createElement('div');
-                meta.className = 'vsm-list-card-meta';
-                if (typeof fac.distanceKm === 'number') {
-                    const dist = document.createElement('span');
-                    dist.className = 'vsm-list-card-badge dist';
-                    dist.textContent = fac.distanceKm.toFixed(1) + ' km';
-                    meta.appendChild(dist);
-                }
-                const hours = document.createElement('span');
-                hours.className = 'vsm-list-card-badge dist';
-                hours.textContent = (fac.gioMoCua || '--:--') + '-' + (fac.gioDongCua || '--:--');
-                meta.appendChild(hours);
-                const price = fmtVnd(fac.minPrice);
-                if (price) {
-                    const priceBadge = document.createElement('span');
-                    priceBadge.className = 'vsm-list-card-badge price';
-                    priceBadge.textContent = price;
-                    meta.appendChild(priceBadge);
-                }
-                info.appendChild(meta);
-                card.appendChild(info);
-
-                function activate() {
-                    closeListSheet();
+            list.forEach(function (fac) {
+                if (typeof fac.viDo !== 'number' || typeof fac.kinhDo !== 'number') return;
+                const marker = L.marker([fac.viDo, fac.kinhDo], {
+                    icon: buildMarkerIcon(fac, fac.coSoId === focusedFacilityId),
+                    keyboard: true,
+                    alt: fac.tenCoSo || ''
+                });
+                marker.on('click', function () {
                     focusMarker(fac.coSoId, { pan: true });
                     openDetailSheet(fac);
-                }
-                card.addEventListener('click', activate);
-                card.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
                 });
-                scroll.appendChild(card);
+                marker.addTo(markerLayer);
+                markerById.set(fac.coSoId, { marker: marker, fac: fac });
             });
         }
 
-        listSheet.classList.add('is-open');
-        listSheet.setAttribute('aria-hidden', 'false');
-        backdrop.classList.add('is-open');
-        listSheetOpen = true;
-        lockScroll();
-        document.getElementById('vsmListClose').focus();
-    }
+        // FIXED: Sửa lỗi tính toán offset khiến bản đồ bị văng ra xa
+        function focusMarker(coSoId, opts) {
+            opts = opts || {};
+            focusedFacilityId = coSoId;
+            markerById.forEach(function (entry, id) {
+                entry.marker.setIcon(buildMarkerIcon(entry.fac, id === coSoId));
+            });
+            const entry = markerById.get(coSoId);
+            if (entry && opts.pan) {
+                const isDesktop = window.innerWidth >= 1024;
 
-    function closeListSheet() {
-        if (!listSheetOpen) return;
-        listSheetOpen = false;
-        listSheet.classList.remove('is-open');
-        listSheet.setAttribute('aria-hidden', 'true');
-        if (!sheetOpen) backdrop.classList.remove('is-open');
-        unlockScroll();
-        if (sheetReturnFocus && document.contains(sheetReturnFocus)) sheetReturnFocus.focus();
-        sheetReturnFocus = null;
-    }
-    document.getElementById('vsmListBtn').addEventListener('click', openListSheet);
-    document.getElementById('vsmListClose').addEventListener('click', closeListSheet);
-    document.getElementById('vsmListHandle').addEventListener('click', closeListSheet);
-    listSheet.addEventListener('keydown', function (e) { trapTab(listSheet, e); });
+                // Mức zoom mục tiêu mà bản đồ sẽ đến
+                const targetZoom = Math.max(map.getZoom(), 15);
+                const offsetY = isDesktop ? 0 : -140;
+                const offsetX = isDesktop ? -160 : 0;
 
-    // ================= Shared sheet helpers =================
-    let scrollLocks = 0;
-    function lockScroll() { scrollLocks++; document.body.style.overflow = 'hidden'; }
-    function unlockScroll() { scrollLocks = Math.max(0, scrollLocks - 1); if (!scrollLocks) document.body.style.overflow = ''; }
+                // Sử dụng targetZoom thay vì map.getZoom() để tính toán chính xác
+                const targetPoint = map.project(entry.marker.getLatLng(), targetZoom).add([offsetX, offsetY]);
+                const targetLatLng = map.unproject(targetPoint, targetZoom);
 
-    function focusables(container) {
-        return Array.from(container.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'))
-            .filter(function (el) { return el.offsetParent !== null; });
-    }
-    function trapTab(container, e) {
-        if (e.key === 'Escape') { closeSheet(); closeListSheet(); return; }
-        if (e.key !== 'Tab') return;
-        const list = focusables(container);
-        if (!list.length) return;
-        const first = list[0], last = list[list.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    }
-    document.addEventListener('keydown', function (e) {
-        if (e.key !== 'Escape') return;
-        if (sheetOpen) closeSheet();
-        else if (listSheetOpen) closeListSheet();
-        else if (filterOpen) setFilterOpen(false);
-    });
-
-    // Drag-down to close on mobile (both sheets share the pattern).
-    (function initDrag(handleId, sheetEl, closeFn) {
-        [['vsmSheetHandle', sheet, closeSheet], ['vsmListHandle', listSheet, closeListSheet]].forEach(function (cfg) {
-            const handle = document.getElementById(cfg[0]);
-            const targetSheet = cfg[1];
-            const close = cfg[2];
-            let startY = null, delta = 0, dragging = false;
-            function onStart(e) { dragging = true; startY = (e.touches ? e.touches[0] : e).clientY; delta = 0; targetSheet.style.transition = 'none'; }
-            function onMove(e) {
-                if (!dragging || startY == null) return;
-                const y = (e.touches ? e.touches[0] : e).clientY;
-                delta = Math.max(0, y - startY);
-                targetSheet.style.transform = 'translateY(' + delta + 'px)';
+                // Dùng map.flyTo để mang lại trải nghiệm bay tới marker siêu mượt mà
+                map.flyTo(targetLatLng, targetZoom, { animate: !reduceMotion, duration: 0.6 });
             }
-            function onEnd() {
-                if (!dragging) return;
-                dragging = false;
-                targetSheet.style.transition = '';
-                if (delta > 110) { close(); } else { targetSheet.style.transform = ''; }
-                startY = null;
-            }
-            handle.addEventListener('touchstart', onStart, { passive: true });
-            handle.addEventListener('touchmove', onMove, { passive: true });
-            handle.addEventListener('touchend', onEnd);
-            handle.addEventListener('mousedown', function (e) { onStart(e); e.preventDefault(); });
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onEnd);
-        });
-    })();
-
-    // ================= facilityId deep link =================
-    function loadInitialFacility() {
-        if (!INITIAL_FACILITY_ID) {
-            refreshFacilities();
-            return;
         }
-        fetchFacilities({ facilityId: INITIAL_FACILITY_ID }).then(function (data) {
-            if (data === null) { refreshFacilities(); return; }
-            if (!data.length) {
-                showToast('Không tìm thấy cơ sở hoặc cơ sở chưa cập nhật vị trí.');
+
+        function fitToMarkers(list) {
+            const pts = list.filter(function (f) { return typeof f.viDo === 'number' && typeof f.kinhDo === 'number'; })
+                .map(function (f) { return [f.viDo, f.kinhDo]; });
+            if (userLocation) pts.push([userLocation.lat, userLocation.lon]);
+            if (!pts.length) return;
+            if (pts.length === 1) {
+                map.setView(pts[0], 15, { animate: !reduceMotion });
+                return;
+            }
+            map.fitBounds(L.latLngBounds(pts), { padding: [64, 64], maxZoom: 16, animate: !reduceMotion });
+        }
+
+        // ================= Search =================
+        const searchInput = document.getElementById('vsmSearchInput');
+        const searchClear = document.getElementById('vsmSearchClear');
+
+        function runSearch() {
+            currentKeyword = searchInput.value.trim();
+            searchClear.classList.toggle('is-visible', currentKeyword.length > 0);
+            refreshFacilities();
+        }
+        searchInput.addEventListener('input', function () {
+            searchClear.classList.toggle('is-visible', searchInput.value.trim().length > 0);
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(runSearch, 400);
+        });
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                runSearch();
+            }
+        });
+        document.querySelector('.vsm-search-btn').addEventListener('click', function () {
+            clearTimeout(searchDebounceTimer);
+            runSearch();
+        });
+        searchClear.addEventListener('click', function () {
+            searchInput.value = '';
+            searchClear.classList.remove('is-visible');
+            currentKeyword = '';
+            refreshFacilities();
+            searchInput.focus();
+        });
+
+        // ================= Sport chips =================
+        document.getElementById('vsmChipRow').addEventListener('click', function (e) {
+            const chip = e.target.closest('.vsm-chip');
+            if (!chip) return;
+            document.querySelectorAll('#vsmChipRow .vsm-chip').forEach(function (c) {
+                c.classList.remove('is-active');
+                c.setAttribute('aria-selected', 'false');
+            });
+            chip.classList.add('is-active');
+            chip.setAttribute('aria-selected', 'true');
+            currentSportId = chip.getAttribute('data-sport-id') || '';
+            refreshFacilities();
+        });
+
+        // ================= Advanced filter panel =================
+        const filterToggle = document.getElementById('vsmFilterToggle');
+        const filterPanel = document.getElementById('vsmFilterPanel');
+        let filterOpen = false;
+        function setFilterOpen(open) {
+            filterOpen = open;
+            filterPanel.classList.toggle('is-open', open);
+            filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        filterToggle.addEventListener('click', function () { setFilterOpen(!filterOpen); });
+        document.addEventListener('click', function (e) {
+            if (!filterOpen) return;
+            if (filterPanel.contains(e.target) || filterToggle.contains(e.target)) return;
+            setFilterOpen(false);
+        });
+
+        document.getElementById('vsmRadiusGrid').addEventListener('click', function (e) {
+            const opt = e.target.closest('.vsm-radius-opt');
+            if (!opt) return;
+            document.querySelectorAll('.vsm-radius-opt').forEach(function (o) { o.classList.remove('is-active'); });
+            opt.classList.add('is-active');
+        });
+        document.querySelector('.vsm-radius-opt[data-radius=""]').classList.add('is-active');
+
+        document.getElementById('vsmFilterApply').addEventListener('click', function () {
+            const activeRadius = document.querySelector('.vsm-radius-opt.is-active');
+            currentRadiusKm = activeRadius ? activeRadius.getAttribute('data-radius') : '';
+            currentOpenNow = document.getElementById('vsmOpenNowCheck').checked;
+            setFilterOpen(false);
+            if (currentRadiusKm && !userLocation) {
+                showToast('Hãy bật định vị (GPS) để lọc theo bán kính.');
+            }
+            refreshFacilities();
+        });
+        document.getElementById('vsmFilterReset').addEventListener('click', resetAllFilters);
+        document.getElementById('vsmEmptyReset').addEventListener('click', resetAllFilters);
+
+        function resetAllFilters() {
+            currentSportId = ''; currentRadiusKm = ''; currentOpenNow = false; currentKeyword = '';
+            searchInput.value = ''; searchClear.classList.remove('is-visible');
+            document.querySelectorAll('#vsmChipRow .vsm-chip').forEach(function (c, i) {
+                c.classList.toggle('is-active', i === 0);
+                c.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+            });
+            document.querySelectorAll('.vsm-radius-opt').forEach(function (o) {
+                o.classList.toggle('is-active', o.getAttribute('data-radius') === '');
+            });
+            document.getElementById('vsmOpenNowCheck').checked = false;
+            setFilterOpen(false);
+            refreshFacilities();
+        }
+
+        // ================= GPS =================
+        const gpsBtn = document.getElementById('vsmGpsBtn');
+        function setGpsLoading(loading) {
+            gpsBtn.innerHTML = loading
+                ? '<span class="vsm-spinner-ring"></span>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/></svg>';
+        }
+        gpsBtn.addEventListener('click', function () {
+            if (userLocation) {
+                userLocation = null;
+                gpsBtn.classList.remove('is-active');
+                if (selfMarker) { map.removeLayer(selfMarker); selfMarker = null; }
                 refreshFacilities();
                 return;
             }
-            const fac = data[0];
-            facilitiesCache = data;
-            // Load the full surrounding set too, so the map isn't just one pin.
-            refreshFacilities({ fitBounds: false });
-            renderMarkers([fac]);
-            map.setView([fac.viDo, fac.kinhDo], 16, { animate: false });
-            focusMarker(fac.coSoId, { pan: false });
-            openDetailSheet(fac);
+            if (!navigator.geolocation) {
+                showToast('Trình duyệt không hỗ trợ định vị GPS.');
+                return;
+            }
+            setGpsLoading(true);
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    setGpsLoading(false);
+                    gpsBtn.classList.add('is-active');
+                    userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                    placeSelfMarker(userLocation.lat, userLocation.lon);
+                    map.setView([userLocation.lat, userLocation.lon], 14, { animate: !reduceMotion });
+                    refreshFacilities({ fitBounds: false });
+                },
+                function (err) {
+                    setGpsLoading(false);
+                    if (err && err.code === err.PERMISSION_DENIED) {
+                        showToast('Bạn đã từ chối quyền định vị. Bản đồ vẫn hoạt động bình thường.');
+                    } else if (err && err.code === err.TIMEOUT) {
+                        showToast('Định vị quá thời gian chờ. Vui lòng thử lại.');
+                    } else {
+                        showToast('Không thể lấy vị trí của bạn. Vui lòng thử lại.');
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            );
         });
-    }
 
-    // ================= Boot =================
-    document.addEventListener('DOMContentLoaded', function () {
-        initMap();
-        loadInitialFacility();
-        window.addEventListener('resize', function () { if (map) map.invalidateSize(); });
-    });
-})();
+        function placeSelfMarker(lat, lon) {
+            const html = '<div class="vsm-self-marker" aria-hidden="true"></div>';
+            const icon = L.divIcon({ className: '', html: html, iconSize: [22, 22], iconAnchor: [11, 11] });
+            if (selfMarker) {
+                selfMarker.setLatLng([lat, lon]);
+            } else {
+                selfMarker = L.marker([lat, lon], { icon: icon, keyboard: false, zIndexOffset: -100, alt: 'Vị trí của bạn' }).addTo(map);
+            }
+        }
+
+        // ================= Detail sheet =================
+        const sheet = document.getElementById('vsmSheet');
+        const backdrop = document.getElementById('vsmBackdrop');
+        const listSheet = document.getElementById('vsmListSheet');
+        let sheetOpen = false;
+        let listSheetOpen = false;
+        let sheetReturnFocus = null;
+
+        function fmtVnd(n) {
+            if (typeof n !== 'number' || !isFinite(n) || n <= 0) return null;
+            return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + 'đ/giờ';
+        }
+
+        function openDetailSheet(fac) {
+            if (listSheetOpen) closeListSheet();
+            sheetReturnFocus = document.activeElement;
+
+            document.getElementById('vsmSheetTitle').textContent = fac.tenCoSo || '';
+            document.getElementById('vsmSheetAddr').textContent = fac.diaChi || fac.address || 'Chưa cập nhật địa chỉ';
+
+            const distRow = document.getElementById('vsmSheetDistanceRow');
+            if (typeof fac.distanceKm === 'number') {
+                distRow.hidden = false;
+                document.getElementById('vsmSheetDistance').textContent = fac.distanceKm.toFixed(1) + ' km từ vị trí của bạn';
+            } else {
+                distRow.hidden = true;
+            }
+
+            const gioMo = fac.gioMoCua || '--:--';
+            const gioDong = fac.gioDongCua || '--:--';
+            document.getElementById('vsmSheetHours').textContent = gioMo + ' - ' + gioDong;
+
+            const phoneRow = document.getElementById('vsmSheetPhoneRow');
+            if (fac.soDienThoai) {
+                phoneRow.hidden = false;
+                document.getElementById('vsmSheetPhone').textContent = fac.soDienThoai;
+            } else {
+                phoneRow.hidden = true;
+            }
+
+            const statusEl = document.getElementById('vsmSheetStatus');
+            const statusText = document.getElementById('vsmSheetStatusText');
+            const isOpen = !!fac.moCuaHienTai;
+            statusEl.classList.toggle('is-closed', !isOpen);
+            statusText.textContent = isOpen ? 'Đang mở' : 'Đã đóng';
+
+            const sportsEl = document.getElementById('vsmSheetSports');
+            sportsEl.innerHTML = '';
+            (Array.isArray(fac.sports) ? fac.sports : []).forEach(function (s) {
+                const chip = document.createElement('span');
+                chip.className = 'vsm-sheet-chip';
+                chip.textContent = s;
+                sportsEl.appendChild(chip);
+            });
+
+            const price = fmtVnd(fac.minPrice);
+            document.getElementById('vsmSheetPrice').textContent = price || 'Liên hệ';
+            document.getElementById('vsmSheetCourts').textContent = (fac.readyCourtCount || 0) + ' sân sẵn sàng';
+
+            const img = document.getElementById('vsmSheetImg');
+            img.onerror = function () { this.onerror = null; this.src = CTX + '/assets/images/vsport-fallback.svg'; };
+            img.src = fac.hinhAnh || (CTX + '/assets/images/vsport-fallback.svg');
+            img.alt = fac.tenCoSo || '';
+
+            document.getElementById('vsmCtaBook').href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(fac.coSoId);
+            document.getElementById('vsmCtaView').href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(fac.coSoId);
+
+            const callBtn = document.getElementById('vsmCtaCall');
+            if (fac.soDienThoai) {
+                callBtn.href = 'tel:' + String(fac.soDienThoai).replace(/[^+\d]/g, '');
+                callBtn.removeAttribute('aria-disabled');
+                callBtn.style.pointerEvents = '';
+                callBtn.style.opacity = '';
+            } else {
+                callBtn.href = '#';
+                callBtn.setAttribute('aria-disabled', 'true');
+                callBtn.style.pointerEvents = 'none';
+                callBtn.style.opacity = '.5';
+            }
+
+            const dirBtn = document.getElementById('vsmCtaDirections');
+            if (typeof fac.viDo === 'number' && typeof fac.kinhDo === 'number') {
+                dirBtn.href = 'https://www.google.com/maps/dir/?api=1&destination=' + fac.viDo + ',' + fac.kinhDo;
+                dirBtn.removeAttribute('aria-disabled');
+                dirBtn.style.pointerEvents = '';
+                dirBtn.style.opacity = '';
+            } else {
+                dirBtn.href = '#';
+                dirBtn.setAttribute('aria-disabled', 'true');
+                dirBtn.style.pointerEvents = 'none';
+                dirBtn.style.opacity = '.5';
+            }
+
+            sheet.classList.add('is-open');
+            sheet.setAttribute('aria-hidden', 'false');
+            backdrop.classList.add('is-open');
+            sheetOpen = true;
+            lockScroll();
+            document.getElementById('vsmSheetClose').focus();
+        }
+
+        function closeSheet() {
+            if (!sheetOpen) return;
+            sheetOpen = false;
+            sheet.classList.remove('is-open');
+            sheet.setAttribute('aria-hidden', 'true');
+            if (!listSheetOpen) backdrop.classList.remove('is-open');
+            unlockScroll();
+            if (sheetReturnFocus && document.contains(sheetReturnFocus)) sheetReturnFocus.focus();
+            sheetReturnFocus = null;
+        }
+        document.getElementById('vsmSheetClose').addEventListener('click', closeSheet);
+        document.getElementById('vsmSheetHandle').addEventListener('click', closeSheet);
+        backdrop.addEventListener('click', function () { closeSheet(); closeListSheet(); });
+        sheet.addEventListener('keydown', function (e) { trapTab(sheet, e); });
+
+        // ================= List sheet =================
+        function openListSheet() {
+            if (sheetOpen) closeSheet();
+            sheetReturnFocus = document.activeElement;
+            const scroll = document.getElementById('vsmListScroll');
+            scroll.innerHTML = '';
+
+            const items = facilitiesCache.slice(0, 30);
+            if (!items.length) {
+                const empty = document.createElement('p');
+                empty.style.cssText = 'padding:24px 8px;text-align:center;color:var(--vsm-text-secondary);font-size:13.5px;';
+                empty.textContent = 'Không có cơ sở nào trong khu vực hiện tại.';
+                scroll.appendChild(empty);
+            } else {
+                items.forEach(function (fac) {
+                    const card = document.createElement('div');
+                    card.className = 'vsm-list-card';
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('tabindex', '0');
+                    card.setAttribute('aria-label', 'Xem ' + (fac.tenCoSo || '') + ' trên bản đồ');
+
+                    const img = document.createElement('img');
+                    img.className = 'vsm-list-card-img';
+                    img.loading = 'lazy';
+                    img.alt = '';
+                    img.src = fac.hinhAnh || (CTX + '/assets/images/vsport-fallback.svg');
+                    img.onerror = function () { this.onerror = null; this.src = CTX + '/assets/images/vsport-fallback.svg'; };
+                    card.appendChild(img);
+
+                    const info = document.createElement('div');
+                    info.style.cssText = 'min-width:0;flex:1;';
+                    const name = document.createElement('div');
+                    name.className = 'vsm-list-card-name';
+                    name.textContent = fac.tenCoSo || '';
+                    info.appendChild(name);
+                    const addr = document.createElement('div');
+                    addr.className = 'vsm-list-card-addr';
+                    addr.textContent = fac.diaChi || fac.address || '';
+                    info.appendChild(addr);
+
+                    const meta = document.createElement('div');
+                    meta.className = 'vsm-list-card-meta';
+                    if (typeof fac.distanceKm === 'number') {
+                        const dist = document.createElement('span');
+                        dist.className = 'vsm-list-card-badge dist';
+                        dist.textContent = fac.distanceKm.toFixed(1) + ' km';
+                        meta.appendChild(dist);
+                    }
+                    const hours = document.createElement('span');
+                    hours.className = 'vsm-list-card-badge dist';
+                    hours.textContent = (fac.gioMoCua || '--:--') + '-' + (fac.gioDongCua || '--:--');
+                    meta.appendChild(hours);
+                    const price = fmtVnd(fac.minPrice);
+                    if (price) {
+                        const priceBadge = document.createElement('span');
+                        priceBadge.className = 'vsm-list-card-badge price';
+                        priceBadge.textContent = price;
+                        meta.appendChild(priceBadge);
+                    }
+                    info.appendChild(meta);
+                    card.appendChild(info);
+
+                    function activate() {
+                        closeListSheet();
+                        focusMarker(fac.coSoId, { pan: true });
+                        openDetailSheet(fac);
+                    }
+                    card.addEventListener('click', activate);
+                    card.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+                    });
+                    scroll.appendChild(card);
+                });
+            }
+
+            listSheet.classList.add('is-open');
+            listSheet.setAttribute('aria-hidden', 'false');
+            backdrop.classList.add('is-open');
+            listSheetOpen = true;
+            lockScroll();
+            document.getElementById('vsmListClose').focus();
+        }
+
+        function closeListSheet() {
+            if (!listSheetOpen) return;
+            listSheetOpen = false;
+            listSheet.classList.remove('is-open');
+            listSheet.setAttribute('aria-hidden', 'true');
+            if (!sheetOpen) backdrop.classList.remove('is-open');
+            unlockScroll();
+            if (sheetReturnFocus && document.contains(sheetReturnFocus)) sheetReturnFocus.focus();
+            sheetReturnFocus = null;
+        }
+        document.getElementById('vsmListBtn').addEventListener('click', openListSheet);
+        document.getElementById('vsmListClose').addEventListener('click', closeListSheet);
+        document.getElementById('vsmListHandle').addEventListener('click', closeListSheet);
+        listSheet.addEventListener('keydown', function (e) { trapTab(listSheet, e); });
+
+        // ================= Shared sheet helpers =================
+        let scrollLocks = 0;
+        function lockScroll() { scrollLocks++; document.body.style.overflow = 'hidden'; }
+        function unlockScroll() { scrollLocks = Math.max(0, scrollLocks - 1); if (!scrollLocks) document.body.style.overflow = ''; }
+
+        function focusables(container) {
+            return Array.from(container.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'))
+                .filter(function (el) { return el.offsetParent !== null; });
+        }
+        function trapTab(container, e) {
+            if (e.key === 'Escape') { closeSheet(); closeListSheet(); return; }
+            if (e.key !== 'Tab') return;
+            const list = focusables(container);
+            if (!list.length) return;
+            const first = list[0], last = list[list.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            if (sheetOpen) closeSheet();
+            else if (listSheetOpen) closeListSheet();
+            else if (filterOpen) setFilterOpen(false);
+        });
+
+        // Drag-down to close on mobile
+        (function initDrag() {
+            [['vsmSheetHandle', sheet, closeSheet], ['vsmListHandle', listSheet, closeListSheet]].forEach(function (cfg) {
+                const handle = document.getElementById(cfg[0]);
+                const targetSheet = cfg[1];
+                const close = cfg[2];
+                let startY = null, delta = 0, dragging = false;
+                function onStart(e) { dragging = true; startY = (e.touches ? e.touches[0] : e).clientY; delta = 0; targetSheet.style.transition = 'none'; }
+                function onMove(e) {
+                    if (!dragging || startY == null) return;
+                    const y = (e.touches ? e.touches[0] : e).clientY;
+                    delta = Math.max(0, y - startY);
+                    targetSheet.style.transform = 'translateY(' + delta + 'px)';
+                }
+                function onEnd() {
+                    if (!dragging) return;
+                    dragging = false;
+                    targetSheet.style.transition = '';
+                    if (delta > 110) { close(); } else { targetSheet.style.transform = ''; }
+                    startY = null;
+                }
+                handle.addEventListener('touchstart', onStart, { passive: true });
+                handle.addEventListener('touchmove', onMove, { passive: true });
+                handle.addEventListener('touchend', onEnd);
+                handle.addEventListener('mousedown', function (e) { onStart(e); e.preventDefault(); });
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onEnd);
+            });
+        })();
+
+        // ================= facilityId deep link =================
+        function loadInitialFacility() {
+            if (!INITIAL_FACILITY_ID) {
+                refreshFacilities();
+                return;
+            }
+            fetchFacilities({ facilityId: INITIAL_FACILITY_ID }).then(function (data) {
+                if (data === null) { refreshFacilities(); return; }
+                if (!data.length) {
+                    showToast('Không tìm thấy cơ sở hoặc cơ sở chưa cập nhật vị trí.');
+                    refreshFacilities();
+                    return;
+                }
+                const fac = data[0];
+                facilitiesCache = data;
+                refreshFacilities({ fitBounds: false });
+                renderMarkers([fac]);
+                map.setView([fac.viDo, fac.kinhDo], 16, { animate: false });
+                focusMarker(fac.coSoId, { pan: false });
+                openDetailSheet(fac);
+            });
+        }
+
+        // ================= Boot =================
+        document.addEventListener('DOMContentLoaded', function () {
+            initMap();
+            loadInitialFacility();
+            window.addEventListener('resize', function () { if (map) map.invalidateSize(); });
+        });
+    })();
 </script>
 </body>
 </html>

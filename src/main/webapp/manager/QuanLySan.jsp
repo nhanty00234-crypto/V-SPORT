@@ -965,6 +965,12 @@
   }
 
   // Status options per mode
+  function normalizeStatus(s) {
+    if (!s) return '';
+    const map = { 'Đang sử dụng': 'Đang dùng', 'Đang dung': 'Đang dùng', 'san-san': 'Sẵn sàng', 'Bao tri': 'Bảo trì', 'Tam dong': 'Tạm đóng' };
+    return map[s] || s;
+  }
+
   function setStatusOptions(isEdit, currentStatus) {
     const sel = document.getElementById('courtStatus');
     sel.innerHTML = '';
@@ -978,7 +984,8 @@
       opt.value = o.v; opt.textContent = o.l;
       sel.appendChild(opt);
     });
-    if (currentStatus) sel.value = currentStatus;
+    const normalized = normalizeStatus(currentStatus);
+    if (normalized) sel.value = normalized;
   }
 
   // Form validation + submit
@@ -1361,7 +1368,7 @@
     populateCourtTypeDropdown(c.typeId);
     updateImagePreview();
 
-    const isOccupied = c.status === 'Đang dùng' || c.status === 'Đang sử dụng';
+    const isOccupied = normalizeStatus(c.status) === 'Đang dùng';
     const warning = document.getElementById('courtOccupiedWarning');
     const nameInput = document.getElementById('courtName');
     const typeSelect = document.getElementById('courtTypeSelect');

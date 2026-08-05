@@ -184,6 +184,25 @@
             .seg-btn { font-size: 11.5px; padding: 7px 6px; }
         }
         
+        /* Card-style mode/payment buttons (action-mode & pay-method) */
+        #action-mode-btn-add, #action-mode-btn-checkout,
+        #lbl-pay-cash, #lbl-pay-transfer {
+            transition: border-color .15s, background .15s, color .15s, box-shadow .15s;
+        }
+        #action-mode-btn-add.active, #action-mode-btn-checkout.active,
+        #lbl-pay-cash.active, #lbl-pay-transfer.active {
+            border-color: #630ed4 !important;
+            background: #f3ebff !important;
+            color: #630ed4 !important;
+            box-shadow: 0 0 0 3px rgba(99,14,212,.1);
+        }
+        #action-mode-btn-add:not(.active), #action-mode-btn-checkout:not(.active),
+        #lbl-pay-cash:not(.active), #lbl-pay-transfer:not(.active) {
+            border-color: #ccc3d8 !important;
+            background: #fff !important;
+            color: #5d5d67 !important;
+        }
+
         /* Cart items styling */
         .cart-item {
             border-bottom: 1px solid #f1f5f9;
@@ -656,59 +675,61 @@
     <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
         <!-- Panel Header -->
-        <div class="px-5 pt-5 pb-4 border-b border-slate-100">
-            <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-                <!-- Title -->
+        <div class="px-5 pt-5 pb-0 border-b border-slate-100">
+            <!-- Title row -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
                 <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-9 h-9 rounded-xl ${isManager ? 'bg-purple-100' : 'bg-orange-100'} flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-[20px] ${themeIcon}">today</span>
+                    <div class="w-10 h-10 rounded-2xl ${isManager ? 'bg-purple-600' : 'bg-orange-600'} flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings:'FILL' 1">event_available</span>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black text-slate-800 tracking-tight leading-tight">Vận Hành &amp; Check-in Hôm Nay</h3>
-                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Theo dõi thời gian thực · Tự cập nhật mỗi 30 giây</p>
+                        <h3 class="text-sm font-black text-slate-800 tracking-tight leading-snug">Vận Hành &amp; Check-in Hôm Nay</h3>
+                        <p class="text-[11px] text-slate-400 font-medium mt-0.5 flex items-center gap-1.5">
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Theo dõi thời gian thực · Tự cập nhật mỗi 30 giây
+                        </p>
                     </div>
                 </div>
-
-                <!-- Tab pills -->
-                <div class="flex items-center gap-2 flex-wrap">
-                    <button type="button" id="tab-btn-playing" onclick="switchBookingTab('playing')"
-                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
-                        <span class="material-symbols-outlined text-[15px]" style="font-variation-settings:'FILL' 1">sports_soccer</span>
-                        Đang chơi
-                        <span id="badge-count-playing" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
-                    </button>
-                    <button type="button" id="tab-btn-waiting" onclick="switchBookingTab('waiting')"
-                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
-                        <span class="material-symbols-outlined text-[15px]">pending</span>
-                        Chờ check-in
-                        <span id="badge-count-waiting" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
-                    </button>
-                    <button type="button" id="tab-btn-completed" onclick="switchBookingTab('completed')"
-                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
-                        <span class="material-symbols-outlined text-[15px]" style="font-variation-settings:'FILL' 1">check_circle</span>
-                        Đã xong
-                        <span id="badge-count-completed" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
-                    </button>
-                    <button type="button" id="tab-btn-preorders" onclick="switchBookingTab('preorders')"
-                            class="ci-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 bg-white transition-all hover:border-slate-300">
-                        <span class="material-symbols-outlined text-[15px]">room_service</span>
-                        Dịch vụ trước
-                        <span id="badge-count-preorders" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-black">0</span>
-                    </button>
+                <!-- Search -->
+                <div class="relative sm:w-64">
+                    <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none material-symbols-outlined text-slate-400 text-[16px]">search</span>
+                    <input type="text" id="booking-search-input" oninput="onBookingSearch(this.value)"
+                           placeholder="Tìm khách, SĐT, sân..."
+                           class="w-full pl-9 pr-3 py-2 text-xs font-medium border border-slate-200 focus:border-${isManager ? 'purple' : 'orange'}-400 rounded-xl bg-slate-50 focus:bg-white focus:outline-none transition-all placeholder-slate-400 text-slate-700">
                 </div>
             </div>
 
-            <!-- Search -->
-            <div class="mt-4 relative">
-                <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none material-symbols-outlined text-slate-350 text-[17px]">search</span>
-                <input type="text" id="booking-search-input" oninput="onBookingSearch(this.value)"
-                       placeholder="Tìm theo tên khách, SĐT hoặc sân..."
-                       class="w-full pl-10 pr-4 py-2.5 text-xs font-semibold border-2 border-slate-200 focus:border-${isManager ? 'purple' : 'orange'}-400 rounded-xl bg-slate-50 focus:bg-white focus:outline-none transition-all placeholder-slate-350 text-slate-700">
+            <!-- Tab bar -->
+            <div class="flex items-center gap-0 overflow-x-auto" style="scrollbar-width:none;">
+                <button type="button" id="tab-btn-playing" onclick="switchBookingTab('playing')"
+                        class="ci-tab group flex-shrink-0 inline-flex items-center gap-2 px-4 py-3 text-[11.5px] font-bold border-b-2 border-transparent text-slate-500 bg-transparent transition-all hover:text-slate-700 hover:bg-slate-50">
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">sports_soccer</span>
+                    Đang chơi
+                    <span id="badge-count-playing" class="badge-num inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black">0</span>
+                </button>
+                <button type="button" id="tab-btn-waiting" onclick="switchBookingTab('waiting')"
+                        class="ci-tab group flex-shrink-0 inline-flex items-center gap-2 px-4 py-3 text-[11.5px] font-bold border-b-2 border-transparent text-slate-500 bg-transparent transition-all hover:text-slate-700 hover:bg-slate-50">
+                    <span class="material-symbols-outlined text-[16px]">pending</span>
+                    Chờ check-in
+                    <span id="badge-count-waiting" class="badge-num inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black">0</span>
+                </button>
+                <button type="button" id="tab-btn-completed" onclick="switchBookingTab('completed')"
+                        class="ci-tab group flex-shrink-0 inline-flex items-center gap-2 px-4 py-3 text-[11.5px] font-bold border-b-2 border-transparent text-slate-500 bg-transparent transition-all hover:text-slate-700 hover:bg-slate-50">
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+                    Đã xong
+                    <span id="badge-count-completed" class="badge-num inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black">0</span>
+                </button>
+                <button type="button" id="tab-btn-preorders" onclick="switchBookingTab('preorders')"
+                        class="ci-tab group flex-shrink-0 inline-flex items-center gap-2 px-4 py-3 text-[11.5px] font-bold border-b-2 border-transparent text-slate-500 bg-transparent transition-all hover:text-slate-700 hover:bg-slate-50">
+                    <span class="material-symbols-outlined text-[16px]">room_service</span>
+                    Dịch vụ trước
+                    <span id="badge-count-preorders" class="badge-num inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black">0</span>
+                </button>
             </div>
         </div>
 
         <!-- Tab Contents -->
-        <div class="p-4">
+        <div class="p-4 lg:p-5">
             <div id="tab-content-playing"  class="tab-pane hidden"><div id="list-playing"  class="flex flex-col gap-3"></div></div>
             <div id="tab-content-waiting"  class="tab-pane hidden"><div id="list-waiting"  class="flex flex-col gap-3"></div></div>
             <div id="tab-content-completed" class="tab-pane hidden"><div id="list-completed" class="flex flex-col gap-3"></div></div>
@@ -721,20 +742,22 @@
 
         <!-- Tips footer -->
         <div class="mx-4 mb-4 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10.5px] text-slate-500 flex items-center gap-2">
-            <span class="material-symbols-outlined text-slate-400 text-[15px] shrink-0">info</span>
+            <span class="material-symbols-outlined text-slate-400 text-[14px] shrink-0">info</span>
             <span>Mẹo: Click số điện thoại để gọi · Nhấn <span class="material-symbols-outlined text-[11px] align-middle text-${isManager ? 'purple' : 'orange'}-600">content_copy</span> để copy số</span>
         </div>
     </section>
 
     <style>
-        .ci-tab.active-playing  { background:#dcfce7; border-color:#86efac; color:#15803d; }
-        .ci-tab.active-playing  .badge-num { background:#22c55e; color:#fff; }
-        .ci-tab.active-waiting  { background:${isManager ? '#f3e8ff' : '#ffedd5'}; border-color:${isManager ? '#c4b5fd' : '#fdba74'}; color:${isManager ? '#6d28d9' : '#c2410c'}; }
-        .ci-tab.active-waiting  .badge-num { background:${isManager ? '#7c3aed' : '#ea580c'}; color:#fff; }
-        .ci-tab.active-completed { background:#f1f5f9; border-color:#cbd5e1; color:#475569; }
-        .ci-tab.active-completed .badge-num { background:#64748b; color:#fff; }
-        .ci-tab.active-preorders { background:#fef3c7; border-color:#fcd34d; color:#92400e; }
-        .ci-tab.active-preorders .badge-num { background:#f59e0b; color:#fff; }
+        /* Tab underline active states */
+        .ci-tab { border-bottom: 2px solid transparent; margin-bottom: -1px; }
+        .ci-tab.active-playing  { border-bottom-color:#22c55e; color:#15803d; background:transparent; }
+        .ci-tab.active-playing  .badge-num { background:#dcfce7; color:#15803d; }
+        .ci-tab.active-waiting  { border-bottom-color:${isManager ? '#7c3aed' : '#ea580c'}; color:${isManager ? '#6d28d9' : '#c2410c'}; background:transparent; }
+        .ci-tab.active-waiting  .badge-num { background:${isManager ? '#f3e8ff' : '#ffedd5'}; color:${isManager ? '#6d28d9' : '#c2410c'}; }
+        .ci-tab.active-completed { border-bottom-color:#64748b; color:#334155; background:transparent; }
+        .ci-tab.active-completed .badge-num { background:#f1f5f9; color:#475569; }
+        .ci-tab.active-preorders { border-bottom-color:#f59e0b; color:#92400e; background:transparent; }
+        .ci-tab.active-preorders .badge-num { background:#fef3c7; color:#92400e; }
 
         /* Booking row */
         .ci-row {
@@ -1116,175 +1139,192 @@
             if (b.trangThai === 'Đang sử dụng' || b.trangThai === 'Đang chơi') {
                 countPlaying++;
                 playingContainer.insertAdjacentHTML('beforeend', `
-                    <div class="border border-emerald-200 hover:border-emerald-350 bg-emerald-50/5 rounded-xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm transition-all duration-200 group text-xs">
-                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
-                            <!-- Sân -->
-                            <div class="flex items-center gap-2 min-w-[160px] truncate">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span>
-                                <div>
-                                    <div class="font-black text-zinc-800 truncate">\${b.tenSan}</div>
-                                    <div class="text-[9px] font-semibold text-emerald-700 px-1 py-0.5 bg-emerald-50 rounded inline-block mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
+                    <div class="relative rounded-xl border border-emerald-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+                        <!-- Green left strip -->
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-l-xl"></div>
+                        <div class="pl-5 pr-4 py-3.5 flex flex-col md:flex-row md:items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-x-5 gap-y-2.5 flex-1 min-w-0 text-xs">
+                                <!-- Sân -->
+                                <div class="flex items-center gap-2.5 min-w-[150px]">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[16px] text-emerald-600" style="font-variation-settings:'FILL' 1">sports_soccer</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-black text-zinc-800 truncate leading-tight">\${b.tenSan}</div>
+                                        <div class="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                                            \${b.tenLoaiSan || 'Sân bóng'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Khách hàng -->
+                                <div class="flex items-center gap-2 min-w-[170px] truncate">
+                                    <div class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[14px] text-zinc-500">person</span>
+                                    </div>
+                                    <div class="truncate">
+                                        <div class="font-extrabold text-zinc-800 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
+                                        <div class="mt-0.5">\${phoneActionHtml}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Ca chơi -->
+                                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shrink-0">
+                                    <span class="material-symbols-outlined text-[14px] text-slate-400">schedule</span>
+                                    <span class="font-mono font-bold text-slate-700">\${batDau} – \${ketThuc}</span>
+                                </div>
+
+                                <!-- Timer đếm ngược -->
+                                <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5 shrink-0">
+                                    <span class="material-symbols-outlined text-[14px] text-emerald-600">timer</span>
+                                    <span class="font-black card-timer text-emerald-700" data-start="\${b.gioBatDau}" data-end="\${b.gioKetThuc}" data-note="\${b.ghiChu}">-</span>
+                                </div>
+
+                                <!-- Badges -->
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="badge \${statusBadgeClass} text-[9.5px]">\${b.trangThaiThanhToan}</span>
+                                    <span class="badge \${nguonBadgeClass} text-[9px]">\${b.nguonDatSan}</span>
+                                    \${b.ghiChu ? `<span class="text-[10px] text-slate-400 italic truncate max-w-[160px]">💬 \${b.ghiChu}</span>` : ''}
                                 </div>
                             </div>
 
-                            <!-- Khách hàng -->
-                            <div class="flex items-center gap-2 min-w-[180px] truncate">
-                                <span class="material-symbols-outlined text-[16px] text-zinc-450 shrink-0">person</span>
-                                <div class="truncate">
-                                    <div class="font-extrabold text-zinc-800 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
-                                    <div class="mt-0.5">\${phoneActionHtml}</div>
-                                </div>
+                            <!-- Action -->
+                            <div class="shrink-0">
+                                <button type="button" onclick="openStaffInvoiceModal(\${b.datSanId})" class="\${themeBg} \${themeBgHover} text-white font-bold text-[11px] px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all active:scale-95 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[15px]">receipt_long</span>
+                                    Dịch vụ &amp; Thanh toán
+                                </button>
                             </div>
-
-                            <!-- Ca chơi -->
-                            <div class="flex items-center gap-2 min-w-[130px] font-mono font-bold text-zinc-650">
-                                <span class="material-symbols-outlined text-[15px] text-zinc-450 shrink-0">schedule</span>
-                                <span>\${batDau} - \${ketThuc}</span>
-                            </div>
-
-                            <!-- Trạng thái / Thanh toán -->
-                            <div class="flex items-center gap-2 min-w-[160px] shrink-0">
-                                <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
-                                <span class="badge \${nguonBadgeClass} text-[8px]">\${b.nguonDatSan}</span>
-                            </div>
-
-                            <!-- Timer -->
-                            <div class="flex items-center gap-2 min-w-[150px] bg-emerald-50 border border-emerald-100/80 px-2.5 py-1 rounded-lg text-emerald-800 text-[11px] font-semibold shrink-0">
-                                <span class="material-symbols-outlined text-[14px]">play_circle</span>
-                                <span class="font-black card-timer animate-pulse" data-start="\${b.gioBatDau}" data-end="\${b.gioKetThuc}" data-note="\${b.ghiChu}">-</span>
-                            </div>
-
-                            <!-- Ghi chú (nếu có) -->
-                            <div class="min-w-[100px] flex-1 max-w-[200px] truncate text-[10px] text-zinc-400 italic">
-                                \${b.ghiChu ? `<span>Ghi chú: \${b.ghiChu}</span>` : ''}
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="shrink-0 flex items-center justify-end">
-                            <button type="button" onclick="openStaffInvoiceModal(\${b.datSanId})" class="\${themeBg} \${themeBgHover} text-white font-extrabold text-[10.5px] px-3.5 py-2 rounded-lg shadow-sm hover:shadow transition-all active:scale-95 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[15px]">receipt_long</span>
-                                Dịch vụ &amp; Thanh toán
-                            </button>
                         </div>
                     </div>
                 `);
             } else if (b.trangThai === 'Đã xác nhận' || b.trangThai === 'Chờ xác nhận') {
                 countWaiting++;
-                
+
                 let checkinBtnText = b.trangThai === 'Đã xác nhận' ? "Check-in khách" : "Mở sân";
                 let checkinAction = "checkInPreBooked";
-                
+                const isConfirmed = b.trangThai === 'Đã xác nhận';
+                const stripColor = isConfirmed ? (isManager ? '#7c3aed' : '#ea580c') : '#f59e0b';
+
                 waitingContainer.insertAdjacentHTML('beforeend', `
-                    <div class="border border-zinc-200 hover:border-zinc-300 bg-white rounded-xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm transition-all duration-200 group text-xs">
-                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
-                            <!-- Sân -->
-                            <div class="flex items-center gap-2 min-w-[160px] truncate">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                                <div>
-                                    <div class="font-black text-zinc-800 truncate">\${b.tenSan}</div>
-                                    <div class="text-[9px] font-semibold text-zinc-500 px-1 py-0.5 bg-zinc-100 rounded inline-block mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
+                    <div class="relative rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+                        <!-- Colored left strip -->
+                        <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl" style="background:\${stripColor}"></div>
+                        <div class="pl-5 pr-4 py-3.5 flex flex-col md:flex-row md:items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-x-5 gap-y-2.5 flex-1 min-w-0 text-xs">
+                                <!-- Sân -->
+                                <div class="flex items-center gap-2.5 min-w-[150px]">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[16px] text-slate-500" style="font-variation-settings:'FILL' 1">sports_soccer</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-black text-zinc-800 truncate leading-tight">\${b.tenSan}</div>
+                                        <div class="text-[10px] text-slate-500 font-medium mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Khách hàng -->
+                                <div class="flex items-center gap-2 min-w-[170px] truncate">
+                                    <div class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[14px] text-zinc-500">person</span>
+                                    </div>
+                                    <div class="truncate">
+                                        <div class="font-extrabold text-zinc-800 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
+                                        <div class="mt-0.5">\${phoneActionHtml}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Ca chơi -->
+                                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shrink-0">
+                                    <span class="material-symbols-outlined text-[14px] text-slate-400">schedule</span>
+                                    <span class="font-mono font-bold text-slate-700">\${batDau} – \${ketThuc}</span>
+                                </div>
+
+                                <!-- Badges -->
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="badge \${statusBadgeClass} text-[9.5px]">\${b.trangThaiThanhToan}</span>
+                                    <span class="badge \${statusTheme} text-[9px]">\${b.trangThai === 'Chờ xác nhận' ? 'Chờ duyệt' : b.trangThai}</span>
+                                    <span class="badge \${nguonBadgeClass} text-[9px]">\${b.nguonDatSan}</span>
+                                    \${b.ghiChu ? `<span class="text-[10px] text-slate-400 italic truncate max-w-[160px]">💬 \${b.ghiChu}</span>` : ''}
                                 </div>
                             </div>
 
-                            <!-- Khách hàng -->
-                            <div class="flex items-center gap-2 min-w-[180px] truncate">
-                                <span class="material-symbols-outlined text-[16px] text-zinc-450 shrink-0">person</span>
-                                <div class="truncate">
-                                    <div class="font-extrabold text-zinc-800 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
-                                    <div class="mt-0.5">\${phoneActionHtml}</div>
-                                </div>
-                            </div>
-
-                            <!-- Ca chơi -->
-                            <div class="flex items-center gap-2 min-w-[130px] font-mono font-bold text-zinc-650">
-                                <span class="material-symbols-outlined text-[15px] text-zinc-450 shrink-0">schedule</span>
-                                <span>\${batDau} - \${ketThuc}</span>
-                            </div>
-
-                            <!-- Trạng thái / Thanh toán -->
-                            <div class="flex items-center gap-2 min-w-[200px] shrink-0">
-                                <span class="badge \${statusBadgeClass} text-[9px]">\${b.trangThaiThanhToan}</span>
-                                <span class="badge \${statusTheme} text-[8px] uppercase font-bold tracking-tight">\${b.trangThai === 'Chờ xác nhận' ? 'Chờ duyệt' : b.trangThai}</span>
-                                <span class="badge \${nguonBadgeClass} text-[8px]">\${b.nguonDatSan}</span>
-                            </div>
-
-                            <!-- Ghi chú (nếu có) -->
-                            <div class="min-w-[100px] flex-1 max-w-[200px] truncate text-[10px] text-zinc-400 italic">
-                                \${b.ghiChu ? `<span>Ghi chú: \${b.ghiChu}</span>` : ''}
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="shrink-0 flex items-center justify-end gap-2">
-                            <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
-                                <input type="hidden" name="action" value="\${checkinAction}">
-                                <input type="hidden" name="datSanId" value="\${b.datSanId}">
-                                <input type="hidden" name="daThuTienMat" value="false">
-                                <button type="submit" class="\${themeBg} \${themeBgHover} text-white font-extrabold text-[10.5px] px-3.5 py-2 rounded-lg shadow-sm hover:shadow transition-all active:scale-95 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">power_settings_new</span>
-                                    \${checkinBtnText}
+                            <!-- Actions -->
+                            <div class="shrink-0 flex items-center gap-2">
+                                <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="inline-block">
+                                    <input type="hidden" name="action" value="\${checkinAction}">
+                                    <input type="hidden" name="datSanId" value="\${b.datSanId}">
+                                    <input type="hidden" name="daThuTienMat" value="false">
+                                    <button type="submit" class="\${themeBg} \${themeBgHover} text-white font-bold text-[11px] px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all active:scale-95 flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[15px]">login</span>
+                                        \${checkinBtnText}
+                                    </button>
+                                </form>
+                                <button type="button" onclick="openNoShowModal(\${b.datSanId}, '\${escapeForInlineOnclickJsString(b.tenKhachHang)}', \${b.reputationScore != null ? b.reputationScore : 'null'})"
+                                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-500 hover:text-rose-600 transition-all active:scale-95" title="Khách không đến (No-show)">
+                                    <span class="material-symbols-outlined text-[16px]">person_off</span>
                                 </button>
-                            </form>
-                            <button type="button" onclick="openNoShowModal(\${b.datSanId}, '\${escapeForInlineOnclickJsString(b.tenKhachHang)}', \${b.reputationScore != null ? b.reputationScore : 'null'})"
-                                    class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[10.5px] px-2.5 py-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Hủy ca do khách không đến">
-                                <span class="material-symbols-outlined text-[15px]">cancel</span>
-                            </button>
+                            </div>
                         </div>
                     </div>
                 `);
             } else {
                 countCompleted++;
+                const isPaid = b.trangThaiThanhToan === 'Đã thanh toán';
                 completedContainer.insertAdjacentHTML('beforeend', `
-                    <div class="border border-zinc-200 bg-zinc-50/50 opacity-90 hover:opacity-100 rounded-xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm transition-all duration-200 group text-xs">
-                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
-                            <!-- Sân -->
-                            <div class="flex items-center gap-2 min-w-[160px] truncate">
-                                <span class="w-2 h-2 rounded-full bg-zinc-400 shrink-0"></span>
-                                <div>
-                                    <div class="font-black text-zinc-700 truncate">\${b.tenSan}</div>
-                                    <div class="text-[9px] font-semibold text-zinc-500 px-1 py-0.5 bg-zinc-100 rounded inline-block mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
+                    <div class="relative rounded-xl border border-slate-200 bg-slate-50/60 overflow-hidden shadow-sm hover:bg-white hover:shadow transition-all duration-200 group">
+                        <!-- Gray left strip -->
+                        <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl \${isPaid ? 'bg-slate-400' : 'bg-amber-400'}"></div>
+                        <div class="pl-5 pr-4 py-3 flex flex-col md:flex-row md:items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 flex-1 min-w-0 text-xs">
+                                <!-- Sân -->
+                                <div class="flex items-center gap-2 min-w-[150px]">
+                                    <div class="w-7 h-7 rounded-lg bg-slate-200 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[14px] text-slate-500" style="font-variation-settings:'FILL' 1">sports_soccer</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-zinc-700 truncate leading-tight">\${b.tenSan}</div>
+                                        <div class="text-[10px] text-slate-400 font-medium mt-0.5">\${b.tenLoaiSan || 'Sân bóng'}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Khách hàng -->
+                                <div class="flex items-center gap-2 min-w-[160px] truncate">
+                                    <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[13px] text-slate-400">person</span>
+                                    </div>
+                                    <div class="truncate">
+                                        <div class="font-bold text-zinc-700 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
+                                        <div class="text-[10px] text-slate-400 font-mono mt-0.5">\${b.soDienThoai || '---'}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Ca chơi -->
+                                <div class="flex items-center gap-1.5 text-slate-500 font-mono font-medium">
+                                    <span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
+                                    \${batDau} – \${ketThuc}
+                                </div>
+
+                                <!-- Nguồn + trạng thái -->
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="badge \${nguonBadgeClass} text-[9px]">\${b.nguonDatSan}</span>
+                                    <span class="badge badge-gray text-[9px]">\${b.trangThai}</span>
+                                </div>
+
+                                <!-- Tổng tiền -->
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <span class="text-slate-400 font-medium">Tổng:</span>
+                                    <span class="font-extrabold text-zinc-700">\${formattedTongTien}</span>
                                 </div>
                             </div>
 
-                            <!-- Khách hàng -->
-                            <div class="flex items-center gap-2 min-w-[180px] truncate">
-                                <span class="material-symbols-outlined text-[16px] text-zinc-450 shrink-0">person</span>
-                                <div class="truncate">
-                                    <div class="font-extrabold text-zinc-700 truncate" title="\${b.tenKhachHang}">\${b.tenKhachHang}</div>
-                                    <div class="text-[10px] text-zinc-500 font-mono mt-0.5">\${b.soDienThoai || '---'}</div>
+                            <!-- Trạng thái HĐ -->
+                            <div class="shrink-0">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold \${isPaid ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}">
+                                    <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1">\${isPaid ? 'check_circle' : 'pending'}</span>
+                                    \${b.trangThaiThanhToan}
                                 </div>
-                            </div>
-
-                            <!-- Ca chơi -->
-                            <div class="flex items-center gap-2 min-w-[130px] font-mono font-medium text-zinc-500">
-                                <span class="material-symbols-outlined text-[15px] text-zinc-400 shrink-0">schedule</span>
-                                <span>\${batDau} - \${ketThuc}</span>
-                            </div>
-
-                            <!-- Nguồn đặt sân -->
-                            <div class="flex items-center gap-2 min-w-[90px] shrink-0">
-                                <span class="badge \${nguonBadgeClass} text-[8px]">\${b.nguonDatSan}</span>
-                                <span class="badge badge-gray text-[8px] uppercase font-bold tracking-tight">\${b.trangThai}</span>
-                            </div>
-
-                            <!-- Tổng tiền -->
-                            <div class="flex items-center gap-2 min-w-[120px] shrink-0 font-extrabold text-zinc-800">
-                                <span class="text-zinc-450 text-[10px] font-medium">Tổng tiền:</span>
-                                <span>\${formattedTongTien}</span>
-                            </div>
-
-                            <!-- Ghi chú (nếu có) -->
-                            <div class="min-w-[100px] flex-1 max-w-[200px] truncate text-[10px] text-zinc-400 italic">
-                                \${b.ghiChu ? `<span>Ghi chú: \${b.ghiChu}</span>` : ''}
-                            </div>
-                        </div>
-
-                        <!-- Trạng thái HĐ -->
-                        <div class="shrink-0 flex items-center justify-end">
-                            <div class="px-3 py-1.5 rounded-lg bg-zinc-100 border border-zinc-200 text-zinc-600 text-[10px] font-semibold">
-                                <span class="font-medium text-zinc-450">Trạng thái HD:</span>
-                                <span class="font-bold uppercase ml-1 \${b.trangThaiThanhToan === 'Đã thanh toán' ? 'text-emerald-700' : 'text-amber-700'}">\${b.trangThaiThanhToan}</span>
                             </div>
                         </div>
                     </div>
@@ -1295,25 +1335,40 @@
         // Show empty states if counters are 0
         if (countPlaying === 0) {
             playingContainer.innerHTML = `
-                <div class="col-span-full py-12 text-center text-xs text-zinc-450 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-[32px] text-zinc-300">sports_soccer</span>
-                    Hiện chưa có ca chơi nào đang hoạt động.
+                <div class="py-14 flex flex-col items-center justify-center gap-3 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[28px] text-slate-350">sports_soccer</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-500">Chưa có ca chơi nào đang hoạt động</p>
+                        <p class="text-xs text-slate-400 mt-1">Các lịch đặt sẽ xuất hiện tại đây khi được check-in.</p>
+                    </div>
                 </div>
             `;
         }
         if (countWaiting === 0) {
             waitingContainer.innerHTML = `
-                <div class="col-span-full py-12 text-center text-xs text-zinc-450 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-[32px] text-zinc-300">schedule</span>
-                    Không có lịch chờ check-in nào trong ngày hôm nay.
+                <div class="py-14 flex flex-col items-center justify-center gap-3 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[28px] text-slate-350">pending_actions</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-500">Không có lịch chờ check-in</p>
+                        <p class="text-xs text-slate-400 mt-1">Hôm nay chưa có đặt sân nào đang chờ được mở sân.</p>
+                    </div>
                 </div>
             `;
         }
         if (countCompleted === 0) {
             completedContainer.innerHTML = `
-                <div class="col-span-full py-12 text-center text-xs text-zinc-450 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-[32px] text-zinc-300">check_circle</span>
-                    Chưa ghi nhận ca chơi hoàn thành nào hôm nay.
+                <div class="py-14 flex flex-col items-center justify-center gap-3 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[28px] text-slate-350">check_circle</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-500">Chưa có ca hoàn thành</p>
+                        <p class="text-xs text-slate-400 mt-1">Các ca chơi kết thúc sẽ được liệt kê tại đây.</p>
+                    </div>
                 </div>
             `;
         }
@@ -1869,80 +1924,110 @@
 
                     <!-- Mục đích thao tác -->
                     <div class="shrink-0">
-                        <h4 class="text-[11px] text-[#5d5d67] uppercase font-semibold tracking-wide mb-2">Mục đích thao tác</h4>
-                        <div class="seg-control" role="radiogroup" aria-label="Mục đích thao tác">
-                            <button type="button" id="action-mode-btn-add" class="seg-btn active" role="radio" aria-checked="true" onclick="setActionMode(PaymentActionMode.ADD_SERVICES)">
-                                <span class="material-symbols-outlined text-[16px]">add_shopping_cart</span> Thêm dịch vụ
+                        <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Mục đích thao tác">
+                            <button type="button" id="action-mode-btn-add" role="radio" aria-checked="true"
+                                onclick="setActionMode(PaymentActionMode.ADD_SERVICES)"
+                                class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-[#630ed4] bg-[#f3ebff] text-[#630ed4] font-bold text-xs transition-all hover:shadow-sm active:scale-95">
+                                <span class="material-symbols-outlined text-[22px]">add_shopping_cart</span>
+                                Thêm dịch vụ
                             </button>
-                            <button type="button" id="action-mode-btn-checkout" class="seg-btn" role="radio" aria-checked="false" onclick="setActionMode(PaymentActionMode.CHECKOUT)">
-                                <span class="material-symbols-outlined text-[16px]">payments</span> Thanh toán &amp; kết thúc
+                            <button type="button" id="action-mode-btn-checkout" role="radio" aria-checked="false"
+                                onclick="setActionMode(PaymentActionMode.CHECKOUT)"
+                                class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-[#ccc3d8] bg-white text-[#5d5d67] font-bold text-xs transition-all hover:border-[#630ed4] hover:text-[#630ed4] hover:bg-[#f8f4ff] active:scale-95">
+                                <span class="material-symbols-outlined text-[22px]">payments</span>
+                                Thanh toán &amp; kết thúc
                             </button>
                         </div>
                     </div>
 
                     <!-- Giỏ dịch vụ -->
-                    <div class="bg-white rounded-xl border border-[#ccc3d8] p-3.5 shrink-0 flex flex-col" style="max-height:230px;">
-                        <div class="flex justify-between items-center mb-2 shrink-0">
-                            <h4 class="text-[11px] text-[#5d5d67] uppercase font-semibold tracking-wide">Đơn hàng</h4>
-                            <span class="text-xs font-semibold text-[#0b1c30]" id="staff-cart-item-count">0 mặt hàng</span>
+                    <div class="bg-white rounded-xl border border-[#ccc3d8] overflow-hidden shrink-0 flex flex-col" style="max-height:230px;">
+                        <div class="flex justify-between items-center px-3.5 py-2.5 border-b border-[#eee9f5] shrink-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px] text-[#630ed4]">shopping_cart</span>
+                                <span class="text-xs font-bold text-[#0b1c30]">Giỏ hàng</span>
+                            </div>
+                            <span class="text-[11px] font-semibold bg-[#f3ebff] text-[#630ed4] px-2 py-0.5 rounded-full" id="staff-cart-item-count">0 mặt hàng</span>
                         </div>
-                        <div id="staff-cart-list" class="overflow-y-auto pr-1 space-y-1 flex-1 min-h-0">
+                        <div id="staff-cart-list" class="overflow-y-auto px-3.5 py-2 space-y-1.5 flex-1 min-h-0">
                             <!-- Populated dynamically via JS -->
                         </div>
-                        <div class="mt-2 pt-2 border-t border-[#ccc3d8] flex justify-between items-center shrink-0">
-                            <span class="text-xs text-[#5d5d67] font-medium">Tổng tiền dịch vụ</span>
+                        <div class="px-3.5 py-2.5 border-t border-[#eee9f5] flex justify-between items-center shrink-0 bg-[#faf8ff]">
+                            <span class="text-xs text-[#5d5d67] font-medium">Tổng dịch vụ</span>
                             <span class="text-sm font-bold text-[#0b1c30]" id="staff-cart-subtotal">0 đ</span>
                         </div>
                     </div>
 
                     <!-- Loại hóa đơn dịch vụ (ẩn khi giỏ rỗng) -->
-                    <div id="bill-mode-section" class="hidden shrink-0">
-                        <h4 class="text-[11px] text-[#5d5d67] uppercase font-semibold tracking-wide mb-2">Loại hóa đơn dịch vụ</h4>
-                        <div class="seg-control" role="radiogroup" aria-label="Loại hóa đơn dịch vụ">
-                            <button type="button" id="lbl-billmode-main" class="seg-btn active" role="radio" aria-checked="true" onclick="setBillMode('MAIN')">Cộng vào hóa đơn sân</button>
-                            <button type="button" id="lbl-billmode-split" class="seg-btn" role="radio" aria-checked="false" onclick="setBillMode('SPLIT')">Tách hóa đơn</button>
+                    <div id="bill-mode-section" class="hidden shrink-0 bg-white rounded-xl border border-[#ccc3d8] overflow-hidden">
+                        <div class="px-3.5 pt-2.5 pb-2">
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <span class="material-symbols-outlined text-[15px] text-[#5d5d67]">receipt</span>
+                                <span class="text-[11px] text-[#5d5d67] font-semibold">Hóa đơn dịch vụ</span>
+                            </div>
+                            <div class="seg-control" role="radiogroup" aria-label="Loại hóa đơn dịch vụ">
+                                <button type="button" id="lbl-billmode-main" class="seg-btn active" role="radio" aria-checked="true" onclick="setBillMode('MAIN')">Cộng vào sân</button>
+                                <button type="button" id="lbl-billmode-split" class="seg-btn" role="radio" aria-checked="false" onclick="setBillMode('SPLIT')">Tách hóa đơn</button>
+                            </div>
+                            <p class="text-[10px] text-[#9291a0] mt-1.5 leading-snug" id="bill-mode-description">Tiền sân và dịch vụ được thanh toán chung.</p>
                         </div>
-                        <p class="text-[11px] text-[#5d5d67] mt-1.5" id="bill-mode-description">Tiền sân và dịch vụ được thanh toán chung.</p>
-                        <div id="split-paynow-section" class="hidden items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+                        <div id="split-paynow-section" class="hidden items-center gap-2 bg-amber-50 border-t border-amber-200 px-3.5 py-2">
                             <input type="checkbox" id="split-pay-now-cb" class="${isManager ? 'accent-purple-600' : 'accent-orange-600'}">
-                            <label for="split-pay-now-cb" class="text-xs font-bold text-amber-800 cursor-pointer">Thanh toán bill tách ngay bây giờ</label>
+                            <label for="split-pay-now-cb" class="text-xs font-bold text-amber-800 cursor-pointer">Thanh toán bill tách ngay</label>
                         </div>
                     </div>
 
                     <!-- Split bills list -->
                     <div id="split-bills-section" class="hidden shrink-0">
-                        <h4 class="text-xs text-[#0b1c30] uppercase font-semibold mb-2 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[15px] text-amber-600">receipt</span>
-                            Hóa đơn tách dịch vụ
-                        </h4>
+                        <div class="flex items-center gap-1.5 mb-2">
+                            <span class="material-symbols-outlined text-[15px] text-amber-600">receipt_long</span>
+                            <span class="text-xs font-semibold text-[#0b1c30]">Hóa đơn tách dịch vụ</span>
+                        </div>
                         <div id="split-bills-list" class="space-y-2"></div>
                     </div>
 
                     <!-- Phương thức thanh toán (chỉ hiện ở chế độ Thanh toán & kết thúc) -->
                     <div id="payment-method-section" class="hidden shrink-0">
-                        <h4 class="text-[11px] text-[#5d5d67] uppercase font-semibold tracking-wide mb-2">Phương thức thanh toán</h4>
-                        <div class="seg-control" role="radiogroup" aria-label="Phương thức thanh toán">
-                            <button type="button" id="lbl-pay-cash" class="seg-btn active" role="radio" aria-checked="true" onclick="changeStaffPayMethod('Tiền mặt')">
-                                <span class="material-symbols-outlined text-[16px]">payments</span> Tiền mặt
+                        <div class="flex items-center gap-1.5 mb-2">
+                            <span class="material-symbols-outlined text-[15px] text-[#5d5d67]">credit_card</span>
+                            <span class="text-[11px] text-[#5d5d67] font-semibold">Thanh toán bằng</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Phương thức thanh toán">
+                            <button type="button" id="lbl-pay-cash" role="radio" aria-checked="true"
+                                onclick="changeStaffPayMethod('Tiền mặt')"
+                                class="flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-[#630ed4] bg-[#f3ebff] text-[#630ed4] font-bold text-xs transition-all hover:shadow-sm active:scale-95">
+                                <span class="material-symbols-outlined text-[18px]">payments</span> Tiền mặt
                             </button>
-                            <button type="button" id="lbl-pay-transfer" class="seg-btn" role="radio" aria-checked="false" onclick="changeStaffPayMethod('PayOS')">
-                                <span class="material-symbols-outlined text-[16px]">qr_code_2</span> PayOS
+                            <button type="button" id="lbl-pay-transfer" role="radio" aria-checked="false"
+                                onclick="changeStaffPayMethod('PayOS')"
+                                class="flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-[#ccc3d8] bg-white text-[#5d5d67] font-bold text-xs transition-all hover:border-[#630ed4] hover:text-[#630ed4] hover:bg-[#f8f4ff] active:scale-95">
+                                <span class="material-symbols-outlined text-[18px]">qr_code_2</span> PayOS
                             </button>
                         </div>
-                        <p class="text-[11px] text-[#5d5d67] mt-1.5">Quét mã QR hoặc mở trang thanh toán PayOS. Hệ thống tự động xác nhận khi khách thanh toán xong.</p>
                     </div>
 
                     <!-- Cơ sở chưa cấu hình tài khoản ngân hàng -->
-                    <div id="bank-not-configured-banner" class="hidden shrink-0 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-2">
-                        <p>Cơ sở chưa cấu hình thông tin chuyển khoản.</p>
-                        <button type="button" onclick="document.getElementById('bank-not-configured-banner').classList.add('hidden'); changeStaffPayMethod(PaymentMethod.CASH);" class="font-bold underline">Chọn tiền mặt</button>
+                    <div id="bank-not-configured-banner" class="hidden shrink-0 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center justify-between gap-3">
+                        <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">warning</span> Chưa cấu hình chuyển khoản.</span>
+                        <button type="button" onclick="document.getElementById('bank-not-configured-banner').classList.add('hidden'); changeStaffPayMethod(PaymentMethod.CASH);" class="font-bold underline shrink-0">Dùng tiền mặt</button>
                     </div>
 
-                    <!-- Cảnh báo trả sân sớm - luôn hiển thị vì cần thao tác, không ẩn trong disclosure -->
+                    <!-- Panel khách đặt trước hủy sân sớm: tính phí theo toàn bộ khung giờ đã đặt -->
+                    <div id="staff-detail-prebooked-cancel-panel" class="shrink-0 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800 space-y-1.5 hidden">
+                        <div class="flex items-center gap-1.5 font-bold">
+                            <span class="material-symbols-outlined text-[16px]">event_available</span>
+                            <span>Khách đặt trước — hủy sân trước giờ kết thúc</span>
+                        </div>
+                        <p class="text-[11px] leading-relaxed">Sân đã được <strong>giữ chỗ</strong> cho khách theo khung giờ
+                            <span id="staff-detail-prebooked-slot" class="font-bold"></span>.
+                            Phí tính theo <strong>toàn bộ thời gian đã đặt</strong>, không tính theo giờ thực tế chơi.</p>
+                    </div>
+
+                    <!-- Cảnh báo trả sân sớm - chỉ dành cho walk-in FIXED_DURATION, không dùng cho khách đặt trước -->
                     <div id="staff-detail-early-checkout-warning-panel" class="shrink-0 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1.5 hidden">
                         <div class="flex items-center gap-1.5 font-bold">
                             <span class="material-symbols-outlined text-[16px]">warning</span>
-                            <span>Khách trả sân sớm <span id="staff-detail-early-checkout-minutes">0</span> phút</span>
+                            <span>Khách vãng lai trả sân sớm <span id="staff-detail-early-checkout-minutes">0</span> phút</span>
                         </div>
                         <p class="text-[11px] leading-relaxed">Theo quy định, ca chơi cố định trả sớm vẫn tính đủ tiền giờ đã đăng ký ban đầu.</p>
                         <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2}">
@@ -1954,11 +2039,12 @@
                     </div>
 
                     <!-- Gia hạn thời gian chơi -->
-                    <div id="staff-extension-panel" class="bg-white rounded-xl border border-[#ccc3d8] p-3.5 shrink-0 hidden">
-                        <h4 class="text-[11px] text-[#5d5d67] uppercase font-semibold tracking-wide mb-2 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[15px] ${isManager ? 'text-purple-600' : 'text-orange-600'}">more_time</span>
-                            Gia hạn thời gian chơi
-                        </h4>
+                    <div id="staff-extension-panel" class="bg-white rounded-xl border border-[#ccc3d8] overflow-hidden shrink-0 hidden">
+                        <div class="flex items-center gap-2 px-3.5 py-2.5 border-b border-[#eee9f5]">
+                            <span class="material-symbols-outlined text-[17px] ${isManager ? 'text-purple-600' : 'text-orange-600'}">more_time</span>
+                            <span class="text-xs font-bold text-[#0b1c30]">Gia hạn thời gian chơi</span>
+                        </div>
+                        <div class="p-3.5">
                         <div class="space-y-2.5">
                             <!-- Nút nhanh -->
                             <div class="flex gap-2">
@@ -1994,6 +2080,7 @@
                                 <span class="material-symbols-outlined text-[14px]">done</span>
                                 Xác nhận gia hạn
                             </button>
+                        </div>
                         </div>
                     </div>
 
@@ -2872,14 +2959,29 @@
             });
         }
 
-        // Update early checkout warning & discount views
+        // Update early checkout / prebooked-cancel panels
+        // Phân biệt rõ: khách đặt trước (FIXED_BOOKING) vs khách vãng lai (FIXED_DURATION / OPEN_ENDED)
+        const prebookedCancelPanel = document.getElementById("staff-detail-prebooked-cancel-panel");
         const warningPanel = document.getElementById("staff-detail-early-checkout-warning-panel");
         const earlyMinsEl = document.getElementById("staff-detail-early-checkout-minutes");
         const earlyDiscountContainer = document.getElementById("staff-detail-early-discount-container");
         const earlyDiscountValEl = document.getElementById("staff-detail-early-discount-value");
 
+        const isNotPaid = data.trangThaiThanhToan !== 'Đã thanh toán';
+        // Khách đặt trước hủy sân sớm: hiển thị panel xanh, KHÔNG hiển thị panel vàng giảm trừ
+        if (prebookedCancelPanel) {
+            if (data.isFixedBooking && data.bookingTrangThai === 'Đang sử dụng' && isNotPaid &&
+                    !data.actualEndAt && data.gioKetThuc) {
+                const slotEl = document.getElementById("staff-detail-prebooked-slot");
+                if (slotEl) slotEl.textContent = (data.gioBatDau ? data.gioBatDau.substring(0, 5) : '') + ' – ' + data.gioKetThuc.substring(0, 5);
+                prebookedCancelPanel.classList.remove("hidden");
+            } else {
+                prebookedCancelPanel.classList.add("hidden");
+            }
+        }
+        // Walk-in FIXED_DURATION trả sớm: hiển thị panel vàng (có thể áp giảm trừ)
         if (warningPanel) {
-            if (data.isEarly && data.trangThaiThanhToan !== 'Đã thanh toán') {
+            if (!data.isFixedBooking && data.isEarly && isNotPaid) {
                 warningPanel.classList.remove("hidden");
                 if (earlyMinsEl) earlyMinsEl.textContent = data.minutesEarly;
             } else {
