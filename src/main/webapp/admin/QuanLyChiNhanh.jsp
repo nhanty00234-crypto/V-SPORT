@@ -212,8 +212,8 @@ body { font-family: 'Inter', sans-serif; }
         <!-- Top row: avatar + name + status -->
         <div class="flex items-start gap-4">
           <c:choose>
-            <c:when test="${not empty cn.hinhAnh}">
-              <img src="${cn.hinhAnh}" alt="${cn.tenCoSo}" class="cs-avatar">
+            <c:when test="${not empty cn.thumbnailUrl}">
+              <img src="${cn.thumbnailUrl}" alt="${cn.tenCoSo}" class="cs-avatar">
             </c:when>
             <c:otherwise>
               <div class="cs-avatar-placeholder">

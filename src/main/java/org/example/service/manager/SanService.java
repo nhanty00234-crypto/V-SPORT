@@ -555,6 +555,11 @@ public class SanService {
      * Rủi ro:
      * - Thấp. Ném ngoại lệ if-else nếu thông tin request không hợp lệ.
      */
+    /** Cập nhật trực tiếp entity LoaiSan (chỉ dùng khi đã kiểm tra ownership ở caller). */
+    public void updateLoaiSanDirect(LoaiSan ls) {
+        loaiSanDAO.update(ls);
+    }
+
     public void updateLoaiSan(int loaiSanId, LoaiSanRequest request, int managerCoSoId) {
         LoaiSan existing = loaiSanDAO.getLoaiSanById(loaiSanId);
         BranchSecurityUtils.getEntityOrThrow(existing, "Loại sân");

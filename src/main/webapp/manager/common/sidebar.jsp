@@ -409,7 +409,7 @@
         </a>
         <a href="${pageContext.request.contextPath}/manager/dat-san"
           class="nav-link ${uri.contains('/manager/dat-san') || uri.contains('/QuanLyDatSan') ? 'active' : ''}">
-          <i class="ti ti-calendar-check text-[16px]"></i>Đặt sân
+          <i class="ti ti-calendar-check text-[16px]"></i>Duyệt sân
         </a>
       </div>
     </div>

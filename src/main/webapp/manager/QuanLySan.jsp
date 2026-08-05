@@ -469,6 +469,28 @@
                   class="px-3 py-2 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 resize-none"></textarea>
       </div>
 
+      <!-- Khung giờ bật/tắt đèn — chỉ hiện khi chỉnh sửa -->
+      <div id="courtLightTimeSection" class="hidden flex flex-col gap-2">
+        <input type="hidden" name="loaiSanID" id="courtLoaiSanIdHidden">
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-purple-900">
+          <span class="material-symbols-outlined text-[14px]">wb_incandescent</span>
+          Khung giờ bật đèn
+          <span class="font-normal text-zinc-400 ml-1">(áp dụng cho toàn loại sân)</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-purple-700">Bắt đầu bật đèn</label>
+            <input type="time" name="gioBatDauLenDen" id="courtLightStart"
+                   class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-purple-700">Kết thúc bật đèn</label>
+            <input type="time" name="gioKetThucLenDen" id="courtLightEnd"
+                   class="h-10 px-3 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400">
+          </div>
+        </div>
+      </div>
+
       <!-- Xem trước hiển thị: thu gọn, có thể mở rộng -->
       <details class="group rounded-xl border border-purple-100">
         <summary class="cursor-pointer list-none flex items-center justify-between px-3 py-2 text-xs font-semibold text-purple-900 select-none">
@@ -790,6 +812,10 @@
     if (document.getElementById('courtAction').value === 'add' && !courtNameEdited) {
       document.getElementById('courtName').value = suggestCourtName(type);
       updateBulkNamePreview();
+    }
+    // Khi đổi loại sân lúc chỉnh sửa → cập nhật lại giờ đèn hiển thị
+    if (document.getElementById('courtAction').value === 'update') {
+      fillCourtLightTimes(typeId);
     }
     updateCardPreview();
   }
@@ -1144,14 +1170,11 @@
               <span class="font-bold text-zinc-800">\${formatCurrency(type.priceNoLight || 0)}</span>
               <span class="text-purple-300">/</span>
               <span class="font-bold text-purple-700">\${formatCurrency(type.priceWithLight || 0)}</span>
-              <span class="text-zinc-400 text-[10px]">\${type.lightStart || '17:30'}-\${type.lightEnd || '22:00'}</span>
+              <span class="text-zinc-400 text-[10px]">\${type.lightStart ? type.lightStart + '-' + type.lightEnd : ''}</span>
             </div>
             <div class="relative flex items-center gap-1.5 mt-auto pt-2.5 border-t border-purple-50">
               <button onclick="openEditModal(\${c.id})" class="flex-1 h-8 text-[11px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg flex items-center justify-center gap-1 transition-colors">
                 <span class="material-symbols-outlined text-[13px]">edit</span>Sửa
-              </button>
-              <button onclick="openPriceConfigModal(\${c.id})" class="flex-1 h-8 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center justify-center gap-1 transition-colors">
-                <span class="material-symbols-outlined text-[13px]">payments</span>Giá
               </button>
               <button onclick="toggleCardMenu(event, \${c.id})" class="h-8 w-8 text-zinc-500 hover:bg-zinc-100 rounded-lg flex items-center justify-center transition-colors" title="Thêm thao tác">
                 <span class="material-symbols-outlined text-[16px]">more_vert</span>
@@ -1195,13 +1218,12 @@
           <td class="px-5 py-4 font-medium">
             <span class="text-zinc-700 font-semibold">\${formatCurrency(type.priceNoLight || 0)}</span> /
             <span class="text-purple-700 font-bold">\${formatCurrency(type.priceWithLight || 0)}</span>
-            <span class="text-zinc-400 text-[10px] block mt-0.5">\${type.lightStart || '17:30'} - \${type.lightEnd || '22:00'}</span>
+            <span class="text-zinc-400 text-[10px] block mt-0.5">\${type.lightStart ? type.lightStart + ' - ' + type.lightEnd : ''}</span>
           </td>
           <td class="px-5 py-4"><span class="badge \${badgeColor}">\${c.status}</span></td>
           <td class="px-5 py-4 text-right">
             <div class="flex items-center justify-end gap-1">
               <button onclick="openEditModal(\${c.id})" class="p-1 hover:bg-purple-50 text-purple-700 rounded-lg transition-colors" title="Chỉnh sửa"><span class="material-symbols-outlined text-[16px]">edit</span></button>
-              <button onclick="openPriceConfigModal(\${c.id})" class="p-1 hover:bg-emerald-50 text-emerald-700 rounded-lg transition-colors" title="Cấu hình giá"><span class="material-symbols-outlined text-[16px]">payments</span></button>
               <button onclick="duplicateCourt(\${c.id})" class="p-1 hover:bg-sky-50 text-sky-600 rounded-lg transition-colors" title="Nhân bản sân"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
               <button onclick="deleteCourt(\${c.id})" class="p-1 hover:bg-red-50 text-red-500 rounded-lg transition-colors" title="Xóa"><span class="material-symbols-outlined text-[16px]">delete</span></button>
             </div>
@@ -1316,6 +1338,8 @@
       setStatusOptions(false, 'Sẵn sàng');
       populateCourtTypeDropdown();
     }
+    // Ẩn section giờ đèn khi tạo mới
+    document.getElementById('courtLightTimeSection').classList.add('hidden');
     document.getElementById('courtModal').classList.remove('hidden');
   }
 
@@ -1357,7 +1381,31 @@
 
     document.getElementById('courtNoTypesBanner').classList.add('hidden');
     document.getElementById('courtForm').classList.remove('hidden');
+
+    // Hiện section giờ đèn và điền giá trị từ loại sân hiện tại
+    const lightSection = document.getElementById('courtLightTimeSection');
+    lightSection.classList.remove('hidden');
+    fillCourtLightTimes(c.typeId);
+
     document.getElementById('courtModal').classList.remove('hidden');
+  }
+
+  function fillCourtLightTimes(typeId) {
+    const type = mockLoaiSan.find(t => t.id === typeId);
+    const loaiSanIdEl = document.getElementById('courtLoaiSanIdHidden');
+    const startEl = document.getElementById('courtLightStart');
+    const endEl   = document.getElementById('courtLightEnd');
+    if (type) {
+      loaiSanIdEl.value = type.id;
+      let s = (type.lightStart || '').substring(0, 5);
+      let e = (type.lightEnd   || '').substring(0, 5);
+      startEl.value = s;
+      endEl.value   = e;
+    } else {
+      loaiSanIdEl.value = '';
+      startEl.value = '';
+      endEl.value   = '';
+    }
   }
 
   function closeCourtModal() {
@@ -1541,8 +1589,8 @@
     // Set time inputs AFTER modal is visible — Chrome on Windows does not re-render
     // <input type="time"> correctly when value is set while the element is display:none
     requestAnimationFrame(() => {
-      document.getElementById('priceConfigLightStart').value = timeStr || '17:30';
-      document.getElementById('priceConfigLightEnd').value = endTimeStr || '22:00';
+      document.getElementById('priceConfigLightStart').value = timeStr || '';
+      document.getElementById('priceConfigLightEnd').value = endTimeStr || '';
     });
   }
 

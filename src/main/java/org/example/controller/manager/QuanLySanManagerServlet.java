@@ -177,6 +177,25 @@ public class QuanLySanManagerServlet extends HttpServlet {
         updateReq.setHinhAnh(resolveCourtImage(req, req.getParameter("existingHinhAnh")));
 
         sanService.updateSan(sanId, updateReq, coSoId);
+
+        // Nếu manager gửi kèm giờ đèn → cập nhật luôn LoaiSan
+        String loaiSanIdStr = req.getParameter("loaiSanID");
+        String lightStart = req.getParameter("gioBatDauLenDen");
+        String lightEnd   = req.getParameter("gioKetThucLenDen");
+        if (loaiSanIdStr != null && !loaiSanIdStr.isBlank()
+                && lightStart != null && !lightStart.isBlank()
+                && lightEnd   != null && !lightEnd.isBlank()) {
+            int loaiSanId = Integer.parseInt(loaiSanIdStr);
+            LoaiSan ls = sanService.getLoaiSanById(loaiSanId);
+            if (ls != null && ls.getCoSoID() != null && ls.getCoSoID() == coSoId) {
+                if (lightStart.length() == 5) lightStart += ":00";
+                if (lightEnd.length()   == 5) lightEnd   += ":00";
+                ls.setGioBatDauLenDen(LocalTime.parse(lightStart));
+                ls.setGioKetThucLenDen(LocalTime.parse(lightEnd));
+                sanService.updateLoaiSanDirect(ls);
+            }
+        }
+
         session.setAttribute("message", "Cập nhật sân thành công!");
         AuditLogService.log(req, manager,
             AuditLogService.ACTION_UPDATE, AuditLogService.ENTITY_SAN,

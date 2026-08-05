@@ -332,15 +332,52 @@
         @media (min-width: 1024px) { .vsm-sheet-handle-wrap { display: none; } }
         .vsm-sheet-handle { width: 42px; height: 5px; border-radius: 9999px; background: #D8E0EA; }
         .vsm-sheet-close {
-            position: absolute; top: 8px; right: 8px; z-index: 3;
-            width: 24px; height: 24px; border-radius: 50%; border: none;
-            background: transparent; box-shadow: none;
-            color: var(--vsm-navy); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background-color .15s ease;
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 50;
+
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 50%;
+
+            background: rgba(255,255,255,.95);
+            backdrop-filter: blur(12px);
+
+            color: var(--vsm-navy);
+
+            cursor: pointer;
+
+            box-shadow:
+                0 8px 20px rgba(0,0,0,.12);
+
+            transition:
+                transform .25s ease,
+                background .25s ease,
+                box-shadow .25s ease;
         }
-        .vsm-sheet-close:hover { background: rgba(11,46,89,.1); }
-        .vsm-sheet-close svg { width: 15px; height: 15px; }
+
+        .vsm-sheet-close:hover{
+            background:#fff;
+            transform:scale(1.08) rotate(90deg);
+            box-shadow:
+                0 12px 28px rgba(0,0,0,.18);
+        }
+
+        .vsm-sheet-close:active{
+            transform:scale(.95);
+        }
+
+        .vsm-sheet-close svg{
+            width:18px;
+            height:18px;
+        }
         .vsm-sheet-scroll { overflow-y: auto; min-height: 0; flex: 1; }
         .vsm-sheet-hero { position: relative; width: 100%; height: 84px; background: var(--vsm-cyan-light); overflow: hidden; }
         .vsm-sheet-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -813,10 +850,9 @@
                 keyboard: true,
                 alt: fac.tenCoSo || ''
             });
-            marker.on('click', function () {
-                focusMarker(fac.coSoId, { pan: true });
-                openDetailSheet(fac);
-            });
+           marker.on('click', function () {
+               openDetailSheet(fac);
+           });
             marker.addTo(markerLayer);
             markerById.set(fac.coSoId, { marker: marker, fac: fac });
         });

@@ -139,6 +139,20 @@ public class CoSo {
         return HinhAnh;
     }
 
+    /** Trả về URL ảnh đại diện đầu tiên, xử lý cả JSON array lẫn plain URL. */
+    public String getThumbnailUrl() {
+        if (HinhAnh == null || HinhAnh.isBlank()) return null;
+        String s = HinhAnh.trim();
+        if (s.startsWith("[")) {
+            // JSON array: ["url1","url2"] → lấy url1
+            s = s.substring(1, s.endsWith("]") ? s.length() - 1 : s.length()).trim();
+            if (s.startsWith("\"")) s = s.substring(1);
+            int end = s.indexOf('"');
+            return end > 0 ? s.substring(0, end) : s;
+        }
+        return s;
+    }
+
     public void setHinhAnh(String hinhAnh) {
         HinhAnh = hinhAnh;
     }
