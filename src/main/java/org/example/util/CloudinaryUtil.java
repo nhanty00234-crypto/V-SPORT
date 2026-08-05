@@ -28,11 +28,15 @@ public final class CloudinaryUtil {
         if (instance == null) {
             synchronized (CloudinaryUtil.class) {
                 if (instance == null) {
+                    // Ưu tiên: env var → system property (-DCLOUDINARY_URL=... trong VM options)
                     String cloudinaryUrl = System.getenv(CLOUDINARY_URL_ENV);
                     if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
+                        cloudinaryUrl = System.getProperty(CLOUDINARY_URL_ENV);
+                    }
+                    if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
                         throw new IllegalStateException(
-                            "Biến môi trường CLOUDINARY_URL chưa được cấu hình. " +
-                            "Format: cloudinary://api_key:api_secret@cloud_name");
+                            "CLOUDINARY_URL chưa được cấu hình. Thêm vào Environment variables " +
+                            "hoặc VM options của Tomcat: CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name");
                     }
                     instance = new Cloudinary(cloudinaryUrl);
                 }
