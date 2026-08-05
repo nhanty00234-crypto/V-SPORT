@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>V-SPORT Sơ Đồ Thực Thể - Liên Kết</title>
+<title>V-SPORT Entity–Relationship Diagram</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,43 +14,43 @@
       <span class="wordmark" style="display:none;">V-SPORT</span>
     </div>
     <div class="header-titles">
-      <p class="main-title">SƠ ĐỒ THỰC THỂ - LIÊN KẾT</p>
-      <p class="group-title" id="groupTitle">TỔNG QUAN</p>
+      <p class="main-title">ENTITY–RELATIONSHIP DIAGRAM</p>
+      <p class="group-title" id="groupTitle">OVERVIEW</p>
     </div>
     <div class="header-mascot"></div>
   </header>
 
-  <nav class="group-nav" aria-label="Điều hướng nhóm ERD">
-    <h2>Nhóm sơ đồ</h2>
-    <input type="search" class="search-box" id="tableSearch" placeholder="Tìm bảng..." aria-label="Tìm bảng" />
+  <nav class="group-nav" aria-label="ERD Group Navigation">
+    <h2>ERD Groups</h2>
+    <input type="search" class="search-box" id="tableSearch" placeholder="Search table..." aria-label="Search table" />
     <ul class="nav-list" id="navList">
-      <li><button class="nav-item overview-item" data-view="overview">Tổng quan</button></li>
+      <li><button class="nav-item overview-item" data-view="overview">Overview</button></li>
     </ul>
   </nav>
 
   <div class="main-area">
-    <div class="toolbar" role="toolbar" aria-label="Điều khiển ERD">
-      <button id="prevBtn" aria-label="Nhóm trước">&#8592; Trước</button>
-      <button id="nextBtn" aria-label="Nhóm sau">Sau &#8594;</button>
+    <div class="toolbar" role="toolbar" aria-label="ERD Controls">
+      <button id="prevBtn" aria-label="Previous group">&#8592; Prev</button>
+      <button id="nextBtn" aria-label="Next group">Next &#8594;</button>
       <span class="spacer" style="flex:0 0 16px;"></span>
-      <button id="zoomOut" aria-label="Thu nhỏ">−</button>
+      <button id="zoomOut" aria-label="Zoom out">−</button>
       <span class="zoom-readout" id="zoomReadout">100%</span>
-      <button id="zoomIn" aria-label="Phóng to">+</button>
-      <button id="fitBtn" aria-label="Vừa khung">Vừa khung</button>
-      <button id="resetZoomBtn" aria-label="Đặt lại độ phóng">Đặt lại (0)</button>
-      <button id="resetLayoutBtn" aria-label="Đặt lại vị trí bảng">Đặt lại bố cục</button>
+      <button id="zoomIn" aria-label="Zoom in">+</button>
+      <button id="fitBtn" aria-label="Fit to frame">Fit (0)</button>
+      <button id="resetZoomBtn" aria-label="Reset zoom" style="display:none;">Reset Zoom</button>
+      <button id="resetLayoutBtn" aria-label="Reset layout">Reset Layout</button>
       <span class="spacer"></span>
-      <button id="extendedToggle" aria-pressed="false">Xem cột mở rộng (E)</button>
-      <button id="screenshotToggle" aria-pressed="false">Chế độ chụp màn hình (S)</button>
+      <button id="extendedToggle" aria-pressed="false">Extended Columns (E)</button>
+      <button id="screenshotToggle" aria-pressed="false">Screenshot Mode (S)</button>
     </div>
 
     <div class="screenshot-header" id="screenshotHeader">
       <div class="header-logo">
-        <img src="assets/logo.png" alt="Logo V-SPORT" onerror="this.style.display='none';" />
+        <img src="assets/logo.png" alt="V-SPORT Logo" onerror="this.style.display='none';" />
       </div>
       <div class="header-titles">
-        <p class="main-title">SƠ ĐỒ THỰC THỂ - LIÊN KẾT</p>
-        <p class="group-title" id="ssGroupTitle">TỔNG QUAN</p>
+        <p class="main-title">ENTITY–RELATIONSHIP DIAGRAM</p>
+        <p class="group-title" id="ssGroupTitle">OVERVIEW</p>
       </div>
       <div class="header-mascot"></div>
     </div>
@@ -60,12 +60,12 @@
     </div>
 
     <div class="legend" aria-hidden="true">
-      <span class="legend-item"><span class="swatch" style="background:#F59E0B"></span> PK (Khóa chính)</span>
-      <span class="legend-item"><span class="swatch" style="background:#2563EB"></span> FK (Khóa ngoại)</span>
-      <span class="legend-item"><span class="swatch" style="background:#7C3AED"></span> UQ (Duy nhất)</span>
-      <span class="legend-item"><span class="swatch" style="background:#94A3B8"></span> Nullable (Có thể trống)</span>
-      <span class="legend-item"><span class="swatch" style="background:#315B7D"></span> Quan hệ</span>
-      <span class="legend-item">Bậc số lượng hiển thị dạng 1 / 0..1 / N ở mỗi đầu</span>
+      <span class="legend-item"><span class="swatch" style="background:#F59E0B"></span> PK (Primary Key)</span>
+      <span class="legend-item"><span class="swatch" style="background:#2563EB"></span> FK (Foreign Key)</span>
+      <span class="legend-item"><span class="swatch" style="background:#7C3AED"></span> UQ (Unique)</span>
+      <span class="legend-item"><span class="swatch" style="background:#94A3B8"></span> NULL (Nullable)</span>
+      <span class="legend-item"><span class="swatch" style="background:#315B7D"></span> Relationship</span>
+      <span class="legend-item">Cardinality shown as 1 / 0..1 / N at each end</span>
     </div>
   </div>
 </div>

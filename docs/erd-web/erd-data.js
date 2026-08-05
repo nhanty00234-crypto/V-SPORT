@@ -1,21 +1,21 @@
-/* V-SPORT ERD — dữ liệu nguồn duy nhất (schema đúng, đầy đủ).
- * 35 thực thể logic, 21 nhóm màn hình. Toàn bộ đường quan hệ được suy ra
- * (derive) từ metadata FK (thamChieu) khai báo trong từng cột — không có
- * danh sách cạnh thủ công nào khác trong app.js.
+/* V-SPORT ERD — single source of truth (correct schema, complete).
+ * 35 logical entities, 21 screen groups. All relationship lines are derived
+ * from FK metadata (thamChieu) declared in each column — no manual edge list
+ * exists anywhere in app.js.
  *
- * Mỗi cột:
+ * Each column:
  * {
- *   columnKey,     // tên cột vật lý
- *   tenHienThi,    // tên cột hiển thị (tiếng Việt có dấu)
- *   kieu,          // kiểu SQL hiển thị
- *   pk, fk, unique, nullable,  // cờ ràng buộc
- *   thamChieu,     // "TargetTableKey.TargetColumnKey" — chỉ khi fk === true
- *   ghiChuNgan,    // ghi chú ngắn tuỳ chọn
- *   vaiTro,        // nhãn vai trò khi có nhiều FK cùng trỏ tới 1 bảng
- *   fkLogic,       // true = khóa ngoại LOGIC (không vẽ đường nối thật)
+ *   columnKey,     // physical column name
+ *   tenHienThi,    // display name (English)
+ *   kieu,          // SQL type
+ *   pk, fk, unique, nullable,
+ *   thamChieu,     // "TargetTableKey.TargetColumnKey" — only when fk === true
+ *   ghiChuNgan,    // optional short note
+ *   vaiTro,        // role label when multiple FKs point to same table
+ *   fkLogic,       // true = LOGICAL FK (no connector drawn)
  * }
  *
- * Mỗi thực thể:
+ * Each entity:
  * { tableKey, tenVatLy, tenHienThi, ghiChu, cotChinh: [...], cotMoRong: [...] }
  */
 (function (global) {
@@ -26,11 +26,11 @@
     {
       tableKey: 'Roles',
       tenVatLy: 'Roles',
-      tenHienThi: 'VAI TRÒ',
-      ghiChu: '',
+      tenHienThi: 'ROLES',
+      ghiChu: 'Purpose: Defines the system roles assigned to user accounts.',
       cotChinh: [
-        { columnKey: 'RoleID', tenHienThi: 'Mã vai trò', kieu: 'INT', pk: true },
-        { columnKey: 'RoleName', tenHienThi: 'Tên vai trò', kieu: 'NVARCHAR(50)', unique: true }
+        { columnKey: 'RoleID', tenHienThi: 'Role ID', kieu: 'INT', pk: true },
+        { columnKey: 'RoleName', tenHienThi: 'Role Name', kieu: 'NVARCHAR(50)', unique: true }
       ],
       cotMoRong: []
     },
@@ -39,24 +39,24 @@
     {
       tableKey: 'Accounts',
       tenVatLy: 'Accounts',
-      tenHienThi: 'TÀI KHOẢN',
-      ghiChu: 'Chỉ 4 vai trò chính thức: ADMIN, MANAGER, STAFF, CUSTOMER.',
+      tenHienThi: 'ACCOUNTS',
+      ghiChu: 'Purpose: Stores user login, profile, facility assignment, and reputation information.',
       cotChinh: [
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', pk: true },
-        { columnKey: 'RoleID', tenHienThi: 'Mã vai trò', kieu: 'INT', fk: true, thamChieu: 'Roles.RoleID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, nullable: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'FullName', tenHienThi: 'Họ và tên', kieu: 'NVARCHAR(255)' },
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', pk: true },
+        { columnKey: 'RoleID', tenHienThi: 'Role ID', kieu: 'INT', fk: true, thamChieu: 'Roles.RoleID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'FullName', tenHienThi: 'Full Name', kieu: 'NVARCHAR(255)' },
         { columnKey: 'Email', tenHienThi: 'Email', kieu: 'VARCHAR(100)', unique: true },
-        { columnKey: 'PhoneNumber', tenHienThi: 'Số điện thoại', kieu: 'NVARCHAR(20)', unique: true, nullable: true },
-        { columnKey: 'Password', tenHienThi: 'Mật khẩu đã băm', kieu: 'VARCHAR(255)' },
-        { columnKey: 'AvatarUrl', tenHienThi: 'Ảnh đại diện', kieu: 'NVARCHAR(500)', nullable: true },
-        { columnKey: 'DiemUyTin', tenHienThi: 'Điểm uy tín', kieu: 'INT', ghiChuNgan: 'mặc định 100' }
+        { columnKey: 'PhoneNumber', tenHienThi: 'Phone Number', kieu: 'NVARCHAR(20)', unique: true, nullable: true },
+        { columnKey: 'Password', tenHienThi: 'Password Hash', kieu: 'VARCHAR(255)' },
+        { columnKey: 'AvatarUrl', tenHienThi: 'Avatar URL', kieu: 'NVARCHAR(500)', nullable: true },
+        { columnKey: 'DiemUyTin', tenHienThi: 'Reputation Score', kieu: 'INT', ghiChuNgan: 'default 100' }
       ],
       cotMoRong: [
-        { columnKey: 'CoverImageUrl', tenHienThi: 'Ảnh bìa', kieu: 'NVARCHAR(500)', nullable: true },
-        { columnKey: 'DiemTrinhDo', tenHienThi: 'Điểm trình độ', kieu: 'INT' },
-        { columnKey: 'NgaySinh', tenHienThi: 'Ngày sinh', kieu: 'DATE', nullable: true },
-        { columnKey: 'GioiTinh', tenHienThi: 'Giới tính', kieu: 'NVARCHAR(10)', nullable: true }
+        { columnKey: 'CoverImageUrl', tenHienThi: 'Cover Image', kieu: 'NVARCHAR(500)', nullable: true },
+        { columnKey: 'DiemTrinhDo', tenHienThi: 'Skill Score', kieu: 'INT' },
+        { columnKey: 'NgaySinh', tenHienThi: 'Date of Birth', kieu: 'DATE', nullable: true },
+        { columnKey: 'GioiTinh', tenHienThi: 'Gender', kieu: 'NVARCHAR(10)', nullable: true }
       ]
     },
 
@@ -64,12 +64,12 @@
     {
       tableKey: 'MonTheThaoYeuThich',
       tenVatLy: 'MonTheThaoYeuThich',
-      tenHienThi: 'MÔN THỂ THAO YÊU THÍCH',
-      ghiChu: 'Bảng nối N-N giữa Tài khoản và Môn thể thao.',
+      tenHienThi: 'FAVORITE SPORTS',
+      ghiChu: 'Purpose: Links each customer account to the sports they prefer.',
       cotChinh: [
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', pk: true, fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'MonTheThaoID', tenHienThi: 'Mã môn thể thao', kieu: 'INT', pk: true, fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
-        { columnKey: 'NgayThem', tenHienThi: 'Ngày thêm', kieu: 'DATETIME' }
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', pk: true, fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', pk: true, fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
+        { columnKey: 'NgayThem', tenHienThi: 'Added At', kieu: 'DATETIME' }
       ],
       cotMoRong: []
     },
@@ -78,19 +78,19 @@
     {
       tableKey: 'CoSo',
       tenVatLy: 'CoSo',
-      tenHienThi: 'CƠ SỞ',
-      ghiChu: 'HinhAnh lưu mảng JSON đường dẫn, tối đa 10 ảnh. ViDo/KinhDo dùng cho bản đồ và tìm cơ sở gần nhất.',
+      tenHienThi: 'FACILITIES',
+      ghiChu: 'Purpose: Stores facility details, image gallery, operating hours, and map coordinates.',
       cotChinh: [
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', pk: true },
-        { columnKey: 'AccountID_QuanLy', tenHienThi: 'Mã quản lý', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Quản lý cơ sở' },
-        { columnKey: 'TenCoSo', tenHienThi: 'Tên cơ sở', kieu: 'NVARCHAR(255)' },
-        { columnKey: 'DiaChi', tenHienThi: 'Địa chỉ', kieu: 'NVARCHAR(500)' },
-        { columnKey: 'GioMoCua', tenHienThi: 'Giờ mở cửa', kieu: 'TIME' },
-        { columnKey: 'GioDongCua', tenHienThi: 'Giờ đóng cửa', kieu: 'TIME' },
-        { columnKey: 'HinhAnh', tenHienThi: 'Danh sách hình ảnh', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'JSON đường dẫn ảnh, tối đa 10 ảnh' },
-        { columnKey: 'ViDo', tenHienThi: 'Vĩ độ', kieu: 'DECIMAL(12,9)', nullable: true },
-        { columnKey: 'KinhDo', tenHienThi: 'Kinh độ', kieu: 'DECIMAL(12,9)', nullable: true },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' }
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', pk: true },
+        { columnKey: 'AccountID_QuanLy', tenHienThi: 'Manager Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Facility Manager' },
+        { columnKey: 'TenCoSo', tenHienThi: 'Facility Name', kieu: 'NVARCHAR(255)' },
+        { columnKey: 'DiaChi', tenHienThi: 'Address', kieu: 'NVARCHAR(500)' },
+        { columnKey: 'GioMoCua', tenHienThi: 'Opening Time', kieu: 'TIME' },
+        { columnKey: 'GioDongCua', tenHienThi: 'Closing Time', kieu: 'TIME' },
+        { columnKey: 'HinhAnh', tenHienThi: 'Image Gallery', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'JSON array of paths, max 10 images' },
+        { columnKey: 'ViDo', tenHienThi: 'Latitude', kieu: 'DECIMAL(12,9)', nullable: true },
+        { columnKey: 'KinhDo', tenHienThi: 'Longitude', kieu: 'DECIMAL(12,9)', nullable: true },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' }
       ],
       cotMoRong: []
     },
@@ -99,11 +99,11 @@
     {
       tableKey: 'MonTheThao',
       tenVatLy: 'MonTheThao',
-      tenHienThi: 'MÔN THỂ THAO',
-      ghiChu: '',
+      tenHienThi: 'SPORTS',
+      ghiChu: 'Purpose: Stores the sports supported by the booking system.',
       cotChinh: [
-        { columnKey: 'MonTheThaoID', tenHienThi: 'Mã môn thể thao', kieu: 'INT', pk: true },
-        { columnKey: 'TenMon', tenHienThi: 'Tên môn', kieu: 'NVARCHAR(50)', unique: true }
+        { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', pk: true },
+        { columnKey: 'TenMon', tenHienThi: 'Sport Name', kieu: 'NVARCHAR(50)', unique: true }
       ],
       cotMoRong: []
     },
@@ -112,16 +112,16 @@
     {
       tableKey: 'LoaiSan',
       tenVatLy: 'LoaiSan',
-      tenHienThi: 'LOẠI SÂN',
-      ghiChu: '',
+      tenHienThi: 'COURT TYPES',
+      ghiChu: 'Purpose: Defines court categories, supported sport, lighting periods, and hourly rates.',
       cotChinh: [
-        { columnKey: 'LoaiSanID', tenHienThi: 'Mã loại sân', kieu: 'INT', pk: true },
-        { columnKey: 'MonTheThaoID', tenHienThi: 'Mã môn thể thao', kieu: 'INT', fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
-        { columnKey: 'TenLoai', tenHienThi: 'Tên loại sân', kieu: 'NVARCHAR(100)' },
-        { columnKey: 'GiaKhongDen', tenHienThi: 'Giá không đèn', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'GiaCoDen', tenHienThi: 'Giá có đèn', kieu: 'DECIMAL(18,2)', nullable: true },
-        { columnKey: 'GioBatDauLenDen', tenHienThi: 'Giờ bắt đầu có đèn', kieu: 'TIME', nullable: true },
-        { columnKey: 'GioKetThucLenDen', tenHienThi: 'Giờ kết thúc có đèn', kieu: 'TIME', nullable: true }
+        { columnKey: 'LoaiSanID', tenHienThi: 'Court Type ID', kieu: 'INT', pk: true },
+        { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
+        { columnKey: 'TenLoai', tenHienThi: 'Court Type Name', kieu: 'NVARCHAR(100)' },
+        { columnKey: 'GiaKhongDen', tenHienThi: 'Unlit Hourly Rate', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'GiaCoDen', tenHienThi: 'Lit Hourly Rate', kieu: 'DECIMAL(18,2)', nullable: true },
+        { columnKey: 'GioBatDauLenDen', tenHienThi: 'Lighting Start Time', kieu: 'TIME', nullable: true },
+        { columnKey: 'GioKetThucLenDen', tenHienThi: 'Lighting End Time', kieu: 'TIME', nullable: true }
       ],
       cotMoRong: []
     },
@@ -130,15 +130,15 @@
     {
       tableKey: 'San',
       tenVatLy: 'San',
-      tenHienThi: 'SÂN',
-      ghiChu: '',
+      tenHienThi: 'COURTS',
+      ghiChu: 'Purpose: Stores the individual courts available at each facility.',
       cotChinh: [
-        { columnKey: 'SanID', tenHienThi: 'Mã sân', kieu: 'INT', pk: true },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'LoaiSanID', tenHienThi: 'Mã loại sân', kieu: 'INT', fk: true, thamChieu: 'LoaiSan.LoaiSanID' },
-        { columnKey: 'TenSan', tenHienThi: 'Tên sân', kieu: 'NVARCHAR(100)' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'HinhAnh', tenHienThi: 'Hình ảnh', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'đường dẫn ảnh' }
+        { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', pk: true },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'LoaiSanID', tenHienThi: 'Court Type ID', kieu: 'INT', fk: true, thamChieu: 'LoaiSan.LoaiSanID' },
+        { columnKey: 'TenSan', tenHienThi: 'Court Name', kieu: 'NVARCHAR(100)' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'HinhAnh', tenHienThi: 'Image URL', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'image path' }
       ],
       cotMoRong: []
     },
@@ -147,16 +147,16 @@
     {
       tableKey: 'SoftHold',
       tenVatLy: 'SoftHold',
-      tenHienThi: 'GIỮ CHỖ TẠM',
-      ghiChu: '',
+      tenHienThi: 'SOFT HOLDS',
+      ghiChu: 'Purpose: Temporarily reserves a court slot while a customer completes a booking.',
       cotChinh: [
-        { columnKey: 'HoldID', tenHienThi: 'Mã giữ chỗ', kieu: 'INT', pk: true },
-        { columnKey: 'SanID', tenHienThi: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'NgayDat', tenHienThi: 'Ngày đặt', kieu: 'DATE' },
-        { columnKey: 'GioBatDau', tenHienThi: 'Giờ bắt đầu', kieu: 'TIME' },
-        { columnKey: 'GioKetThuc', tenHienThi: 'Giờ kết thúc', kieu: 'TIME' },
-        { columnKey: 'ExpiresAt', tenHienThi: 'Hết hạn lúc', kieu: 'DATETIME2' }
+        { columnKey: 'HoldID', tenHienThi: 'Hold ID', kieu: 'INT', pk: true },
+        { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'NgayDat', tenHienThi: 'Booking Date', kieu: 'DATE' },
+        { columnKey: 'GioBatDau', tenHienThi: 'Start Time', kieu: 'TIME' },
+        { columnKey: 'GioKetThuc', tenHienThi: 'End Time', kieu: 'TIME' },
+        { columnKey: 'ExpiresAt', tenHienThi: 'Expires At', kieu: 'DATETIME2' }
       ],
       cotMoRong: []
     },
@@ -165,26 +165,26 @@
     {
       tableKey: 'LichDatSan',
       tenVatLy: 'LichDatSan',
-      tenHienThi: 'LỊCH ĐẶT SÂN',
-      ghiChu: '',
+      tenHienThi: 'BOOKINGS',
+      ghiChu: 'Purpose: Stores court reservations and their planned and actual usage times.',
       cotChinh: [
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', pk: true },
-        { columnKey: 'AccountID', tenHienThi: 'Mã khách hàng', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'SanID', tenHienThi: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
-        { columnKey: 'NgayDat', tenHienThi: 'Ngày đặt', kieu: 'DATE' },
-        { columnKey: 'GioBatDau', tenHienThi: 'Giờ bắt đầu', kieu: 'TIME' },
-        { columnKey: 'GioKetThuc', tenHienThi: 'Giờ kết thúc', kieu: 'TIME' },
-        { columnKey: 'TongTienDuKien', tenHienThi: 'Tổng tiền dự kiến', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'ActualStartAt', tenHienThi: 'Bắt đầu thực tế', kieu: 'DATETIME2', nullable: true },
-        { columnKey: 'ActualEndAt', tenHienThi: 'Kết thúc thực tế', kieu: 'DATETIME2', nullable: true }
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', pk: true },
+        { columnKey: 'AccountID', tenHienThi: 'Customer Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Customer' },
+        { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
+        { columnKey: 'NgayDat', tenHienThi: 'Booking Date', kieu: 'DATE' },
+        { columnKey: 'GioBatDau', tenHienThi: 'Start Time', kieu: 'TIME' },
+        { columnKey: 'GioKetThuc', tenHienThi: 'End Time', kieu: 'TIME' },
+        { columnKey: 'TongTienDuKien', tenHienThi: 'Estimated Total', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'ActualStartAt', tenHienThi: 'Actual Start At', kieu: 'DATETIME2', nullable: true },
+        { columnKey: 'ActualEndAt', tenHienThi: 'Actual End At', kieu: 'DATETIME2', nullable: true }
       ],
       cotMoRong: [
-        { columnKey: 'BookingSource', tenHienThi: 'Nguồn đặt sân', kieu: 'NVARCHAR(50)', nullable: true },
-        { columnKey: 'CancelType', tenHienThi: 'Loại hủy', kieu: 'NVARCHAR(50)', nullable: true },
-        { columnKey: 'CancelReason', tenHienThi: 'Lý do hủy', kieu: 'NVARCHAR(500)', nullable: true },
-        { columnKey: 'ConfirmedBy', tenHienThi: 'Người xác nhận', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người xác nhận' },
-        { columnKey: 'CancelledBy', tenHienThi: 'Người hủy', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người hủy' }
+        { columnKey: 'BookingSource', tenHienThi: 'Booking Source', kieu: 'NVARCHAR(50)', nullable: true },
+        { columnKey: 'CancelType', tenHienThi: 'Cancellation Type', kieu: 'NVARCHAR(50)', nullable: true },
+        { columnKey: 'CancelReason', tenHienThi: 'Cancellation Reason', kieu: 'NVARCHAR(500)', nullable: true },
+        { columnKey: 'ConfirmedBy', tenHienThi: 'Confirmed By Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Confirmed By' },
+        { columnKey: 'CancelledBy', tenHienThi: 'Cancelled By Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Cancelled By' }
       ]
     },
 
@@ -192,15 +192,15 @@
     {
       tableKey: 'BookingExtension',
       tenVatLy: 'BookingExtension',
-      tenHienThi: 'LỊCH SỬ GIA HẠN',
-      ghiChu: '',
+      tenHienThi: 'BOOKING EXTENSIONS',
+      ghiChu: 'Purpose: Records approved booking extensions and additional charges.',
       cotChinh: [
-        { columnKey: 'ExtensionID', tenHienThi: 'Mã gia hạn', kieu: 'INT', pk: true },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'NewGioKetThucDateTime', tenHienThi: 'Kết thúc mới', kieu: 'DATETIME2' },
-        { columnKey: 'AdditionalAmount', tenHienThi: 'Phí phát sinh', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'OperatorAccountID', tenHienThi: 'Nhân viên thao tác', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người thao tác' },
-        { columnKey: 'CreatedAt', tenHienThi: 'Thời gian tạo', kieu: 'DATETIME2' }
+        { columnKey: 'ExtensionID', tenHienThi: 'Extension ID', kieu: 'INT', pk: true },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'NewGioKetThucDateTime', tenHienThi: 'New End DateTime', kieu: 'DATETIME2' },
+        { columnKey: 'AdditionalAmount', tenHienThi: 'Additional Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'OperatorAccountID', tenHienThi: 'Operator Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Operator' },
+        { columnKey: 'CreatedAt', tenHienThi: 'Created At', kieu: 'DATETIME2' }
       ],
       cotMoRong: []
     },
@@ -209,11 +209,11 @@
     {
       tableKey: 'DanhMucSanPham',
       tenVatLy: 'DanhMucSanPham',
-      tenHienThi: 'DANH MỤC SẢN PHẨM',
-      ghiChu: '',
+      tenHienThi: 'PRODUCT CATEGORIES',
+      ghiChu: 'Purpose: Groups products and services sold at facilities.',
       cotChinh: [
-        { columnKey: 'DanhMucID', tenHienThi: 'Mã danh mục', kieu: 'INT', pk: true },
-        { columnKey: 'TenDanhMuc', tenHienThi: 'Tên danh mục', kieu: 'NVARCHAR(100)', unique: true }
+        { columnKey: 'DanhMucID', tenHienThi: 'Category ID', kieu: 'INT', pk: true },
+        { columnKey: 'TenDanhMuc', tenHienThi: 'Category Name', kieu: 'NVARCHAR(100)', unique: true }
       ],
       cotMoRong: []
     },
@@ -222,17 +222,17 @@
     {
       tableKey: 'SanPham_DichVu',
       tenVatLy: 'SanPham_DichVu',
-      tenHienThi: 'SẢN PHẨM DỊCH VỤ',
-      ghiChu: '',
+      tenHienThi: 'PRODUCTS & SERVICES',
+      ghiChu: 'Purpose: Stores facility products, services, stock, prices, and images.',
       cotChinh: [
-        { columnKey: 'SanPhamID', tenHienThi: 'Mã sản phẩm', kieu: 'INT', pk: true },
-        { columnKey: 'DanhMucID', tenHienThi: 'Mã danh mục', kieu: 'INT', fk: true, thamChieu: 'DanhMucSanPham.DanhMucID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'TenSanPham', tenHienThi: 'Tên sản phẩm', kieu: 'NVARCHAR(200)' },
-        { columnKey: 'DonGia', tenHienThi: 'Đơn giá', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'SoLuongTon', tenHienThi: 'Số lượng tồn', kieu: 'INT' },
-        { columnKey: 'HinhAnh', tenHienThi: 'Hình ảnh', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'đường dẫn ảnh' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' }
+        { columnKey: 'SanPhamID', tenHienThi: 'Product ID', kieu: 'INT', pk: true },
+        { columnKey: 'DanhMucID', tenHienThi: 'Category ID', kieu: 'INT', fk: true, thamChieu: 'DanhMucSanPham.DanhMucID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'TenSanPham', tenHienThi: 'Product Name', kieu: 'NVARCHAR(200)' },
+        { columnKey: 'DonGia', tenHienThi: 'Unit Price', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'SoLuongTon', tenHienThi: 'Stock Quantity', kieu: 'INT' },
+        { columnKey: 'HinhAnh', tenHienThi: 'Image URL', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'image path' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' }
       ],
       cotMoRong: []
     },
@@ -241,17 +241,17 @@
     {
       tableKey: 'LichDatSan_DichVu',
       tenVatLy: 'LichDatSan_DichVu',
-      tenHienThi: 'DỊCH VỤ ĐẶT KÈM',
-      ghiChu: '',
+      tenHienThi: 'BOOKING SERVICES',
+      ghiChu: 'Purpose: Records products or services added to a court booking.',
       cotChinh: [
-        { columnKey: 'Id', tenHienThi: 'Mã chi tiết', kieu: 'INT', pk: true },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'SanPhamID', tenHienThi: 'Mã sản phẩm', kieu: 'INT', fk: true, thamChieu: 'SanPham_DichVu.SanPhamID' },
-        { columnKey: 'Quantity', tenHienThi: 'Số lượng', kieu: 'INT' },
-        { columnKey: 'UnitPrice', tenHienThi: 'Đơn giá', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'TotalPrice', tenHienThi: 'Thành tiền', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'Status', tenHienThi: 'Trạng thái giao', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'DeliveredBy', tenHienThi: 'Nhân viên giao', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Nhân viên giao' }
+        { columnKey: 'Id', tenHienThi: 'Detail ID', kieu: 'INT', pk: true },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'SanPhamID', tenHienThi: 'Product ID', kieu: 'INT', fk: true, thamChieu: 'SanPham_DichVu.SanPhamID' },
+        { columnKey: 'Quantity', tenHienThi: 'Quantity', kieu: 'INT' },
+        { columnKey: 'UnitPrice', tenHienThi: 'Unit Price', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'TotalPrice', tenHienThi: 'Line Total', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'Status', tenHienThi: 'Delivery Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'DeliveredBy', tenHienThi: 'Delivered By Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Handling Staff' }
       ],
       cotMoRong: []
     },
@@ -260,19 +260,19 @@
     {
       tableKey: 'HoaDon',
       tenVatLy: 'HoaDon',
-      tenHienThi: 'HÓA ĐƠN',
-      ghiChu: '',
+      tenHienThi: 'INVOICES',
+      ghiChu: 'Purpose: Stores the financial summary and payment status of a booking.',
       cotChinh: [
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', pk: true },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'KhuyenMaiID', tenHienThi: 'Mã khuyến mãi', kieu: 'INT', fk: true, nullable: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
-        { columnKey: 'ParentHoaDonID', tenHienThi: 'Hóa đơn cha', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID', ghiChuNgan: 'tự tham chiếu' },
-        { columnKey: 'TongTienSan', tenHienThi: 'Tiền sân', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'TongTienDichVu', tenHienThi: 'Tiền dịch vụ', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'GiamGia', tenHienThi: 'Giảm giá', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'TongThanhToan', tenHienThi: 'Tổng thanh toán', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'PhuongThucThanhToan', tenHienThi: 'Phương thức', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'TrangThaiThanhToan', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' }
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', pk: true },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
+        { columnKey: 'ParentHoaDonID', tenHienThi: 'Parent Invoice ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID', ghiChuNgan: 'self-reference' },
+        { columnKey: 'TongTienSan', tenHienThi: 'Court Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'TongTienDichVu', tenHienThi: 'Service Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'GiamGia', tenHienThi: 'Discount Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'TongThanhToan', tenHienThi: 'Total Payable', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'PhuongThucThanhToan', tenHienThi: 'Payment Method', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'TrangThaiThanhToan', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' }
       ],
       cotMoRong: []
     },
@@ -281,15 +281,15 @@
     {
       tableKey: 'ChiTietHoaDon',
       tenVatLy: 'ChiTietHoaDon',
-      tenHienThi: 'CHI TIẾT HÓA ĐƠN',
-      ghiChu: '',
+      tenHienThi: 'INVOICE ITEMS',
+      ghiChu: 'Purpose: Stores product and service line items included in an invoice.',
       cotChinh: [
-        { columnKey: 'ChiTietID', tenHienThi: 'Mã chi tiết', kieu: 'INT', pk: true },
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
-        { columnKey: 'SanPhamID', tenHienThi: 'Mã sản phẩm', kieu: 'INT', fk: true, thamChieu: 'SanPham_DichVu.SanPhamID' },
-        { columnKey: 'SoLuong', tenHienThi: 'Số lượng', kieu: 'INT' },
-        { columnKey: 'DonGiaTaiThoiDiemBan', tenHienThi: 'Đơn giá bán', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'ThanhTien', tenHienThi: 'Thành tiền', kieu: 'DECIMAL(18,2)' }
+        { columnKey: 'ChiTietID', tenHienThi: 'Detail ID', kieu: 'INT', pk: true },
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
+        { columnKey: 'SanPhamID', tenHienThi: 'Product ID', kieu: 'INT', fk: true, thamChieu: 'SanPham_DichVu.SanPhamID' },
+        { columnKey: 'SoLuong', tenHienThi: 'Quantity', kieu: 'INT' },
+        { columnKey: 'DonGiaTaiThoiDiemBan', tenHienThi: 'Sale Unit Price', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'ThanhTien', tenHienThi: 'Line Total', kieu: 'DECIMAL(18,2)' }
       ],
       cotMoRong: []
     },
@@ -298,17 +298,17 @@
     {
       tableKey: 'CourtChargeSegment',
       tenVatLy: 'CourtChargeSegment',
-      tenHienThi: 'PHÂN ĐOẠN TÍNH GIÁ',
-      ghiChu: '',
+      tenHienThi: 'COURT CHARGE SEGMENTS',
+      ghiChu: 'Purpose: Splits court usage into time segments with different hourly rates.',
       cotChinh: [
-        { columnKey: 'SegmentID', tenHienThi: 'Mã phân đoạn', kieu: 'INT', pk: true },
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'StartAt', tenHienThi: 'Bắt đầu', kieu: 'DATETIME2' },
-        { columnKey: 'EndAt', tenHienThi: 'Kết thúc', kieu: 'DATETIME2' },
-        { columnKey: 'RateType', tenHienThi: 'Loại giá', kieu: 'NVARCHAR(30)', ghiChuNgan: 'có đèn/không đèn' },
-        { columnKey: 'HourlyRate', tenHienThi: 'Đơn giá giờ', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'Amount', tenHienThi: 'Thành tiền', kieu: 'DECIMAL(18,2)' }
+        { columnKey: 'SegmentID', tenHienThi: 'Segment ID', kieu: 'INT', pk: true },
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'StartAt', tenHienThi: 'Start At', kieu: 'DATETIME2' },
+        { columnKey: 'EndAt', tenHienThi: 'End At', kieu: 'DATETIME2' },
+        { columnKey: 'RateType', tenHienThi: 'Rate Type', kieu: 'NVARCHAR(30)', ghiChuNgan: 'lit / unlit' },
+        { columnKey: 'HourlyRate', tenHienThi: 'Hourly Rate', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'Amount', tenHienThi: 'Line Total', kieu: 'DECIMAL(18,2)' }
       ],
       cotMoRong: []
     },
@@ -317,18 +317,18 @@
     {
       tableKey: 'PayOSPaymentAttempt',
       tenVatLy: 'PayOSPaymentAttempt',
-      tenHienThi: 'GIAO DỊCH PAYOS',
-      ghiChu: 'QrCode là payload/nội dung QR thanh toán trả về từ PayOS, không phải file ảnh, không liên kết SanQR.',
+      tenHienThi: 'PAYOS PAYMENT ATTEMPTS',
+      ghiChu: 'Purpose: Tracks PayOS payment orders, QR payloads, amounts, and outcomes.',
       cotChinh: [
-        { columnKey: 'AttemptID', tenHienThi: 'Mã giao dịch', kieu: 'BIGINT', pk: true },
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'OrderCode', tenHienThi: 'Mã đơn PayOS', kieu: 'BIGINT', unique: true },
-        { columnKey: 'QrCode', tenHienThi: 'Payload QR', kieu: 'NVARCHAR(MAX)', nullable: true },
-        { columnKey: 'Amount', tenHienThi: 'Số tiền', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'Status', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(30)' },
-        { columnKey: 'PaidAt', tenHienThi: 'Thanh toán lúc', kieu: 'DATETIME2', nullable: true }
+        { columnKey: 'AttemptID', tenHienThi: 'Payment Attempt ID', kieu: 'BIGINT', pk: true },
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'OrderCode', tenHienThi: 'PayOS Order Code', kieu: 'BIGINT', unique: true },
+        { columnKey: 'QrCode', tenHienThi: 'QR Payload', kieu: 'NVARCHAR(MAX)', nullable: true },
+        { columnKey: 'Amount', tenHienThi: 'Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'Status', tenHienThi: 'Status', kieu: 'NVARCHAR(30)' },
+        { columnKey: 'PaidAt', tenHienThi: 'Paid At', kieu: 'DATETIME2', nullable: true }
       ],
       cotMoRong: []
     },
@@ -337,20 +337,20 @@
     {
       tableKey: 'KhuyenMai',
       tenVatLy: 'KhuyenMai',
-      tenHienThi: 'KHUYẾN MÃI',
-      ghiChu: '',
+      tenHienThi: 'PROMOTIONS',
+      ghiChu: 'Purpose: Stores promotion rules, validity periods, limits, and facility scope.',
       cotChinh: [
-        { columnKey: 'KhuyenMaiID', tenHienThi: 'Mã khuyến mãi', kieu: 'INT', pk: true },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, nullable: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'MaCode', tenHienThi: 'Mã code', kieu: 'VARCHAR(50)', unique: true },
-        { columnKey: 'LoaiGiam', tenHienThi: 'Loại giảm', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'GiaTriGiam', tenHienThi: 'Giá trị giảm', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'NgayBatDau', tenHienThi: 'Ngày bắt đầu', kieu: 'DATE' },
-        { columnKey: 'NgayKetThuc', tenHienThi: 'Ngày kết thúc', kieu: 'DATE' },
-        { columnKey: 'GiaTriToiThieu', tenHienThi: 'Giá trị tối thiểu', kieu: 'DECIMAL(18,2)', nullable: true },
-        { columnKey: 'GiamToiDa', tenHienThi: 'Giảm tối đa', kieu: 'DECIMAL(18,2)', nullable: true },
-        { columnKey: 'HienThiCongKhai', tenHienThi: 'Hiển thị công khai', kieu: 'BIT' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' }
+        { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', pk: true },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'MaCode', tenHienThi: 'Promotion Code', kieu: 'VARCHAR(50)', unique: true },
+        { columnKey: 'LoaiGiam', tenHienThi: 'Discount Type', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'GiaTriGiam', tenHienThi: 'Discount Value', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'NgayBatDau', tenHienThi: 'Start Date', kieu: 'DATE' },
+        { columnKey: 'NgayKetThuc', tenHienThi: 'End Date', kieu: 'DATE' },
+        { columnKey: 'GiaTriToiThieu', tenHienThi: 'Minimum Order Value', kieu: 'DECIMAL(18,2)', nullable: true },
+        { columnKey: 'GiamToiDa', tenHienThi: 'Maximum Discount', kieu: 'DECIMAL(18,2)', nullable: true },
+        { columnKey: 'HienThiCongKhai', tenHienThi: 'Publicly Visible', kieu: 'BIT' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' }
       ],
       cotMoRong: []
     },
@@ -359,21 +359,21 @@
     {
       tableKey: 'KhuyenMaiHinhAnh',
       tenVatLy: 'KhuyenMaiHinhAnh',
-      tenHienThi: 'HÌNH ẢNH KHUYẾN MÃI',
-      ghiChu: 'Tối đa 5 ảnh/khuyến mãi, đúng tối đa 1 ảnh bìa/khuyến mãi.',
+      tenHienThi: 'PROMOTION IMAGES',
+      ghiChu: 'Purpose: Stores the ordered image gallery and cover image of a promotion.',
       cotChinh: [
-        { columnKey: 'HinhAnhID', tenHienThi: 'Mã hình ảnh', kieu: 'INT', pk: true },
-        { columnKey: 'KhuyenMaiID', tenHienThi: 'Mã khuyến mãi', kieu: 'INT', fk: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
-        { columnKey: 'DuongDan', tenHienThi: 'Đường dẫn', kieu: 'NVARCHAR(500)' },
-        { columnKey: 'ThuTu', tenHienThi: 'Thứ tự', kieu: 'INT' },
-        { columnKey: 'LaAnhBia', tenHienThi: 'Là ảnh bìa', kieu: 'BIT', ghiChuNgan: 'tối đa một ảnh bìa/khuyến mãi' }
+        { columnKey: 'HinhAnhID', tenHienThi: 'Image ID', kieu: 'INT', pk: true },
+        { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', fk: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
+        { columnKey: 'DuongDan', tenHienThi: 'File Path', kieu: 'NVARCHAR(500)' },
+        { columnKey: 'ThuTu', tenHienThi: 'Display Order', kieu: 'INT' },
+        { columnKey: 'LaAnhBia', tenHienThi: 'Is Cover Image', kieu: 'BIT', ghiChuNgan: 'max one cover per promotion' }
       ],
       cotMoRong: [
-        { columnKey: 'OriginalFileName', tenHienThi: 'Tên file gốc', kieu: 'NVARCHAR(255)', nullable: true },
-        { columnKey: 'MimeType', tenHienThi: 'MIME type', kieu: 'NVARCHAR(100)', nullable: true },
-        { columnKey: 'FileSize', tenHienThi: 'Dung lượng', kieu: 'BIGINT', nullable: true },
-        { columnKey: 'Width', tenHienThi: 'Chiều rộng', kieu: 'INT', nullable: true },
-        { columnKey: 'Height', tenHienThi: 'Chiều cao', kieu: 'INT', nullable: true }
+        { columnKey: 'OriginalFileName', tenHienThi: 'Original File Name', kieu: 'NVARCHAR(255)', nullable: true },
+        { columnKey: 'MimeType', tenHienThi: 'MIME Type', kieu: 'NVARCHAR(100)', nullable: true },
+        { columnKey: 'FileSize', tenHienThi: 'File Size', kieu: 'BIGINT', nullable: true },
+        { columnKey: 'Width', tenHienThi: 'Width', kieu: 'INT', nullable: true },
+        { columnKey: 'Height', tenHienThi: 'Height', kieu: 'INT', nullable: true }
       ]
     },
 
@@ -381,14 +381,14 @@
     {
       tableKey: 'LichSuKhuyenMai',
       tenVatLy: 'LichSuKhuyenMai',
-      tenHienThi: 'LỊCH SỬ DÙNG KHUYẾN MÃI',
-      ghiChu: '',
+      tenHienThi: 'PROMOTION USAGE HISTORY',
+      ghiChu: 'Purpose: Records when an account uses a promotion for an invoice.',
       cotChinh: [
-        { columnKey: 'LichSuKhuyenMaiID', tenHienThi: 'Mã lịch sử', kieu: 'INT', pk: true },
-        { columnKey: 'KhuyenMaiID', tenHienThi: 'Mã khuyến mãi', kieu: 'INT', fk: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID' },
-        { columnKey: 'ThoiGianSuDung', tenHienThi: 'Thời gian sử dụng', kieu: 'DATETIME2' }
+        { columnKey: 'LichSuKhuyenMaiID', tenHienThi: 'History ID', kieu: 'INT', pk: true },
+        { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', fk: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID' },
+        { columnKey: 'ThoiGianSuDung', tenHienThi: 'Used At', kieu: 'DATETIME2' }
       ],
       cotMoRong: []
     },
@@ -397,19 +397,19 @@
     {
       tableKey: 'HoanTien',
       tenVatLy: 'HoanTien',
-      tenHienThi: 'HOÀN TIỀN',
-      ghiChu: '',
+      tenHienThi: 'REFUNDS',
+      ghiChu: 'Purpose: Stores refund requests, approval results, and the customer\'s receiving QR image.',
       cotChinh: [
-        { columnKey: 'HoanTienID', tenHienThi: 'Mã hoàn tiền', kieu: 'INT', pk: true },
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID' },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'AccountID', tenHienThi: 'Mã khách hàng', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Khách hàng' },
-        { columnKey: 'SoTienDeNghiHoan', tenHienThi: 'Số tiền đề nghị', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'SoTienDuocDuyet', tenHienThi: 'Số tiền được duyệt', kieu: 'DECIMAL(18,2)', nullable: true },
-        { columnKey: 'QrNhanTienPath', tenHienThi: 'Ảnh QR nhận tiền', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'đường dẫn ảnh QR ngân hàng do khách tải lên' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'NguoiDuyetID', tenHienThi: 'Người duyệt', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người duyệt' }
+        { columnKey: 'HoanTienID', tenHienThi: 'Refund ID', kieu: 'INT', pk: true },
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID' },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'AccountID', tenHienThi: 'Customer Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Customer' },
+        { columnKey: 'SoTienDeNghiHoan', tenHienThi: 'Requested Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'SoTienDuocDuyet', tenHienThi: 'Approved Amount', kieu: 'DECIMAL(18,2)', nullable: true },
+        { columnKey: 'QrNhanTienPath', tenHienThi: 'Receiving QR Image', kieu: 'NVARCHAR(500)', nullable: true, ghiChuNgan: 'bank QR image path uploaded by customer' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'NguoiDuyetID', tenHienThi: 'Approver Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Approver' }
       ],
       cotMoRong: []
     },
@@ -418,14 +418,14 @@
     {
       tableKey: 'SanQR',
       tenVatLy: 'SanQR',
-      tenHienThi: 'MÃ QR SÂN',
-      ghiChu: 'Ảnh QR được sinh động từ Token/ShortCode, không lưu file ảnh QR trong bảng.',
+      tenHienThi: 'COURT QR CODES',
+      ghiChu: 'Purpose: Stores the active secure QR token assigned one-to-one to each court.',
       cotChinh: [
-        { columnKey: 'SanQRID', tenHienThi: 'Mã QR', kieu: 'INT', pk: true },
-        { columnKey: 'SanID', tenHienThi: 'Mã sân', kieu: 'INT', fk: true, unique: true, thamChieu: 'San.SanID' },
-        { columnKey: 'Token', tenHienThi: 'Token bảo mật', kieu: 'UNIQUEIDENTIFIER', unique: true },
-        { columnKey: 'ShortCode', tenHienThi: 'Mã nhập tay', kieu: 'NVARCHAR(12)', unique: true },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(20)' }
+        { columnKey: 'SanQRID', tenHienThi: 'QR ID', kieu: 'INT', pk: true },
+        { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, unique: true, thamChieu: 'San.SanID' },
+        { columnKey: 'Token', tenHienThi: 'Secure Token', kieu: 'UNIQUEIDENTIFIER', unique: true },
+        { columnKey: 'ShortCode', tenHienThi: 'Manual Code', kieu: 'NVARCHAR(12)', unique: true },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(20)' }
       ],
       cotMoRong: []
     },
@@ -434,16 +434,16 @@
     {
       tableKey: 'SanQRTokenHistory',
       tenVatLy: 'SanQRTokenHistory',
-      tenHienThi: 'LỊCH SỬ MÃ QR',
-      ghiChu: 'Không hiển thị token plaintext cũ.',
+      tenHienThi: 'COURT QR TOKEN HISTORY',
+      ghiChu: 'Purpose: Stores revoked QR token hashes for security and revocation checks.',
       cotChinh: [
-        { columnKey: 'HistoryID', tenHienThi: 'Mã lịch sử', kieu: 'INT', pk: true },
-        { columnKey: 'SanQRID', tenHienThi: 'Mã QR', kieu: 'INT', fk: true, thamChieu: 'SanQR.SanQRID' },
-        { columnKey: 'SanID', tenHienThi: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
-        { columnKey: 'TokenHash', tenHienThi: 'Hash token', kieu: 'NVARCHAR(64)', unique: true },
-        { columnKey: 'ShortCode', tenHienThi: 'Mã nhập tay cũ', kieu: 'NVARCHAR(12)', nullable: true },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(20)' },
-        { columnKey: 'RevokedAt', tenHienThi: 'Thu hồi lúc', kieu: 'DATETIME2', nullable: true }
+        { columnKey: 'HistoryID', tenHienThi: 'History ID', kieu: 'INT', pk: true },
+        { columnKey: 'SanQRID', tenHienThi: 'QR ID', kieu: 'INT', fk: true, thamChieu: 'SanQR.SanQRID' },
+        { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
+        { columnKey: 'TokenHash', tenHienThi: 'Token Hash', kieu: 'NVARCHAR(64)', unique: true },
+        { columnKey: 'ShortCode', tenHienThi: 'Previous Manual Code', kieu: 'NVARCHAR(12)', nullable: true },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(20)' },
+        { columnKey: 'RevokedAt', tenHienThi: 'Revoked At', kieu: 'DATETIME2', nullable: true }
       ],
       cotMoRong: []
     },
@@ -452,18 +452,18 @@
     {
       tableKey: 'QRRequest',
       tenVatLy: 'QRRequest',
-      tenHienThi: 'YÊU CẦU QR SÂN',
-      ghiChu: 'Yêu cầu gọi nhân viên hoặc đặt món/dịch vụ được gửi sau khi khách quét QR.',
+      tenHienThi: 'COURT QR REQUESTS',
+      ghiChu: 'Purpose: Stores staff, product, or service requests submitted after scanning a court QR code.',
       cotChinh: [
-        { columnKey: 'RequestID', tenHienThi: 'Mã yêu cầu', kieu: 'INT', pk: true },
-        { columnKey: 'SanID', tenHienThi: 'Mã sân', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'CustomerID', tenHienThi: 'Mã khách hàng', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Khách hàng' },
-        { columnKey: 'RequestType', tenHienThi: 'Loại yêu cầu', kieu: 'VARCHAR(20)', ghiChuNgan: 'gọi nhân viên/đặt món/dịch vụ' },
-        { columnKey: 'ItemsJson', tenHienThi: 'Danh sách món', kieu: 'NVARCHAR(MAX)', nullable: true, ghiChuNgan: 'JSON' },
-        { columnKey: 'Note', tenHienThi: 'Ghi chú', kieu: 'NVARCHAR(500)', nullable: true },
-        { columnKey: 'Status', tenHienThi: 'Trạng thái', kieu: 'VARCHAR(20)' },
-        { columnKey: 'HandledByStaffID', tenHienThi: 'Nhân viên xử lý', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Nhân viên xử lý' }
+        { columnKey: 'RequestID', tenHienThi: 'Request ID', kieu: 'INT', pk: true },
+        { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'CustomerID', tenHienThi: 'Customer Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Customer' },
+        { columnKey: 'RequestType', tenHienThi: 'Request Type', kieu: 'VARCHAR(20)', ghiChuNgan: 'call staff / order / service' },
+        { columnKey: 'ItemsJson', tenHienThi: 'Requested Items', kieu: 'NVARCHAR(MAX)', nullable: true, ghiChuNgan: 'JSON' },
+        { columnKey: 'Note', tenHienThi: 'Note', kieu: 'NVARCHAR(500)', nullable: true },
+        { columnKey: 'Status', tenHienThi: 'Status', kieu: 'VARCHAR(20)' },
+        { columnKey: 'HandledByStaffID', tenHienThi: 'Handling Staff Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Handling Staff' }
       ],
       cotMoRong: []
     },
@@ -472,15 +472,15 @@
     {
       tableKey: 'CaLamViec',
       tenVatLy: 'CaLamViec',
-      tenHienThi: 'CA LÀM VIỆC',
-      ghiChu: '',
+      tenHienThi: 'WORK SHIFTS',
+      ghiChu: 'Purpose: Assigns staff members to scheduled working times at a facility.',
       cotChinh: [
-        { columnKey: 'CaLamViecID', tenHienThi: 'Mã ca làm', kieu: 'INT', pk: true },
-        { columnKey: 'AccountID', tenHienThi: 'Mã nhân viên', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'NgayLam', tenHienThi: 'Ngày làm', kieu: 'DATE' },
-        { columnKey: 'GioBatDau', tenHienThi: 'Giờ bắt đầu', kieu: 'TIME' },
-        { columnKey: 'GioKetThuc', tenHienThi: 'Giờ kết thúc', kieu: 'TIME' }
+        { columnKey: 'CaLamViecID', tenHienThi: 'Shift ID', kieu: 'INT', pk: true },
+        { columnKey: 'AccountID', tenHienThi: 'Staff Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'NgayLam', tenHienThi: 'Work Date', kieu: 'DATE' },
+        { columnKey: 'GioBatDau', tenHienThi: 'Start Time', kieu: 'TIME' },
+        { columnKey: 'GioKetThuc', tenHienThi: 'End Time', kieu: 'TIME' }
       ],
       cotMoRong: []
     },
@@ -489,17 +489,17 @@
     {
       tableKey: 'YeuCauNghi',
       tenVatLy: 'YeuCauNghi',
-      tenHienThi: 'YÊU CẦU NGHỈ',
-      ghiChu: '',
+      tenHienThi: 'LEAVE REQUESTS',
+      ghiChu: 'Purpose: Stores staff leave requests and manager processing results.',
       cotChinh: [
-        { columnKey: 'YeuCauNghiID', tenHienThi: 'Mã yêu cầu nghỉ', kieu: 'INT', pk: true },
-        { columnKey: 'AccountID', tenHienThi: 'Mã nhân viên', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
-        { columnKey: 'NgayNghi', tenHienThi: 'Ngày nghỉ', kieu: 'DATE' },
-        { columnKey: 'LoaiNghi', tenHienThi: 'Loại nghỉ', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'LyDo', tenHienThi: 'Lý do', kieu: 'NVARCHAR(MAX)' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'XuLyBy', tenHienThi: 'Người xử lý', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người xử lý' }
+        { columnKey: 'YeuCauNghiID', tenHienThi: 'Leave Request ID', kieu: 'INT', pk: true },
+        { columnKey: 'AccountID', tenHienThi: 'Staff Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
+        { columnKey: 'NgayNghi', tenHienThi: 'Leave Date', kieu: 'DATE' },
+        { columnKey: 'LoaiNghi', tenHienThi: 'Leave Type', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'LyDo', tenHienThi: 'Reason', kieu: 'NVARCHAR(MAX)' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'XuLyBy', tenHienThi: 'Processed By Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Handling Staff' }
       ],
       cotMoRong: []
     },
@@ -508,16 +508,16 @@
     {
       tableKey: 'DanhGia',
       tenVatLy: 'DanhGia',
-      tenHienThi: 'ĐÁNH GIÁ',
-      ghiChu: '',
+      tenHienThi: 'REVIEWS',
+      ghiChu: 'Purpose: Stores post-booking ratings and comments.',
       cotChinh: [
-        { columnKey: 'DanhGiaID', tenHienThi: 'Mã đánh giá', kieu: 'INT', pk: true },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, unique: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'AccountID_NguoiDanhGia', tenHienThi: 'Người đánh giá', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người đánh giá' },
-        { columnKey: 'AccountID_NguoiBiDanhGia', tenHienThi: 'Người được đánh giá', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người được đánh giá' },
-        { columnKey: 'SoSao', tenHienThi: 'Số sao', kieu: 'INT', ghiChuNgan: '1–5' },
-        { columnKey: 'BinhLuan', tenHienThi: 'Bình luận', kieu: 'NVARCHAR(MAX)', nullable: true },
-        { columnKey: 'NgayDanhGia', tenHienThi: 'Ngày đánh giá', kieu: 'DATETIME' }
+        { columnKey: 'DanhGiaID', tenHienThi: 'Review ID', kieu: 'INT', pk: true },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, unique: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'AccountID_NguoiDanhGia', tenHienThi: 'Reviewer Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Reviewer' },
+        { columnKey: 'AccountID_NguoiBiDanhGia', tenHienThi: 'Reviewed Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Reviewed' },
+        { columnKey: 'SoSao', tenHienThi: 'Rating', kieu: 'INT', ghiChuNgan: '1–5' },
+        { columnKey: 'BinhLuan', tenHienThi: 'Comment', kieu: 'NVARCHAR(MAX)', nullable: true },
+        { columnKey: 'NgayDanhGia', tenHienThi: 'Reviewed At', kieu: 'DATETIME' }
       ],
       cotMoRong: []
     },
@@ -526,17 +526,17 @@
     {
       tableKey: 'CustomerReputationHistory',
       tenVatLy: 'CustomerReputationHistory',
-      tenHienThi: 'LỊCH SỬ ĐIỂM UY TÍN',
-      ghiChu: '',
+      tenHienThi: 'REPUTATION HISTORY',
+      ghiChu: 'Purpose: Records every change to a customer\'s reputation score.',
       cotChinh: [
-        { columnKey: 'ReputationHistoryID', tenHienThi: 'Mã lịch sử', kieu: 'BIGINT', pk: true },
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'ActionType', tenHienThi: 'Loại thay đổi', kieu: 'NVARCHAR(30)' },
-        { columnKey: 'ScoreDelta', tenHienThi: 'Điểm thay đổi', kieu: 'INT' },
-        { columnKey: 'ScoreBefore', tenHienThi: 'Điểm trước', kieu: 'INT' },
-        { columnKey: 'ScoreAfter', tenHienThi: 'Điểm sau', kieu: 'INT' },
-        { columnKey: 'Reason', tenHienThi: 'Lý do', kieu: 'NVARCHAR(500)' }
+        { columnKey: 'ReputationHistoryID', tenHienThi: 'History ID', kieu: 'BIGINT', pk: true },
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'ActionType', tenHienThi: 'Action Type', kieu: 'NVARCHAR(30)' },
+        { columnKey: 'ScoreDelta', tenHienThi: 'Score Delta', kieu: 'INT' },
+        { columnKey: 'ScoreBefore', tenHienThi: 'Score Before', kieu: 'INT' },
+        { columnKey: 'ScoreAfter', tenHienThi: 'Score After', kieu: 'INT' },
+        { columnKey: 'Reason', tenHienThi: 'Reason', kieu: 'NVARCHAR(500)' }
       ],
       cotMoRong: []
     },
@@ -545,17 +545,17 @@
     {
       tableKey: 'GhepKeo',
       tenVatLy: 'GhepKeo',
-      tenHienThi: 'GHÉP KÈO',
-      ghiChu: '',
+      tenHienThi: 'MATCHMAKING POSTS',
+      ghiChu: 'Purpose: Stores player-finding posts linked to a booking and sport.',
       cotChinh: [
-        { columnKey: 'KeoID', tenHienThi: 'Mã kèo', kieu: 'INT', pk: true },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, unique: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'AccountID_NguoiTao', tenHienThi: 'Người tạo', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người tạo' },
-        { columnKey: 'MonTheThaoID', tenHienThi: 'Mã môn thể thao', kieu: 'INT', fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
-        { columnKey: 'TrinhDo', tenHienThi: 'Trình độ', kieu: 'NVARCHAR(50)', nullable: true },
-        { columnKey: 'SoNguoiCanTim', tenHienThi: 'Số người cần tìm', kieu: 'INT' },
-        { columnKey: 'HinhThucDuyet', tenHienThi: 'Hình thức duyệt', kieu: 'NVARCHAR(20)' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' }
+        { columnKey: 'KeoID', tenHienThi: 'Matchmaking Post ID', kieu: 'INT', pk: true },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, unique: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'AccountID_NguoiTao', tenHienThi: 'Creator Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Creator' },
+        { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
+        { columnKey: 'TrinhDo', tenHienThi: 'Skill Level', kieu: 'NVARCHAR(50)', nullable: true },
+        { columnKey: 'SoNguoiCanTim', tenHienThi: 'Required Players', kieu: 'INT' },
+        { columnKey: 'HinhThucDuyet', tenHienThi: 'Approval Mode', kieu: 'NVARCHAR(20)' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' }
       ],
       cotMoRong: []
     },
@@ -564,14 +564,14 @@
     {
       tableKey: 'ChiTietGhepKeo',
       tenVatLy: 'ChiTietGhepKeo',
-      tenHienThi: 'CHI TIẾT GHÉP KÈO',
-      ghiChu: '',
+      tenHienThi: 'MATCHMAKING PARTICIPANTS',
+      ghiChu: 'Purpose: Stores participants and approval status for each matchmaking post.',
       cotChinh: [
-        { columnKey: 'ChiTietKeoID', tenHienThi: 'Mã tham gia', kieu: 'INT', pk: true },
-        { columnKey: 'KeoID', tenHienThi: 'Mã kèo', kieu: 'INT', fk: true, thamChieu: 'GhepKeo.KeoID' },
-        { columnKey: 'AccountID_NguoiThamGia', tenHienThi: 'Người tham gia', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người tham gia' },
-        { columnKey: 'TrangThaiThamGia', tenHienThi: 'Trạng thái tham gia', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'ViTriThamGia', tenHienThi: 'Vị trí tham gia', kieu: 'NVARCHAR(100)', nullable: true }
+        { columnKey: 'ChiTietKeoID', tenHienThi: 'Participant ID', kieu: 'INT', pk: true },
+        { columnKey: 'KeoID', tenHienThi: 'Matchmaking Post ID', kieu: 'INT', fk: true, thamChieu: 'GhepKeo.KeoID' },
+        { columnKey: 'AccountID_NguoiThamGia', tenHienThi: 'Participant Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Participant' },
+        { columnKey: 'TrangThaiThamGia', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'ViTriThamGia', tenHienThi: 'Playing Position', kieu: 'NVARCHAR(100)', nullable: true }
       ],
       cotMoRong: []
     },
@@ -580,17 +580,17 @@
     {
       tableKey: 'NhomChiaTien',
       tenVatLy: 'NhomChiaTien',
-      tenHienThi: 'NHÓM CHIA TIỀN',
-      ghiChu: '',
+      tenHienThi: 'BILL SPLIT GROUPS',
+      ghiChu: 'Purpose: Defines how an invoice is divided among multiple payers.',
       cotChinh: [
-        { columnKey: 'NhomChiaTienID', tenHienThi: 'Mã nhóm chia', kieu: 'INT', pk: true },
-        { columnKey: 'HoaDonID', tenHienThi: 'Mã hóa đơn', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
-        { columnKey: 'DatSanID', tenHienThi: 'Mã đặt sân', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
-        { columnKey: 'CreatedByAccountID', tenHienThi: 'Người tạo', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Người tạo' },
-        { columnKey: 'SplitType', tenHienThi: 'Hình thức chia', kieu: 'NVARCHAR(20)' },
-        { columnKey: 'TongTien', tenHienThi: 'Tổng tiền', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(20)' },
-        { columnKey: 'ExpiresAt', tenHienThi: 'Hết hạn lúc', kieu: 'DATETIME2', nullable: true }
+        { columnKey: 'NhomChiaTienID', tenHienThi: 'Split Group ID', kieu: 'INT', pk: true },
+        { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
+        { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
+        { columnKey: 'CreatedByAccountID', tenHienThi: 'Creator Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Creator' },
+        { columnKey: 'SplitType', tenHienThi: 'Split Type', kieu: 'NVARCHAR(20)' },
+        { columnKey: 'TongTien', tenHienThi: 'Total Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(20)' },
+        { columnKey: 'ExpiresAt', tenHienThi: 'Expires At', kieu: 'DATETIME2', nullable: true }
       ],
       cotMoRong: []
     },
@@ -599,17 +599,17 @@
     {
       tableKey: 'NhomChiaTienChiTiet',
       tenVatLy: 'NhomChiaTienChiTiet',
-      tenHienThi: 'CHI TIẾT CHIA TIỀN',
-      ghiChu: 'QR sinh từ ShareToken, không dùng bảng MaQR cũ.',
+      tenHienThi: 'BILL SPLIT MEMBERS',
+      ghiChu: 'Purpose: Stores each payer\'s share, token, amount, and payment status.',
       cotChinh: [
-        { columnKey: 'ChiTietID', tenHienThi: 'Mã phần tiền', kieu: 'INT', pk: true },
-        { columnKey: 'NhomChiaTienID', tenHienThi: 'Mã nhóm chia', kieu: 'INT', fk: true, thamChieu: 'NhomChiaTien.NhomChiaTienID' },
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'DisplayName', tenHienThi: 'Tên người trả', kieu: 'NVARCHAR(100)' },
-        { columnKey: 'ShareToken', tenHienThi: 'Token chia sẻ', kieu: 'CHAR(43)', unique: true },
-        { columnKey: 'SoTien', tenHienThi: 'Số tiền', kieu: 'DECIMAL(18,2)' },
-        { columnKey: 'TrangThai', tenHienThi: 'Trạng thái', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'PaidAt', tenHienThi: 'Thanh toán lúc', kieu: 'DATETIME2', nullable: true }
+        { columnKey: 'ChiTietID', tenHienThi: 'Split Member ID', kieu: 'INT', pk: true },
+        { columnKey: 'NhomChiaTienID', tenHienThi: 'Split Group ID', kieu: 'INT', fk: true, thamChieu: 'NhomChiaTien.NhomChiaTienID' },
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'DisplayName', tenHienThi: 'Payer Name', kieu: 'NVARCHAR(100)' },
+        { columnKey: 'ShareToken', tenHienThi: 'Share Token', kieu: 'CHAR(43)', unique: true },
+        { columnKey: 'SoTien', tenHienThi: 'Amount', kieu: 'DECIMAL(18,2)' },
+        { columnKey: 'TrangThai', tenHienThi: 'Status', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'PaidAt', tenHienThi: 'Paid At', kieu: 'DATETIME2', nullable: true }
       ],
       cotMoRong: []
     },
@@ -618,17 +618,17 @@
     {
       tableKey: 'ThongBao',
       tenVatLy: 'ThongBao',
-      tenHienThi: 'THÔNG BÁO',
-      ghiChu: '',
+      tenHienThi: 'NOTIFICATIONS',
+      ghiChu: 'Purpose: Stores notifications generated for user accounts by system workflows.',
       cotChinh: [
-        { columnKey: 'ThongBaoID', tenHienThi: 'Mã thông báo', kieu: 'INT', pk: true },
-        { columnKey: 'AccountID', tenHienThi: 'Mã tài khoản', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
-        { columnKey: 'TieuDe', tenHienThi: 'Tiêu đề', kieu: 'NVARCHAR(200)' },
-        { columnKey: 'NoiDung', tenHienThi: 'Nội dung', kieu: 'NVARCHAR(MAX)' },
-        { columnKey: 'LoaiThongBao', tenHienThi: 'Loại thông báo', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'DaDoc', tenHienThi: 'Đã đọc', kieu: 'BIT' },
-        { columnKey: 'ThoiGianGui', tenHienThi: 'Thời gian gửi', kieu: 'DATETIME' },
-        { columnKey: 'DuongDan', tenHienThi: 'Đường dẫn', kieu: 'NVARCHAR(500)', nullable: true }
+        { columnKey: 'ThongBaoID', tenHienThi: 'Notification ID', kieu: 'INT', pk: true },
+        { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
+        { columnKey: 'TieuDe', tenHienThi: 'Title', kieu: 'NVARCHAR(200)' },
+        { columnKey: 'NoiDung', tenHienThi: 'Content', kieu: 'NVARCHAR(MAX)' },
+        { columnKey: 'LoaiThongBao', tenHienThi: 'Notification Type', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'DaDoc', tenHienThi: 'Is Read', kieu: 'BIT' },
+        { columnKey: 'ThoiGianGui', tenHienThi: 'Sent At', kieu: 'DATETIME' },
+        { columnKey: 'DuongDan', tenHienThi: 'File Path', kieu: 'NVARCHAR(500)', nullable: true }
       ],
       cotMoRong: []
     },
@@ -637,17 +637,17 @@
     {
       tableKey: 'AuditLog',
       tenVatLy: 'AuditLog',
-      tenHienThi: 'NHẬT KÝ HỆ THỐNG',
-      ghiChu: 'ActorAccountID/CoSoID là khóa ngoại LOGIC — không vẽ đường nối thật tới hàng loạt bảng.',
+      tenHienThi: 'AUDIT LOGS',
+      ghiChu: 'Purpose: Records important system actions for administration and traceability.',
       cotChinh: [
-        { columnKey: 'AuditLogID', tenHienThi: 'Mã nhật ký', kieu: 'BIGINT', pk: true },
-        { columnKey: 'ActorAccountID', tenHienThi: 'Người thực hiện', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'FK logic → Accounts.AccountID' },
-        { columnKey: 'CoSoID', tenHienThi: 'Mã cơ sở', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'FK logic → CoSo.CoSoID' },
-        { columnKey: 'Action', tenHienThi: 'Hành động', kieu: 'NVARCHAR(100)' },
-        { columnKey: 'EntityType', tenHienThi: 'Loại đối tượng', kieu: 'NVARCHAR(100)' },
-        { columnKey: 'EntityID', tenHienThi: 'Mã đối tượng', kieu: 'NVARCHAR(50)' },
-        { columnKey: 'IpAddress', tenHienThi: 'Địa chỉ IP', kieu: 'NVARCHAR(50)', nullable: true },
-        { columnKey: 'CreatedAt', tenHienThi: 'Thời gian', kieu: 'DATETIME2' }
+        { columnKey: 'AuditLogID', tenHienThi: 'Audit Log ID', kieu: 'BIGINT', pk: true },
+        { columnKey: 'ActorAccountID', tenHienThi: 'Actor Account ID', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'logical FK → Accounts.AccountID' },
+        { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'logical FK → CoSo.CoSoID' },
+        { columnKey: 'Action', tenHienThi: 'Action', kieu: 'NVARCHAR(100)' },
+        { columnKey: 'EntityType', tenHienThi: 'Entity Type', kieu: 'NVARCHAR(100)' },
+        { columnKey: 'EntityID', tenHienThi: 'Entity ID', kieu: 'NVARCHAR(50)' },
+        { columnKey: 'IpAddress', tenHienThi: 'IP Address', kieu: 'NVARCHAR(50)', nullable: true },
+        { columnKey: 'CreatedAt', tenHienThi: 'Event Time', kieu: 'DATETIME2' }
       ],
       cotMoRong: []
     },
@@ -656,25 +656,25 @@
     {
       tableKey: 'AdminTrash',
       tenVatLy: 'AdminTrash',
-      tenHienThi: 'THÙNG RÁC',
-      ghiChu: 'DeletedBy/RestoredBy là khóa ngoại LOGIC — không vẽ đường nối thật tới các bảng nghiệp vụ.',
+      tenHienThi: 'ADMIN TRASH',
+      ghiChu: 'Purpose: Stores references to deleted records that can be reviewed or restored.',
       cotChinh: [
-        { columnKey: 'TrashID', tenHienThi: 'Mã bản ghi xóa', kieu: 'INT', pk: true },
-        { columnKey: 'EntityType', tenHienThi: 'Loại đối tượng', kieu: 'NVARCHAR(100)' },
-        { columnKey: 'EntityID', tenHienThi: 'Mã đối tượng', kieu: 'INT', ghiChuNgan: 'tham chiếu logic' },
-        { columnKey: 'DisplayName', tenHienThi: 'Tên hiển thị', kieu: 'NVARCHAR(255)', nullable: true },
-        { columnKey: 'DeletedBy', tenHienThi: 'Người xóa', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'FK logic → Accounts.AccountID' },
-        { columnKey: 'DeletedAt', tenHienThi: 'Thời gian xóa', kieu: 'DATETIME2' },
-        { columnKey: 'IsRestored', tenHienThi: 'Đã khôi phục', kieu: 'BIT' },
-        { columnKey: 'RestoredBy', tenHienThi: 'Người khôi phục', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'FK logic → Accounts.AccountID' }
+        { columnKey: 'TrashID', tenHienThi: 'Trash ID', kieu: 'INT', pk: true },
+        { columnKey: 'EntityType', tenHienThi: 'Entity Type', kieu: 'NVARCHAR(100)' },
+        { columnKey: 'EntityID', tenHienThi: 'Entity ID', kieu: 'INT', ghiChuNgan: 'logical reference' },
+        { columnKey: 'DisplayName', tenHienThi: 'Display Name', kieu: 'NVARCHAR(255)', nullable: true },
+        { columnKey: 'DeletedBy', tenHienThi: 'Deleted By Account ID', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'logical FK → Accounts.AccountID' },
+        { columnKey: 'DeletedAt', tenHienThi: 'Deleted At', kieu: 'DATETIME2' },
+        { columnKey: 'IsRestored', tenHienThi: 'Is Restored', kieu: 'BIT' },
+        { columnKey: 'RestoredBy', tenHienThi: 'Restored By Account ID', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'logical FK → Accounts.AccountID' }
       ],
       cotMoRong: []
     }
   ];
 
   // -----------------------------------------------------------------
-  // 21 nhóm màn hình. Mỗi nhóm tối đa 3 bảng (trừ "Cơ sở và định vị").
-  // layout: vị trí mặc định {x,y} góc trên-trái của từng card trong nhóm.
+  // 21 screen groups. Each group max 3 tables (except "Facilities and Geolocation").
+  // layout: default top-left position {x,y} of each card in the group.
   // -----------------------------------------------------------------
   var CANVAS = { w: 1600, h: 900 };
   var CANVAS_TALL = { w: 1600, h: 1000 };
@@ -696,169 +696,169 @@
 
   var ERD_VIEWS = [
     {
-      id: 'phan-quyen-va-ho-so',
+      id: 'roles-and-profiles',
       code: '01',
-      title: 'Phân quyền và hồ sơ',
+      title: 'Roles and Profiles',
       entities: ['Roles', 'Accounts', 'MonTheThaoYeuThich'],
       canvas: CANVAS_TALL,
       layout: layout3('Roles', 'Accounts', 'MonTheThaoYeuThich')
     },
     {
-      id: 'co-so-va-dinh-vi',
+      id: 'facilities-and-geolocation',
       code: '02',
-      title: 'Cơ sở và định vị',
+      title: 'Facilities and Geolocation',
       entities: ['Accounts', 'CoSo'],
       canvas: CANVAS_TALL,
       layout: layout2('Accounts', 'CoSo')
     },
     {
-      id: 'mon-the-thao-va-san',
+      id: 'sports-and-courts',
       code: '03',
-      title: 'Môn thể thao và sân',
+      title: 'Sports and Courts',
       entities: ['MonTheThao', 'LoaiSan', 'San'],
       canvas: CANVAS,
       layout: layout3('MonTheThao', 'LoaiSan', 'San')
     },
     {
-      id: 'dat-san',
+      id: 'court-bookings',
       code: '04',
-      title: 'Đặt sân',
+      title: 'Court Bookings',
       entities: ['Accounts', 'San', 'LichDatSan'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'San', 'LichDatSan')
     },
     {
-      id: 'giu-cho-tam',
+      id: 'temporary-holds',
       code: '05',
-      title: 'Giữ chỗ tạm',
+      title: 'Temporary Holds',
       entities: ['Accounts', 'San', 'SoftHold'],
       canvas: CANVAS,
       layout: layout3('Accounts', 'San', 'SoftHold')
     },
     {
-      id: 'gia-han-ca-choi',
+      id: 'booking-extensions',
       code: '06',
-      title: 'Gia hạn ca chơi',
+      title: 'Booking Extensions',
       entities: ['LichDatSan', 'BookingExtension', 'Accounts'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'BookingExtension', 'Accounts')
     },
     {
-      id: 'kho-san-pham-dich-vu',
+      id: 'products-services-inventory',
       code: '07',
-      title: 'Kho sản phẩm dịch vụ',
+      title: 'Products and Services Inventory',
       entities: ['CoSo', 'DanhMucSanPham', 'SanPham_DichVu'],
       canvas: CANVAS_TALL,
       layout: layout3('CoSo', 'DanhMucSanPham', 'SanPham_DichVu')
     },
     {
-      id: 'dich-vu-dat-kem',
+      id: 'booking-services',
       code: '08',
-      title: 'Dịch vụ đặt kèm',
+      title: 'Booking Services',
       entities: ['LichDatSan', 'SanPham_DichVu', 'LichDatSan_DichVu'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'SanPham_DichVu', 'LichDatSan_DichVu')
     },
     {
-      id: 'hoa-don',
+      id: 'invoices',
       code: '09',
-      title: 'Hóa đơn',
+      title: 'Invoices',
       entities: ['LichDatSan', 'HoaDon', 'ChiTietHoaDon'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'HoaDon', 'ChiTietHoaDon')
     },
     {
-      id: 'tinh-gia-san',
+      id: 'court-pricing',
       code: '10',
-      title: 'Tính giá sân',
+      title: 'Court Pricing',
       entities: ['HoaDon', 'LichDatSan', 'CourtChargeSegment'],
       canvas: CANVAS_TALL,
       layout: layout3('HoaDon', 'LichDatSan', 'CourtChargeSegment')
     },
     {
-      id: 'thanh-toan-payos',
+      id: 'payos-payments',
       code: '11',
-      title: 'Thanh toán PayOS',
+      title: 'PayOS Payments',
       entities: ['CoSo', 'HoaDon', 'PayOSPaymentAttempt'],
       canvas: CANVAS_TALL,
       layout: layout3('CoSo', 'HoaDon', 'PayOSPaymentAttempt')
     },
     {
-      id: 'khuyen-mai-va-hinh-anh',
+      id: 'promotions-and-images',
       code: '12',
-      title: 'Khuyến mãi và hình ảnh',
+      title: 'Promotions and Images',
       entities: ['KhuyenMai', 'KhuyenMaiHinhAnh', 'LichSuKhuyenMai'],
       canvas: CANVAS_TALL,
       layout: layout3('KhuyenMai', 'KhuyenMaiHinhAnh', 'LichSuKhuyenMai')
     },
     {
-      id: 'hoan-tien-va-qr-nhan-tien',
+      id: 'refunds-and-receiving-qr',
       code: '13',
-      title: 'Hoàn tiền và QR nhận tiền',
+      title: 'Refunds and Receiving QR',
       entities: ['HoaDon', 'HoanTien', 'Accounts'],
       canvas: CANVAS_TALL,
       layout: layout3('HoaDon', 'HoanTien', 'Accounts')
     },
     {
-      id: 'ma-qr-bao-mat-cua-san',
+      id: 'secure-court-qr-codes',
       code: '14',
-      title: 'Mã QR bảo mật của sân',
+      title: 'Secure Court QR Codes',
       entities: ['San', 'SanQR', 'SanQRTokenHistory'],
       canvas: CANVAS,
       layout: layout3('San', 'SanQR', 'SanQRTokenHistory')
     },
     {
-      id: 'yeu-cau-sau-khi-quet-qr',
+      id: 'requests-after-qr-scan',
       code: '15',
-      title: 'Yêu cầu sau khi quét QR',
+      title: 'Requests After QR Scan',
       entities: ['San', 'QRRequest', 'Accounts'],
       canvas: CANVAS_TALL,
       layout: layout3('San', 'QRRequest', 'Accounts')
     },
     {
-      id: 'ca-lam-va-nghi-phep',
+      id: 'work-shifts-and-leave-requests',
       code: '16',
-      title: 'Ca làm và nghỉ phép',
+      title: 'Work Shifts and Leave Requests',
       entities: ['Accounts', 'CaLamViec', 'YeuCauNghi'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'CaLamViec', 'YeuCauNghi')
     },
     {
-      id: 'danh-gia-va-diem-uy-tin',
+      id: 'reviews-and-reputation',
       code: '17',
-      title: 'Đánh giá và điểm uy tín',
+      title: 'Reviews and Reputation',
       entities: ['LichDatSan', 'DanhGia', 'CustomerReputationHistory'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'DanhGia', 'CustomerReputationHistory')
     },
     {
-      id: 'ghep-keo',
+      id: 'matchmaking',
       code: '18',
-      title: 'Ghép kèo',
+      title: 'Matchmaking',
       entities: ['Accounts', 'GhepKeo', 'ChiTietGhepKeo'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'GhepKeo', 'ChiTietGhepKeo')
     },
     {
-      id: 'chia-tien-hoa-don',
+      id: 'bill-splitting',
       code: '19',
-      title: 'Chia tiền hóa đơn',
+      title: 'Bill Splitting',
       entities: ['HoaDon', 'NhomChiaTien', 'NhomChiaTienChiTiet'],
       canvas: CANVAS_TALL,
       layout: layout3('HoaDon', 'NhomChiaTien', 'NhomChiaTienChiTiet')
     },
     {
-      id: 'thong-bao',
+      id: 'notifications',
       code: '20',
-      title: 'Thông báo',
+      title: 'Notifications',
       entities: ['Accounts', 'ThongBao'],
       canvas: CANVAS_TALL,
       layout: layout2('Accounts', 'ThongBao')
     },
     {
-      id: 'kiem-toan-va-khoi-phuc',
+      id: 'audit-and-recovery',
       code: '21',
-      title: 'Kiểm toán và khôi phục',
+      title: 'Audit and Recovery',
       entities: ['Accounts', 'AuditLog', 'AdminTrash'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'AuditLog', 'AdminTrash')

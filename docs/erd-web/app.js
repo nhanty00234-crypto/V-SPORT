@@ -88,7 +88,7 @@
       const btn = document.createElement('button');
       btn.className = 'nav-item';
       btn.dataset.view = v.id;
-      btn.innerHTML = '<span class="nav-code">Nhóm ' + v.code + '</span>' + v.title;
+      btn.innerHTML = '<span class="nav-code">Group ' + v.code + '</span>' + v.title;
       btn.addEventListener('click', () => setView(v.id));
       li.appendChild(btn);
       els.navList.appendChild(li);
@@ -141,13 +141,13 @@
   function render() {
     if (state.viewId === 'overview') {
       renderOverview();
-      els.groupTitle.textContent = 'TỔNG QUAN';
-      els.ssGroupTitle.textContent = 'TỔNG QUAN';
+      els.groupTitle.textContent = 'OVERVIEW';
+      els.ssGroupTitle.textContent = 'OVERVIEW';
     } else {
       const view = ERD_VIEWS.find((v) => v.id === state.viewId);
       renderGroupView(view);
-      els.groupTitle.textContent = 'Nhóm ' + view.code + ' — ' + view.title;
-      els.ssGroupTitle.textContent = 'Nhóm ' + view.code + ' — ' + view.title;
+      els.groupTitle.textContent = 'Group ' + view.code + ' — ' + view.title;
+      els.ssGroupTitle.textContent = 'Group ' + view.code + ' — ' + view.title;
     }
   }
 
@@ -162,7 +162,7 @@
       tile.className = 'overview-tile';
       const entityNames = v.entities.map((key) => entityByKey.get(key).tenHienThi);
       tile.innerHTML =
-        '<div class="tile-code">NHÓM ' + v.code + '</div>' +
+        '<div class="tile-code">GROUP ' + v.code + '</div>' +
         '<div class="tile-title">' + v.title + '</div>' +
         '<div class="tile-entities">' + entityNames.join(' · ') + '</div>';
       tile.addEventListener('click', () => setView(v.id));
@@ -176,7 +176,7 @@
     let out = '';
     if (field.pk) out += '<span class="badge pk">PK</span>';
     if (field.fk) out += '<span class="badge fk">FK</span>';
-    else if (field.fkLogic) out += '<span class="badge fk-logic" title="Khóa ngoại logic — không có đường nối thật">FK*</span>';
+    else if (field.fkLogic) out += '<span class="badge fk-logic" title="Logical FK — no real connector drawn">FK*</span>';
     if (field.unique && !field.pk) out += '<span class="badge uq">UQ</span>';
     if (field.nullable) out += '<span class="badge nullable">NULL</span>';
     return out;
@@ -317,8 +317,15 @@
       const header = document.createElement('div');
       header.className = 'entity-header';
       header.innerHTML =
-        '<span>' + entity.tenHienThi + '</span><span class="entity-badge">' + fields.length + ' cột</span>';
+        '<span>' + entity.tenHienThi + '</span><span class="entity-badge">' + fields.length + ' cols</span>';
       card.appendChild(header);
+
+      if (entity.ghiChu) {
+        const purposeEl = document.createElement('div');
+        purposeEl.className = 'entity-purpose';
+        purposeEl.textContent = entity.ghiChu;
+        card.appendChild(purposeEl);
+      }
 
       fields.forEach((field) => {
         const row = document.createElement('div');

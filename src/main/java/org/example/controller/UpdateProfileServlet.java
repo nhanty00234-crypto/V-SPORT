@@ -16,12 +16,11 @@ import org.example.model.TaiKhoan;
 import org.example.util.EmailUtil;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.File;
+import org.example.util.CloudinaryUtil;
+
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 @WebServlet({"/admin/update-profile", "/manager/update-profile", "/staff/update-profile", "/account/update-profile"})
 @MultipartConfig(
@@ -69,13 +68,13 @@ public class UpdateProfileServlet extends HttpServlet {
                     return;
                 }
 
-                String avatarUrl = saveAvatarFile(req, avatarPart, account.getAccountId());
+                String avatarUrl = saveAvatarFile(avatarPart, account.getAccountId());
                 account.setAvatarUrl(avatarUrl);
 
                 boolean success = taiKhoanDAO.updateAccount(account);
                 if (success) {
                     session.setAttribute("user", account);
-                    resp.getWriter().write("{\"success\":true,\"message\":\"Cập nhật ảnh đại diện thành công.\",\"avatarUrl\":\"" + json(req.getContextPath() + avatarUrl) + "\"}");
+                    resp.getWriter().write("{\"success\":true,\"message\":\"Cập nhật ảnh đại diện thành công.\",\"avatarUrl\":\"" + json(avatarUrl) + "\"}");
                 } else {
                     resp.getWriter().write("{\"success\":false,\"message\":\"Không thể lưu ảnh đại diện vào cơ sở dữ liệu.\"}");
                 }
@@ -391,24 +390,9 @@ public class UpdateProfileServlet extends HttpServlet {
         return sb.toString();
     }
 
-    private String saveAvatarFile(HttpServletRequest req, Part avatarPart, int accountId) throws IOException {
-        String submittedFileName = Paths.get(avatarPart.getSubmittedFileName()).getFileName().toString();
-        String extension = getSafeImageExtension(submittedFileName, avatarPart.getContentType());
-        String fileName = "acc-" + accountId + "-" + UUID.randomUUID() + extension;
-
-        String uploadPath = getServletContext().getRealPath("/uploads/avatars");
-        if (uploadPath == null) {
-            uploadPath = new File(System.getProperty("user.home"), "v-sport/uploads/avatars").getAbsolutePath();
-        }
-
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
-            throw new IOException("Không thể tạo thư mục lưu ảnh đại diện.");
-        }
-
-        File avatarFile = new File(uploadDir, fileName);
-        avatarPart.write(avatarFile.getAbsolutePath());
-        return "/uploads/avatars/" + fileName;
+    private String saveAvatarFile(Part avatarPart, int accountId) throws IOException {
+        byte[] bytes = avatarPart.getInputStream().readAllBytes();
+        return CloudinaryUtil.uploadImage(bytes, "vsport/avatars");
     }
 
     private String getSafeImageExtension(String fileName, String contentType) {

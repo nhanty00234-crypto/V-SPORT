@@ -11,7 +11,8 @@ import jakarta.servlet.http.Part;
 import org.example.model.TaiKhoan;
 import org.example.util.Constants;
 
-import java.io.File;
+import org.example.util.CloudinaryUtil;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Quản lý gallery ảnh cơ sở (CoSo.HinhAnh lưu JSON array).
@@ -71,14 +71,8 @@ public class CoSoGalleryServlet extends HttpServlet {
             writeJson(resp, 400, Map.of("error", "Tối đa " + MAX_IMAGES + " ảnh cho mỗi cơ sở.")); return;
         }
 
-        String ext = resolveExt(part.getSubmittedFileName(), ct);
-        String fileName = "coso-" + UUID.randomUUID() + ext;
-        String uploadPath = req.getServletContext().getRealPath("/uploads/courts/");
-        File dir = new File(uploadPath);
-        if (!dir.exists()) dir.mkdirs();
-        part.write(new File(dir, fileName).getAbsolutePath());
-
-        String url = "/uploads/courts/" + fileName;
+        byte[] bytes = part.getInputStream().readAllBytes();
+        String url = CloudinaryUtil.uploadImage(bytes, "vsport/courts");
         urls.add(url);
         saveUrls(coSoId, urls);
         writeJson(resp, 200, Map.of("url", url, "images", urls));
@@ -89,9 +83,11 @@ public class CoSoGalleryServlet extends HttpServlet {
         if (url == null || url.isBlank()) {
             writeJson(resp, 400, Map.of("error", "Thiếu tham số url.")); return;
         }
+        String trimmedUrl = url.trim();
         List<String> urls = loadUrls(coSoId);
-        urls.remove(url.trim());
+        urls.remove(trimmedUrl);
         saveUrls(coSoId, urls);
+        CloudinaryUtil.deleteByUrl(trimmedUrl);
         writeJson(resp, 200, Map.of("images", urls));
     }
 

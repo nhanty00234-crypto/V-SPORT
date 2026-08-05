@@ -166,6 +166,12 @@
             <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Cloudinary - lưu trữ ảnh trên cloud thay vì filesystem -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.38.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -5,19 +5,16 @@ import org.apache.logging.log4j.Logger;
 import org.example.dao.KhuyenMaiHinhAnhDAO;
 import org.example.dao.impl.KhuyenMaiHinhAnhDAOImpl;
 import org.example.model.KhuyenMaiHinhAnh;
+import org.example.util.CloudinaryUtil;
 import org.example.util.DBUtil;
 import org.example.util.ImageInspector;
-import org.example.util.PromotionUploadPaths;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Nghiệp vụ quản lý gallery ảnh của một khuyến mãi (KhuyenMai): giới hạn 5 ảnh / 25MB tổng,
@@ -102,8 +99,19 @@ public class PromotionImageService {
             batchBytes += f.bytes.length;
         }
 
+        // Upload lên Cloudinary trước: nếu DB thất bại ta có thể rollback Cloudinary
+        String cloudinaryFolder = "vsport/promotions/" + khuyenMaiId;
+        List<String> uploadedUrls = new ArrayList<>();
+        try {
+            for (UploadedImageFile f : nonEmpty) {
+                uploadedUrls.add(CloudinaryUtil.uploadImage(f.bytes, cloudinaryFolder));
+            }
+        } catch (IOException e) {
+            for (String url : uploadedUrls) CloudinaryUtil.deleteByUrl(url);
+            throw new PromotionImageException("Không thể tải ảnh lên Cloudinary: " + e.getMessage());
+        }
+
         Connection conn = null;
-        List<File> writtenFiles = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -121,26 +129,14 @@ public class PromotionImageService {
             }
 
             boolean needCover = existingCount == 0;
-            File promotionDir = PromotionUploadPaths.promotionDir(khuyenMaiId);
-            if (!promotionDir.exists() && !promotionDir.mkdirs()) {
-                throw new IOException("Không thể tạo thư mục lưu ảnh khuyến mãi.");
-            }
-
             List<KhuyenMaiHinhAnh> inserted = new ArrayList<>();
             for (int i = 0; i < nonEmpty.size(); i++) {
                 UploadedImageFile f = nonEmpty.get(i);
                 ImageInspector.Result r = validated.get(i);
 
-                String fileName = UUID.randomUUID() + r.extension;
-                File target = new File(promotionDir, fileName);
-                try (FileOutputStream fos = new FileOutputStream(target)) {
-                    fos.write(f.bytes);
-                }
-                writtenFiles.add(target);
-
                 KhuyenMaiHinhAnh img = new KhuyenMaiHinhAnh();
                 img.setKhuyenMaiId(khuyenMaiId);
-                img.setDuongDan(PromotionUploadPaths.relativePath(khuyenMaiId, fileName));
+                img.setDuongDan(uploadedUrls.get(i));
                 img.setTenFileGoc(safeDisplayName(f.submittedFileName));
                 img.setMimeType(r.detectedMimeType);
                 img.setDungLuong((long) f.bytes.length);
@@ -161,13 +157,12 @@ public class PromotionImageService {
             return inserted;
         } catch (PromotionImageException e) {
             rollbackQuietly(conn);
+            // Giới hạn bị vượt sau khi đã upload → xóa Cloudinary orphans
+            for (String url : uploadedUrls) CloudinaryUtil.deleteByUrl(url);
             throw e;
         } catch (Exception e) {
             rollbackQuietly(conn);
-            // Upload thành công nhưng DB thất bại (hoặc lỗi khác giữa chừng) -> xóa file mồ côi đã ghi.
-            for (File f : writtenFiles) {
-                if (!f.delete()) logger.warn("Không xóa được file mồ côi khi rollback upload ảnh khuyến mãi.");
-            }
+            for (String url : uploadedUrls) CloudinaryUtil.deleteByUrl(url);
             logger.error("addImages khuyenMaiId={}: {}", khuyenMaiId, e.getMessage(), e);
             throw new PromotionImageException("Không thể lưu ảnh khuyến mãi. Vui lòng thử lại.");
         } finally {
@@ -197,10 +192,7 @@ public class PromotionImageService {
             closeQuietly(conn);
         }
 
-        File file = PromotionUploadPaths.resolveSafely(existing.getDuongDan());
-        if (file != null && file.exists() && !file.delete()) {
-            logger.warn("Không xóa được file vật lý sau khi xóa metadata ảnh khuyến mãi (hinhAnhId={}).", hinhAnhId);
-        }
+        CloudinaryUtil.deleteByUrl(existing.getDuongDan());
     }
 
     /** Đổi ảnh bìa trong một transaction: bỏ cờ ảnh bìa cũ rồi đặt ảnh mới, đảm bảo luôn chỉ có 1 ảnh bìa. */
@@ -275,10 +267,7 @@ public class PromotionImageService {
             closeQuietly(conn);
         }
         for (KhuyenMaiHinhAnh img : removed) {
-            File file = PromotionUploadPaths.resolveSafely(img.getDuongDan());
-            if (file != null && file.exists() && !file.delete()) {
-                logger.warn("Không xóa được file vật lý khi hard-delete khuyến mãi (hinhAnhId={}).", img.getHinhAnhId());
-            }
+            CloudinaryUtil.deleteByUrl(img.getDuongDan());
         }
     }
 

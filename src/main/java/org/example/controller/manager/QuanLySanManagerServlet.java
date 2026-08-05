@@ -19,14 +19,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.service.AuditLogService;
 
+import org.example.util.CloudinaryUtil;
+
 import java.io.IOException;
-import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Servlet quản lý sân thi đấu dành cho Manager
@@ -337,23 +336,8 @@ public class QuanLySanManagerServlet extends HttpServlet {
     }
 
     private String saveCourtImageFile(HttpServletRequest req, Part imagePart) throws IOException {
-        String submittedFileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
-        String extension = getSafeImageExtension(submittedFileName, imagePart.getContentType());
-        String fileName = "court-" + UUID.randomUUID() + extension;
-
-        String uploadPath = getServletContext().getRealPath("/uploads/courts");
-        if (uploadPath == null) {
-            uploadPath = new File(System.getProperty("user.home"), "v-sport/uploads/courts").getAbsolutePath();
-        }
-
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
-            throw new IOException("Không thể tạo thư mục lưu ảnh sân.");
-        }
-
-        File courtImageFile = new File(uploadDir, fileName);
-        imagePart.write(courtImageFile.getAbsolutePath());
-        return "/uploads/courts/" + fileName;
+        byte[] bytes = imagePart.getInputStream().readAllBytes();
+        return CloudinaryUtil.uploadImage(bytes, "vsport/courts");
     }
 
     private String getSafeImageExtension(String fileName, String contentType) {

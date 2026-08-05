@@ -46,8 +46,15 @@ public final class PromotionUploadPaths {
         return SUBFOLDER + "/" + khuyenMaiId + "/" + fileName;
     }
 
-    /** URL công khai để Customer/Manager tải ảnh qua servlet stream (không phải filesystem path). */
+    /**
+     * URL công khai để hiển thị ảnh. Nếu đã là Cloudinary URL (https://res.cloudinary.com/...)
+     * trả về nguyên bản; nếu là đường dẫn tương đối cũ thì ghép contextPath + /media/.
+     */
     public static String publicUrl(String contextPath, String relativePath) {
+        if (relativePath == null) return null;
+        if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
+            return relativePath;
+        }
         return (contextPath == null ? "" : contextPath) + "/media/" + relativePath;
     }
 

@@ -367,6 +367,15 @@ input:focus-visible {
   font-weight: 600;
 }
 
+.entity-purpose {
+  font-size: 11px;
+  font-style: italic;
+  color: #55627A;
+  padding: 5px 14px 6px;
+  border-bottom: 1px solid #E4E9F1;
+  line-height: 1.4;
+}
+
 .entity-card .field-row {
   display: flex;
   align-items: center;
