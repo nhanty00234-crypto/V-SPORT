@@ -2503,8 +2503,9 @@ function renderSwapRequests() {
     const guiShift = shiftList.find(s => s.caLamViecId === sr.caLamViecIdGui);
     const nhanShift = sr.caLamViecIdNhan ? shiftList.find(s => s.caLamViecId === sr.caLamViecIdNhan) : null;
     const fmtShift = s => s ? `\${formatDate(s.ngayLam)} \${formatTime(s.gioBatDau)}-\${formatTime(s.gioKetThuc)}` : 'N/A';
-    const nhanInfo = nhanShift ? fmtShift(nhanShift) : '<span class="text-zinc-400 italic">Nhường ca</span>';
-    const swapId = sr.swapId || sr.id || 0;
+    const guiInfo = guiShift ? fmtShift(guiShift) : (sr.caGuiInfo || 'N/A');
+    const nhanInfo = nhanShift ? fmtShift(nhanShift) : (sr.caNhanInfo && sr.caNhanInfo !== 'Xin gánh ca (Không đổi ca)' ? sr.caNhanInfo : '<span class="text-zinc-400 italic">Nhường ca</span>');
+    const swapId = sr.swapRequestId || 0;
     const labelSafe = `\${(sr.tenNguoiGui || 'N/A')} ↔ \${(sr.tenNguoiNhan || 'N/A')}`;
 
     return `<tr class="hover:bg-purple-50/30 transition-colors">
@@ -2514,7 +2515,7 @@ function renderSwapRequests() {
           <span class="text-xs font-semibold text-purple-950">\${sr.tenNguoiGui || 'N/A'}</span>
         </div>
       </td>
-      <td class="px-4 py-3 text-xs font-medium text-zinc-700">\${fmtShift(guiShift)}</td>
+      <td class="px-4 py-3 text-xs font-medium text-zinc-700">\${guiInfo}</td>
       <td class="px-4 py-3">
         <div class="flex items-center gap-2">
           <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">\${(sr.tenNguoiNhan || 'N')[0].toUpperCase()}</div>

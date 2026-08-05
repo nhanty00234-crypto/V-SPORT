@@ -994,7 +994,7 @@ ul{list-style:none}
     let geoPendingLng = null;
     let geoSearchTimer = null;
 
-    const GEO_DEFAULT = [16.047079, 108.206230];
+    const GEO_DEFAULT = [10.776530, 106.700981];
 
     function autoFillAddress() {
         document.getElementById('geoModal').classList.remove('hidden');
