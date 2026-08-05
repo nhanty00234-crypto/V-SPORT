@@ -1732,18 +1732,24 @@ public class DatSanServlet extends HttpServlet {
             }
 
             San san = sanDAO.getSanById(lich.getSanId());
+            if (san == null) {
+                LOGGER.warning("[handleGetDichVu] San not found for sanId=" + lich.getSanId() + ", datSanId=" + datSanId);
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"products\":[],\"ordered\":[]}");
+                return;
+            }
             int coSoId = san.getCoSoID();
 
             org.example.dao.SanPhamDichVuDAO spDao = new org.example.dao.impl.SanPhamDichVuDAOImpl();
             List<org.example.model.SanPham_DichVu> allSp = spDao.findByCoSo(coSoId);
             List<org.example.model.SanPham_DichVu> products = allSp.stream()
-                .filter(sp -> "Đang kinh doanh".equals(sp.getTrangThai()))
+                .filter(sp -> sp.getTrangThai() != null && !"Ngừng kinh doanh".equals(sp.getTrangThai()))
                 .collect(java.util.stream.Collectors.toList());
 
             org.example.dao.HoaDonDAO hdDao = new org.example.dao.impl.HoaDonDAOImpl();
             int hoaDonId = -1;
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
-                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID FROM HoaDon WHERE DatSanID = ?")) {
+                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID FROM HoaDon WHERE DatSanID = ? AND LoaiHoaDon = 'MAIN'")) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
