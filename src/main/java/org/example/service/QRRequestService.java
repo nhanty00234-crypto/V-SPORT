@@ -268,7 +268,9 @@ public class QRRequestService {
     }
 
     private QRRequestDTO toDTO(QRRequest r, String tenSan) {
+        String createdAt = r.getCreatedAt() != null ? r.getCreatedAt().toString() : null;
+        String updatedAt = r.getUpdatedAt() != null ? r.getUpdatedAt().toString() : null;
         return new QRRequestDTO(r.getRequestId(), r.getSanId(), tenSan, r.getRequestType(),
-            r.getItemsJson(), r.getNote(), r.getStatus(), r.getCreatedAt(), r.getUpdatedAt());
+            r.getItemsJson(), r.getNote(), r.getStatus(), createdAt, updatedAt);
     }
 }

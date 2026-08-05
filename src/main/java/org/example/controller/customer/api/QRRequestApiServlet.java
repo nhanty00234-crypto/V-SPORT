@@ -37,6 +37,13 @@ public class QRRequestApiServlet extends HttpServlet {
                 resp.getWriter().write(gson.toJson(out));
                 return;
             }
+            if (QRRequest.TYPE_PAYMENT_REQUEST.equals(requestType) && !isValidPaymentMethod(note)) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.put("success", false);
+                out.put("message", "Vui lòng chọn phương thức thanh toán hợp lệ.");
+                resp.getWriter().write(gson.toJson(out));
+                return;
+            }
 
             QRRequestService.Result result = service.createRequest(sanId, guestToken, null, requestType, itemsJson, note);
             if (!result.success) {
@@ -64,7 +71,11 @@ public class QRRequestApiServlet extends HttpServlet {
 
     private boolean isValidType(String type) {
         return QRRequest.TYPE_CALL_STAFF.equals(type) || QRRequest.TYPE_ORDER_ITEM.equals(type)
-            || QRRequest.TYPE_SERVICE_REQUEST.equals(type);
+            || QRRequest.TYPE_SERVICE_REQUEST.equals(type) || QRRequest.TYPE_PAYMENT_REQUEST.equals(type);
+    }
+
+    private boolean isValidPaymentMethod(String note) {
+        return QRRequest.PAYMENT_METHOD_TRANSFER.equals(note) || QRRequest.PAYMENT_METHOD_CASH.equals(note);
     }
 
     private int statusFor(QRRequestService.ErrorCode code) {

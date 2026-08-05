@@ -9,6 +9,10 @@ public class QRRequest {
     public static final String TYPE_CALL_STAFF = "CALL_STAFF";
     public static final String TYPE_ORDER_ITEM = "ORDER_ITEM";
     public static final String TYPE_SERVICE_REQUEST = "SERVICE_REQUEST";
+    public static final String TYPE_PAYMENT_REQUEST = "PAYMENT_REQUEST";
+
+    public static final String PAYMENT_METHOD_TRANSFER = "Chuyển khoản";
+    public static final String PAYMENT_METHOD_CASH = "Tiền mặt";
 
     public static final String STATUS_NEW = "NEW";
     public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";

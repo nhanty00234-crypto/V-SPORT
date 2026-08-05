@@ -29,6 +29,7 @@
   .type-icon.call   { background: #eff6ff; color: #2563eb; }
   .type-icon.order  { background: #fff7ed; color: #ea580c; }
   .type-icon.service { background: #f0fdf4; color: #16a34a; }
+  .type-icon.payment { background: #f5f3ff; color: #7c3aed; }
 
   .tab-pill {
     display: inline-flex; align-items: center; gap: 6px;
@@ -158,6 +159,7 @@ function timeAgo(isoStr) {
 function typeInfo(type) {
   if (type === 'CALL_STAFF') return { label: 'Gọi nhân viên', icon: 'support_agent', cls: 'call' };
   if (type === 'ORDER_ITEM')  return { label: 'Gọi món', icon: 'restaurant', cls: 'order' };
+  if (type === 'PAYMENT_REQUEST') return { label: 'Thanh toán', icon: 'payments', cls: 'payment' };
   return { label: 'Yêu cầu dịch vụ', icon: 'build', cls: 'service' };
 }
 
@@ -290,7 +292,7 @@ function loadList() {
       renderCards(res.data);
     });
   if (currentStatus === 'NEW' || currentStatus === 'IN_PROGRESS') {
-    pollTimer = setTimeout(loadList, 8000);
+    pollTimer = setTimeout(loadList, 3000);
   }
 }
 
@@ -319,7 +321,7 @@ function loadCounts() {
         }
       });
   });
-  setTimeout(loadCounts, 15000);
+  setTimeout(loadCounts, 5000);
 }
 
 loadList();

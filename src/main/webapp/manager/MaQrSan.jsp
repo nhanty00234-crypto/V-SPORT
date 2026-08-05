@@ -98,8 +98,11 @@
   .cbtn-print:hover  { background: #ede9fe; }
   .cbtn-dl     { background: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
   .cbtn-dl:hover     { background: #ede9fe; }
+  .cbtn-view   { background: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
+  .cbtn-view:hover   { background: #ede9fe; }
   .cbtn-create { background: #7c3aed; color: #fff; border-color: #7c3aed; width: 100%; flex: none; }
   .cbtn-create:hover { background: #6d28d9; }
+
 
   /* ── More menu (⋯) ── */
   .more-wrap { position: relative; }
@@ -300,6 +303,9 @@
               <button class="cbtn cbtn-print" onclick="printQR(${row.sanId})" title="In mã QR">
                 <span class="material-symbols-outlined">print</span>In
               </button>
+              <button class="cbtn cbtn-view" onclick="window.open('${pageContext.request.contextPath}/manager/ma-qr-san-xem?sanId=${row.sanId}','_blank')" title="Xem giao diện khách hàng">
+                <span class="material-symbols-outlined">visibility</span>Xem
+              </button>
               <button class="cbtn cbtn-dl" onclick="downloadQR(${row.sanId})" title="Tải PNG">
                 <span class="material-symbols-outlined">download</span>PNG
               </button>
@@ -414,9 +420,10 @@ function clearFilters() { location.href = CTX + '/manager/ma-qr-san'; }
 
 document.getElementById('fSearch').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
 
-/* ── Print / Download ── */
+/* ── Print / Download / Preview ── */
 function printQR(sanId) { window.open(CTX + '/manager/ma-qr-san-in?sanId=' + sanId, '_blank'); }
 function downloadQR(sanId) { location.href = CTX + '/manager/ma-qr-san-anh?sanId=' + sanId + '&mode=download'; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeRegen(); closeAllMenus(); } });
 
 /* ── More menu (⋯) ── */
 function toggleMoreMenu(btn) {
@@ -455,7 +462,6 @@ function closeRegen() {
   document.getElementById('regenOverlay').classList.remove('open');
 }
 function onOverlayClick(e) { if (e.target === document.getElementById('regenOverlay')) closeRegen(); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeRegen(); closeAllMenus(); } });
 
 async function confirmRegen() {
   if (regenBusy) return;

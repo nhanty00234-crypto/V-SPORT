@@ -1,7 +1,5 @@
 package org.example.dto.qr;
 
-import java.time.LocalDateTime;
-
 public final class QRRequestDTO {
     private final int requestId;
     private final int sanId;
@@ -10,12 +8,12 @@ public final class QRRequestDTO {
     private final String itemsJson;
     private final String note;
     private final String status;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private final String createdAt;
+    private final String updatedAt;
 
     public QRRequestDTO(int requestId, int sanId, String tenSan, String requestType,
                          String itemsJson, String note, String status,
-                         LocalDateTime createdAt, LocalDateTime updatedAt) {
+                         String createdAt, String updatedAt) {
         this.requestId = requestId;
         this.sanId = sanId;
         this.tenSan = tenSan;
@@ -34,6 +32,6 @@ public final class QRRequestDTO {
     public String getItemsJson() { return itemsJson; }
     public String getNote() { return note; }
     public String getStatus() { return status; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getCreatedAt() { return createdAt; }
+    public String getUpdatedAt() { return updatedAt; }
 }
