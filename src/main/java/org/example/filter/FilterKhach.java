@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Filter chặn người dùng đã đăng nhập truy cập lại các trang Auth (Login, Register, Quên mật khẩu)
  */
-@WebFilter(urlPatterns = {"/dangnhap", "/dangky", "/quenmatkhau", "/nhapma", "/nhapmatkhaumoi", "/auth/*"})
+@WebFilter(urlPatterns = {"/dangnhap", "/dangky", "/quenmatkhau", "/nhapma", "/auth/*"})
 public class FilterKhach implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {}

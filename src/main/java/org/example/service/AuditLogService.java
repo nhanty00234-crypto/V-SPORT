@@ -13,12 +13,11 @@ import org.slf4j.LoggerFactory;
  * Nhiệm vụ:
  * - Ghi lại thông tin người thực hiện hành động (ID tài khoản, Tên hiển thị, Vai trò).
  * - Ghi lại hành động gì (Thêm, Sửa, Xóa tạm, Duyệt, Từ chối).
- * - Ghi lại thực thể nào bị ảnh hưởng (Tài khoản, Sân, Ca làm, Yêu cầu nghỉ phép).
+ * - Ghi lại thực thể nào bị ảnh hưởng (Tài khoản, Sân, Ca làm).
  *
  * Được gọi bởi:
  * - XacThucOTPServlet.java
  * - CheckInServlet.java
- * - YeuCauNghiManagerServlet.java
  * - ThungRacManagerServlet.java
  * - QuanLySanManagerServlet.java
  * - QuanLyCaLamManagerServlet.java
@@ -55,7 +54,6 @@ public class AuditLogService {
     public static final String ENTITY_CO_SO      = "CoSo";
     public static final String ENTITY_PAYOS_CONFIG = "PayOSConfig";
     public static final String ENTITY_CA_LAM     = "CaLamViec";
-    public static final String ENTITY_YEU_CAU_NGHI = "YeuCauNghi";
     public static final String ENTITY_DAT_SAN    = "LichDatSan";
     public static final String ENTITY_REPUTATION = "CustomerReputation";
     public static final String ENTITY_HOA_DON    = "HoaDon";

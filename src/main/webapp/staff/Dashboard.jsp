@@ -233,24 +233,6 @@
         </div>
       </div>
 
-      <!-- Quick Warnings & Requests alerts -->
-      <div class="card overflow-hidden">
-        <div class="px-5 py-4 border-b border-orange-50 flex items-center justify-between">
-          <h3 class="text-sm font-bold text-orange-950 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-orange-700">warning</span>Cảnh báo & Nhắc việc</h3>
-        </div>
-        <div class="p-4 flex flex-col gap-3">
-          <!-- Leave Requests Link -->
-          <div class="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200/50">
-            <span class="material-symbols-outlined text-[18px] text-amber-600 shrink-0 mt-0.5">date_range</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold text-zinc-900">Đăng ký nghỉ phép</p>
-              <p class="text-[10px] text-zinc-500 mt-0.5">Bạn có thể gửi yêu cầu xin nghỉ phép phép.</p>
-              <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="text-[10px] text-amber-700 font-bold hover:underline mt-1 inline-block">Đăng ký nghỉ phép →</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
   </section>

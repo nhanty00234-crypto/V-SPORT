@@ -165,9 +165,6 @@
 
     <!-- Quick actions -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 reveal d1">
-      <a href="${pageContext.request.contextPath}/staff/yeu-cau-nghi" class="quick-action-btn">
-        <i class="ti ti-file-time"></i>Đăng ký nghỉ phép
-      </a>
       <a href="${pageContext.request.contextPath}/staff/checkin" class="quick-action-btn">
         <i class="ti ti-door-enter"></i>Check-in sân
       </a>

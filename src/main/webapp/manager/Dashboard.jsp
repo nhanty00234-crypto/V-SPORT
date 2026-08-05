@@ -222,23 +222,6 @@
             </c:forEach>
           </div>
         </div>
-
-        <!-- Warnings -->
-        <div class="card overflow-hidden">
-          <div class="px-5 py-4 border-b border-purple-50">
-            <h3 class="text-sm font-bold text-purple-950 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-purple-700">warning</span>Cảnh báo & Nhắc việc</h3>
-          </div>
-          <div class="p-4 flex flex-col gap-3">
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200/50">
-              <span class="material-symbols-outlined text-[18px] text-amber-600 shrink-0 mt-0.5">date_range</span>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-zinc-900">Có yêu cầu nghỉ phép đang chờ duyệt</p>
-                <p class="text-[10px] text-zinc-500 mt-0.5">Nhân viên gửi yêu cầu xin nghỉ phép.</p>
-                <a href="${pageContext.request.contextPath}/manager/yeu-cau-nghi" class="text-[10px] text-amber-700 font-bold hover:underline mt-1 inline-block">Duyệt yêu cầu →</a>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   </div>

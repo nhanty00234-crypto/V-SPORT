@@ -107,10 +107,6 @@
       <span class="material-symbols-outlined text-[16px]">people</span>
       Nhân viên
     </button>
-    <button onclick="switchView('leave')" id="nav-leave" class="nav-link-tab">
-      <span class="material-symbols-outlined text-[16px]">assignment</span>
-      Yêu cầu nghỉ
-    </button>
   </div>
 
   <!-- Staff Section (View 1) -->
@@ -151,90 +147,6 @@
     </div>
   </div>
 
-  <!-- ==================== VIEW 3: YÊU CẦU NGHỈ ==================== -->
-  <div id="viewLeaveSection" class="hidden">
-    <!-- Header -->
-    <div class="flex items-center justify-between gap-4 mb-3">
-      <div>
-        <h2 class="text-lg font-bold text-violet-950">Quản lý yêu cầu nghỉ</h2>
-        <p class="text-xs text-zinc-500">Duyệt và quản lý yêu cầu nghỉ phép của nhân viên</p>
-      </div>
-      <button onclick="switchView('staff')" class="flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-violet-100 text-violet-750 text-sm font-semibold hover:bg-violet-200 transition-all">
-        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-        Quay lại nhân viên
-      </button>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-      <div class="card p-5 bg-white border border-zinc-100 rounded-2xl flex items-center justify-between shadow-sm">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-medium text-zinc-500">Tất cả yêu cầu</span>
-          <span class="text-2xl font-extrabold text-zinc-800" id="leaveTotalCount">0</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
-          <span class="material-symbols-outlined text-[24px]">assignment</span>
-        </div>
-      </div>
-      <div class="card p-5 bg-white border border-zinc-100 rounded-2xl flex items-center justify-between shadow-sm">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-medium text-zinc-500">Chờ duyệt</span>
-          <span class="text-2xl font-extrabold text-amber-600" id="leavePendingCount">0</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-          <span class="material-symbols-outlined text-[24px]">pending_actions</span>
-        </div>
-      </div>
-      <div class="card p-5 bg-white border border-zinc-100 rounded-2xl flex items-center justify-between shadow-sm">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-medium text-zinc-500">Đã duyệt</span>
-          <span class="text-2xl font-extrabold text-emerald-600" id="leaveApprovedCount">0</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-          <span class="material-symbols-outlined text-[24px]">check_circle</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filter -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-      <div class="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-        <button onclick="filterLeaveRequests('all', this)" class="leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-white text-zinc-800 shadow-sm transition-all cursor-pointer">Tất cả</button>
-        <button onclick="filterLeaveRequests('ChoDuyet', this)" class="leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer">Chờ duyệt</button>
-        <button onclick="filterLeaveRequests('DaDuyet', this)" class="leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer">Đã duyệt</button>
-        <button onclick="filterLeaveRequests('TuChoi', this)" class="leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer">Từ chối</button>
-      </div>
-    </div>
-
-    <!-- Leave Requests Table -->
-    <div class="card overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr class="bg-violet-50/50 text-violet-950 font-bold border-b border-violet-100">
-              <th class="p-4 w-12 text-center">#</th>
-              <th class="p-4">Nhân viên</th>
-              <th class="p-4">Vai trò</th>
-              <th class="p-4">Ngày nghỉ</th>
-              <th class="p-4">Loại nghỉ</th>
-              <th class="p-4">Lý do</th>
-              <th class="p-4">Trạng thái</th>
-              <th class="p-4">Ngày gửi</th>
-              <th class="p-4 text-right pr-6">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-violet-50" id="leaveRequestBody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-      </div>
-      <!-- Empty State -->
-      <div id="leaveEmptyState" class="hidden flex flex-col items-center justify-center py-12 px-4 text-center">
-        <span class="material-symbols-outlined text-[48px] text-violet-200 mb-2">event_busy</span>
-        <p class="text-zinc-500 text-sm font-medium">Chưa có yêu cầu nghỉ nào</p>
-      </div>
-    </div>
-  </div>
 </main>
 
 <!-- Staff Modal -->
@@ -955,7 +867,6 @@ function deleteStaff(id) {
 
 let currentView = 'staff';
 let staffListFull = [];
-let leaveRequests = [];
 let currentManagerCoSoId = ${sessionScope.user.coSoId != null ? sessionScope.user.coSoId : 'null'};
 
 function switchView(viewName) {
@@ -966,221 +877,7 @@ function switchView(viewName) {
     });
     document.getElementById('nav-' + viewName).classList.add('active');
 
-    document.getElementById('viewStaffSection').classList.add('hidden');
-    document.getElementById('viewLeaveSection').classList.add('hidden');
-
-    if (viewName === 'staff') {
-        document.getElementById('viewStaffSection').classList.remove('hidden');
-    } else if (viewName === 'leave') {
-        document.getElementById('viewLeaveSection').classList.remove('hidden');
-        if (leaveRequests.length === 0) {
-            loadLeaveRequests();
-        }
-    }
-}
-
-
-// ==================== LEAVE VIEW (Yêu cầu nghỉ) ====================
-
-async function loadLeaveRequests() {
-    try {
-        const response = await fetch('${pageContext.request.contextPath}/manager/yeu-cau-nghi?format=json');
-        if (response.ok) {
-            const data = await response.json();
-            leaveRequests = data;
-            renderLeaveTable();
-        } else {
-            console.error('Failed to load leave requests');
-            let errorText = 'Lỗi máy chủ khi tải yêu cầu nghỉ';
-            try {
-                const errData = await response.json();
-                if (errData && errData.error) errorText = errData.error;
-            } catch (e) {}
-            showNotification('error', errorText);
-        }
-    } catch (error) {
-        console.error('Error loading leave requests:', error);
-        showNotification('error', 'Lỗi tải dữ liệu yêu cầu nghỉ.');
-    }
-}
-
-function renderLeaveTable(filteredList = null) {
-    const list = filteredList || leaveRequests;
-    const tbody = document.getElementById('leaveRequestBody');
-    const emptyState = document.getElementById('leaveEmptyState');
-    const totalCountEl = document.getElementById('leaveTotalCount');
-    const pendingCountEl = document.getElementById('leavePendingCount');
-    const approvedCountEl = document.getElementById('leaveApprovedCount');
-
-    // Stats
-    totalCountEl.innerText = list.length;
-    const pendingCount = list.filter(r => r.trangThai === 'ChoDuyet').length;
-    pendingCountEl.innerText = pendingCount;
-    const approvedCount = list.filter(r => r.trangThai === 'DaDuyet').length;
-    approvedCountEl.innerText = approvedCount;
-
-    if (list.length === 0) {
-        tbody.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-    }
-    emptyState.classList.add('hidden');
-
-    tbody.innerHTML = list.map(function(req, idx) {
-        var statusClass = req.trangThai === 'ChoDuyet' ? 'badge-amber' :
-                          req.trangThai === 'DaDuyet'  ? 'badge-green'  :
-                          req.trangThai === 'TuChoi'   ? 'badge-red'    : 'badge-zinc';
-        var statusLabel = req.trangThai === 'ChoDuyet' ? 'Chờ duyệt' :
-                          req.trangThai === 'DaDuyet'  ? 'Đã duyệt'  :
-                          req.trangThai === 'TuChoi'   ? 'Từ chối'   :
-                          req.trangThai === 'DaHuy'    ? 'Đã hủy'    : req.trangThai;
-        var dateFormatted   = formatDate(req.ngayNghi);
-        var loaiNghiDisplay = req.loaiNghi === 'FullDay'           ? 'Cả ngày'    :
-                              req.loaiNghi === 'HalfDay_Morning'   ? 'Buổi sáng'  :
-                              req.loaiNghi === 'HalfDay_Afternoon' ? 'Buổi chiều' : req.loaiNghi;
-        
-        var typeClass = req.loaiNghi === 'FullDay' ? 'bg-indigo-50 text-indigo-700' : 'bg-sky-50 text-sky-700';
-
-        var dateSent = '-';
-        if (req.ngayGui) {
-            var d = new Date(req.ngayGui);
-            dateSent = d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear()
-                     + ' ' + d.getHours().toString().padStart(2,'0')
-                     + ':' + d.getMinutes().toString().padStart(2,'0');
-        }
-
-        var nameParts = req.tenNhanVien ? req.tenNhanVien.trim().split(' ') : [];
-        var initials = nameParts.length > 0 ? nameParts[nameParts.length - 1].substring(0, 2).toUpperCase() : 'NV';
-
-        var actionHtml = '';
-        if (req.trangThai === 'ChoDuyet') {
-            actionHtml =
-                '<button type="button" onclick="approveLeave(' + req.yeuCauNghiID + ')"'
-                + ' class="px-3 py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 text-[11px] font-bold transition-all shadow-sm cursor-pointer mr-2">Phê duyệt</button>'
-                + '<button type="button" onclick="rejectLeave(' + req.yeuCauNghiID + ')"'
-                + ' class="px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-650 hover:bg-red-100 text-[11px] font-bold transition-all shadow-sm cursor-pointer">Từ chối</button>';
-        }
-
-        return '<tr class="hover:bg-violet-50/10 transition-colors reveal-on-scroll">'
-            + '<td class="p-4 text-center text-zinc-500 font-medium">' + (idx + 1) + '</td>'
-            + '<td class="p-4">'
-            +   '<div class="flex items-center gap-3">'
-            +     '<div class="w-9 h-9 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center text-xs shrink-0">' + initials + '</div>'
-            +     '<div>'
-            +       '<div class="text-sm font-semibold text-zinc-800">' + req.tenNhanVien + '</div>'
-            +       '<div class="text-xs text-zinc-400 font-mono mt-0.5">' + req.username + '</div>'
-            +     '</div>'
-            +   '</div>'
-            + '</td>'
-            + '<td class="p-4 text-zinc-600 font-medium">' + req.roleName + '</td>'
-            + '<td class="p-4 font-semibold text-zinc-700">' + dateFormatted + '</td>'
-            + '<td class="p-4"><span class="px-2 py-0.5 rounded text-[11px] font-semibold ' + typeClass + '">' + loaiNghiDisplay + '</span></td>'
-            + '<td class="p-4 text-zinc-600 max-w-[200px] truncate" title="' + req.lyDo + '">' + req.lyDo + '</td>'
-            + '<td class="p-4"><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>'
-            + '<td class="p-4 text-zinc-400 font-mono">' + dateSent + '</td>'
-            + '<td class="p-4 text-right pr-6">' + actionHtml + '</td>'
-            + '</tr>';
-    }).join('');
-
-    if (typeof observer !== 'undefined') {
-        document.querySelectorAll("#leaveRequestBody .reveal-on-scroll").forEach(el => {
-            observer.observe(el);
-        });
-    } else {
-        document.querySelectorAll("#leaveRequestBody .reveal-on-scroll").forEach(el => {
-            el.classList.add("revealed");
-        });
-    }
-}
-
-function filterLeaveRequests(status, btn) {
-    document.querySelectorAll('.leave-filter-btn').forEach(b => {
-        b.className = 'leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer';
-    });
-    if (btn) {
-        btn.className = 'leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-white text-zinc-800 shadow-sm transition-all cursor-pointer';
-    } else {
-        const first = document.querySelector('.leave-filter-btn');
-        if (first) first.className = 'leave-filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-white text-zinc-800 shadow-sm transition-all cursor-pointer';
-    }
-    
-    if (status === 'all') {
-        renderLeaveTable(leaveRequests);
-    } else {
-        const filtered = leaveRequests.filter(r => r.trangThai === status);
-        renderLeaveTable(filtered);
-    }
-}
-
-
-async function approveLeave(id) {
-    if (!confirm('Phê duyệt yêu cầu nghỉ này?')) return;
-    
-    const params = new URLSearchParams();
-    params.append('action', 'approve');
-    params.append('id', id);
-    params.append('format', 'json');
-
-    try {
-        const response = await fetch(_ctxPath + '/manager/yeu-cau-nghi', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: params
-        });
-
-        if (response.ok) {
-            const res = await response.json();
-            if (res.success) {
-                showNotification('success', res.message || 'Đã phê duyệt yêu cầu nghỉ');
-                await loadLeaveRequests();
-            } else {
-                showNotification('error', res.error || 'Lỗi phê duyệt yêu cầu nghỉ.');
-            }
-        } else {
-            showNotification('error', 'Lỗi máy chủ khi phê duyệt.');
-        }
-    } catch (error) {
-        console.error('Error approving leave request:', error);
-        showNotification('error', 'Lỗi kết nối mạng.');
-    }
-}
-
-async function rejectLeave(id) {
-    const ghiChu = prompt('Nhập lý do từ chối (tùy chọn):');
-    if (ghiChu === null) return; // Cancelled
-    
-    const params = new URLSearchParams();
-    params.append('action', 'reject');
-    params.append('id', id);
-    params.append('ghiChu', ghiChu);
-    params.append('format', 'json');
-
-    try {
-        const response = await fetch(_ctxPath + '/manager/yeu-cau-nghi', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: params
-        });
-
-        if (response.ok) {
-            const res = await response.json();
-            if (res.success) {
-                showNotification('success', res.message || 'Đã từ chối yêu cầu nghỉ');
-                await loadLeaveRequests();
-            } else {
-                showNotification('error', res.error || 'Lỗi từ chối yêu cầu nghỉ.');
-            }
-        } else {
-            showNotification('error', 'Lỗi máy chủ khi từ chối.');
-        }
-    } catch (error) {
-        console.error('Error rejecting leave request:', error);
-        showNotification('error', 'Lỗi kết nối mạng.');
-    }
+    document.getElementById('viewStaffSection').classList.remove('hidden');
 }
 
 // Global observer for scroll animations
@@ -1203,13 +900,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadStaffList();
-    
-    // Automatically switch to correct tab if tab parameter is specified
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
-    if (tab && ['staff', 'leave'].includes(tab)) {
-        switchView(tab);
-    }
 });
 
 // Reload page when navigated back/forward via bfcache

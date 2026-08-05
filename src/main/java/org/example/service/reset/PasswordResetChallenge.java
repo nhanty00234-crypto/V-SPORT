@@ -1,103 +1,96 @@
 package org.example.service.reset;
 
-import java.io.Serializable;
+public class PasswordResetChallenge {
 
-/**
- * Challenge đặt lại mật khẩu, lưu trong HTTP session (nhất quán với kiến trúc
- * OTP-in-session hiện có của luồng đăng ký). Chỉ giữ HASH của OTP; OTP raw chỉ
- * tồn tại trong email gửi cho người dùng.
- *
- * Challenge "decoy" (accountEmail == null) được tạo khi identifier không khớp
- * tài khoản hợp lệ của portal — mọi lần verify đều thất bại với thông báo
- * generic, chống account enumeration.
- *
- * Logic thuần với clock truyền vào để unit-test không cần DB.
- */
-public class PasswordResetChallenge implements Serializable {
+    public static final long TTL_MS = 10 * 60 * 1000L;
+    private static final long RESEND_COOLDOWN_MS = 60_000L;
+    private static final int MAX_ATTEMPTS = 5;
+    private static final int MAX_SENDS = 5;
 
-    private static final long serialVersionUID = 1L;
+    public enum VerifyResult { OK, INVALID, EXPIRED, USED, LOCKED }
 
-    public static final long TTL_MS = 10 * 60_000L;            // OTP hết hạn sau 10 phút
-    public static final long RESEND_COOLDOWN_MS = 60_000L;     // 60s giữa 2 lần gửi
-    public static final int MAX_ATTEMPTS = 5;                  // tối đa 5 lần nhập sai
-    public static final int MAX_SENDS = 5;                     // tối đa 5 lần gửi mã
+    private final String accountEmail;
+    private final String maskedEmail;
+    private final String role;
+    private final boolean decoy;
 
-    public enum VerifyResult { OK, INVALID, EXPIRED, LOCKED, USED }
-
-    private final String accountEmail;      // null = decoy
-    private final String maskedDestination; // hiển thị cho người dùng (đã che)
-    private final String portal;            // customer | internal
-
-    private String salt;
-    private String otpHash;
-    private long expiresAt;
+    private String otp;
+    private long issuedAt;
     private long lastSentAt;
-    private int sendCount;
     private int attemptCount;
+    private int sendCount;
     private boolean used;
 
-    private PasswordResetChallenge(String accountEmail, String maskedDestination, String portal) {
+    private PasswordResetChallenge(String accountEmail, String maskedEmail, String role,
+                                   String otp, long issuedAt, boolean decoy) {
         this.accountEmail = accountEmail;
-        this.maskedDestination = maskedDestination;
-        this.portal = portal;
+        this.maskedEmail = maskedEmail;
+        this.role = role;
+        this.otp = otp;
+        this.issuedAt = issuedAt;
+        this.lastSentAt = issuedAt;
+        this.decoy = decoy;
+        this.sendCount = 1;
     }
 
-    public static PasswordResetChallenge create(String accountEmail, String maskedDestination,
-                                                String portal, String otp, long now) {
-        PasswordResetChallenge c = new PasswordResetChallenge(accountEmail, maskedDestination, portal);
-        c.applyNewOtp(otp, now);
-        return c;
+    public static PasswordResetChallenge create(String accountEmail, String maskedEmail,
+                                                 String role, String otp, long nowMs) {
+        boolean decoy = (accountEmail == null);
+        return new PasswordResetChallenge(accountEmail, maskedEmail, role, otp, nowMs, decoy);
     }
 
-    private void applyNewOtp(String otp, long now) {
-        this.salt = ResetSecurityUtil.newSalt();
-        this.otpHash = ResetSecurityUtil.hashOtp(this.salt, otp);
-        this.expiresAt = now + TTL_MS;
-        this.lastSentAt = now;
-        this.sendCount++;
-        this.attemptCount = 0;
-    }
-
-    /** Xác thực OTP; tăng attempt khi sai; one-time-use khi đúng. Decoy luôn INVALID. */
-    public VerifyResult verify(String input, long now) {
+    public VerifyResult verify(String input, long nowMs) {
+        if (decoy) return VerifyResult.INVALID;
         if (used) return VerifyResult.USED;
-        if (now > expiresAt) return VerifyResult.EXPIRED;
         if (attemptCount >= MAX_ATTEMPTS) return VerifyResult.LOCKED;
-        attemptCount++;
-        if (isDecoy() || input == null || !input.matches("\\d{6}")) {
-            return attemptCount >= MAX_ATTEMPTS ? VerifyResult.LOCKED : VerifyResult.INVALID;
+        if (nowMs - issuedAt > TTL_MS) return VerifyResult.EXPIRED;
+        if (!isValid6Digit(input)) {
+            attemptCount++;
+            if (attemptCount >= MAX_ATTEMPTS) return VerifyResult.LOCKED;
+            return VerifyResult.INVALID;
         }
-        String actual = ResetSecurityUtil.hashOtp(salt, input);
-        if (ResetSecurityUtil.hashEquals(otpHash, actual)) {
-            used = true;
-            return VerifyResult.OK;
+        if (!otp.equals(input)) {
+            attemptCount++;
+            if (attemptCount >= MAX_ATTEMPTS) return VerifyResult.LOCKED;
+            return VerifyResult.INVALID;
         }
-        return attemptCount >= MAX_ATTEMPTS ? VerifyResult.LOCKED : VerifyResult.INVALID;
+        used = true;
+        return VerifyResult.OK;
     }
 
-    public boolean canResend(long now) {
-        return !used && sendCount < MAX_SENDS && (now - lastSentAt) >= RESEND_COOLDOWN_MS;
+    public boolean canResend(long nowMs) {
+        return sendCount < MAX_SENDS && (nowMs - lastSentAt) >= RESEND_COOLDOWN_MS;
     }
 
-    /** Số giây còn phải chờ trước khi được gửi lại (0 nếu được gửi ngay). */
-    public long resendWaitSeconds(long now) {
-        long wait = (RESEND_COOLDOWN_MS - (now - lastSentAt) + 999) / 1000;
-        return Math.max(0, wait);
+    public long resendWaitSeconds(long nowMs) {
+        long waited = nowMs - lastSentAt;
+        long remaining = RESEND_COOLDOWN_MS - waited;
+        return remaining > 0 ? remaining / 1000 : 0;
     }
 
-    /** Gửi lại: OTP mới thay OTP cũ (invalidate mã cũ), reset attempts, gia hạn expiry. */
-    public void applyResend(String newOtp, long now) {
-        if (!canResend(now)) {
-            throw new IllegalStateException("Chưa đủ điều kiện gửi lại mã");
-        }
-        applyNewOtp(newOtp, now);
+    public void applyResend(String newOtp, long nowMs) {
+        if (!canResend(nowMs)) throw new IllegalStateException("Resend not allowed yet");
+        this.otp = newOtp;
+        this.issuedAt = nowMs;
+        this.lastSentAt = nowMs;
+        this.attemptCount = 0;
+        this.used = false;
+        this.sendCount++;
     }
 
-    public boolean isDecoy() { return accountEmail == null; }
     public boolean isUsed() { return used; }
+    public boolean isDecoy() { return decoy; }
     public String getAccountEmail() { return accountEmail; }
-    public String getMaskedDestination() { return maskedDestination; }
-    public String getPortal() { return portal; }
+    public String getMaskedEmail() { return maskedEmail; }
+    public String getRole() { return role; }
     public int getAttemptCount() { return attemptCount; }
     public int getSendCount() { return sendCount; }
+
+    private static boolean isValid6Digit(String s) {
+        if (s == null || s.length() != 6) return false;
+        for (char ch : s.toCharArray()) {
+            if (ch < '0' || ch > '9') return false;
+        }
+        return true;
+    }
 }

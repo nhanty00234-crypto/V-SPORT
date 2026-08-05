@@ -355,7 +355,7 @@
                         if (ref && history.length > 1) {
                             var refUrl = new URL(ref);
                             var sameOrigin = refUrl.origin === window.location.origin;
-                            var isAuthPage = /\/(dangnhap|dangky|quenmatkhau|nhapma|nhapmatkhaumoi)(\?|$)/.test(refUrl.pathname);
+                            var isAuthPage = /\/(dangnhap|dangky|quenmatkhau|nhapma)(\?|$)/.test(refUrl.pathname);
                             if (sameOrigin && !isAuthPage) {
                                 e.preventDefault();
                                 history.back();

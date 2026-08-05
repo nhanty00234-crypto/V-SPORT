@@ -75,7 +75,7 @@ public class CaLamValidationTest {
         System.out.println("      will use stub accounts that may not exist in DB.");
         System.out.println();
 
-        // Uses default constructor (wires CaLamViecDAOImpl + YeuCauNghiDAOImpl internally)
+        // Uses default constructor (wires CaLamViecDAOImpl internally)
         CaLamValidationEngine engine = new CaLamValidationEngine();
 
         LocalDate today = LocalDate.now();
@@ -232,11 +232,6 @@ public class CaLamValidationTest {
         // ─── TC_VALID_20: Trùng ca (SHIFT_OVERLAP) ───
         {
             System.out.println("[SKIP] TC_VALID_20 — SHIFT_OVERLAP yêu cầu ca đã tồn tại trong DB cùng nhân viên/giờ.");
-        }
-
-        // ─── TC_VALID_21: Trùng ngày nghỉ phép — phải lỗi LEAVE_FULL_DAY ───
-        {
-            System.out.println("[SKIP] TC_VALID_21 — LEAVE_FULL_DAY yêu cầu nghỉ phép đã được duyệt trong DB.");
         }
 
         // ─── TC_VALID_22: Batch all-or-nothing: 1 ca lỗi thì rollback toàn batch ───

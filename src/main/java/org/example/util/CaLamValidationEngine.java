@@ -1,15 +1,12 @@
 package org.example.util;
 
 import org.example.dao.CaLamViecDAO;
-import org.example.dao.YeuCauNghiDAO;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dao.CoSoDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
-import org.example.dao.impl.YeuCauNghiDAOImpl;
 import org.example.dao.impl.TaiKhoanDAOImpl;
 import org.example.dao.impl.CoSoDAOImpl;
 import org.example.model.CaLamViec;
-import org.example.model.YeuCauNghi;
 import org.example.model.TaiKhoan;
 import org.example.model.CoSo;
 
@@ -23,13 +20,11 @@ import java.util.List;
 public class CaLamValidationEngine {
 
     private final CaLamViecDAO caLamViecDAO;
-    private final YeuCauNghiDAO yeuCauNghiDAO;
     private final TaiKhoanDAO taiKhoanDAO;
     private final CoSoDAO coSoDAO;
 
     public CaLamValidationEngine() {
         this.caLamViecDAO = new CaLamViecDAOImpl();
-        this.yeuCauNghiDAO = new YeuCauNghiDAOImpl();
         this.taiKhoanDAO = new TaiKhoanDAOImpl();
         this.coSoDAO = new CoSoDAOImpl();
     }
@@ -303,33 +298,6 @@ public class CaLamValidationEngine {
                     errors.add(new ValidationItem("SHIFT_OVERLAP", String.format("Trùng ca: Nhân viên đã có ca làm việc từ %s đến %s vào ngày %s (Cơ sở ID: %d)",
                             shift.getGioBatDau(), shift.getGioKetThuc(), shift.getNgayLam(), shift.getCoSoId()), "gioBatDau", shift));
                 }
-            }
-        }
-
-        List<YeuCauNghi> approvedLeaves = yeuCauNghiDAO.findByAccountIDAndTrangThai(accountId, "DaDuyet");
-        for (YeuCauNghi leave : approvedLeaves) {
-            if (ngayLam.equals(leave.getNgayNghi())) {
-                String loai = leave.getLoaiNghi();
-                if ("FullDay".equalsIgnoreCase(loai)) {
-                    errors.add(new ValidationItem("LEAVE_FULLDAY", "Xếp ca cho người đang nghỉ: Nhân viên có lịch nghỉ phép cả ngày đã được phê duyệt.", "ngayLam", leave));
-                } else {
-                    boolean morningOverlap = gioBatDau.isBefore(LocalTime.NOON);
-                    boolean afternoonOverlap = (gioKetThuc.isAfter(LocalTime.NOON) || gioKetThuc.isBefore(gioBatDau)) 
-                                                && gioBatDau.isBefore(LocalTime.of(23, 59));
-                    if ("HalfDay_Morning".equalsIgnoreCase(loai) && morningOverlap) {
-                        errors.add(new ValidationItem("LEAVE_HALFDAY_MORNING", "Xếp ca cho người đang nghỉ: Nhân viên nghỉ phép buổi sáng (trước 12:00).", "ngayLam", leave));
-                    } else if ("HalfDay_Afternoon".equalsIgnoreCase(loai) && afternoonOverlap) {
-                        errors.add(new ValidationItem("LEAVE_HALFDAY_AFTERNOON", "Xếp ca cho người đang nghỉ: Nhân viên nghỉ phép buổi chiều (sau 12:00).", "ngayLam", leave));
-                    }
-                }
-            }
-        }
-
-        List<YeuCauNghi> pendingLeaves = yeuCauNghiDAO.findByAccountIDAndTrangThai(accountId, "ChoDuyet");
-        for (YeuCauNghi leave : pendingLeaves) {
-            if (ngayLam.equals(leave.getNgayNghi())) {
-                warnings.add(new ValidationItem("PENDING_LEAVE", "Cảnh báo: Nhân viên có đơn xin nghỉ đang chờ duyệt vào ngày này.", "ngayLam", leave));
-                break;
             }
         }
 

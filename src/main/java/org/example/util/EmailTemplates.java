@@ -30,18 +30,26 @@ public class EmailTemplates {
         );
     }
 
-    // ── OTP quên mật khẩu ────────────────────────────────────────────────────
+    // ── Mật khẩu mới khi quên mật khẩu (gửi trực tiếp, không qua OTP) ────────
 
-    public static String otpQuenMatKhau(String fullName, String otp) {
+    public static String matKhauMoiQuenMatKhau(String fullName, String newPassword, String loginUrl) {
+        String pwBox = "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;margin:20px 0;'>"
+            + "<tr><td style='padding:20px;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;text-align:center;'>"
+            + "<div style='font-size:13px;color:#0369a1;margin-bottom:10px;'>Mật khẩu mới của bạn</div>"
+            + "<strong style='font-family:Consolas,monospace;font-size:20px;letter-spacing:1px;color:#0f172a;background:#ffffff;border:1px solid #e0f2fe;padding:10px 18px;border-radius:8px;display:inline-block;'>"
+            + esc(newPassword) + "</strong>"
+            + "</td></tr></table>";
+        String mainContent = pwBox + (loginUrl != null ? button("Đăng nhập ngay ➔", loginUrl) : "");
+
         return build(
-            "Đặt lại mật khẩu - V-SPORT",
+            "Mật khẩu mới - V-SPORT",
             ORANGE,
-            "Đặt lại mật khẩu",
+            "Mật khẩu mới đã được cấp",
             "Hệ thống vừa nhận được yêu cầu đặt lại mật khẩu cho tài khoản <strong>V-SPORT</strong> của bạn."
-            + " Vui lòng nhập mã xác thực bên dưới để tiến hành khôi phục:",
-            otpBox(otp),
-            "Mã xác thực có hiệu lực trong <strong>10 phút</strong>.<br><br>"
-            + "Nếu bạn <strong>không thực hiện</strong> yêu cầu này, vui lòng bỏ qua email — tài khoản của bạn vẫn an toàn.",
+            + " Một mật khẩu mới đã được tạo tự động, vui lòng dùng mật khẩu bên dưới để đăng nhập:",
+            mainContent,
+            "Vì lý do bảo mật, hãy <strong>đổi mật khẩu ngay</strong> sau khi đăng nhập.<br><br>"
+            + "Nếu bạn <strong>không thực hiện</strong> yêu cầu này, vui lòng liên hệ ngay với đội ngũ hỗ trợ V-SPORT.",
             null,
             "warning"
         );

@@ -33,7 +33,6 @@ public interface TaiKhoanDAO {
 
     // Logic previously in service
     String sendRegistrationOTP(String email, String fullName);
-    String sendForgotPasswordOTP(String email);
 
     // Admin CRUD
     List<TaiKhoan> getAllAccounts();

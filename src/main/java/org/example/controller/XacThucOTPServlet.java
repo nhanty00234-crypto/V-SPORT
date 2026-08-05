@@ -17,20 +17,6 @@ public class XacThucOTPServlet extends HttpServlet {
 
     private TaiKhoanDAO TaiKhoanDAO = new TaiKhoanDAOImpl();
 
-    /** JSP nhập mã quên mật khẩu theo portal của challenge. */
-    private static String forgotOtpJsp(String portal) {
-        return org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(portal)
-                ? "/auth/NhapMaQuenMatKhauNoiBo.jsp"
-                : "/auth/NhapMaQuenMatKhau.jsp";
-    }
-
-    /** JSP tạo mật khẩu mới theo portal. */
-    private static String newPasswordJsp(String portal) {
-        return org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(portal)
-                ? "/auth/NhapMatKhauMoiNoiBo.jsp"
-                : "/auth/NhapMatKauMoi.jsp";
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getServletPath();
@@ -38,25 +24,11 @@ public class XacThucOTPServlet extends HttpServlet {
             handleResendOTP(req, resp);
             return;
         }
-        // GET /nhapma | /he-thong/xac-thuc-otp: chỉ hợp lệ khi có reset challenge
-        // quên-mật-khẩu trong session, ĐÚNG portal của route (đích PRG sau khi gửi
-        // OTP thành công). Truy cập trực tiếp bị đẩy về đầu luồng của portal đó.
+        // Quên mật khẩu không còn đi qua bước nhập OTP; GET trực tiếp vào đây
+        // (không có OTP đăng ký/admin trong session) bị đẩy về đầu luồng.
         boolean internalRoute = "/he-thong/xac-thuc-otp".equals(path);
-        HttpSession session = req.getSession(false);
-        org.example.service.reset.PasswordResetChallenge challenge = session == null ? null
-                : (org.example.service.reset.PasswordResetChallenge) session.getAttribute("resetChallenge");
-        String challengePortal = session == null ? null : (String) session.getAttribute("resetPortal");
-        boolean portalMatches = internalRoute
-                ? org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(challengePortal)
-                : !org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(challengePortal);
-        if (session != null && "FORGOT_PASSWORD".equals(session.getAttribute("authType"))
-                && challenge != null && !challenge.isUsed() && portalMatches) {
-            req.setAttribute("email", challenge.getMaskedDestination());
-            req.getRequestDispatcher(forgotOtpJsp(challengePortal)).forward(req, resp);
-        } else {
-            resp.sendRedirect(req.getContextPath()
-                    + (internalRoute ? "/he-thong/quen-mat-khau" : "/quenmatkhau"));
-        }
+        resp.sendRedirect(req.getContextPath()
+                + (internalRoute ? "/he-thong/quen-mat-khau" : "/quenmatkhau"));
     }
 
     @Override
@@ -73,15 +45,9 @@ public class XacThucOTPServlet extends HttpServlet {
         HttpSession session = req.getSession();
         String userOtp = req.getParameter("otp");
         String sessionOtp = (String) session.getAttribute("otp");
-        String authType = (String) session.getAttribute("authType"); // REGISTER, FORGOT_PASSWORD hoặc ADMIN_ADD
+        String authType = (String) session.getAttribute("authType"); // REGISTER, ADMIN_ADD, ...
         String email = req.getParameter("email");
         req.setAttribute("email", email);
-
-        // Luồng quên mật khẩu dùng challenge băm OTP + expiry + attempt limit riêng.
-        if ("FORGOT_PASSWORD".equals(authType)) {
-            handleForgotPasswordVerify(req, resp, session, userOtp);
-            return;
-        }
 
         String requestedWith = req.getHeader("X-Requested-With");
         boolean isAjax = "XMLHttpRequest".equals(requestedWith);
@@ -377,153 +343,12 @@ public class XacThucOTPServlet extends HttpServlet {
                 }
             }
 
-        } else if ("FORGOT_PASSWORD".equals(authType)) {
-            // Xác thực thành công cho quên mật khẩu, chuyển sang trang nhập pass mới
-            session.setAttribute("isVerified", true); // Đánh dấu đã xác thực OTP thành công
-            if (isAjax) {
-                resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": true, \"step\": \"reset-password\"}");
-                return;
-            }
-            req.getRequestDispatcher("/auth/NhapMatKauMoi.jsp").forward(req, resp);
         }
-    }
-
-    /**
-     * Xác thực OTP quên mật khẩu bằng PasswordResetChallenge (hash + expiry +
-     * attempt limit + one-time-use, decoy chống enumeration).
-     */
-    private void handleForgotPasswordVerify(HttpServletRequest req, HttpServletResponse resp,
-                                            HttpSession session, String userOtp)
-            throws ServletException, IOException {
-        String requestedWith = req.getHeader("X-Requested-With");
-        boolean isAjax = "XMLHttpRequest".equals(requestedWith);
-
-        org.example.service.reset.PasswordResetChallenge challenge =
-                (org.example.service.reset.PasswordResetChallenge) session.getAttribute("resetChallenge");
-        String portal = (String) session.getAttribute("resetPortal");
-        boolean internal = org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(portal);
-        String requestUrl = req.getContextPath() + (internal ? "/he-thong/quen-mat-khau" : "/quenmatkhau");
-
-        if (challenge == null) {
-            if (isAjax) {
-                resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"Phiên đặt lại mật khẩu đã hết hạn. Vui lòng thực hiện lại.\"}");
-                return;
-            }
-            resp.sendRedirect(requestUrl);
-            return;
-        }
-
-        req.setAttribute("email", challenge.getMaskedDestination());
-        String loi;
-        switch (challenge.verify(userOtp == null ? "" : userOtp.trim(), System.currentTimeMillis())) {
-            case OK:
-                session.setAttribute("isVerified", true);
-                session.removeAttribute("resetChallenge");
-                org.apache.logging.log4j.LogManager.getLogger(XacThucOTPServlet.class)
-                        .info("PASSWORD_RESET_VERIFIED portal={}", portal);
-                if (isAjax) {
-                    resp.setContentType("application/json;charset=UTF-8");
-                    resp.getWriter().write("{\"success\": true, \"step\": \"reset-password\"}");
-                    return;
-                }
-                req.getRequestDispatcher(newPasswordJsp(portal)).forward(req, resp);
-                return;
-            case EXPIRED:
-            case USED:
-                loi = "Mã xác thực không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu mã mới.";
-                break;
-            case LOCKED:
-                loi = "Bạn đã nhập sai quá số lần cho phép. Vui lòng yêu cầu mã mới.";
-                break;
-            default:
-                loi = "Mã xác thực không chính xác.";
-        }
-        org.apache.logging.log4j.LogManager.getLogger(XacThucOTPServlet.class)
-                .info("PASSWORD_RESET_FAILED portal={} attempts={}", portal, challenge.getAttemptCount());
-        if (isAjax) {
-            resp.setContentType("application/json;charset=UTF-8");
-            resp.getWriter().write("{\"success\": false, \"loi\": \"" + loi + "\"}");
-            return;
-        }
-        req.setAttribute("loi", loi);
-        req.getRequestDispatcher(forgotOtpJsp(portal)).forward(req, resp);
-    }
-
-    /** Gửi lại mã quên mật khẩu: cooldown 60s, tối đa 5 lần, mã cũ bị vô hiệu. */
-    private void handleForgotPasswordResend(HttpServletRequest req, HttpServletResponse resp,
-                                            HttpSession session, boolean isAjax)
-            throws ServletException, IOException {
-        org.example.service.reset.PasswordResetChallenge challenge =
-                (org.example.service.reset.PasswordResetChallenge) session.getAttribute("resetChallenge");
-        String portal = (String) session.getAttribute("resetPortal");
-        boolean internal = org.example.util.AuthPortalPolicy.PORTAL_INTERNAL.equals(portal);
-        String requestUrl = req.getContextPath() + (internal ? "/he-thong/quen-mat-khau" : "/quenmatkhau");
-
-        if (challenge == null || challenge.isUsed()) {
-            resp.sendRedirect(requestUrl);
-            return;
-        }
-
-        req.setAttribute("email", challenge.getMaskedDestination());
-        long now = System.currentTimeMillis();
-        if (!challenge.canResend(now)) {
-            long wait = challenge.resendWaitSeconds(now);
-            String loi = wait > 0
-                    ? "Vui lòng chờ " + wait + " giây trước khi yêu cầu mã mới."
-                    : "Bạn đã yêu cầu gửi lại quá số lần cho phép. Vui lòng thực hiện lại từ đầu.";
-            if (isAjax) {
-                resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"" + loi + "\"}");
-                return;
-            }
-            req.setAttribute("loi", loi);
-            req.getRequestDispatcher(forgotOtpJsp(portal)).forward(req, resp);
-            return;
-        }
-
-        // Gửi ĐỒNG BỘ mã mới; chỉ vô hiệu mã cũ khi email đi thành công.
-        String newOtp = org.example.service.reset.ResetSecurityUtil.generateOtp();
-        try {
-            org.example.util.EmailUtil.sendHtmlEmail(challenge.getAccountEmail(),
-                    "V-SPORT — Đặt lại mật khẩu",
-                    org.example.util.EmailTemplates.otpQuenMatKhau(challenge.getAccountEmail(), newOtp));
-        } catch (Exception e) {
-            org.apache.logging.log4j.LogManager.getLogger(XacThucOTPServlet.class)
-                    .error("Lỗi gửi lại email đặt lại mật khẩu: {}", e.getMessage());
-            String loiGui = "Hiện chưa thể gửi mã xác thực. Vui lòng thử lại sau.";
-            if (isAjax) {
-                resp.setContentType("application/json;charset=UTF-8");
-                resp.getWriter().write("{\"success\": false, \"loi\": \"" + loiGui + "\"}");
-                return;
-            }
-            req.setAttribute("loi", loiGui);
-            req.getRequestDispatcher(forgotOtpJsp(portal)).forward(req, resp);
-            return;
-        }
-        challenge.applyResend(newOtp, now);
-
-        String thongbao = "Mã xác thực mới đã được gửi.";
-        if (isAjax) {
-            resp.setContentType("application/json;charset=UTF-8");
-            resp.getWriter().write("{\"success\": true, \"thongbao\": \"" + thongbao + "\"}");
-            return;
-        }
-        req.setAttribute("thongbao", thongbao);
-        req.getRequestDispatcher(forgotOtpJsp(portal)).forward(req, resp);
     }
 
     private void handleResendOTP(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         String authType = (String) session.getAttribute("authType");
-
-        String requestedWithResend = req.getHeader("X-Requested-With");
-        boolean isAjaxResend = "XMLHttpRequest".equals(requestedWithResend);
-        if ("FORGOT_PASSWORD".equals(authType)) {
-            handleForgotPasswordResend(req, resp, session, isAjaxResend);
-            return;
-        }
 
         String email = null;
         String fullName = "";
@@ -568,13 +393,8 @@ public class XacThucOTPServlet extends HttpServlet {
         session.setAttribute("resendCount", resendCount);
         
         // Gửi OTP mới
-        String otpString = "";
-        if ("FORGOT_PASSWORD".equals(authType)) {
-            otpString = TaiKhoanDAO.sendForgotPasswordOTP(email);
-        } else {
-            otpString = TaiKhoanDAO.sendRegistrationOTP(email, fullName);
-        }
-        
+        String otpString = TaiKhoanDAO.sendRegistrationOTP(email, fullName);
+
         session.setAttribute("otp", otpString);
         session.setAttribute("otpAttempts", 0); // Reset số lần thử khi gửi lại mã mới
         

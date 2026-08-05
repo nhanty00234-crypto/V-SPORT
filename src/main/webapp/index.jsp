@@ -1062,19 +1062,19 @@
                 <div class="modal-content">
                     <button class="modal-close" aria-label="Đóng" id="closeModalBtn"><i class="fas fa-times"></i></button>
                     <h3 id="modalTitle">Khôi phục mật khẩu</h3>
-                    <p>Nhập email của bạn và chúng tôi sẽ gửi cho bạn một liên kết để đặt lại mật khẩu.</p>
+                    <p>Nhập email của bạn, chúng tôi sẽ tạo một mật khẩu mới và gửi ngay đến email này.</p>
 
                     <form id="forgotForm" novalidate>
                         <div class="form-group">
                             <label for="forgotEmail">Email <span>*</span></label>
-                            <input type="email" id="forgotEmail" class="form-control" placeholder="Nhập email..." required aria-describedby="forgotEmailError">
+                            <input type="email" id="forgotEmail" name="email" class="form-control" placeholder="Nhập email..." required aria-describedby="forgotEmailError">
                             <div id="forgotEmailError" class="error-message"><i class="fas fa-exclamation-circle"></i> Email không hợp lệ</div>
                         </div>
 
                         <div class="auth-actions">
                             <button type="submit" class="btn btn-primary btn-auth" id="forgotSubmitBtn" style="width: 100%;">
                                 <i class="fas fa-spinner"></i>
-                                <span class="btn-text">Gửi liên kết khôi phục</span>
+                                <span class="btn-text">Gửi mật khẩu mới</span>
                             </button>
                         </div>
                     </form>
@@ -1621,14 +1621,36 @@
                     const btnText = forgotSubmitBtn.querySelector('.btn-text');
                     const originalText = btnText.textContent;
                     btnText.textContent = 'Đang gửi...';
-                    setTimeout(() => {
+
+                    const formData = new URLSearchParams();
+                    formData.append('method', 'email');
+                    formData.append('email', email.value.trim());
+
+                    fetch('${pageContext.request.contextPath}/quenmatkhau', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData.toString()
+                    })
+                    .then(r => r.json())
+                    .then(data => {
                         forgotSubmitBtn.disabled = false;
                         forgotSubmitBtn.classList.remove('loading');
                         btnText.textContent = originalText;
-                        closeModal();
-                        showToast('Liên kết khôi phục mật khẩu đã được gửi đến email của bạn.');
-                        forgotForm.reset();
-                    }, 800);
+                        if (data.success) {
+                            closeModal();
+                            showToast(data.thongbao || 'Mật khẩu mới đã được gửi đến email của bạn.');
+                            forgotForm.reset();
+                            setTimeout(() => { window.location.href = data.redirectUrl; }, 1500);
+                        } else {
+                            showToast(data.loi || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.', true);
+                        }
+                    })
+                    .catch(() => {
+                        forgotSubmitBtn.disabled = false;
+                        forgotSubmitBtn.classList.remove('loading');
+                        btnText.textContent = originalText;
+                        showToast('Lỗi kết nối máy chủ', true);
+                    });
                 });
             }
 
