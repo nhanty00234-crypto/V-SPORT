@@ -27,7 +27,7 @@
       tableKey: 'Roles',
       tenVatLy: 'Roles',
       tenHienThi: 'ROLES',
-      ghiChu: 'Purpose: Defines the system roles assigned to user accounts.',
+      ghiChu: 'Mục đích: Định nghĩa các vai trò hệ thống được gán cho tài khoản người dùng.',
       cotChinh: [
         { columnKey: 'RoleID', tenHienThi: 'Role ID', kieu: 'INT', pk: true },
         { columnKey: 'RoleName', tenHienThi: 'Role Name', kieu: 'NVARCHAR(50)', unique: true }
@@ -40,7 +40,7 @@
       tableKey: 'Accounts',
       tenVatLy: 'Accounts',
       tenHienThi: 'ACCOUNTS',
-      ghiChu: 'Purpose: Stores user login, profile, facility assignment, and reputation information.',
+      ghiChu: 'Mục đích: Lưu thông tin đăng nhập, hồ sơ, cơ sở được phân công và điểm uy tín của người dùng.',
       cotChinh: [
         { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', pk: true },
         { columnKey: 'RoleID', tenHienThi: 'Role ID', kieu: 'INT', fk: true, thamChieu: 'Roles.RoleID' },
@@ -65,7 +65,7 @@
       tableKey: 'MonTheThaoYeuThich',
       tenVatLy: 'MonTheThaoYeuThich',
       tenHienThi: 'FAVORITE SPORTS',
-      ghiChu: 'Purpose: Links each customer account to the sports they prefer.',
+      ghiChu: 'Mục đích: Liên kết từng tài khoản khách hàng với các môn thể thao yêu thích của họ.',
       cotChinh: [
         { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', pk: true, fk: true, thamChieu: 'Accounts.AccountID' },
         { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', pk: true, fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
@@ -79,7 +79,7 @@
       tableKey: 'CoSo',
       tenVatLy: 'CoSo',
       tenHienThi: 'FACILITIES',
-      ghiChu: 'Purpose: Stores facility details, image gallery, operating hours, and map coordinates.',
+      ghiChu: 'Mục đích: Lưu thông tin cơ sở, thư viện ảnh, giờ hoạt động và tọa độ bản đồ.',
       cotChinh: [
         { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', pk: true },
         { columnKey: 'AccountID_QuanLy', tenHienThi: 'Manager Account ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Facility Manager' },
@@ -100,7 +100,7 @@
       tableKey: 'MonTheThao',
       tenVatLy: 'MonTheThao',
       tenHienThi: 'SPORTS',
-      ghiChu: 'Purpose: Stores the sports supported by the booking system.',
+      ghiChu: 'Mục đích: Lưu danh sách các môn thể thao được hỗ trợ trong hệ thống đặt sân.',
       cotChinh: [
         { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', pk: true },
         { columnKey: 'TenMon', tenHienThi: 'Sport Name', kieu: 'NVARCHAR(50)', unique: true }
@@ -113,7 +113,7 @@
       tableKey: 'LoaiSan',
       tenVatLy: 'LoaiSan',
       tenHienThi: 'COURT TYPES',
-      ghiChu: 'Purpose: Defines court categories, supported sport, lighting periods, and hourly rates.',
+      ghiChu: 'Mục đích: Định nghĩa các loại sân, môn thể thao, khung giờ bật đèn và giá thuê theo giờ.',
       cotChinh: [
         { columnKey: 'LoaiSanID', tenHienThi: 'Court Type ID', kieu: 'INT', pk: true },
         { columnKey: 'MonTheThaoID', tenHienThi: 'Sport ID', kieu: 'INT', fk: true, thamChieu: 'MonTheThao.MonTheThaoID' },
@@ -131,7 +131,7 @@
       tableKey: 'San',
       tenVatLy: 'San',
       tenHienThi: 'COURTS',
-      ghiChu: 'Purpose: Stores the individual courts available at each facility.',
+      ghiChu: 'Mục đích: Lưu thông tin từng sân cụ thể có tại mỗi cơ sở.',
       cotChinh: [
         { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', pk: true },
         { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, thamChieu: 'CoSo.CoSoID' },
@@ -148,7 +148,7 @@
       tableKey: 'SoftHold',
       tenVatLy: 'SoftHold',
       tenHienThi: 'SOFT HOLDS',
-      ghiChu: 'Purpose: Temporarily reserves a court slot while a customer completes a booking.',
+      ghiChu: 'Mục đích: Tạm giữ khung giờ sân trong khi khách hàng hoàn tất quy trình đặt sân.',
       cotChinh: [
         { columnKey: 'HoldID', tenHienThi: 'Hold ID', kieu: 'INT', pk: true },
         { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
@@ -166,7 +166,7 @@
       tableKey: 'LichDatSan',
       tenVatLy: 'LichDatSan',
       tenHienThi: 'BOOKINGS',
-      ghiChu: 'Purpose: Stores court reservations and their planned and actual usage times.',
+      ghiChu: 'Mục đích: Lưu thông tin đặt sân và thời gian sử dụng dự kiến lẫn thực tế.',
       cotChinh: [
         { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', pk: true },
         { columnKey: 'AccountID', tenHienThi: 'Customer Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID', vaiTro: 'Customer' },
@@ -193,7 +193,7 @@
       tableKey: 'BookingExtension',
       tenVatLy: 'BookingExtension',
       tenHienThi: 'BOOKING EXTENSIONS',
-      ghiChu: 'Purpose: Records approved booking extensions and additional charges.',
+      ghiChu: 'Mục đích: Ghi nhận các yêu cầu gia hạn đặt sân được duyệt và phí phát sinh thêm.',
       cotChinh: [
         { columnKey: 'ExtensionID', tenHienThi: 'Extension ID', kieu: 'INT', pk: true },
         { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
@@ -210,7 +210,7 @@
       tableKey: 'DanhMucSanPham',
       tenVatLy: 'DanhMucSanPham',
       tenHienThi: 'PRODUCT CATEGORIES',
-      ghiChu: 'Purpose: Groups products and services sold at facilities.',
+      ghiChu: 'Mục đích: Phân nhóm các sản phẩm và dịch vụ được bán tại cơ sở.',
       cotChinh: [
         { columnKey: 'DanhMucID', tenHienThi: 'Category ID', kieu: 'INT', pk: true },
         { columnKey: 'TenDanhMuc', tenHienThi: 'Category Name', kieu: 'NVARCHAR(100)', unique: true }
@@ -223,7 +223,7 @@
       tableKey: 'SanPham_DichVu',
       tenVatLy: 'SanPham_DichVu',
       tenHienThi: 'PRODUCTS & SERVICES',
-      ghiChu: 'Purpose: Stores facility products, services, stock, prices, and images.',
+      ghiChu: 'Mục đích: Lưu sản phẩm, dịch vụ, số lượng tồn kho, giá cả và hình ảnh của cơ sở.',
       cotChinh: [
         { columnKey: 'SanPhamID', tenHienThi: 'Product ID', kieu: 'INT', pk: true },
         { columnKey: 'DanhMucID', tenHienThi: 'Category ID', kieu: 'INT', fk: true, thamChieu: 'DanhMucSanPham.DanhMucID' },
@@ -242,7 +242,7 @@
       tableKey: 'LichDatSan_DichVu',
       tenVatLy: 'LichDatSan_DichVu',
       tenHienThi: 'BOOKING SERVICES',
-      ghiChu: 'Purpose: Records products or services added to a court booking.',
+      ghiChu: 'Mục đích: Ghi nhận các sản phẩm hoặc dịch vụ được thêm vào một lịch đặt sân.',
       cotChinh: [
         { columnKey: 'Id', tenHienThi: 'Detail ID', kieu: 'INT', pk: true },
         { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, thamChieu: 'LichDatSan.DatSanID' },
@@ -261,7 +261,7 @@
       tableKey: 'HoaDon',
       tenVatLy: 'HoaDon',
       tenHienThi: 'INVOICES',
-      ghiChu: 'Purpose: Stores the financial summary and payment status of a booking.',
+      ghiChu: 'Mục đích: Lưu tóm tắt tài chính và trạng thái thanh toán của một lịch đặt sân.',
       cotChinh: [
         { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', pk: true },
         { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'LichDatSan.DatSanID' },
@@ -282,7 +282,7 @@
       tableKey: 'ChiTietHoaDon',
       tenVatLy: 'ChiTietHoaDon',
       tenHienThi: 'INVOICE ITEMS',
-      ghiChu: 'Purpose: Stores product and service line items included in an invoice.',
+      ghiChu: 'Mục đích: Lưu từng dòng sản phẩm và dịch vụ có trong hóa đơn.',
       cotChinh: [
         { columnKey: 'ChiTietID', tenHienThi: 'Detail ID', kieu: 'INT', pk: true },
         { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
@@ -299,7 +299,7 @@
       tableKey: 'CourtChargeSegment',
       tenVatLy: 'CourtChargeSegment',
       tenHienThi: 'COURT CHARGE SEGMENTS',
-      ghiChu: 'Purpose: Splits court usage into time segments with different hourly rates.',
+      ghiChu: 'Mục đích: Chia thời gian sử dụng sân thành các đoạn với giá thuê theo giờ khác nhau.',
       cotChinh: [
         { columnKey: 'SegmentID', tenHienThi: 'Segment ID', kieu: 'INT', pk: true },
         { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
@@ -318,7 +318,7 @@
       tableKey: 'PayOSPaymentAttempt',
       tenVatLy: 'PayOSPaymentAttempt',
       tenHienThi: 'PAYOS PAYMENT ATTEMPTS',
-      ghiChu: 'Purpose: Tracks PayOS payment orders, QR payloads, amounts, and outcomes.',
+      ghiChu: 'Mục đích: Theo dõi các lệnh thanh toán PayOS, dữ liệu mã QR, số tiền và kết quả giao dịch.',
       cotChinh: [
         { columnKey: 'AttemptID', tenHienThi: 'Payment Attempt ID', kieu: 'BIGINT', pk: true },
         { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
@@ -338,7 +338,7 @@
       tableKey: 'KhuyenMai',
       tenVatLy: 'KhuyenMai',
       tenHienThi: 'PROMOTIONS',
-      ghiChu: 'Purpose: Stores promotion rules, validity periods, limits, and facility scope.',
+      ghiChu: 'Mục đích: Lưu quy tắc khuyến mãi, thời hạn hiệu lực, giới hạn sử dụng và phạm vi cơ sở.',
       cotChinh: [
         { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', pk: true },
         { columnKey: 'CoSoID', tenHienThi: 'Facility ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'CoSo.CoSoID' },
@@ -360,7 +360,7 @@
       tableKey: 'KhuyenMaiHinhAnh',
       tenVatLy: 'KhuyenMaiHinhAnh',
       tenHienThi: 'PROMOTION IMAGES',
-      ghiChu: 'Purpose: Stores the ordered image gallery and cover image of a promotion.',
+      ghiChu: 'Mục đích: Lưu thư viện ảnh theo thứ tự và ảnh bìa của một chương trình khuyến mãi.',
       cotChinh: [
         { columnKey: 'HinhAnhID', tenHienThi: 'Image ID', kieu: 'INT', pk: true },
         { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', fk: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
@@ -382,7 +382,7 @@
       tableKey: 'LichSuKhuyenMai',
       tenVatLy: 'LichSuKhuyenMai',
       tenHienThi: 'PROMOTION USAGE HISTORY',
-      ghiChu: 'Purpose: Records when an account uses a promotion for an invoice.',
+      ghiChu: 'Mục đích: Ghi nhận thời điểm tài khoản sử dụng khuyến mãi cho một hóa đơn.',
       cotChinh: [
         { columnKey: 'LichSuKhuyenMaiID', tenHienThi: 'History ID', kieu: 'INT', pk: true },
         { columnKey: 'KhuyenMaiID', tenHienThi: 'Promotion ID', kieu: 'INT', fk: true, thamChieu: 'KhuyenMai.KhuyenMaiID' },
@@ -398,7 +398,7 @@
       tableKey: 'HoanTien',
       tenVatLy: 'HoanTien',
       tenHienThi: 'REFUNDS',
-      ghiChu: 'Purpose: Stores refund requests, approval results, and the customer\'s receiving QR image.',
+      ghiChu: 'Mục đích: Lưu yêu cầu hoàn tiền, kết quả phê duyệt và ảnh mã QR nhận tiền của khách hàng.',
       cotChinh: [
         { columnKey: 'HoanTienID', tenHienThi: 'Refund ID', kieu: 'INT', pk: true },
         { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, nullable: true, thamChieu: 'HoaDon.HoaDonID' },
@@ -419,7 +419,7 @@
       tableKey: 'SanQR',
       tenVatLy: 'SanQR',
       tenHienThi: 'COURT QR CODES',
-      ghiChu: 'Purpose: Stores the active secure QR token assigned one-to-one to each court.',
+      ghiChu: 'Mục đích: Lưu token QR bảo mật đang hoạt động, gán một-một với từng sân.',
       cotChinh: [
         { columnKey: 'SanQRID', tenHienThi: 'QR ID', kieu: 'INT', pk: true },
         { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, unique: true, thamChieu: 'San.SanID' },
@@ -435,7 +435,7 @@
       tableKey: 'SanQRTokenHistory',
       tenVatLy: 'SanQRTokenHistory',
       tenHienThi: 'COURT QR TOKEN HISTORY',
-      ghiChu: 'Purpose: Stores revoked QR token hashes for security and revocation checks.',
+      ghiChu: 'Mục đích: Lưu lịch sử các mã hash token QR đã bị thu hồi để kiểm tra bảo mật.',
       cotChinh: [
         { columnKey: 'HistoryID', tenHienThi: 'History ID', kieu: 'INT', pk: true },
         { columnKey: 'SanQRID', tenHienThi: 'QR ID', kieu: 'INT', fk: true, thamChieu: 'SanQR.SanQRID' },
@@ -453,7 +453,7 @@
       tableKey: 'QRRequest',
       tenVatLy: 'QRRequest',
       tenHienThi: 'COURT QR REQUESTS',
-      ghiChu: 'Purpose: Stores staff, product, or service requests submitted after scanning a court QR code.',
+      ghiChu: 'Mục đích: Lưu các yêu cầu gọi nhân viên, đặt sản phẩm hoặc dịch vụ được gửi sau khi quét mã QR sân.',
       cotChinh: [
         { columnKey: 'RequestID', tenHienThi: 'Request ID', kieu: 'INT', pk: true },
         { columnKey: 'SanID', tenHienThi: 'Court ID', kieu: 'INT', fk: true, thamChieu: 'San.SanID' },
@@ -473,7 +473,7 @@
       tableKey: 'CaLamViec',
       tenVatLy: 'CaLamViec',
       tenHienThi: 'WORK SHIFTS',
-      ghiChu: 'Purpose: Assigns staff members to scheduled working times at a facility.',
+      ghiChu: 'Mục đích: Phân công nhân viên vào các ca làm việc theo lịch tại cơ sở.',
       cotChinh: [
         { columnKey: 'CaLamViecID', tenHienThi: 'Shift ID', kieu: 'INT', pk: true },
         { columnKey: 'AccountID', tenHienThi: 'Staff Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
@@ -490,7 +490,7 @@
       tableKey: 'YeuCauNghi',
       tenVatLy: 'YeuCauNghi',
       tenHienThi: 'LEAVE REQUESTS',
-      ghiChu: 'Purpose: Stores staff leave requests and manager processing results.',
+      ghiChu: 'Mục đích: Lưu các yêu cầu nghỉ phép của nhân viên và kết quả xử lý của quản lý.',
       cotChinh: [
         { columnKey: 'YeuCauNghiID', tenHienThi: 'Leave Request ID', kieu: 'INT', pk: true },
         { columnKey: 'AccountID', tenHienThi: 'Staff Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
@@ -509,7 +509,7 @@
       tableKey: 'DanhGia',
       tenVatLy: 'DanhGia',
       tenHienThi: 'REVIEWS',
-      ghiChu: 'Purpose: Stores post-booking ratings and comments.',
+      ghiChu: 'Mục đích: Lưu đánh giá sao và bình luận sau khi hoàn tất buổi đặt sân.',
       cotChinh: [
         { columnKey: 'DanhGiaID', tenHienThi: 'Review ID', kieu: 'INT', pk: true },
         { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, unique: true, thamChieu: 'LichDatSan.DatSanID' },
@@ -527,7 +527,7 @@
       tableKey: 'CustomerReputationHistory',
       tenVatLy: 'CustomerReputationHistory',
       tenHienThi: 'REPUTATION HISTORY',
-      ghiChu: 'Purpose: Records every change to a customer\'s reputation score.',
+      ghiChu: 'Mục đích: Ghi lại mọi thay đổi điểm uy tín của khách hàng.',
       cotChinh: [
         { columnKey: 'ReputationHistoryID', tenHienThi: 'History ID', kieu: 'BIGINT', pk: true },
         { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
@@ -546,7 +546,7 @@
       tableKey: 'GhepKeo',
       tenVatLy: 'GhepKeo',
       tenHienThi: 'MATCHMAKING POSTS',
-      ghiChu: 'Purpose: Stores player-finding posts linked to a booking and sport.',
+      ghiChu: 'Mục đích: Lưu các bài đăng tìm người ghép kèo gắn với lịch đặt sân và môn thể thao.',
       cotChinh: [
         { columnKey: 'KeoID', tenHienThi: 'Matchmaking Post ID', kieu: 'INT', pk: true },
         { columnKey: 'DatSanID', tenHienThi: 'Booking ID', kieu: 'INT', fk: true, unique: true, thamChieu: 'LichDatSan.DatSanID' },
@@ -565,7 +565,7 @@
       tableKey: 'ChiTietGhepKeo',
       tenVatLy: 'ChiTietGhepKeo',
       tenHienThi: 'MATCHMAKING PARTICIPANTS',
-      ghiChu: 'Purpose: Stores participants and approval status for each matchmaking post.',
+      ghiChu: 'Mục đích: Lưu danh sách người tham gia và trạng thái phê duyệt cho từng bài đăng ghép kèo.',
       cotChinh: [
         { columnKey: 'ChiTietKeoID', tenHienThi: 'Participant ID', kieu: 'INT', pk: true },
         { columnKey: 'KeoID', tenHienThi: 'Matchmaking Post ID', kieu: 'INT', fk: true, thamChieu: 'GhepKeo.KeoID' },
@@ -581,7 +581,7 @@
       tableKey: 'NhomChiaTien',
       tenVatLy: 'NhomChiaTien',
       tenHienThi: 'BILL SPLIT GROUPS',
-      ghiChu: 'Purpose: Defines how an invoice is divided among multiple payers.',
+      ghiChu: 'Mục đích: Định nghĩa cách chia hóa đơn cho nhiều người cùng thanh toán.',
       cotChinh: [
         { columnKey: 'NhomChiaTienID', tenHienThi: 'Split Group ID', kieu: 'INT', pk: true },
         { columnKey: 'HoaDonID', tenHienThi: 'Invoice ID', kieu: 'INT', fk: true, thamChieu: 'HoaDon.HoaDonID' },
@@ -600,7 +600,7 @@
       tableKey: 'NhomChiaTienChiTiet',
       tenVatLy: 'NhomChiaTienChiTiet',
       tenHienThi: 'BILL SPLIT MEMBERS',
-      ghiChu: 'Purpose: Stores each payer\'s share, token, amount, and payment status.',
+      ghiChu: 'Mục đích: Lưu phần tiền, token chia sẻ, số tiền và trạng thái thanh toán của từng người.',
       cotChinh: [
         { columnKey: 'ChiTietID', tenHienThi: 'Split Member ID', kieu: 'INT', pk: true },
         { columnKey: 'NhomChiaTienID', tenHienThi: 'Split Group ID', kieu: 'INT', fk: true, thamChieu: 'NhomChiaTien.NhomChiaTienID' },
@@ -619,7 +619,7 @@
       tableKey: 'ThongBao',
       tenVatLy: 'ThongBao',
       tenHienThi: 'NOTIFICATIONS',
-      ghiChu: 'Purpose: Stores notifications generated for user accounts by system workflows.',
+      ghiChu: 'Mục đích: Lưu các thông báo được hệ thống tạo ra cho tài khoản người dùng.',
       cotChinh: [
         { columnKey: 'ThongBaoID', tenHienThi: 'Notification ID', kieu: 'INT', pk: true },
         { columnKey: 'AccountID', tenHienThi: 'Account ID', kieu: 'INT', fk: true, thamChieu: 'Accounts.AccountID' },
@@ -638,7 +638,7 @@
       tableKey: 'AuditLog',
       tenVatLy: 'AuditLog',
       tenHienThi: 'AUDIT LOGS',
-      ghiChu: 'Purpose: Records important system actions for administration and traceability.',
+      ghiChu: 'Mục đích: Ghi lại các hành động quan trọng trong hệ thống phục vụ quản trị và truy vết.',
       cotChinh: [
         { columnKey: 'AuditLogID', tenHienThi: 'Audit Log ID', kieu: 'BIGINT', pk: true },
         { columnKey: 'ActorAccountID', tenHienThi: 'Actor Account ID', kieu: 'INT', fk: false, fkLogic: true, nullable: true, thamChieu: '', ghiChuNgan: 'logical FK → Accounts.AccountID' },
@@ -657,7 +657,7 @@
       tableKey: 'AdminTrash',
       tenVatLy: 'AdminTrash',
       tenHienThi: 'ADMIN TRASH',
-      ghiChu: 'Purpose: Stores references to deleted records that can be reviewed or restored.',
+      ghiChu: 'Mục đích: Lưu tham chiếu các bản ghi đã xóa có thể xem lại hoặc khôi phục.',
       cotChinh: [
         { columnKey: 'TrashID', tenHienThi: 'Trash ID', kieu: 'INT', pk: true },
         { columnKey: 'EntityType', tenHienThi: 'Entity Type', kieu: 'NVARCHAR(100)' },
@@ -698,7 +698,7 @@
     {
       id: 'roles-and-profiles',
       code: '01',
-      title: 'Roles and Profiles',
+      title: 'Vai trò và Hồ sơ',
       entities: ['Roles', 'Accounts', 'MonTheThaoYeuThich'],
       canvas: CANVAS_TALL,
       layout: layout3('Roles', 'Accounts', 'MonTheThaoYeuThich')
@@ -706,7 +706,7 @@
     {
       id: 'facilities-and-geolocation',
       code: '02',
-      title: 'Facilities and Geolocation',
+      title: 'Cơ sở và Vị trí địa lý',
       entities: ['Accounts', 'CoSo'],
       canvas: CANVAS_TALL,
       layout: layout2('Accounts', 'CoSo')
@@ -714,7 +714,7 @@
     {
       id: 'sports-and-courts',
       code: '03',
-      title: 'Sports and Courts',
+      title: 'Môn thể thao và Sân',
       entities: ['MonTheThao', 'LoaiSan', 'San'],
       canvas: CANVAS,
       layout: layout3('MonTheThao', 'LoaiSan', 'San')
@@ -722,7 +722,7 @@
     {
       id: 'court-bookings',
       code: '04',
-      title: 'Court Bookings',
+      title: 'Đặt sân',
       entities: ['Accounts', 'San', 'LichDatSan'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'San', 'LichDatSan')
@@ -730,7 +730,7 @@
     {
       id: 'temporary-holds',
       code: '05',
-      title: 'Temporary Holds',
+      title: 'Giữ sân tạm thời',
       entities: ['Accounts', 'San', 'SoftHold'],
       canvas: CANVAS,
       layout: layout3('Accounts', 'San', 'SoftHold')
@@ -738,7 +738,7 @@
     {
       id: 'booking-extensions',
       code: '06',
-      title: 'Booking Extensions',
+      title: 'Gia hạn đặt sân',
       entities: ['LichDatSan', 'BookingExtension', 'Accounts'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'BookingExtension', 'Accounts')
@@ -746,7 +746,7 @@
     {
       id: 'products-services-inventory',
       code: '07',
-      title: 'Products and Services Inventory',
+      title: 'Kho sản phẩm và Dịch vụ',
       entities: ['CoSo', 'DanhMucSanPham', 'SanPham_DichVu'],
       canvas: CANVAS_TALL,
       layout: layout3('CoSo', 'DanhMucSanPham', 'SanPham_DichVu')
@@ -754,7 +754,7 @@
     {
       id: 'booking-services',
       code: '08',
-      title: 'Booking Services',
+      title: 'Dịch vụ kèm đặt sân',
       entities: ['LichDatSan', 'SanPham_DichVu', 'LichDatSan_DichVu'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'SanPham_DichVu', 'LichDatSan_DichVu')
@@ -762,7 +762,7 @@
     {
       id: 'invoices',
       code: '09',
-      title: 'Invoices',
+      title: 'Hóa đơn',
       entities: ['LichDatSan', 'HoaDon', 'ChiTietHoaDon'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'HoaDon', 'ChiTietHoaDon')
@@ -770,7 +770,7 @@
     {
       id: 'court-pricing',
       code: '10',
-      title: 'Court Pricing',
+      title: 'Định giá sân',
       entities: ['HoaDon', 'LichDatSan', 'CourtChargeSegment'],
       canvas: CANVAS_TALL,
       layout: layout3('HoaDon', 'LichDatSan', 'CourtChargeSegment')
@@ -778,7 +778,7 @@
     {
       id: 'payos-payments',
       code: '11',
-      title: 'PayOS Payments',
+      title: 'Thanh toán PayOS',
       entities: ['CoSo', 'HoaDon', 'PayOSPaymentAttempt'],
       canvas: CANVAS_TALL,
       layout: layout3('CoSo', 'HoaDon', 'PayOSPaymentAttempt')
@@ -786,7 +786,7 @@
     {
       id: 'promotions-and-images',
       code: '12',
-      title: 'Promotions and Images',
+      title: 'Khuyến mãi và Hình ảnh',
       entities: ['KhuyenMai', 'KhuyenMaiHinhAnh', 'LichSuKhuyenMai'],
       canvas: CANVAS_TALL,
       layout: layout3('KhuyenMai', 'KhuyenMaiHinhAnh', 'LichSuKhuyenMai')
@@ -794,7 +794,7 @@
     {
       id: 'refunds-and-receiving-qr',
       code: '13',
-      title: 'Refunds and Receiving QR',
+      title: 'Hoàn tiền và QR nhận tiền',
       entities: ['HoaDon', 'HoanTien', 'Accounts'],
       canvas: CANVAS_TALL,
       layout: layout3('HoaDon', 'HoanTien', 'Accounts')
@@ -802,7 +802,7 @@
     {
       id: 'secure-court-qr-codes',
       code: '14',
-      title: 'Secure Court QR Codes',
+      title: 'Mã QR bảo mật sân',
       entities: ['San', 'SanQR', 'SanQRTokenHistory'],
       canvas: CANVAS,
       layout: layout3('San', 'SanQR', 'SanQRTokenHistory')
@@ -810,7 +810,7 @@
     {
       id: 'requests-after-qr-scan',
       code: '15',
-      title: 'Requests After QR Scan',
+      title: 'Yêu cầu sau quét QR',
       entities: ['San', 'QRRequest', 'Accounts'],
       canvas: CANVAS_TALL,
       layout: layout3('San', 'QRRequest', 'Accounts')
@@ -818,7 +818,7 @@
     {
       id: 'work-shifts-and-leave-requests',
       code: '16',
-      title: 'Work Shifts and Leave Requests',
+      title: 'Ca làm việc và Nghỉ phép',
       entities: ['Accounts', 'CaLamViec', 'YeuCauNghi'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'CaLamViec', 'YeuCauNghi')
@@ -826,7 +826,7 @@
     {
       id: 'reviews-and-reputation',
       code: '17',
-      title: 'Reviews and Reputation',
+      title: 'Đánh giá và Uy tín',
       entities: ['LichDatSan', 'DanhGia', 'CustomerReputationHistory'],
       canvas: CANVAS_TALL,
       layout: layout3('LichDatSan', 'DanhGia', 'CustomerReputationHistory')
@@ -834,7 +834,7 @@
     {
       id: 'matchmaking',
       code: '18',
-      title: 'Matchmaking',
+      title: 'Ghép kèo',
       entities: ['Accounts', 'GhepKeo', 'ChiTietGhepKeo'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'GhepKeo', 'ChiTietGhepKeo')
@@ -842,7 +842,7 @@
     {
       id: 'bill-splitting',
       code: '19',
-      title: 'Bill Splitting',
+      title: 'Chia tiền hóa đơn',
       entities: ['HoaDon', 'NhomChiaTien', 'NhomChiaTienChiTiet'],
       canvas: CANVAS_TALL,
       layout: layout3('HoaDon', 'NhomChiaTien', 'NhomChiaTienChiTiet')
@@ -850,7 +850,7 @@
     {
       id: 'notifications',
       code: '20',
-      title: 'Notifications',
+      title: 'Thông báo',
       entities: ['Accounts', 'ThongBao'],
       canvas: CANVAS_TALL,
       layout: layout2('Accounts', 'ThongBao')
@@ -858,7 +858,7 @@
     {
       id: 'audit-and-recovery',
       code: '21',
-      title: 'Audit and Recovery',
+      title: 'Kiểm tra và Khôi phục',
       entities: ['Accounts', 'AuditLog', 'AdminTrash'],
       canvas: CANVAS_TALL,
       layout: layout3('Accounts', 'AuditLog', 'AdminTrash')
