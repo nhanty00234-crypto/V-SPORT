@@ -128,6 +128,10 @@ public class GhepKeoService {
             ghepKeoDAO.updateStatusIfOwner(keoId, GhepKeoDAOImpl.STATUS_CANCELLED, view.accountIdNguoiTao);
             return Result.fail("Ca đặt sân của kèo này đã bị hủy, kèo không còn hợp lệ.");
         }
+        // Chỉ cho tham gia khi ca đặt sân gốc đã được quản lý xác nhận
+        if (!"Đã xác nhận".equals(view.trangThaiBooking)) {
+            return Result.fail("Ca đặt sân của kèo này chưa được xác nhận, chưa thể tham gia.");
+        }
 
         // Enforcement: Chặn tham gia kèo nếu điểm uy tín cá nhân < 60
         TaiKhoan player = taiKhoanDAO.getAccountById(accountId);

@@ -205,8 +205,8 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
     public List<GhepKeoView> listOpenMatches(Integer coSoId, Integer monTheThaoId, LocalDate fromDate, LocalDate toDate) {
         StringBuilder sql = new StringBuilder(SELECT_VIEW_BASE);
         sql.append(" WHERE g.TrangThai = N'").append(STATUS_OPEN).append("' ");
-        // Chỉ kèo có booking hợp lệ + booking không bị hủy + ngày chưa qua
-        sql.append(" AND l.DatSanID IS NOT NULL AND l.TrangThai <> N'Đã hủy' AND l.NgayDat >= CAST(GETDATE() AS DATE) ");
+        // Chỉ kèo có booking hợp lệ + đã được quản lý xác nhận + ngày chưa qua
+        sql.append(" AND l.DatSanID IS NOT NULL AND l.TrangThai = N'Đã xác nhận' AND l.NgayDat >= CAST(GETDATE() AS DATE) ");
         List<Object> params = new ArrayList<>();
         if (coSoId != null) { sql.append(" AND s.CoSoID = ?"); params.add(coSoId); }
         if (monTheThaoId != null) { sql.append(" AND g.MonTheThaoID = ?"); params.add(monTheThaoId); }

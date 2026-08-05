@@ -287,7 +287,8 @@ public class GhepKeoServlet extends HttpServlet {
         for (Lichdatsan l : raw) {
             if (l.getNgayDat() == null || l.getNgayDat().isBefore(today)) continue;
             String tt = l.getTrangThai();
-            if (!"Chờ xác nhận".equals(tt) && !"Đã xác nhận".equals(tt) && !"Chờ thanh toán".equals(tt)) continue;
+            // Chỉ ca đã được quản lý xác nhận mới được dùng để tạo kèo.
+            if (!"Đã xác nhận".equals(tt)) continue;
             org.example.model.San san = sanDAO.getSanById(l.getSanId());
             org.example.model.CoSo cs = san != null ? coSoDAO.getCoSoById(san.getCoSoID()) : null;
             org.example.model.LoaiSan ls = san != null ? loaiSanDAO.getLoaiSanById(san.getLoaiSanID()) : null;
