@@ -493,10 +493,6 @@
           class="nav-link ${uri.contains('/manager/khach-hang') || uri.contains('/KhachHang') ? 'active' : ''}">
           <i class="ti ti-address-book text-[16px]"></i>Danh sách KH
         </a>
-        <a href="${pageContext.request.contextPath}/manager/danh-gia"
-          class="nav-link ${uri.contains('/manager/danh-gia') || uri.contains('/DanhGia') ? 'active' : ''}">
-          <i class="ti ti-star text-[16px]"></i>Đánh giá &amp; Phản hồi
-        </a>
       </div>
     </div>
 

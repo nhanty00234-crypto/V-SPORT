@@ -1012,26 +1012,35 @@ function updateWeekDays() {
     const dateStr = `\${year}-\${month}-\${dateNum}`;
     const displayDate = `\${dateNum}/\${month}`;
     
-    const isToday = (dateStr === new Date().toISOString().split('T')[0]);
-    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isToday = (dateStr === todayStr);
+    const isPast = (dateStr < todayStr);
+
     let isChecked = true;
     let isDisabled = false;
-    
+
     if (editId) {
       // In edit mode, check only the exact shift date
       isChecked = (dateStr === dateVal);
       isDisabled = !isChecked;
+    } else if (isPast) {
+      // Không cho chọn ngày trong quá khứ khi tạo ca mới
+      isChecked = false;
+      isDisabled = true;
     }
-    
+
     const checkboxId = `day_\${i}`;
     const wrapper = document.createElement('label');
-    wrapper.className = `flex flex-col items-center justify-center p-3.5 rounded-xl border cursor-pointer select-none transition-all text-center bg-white border-zinc-200 hover:border-purple-300 hover:bg-purple-50/10`;
-    
+    wrapper.className = isPast
+      ? `flex flex-col items-center justify-center p-3.5 rounded-xl border cursor-not-allowed select-none transition-all text-center bg-zinc-100 border-zinc-200 opacity-50`
+      : `flex flex-col items-center justify-center p-3.5 rounded-xl border cursor-pointer select-none transition-all text-center bg-white border-zinc-200 hover:border-purple-300 hover:bg-purple-50/10`;
+
     wrapper.innerHTML = `
       <span class="text-[10px] font-bold text-zinc-500">\${dayNames[i]}</span>
       <span class="text-sm font-extrabold text-zinc-800 my-1">\${displayDate}</span>
       <input type="checkbox" id="\${checkboxId}" value="\${dateStr}" \${isChecked ? 'checked' : ''} \${isDisabled ? 'disabled' : ''} onchange="updateCheckboxStyles(); triggerRealtimeValidation();"
              class="w-4 h-4 text-purple-650 rounded border-zinc-300 focus:ring-purple-500 cursor-pointer mt-1">
+      \${isPast ? '<span class="text-[9px] text-zinc-400 mt-0.5">Đã qua</span>' : ''}
     `;
     container.appendChild(wrapper);
   }
@@ -1310,6 +1319,9 @@ function validateWizardStep(step) {
     if (isWizardEditMode()) return true;
     const checked = document.querySelectorAll('#weekDaysCheckboxes input[type="checkbox"]:checked');
     if (checked.length === 0) { alert('Vui lòng chọn ít nhất một ngày làm việc trong tuần!'); return false; }
+    const todayStr = new Date().toISOString().split('T')[0];
+    const hasPastDate = Array.from(checked).some(cb => cb.value < todayStr);
+    if (hasPastDate) { alert('Không thể tạo ca làm việc trong quá khứ. Vui lòng bỏ chọn các ngày đã qua!'); return false; }
     return true;
   }
   if (step === 3) {
@@ -1671,6 +1683,19 @@ async function loadScheduleData() {
     if (response.ok) {
       const data = await response.json();
       shiftList = data.shifts || [];
+      // Refresh staff dropdown too, so newly-created staff show up without a full page reload
+      if (data.staffs) {
+        staffList = data.staffs.map(s => ({
+          id: s.accountId,
+          username: s.username,
+          fullName: (s.fullName && s.fullName.trim()) ? s.fullName : s.username,
+          roleId: s.roleId,
+          roleName: s.roleId === 4 ? 'Lễ tân' : 'Nhân viên'
+        }));
+        const staffSelect = document.getElementById('shiftStaff');
+        const currentStaffId = staffSelect ? parseInt(staffSelect.value) : NaN;
+        populateStaffDropdown(isNaN(currentStaffId) ? null : currentStaffId);
+      }
       // Rerender table
       filterShifts();
       // Rerender calendar grid
@@ -2077,7 +2102,27 @@ function renderCalendar() {
   grid.innerHTML = html;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function refreshStaffListFromApi() {
+  try {
+    const resp = await fetch(`\${_ctxPath}/manager/nhan-su?action=list`);
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!Array.isArray(data) || data.length === 0) return;
+    staffList = data.map(s => ({
+      id: parseInt(s.id),
+      username: s.username,
+      fullName: (s.name && s.name.trim()) ? s.name : s.username,
+      roleId: s.roleId,
+      roleName: s.VaiTro || 'Nhân viên'
+    }));
+    populateStaffDropdown(null);
+    filterShifts();
+  } catch (e) {
+    console.error('Không thể tải danh sách nhân viên:', e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   // Initialize Vietnamese date pickers first so setFpDate works below
   initVietnameseDatePickers();
 
@@ -2095,6 +2140,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Default to Calendar view
   switchScheduleView('calendar');
 
+  // If server-side rendering did not populate staffList (e.g. DAO exception), fetch via AJAX
+  if (staffList.length === 0) {
+    await refreshStaffListFromApi();
+  }
+
   // Load pending swap requests on page load
   loadSwapRequests();
 
@@ -2106,20 +2156,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============================================================
 // VIETNAMESE DATE PICKER (flatpickr)
+// Note: `Vietnamese` locale object is already declared globally in manager_head.jsp
 // ============================================================
-const Vietnamese = {
-  weekdays: {
-    shorthand: ["CN","T2","T3","T4","T5","T6","T7"],
-    longhand: ["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"]
-  },
-  months: {
-    shorthand: ["Th1","Th2","Th3","Th4","Th5","Th6","Th7","Th8","Th9","Th10","Th11","Th12"],
-    longhand: ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"]
-  },
-  firstDayOfWeek: 1,
-  rangeSeparator: " – ",
-  time_24hr: true
-};
 
 // Sync alt input classes with original so our Tailwind styles are applied
 function _fpSyncClass(fp) {

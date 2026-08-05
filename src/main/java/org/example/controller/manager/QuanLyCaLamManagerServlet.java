@@ -67,6 +67,7 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
         try {
             List<CaLamViec> shifts = caLamService.getShiftsByBranch(managerCoSoId);
             List<TaiKhoan> staffs = caLamService.getStaffAvailableForShift(managerCoSoId);
+            if (staffs == null) staffs = new ArrayList<>();
 
             // Check if JSON format requested
             String format = req.getParameter("format");

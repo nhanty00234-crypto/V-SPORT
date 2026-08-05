@@ -418,10 +418,10 @@ body { background: var(--vs-bg); color: var(--vs-text); }
   transition: opacity .6s var(--vs-ease) .1s, transform .6s var(--vs-ease) .1s;
 }
 .vs-slide__title {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Anton', 'Outfit', sans-serif;
   font-size: clamp(38px, 5.5vw, 70px);
-  font-weight: 900; line-height: 1.05;
-  letter-spacing: -.03em;
+  font-weight: 400; line-height: 1.05;
+  letter-spacing: -.01em;
   color: #fff; margin: 0 0 20px;
   opacity: 0; transform: translateY(24px);
   transition: opacity .6s var(--vs-ease) .22s, transform .6s var(--vs-ease) .22s;

@@ -38,9 +38,6 @@
                         <div class="vs-slide__overlay"></div>
                     </div>
                     <div class="vs-slide__content">
-                        <span class="vs-slide__eyebrow">Nền tảng đặt sân thể thao hàng đầu</span>
-                        <h1 class="vs-slide__title">Sân đẹp, lịch rõ,<br>trận đấu sẵn sàng</h1>
-                        <p class="vs-slide__desc">Tìm sân theo môn, khu vực và khung giờ phù hợp trong vài giây.</p>
                         <a href="${pageContext.request.contextPath}/customer/dat-san" class="vs-slide__cta">
                             Đặt sân ngay
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -55,9 +52,6 @@
                         <div class="vs-slide__overlay"></div>
                     </div>
                     <div class="vs-slide__content">
-                        <span class="vs-slide__eyebrow">Kết nối đam mê thể thao</span>
-                        <h1 class="vs-slide__title">Ghép kèo dễ dàng,<br>thi đấu vui hơn</h1>
-                        <p class="vs-slide__desc">Tìm đồng đội cùng trình độ, cùng môn và khung giờ phù hợp với bạn.</p>
                         <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="vs-slide__cta">
                             Ghép kèo ngay
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -72,9 +66,6 @@
                         <div class="vs-slide__overlay"></div>
                     </div>
                     <div class="vs-slide__content">
-                        <span class="vs-slide__eyebrow">Đặt sân – Thuê dụng cụ – Kết nối</span>
-                        <h1 class="vs-slide__title">Tất cả trong<br>một nền tảng</h1>
-                        <p class="vs-slide__desc">Từ đặt sân đến mua dụng cụ và ghép kèo — V-SPORT lo hết cho bạn.</p>
                         <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="vs-slide__cta">
                             Khám phá ngay
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
