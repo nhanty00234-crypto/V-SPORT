@@ -38,6 +38,9 @@
                         <div class="vs-slide__overlay"></div>
                     </div>
                     <div class="vs-slide__content">
+                        <span class="vs-slide__eyebrow">V-Sport · Đặt sân thông minh</span>
+                        <h1 class="vs-slide__title">Đặt Sân Nhanh<br>Chơi Ngay Hôm Nay</h1>
+                        <p class="vs-slide__desc">Hàng trăm sân bóng đá, cầu lông, pickleball chất lượng cao — đặt sân chỉ trong 30 giây, xác nhận tức thì.</p>
                         <a href="${pageContext.request.contextPath}/customer/dat-san" class="vs-slide__cta">
                             Đặt sân ngay
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -52,6 +55,9 @@
                         <div class="vs-slide__overlay"></div>
                     </div>
                     <div class="vs-slide__content">
+                        <span class="vs-slide__eyebrow">Cộng đồng thể thao</span>
+                        <h1 class="vs-slide__title">Ghép Kèo<br>Kết Nối Đồng Đội</h1>
+                        <p class="vs-slide__desc">Không đủ người? Tìm ngay đối thủ hoặc đồng đội phù hợp trình độ, gần khu vực của bạn chỉ với vài cú chạm.</p>
                         <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="vs-slide__cta">
                             Ghép kèo ngay
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -66,6 +72,9 @@
                         <div class="vs-slide__overlay"></div>
                     </div>
                     <div class="vs-slide__content">
+                        <span class="vs-slide__eyebrow">Khám phá hệ thống sân</span>
+                        <h1 class="vs-slide__title">Đa Dạng Bộ Môn<br>Đẳng Cấp Dịch Vụ</h1>
+                        <p class="vs-slide__desc">Từ bóng đá, cầu lông đến pickleball — hệ thống sân trải dài khắp thành phố, sẵn sàng cho mọi lịch trình của bạn.</p>
                         <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="vs-slide__cta">
                             Khám phá ngay
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
