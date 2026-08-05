@@ -2414,3 +2414,41 @@
             btn.appendChild(circle);
         });
     </script>
+    <%-- Flatpickr Vietnamese date picker (shared across customer pages) --%>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+/* ══ Flatpickr — Customer Navy/Green theme (isolated reset) ══ */
+.flatpickr-calendar,.flatpickr-calendar *{box-sizing:border-box!important;margin:0!important;padding:0!important;border:none!important;outline:none!important;font-family:'Inter','Outfit',sans-serif!important;line-height:normal!important}
+.flatpickr-calendar{background:#fff!important;border-radius:18px!important;box-shadow:0 16px 40px -8px rgba(18,45,64,.18),0 4px 12px rgba(0,0,0,.07)!important;border:1px solid #d1fae5!important;z-index:99999!important;width:308px!important;display:none;overflow:hidden!important}
+.flatpickr-calendar.open{display:inline-block!important}
+.flatpickr-calendar.inline{display:block!important}
+.flatpickr-month{background:linear-gradient(135deg,#1a3c54 0%,#122d40 100%)!important;height:52px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 6px!important;color:#fff!important}
+.flatpickr-current-month{display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;font-size:.9rem!important;font-weight:700!important;color:#fff!important;flex:1!important;position:static!important;width:auto!important;padding:0!important}
+.flatpickr-current-month .flatpickr-monthDropdown-months{appearance:none!important;-webkit-appearance:none!important;background:transparent!important;color:#fff!important;border:none!important;font-weight:700!important;font-size:.9rem!important;cursor:pointer!important;padding:2px 4px!important}
+.flatpickr-current-month input.cur-year{display:inline-block!important;visibility:visible!important;opacity:1!important;color:#fff!important;font-weight:700!important;font-size:.9rem!important;background:transparent!important;border:none!important;width:52px!important;text-align:left!important;cursor:default!important;padding:2px 0!important;-moz-appearance:textfield!important}
+.flatpickr-current-month input.cur-year::-webkit-inner-spin-button,.flatpickr-current-month input.cur-year::-webkit-outer-spin-button{display:none!important}
+.numInputWrapper{display:inline-flex!important;align-items:center!important} .numInputWrapper span{display:block!important}
+.flatpickr-prev-month,.flatpickr-next-month{display:flex!important;align-items:center!important;justify-content:center!important;width:32px!important;height:32px!important;border-radius:8px!important;cursor:pointer!important;padding:6px!important;flex-shrink:0!important;position:static!important}
+.flatpickr-prev-month:hover,.flatpickr-next-month:hover{background:rgba(1,226,129,.2)!important}
+.flatpickr-prev-month svg,.flatpickr-next-month svg{fill:#01e281!important;width:14px!important;height:14px!important}
+.flatpickr-weekdays{background:#f0fdf4!important;height:34px!important;display:flex!important;align-items:center!important}
+.flatpickr-weekdaycontainer{display:flex!important;flex:1!important}
+span.flatpickr-weekday{flex:1!important;display:flex!important;align-items:center!important;justify-content:center!important;background:transparent!important;color:#15803d!important;font-weight:700!important;font-size:.72rem!important;text-transform:uppercase!important}
+.flatpickr-innerContainer{display:block!important;padding:6px 10px 10px!important}
+.flatpickr-rContainer{display:block!important}
+.flatpickr-days{display:flex!important;width:100%!important}
+.dayContainer{display:flex!important;flex-wrap:wrap!important;width:100%!important;min-width:100%!important;max-width:100%!important;justify-content:space-around!important;gap:2px!important;padding:0!important}
+.flatpickr-day{display:flex!important;align-items:center!important;justify-content:center!important;width:36px!important;height:36px!important;max-width:36px!important;border-radius:10px!important;font-size:.83rem!important;font-weight:500!important;color:#122d40!important;cursor:pointer!important;flex-basis:calc(100%/7 - 3px)!important;transition:background .12s,color .12s!important;border:2px solid transparent!important}
+.flatpickr-day:hover{background:#dcfce7!important;color:#15803d!important;border-color:#a7f3d0!important}
+.flatpickr-day.today{border-color:#01e281!important;color:#166534!important;font-weight:700!important;background:#f0fdf4!important}
+.flatpickr-day.selected,.flatpickr-day.selected:hover{background:#122d40!important;border-color:#122d40!important;color:#fff!important;font-weight:700!important}
+.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay{color:#d1d5db!important}
+.flatpickr-day.flatpickr-disabled,.flatpickr-day.flatpickr-disabled:hover{color:#e5e7eb!important;cursor:not-allowed!important;background:transparent!important}
+input[type=date]::-webkit-calendar-picker-indicator{display:none!important}
+.flatpickr-input.flatpickr-mobile{display:none!important}
+    </style>
+    <script>
+    const Vietnamese=window.Vietnamese||{weekdays:{shorthand:["CN","T2","T3","T4","T5","T6","T7"],longhand:["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"]},months:{shorthand:["Th1","Th2","Th3","Th4","Th5","Th6","Th7","Th8","Th9","Th10","Th11","Th12"],longhand:["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"]},firstDayOfWeek:1,rangeSeparator:" – ",time_24hr:true};
+    function vsDatePicker(sel,opts){document.querySelectorAll(sel).forEach(function(el){var cfg=Object.assign({dateFormat:"Y-m-d",allowInput:true,locale:Vietnamese,disableMobile:true},opts||{});flatpickr(el,cfg);});}
+    </script>

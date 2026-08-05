@@ -565,6 +565,7 @@
   });
 
   loadServiceOrders();
+  vsDatePicker('#f_from,#f_to');
 </script>
 <jsp:include page="/common/footer.jsp" />
 </body>

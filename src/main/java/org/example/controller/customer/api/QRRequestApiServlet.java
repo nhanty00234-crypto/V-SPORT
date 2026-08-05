@@ -72,6 +72,7 @@ public class QRRequestApiServlet extends HttpServlet {
         switch (code) {
             case NOT_FOUND: return HttpServletResponse.SC_NOT_FOUND;
             case FORBIDDEN: return HttpServletResponse.SC_FORBIDDEN;
+            case DUPLICATE: return HttpServletResponse.SC_CONFLICT;
             default: return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
         }
     }

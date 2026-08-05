@@ -448,7 +448,7 @@
                     Ghép Kèo&nbsp;<span class="nav-hot-badge">HOT</span>
                 </a>
             </li>
-            <li><a href="${pageContext.request.contextPath}/customer/dich-vu" id="nav-dichvu">Cửa hàng &amp; Dịch vụ</a></li>
+
             <li class="nav-dropdown-wrap">
                 <a href="#" id="nav-tintuc">
                     Tin tức&nbsp;
@@ -665,7 +665,7 @@
     else if (path.includes('/customer/lich-su-dat-san')) { setActive('mnav-history'); }
     else if (path.includes('/customer/tai-khoan'))       { setActive('mnav-account'); }
     else if (path.includes('/customer/uu-dai'))          { setActive('nav-uudai'); }
-    else if (path.includes('/customer/dich-vu'))         { setActive('nav-dichvu'); }
+
     else if (path.includes('dat-san') || path.includes('ChiTietSan')) { setActive('nav-booking'); setActive('mnav-booking'); }
     else if (path.includes('/customer/ban-do'))          { setActive('nav-map'); }
     else if (path.endsWith('index.jsp') || path === '/' || path.endsWith('/')) { setActive('nav-home'); setActive('mnav-home'); }

@@ -1053,6 +1053,6 @@ kmRenderImages();
 window.addEventListener('DOMContentLoaded', function () { openKmDrawer('${editing.khuyenMaiID}'); });
 </c:if>
 </script>
-
+<script>document.addEventListener('DOMContentLoaded',function(){ vsDatePicker('#f_ngayBatDau,#f_ngayKetThuc'); });</script>
 </body>
 </html>

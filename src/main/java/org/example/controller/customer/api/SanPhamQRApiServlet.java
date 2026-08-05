@@ -73,11 +73,13 @@ public class SanPhamQRApiServlet extends HttpServlet {
         List<SanPham_DichVu> items = sanPhamDao.findByCoSo(san.getCoSoID());
         List<Map<String, Object>> data = items.stream()
             .filter(p -> !Constants.TRANG_THAI_SP_NGUNG_KINH_DOANH.equals(p.getTrangThai()))
+            .filter(p -> p.getSoLuongTon() > 0)
             .map(p -> {
                 Map<String, Object> m = new HashMap<>();
                 m.put("sanPhamId", p.getSanPhamID());
                 m.put("tenSanPham", p.getTenSanPham());
                 m.put("donGia", p.getDonGia());
+                m.put("soLuongTon", p.getSoLuongTon());
                 return m;
             })
             .collect(Collectors.toList());

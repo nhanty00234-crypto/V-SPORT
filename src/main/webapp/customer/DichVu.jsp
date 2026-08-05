@@ -916,6 +916,7 @@
 
   var initialTab = new URLSearchParams(window.location.search).get('tab') === 'san-pham' ? 'san-pham' : 'dich-vu';
   switchTab(initialTab, false);
+  vsDatePicker('#rq_appointmentDate');
 </script>
 
 <jsp:include page="/common/footer.jsp" />

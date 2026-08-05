@@ -241,5 +241,6 @@
   </div>
 
 </main>
+<script>document.addEventListener('DOMContentLoaded',function(){ vsDatePicker('input[name="dateFrom"],input[name="dateTo"]'); });</script>
 </body>
 </html>

@@ -436,46 +436,53 @@
         </c:choose>
     </c:forEach>
 
-    <!-- Welcome & Facility Status Bar -->
-    <section class="hero-gradient rounded-2xl border ${themeBorderStrong} p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
-        <div class="absolute -top-12 -right-12 w-64 h-64 ${isManager ? 'bg-purple-300/10' : 'bg-orange-300/10'} rounded-full blur-3xl pointer-events-none"></div>
-        <div>
-            <span class="text-[10px] font-extrabold ${themeTextMedium} block mb-0.5">BẢNG ĐIỀU KHIỂN CHI NHÁNH CƠ SỞ</span>
-            <h2 class="text-xl font-black ${themeTextDark} tracking-tight">Kích hoạt & Giám sát sân bãi thời gian thực</h2>
-            <p class="text-xs ${themeTextMedium} mt-1">Đảm bảo việc mở sân chính xác và xử lý tranh chấp đặt sân online.</p>
+    <!-- Compact Command Strip: title + live stats in one bar -->
+    <section class="bg-white border border-zinc-200 rounded-2xl shadow-sm px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
+        <div class="flex items-center gap-2.5 sm:flex-1 min-w-0">
+            <div class="w-8 h-8 rounded-xl ${themeBg} flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-[18px]">sports_soccer</span>
+            </div>
+            <div class="min-w-0">
+                <h2 class="text-sm font-black text-zinc-800 leading-tight">Mở sân &amp; Check-in</h2>
+                <p class="text-[10px] text-zinc-450 font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                    Trực tiếp · CS${sessionScope.user.coSoId}
+                </p>
+            </div>
         </div>
-    </section>
-
-    <!-- Dashboard Stats Grid -->
-    <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-zinc-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block">Tổng số sân</span>
-            <span id="stat-total" class="text-lg font-black text-zinc-800 mt-1">${danhSachSan.size()}</span>
-        </div>
-        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-green-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block">Sẵn sàng</span>
-            <span id="stat-available" class="text-lg font-black text-green-600 mt-1">${availCount}</span>
-        </div>
-        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border ${themeBorder} shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block">Đang sử dụng</span>
-            <span id="stat-in-use" class="text-lg font-black ${themeText} mt-1">${useCount}</span>
-        </div>
-        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-amber-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block">Bảo trì</span>
-            <span id="stat-maintenance" class="text-lg font-black text-amber-600 mt-1">${maintCount}</span>
-        </div>
-        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-red-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block">Tạm đóng</span>
-            <span id="stat-closed" class="text-lg font-black text-red-650 mt-1">${closeCount}</span>
-        </div>
-        <div class="card p-3.5 flex flex-col items-center justify-center bg-white border border-zinc-200 shadow-sm text-center">
-            <span class="text-[9px] text-zinc-550 font-bold block">Lịch hôm nay</span>
-            <span id="stat-today" class="text-lg font-black ${themeTextMedium} mt-1">${danhSachLich.size()}</span>
+        <div class="flex items-center gap-1 flex-wrap">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs">
+                <span class="font-black text-zinc-800" id="stat-total">${danhSachSan.size()}</span>
+                <span class="text-zinc-450 font-medium">sân</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 border border-green-200 text-xs">
+                <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
+                <span class="font-black text-green-700" id="stat-available">${availCount}</span>
+                <span class="text-green-600 font-medium">sẵn sàng</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${themeBgLight} border ${themeBorder} text-xs">
+                <span class="w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot shrink-0"></span>
+                <span class="font-black ${themeTextMedium}" id="stat-in-use">${useCount}</span>
+                <span class="${themeTextMedium} font-medium">đang chơi</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-xs">
+                <span class="font-black text-amber-600" id="stat-maintenance">${maintCount}</span>
+                <span class="text-amber-600 font-medium">bảo trì</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-xs">
+                <span class="font-black text-red-600" id="stat-closed">${closeCount}</span>
+                <span class="text-red-600 font-medium">đóng</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                <span class="material-symbols-outlined text-[13px] text-slate-500">today</span>
+                <span class="font-black text-slate-700" id="stat-today">${danhSachLich.size()}</span>
+                <span class="text-slate-500 font-medium">lịch hôm nay</span>
+            </div>
         </div>
     </section>
 
     <!-- 2. HÌNH ẢNH TRẠNG THÁI SÂN BÃI THỰC TẾ (Real-time Field Status Grid) -->
-    <section id="field-status-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <section id="field-status-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <c:choose>
             <c:when test="${danhSachSan.size() == 0}">
                 <div class="col-span-full py-12 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-zinc-150 p-6">
@@ -486,7 +493,7 @@
             </c:when>
             <c:otherwise>
                 <c:forEach var="san" items="${danhSachSan}">
-                    <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300
+                    <div class="card p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300
                          ${san.trangThai == 'Đang sử dụng' ? (isManager ? 'border-purple-300 shadow-md' : 'border-orange-300 shadow-md') : ''}
                          ${san.trangThai == 'Sẵn sàng' && san.hasUpcomingBooking ? 'border-amber-300 bg-amber-50/30 shadow-md' : ''}
                          ${san.trangThai == 'Bảo trì' ? 'border-amber-200 bg-amber-50/20' : ''}
@@ -507,113 +514,138 @@
                          data-nextdatsanid="${san.nextDatSanId}"
                          onclick="onCardClick(event, this)">
                         
-                        <div class="w-full flex flex-col items-center">
-                            <c:choose>
-                                <c:when test="${san.trangThai == 'Đang sử dụng'}">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
-                                    <div class="w-12 h-12 rounded-2xl ${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center ${themeIcon} mb-2 shadow-inner">
-                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                        <c:choose>
+                            <%-- ĐANG SỬ DỤNG --%>
+                            <c:when test="${san.trangThai == 'Đang sử dụng'}">
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl ${isManager ? 'bg-purple-100' : 'bg-orange-100'} flex items-center justify-center ${themeIcon} shrink-0">
+                                        <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1">sports_soccer</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
-                                    <span class="badge ${badgeTheme} mt-2 uppercase text-[10px]">Đang sử dụng</span>
-                                    <p class="text-[10px] text-zinc-500 mt-1 flex items-center justify-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px]">schedule</span>
-                                        <span class="card-timer font-bold text-zinc-700" 
-                                              data-start="${san.gioBatDauActive}" 
-                                              data-end="${san.gioKetThucActive}" 
-                                              data-note="${san.ghiChuActive}">Bắt đầu: ${san.gioBatDauActive}</span>
-                                    </p>
-                                    
-                                    <c:if test="${san.ghiChuActive != null && san.ghiChuActive.contains('Không cố định') && !san.ghiChuActive.contains('Đã chốt giờ thực tế')}">
-                                        <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="w-full mt-2" onsubmit="return confirm('Bạn có chắc chắn muốn dừng chơi và chốt giờ thực tế cho ca này?');">
-                                            <input type="hidden" name="action" value="stopOpenSession">
-                                            <input type="hidden" name="datSanId" value="${san.datSanIdActive}">
-                                            <button type="submit" class="w-full bg-red-550 hover:bg-red-700 text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
-                                                <span class="material-symbols-outlined text-[12px]">stop_circle</span>
-                                                Dừng chơi & Tính tiền
-                                            </button>
-                                        </form>
-                                    </c:if>
-                                    <button type="button" onclick="openStaffInvoiceModal(${san.datSanIdActive})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
-                                        Dịch vụ & Thanh toán
-                                    </button>
-                                </c:when>
-                                <c:when test="${san.trangThai == 'Sẵn sàng' && san.hasUpcomingBooking}">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">event_upcoming</span>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-900 truncate">${san.tenSan}</h4>
+                                        <span class="badge ${badgeTheme} text-[10px] mt-0.5">Đang chơi</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
-                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Sắp có lịch đặt</span>
-
-                                    <div class="w-full mt-2 text-left text-[10px] text-zinc-600 space-y-0.5">
-                                        <p class="font-bold text-zinc-800 truncate flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[12px]">person</span>${san.nextTenKhachHang}
-                                        </p>
-                                        <p class="flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
-                                            ${san.nextGioBatDau.toString().substring(11,16)} – ${san.nextGioKetThuc.toString().substring(11,16)}
-                                            <span class="badge badge-gray text-[8px] uppercase ml-1">${san.nextNguonDatSan}</span>
-                                        </p>
-                                    </div>
-                                    <p class="text-[10px] mt-1.5 flex items-center justify-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px] text-amber-600">hourglass_top</span>
-                                        <span class="upcoming-timer font-bold text-amber-700" data-next-start="${san.nextGioBatDau}">Đang tính...</span>
-                                    </p>
-
-                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="w-full mt-2">
-                                        <input type="hidden" name="action" value="checkInPreBooked">
-                                        <input type="hidden" name="datSanId" value="${san.nextDatSanId}">
-                                        <input type="hidden" name="daThuTienMat" value="false">
-                                        <button type="submit" onclick="event.stopPropagation();" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
-                                            <span class="material-symbols-outlined text-[14px]">how_to_reg</span>
-                                            Check-in khách
+                                </div>
+                                <div class="flex items-center gap-1.5 text-xs text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2">
+                                    <span class="material-symbols-outlined text-[14px]">timer</span>
+                                    <span class="card-timer font-bold text-zinc-700 flex-1"
+                                          data-start="${san.gioBatDauActive}"
+                                          data-end="${san.gioKetThucActive}"
+                                          data-note="${san.ghiChuActive}">Bắt đầu: ${san.gioBatDauActive}</span>
+                                </div>
+                                <c:if test="${san.ghiChuActive != null && san.ghiChuActive.contains('Không cố định') && !san.ghiChuActive.contains('Đã chốt giờ thực tế')}">
+                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn dừng chơi và chốt giờ thực tế cho ca này?');">
+                                        <input type="hidden" name="action" value="stopOpenSession">
+                                        <input type="hidden" name="datSanId" value="${san.datSanIdActive}">
+                                        <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                                            <span class="material-symbols-outlined text-[15px]">stop_circle</span>
+                                            Dừng &amp; Tính tiền
                                         </button>
                                     </form>
-                                </c:when>
-                                <c:when test="${san.trangThai == 'Sẵn sàng'}">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-zinc-800">${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
-                                    <span class="badge badge-green mt-2 uppercase text-[10px]">Sẵn sàng</span>
+                                </c:if>
+                                <button type="button" onclick="openStaffInvoiceModal(${san.datSanIdActive})"
+                                        class="w-full ${themeBg} ${themeBgHover} text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">payments</span>
+                                    Dịch vụ &amp; Thanh toán
+                                </button>
+                            </c:when>
 
-                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
-                                        Mở sân
-                                    </button>
-                                </c:when>
-                                <c:when test="${san.trangThai == 'Bảo trì'}">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">build</span>
+                            <%-- SẴN SÀNG + SẮP CÓ LỊCH --%>
+                            <c:when test="${san.trangThai == 'Sẵn sàng' && san.hasUpcomingBooking}">
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                        <span class="material-symbols-outlined text-[22px]">event_upcoming</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
-                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Bảo trì</span>
-                                    
-                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
-                                        Chi tiết
-                                    </button>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-650 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">block</span>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-900 truncate">${san.tenSan}</h4>
+                                        <span class="badge badge-amber text-[10px] mt-0.5">Sắp có khách</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">${san.tenLoaiSan}</p>
-                                    <span class="badge badge-red mt-2 uppercase text-[10px]">Tạm đóng</span>
-                                    
-                                    <button type="button" onclick="openCourtDetailDrawer(${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
-                                        Chi tiết
+                                </div>
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs space-y-0.5">
+                                    <p class="font-bold text-zinc-800 truncate flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[13px] text-amber-600">person</span>${san.nextTenKhachHang}
+                                    </p>
+                                    <p class="text-amber-700 font-semibold flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                        ${san.nextGioBatDau.toString().substring(11,16)} – ${san.nextGioKetThuc.toString().substring(11,16)}
+                                        &nbsp;<span class="upcoming-timer font-bold" data-next-start="${san.nextGioBatDau}"></span>
+                                    </p>
+                                </div>
+                                <form action="${pageContext.request.contextPath}/staff/checkin" method="post">
+                                    <input type="hidden" name="action" value="checkInPreBooked">
+                                    <input type="hidden" name="datSanId" value="${san.nextDatSanId}">
+                                    <input type="hidden" name="daThuTienMat" value="false">
+                                    <button type="submit" onclick="event.stopPropagation();"
+                                            class="w-full ${themeBg} ${themeBgHover} text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                                        <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                                        Check-in khách
                                     </button>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
+                                </form>
+                            </c:when>
+
+                            <%-- SẴN SÀNG --%>
+                            <c:when test="${san.trangThai == 'Sẵn sàng'}">
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+                                        <span class="material-symbols-outlined text-[22px]">sports_soccer</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-900 truncate">${san.tenSan}</h4>
+                                        <span class="badge badge-green text-[10px] mt-0.5">Sẵn sàng</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-zinc-400 italic text-center">Chưa có lịch hôm nay</p>
+                                <button type="button" onclick="openCourtDetailDrawer(${san.sanID})"
+                                        class="w-full ${themeBg} ${themeBgHover} text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                                    Mở sân
+                                </button>
+                            </c:when>
+
+                            <%-- BẢO TRÌ --%>
+                            <c:when test="${san.trangThai == 'Bảo trì'}">
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 opacity-70">
+                                        <span class="material-symbols-outlined text-[22px]">build</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-500 truncate">${san.tenSan}</h4>
+                                        <span class="badge badge-amber text-[10px] mt-0.5">Bảo trì</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-zinc-400 italic text-center">Sân đang được bảo trì</p>
+                                <button type="button" onclick="openCourtDetailDrawer(${san.sanID})"
+                                        class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-[18px]">info</span>
+                                    Chi tiết
+                                </button>
+                            </c:when>
+
+                            <%-- TẠM ĐÓNG --%>
+                            <c:otherwise>
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center text-red-500 shrink-0 opacity-70">
+                                        <span class="material-symbols-outlined text-[22px]">block</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-500 truncate">${san.tenSan}</h4>
+                                        <span class="badge badge-red text-[10px] mt-0.5">Tạm đóng</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-zinc-400 italic text-center">Sân đang tạm đóng</p>
+                                <button type="button" onclick="openCourtDetailDrawer(${san.sanID})"
+                                        class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-[18px]">info</span>
+                                    Chi tiết
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </c:forEach>
             </c:otherwise>
@@ -1540,197 +1572,161 @@
                     const gioBatDauLenDenStr = san.gioBatDauLenDen || '';
                     const gioKetThucLenDenStr = san.gioKetThucLenDen || '';
                     
+                    const cardDataAttrs = `
+                        data-sanid="\${san.sanID}"
+                        data-tensan="\${san.tenSan}"
+                        data-loaisan="\${tenLoaiSan}"
+                        data-trangthai="\${san.trangThai}"
+                        data-mota="\${san.moTa || ''}"
+                        data-giakhongden="\${san.giaKhongDen}"
+                        data-giacoden="\${san.giaCoDen}"
+                        data-giobatdaulenden="\${gioBatDauLenDenStr}"
+                        data-giokethuclenden="\${gioKetThucLenDenStr}"
+                        data-datsanidactive="\${san.datSanIdActive}"
+                        data-giobatdauactive="\${san.gioBatDauActive}"
+                        data-giokethucactive="\${san.gioKetThucActive || ''}"
+                        data-ghichuactive="\${san.ghiChuActive || ''}"
+                        data-nextdatsanid="\${san.nextDatSanId || ''}"
+                        onclick="onCardClick(event, this)"
+                    `;
+
                     if (san.trangThai === 'Đang sử dụng') {
                         let stopButtonHtml = '';
                         if (san.ghiChuActive && san.ghiChuActive.includes('Không cố định') && !san.ghiChuActive.includes('Đã chốt giờ thực tế')) {
                             stopButtonHtml = `
-                                <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="w-full mt-2" onsubmit="return confirm('Bạn có chắc chắn muốn dừng chơi và chốt giờ thực tế cho ca này?');">
+                                <form action="${pageContext.request.contextPath}/staff/checkin" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn dừng chơi và chốt giờ thực tế cho ca này?');">
                                     <input type="hidden" name="action" value="stopOpenSession">
                                     <input type="hidden" name="datSanId" value="\${san.datSanIdActive}">
-                                    <button type="submit" class="w-full bg-red-550 hover:bg-red-700 text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px]">stop_circle</span>
-                                        Dừng chơi & Tính tiền
+                                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                                        <span class="material-symbols-outlined text-[15px]">stop_circle</span>
+                                        Dừng &amp; Tính tiền
                                     </button>
                                 </form>
                             `;
                         }
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300 border-${isManager ? 'purple-300' : 'orange-300'} shadow-md"
-                                 data-sanid="\${san.sanID}"
-                                 data-tensan="\${san.tenSan}"
-                                 data-loaisan="\${tenLoaiSan}"
-                                 data-trangthai="\${san.trangThai}"
-                                 data-mota="\${san.moTa || ''}"
-                                 data-giakhongden="\${san.giaKhongDen}"
-                                 data-giacoden="\${san.giaCoDen}"
-                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
-                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
-                                 data-datsanidactive="\${san.datSanIdActive}"
-                                 data-giobatdauactive="\${san.gioBatDauActive}"
-                                 data-giokethucactive="\${san.gioKetThucActive || ''}"
-                                 data-ghichuactive="\${san.ghiChuActive || ''}"
-                                 onclick="onCardClick(event, this)">
-                                <div class="w-full flex flex-col items-center">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
-                                    <div class="w-12 h-12 rounded-2xl ${isManager ? 'bg-purple-50' : 'bg-orange-50'} flex items-center justify-center ${themeIcon} mb-2 shadow-inner">
-                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                            <div class="card p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 cursor-pointer card-hover border-${isManager ? 'purple-300' : 'orange-300'} shadow-md" \${cardDataAttrs}>
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full ${isManager ? 'bg-purple-500' : 'bg-orange-500'} live-dot"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl ${isManager ? 'bg-purple-100' : 'bg-orange-100'} flex items-center justify-center ${themeIcon} shrink-0">
+                                        <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1">sports_soccer</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
-                                    <span class="badge ${badgeTheme} mt-2 uppercase text-[10px]">Đang sử dụng</span>
-                                    <p class="text-[10px] text-zinc-500 mt-1 flex items-center justify-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px]">schedule</span>
-                                        <span class="card-timer font-bold text-zinc-700" 
-                                              data-start="\${san.gioBatDauActive || ''}" 
-                                              data-end="\${san.gioKetThucActive || ''}" 
-                                              data-note="\${san.ghiChuActive || ''}">Bắt đầu: \${san.gioBatDauActive || ''}</span>
-                                    </p>
-                                    
-                                    \${stopButtonHtml}
-                                    <button type="button" onclick="openStaffInvoiceModal(\${san.datSanIdActive})" class="w-full mt-3 \${themeBg} \${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
-                                        Dịch vụ & Thanh toán
-                                    </button>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-900 truncate">\${san.tenSan}</h4>
+                                        <span class="badge ${badgeTheme} text-[10px] mt-0.5">Đang chơi</span>
+                                    </div>
                                 </div>
+                                <div class="flex items-center gap-1.5 text-xs text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2">
+                                    <span class="material-symbols-outlined text-[14px]">timer</span>
+                                    <span class="card-timer font-bold text-zinc-700 flex-1"
+                                          data-start="\${san.gioBatDauActive || ''}"
+                                          data-end="\${san.gioKetThucActive || ''}"
+                                          data-note="\${san.ghiChuActive || ''}">Bắt đầu: \${san.gioBatDauActive || ''}</span>
+                                </div>
+                                \${stopButtonHtml}
+                                <button type="button" onclick="openStaffInvoiceModal(\${san.datSanIdActive})"
+                                        class="w-full ${themeBg} ${themeBgHover} text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">payments</span>
+                                    Dịch vụ &amp; Thanh toán
+                                </button>
                             </div>
                         `;
                     } else if (san.trangThai === 'Sẵn sàng' && san.nextDatSanId != null) {
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300 border-amber-300 bg-amber-50/30 shadow-md"
-                                 data-sanid="\${san.sanID}"
-                                 data-tensan="\${san.tenSan}"
-                                 data-loaisan="\${tenLoaiSan}"
-                                 data-trangthai="\${san.trangThai}"
-                                 data-mota="\${san.moTa || ''}"
-                                 data-giakhongden="\${san.giaKhongDen}"
-                                 data-giacoden="\${san.giaCoDen}"
-                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
-                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
-                                 data-nextdatsanid="\${san.nextDatSanId}"
-                                 onclick="onCardClick(event, this)">
-                                <div class="w-full flex flex-col items-center">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">event_upcoming</span>
+                            <div class="card p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 cursor-pointer card-hover border-amber-300 bg-amber-50/30 shadow-md" \${cardDataAttrs}>
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                        <span class="material-symbols-outlined text-[22px]">event_upcoming</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
-                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Sắp có lịch đặt</span>
-
-                                    <div class="w-full mt-2 text-left text-[10px] text-zinc-600 space-y-0.5">
-                                        <p class="font-bold text-zinc-800 truncate flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[12px]">person</span>\${san.nextTenKhachHang || ''}
-                                        </p>
-                                        <p class="flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
-                                            \${(san.nextGioBatDau || '').substring(11,16)} – \${(san.nextGioKetThuc || '').substring(11,16)}
-                                            <span class="badge badge-gray text-[8px] uppercase ml-1">\${san.nextNguonDatSan || ''}</span>
-                                        </p>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-900 truncate">\${san.tenSan}</h4>
+                                        <span class="badge badge-amber text-[10px] mt-0.5">Sắp có khách</span>
                                     </div>
-                                    <p class="text-[10px] mt-1.5 flex items-center justify-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px] text-amber-600">hourglass_top</span>
-                                        <span class="upcoming-timer font-bold text-amber-700" data-next-start="\${san.nextGioBatDau || ''}">Đang tính...</span>
-                                    </p>
-
-                                    <form action="${pageContext.request.contextPath}/staff/checkin" method="post" class="w-full mt-2">
-                                        <input type="hidden" name="action" value="checkInPreBooked">
-                                        <input type="hidden" name="datSanId" value="\${san.nextDatSanId}">
-                                        <input type="hidden" name="daThuTienMat" value="false">
-                                        <button type="submit" onclick="event.stopPropagation();" class="w-full ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95 flex items-center justify-center gap-1">
-                                            <span class="material-symbols-outlined text-[14px]">how_to_reg</span>
-                                            Check-in khách
-                                        </button>
-                                    </form>
                                 </div>
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs space-y-0.5">
+                                    <p class="font-bold text-zinc-800 truncate flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[13px] text-amber-600">person</span>\${san.nextTenKhachHang || ''}
+                                    </p>
+                                    <p class="text-amber-700 font-semibold flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                        \${(san.nextGioBatDau || '').substring(11,16)} – \${(san.nextGioKetThuc || '').substring(11,16)}
+                                        &nbsp;<span class="upcoming-timer font-bold" data-next-start="\${san.nextGioBatDau || ''}"></span>
+                                    </p>
+                                </div>
+                                <form action="${pageContext.request.contextPath}/staff/checkin" method="post">
+                                    <input type="hidden" name="action" value="checkInPreBooked">
+                                    <input type="hidden" name="datSanId" value="\${san.nextDatSanId}">
+                                    <input type="hidden" name="daThuTienMat" value="false">
+                                    <button type="submit" onclick="event.stopPropagation();"
+                                            class="w-full ${themeBg} ${themeBgHover} text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                                        <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                                        Check-in khách
+                                    </button>
+                                </form>
                             </div>
                         `;
                     } else if (san.trangThai === 'Sẵn sàng') {
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300"
-                                 data-sanid="\${san.sanID}"
-                                 data-tensan="\${san.tenSan}"
-                                 data-loaisan="\${tenLoaiSan}"
-                                 data-trangthai="\${san.trangThai}"
-                                 data-mota="\${san.moTa || ''}"
-                                 data-giakhongden="\${san.giaKhongDen}"
-                                 data-giacoden="\${san.giaCoDen}"
-                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
-                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
-                                 data-datsanidactive="\${san.datSanIdActive}"
-                                 data-giobatdauactive="\${san.gioBatDauActive}"
-                                 onclick="onCardClick(event, this)">
-                                <div class="w-full flex flex-col items-center">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-green-500"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                            <div class="card p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 cursor-pointer card-hover hover:border-zinc-300" \${cardDataAttrs}>
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+                                        <span class="material-symbols-outlined text-[22px]">sports_soccer</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-800">\${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
-                                    <span class="badge badge-green mt-2 uppercase text-[10px]">Sẵn sàng</span>
-
-                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 ${themeBg} ${themeBgHover} text-white font-extrabold text-[10px] py-2 rounded-xl shadow-sm hover:shadow transition-all active:scale-95">
-                                        Mở sân
-                                    </button>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-900 truncate">\${san.tenSan}</h4>
+                                        <span class="badge badge-green text-[10px] mt-0.5">Sẵn sàng</span>
+                                    </div>
                                 </div>
+                                <p class="text-xs text-zinc-400 italic text-center">Chưa có lịch hôm nay</p>
+                                <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})"
+                                        class="w-full ${themeBg} ${themeBgHover} text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                                    Mở sân
+                                </button>
                             </div>
                         `;
                     } else if (san.trangThai === 'Bảo trì') {
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 border-amber-200 bg-amber-50/20 cursor-pointer card-hover hover:border-zinc-300"
-                                 data-sanid="\${san.sanID}"
-                                 data-tensan="\${san.tenSan}"
-                                 data-loaisan="\${tenLoaiSan}"
-                                 data-trangthai="\${san.trangThai}"
-                                 data-mota="\${san.moTa || ''}"
-                                 data-giakhongden="\${san.giaKhongDen}"
-                                 data-giacoden="\${san.giaCoDen}"
-                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
-                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
-                                 data-datsanidactive="\${san.datSanIdActive}"
-                                 data-giobatdauactive="\${san.gioBatDauActive}"
-                                 onclick="onCardClick(event, this)">
-                                <div class="w-full flex flex-col items-center">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">build</span>
+                            <div class="card p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 border-amber-200 bg-amber-50/20 cursor-pointer card-hover hover:border-zinc-300" \${cardDataAttrs}>
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 opacity-70">
+                                        <span class="material-symbols-outlined text-[22px]">build</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">\${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
-                                    <span class="badge badge-amber mt-2 uppercase text-[10px]">Bảo trì</span>
-                                    
-                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
-                                        Chi tiết
-                                    </button>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-500 truncate">\${san.tenSan}</h4>
+                                        <span class="badge badge-amber text-[10px] mt-0.5">Bảo trì</span>
+                                    </div>
                                 </div>
+                                <p class="text-xs text-zinc-400 italic text-center">Sân đang được bảo trì</p>
+                                <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})"
+                                        class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-[18px]">info</span>
+                                    Chi tiết
+                                </button>
                             </div>
                         `;
                     } else {
                         htmlGrid += `
-                            <div class="card p-4 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-200 border-red-200 bg-red-50/20 cursor-pointer card-hover hover:border-zinc-300"
-                                 data-sanid="\${san.sanID}"
-                                 data-tensan="\${san.tenSan}"
-                                 data-loaisan="\${tenLoaiSan}"
-                                 data-trangthai="\${san.trangThai}"
-                                 data-mota="\${san.moTa || ''}"
-                                 data-giakhongden="\${san.giaKhongDen}"
-                                 data-giacoden="\${san.giaCoDen}"
-                                 data-giobatdaulenden="\${gioBatDauLenDenStr}"
-                                 data-giokethuclenden="\${gioKetThucLenDenStr}"
-                                 data-datsanidactive="\${san.datSanIdActive}"
-                                 data-giobatdauactive="\${san.gioBatDauActive}"
-                                 onclick="onCardClick(event, this)">
-                                <div class="w-full flex flex-col items-center">
-                                    <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500"></span>
-                                    <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-655 mb-2">
-                                        <span class="material-symbols-outlined text-[24px]">block</span>
+                            <div class="card p-5 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 border-red-200 bg-red-50/20 cursor-pointer card-hover hover:border-zinc-300" \${cardDataAttrs}>
+                                <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center text-red-500 shrink-0 opacity-70">
+                                        <span class="material-symbols-outlined text-[22px]">block</span>
                                     </div>
-                                    <h4 class="font-bold text-sm text-zinc-850 opacity-60">\${san.tenSan}</h4>
-                                    <p class="text-[10px] text-zinc-500 font-medium">\${tenLoaiSan}</p>
-                                    <span class="badge badge-red mt-2 uppercase text-[10px]">Tạm đóng</span>
-                                    
-                                    <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})" class="w-full mt-3 bg-zinc-150 text-zinc-600 hover:bg-zinc-200 transition-colors font-extrabold text-[10px] py-2 rounded-xl">
-                                        Chi tiết
-                                    </button>
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-base text-zinc-500 truncate">\${san.tenSan}</h4>
+                                        <span class="badge badge-red text-[10px] mt-0.5">Tạm đóng</span>
+                                    </div>
                                 </div>
+                                <p class="text-xs text-zinc-400 italic text-center">Sân đang tạm đóng</p>
+                                <button type="button" onclick="openCourtDetailDrawer(\${san.sanID})"
+                                        class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-[18px]">info</span>
+                                    Chi tiết
+                                </button>
                             </div>
                         `;
                     }
@@ -2275,59 +2271,63 @@
         </div>
 
         <!-- Content (Scrollable) -->
-        <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 sm:grid sm:grid-cols-2 sm:gap-6 sm:space-y-0 sm:items-start">
-        <div class="space-y-6">
-        <!-- Court Specifications -->
-        <div class="bg-zinc-50 rounded-2xl p-4 border border-zinc-150 space-y-3">
-            <h4 class="text-[11px] font-bold text-zinc-450">Thông tin nhanh</h4>
-            <div class="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                    <span class="text-zinc-550 block">Thời gian hiện tại:</span>
-                    <span id="drawer-current-time" class="font-extrabold text-zinc-800">-</span>
+        <div class="flex-1 overflow-y-auto p-5 sm:p-6">
+
+        <!-- Info strip (compact, collapsible) -->
+        <details class="mb-5 group">
+            <summary class="flex items-center justify-between cursor-pointer text-xs font-bold text-zinc-500 hover:text-zinc-700 select-none list-none">
+                <span class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[14px]">info</span>
+                    Thông tin sân &amp; giá
+                </span>
+                <span class="material-symbols-outlined text-[16px] transition-transform group-open:rotate-180">expand_more</span>
+            </summary>
+            <div class="mt-3 bg-zinc-50 border border-zinc-200 rounded-xl p-3.5 grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+                <div class="flex justify-between col-span-1">
+                    <span class="text-zinc-500">Giờ hiện tại</span>
+                    <span id="drawer-current-time" class="font-bold text-zinc-800">-</span>
                 </div>
-                <div>
-                    <span class="text-zinc-550 block">Cơ sở chi nhánh:</span>
-                    <span id="drawer-court-coso" class="font-extrabold text-zinc-800">-</span>
+                <div class="flex justify-between col-span-1">
+                    <span class="text-zinc-500">Chi nhánh</span>
+                    <span id="drawer-court-coso" class="font-bold text-zinc-800">-</span>
                 </div>
-                <div>
-                    <span class="text-zinc-550 block">Giá không đèn:</span>
-                    <span id="drawer-price-nolite" class="font-extrabold text-zinc-800">-</span>
+                <div class="flex justify-between col-span-1">
+                    <span class="text-zinc-500">Giá không đèn</span>
+                    <span id="drawer-price-nolite" class="font-bold text-zinc-800">-</span>
                 </div>
-                <div>
-                    <span class="text-zinc-550 block">Giá có đèn:</span>
-                    <span id="drawer-price-lite" class="font-extrabold text-zinc-800">-</span>
+                <div class="flex justify-between col-span-1">
+                    <span class="text-zinc-500">Giá có đèn</span>
+                    <span id="drawer-price-lite" class="font-bold text-zinc-800">-</span>
                 </div>
-                <div class="col-span-2">
-                    <span class="text-zinc-550 block">Khung giờ bật đèn:</span>
-                    <span id="drawer-light-time" class="font-extrabold text-zinc-800">-</span>
+                <div class="flex justify-between col-span-2">
+                    <span class="text-zinc-500">Khung giờ bật đèn</span>
+                    <span id="drawer-light-time" class="font-bold text-zinc-800">-</span>
+                </div>
+                <div id="drawer-desc-container" class="col-span-2 hidden pt-2 border-t border-zinc-200">
+                    <p id="drawer-court-desc" class="text-xs text-zinc-500 italic"></p>
                 </div>
             </div>
-            <div id="drawer-desc-container" class="mt-2 pt-2 border-t border-zinc-100 hidden">
-                <span class="text-zinc-550 block text-xs">Mô tả:</span>
-                <p id="drawer-court-desc" class="text-xs text-zinc-650 mt-1 italic"></p>
-            </div>
-        </div>
+        </details>
 
         <!-- Section D: Danh sách đặt lịch hôm nay (Khách đặt trước) -->
-        <div id="drawer-action-prebooked" class="hidden space-y-4">
-            <div class="flex items-center gap-2 text-zinc-850 font-extrabold text-sm border-b pb-2">
-                <span class="material-symbols-outlined ${themeText}">calendar_today</span>
-                <span>Khách đã đặt trước & thành công</span>
-            </div>
-            <div id="drawer-prebooked-list" class="space-y-3">
+        <div id="drawer-action-prebooked" class="hidden mb-5">
+            <h4 class="text-xs font-bold text-zinc-500 flex items-center gap-1.5 mb-3">
+                <span class="material-symbols-outlined text-[15px] ${themeText}">calendar_today</span>
+                Khách đã đặt trước hôm nay
+            </h4>
+            <div id="drawer-prebooked-list" class="space-y-2">
                 <!-- Will be dynamically populated via JS -->
             </div>
         </div>
-        </div>
 
         <!-- Action Sections -->
-        <div class="space-y-6">
+        <div class="space-y-5">
 
         <!-- Section A: Sẵn sàng -> Mở sân nhanh -->
         <div id="drawer-action-walkin" class="hidden space-y-4">
-            <div class="flex items-center gap-2 text-zinc-850 font-extrabold text-sm">
-                <span class="material-symbols-outlined text-green-600">bolt</span>
-                <span>Mở sân nhanh cho Khách vãng lai</span>
+            <div class="flex items-center gap-2 text-zinc-800 font-black text-base">
+                <span class="material-symbols-outlined text-green-600 text-[20px]">bolt</span>
+                <span>Mở sân cho Khách vãng lai</span>
             </div>
             <form id="drawer-walkin-form" action="${pageContext.request.contextPath}/staff/checkin" method="post" class="space-y-4">
                 <input type="hidden" name="action" value="checkInWalkIn">
@@ -2460,9 +2460,9 @@
         </div>
 
         <!-- Section C: Bảo trì / Tạm đóng -> Không thể mở -->
-        <div id="drawer-action-disabled" class="hidden bg-red-50/40 border border-red-100 text-red-900 rounded-xl p-4 text-xs flex items-center gap-2">
-            <span class="material-symbols-outlined text-red-600 text-[18px]">warning</span>
-            <span>Sân hiện đang bảo trì hoặc tạm đóng, không thể mở cho khách chơi.</span>
+        <div id="drawer-action-disabled" class="hidden bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm flex items-center gap-3">
+            <span class="material-symbols-outlined text-red-500 text-[22px] shrink-0">block</span>
+            <span>Sân đang bảo trì hoặc tạm đóng, không thể mở cho khách chơi.</span>
         </div>
         </div>
         </div>

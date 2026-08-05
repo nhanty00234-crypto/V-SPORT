@@ -86,8 +86,8 @@ function loadProducts() {
             if (!res.success) return;
             const list = document.getElementById('productList');
             list.innerHTML = res.data.map(p => `
-                <div class="item-row" data-id="${p.sanPhamId}" data-name="${escapeHtml(p.tenSanPham)}">
-                    <span>${escapeHtml(p.tenSanPham)} - ${p.donGia.toLocaleString('vi-VN')}đ</span>
+                <div class="item-row" data-id="${p.sanPhamId}" data-name="${escapeHtml(p.tenSanPham)}" data-ton="${p.soLuongTon}">
+                    <span>${escapeHtml(p.tenSanPham)} - ${p.donGia.toLocaleString('vi-VN')}đ <small style="color:#a1a1aa;">(còn ${p.soLuongTon})</small></span>
                     <span>
                         <button class="qty-btn" onclick="changeQty(${p.sanPhamId}, -1)">-</button>
                         <span id="qty-${p.sanPhamId}" style="margin:0 8px;">0</span>
@@ -99,7 +99,9 @@ function loadProducts() {
 
 const cart = {};
 function changeQty(id, delta) {
-    cart[id] = Math.max(0, (cart[id] || 0) + delta);
+    const row = document.querySelector(`.item-row[data-id="${id}"]`);
+    const max = row ? Number(row.dataset.ton) || 0 : 999;
+    cart[id] = Math.min(max, Math.max(0, (cart[id] || 0) + delta));
     document.getElementById('qty-' + id).textContent = cart[id];
 }
 
@@ -123,7 +125,12 @@ function submitService() {
     createRequest('SERVICE_REQUEST', note, null);
 }
 
+let submitting = false;
 function createRequest(requestType, note, itemsJson) {
+    if (submitting) return;
+    submitting = true;
+    document.querySelectorAll('#composer .submit-btn').forEach(b => { b.disabled = true; b.dataset.origText = b.textContent; b.textContent = 'Đang gửi...'; });
+
     const body = new URLSearchParams();
     body.set('sanId', SAN_ID);
     body.set('guestToken', GUEST_TOKEN);
@@ -139,6 +146,11 @@ function createRequest(requestType, note, itemsJson) {
             } else {
                 alert(res.message || 'Không thể gửi yêu cầu.');
             }
+        })
+        .catch(() => alert('Lỗi kết nối. Vui lòng thử lại.'))
+        .finally(() => {
+            submitting = false;
+            document.querySelectorAll('#composer .submit-btn').forEach(b => { b.disabled = false; if (b.dataset.origText) b.textContent = b.dataset.origText; });
         });
 }
 

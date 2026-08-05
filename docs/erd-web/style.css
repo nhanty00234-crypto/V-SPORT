@@ -5,7 +5,7 @@
   --relation-line: #315B7D;
   --pk-badge: #F59E0B;
   --fk-badge: #2563EB;
-  --uq-badge: #16A34A;
+  --uq-badge: #7C3AED;
   --nullable-badge: #94A3B8;
   --bg: #FFFFFF;
   --card-bg: #FFFFFF;
@@ -238,6 +238,17 @@ input:focus-visible {
 }
 .toolbar #screenshotToggle:hover { background: #0f2c4a; }
 
+.toolbar #extendedToggle[aria-pressed="true"] {
+  background: var(--group-title-color);
+  color: #fff;
+  border-color: var(--group-title-color);
+  font-weight: 600;
+}
+.toolbar #extendedToggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .canvas-viewport {
   flex: 1;
   overflow: auto;
@@ -406,6 +417,26 @@ input:focus-visible {
 .badge.fk { background: var(--fk-badge); }
 .badge.uq { background: var(--uq-badge); }
 .badge.nullable { background: var(--nullable-badge); }
+.badge.fk-logic {
+  background: transparent;
+  color: var(--fk-badge);
+  border: 1px dashed var(--fk-badge);
+}
+
+/* Extended columns ("cột mở rộng") get a faint tint so they read as optional. */
+.entity-card .field-row.extended-row { background: #F8FAFD; }
+.entity-card .field-row.extended-row:hover { background: #EEF3FA; }
+
+/* Role label next to a field name when a table has several FKs to the same
+   target table (e.g. HoanTien.AccountID vs HoanTien.NguoiDuyetID). */
+.field-role {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-style: italic;
+}
 
 /* ---------- SVG relationship layer ---------- */
 .relation-layer {

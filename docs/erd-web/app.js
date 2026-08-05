@@ -8,32 +8,44 @@
 (function () {
   'use strict';
 
-  var entityBySlug = new Map(ERD_ENTITIES.map((e) => [e.slug, e]));
+  var entityByKey = new Map(ERD_ENTITIES.map((e) => [e.tableKey, e]));
+
+  function allFields(entity) {
+    return (entity.cotChinh || []).concat(entity.cotMoRong || []);
+  }
+
+  function visibleFields(entity, showExtended) {
+    return showExtended ? allFields(entity) : entity.cotChinh || [];
+  }
 
   // ---------------------------------------------------------------------
   // Derive all relationships once from field metadata (single source).
+  // Fields with fk !== true or without thamChieu (including fkLogic-only
+  // fields) are skipped automatically — no real connector is ever drawn
+  // for logical FKs (AuditLog, AdminTrash).
   // ---------------------------------------------------------------------
   function deriveRelationships() {
     const rels = [];
     ERD_ENTITIES.forEach((entity) => {
-      entity.fields.forEach((field) => {
+      allFields(entity).forEach((field) => {
         if (!field.fk || !field.thamChieu) return;
         const parts = field.thamChieu.split('.');
-        const targetSlug = parts[0];
-        const targetFieldId = parts[1];
-        if (!entityBySlug.has(targetSlug)) return;
+        const targetKey = parts[0];
+        const targetColumnKey = parts[1];
+        if (!entityByKey.has(targetKey)) return;
 
         const isOneToOne = !!field.pk || !!field.unique;
-        const selfRef = targetSlug === entity.slug && targetFieldId !== field.id;
+        const selfRef = targetKey === entity.tableKey && targetColumnKey !== field.columnKey;
 
         rels.push({
-          fromEntity: entity.slug,
-          fromField: field.id,
-          toEntity: targetSlug,
-          toField: targetFieldId,
+          fromEntity: entity.tableKey,
+          fromField: field.columnKey,
+          toEntity: targetKey,
+          toField: targetColumnKey,
           oneToOne: isOneToOne,
           nullable: !!field.nullable,
           selfRef: selfRef,
+          vaiTro: field.vaiTro || '',
         });
       });
     });
@@ -49,6 +61,7 @@
     viewId: 'overview',
     zoom: 1,
     screenshotMode: false,
+    extendedColumns: false,
     searchTerm: '',
     hoverEntity: null,
     hoverField: null, // { entity, field }
@@ -63,6 +76,7 @@
     zoomReadout: document.getElementById('zoomReadout'),
     tableSearch: document.getElementById('tableSearch'),
     screenshotToggle: document.getElementById('screenshotToggle'),
+    extendedToggle: document.getElementById('extendedToggle'),
   };
 
   // ---------------------------------------------------------------------
@@ -146,7 +160,7 @@
     ERD_VIEWS.forEach((v) => {
       const tile = document.createElement('button');
       tile.className = 'overview-tile';
-      const entityNames = v.entities.map((slug) => entityBySlug.get(slug).ten);
+      const entityNames = v.entities.map((key) => entityByKey.get(key).tenHienThi);
       tile.innerHTML =
         '<div class="tile-code">NHÓM ' + v.code + '</div>' +
         '<div class="tile-title">' + v.title + '</div>' +
@@ -162,6 +176,7 @@
     let out = '';
     if (field.pk) out += '<span class="badge pk">PK</span>';
     if (field.fk) out += '<span class="badge fk">FK</span>';
+    else if (field.fkLogic) out += '<span class="badge fk-logic" title="Khóa ngoại logic — không có đường nối thật">FK*</span>';
     if (field.unique && !field.pk) out += '<span class="badge uq">UQ</span>';
     if (field.nullable) out += '<span class="badge nullable">NULL</span>';
     return out;
@@ -170,10 +185,10 @@
   function fkTargetLabel(field) {
     if (!field.fk || !field.thamChieu) return '';
     const parts = field.thamChieu.split('.');
-    const targetEntity = entityBySlug.get(parts[0]);
+    const targetEntity = entityByKey.get(parts[0]);
     if (!targetEntity) return '';
-    const targetField = targetEntity.fields.find((f) => f.id === parts[1]);
-    return targetEntity.ten + '.' + (targetField ? targetField.ten : parts[1]);
+    const targetField = allFields(targetEntity).find((f) => f.columnKey === parts[1]);
+    return targetEntity.tenHienThi + '.' + (targetField ? targetField.tenHienThi : parts[1]);
   }
 
   // ---------------------------------------------------------------------
@@ -192,9 +207,9 @@
     }
   }
 
-  function saveLayoutOverride(viewId, entitySlug, x, y) {
+  function saveLayoutOverride(viewId, entityKey, x, y) {
     const overrides = loadLayoutOverrides(viewId);
-    overrides[entitySlug] = { x: x, y: y };
+    overrides[entityKey] = { x: x, y: y };
     try {
       localStorage.setItem(layoutStorageKey(viewId), JSON.stringify(overrides));
     } catch (e) {
@@ -210,7 +225,7 @@
     }
   }
 
-  function makeCardDraggable(card, view, entitySlug) {
+  function makeCardDraggable(card, view, entityKey) {
     const header = card.querySelector('.entity-header');
     header.classList.add('draggable-handle');
     let dragging = false;
@@ -244,7 +259,7 @@
       card.classList.remove('dragging');
       const x = parseFloat(card.style.left) || 0;
       const y = parseFloat(card.style.top) || 0;
-      saveLayoutOverride(view.id, entitySlug, x, y);
+      saveLayoutOverride(view.id, entityKey, x, y);
       recomputeConnectors();
     }
     header.addEventListener('pointerup', endDrag);
@@ -255,6 +270,7 @@
     els.canvasStage.innerHTML = '';
     const viewEntitySet = new Set(view.entities);
     const layoutOverrides = loadLayoutOverrides(view.id);
+    const showExtended = state.extendedColumns && !state.screenshotMode;
 
     els.canvasStage.style.width = view.canvas.w + 'px';
     els.canvasStage.style.height = view.canvas.h + 'px';
@@ -283,43 +299,45 @@
 
     els.canvasStage.appendChild(svg);
 
-    // Render entity cards — always show every defined column (no truncation).
+    // Render entity cards.
     const cardEls = {};
-    view.entities.forEach((entitySlug) => {
-      const entity = entityBySlug.get(entitySlug);
-      const basePos = view.layout[entitySlug] || { x: 40, y: 40 };
-      const override = layoutOverrides[entitySlug];
+    view.entities.forEach((entityKey) => {
+      const entity = entityByKey.get(entityKey);
+      const basePos = view.layout[entityKey] || { x: 40, y: 40 };
+      const override = layoutOverrides[entityKey];
       const pos = override ? { x: override.x, y: override.y } : basePos;
+      const fields = visibleFields(entity, showExtended);
 
       const card = document.createElement('div');
       card.className = 'entity-card';
       card.style.left = pos.x + 'px';
       card.style.top = pos.y + 'px';
-      card.dataset.entity = entitySlug;
+      card.dataset.entity = entityKey;
 
       const header = document.createElement('div');
       header.className = 'entity-header';
       header.innerHTML =
-        '<span>' + entity.ten + '</span><span class="entity-badge">' + entity.fields.length + ' cột</span>';
+        '<span>' + entity.tenHienThi + '</span><span class="entity-badge">' + fields.length + ' cột</span>';
       card.appendChild(header);
 
-      entity.fields.forEach((field) => {
+      fields.forEach((field) => {
         const row = document.createElement('div');
-        row.className = 'field-row' + (field.fk ? ' fk-row' : '');
-        row.dataset.field = field.id;
-        row.dataset.entity = entitySlug;
+        row.className = 'field-row' + (field.fk ? ' fk-row' : '') + (allFields(entity).indexOf(field) >= (entity.cotChinh || []).length ? ' extended-row' : '');
+        row.dataset.field = field.columnKey;
+        row.dataset.entity = entityKey;
         row.tabIndex = 0;
         row.setAttribute('role', 'button');
         const target = fkTargetLabel(field);
         row.setAttribute(
           'aria-label',
-          field.ten + ' ' + field.kieu + (field.fk ? ' — khóa ngoại tham chiếu tới ' + target : '')
+          field.tenHienThi + ' ' + field.kieu + (field.fk ? ' — khóa ngoại tham chiếu tới ' + target : '')
         );
+        const roleLabel = field.vaiTro ? '<span class="field-role">' + field.vaiTro + '</span>' : '';
         row.innerHTML =
-          '<span class="field-name">' + field.ten + '</span>' +
+          '<span class="field-name">' + field.tenHienThi + roleLabel + '</span>' +
           '<span class="field-meta">' + badgeHtml(field) + '<span class="field-type">' + field.kieu + '</span></span>';
         row.addEventListener('mouseenter', () => {
-          state.hoverField = { entity: entitySlug, field: field.id };
+          state.hoverField = { entity: entityKey, field: field.columnKey };
           state.hoverEntity = null;
           applyHighlight(view);
         });
@@ -328,7 +346,7 @@
           applyHighlight(view);
         });
         row.addEventListener('focus', () => {
-          state.hoverField = { entity: entitySlug, field: field.id };
+          state.hoverField = { entity: entityKey, field: field.columnKey };
           applyHighlight(view);
         });
         row.addEventListener('blur', () => {
@@ -340,7 +358,7 @@
 
       card.addEventListener('mouseenter', () => {
         if (!state.hoverField) {
-          state.hoverEntity = entitySlug;
+          state.hoverEntity = entityKey;
           applyHighlight(view);
         }
       });
@@ -350,8 +368,8 @@
       });
 
       els.canvasStage.appendChild(card);
-      cardEls[entitySlug] = card;
-      makeCardDraggable(card, view, entitySlug);
+      cardEls[entityKey] = card;
+      makeCardDraggable(card, view, entityKey);
     });
 
     // Compute relationships relevant to this view only (both ends present).
@@ -367,8 +385,8 @@
     els.canvasStage._lastSvg = svg;
   }
 
-  function fieldRowCenter(cardEl, fieldId, stageRect) {
-    const row = cardEl.querySelector('.field-row[data-field="' + CSS.escape(fieldId) + '"]');
+  function fieldRowCenter(cardEl, fieldKey, stageRect) {
+    const row = cardEl.querySelector('.field-row[data-field="' + CSS.escape(fieldKey) + '"]');
     const target = row || cardEl.querySelector('.entity-header');
     const r = target.getBoundingClientRect();
     return {
@@ -398,6 +416,10 @@
       const srcCard = cardEls[rel.fromEntity];
       const dstCard = cardEls[rel.toEntity];
       if (!srcCard || !dstCard) return;
+      // A card may be showing collapsed columns — if the field row for this
+      // relation isn't currently rendered (e.g. it lives in cotMoRong and
+      // extended columns are off), fall back to the header anchor, which
+      // fieldRowCenter already does.
 
       if (rel.selfRef) {
         // short loop beside the card
@@ -425,7 +447,7 @@
         label.setAttribute('class', 'relation-label');
         label.dataset.from = rel.fromEntity;
         label.dataset.to = rel.toEntity;
-        label.textContent = 'tự tham chiếu 0..1 : 1';
+        label.textContent = 'tự tham chiếu 0..1 : 1' + (rel.vaiTro ? ' (' + rel.vaiTro + ')' : '');
         svg.appendChild(label);
         return;
       }
@@ -452,13 +474,14 @@
       path.setAttribute('marker-end', 'url(#arrowhead-' + view.id + ')');
       svg.appendChild(path);
 
+      const srcLabelText = cardinalityLabel(rel, true) + (rel.vaiTro ? ' · ' + rel.vaiTro : '');
       const srcLabel = document.createElementNS(svgNS, 'text');
       srcLabel.setAttribute('x', x1 + (srcOnLeft ? 6 : -18));
       srcLabel.setAttribute('y', y1 - 4);
       srcLabel.setAttribute('class', 'relation-label');
       srcLabel.dataset.from = rel.fromEntity;
       srcLabel.dataset.to = rel.toEntity;
-      srcLabel.textContent = cardinalityLabel(rel, true);
+      srcLabel.textContent = srcLabelText;
       svg.appendChild(srcLabel);
 
       const dstLabel = document.createElementNS(svgNS, 'text');
@@ -556,23 +579,46 @@
   }
 
   // ---------------------------------------------------------------------
-  // Screenshot mode
+  // Screenshot mode — forces extended columns off while active.
   // ---------------------------------------------------------------------
   function setScreenshotMode(on) {
     state.screenshotMode = on;
     document.body.classList.toggle('screenshot-mode', on);
     els.screenshotToggle.setAttribute('aria-pressed', String(on));
-    recomputeConnectors();
+    if (els.extendedToggle) {
+      els.extendedToggle.setAttribute('aria-pressed', String(state.extendedColumns && !on));
+      els.extendedToggle.disabled = on;
+    }
+    render();
   }
 
   // ---------------------------------------------------------------------
-  // Search
+  // Extended columns toggle ("Xem cột mở rộng")
+  // ---------------------------------------------------------------------
+  function setExtendedColumns(on) {
+    if (state.screenshotMode) return; // forced off while screenshot mode is active
+    state.extendedColumns = on;
+    if (els.extendedToggle) {
+      els.extendedToggle.setAttribute('aria-pressed', String(on));
+    }
+    render();
+  }
+
+  // ---------------------------------------------------------------------
+  // Search — matches Vietnamese display name AND physical table name.
   // ---------------------------------------------------------------------
   function handleSearch(term) {
     state.searchTerm = term.trim().toLowerCase();
     if (!state.searchTerm) return;
     const match = ERD_VIEWS.find((v) =>
-      v.entities.some((slug) => entityBySlug.get(slug).ten.toLowerCase().includes(state.searchTerm))
+      v.entities.some((key) => {
+        const entity = entityByKey.get(key);
+        return (
+          entity.tenHienThi.toLowerCase().includes(state.searchTerm) ||
+          entity.tenVatLy.toLowerCase().includes(state.searchTerm) ||
+          entity.tableKey.toLowerCase().includes(state.searchTerm)
+        );
+      })
     );
     if (match) setView(match.id);
   }
@@ -586,7 +632,8 @@
     if (e.key === 'ArrowLeft') { goPrev(); }
     else if (e.key === 'ArrowRight') { goNext(); }
     else if (e.key === 's' || e.key === 'S') { setScreenshotMode(!state.screenshotMode); }
-    else if (e.key === '0') { setZoom(1); }
+    else if (e.key === 'e' || e.key === 'E') { setExtendedColumns(!state.extendedColumns); }
+    else if (e.key === '0') { fitToCanvas(); }
   }
 
   // ---------------------------------------------------------------------
@@ -609,6 +656,9 @@
       render();
     });
     els.screenshotToggle.addEventListener('click', () => setScreenshotMode(!state.screenshotMode));
+    if (els.extendedToggle) {
+      els.extendedToggle.addEventListener('click', () => setExtendedColumns(!state.extendedColumns));
+    }
     els.tableSearch.addEventListener('input', (e) => handleSearch(e.target.value));
 
     document.addEventListener('keydown', handleKeydown);

@@ -30,6 +30,37 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
     }
 
     @Override
+    public int insertPreOrderReturningId(Connection conn, int datSanId, int sanPhamId, int quantity,
+                                          BigDecimal unitPrice, BigDecimal totalPrice) throws SQLException {
+        String sql = "INSERT INTO LichDatSan_DichVu (DatSanID, SanPhamID, Quantity, UnitPrice, TotalPrice, Status) " +
+                "VALUES (?, ?, ?, ?, ?, N'Chờ chuẩn bị')";
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, datSanId);
+            ps.setInt(2, sanPhamId);
+            ps.setInt(3, quantity);
+            ps.setBigDecimal(4, unitPrice);
+            ps.setBigDecimal(5, totalPrice);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (!keys.next()) throw new SQLException("Không thể tạo dòng dịch vụ đặt trước.");
+                return keys.getInt(1);
+            }
+        }
+    }
+
+    @Override
+    public Integer findActiveDatSanIdBySan(int sanId) throws SQLException {
+        String sql = "SELECT TOP 1 DatSanID FROM LichDatSan WHERE SanID = ? AND TrangThai = N'Đang sử dụng'";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sanId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : null;
+            }
+        }
+    }
+
+    @Override
     public List<LichDatSanDichVu> findByDatSanId(int datSanId) throws SQLException {
         List<LichDatSanDichVu> result = new ArrayList<>();
         String sql = "SELECT ldv.*, sp.TenSanPham, sp.DonViTinh " +

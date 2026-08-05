@@ -22,6 +22,13 @@ public interface LichDatSanDichVuDAO {
     void insertPreOrder(Connection conn, int datSanId, int sanPhamId, int quantity,
                          BigDecimal unitPrice, BigDecimal totalPrice) throws SQLException;
 
+    /** Như insertPreOrder, nhưng trả về Id vừa tạo (cần cho luồng xác nhận/giao ngay, vd. QR request). */
+    int insertPreOrderReturningId(Connection conn, int datSanId, int sanPhamId, int quantity,
+                                   BigDecimal unitPrice, BigDecimal totalPrice) throws SQLException;
+
+    /** DatSanID của phiên sân đang "Đang sử dụng" tại sân này, hoặc null nếu không có. */
+    Integer findActiveDatSanIdBySan(int sanId) throws SQLException;
+
     /** Danh sách dịch vụ đặt trước của 1 đơn đặt sân (dùng cho customer xem lịch sử/chi tiết). */
     List<LichDatSanDichVu> findByDatSanId(int datSanId) throws SQLException;
 

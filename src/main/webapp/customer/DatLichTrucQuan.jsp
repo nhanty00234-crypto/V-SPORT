@@ -1358,6 +1358,7 @@
     startPoll();
 })();
 </script>
+<script>document.addEventListener('DOMContentLoaded',function(){ vsDatePicker('#ttvDateInput'); });</script>
 
 </c:if>
 

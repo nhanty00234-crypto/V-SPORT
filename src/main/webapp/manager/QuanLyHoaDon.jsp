@@ -576,6 +576,6 @@ function confirmCancel(hoaDonId) {
   });
 }
 </script>
-
+<script>document.addEventListener('DOMContentLoaded',function(){ vsDatePicker('input[name="filterFrom"],input[name="filterTo"]'); });</script>
 </body>
 </html>

@@ -25,7 +25,7 @@
                         || vsNavPath.startsWith("/customer/chi-tiet-san") || vsNavPath.startsWith("/customer/lich-su-dat-san");
     boolean vsNavUuDai   = vsNavPath.startsWith("/customer/uu-dai");
     boolean vsNavGhepKeo = vsNavPath.startsWith("/customer/ghep-keo");
-    boolean vsNavDichVu  = vsNavPath.startsWith("/customer/dich-vu");
+
     boolean vsNavHome    = vsNavPath.equals("") || vsNavPath.equals("/") || vsNavPath.startsWith("/index.jsp");
     TaiKhoan user = (TaiKhoan) session.getAttribute("user");
     String vsAuthHref;
@@ -80,10 +80,7 @@
             Ghép Kèo&nbsp;<span class="vs-nav__badge">HOT</span>
           </a>
         </li>
-        <li class="vs-nav__item">
-          <a href="${pageContext.request.contextPath}/customer/dich-vu"
-             class="vs-nav__link <%= vsNavDichVu ? "is-active" : "" %>">Cửa hàng &amp; Dịch vụ</a>
-        </li>
+
         <li class="vs-nav__item">
           <a href="#" class="vs-nav__link">
             Tin tức <i class="fas fa-angle-down vs-nav__chevron"></i>
@@ -250,12 +247,7 @@
         <i class="fas fa-users"></i>Ghép Kèo
       </a>
     </li>
-    <li>
-      <a href="${pageContext.request.contextPath}/customer/dich-vu"
-         class="<%= vsNavDichVu ? "is-active" : "" %>">
-        <i class="fas fa-store"></i>Cửa hàng &amp; Dịch vụ
-      </a>
-    </li>
+
     <li><a href="#"><i class="fas fa-newspaper"></i>Tin tức</a></li>
     <% if (user != null) { %>
     <li>

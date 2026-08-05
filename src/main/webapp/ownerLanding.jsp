@@ -786,61 +786,6 @@ ul{list-style:none}
           <textarea id="regDescription" rows="3" placeholder="Dịch vụ đi kèm, tiện ích, lưu ý đặc biệt..." class="resize-vertical"></textarea>
         </div>
 
-        <div class="mb-5">
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Hoạt động và dịch vụ tại cơ sở</label>
-          <p class="text-xs text-slate-400 mb-3">Ngoài cho thuê sân, chọn thêm nếu cơ sở của bạn có các hoạt động sau. Mỗi lựa chọn cần quản trị viên phê duyệt riêng.</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="capabilityList">
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="SAN_PHAM" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Bán sản phẩm thể thao</b> — giày, áo quần, vợt, bóng, phụ kiện</span>
-            </label>
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="THUE_DUNG_CU" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Cho thuê dụng cụ thể thao</b> — vợt, bóng, giày, áo bib...</span>
-            </label>
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="DO_AN_NUOC_UONG" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Đồ ăn và nước uống</b> — quầy giải khát, đồ ăn nhẹ tại chỗ</span>
-            </label>
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="HUAN_LUYEN_VIEN" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Cung cấp huấn luyện viên</b> — HLV riêng hoặc theo nhóm</span>
-            </label>
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="LOP_HOC" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Tổ chức lớp học</b> — lớp học theo lịch, theo khóa</span>
-            </label>
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="DICH_VU_THE_THAO" id="capDichVuTheThao" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Cung cấp dịch vụ thể thao</b> — căng lưới vợt, thay quấn cán, sửa chữa/bảo dưỡng...</span>
-            </label>
-            <label class="capability-chip flex items-center gap-3 px-4 py-3 cursor-pointer">
-              <input type="checkbox" value="KHAC" class="w-5 h-5 accent-[#ea580c] flex-shrink-0"/>
-              <span class="text-sm text-slate-600"><b class="text-slate-900">Dịch vụ khác</b> — sẽ trao đổi thêm với V-SPORT sau khi duyệt</span>
-            </label>
-          </div>
-          <div id="dichVuTheThaoOptions" class="hidden mt-2 ml-8 flex flex-col gap-1.5 pl-3 border-l border-slate-200">
-            <p class="text-xs text-slate-500 mb-1">Loại dịch vụ dự kiến cung cấp (không bắt buộc):</p>
-            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="CANG_LUOI_VOT" class="w-4 h-4 accent-[#ea580c]"/> Căng lưới vợt (cầu lông/tennis)</label>
-            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="THAY_QUAN_CAN" class="w-4 h-4 accent-[#ea580c]"/> Thay quấn cán</label>
-            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="SUA_CHUA_VOT" class="w-4 h-4 accent-[#ea580c]"/> Sửa chữa vợt</label>
-            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="BAO_DUONG_DUNG_CU" class="w-4 h-4 accent-[#ea580c]"/> Bảo dưỡng dụng cụ</label>
-            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="HUAN_LUYEN_VIEN_DV" class="w-4 h-4 accent-[#ea580c]"/> Huấn luyện viên</label>
-            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" value="DICH_VU_KHAC" class="w-4 h-4 accent-[#ea580c]"/> Dịch vụ khác</label>
-            <p class="text-[11px] text-slate-400 mt-1">Đây chỉ là mô tả nhu cầu đăng ký. Sau khi được duyệt, bạn sẽ cấu hình chi tiết trong khu vực Quản lý dịch vụ.</p>
-          </div>
-        </div>
-        <script>
-          document.addEventListener('DOMContentLoaded', function () {
-            var toggle = document.getElementById('capDichVuTheThao');
-            var opts = document.getElementById('dichVuTheThaoOptions');
-            if (toggle && opts) {
-              toggle.addEventListener('change', function () {
-                opts.classList.toggle('hidden', !toggle.checked);
-              });
-            }
-          });
-        </script>
 
         <div class="flex gap-3">
           <button type="button" onclick="goToStep2Back()" class="btn-outline flex-shrink-0 py-3.5">

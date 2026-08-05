@@ -27,10 +27,34 @@
         <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=call&sanId=${resolveDto.sanId}'">📢 Gọi nhân viên</button>
         <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=order&sanId=${resolveDto.sanId}'">🍔 Gọi món</button>
         <button class="action-btn" onclick="location.href='TrangThaiYeuCau.jsp?shortCode=${shortCode}&type=service&sanId=${resolveDto.sanId}'">🛠️ Yêu cầu dịch vụ</button>
+        <button class="action-btn" style="background:#16a34a;" id="payBtn" onclick="payNow(${resolveDto.sanId})">💳 Thanh toán</button>
     </c:when>
     <c:otherwise>
         <div class="error-box">${resolveDto.message}</div>
     </c:otherwise>
 </c:choose>
+<script>
+const CONTEXT = "${pageContext.request.contextPath}";
+function payNow(sanId) {
+    const btn = document.getElementById('payBtn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = 'Đang xử lý...';
+    const body = new URLSearchParams();
+    body.set('sanId', sanId);
+    fetch(`${CONTEXT}/api/qr/thanh-toan`, { method: 'POST', body })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && res.data && res.data.checkoutUrl) {
+                location.href = res.data.checkoutUrl;
+            } else {
+                alert(res.message || 'Hiện chưa có hóa đơn cần thanh toán. Vui lòng liên hệ nhân viên.');
+            }
+        })
+        .catch(() => alert('Lỗi kết nối. Vui lòng thử lại.'))
+        .finally(() => { btn.disabled = false; btn.textContent = origText; });
+}
+</script>
 </body>
 </html>

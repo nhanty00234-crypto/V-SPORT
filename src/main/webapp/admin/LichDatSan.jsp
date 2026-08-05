@@ -71,6 +71,43 @@ body { font-family: 'Inter', sans-serif; }
   }
 </style>
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<style>
+/* ══ Flatpickr — Admin Slate theme (isolated reset) ══ */
+.flatpickr-calendar,.flatpickr-calendar *{box-sizing:border-box!important;margin:0!important;padding:0!important;border:none!important;outline:none!important;font-family:'Inter',sans-serif!important;line-height:normal!important}
+.flatpickr-calendar{background:#fff!important;border-radius:18px!important;box-shadow:0 16px 40px -8px rgba(0,0,0,.15),0 4px 12px rgba(0,0,0,.07)!important;border:1px solid #e2e8f0!important;z-index:99999!important;width:308px!important;display:none;overflow:hidden!important}
+.flatpickr-calendar.open{display:inline-block!important}
+.flatpickr-calendar.inline{display:block!important}
+.flatpickr-month{background:linear-gradient(135deg,#475569 0%,#334155 100%)!important;height:52px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 6px!important;color:#fff!important}
+.flatpickr-current-month{display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;font-size:.9rem!important;font-weight:700!important;color:#fff!important;flex:1!important;position:static!important;width:auto!important;padding:0!important}
+.flatpickr-current-month .flatpickr-monthDropdown-months{appearance:none!important;-webkit-appearance:none!important;background:transparent!important;color:#fff!important;border:none!important;font-weight:700!important;font-size:.9rem!important;cursor:pointer!important;padding:2px 4px!important}
+.flatpickr-current-month input.cur-year{display:inline-block!important;visibility:visible!important;opacity:1!important;color:#fff!important;font-weight:700!important;font-size:.9rem!important;background:transparent!important;border:none!important;width:52px!important;text-align:left!important;cursor:default!important;padding:2px 0!important;-moz-appearance:textfield!important}
+.flatpickr-current-month input.cur-year::-webkit-inner-spin-button,.flatpickr-current-month input.cur-year::-webkit-outer-spin-button{display:none!important}
+.numInputWrapper{display:inline-flex!important;align-items:center!important} .numInputWrapper span{display:block!important}
+.flatpickr-prev-month,.flatpickr-next-month{display:flex!important;align-items:center!important;justify-content:center!important;width:32px!important;height:32px!important;border-radius:8px!important;cursor:pointer!important;padding:6px!important;flex-shrink:0!important;position:static!important}
+.flatpickr-prev-month:hover,.flatpickr-next-month:hover{background:rgba(255,255,255,.18)!important}
+.flatpickr-prev-month svg,.flatpickr-next-month svg{fill:#fff!important;width:14px!important;height:14px!important}
+.flatpickr-weekdays{background:#f8fafc!important;height:34px!important;display:flex!important;align-items:center!important}
+.flatpickr-weekdaycontainer{display:flex!important;flex:1!important}
+span.flatpickr-weekday{flex:1!important;display:flex!important;align-items:center!important;justify-content:center!important;background:transparent!important;color:#475569!important;font-weight:700!important;font-size:.72rem!important;text-transform:uppercase!important}
+.flatpickr-innerContainer{display:block!important;padding:6px 10px 10px!important}
+.flatpickr-rContainer{display:block!important}
+.flatpickr-days{display:flex!important;width:100%!important}
+.dayContainer{display:flex!important;flex-wrap:wrap!important;width:100%!important;min-width:100%!important;max-width:100%!important;justify-content:space-around!important;gap:2px!important;padding:0!important}
+.flatpickr-day{display:flex!important;align-items:center!important;justify-content:center!important;width:36px!important;height:36px!important;max-width:36px!important;border-radius:10px!important;font-size:.83rem!important;font-weight:500!important;color:#374151!important;cursor:pointer!important;flex-basis:calc(100%/7 - 3px)!important;transition:background .12s,color .12s!important;border:2px solid transparent!important}
+.flatpickr-day:hover{background:#f1f5f9!important;color:#334155!important;border-color:#e2e8f0!important}
+.flatpickr-day.today{border-color:#475569!important;color:#1e293b!important;font-weight:700!important;background:#f8fafc!important}
+.flatpickr-day.selected,.flatpickr-day.selected:hover{background:#334155!important;border-color:#334155!important;color:#fff!important;font-weight:700!important}
+.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay{color:#d1d5db!important}
+.flatpickr-day.flatpickr-disabled,.flatpickr-day.flatpickr-disabled:hover{color:#e5e7eb!important;cursor:not-allowed!important;background:transparent!important}
+input[type=date]::-webkit-calendar-picker-indicator{display:none!important}
+.flatpickr-input.flatpickr-mobile{display:none!important}
+</style>
+<script>
+const Vietnamese=window.Vietnamese||{weekdays:{shorthand:["CN","T2","T3","T4","T5","T6","T7"],longhand:["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"]},months:{shorthand:["Th1","Th2","Th3","Th4","Th5","Th6","Th7","Th8","Th9","Th10","Th11","Th12"],longhand:["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"]},firstDayOfWeek:1,rangeSeparator:" – ",time_24hr:true};
+function vsDatePicker(sel,opts){document.querySelectorAll(sel).forEach(function(el){var cfg=Object.assign({dateFormat:"Y-m-d",altInput:true,altFormat:"d/m/Y",allowInput:true,locale:Vietnamese,disableMobile:true,onReady:function(s,str,fp){if(!fp.altInput)return;fp.altInput.className=fp.element.className;fp.altInput.placeholder="dd/mm/yyyy";fp.altInput.removeAttribute("readonly");}},opts||{});flatpickr(el,cfg);});}
+</script>
 </head>
 <body class="bg-zinc-50 text-zinc-900 min-h-screen">
 
@@ -1404,6 +1441,22 @@ confirmBtn.addEventListener('click', () => {
 
 // Original profile drop and menu logic
 document.getElementById('mobileMenuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('-translate-x-full'));
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Schedule view date filter (line 154, no id — assign class-based selector)
+  document.querySelectorAll('input[type="date"]:not(#bookingDate)').forEach(function(el) {
+    vsDatePicker('#' + (el.id || (el.id = 'scheduleDateFilter')));
+  });
+  // Booking modal date — read current value (set by valueAsDate = new Date() above)
+  var bd = document.getElementById('bookingDate');
+  if (bd) {
+    var curVal = bd.value;
+    flatpickr(bd, {dateFormat:"Y-m-d",altInput:true,altFormat:"d/m/Y",allowInput:true,locale:Vietnamese,disableMobile:true,defaultDate:curVal||new Date(),
+      onReady:function(s,str,fp){if(!fp.altInput)return;fp.altInput.className=fp.element.className;fp.altInput.placeholder="dd/mm/yyyy";fp.altInput.removeAttribute("readonly");}
+    });
+  }
+});
 </script>
 </body>
 </html>

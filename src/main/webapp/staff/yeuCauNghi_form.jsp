@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
     });
   }
+  vsDatePicker('#ngayNghi', {altInput:true, altFormat:'d/m/Y'});
 });
 </script>
 </body>
