@@ -107,6 +107,15 @@ public class DatSanServlet extends HttpServlet {
     private final org.example.dao.LichDatSanDichVuDAO lichDatSanDichVuDAO = new org.example.dao.impl.LichDatSanDichVuDAOImpl();
     private final CustomerReputationHistoryDAO reputationHistoryDAO = new CustomerReputationHistoryDAOImpl();
     private final CourtPricingService pricingService = new CourtPricingService();
+    /** Nghiệp vụ đặt sân DÙNG CHUNG với REST API mobile — không duplicate logic ở Servlet. */
+    private final org.example.service.booking.BookingCreationService bookingCreationService =
+            new org.example.service.booking.BookingCreationService();
+    /** Tạo/hủy payment link PayOS DÙNG CHUNG với REST API mobile. */
+    private final org.example.service.payos.BookingPaymentLinkService paymentLinkService =
+            new org.example.service.payos.BookingPaymentLinkService();
+    /** Kiểm tra/finalize thanh toán PayOS DÙNG CHUNG với REST API mobile. */
+    private final org.example.service.payos.BookingPaymentStatusService paymentStatusService =
+            new org.example.service.payos.BookingPaymentStatusService();
     private final org.example.service.booking.BookingCancellationService bookingCancellationService =
             new org.example.service.booking.BookingCancellationService();
     /** Finalizer DÙNG CHUNG với PayOSWebhookServlet cho luồng đặt sân trực tiếp (orderCode=DatSanID). */
@@ -348,16 +357,12 @@ public class DatSanServlet extends HttpServlet {
     private void handleDatSan(HttpServletRequest req, HttpServletResponse resp,
             HttpSession session, TaiKhoan user) throws IOException {
         long tSubmit0 = System.currentTimeMillis();
-        // --- Bước 1: Parse input ---
-        int sanId;
-        LocalDate ngayDat;
-        LocalTime gioBatDau, gioKetThuc;
-        String ghiChu;
-        String paymentMethod;
 
-        // --- Dịch vụ đi kèm đặt trước (Phase 8A) — tham số MỚI, không đụng input cũ ---
-        int[] serviceIds;
-        int[] serviceQtys;
+        // --- Bước 1: Parse input (controller CHỈ parse; mọi nghiệp vụ nằm ở BookingCreationService) ---
+        org.example.service.booking.BookingCreationService.Command cmd =
+                new org.example.service.booking.BookingCreationService.Command();
+        cmd.nguonDatSan = "Web";
+        String paymentMethod;
 
         try {
             String pSanId = req.getParameter("sanId");
@@ -382,11 +387,11 @@ public class DatSanServlet extends HttpServlet {
                 return;
             }
 
-            sanId = Integer.parseInt(pSanId);
-            ngayDat = LocalDate.parse(pNgayDat);
-            gioBatDau = LocalTime.parse(pGioBatDau);
-            gioKetThuc = LocalTime.parse(pGioKetThuc);
-            ghiChu = req.getParameter("ghiChu");
+            cmd.sanId = Integer.parseInt(pSanId);
+            cmd.ngayDat = LocalDate.parse(pNgayDat);
+            cmd.gioBatDau = LocalTime.parse(pGioBatDau);
+            cmd.gioKetThuc = LocalTime.parse(pGioKetThuc);
+            cmd.ghiChu = req.getParameter("ghiChu");
             paymentMethod = req.getParameter("paymentMethod");
             if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
                 paymentMethod = "sau";
@@ -395,15 +400,14 @@ public class DatSanServlet extends HttpServlet {
             String[] serviceIdParams = req.getParameterValues("serviceId");
             String[] serviceQtyParams = req.getParameterValues("serviceQty");
             if (serviceIdParams != null && serviceQtyParams != null && serviceIdParams.length == serviceQtyParams.length) {
-                serviceIds = new int[serviceIdParams.length];
-                serviceQtys = new int[serviceQtyParams.length];
+                int[] serviceIds = new int[serviceIdParams.length];
+                int[] serviceQtys = new int[serviceQtyParams.length];
                 for (int i = 0; i < serviceIdParams.length; i++) {
                     serviceIds[i] = Integer.parseInt(serviceIdParams[i].trim());
                     serviceQtys[i] = Integer.parseInt(serviceQtyParams[i].trim());
                 }
-            } else {
-                serviceIds = new int[0];
-                serviceQtys = new int[0];
+                cmd.serviceIds = serviceIds;
+                cmd.serviceQtys = serviceQtys;
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Dữ liệu đặt sân không hợp lệ", e);
@@ -412,530 +416,108 @@ public class DatSanServlet extends HttpServlet {
             return;
         }
 
-        // --- Chặn đặt sân nếu điểm uy tín quá thấp ---
-        if (user.getDiemUyTin() < org.example.util.Constants.REPUTATION_BOOKING_BLOCK_THRESHOLD) {
-            session.setAttribute("error", "Tài khoản của bạn đã bị hạn chế đặt sân do điểm uy tín quá thấp ("
-                + user.getDiemUyTin() + " điểm, tối thiểu cần "
-                + org.example.util.Constants.REPUTATION_BOOKING_BLOCK_THRESHOLD
-                + " điểm). Vui lòng liên hệ quản lý để được hỗ trợ.");
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-            return;
-        }
-
-        // --- Validate số lượng dịch vụ trước khi vào transaction ---
-        for (int qty : serviceQtys) {
-            if (qty <= 0) {
-                session.setAttribute("error", "Số lượng dịch vụ phải lớn hơn 0.");
-                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                return;
-            }
-        }
-
         // Validate paymentMethod enum value
         if (!"payos".equalsIgnoreCase(paymentMethod) && !"sau".equalsIgnoreCase(paymentMethod)) {
             session.setAttribute("error", "Phương thức thanh toán không hợp lệ.");
             resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
             return;
         }
+        cmd.onlinePayment = "payos".equalsIgnoreCase(paymentMethod);
 
-        // --- Bước 2: Validate thứ tự giờ ---
-        if (!gioKetThuc.isAfter(gioBatDau)) {
-            session.setAttribute("error", "Giờ kết thúc phải sau giờ bắt đầu.");
+        // --- Bước 2: Toàn bộ validate nghiệp vụ + transaction đặt sân nằm trong Service dùng chung
+        //             với REST API mobile (không duplicate logic ở Servlet). ---
+        org.example.service.booking.BookingCreationService.Result result =
+                bookingCreationService.create(user, cmd);
+
+        if (!result.success) {
+            session.setAttribute("error", result.message);
             resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
             return;
         }
 
-        // --- Bước 2c: Validate thời lượng đặt sân (tối thiểu 30 phút, tối đa 4 giờ) ---
-        long durationMinutes = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
-        if (durationMinutes < 30) {
-            session.setAttribute("error", "Thời lượng đặt sân tối thiểu cho mỗi lượt là 30 phút.");
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-            return;
-        }
-        if (durationMinutes > 240) {
-            session.setAttribute("error", "Thời lượng đặt sân tối đa cho mỗi lượt là 4 giờ (240 phút).");
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-            return;
-        }
+        int newDatSanId = result.datSanId;
+        int sanCoSoID = result.coSoId;
+        boolean isOnlineDeposit = cmd.onlinePayment;
+        double tongTien = result.tongTien.doubleValue();
 
-        // --- Bước 2b: Validate ngày/giờ không được trong quá khứ ---
-        LocalDate today = LocalDate.now();
-        LocalTime now = LocalTime.now();
+        LOGGER.info(String.format("NOTIFICATION_EVENT event=BOOKING_CREATED accountId=%d datSanId=%d status=%s",
+                user.getAccountId(), newDatSanId, result.trangThai));
 
-        if (ngayDat.isBefore(today)) {
-            session.setAttribute("error", "Không thể đặt sân cho ngày đã qua. Vui lòng chọn ngày từ hôm nay trở đi.");
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-            return;
+        // Gửi thông báo sau commit — không để lỗi notification làm gãy luồng
+        try {
+            notificationService.notifyBookingCreated(user.getAccountId(), newDatSanId, isOnlineDeposit);
+        } catch (Exception _ne) {
+            LOGGER.warning("notifyBookingCreated failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
         }
 
-        if (ngayDat.equals(today) && gioBatDau.isBefore(now)) {
-            session.setAttribute("error",
-                    "Không thể đặt sân cho giờ đã qua trong ngày hôm nay. Vui lòng chọn giờ khác.");
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+        // Thông báo cho Manager/Staff của cơ sở
+        try {
+            String thoiGianStr = cmd.gioBatDau + "-" + cmd.gioKetThuc;
+            notificationService.notifyManagerStaffNewBooking(sanCoSoID, newDatSanId,
+                    user.getFullName(), null, thoiGianStr);
+        } catch (Exception _ne) {
+            LOGGER.warning("notifyManagerStaffNewBooking failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
+        }
+
+        LOGGER.info(String.format(
+                "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s, tổng submit=%dms",
+                user.getAccountId(), cmd.sanId, cmd.ngayDat, cmd.gioBatDau, cmd.gioKetThuc, tongTien,
+                paymentMethod, System.currentTimeMillis() - tSubmit0));
+
+        boolean isAjax = "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
+
+        if (!isOnlineDeposit) {
+            session.setAttribute("message",
+                    "Đặt sân thành công! Sân đã được thêm vào giỏ hàng. Vui lòng chờ cơ sở xác nhận.");
+            resp.sendRedirect(req.getContextPath() + "/customer/gio-hang");
             return;
         }
 
-        // --- Bước 2d: Validate không đặt quá xa trong tương lai (tối đa 30 ngày) ---
-        LocalDate maxDate = today.plusDays(30);
-        if (ngayDat.isAfter(maxDate)) {
-            session.setAttribute("error",
-                    "Chỉ có thể đặt sân trong vòng 30 ngày tới (tối đa đến ngày " + maxDate + "). Vui lòng chọn ngày khác.");
-            resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-            return;
-        }
+        // ── PayOS: tạo QR hoặc redirect tùy request type ──
+        String baseUrl = resolveBaseUrl(req);
+        String returnUrl = baseUrl + "/customer/payos-return?datSanId=" + newDatSanId;
+        String cancelUrl = baseUrl + "/customer/payos-cancel?datSanId=" + newDatSanId;
+        long amount = result.tongTien.setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+        // description tối đa 25 ký tự theo giới hạn PayOS
+        String description = "VSport DS" + newDatSanId;
 
-        // --- Bước 3: Vòng lặp retry deadlock ---
-        for (int attempt = 1; attempt <= MAX_DEADLOCK_RETRIES; attempt++) {
-            try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
-                if (conn == null) {
-                    session.setAttribute("error", "Không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.");
-                    resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                    return;
-                }
+        long tPayOS0 = System.currentTimeMillis();
+        org.example.service.payos.BookingPaymentLinkService.LinkResult linkResult =
+                paymentLinkService.createLink(sanCoSoID, newDatSanId, amount, description, returnUrl, cancelUrl, false);
+        LOGGER.info(String.format("handleDatSan: PayOS createPaymentLink=%dms, success=%b%s",
+                System.currentTimeMillis() - tPayOS0, linkResult.success,
+                linkResult.success ? "" : ", errorCode=" + linkResult.errorCode));
 
-                conn.setAutoCommit(false);
-                try {
-                    // ── 3a. Khóa hàng San để ngăn concurrent booking cùng sân ──
-                    // Sử dụng UPDLOCK + ROWLOCK để block đọc lẫn ghi cho hàng này
-                    // trong suốt transaction, tránh race condition dẫn đến double booking
-                    String lockSql = "SELECT SanID, TrangThai, CoSoID FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
-                    String sanTrangThai;
-                    int sanCoSoID;
-
-                    try (java.sql.PreparedStatement lockPs = conn.prepareStatement(lockSql)) {
-                        lockPs.setInt(1, sanId);
-                        try (java.sql.ResultSet rsLock = lockPs.executeQuery()) {
-                            if (!rsLock.next()) {
-                                conn.rollback();
-                                session.setAttribute("error", "Sân không tồn tại trong hệ thống.");
-                                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                                return;
-                            }
-                            sanTrangThai = rsLock.getString("TrangThai");
-                            sanCoSoID = rsLock.getInt("CoSoID");
-                        }
-                    }
-
-                    // ── 3a-1. Giải phóng SoftHold của chính tài khoản này cho đúng slot đang submit ──
-                    // Từ đây trở đi việc chặn slot đã do UPDLOCK trên San + re-check overlap bên dưới
-                    // đảm nhiệm; SoftHold tạm (bước "Chọn ngày & giờ") không còn cần thiết nữa dù kết
-                    // quả submit là thành công hay thất bại. Dùng connection riêng (tự commit), không
-                    // nằm trong transaction này, để lệnh release không bị rollback theo nếu bước nào
-                    // đó bên dưới thất bại.
-                    softHoldDAO.deleteHoldsByAccountAndSan(user.getAccountId(), sanId, ngayDat);
-
-                    // ── 3a-2. Kiểm tra giới hạn số booking/ngày per customer (tối đa 3 bookings) ──
-                    if (org.example.dao.impl.LichDatSanDAOImpl.countActiveBookingsForAccountAndDate(
-                            conn, user.getAccountId(), ngayDat) >= 3) {
-                        conn.rollback();
-                        session.setAttribute("error", "Bạn đã đạt giới hạn đặt sân tối đa trong ngày hôm nay (tối đa 3 lượt đặt/ngày).");
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                    // ── 3b. Kiểm tra trạng thái sân ──
-                    // Cho phép đặt khi sân ở trạng thái 'Sẵn sàng' hoặc 'Đang sử dụng' (khung giờ khác).
-                    // Trạng thái 'Bảo trì' hoặc trạng thái khác mới thực sự chặn đặt sân.
-                    // Trùng lịch theo khung giờ sẽ do kiểm tra overlap (3d) bên dưới xử lý.
-                    if (!"Sẵn sàng".equals(sanTrangThai) && !"Đang sử dụng".equals(sanTrangThai)) {
-                        conn.rollback();
-                        session.setAttribute("error",
-                                "Sân này hiện đang ở trạng thái [" + sanTrangThai + "] và không thể đặt. " +
-                                        "Vui lòng chọn sân khác.");
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                    // ── 3c. Kiểm tra giờ hoạt động của Cơ Sở ──
-                    // Nếu Cơ Sở không có cấu hình giờ, mặc định dùng 06:00 - 23:00
-                    LocalTime branchOpen = DEFAULT_OPEN_TIME;
-                    LocalTime branchClose = DEFAULT_CLOSE_TIME;
-                    String branchName = "Cơ Sở";
-
-                    String coSoSql = "SELECT TenCoSo, GioMoCua, GioDongCua FROM CoSo WHERE CoSoID = ?";
-                    try (java.sql.PreparedStatement coSoPs = conn.prepareStatement(coSoSql)) {
-                        coSoPs.setInt(1, sanCoSoID);
-                        try (java.sql.ResultSet rsCoSo = coSoPs.executeQuery()) {
-                            if (rsCoSo.next()) {
-                                branchName = rsCoSo.getString("TenCoSo");
-                                java.sql.Time dbOpen = rsCoSo.getTime("GioMoCua");
-                                java.sql.Time dbClose = rsCoSo.getTime("GioDongCua");
-                                if (dbOpen != null)
-                                    branchOpen = dbOpen.toLocalTime();
-                                if (dbClose != null)
-                                    branchClose = dbClose.toLocalTime();
-                            }
-                        }
-                    }
-
-                    // Kiểm tra giờ bắt đầu không được trước giờ mở cửa
-                    if (gioBatDau.isBefore(branchOpen)) {
-                        conn.rollback();
-                        session.setAttribute("error", String.format(
-                                "%s mở cửa lúc %s. Giờ bắt đầu của bạn (%s) quá sớm.",
-                                branchName,
-                                branchOpen.toString().substring(0, 5),
-                                gioBatDau.toString().substring(0, 5)));
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                    // Kiểm tra giờ kết thúc không được vượt quá giờ đóng cửa
-                    if (gioKetThuc.isAfter(branchClose)) {
-                        conn.rollback();
-                        session.setAttribute("error", String.format(
-                                "%s đóng cửa lúc %s. Giờ kết thúc của bạn (%s) vượt quá giờ hoạt động.",
-                                branchName,
-                                branchClose.toString().substring(0, 5),
-                                gioKetThuc.toString().substring(0, 5)));
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                    // ── 3d. Kiểm tra trùng lịch (Overlap check) ──
-                    // Công thức overlap: NOT (KetThuc <= BatDau_Khac OR BatDau >= KetThuc_Khac)
-                    // "Chờ xác nhận" (COD) chặn slot cho tới khi được duyệt/từ chối/tự hết hạn.
-                    // "Chờ thanh toán" chỉ chặn khi còn hạn giữ chỗ thật (HoldExpiresAt), không còn
-                    // dùng DATEDIFF(CreatedTime) giả nữa.
-                    // "Đã hoàn thành"/"Quá hạn"/"Đã hủy" không chặn — booking cho NgayDat/GioBatDau
-                    // trong quá khứ đã bị validate ở Bước 2b phía trên rồi nên không cần chặn lại ở đây.
-                    String checkSql = "SELECT COUNT(*) FROM LichDatSan " +
-                            "WHERE SanID = ? AND NgayDat = ? " +
-                            "AND (TrangThai IN (N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
-                            "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
-                            "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') " +
-                            "     OR (TrangThai = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND HoldExpiresAt > SYSUTCDATETIME())) " +
-                            "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
-
-                    boolean hasOverlap;
-                    try (java.sql.PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
-                        checkPs.setInt(1, sanId);
-                        checkPs.setDate(2, java.sql.Date.valueOf(ngayDat));
-                        checkPs.setString(3, gioBatDau.toString()); // KetThuc <= BatDauNew => không overlap
-                        checkPs.setString(4, gioKetThuc.toString()); // BatDau >= KetThucNew => không overlap
-                        try (java.sql.ResultSet rs = checkPs.executeQuery()) {
-                            hasOverlap = rs.next() && rs.getInt(1) > 0;
-                        }
-                    }
-
-                    if (hasOverlap) {
-                        conn.rollback();
-                        session.setAttribute("error",
-                                "Khung giờ " + gioBatDau.toString().substring(0, 5) + " - " +
-                                        gioKetThuc.toString().substring(0, 5) +
-                                        " đã có người đặt cho sân này. Vui lòng chọn khung giờ khác.");
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                    // ── 3d-2. Kiểm tra SoftHold đang hoạt động từ tài khoản KHÁC ──
-                    // Không chặn nếu hold đó là của chính tài khoản hiện tại (self-hold).
-                    String checkHoldSql = "SELECT COUNT(*) FROM SoftHold " +
-                            "WHERE SanID = ? AND NgayDat = ? AND AccountID <> ? " +
-                            "AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " +
-                            org.example.util.Constants.SOFT_HOLD_TIMEOUT_MINUTES + " " +
-                            "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
-
-                    boolean hasActiveHoldFromOther;
-                    try (java.sql.PreparedStatement holdPs = conn.prepareStatement(checkHoldSql)) {
-                        holdPs.setInt(1, sanId);
-                        holdPs.setDate(2, java.sql.Date.valueOf(ngayDat));
-                        holdPs.setInt(3, user.getAccountId());
-                        holdPs.setString(4, gioBatDau.toString());
-                        holdPs.setString(5, gioKetThuc.toString());
-                        try (java.sql.ResultSet rsHold = holdPs.executeQuery()) {
-                            hasActiveHoldFromOther = rsHold.next() && rsHold.getInt(1) > 0;
-                        }
-                    }
-
-                    if (hasActiveHoldFromOther) {
-                        conn.rollback();
-                        session.setAttribute("error",
-                                "Khung giờ " + gioBatDau.toString().substring(0, 5) + " - " +
-                                        gioKetThuc.toString().substring(0, 5) +
-                                        " hiện đang được người khác giữ chỗ tạm thời. Vui lòng thử lại sau ít phút hoặc chọn khung giờ khác.");
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                    // ── 3e. Tính giá theo loại sân và giờ đèn (chia theo từng khung giờ thực tế) ──
-                    boolean applyLights = false;
-                    double tongTien;
-
-                    String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen, GioKetThucLenDen " +
-                            "FROM LoaiSan WHERE LoaiSanID = (SELECT LoaiSanID FROM San WHERE SanID = ?)";
-                    BigDecimal giaKhongDenBd = null;
-                    BigDecimal giaCoDenBd = null;
-                    LocalTime gioBatDauLenDen = null;
-                    LocalTime gioKetThucLenDen = null;
-                    try (java.sql.PreparedStatement loaiPs = conn.prepareStatement(loaiSanSql)) {
-                        loaiPs.setInt(1, sanId);
-                        try (java.sql.ResultSet rsLoai = loaiPs.executeQuery()) {
-                            if (rsLoai.next()) {
-                                giaKhongDenBd = BigDecimal.valueOf(rsLoai.getDouble("GiaKhongDen"));
-                                giaCoDenBd = BigDecimal.valueOf(rsLoai.getDouble("GiaCoDen"));
-
-                                java.sql.Time sqlBatDauLenDen = rsLoai.getTime("GioBatDauLenDen");
-                                if (sqlBatDauLenDen != null) gioBatDauLenDen = sqlBatDauLenDen.toLocalTime();
-
-                                java.sql.Time sqlKetThucLenDen = rsLoai.getTime("GioKetThucLenDen");
-                                if (sqlKetThucLenDen != null) gioKetThucLenDen = sqlKetThucLenDen.toLocalTime();
-                            }
-                        }
-                    }
-                    if (giaKhongDenBd == null) {
-                        giaKhongDenBd = BigDecimal.valueOf(100_000); // Fallback mặc định
-                        giaCoDenBd = giaKhongDenBd;
-                    }
-
-                    // Nếu qua nửa đêm (giờ kết thúc <= giờ bắt đầu) thì tính sang ngày hôm sau
-                    LocalDate ngayKetThuc = !gioKetThuc.isAfter(gioBatDau) ? ngayDat.plusDays(1) : ngayDat;
-                    CourtPriceResult priceResult = pricingService.calculate(
-                            LocalDateTime.of(ngayDat, gioBatDau), LocalDateTime.of(ngayKetThuc, gioKetThuc),
-                            gioBatDauLenDen, gioKetThucLenDen, giaKhongDenBd, giaCoDenBd);
-
-                    durationMinutes = priceResult.totalMinutes();
-                    tongTien = priceResult.totalCourtAmount().doubleValue();
-                    applyLights = priceResult.minutesWithLight() > 0;
-
-                    // ── 3f. INSERT lịch đặt sân trong cùng transaction ──
-                    boolean isOnlineDeposit = "payos".equalsIgnoreCase(paymentMethod);
-                    String initialStatus = isOnlineDeposit
-                            ? org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
-                            : org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN;
-                    // HoldExpiresAt là MỐC TUYỆT ĐỐI (instant) → lưu bằng SYSUTCDATETIME() (UTC), không
-                    // phụ thuộc timezone máy chủ DB. Mọi nơi so sánh với HoldExpiresAt cũng dùng
-                    // SYSUTCDATETIME() (SQL) hoặc Instant.now() qua TimeUtil (Java) → nhất quán UTC.
-                    // Không bao giờ nhận từ frontend; BOOKING_HOLD_MINUTES là hằng số compile-time.
-                    String holdExpiresAtExpr = isOnlineDeposit
-                            ? "DATEADD(MINUTE, " + org.example.util.Constants.BOOKING_HOLD_MINUTES + ", SYSUTCDATETIME())"
-                            : "NULL";
-
-                    String insertSql = "INSERT INTO LichDatSan " +
-                            "(AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, " +
-                            " ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan, HoldExpiresAt) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + holdExpiresAtExpr + ")";
-
-                    int newDatSanId = -1;
-                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                        insertPs.setInt(1, user.getAccountId());
-                        insertPs.setInt(2, sanId);
-                        insertPs.setDate(3, java.sql.Date.valueOf(ngayDat));
-                        insertPs.setTime(4, java.sql.Time.valueOf(gioBatDau));
-                        insertPs.setTime(5, java.sql.Time.valueOf(gioKetThuc));
-                        insertPs.setBoolean(6, applyLights);
-                        insertPs.setBigDecimal(7,
-                                BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP));
-                        insertPs.setString(8, initialStatus);
-                        insertPs.setString(9, ghiChu != null ? ghiChu.trim() : "");
-                        insertPs.setString(10, "Web");
-                        insertPs.executeUpdate();
-                        try (java.sql.ResultSet genKeys = insertPs.getGeneratedKeys()) {
-                            if (genKeys.next()) newDatSanId = genKeys.getInt(1);
-                        }
-                    }
-
-                    // ── 3f-1. Lưu dịch vụ đặt trước (Phase 8A) ──
-                    // Dịch vụ được đặt trước, thanh toán tại quầy — KHÔNG cộng vào tongTien/PayOS.
-                    // Giá lấy từ DB (không tin client). Nếu bất kỳ dòng nào không hợp lệ (sai cơ sở,
-                    // ngừng kinh doanh, vượt tồn kho) → rollback toàn bộ booking, báo lỗi rõ ràng.
-                    if (serviceIds.length > 0) {
-                        String svcSql = "SELECT SanPhamID, TenSanPham, DonGia, SoLuongTon, TrangThai, CoSoID " +
-                                "FROM SanPham_DichVu WHERE SanPhamID = ?";
-                        try (java.sql.PreparedStatement svcPs = conn.prepareStatement(svcSql)) {
-                            for (int i = 0; i < serviceIds.length; i++) {
-                                int spId = serviceIds[i];
-                                int qty = serviceQtys[i];
-                                svcPs.setInt(1, spId);
-                                try (java.sql.ResultSet rsSvc = svcPs.executeQuery()) {
-                                    if (!rsSvc.next()) {
-                                        conn.rollback();
-                                        session.setAttribute("error", "Một dịch vụ bạn chọn không tồn tại. Vui lòng thử lại.");
-                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                                        return;
-                                    }
-                                    int spCoSoId = rsSvc.getInt("CoSoID");
-                                    String spTrangThai = rsSvc.getString("TrangThai");
-                                    int soLuongTon = rsSvc.getInt("SoLuongTon");
-                                    String tenSp = rsSvc.getString("TenSanPham");
-                                    BigDecimal donGia = rsSvc.getBigDecimal("DonGia");
-
-                                    if (spCoSoId != sanCoSoID) {
-                                        conn.rollback();
-                                        session.setAttribute("error", "Dịch vụ '" + tenSp + "' không thuộc cơ sở của sân bạn đang đặt.");
-                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                                        return;
-                                    }
-                                    if (!org.example.util.Constants.TRANG_THAI_SP_DANG_KINH_DOANH.equals(spTrangThai)) {
-                                        conn.rollback();
-                                        session.setAttribute("error", "Dịch vụ '" + tenSp + "' hiện không kinh doanh.");
-                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                                        return;
-                                    }
-                                    if (qty > soLuongTon) {
-                                        conn.rollback();
-                                        session.setAttribute("error", "Dịch vụ '" + tenSp + "' chỉ còn " + soLuongTon + " trong kho, không đủ số lượng bạn chọn.");
-                                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                                        return;
-                                    }
-
-                                    BigDecimal totalPrice = donGia.multiply(BigDecimal.valueOf(qty));
-                                    lichDatSanDichVuDAO.insertPreOrder(conn, newDatSanId, spId, qty, donGia, totalPrice);
-                                }
-                            }
-                        }
-                    }
-
-                    // ── 3f-2. Dọn SoftHold của chính tài khoản này cho San+Ngày này ──
-                    // (không bắt buộc cho tính đúng đắn - hold sẽ tự hết hạn sau 2 phút -
-                    //  nhưng dọn ngay giúp tránh soft-hold "rác" không cần thiết)
-                    String cleanupHoldSql = "DELETE FROM SoftHold WHERE AccountID = ? AND SanID = ? AND NgayDat = ?";
-                    try (java.sql.PreparedStatement cleanupPs = conn.prepareStatement(cleanupHoldSql)) {
-                        cleanupPs.setInt(1, user.getAccountId());
-                        cleanupPs.setInt(2, sanId);
-                        cleanupPs.setDate(3, java.sql.Date.valueOf(ngayDat));
-                        cleanupPs.executeUpdate();
-                    }
-
-                    // ── 3g. Commit toàn bộ transaction ──
-                    long tCommit0 = System.currentTimeMillis();
-                    conn.commit();
-                    LOGGER.info(String.format("handleDatSan: commit transaction=%dms", System.currentTimeMillis() - tCommit0));
-
-                    LOGGER.info(String.format("NOTIFICATION_EVENT event=BOOKING_CREATED accountId=%d datSanId=%d status=%s",
-                            user.getAccountId(), newDatSanId, initialStatus));
-
-                    // Gửi thông báo sau commit — không để lỗi notification làm gãy luồng
-                    try {
-                        notificationService.notifyBookingCreated(user.getAccountId(), newDatSanId, isOnlineDeposit);
-                    } catch (Exception _ne) {
-                        LOGGER.warning("notifyBookingCreated failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
-                    }
-
-                    // Thông báo cho Manager/Staff của cơ sở
-                    try {
-                        String thoiGianStr = gioBatDau + "-" + gioKetThuc;
-                        notificationService.notifyManagerStaffNewBooking(sanCoSoID, newDatSanId,
-                                user.getFullName(), null, thoiGianStr);
-                    } catch (Exception _ne) {
-                        LOGGER.warning("notifyManagerStaffNewBooking failed for datSanId=" + newDatSanId + ": " + _ne.getMessage());
-                    }
-
-                    LOGGER.info(String.format(
-                            "Đặt sân thành công: AccountID=%d, SanID=%d, Ngày=%s, %s-%s, Tiền=%,.0fđ, PTTT=%s, tổng submit=%dms",
-                            user.getAccountId(), sanId, ngayDat, gioBatDau, gioKetThuc, tongTien, paymentMethod, System.currentTimeMillis() - tSubmit0));
-
-                    boolean isAjax = "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
-
-                    if (isOnlineDeposit) {
-                        // ── PayOS: tạo QR hoặc redirect tùy request type ──
-                        String scheme = req.getScheme();
-                        String serverName = req.getServerName();
-                        int port = req.getServerPort();
-                        String ctx = req.getContextPath();
-                        boolean defaultPort = (scheme.equals("http") && port == 80)
-                                || (scheme.equals("https") && port == 443);
-                        String baseUrl = scheme + "://" + serverName + (defaultPort ? "" : ":" + port) + ctx;
-
-                        String returnUrl = baseUrl + "/customer/payos-return?datSanId=" + newDatSanId;
-                        String cancelUrl = baseUrl + "/customer/payos-cancel?datSanId=" + newDatSanId;
-                        long amount = BigDecimal.valueOf(tongTien).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
-                        // description tối đa 25 ký tự theo giới hạn PayOS
-                        String description = "VSport DS" + newDatSanId;
-
-                        long tPayOS0 = System.currentTimeMillis();
-                        PayOSLinkResult linkResult = createFacilityPayOSLink(
-                                sanCoSoID, (long) newDatSanId, amount, description, returnUrl, cancelUrl, false);
-                        LOGGER.info(String.format("handleDatSan: PayOS createPaymentLink=%dms, success=%b%s",
-                                System.currentTimeMillis() - tPayOS0, linkResult.success,
-                                linkResult.success ? "" : ", errorCode=" + linkResult.errorCode));
-
-                        if (linkResult.success) {
-                            PayOSCheckoutSession checkoutSession = linkResult.session;
-                            // Lưu QR (session + best-effort DB cache) để trang QR nhúng render lại được
-                            // khi reload/đa tab, KHÔNG gọi lại PayOS. KHÔNG redirect sang checkout PayOS.
-                            stashAndPersistQr(session, newDatSanId, checkoutSession, amount, description);
-                            String qrPageUrl = req.getContextPath() + "/customer/thanh-toan-qr?datSanId=" + newDatSanId;
-                            if (isAjax) {
-                                resp.setContentType("application/json; charset=UTF-8");
-                                resp.getWriter().write(String.format(
-                                        "{\"success\":true,\"datSanId\":%d,\"redirectUrl\":\"%s\"}",
-                                        newDatSanId, jsonEscape(qrPageUrl)));
-                            } else {
-                                resp.sendRedirect(qrPageUrl);
-                            }
-                        } else {
-                            // KHÔNG hủy booking: giữ nguyên "Chờ thanh toán" + HoldExpiresAt hiện có để
-                            // khách bấm "Thử lại" (/customer/payos-retry) hoặc "Thanh toán tại quầy"
-                            // (/customer/payos-pay-counter) trên CÙNG đơn — không tạo booking mới. Nếu
-                            // khách không làm gì, booking tự hết hạn giữ chỗ theo HoldExpiresAt sẵn có.
-                            if (isAjax) {
-                                resp.setContentType("application/json; charset=UTF-8");
-                                resp.getWriter().write(String.format(
-                                        "{\"success\":false,\"errorCode\":\"%s\",\"message\":\"%s\",\"datSanId\":%d,\"retryable\":%b,\"fallbackAvailable\":true}",
-                                        linkResult.errorCode, jsonEscape(linkResult.message), newDatSanId, linkResult.retryable));
-                            } else {
-                                session.setAttribute("error", linkResult.message);
-                                session.setAttribute("errorCode", linkResult.errorCode);
-                                session.setAttribute("errorDatSanId", newDatSanId);
-                                session.setAttribute("errorRetryable", linkResult.retryable);
-                                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                            }
-                        }
-                    } else {
-                        session.setAttribute("message",
-                                "Đặt sân thành công! Sân đã được thêm vào giỏ hàng. Vui lòng chờ cơ sở xác nhận.");
-                        resp.sendRedirect(req.getContextPath() + "/customer/gio-hang");
-                    }
-                    return;
-
-                } catch (SQLException sqlEx) {
-                    // Rollback transaction khi có lỗi SQL
-                    try {
-                        conn.rollback();
-                    } catch (SQLException ignored) {
-                    }
-
-                    // Kiểm tra nếu là lỗi deadlock → thực hiện retry
-                    if (isDeadlockException(sqlEx) && attempt < MAX_DEADLOCK_RETRIES) {
-                        LOGGER.log(Level.WARNING,
-                                String.format("Deadlock phát hiện (lần thử %d/%d), đang retry sau khoảng dừng ngắn...",
-                                        attempt, MAX_DEADLOCK_RETRIES),
-                                sqlEx);
-                        sleepBeforeRetry(attempt); // Dừng ngắn trước khi retry
-                        // Tiếp tục vòng lặp for (retry)
-                    } else {
-                        // Không phải deadlock hoặc đã hết số lần retry
-                        LOGGER.log(Level.SEVERE, "Lỗi SQL không thể phục hồi khi đặt sân", sqlEx);
-                        session.setAttribute("error", "Hệ thống đang bận. Vui lòng thử lại sau ít phút. (SQL Error: "
-                                + sqlEx.getErrorCode() + ")");
-                        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                        return;
-                    }
-
-                } catch (Exception e) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException ignored) {
-                    }
-                    LOGGER.log(Level.SEVERE, "Lỗi bất ngờ khi đặt sân", e);
-                    session.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-                    resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                    return;
-                }
-
-            } catch (SQLException connEx) {
-                LOGGER.log(Level.SEVERE, "Không thể lấy kết nối DB", connEx);
-                session.setAttribute("error", "Không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.");
-                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
-                return;
+        if (linkResult.success) {
+            // Lưu QR (session + best-effort DB cache) để trang QR nhúng render lại được
+            // khi reload/đa tab, KHÔNG gọi lại PayOS. KHÔNG redirect sang checkout PayOS.
+            paymentLinkService.persistQr(session, newDatSanId, linkResult.session, amount, description);
+            String qrPageUrl = req.getContextPath() + "/customer/thanh-toan-qr?datSanId=" + newDatSanId;
+            if (isAjax) {
+                resp.setContentType("application/json; charset=UTF-8");
+                resp.getWriter().write(String.format(
+                        "{\"success\":true,\"datSanId\":%d,\"redirectUrl\":\"%s\"}",
+                        newDatSanId, jsonEscape(qrPageUrl)));
+            } else {
+                resp.sendRedirect(qrPageUrl);
             }
-        } // end retry loop
-
-        // Nếu đến đây: đã retry đủ MAX lần mà vẫn deadlock
-        LOGGER.severe(String.format("Đặt sân thất bại sau %d lần retry do deadlock liên tục.", MAX_DEADLOCK_RETRIES));
-        session.setAttribute("error", "Hệ thống đang có nhiều yêu cầu đồng thời. Vui lòng thử lại sau vài giây.");
-        resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+        } else {
+            // KHÔNG hủy booking: giữ nguyên "Chờ thanh toán" + HoldExpiresAt hiện có để
+            // khách bấm "Thử lại" (/customer/payos-retry) hoặc "Thanh toán tại quầy"
+            // (/customer/payos-pay-counter) trên CÙNG đơn — không tạo booking mới.
+            if (isAjax) {
+                resp.setContentType("application/json; charset=UTF-8");
+                resp.getWriter().write(String.format(
+                        "{\"success\":false,\"errorCode\":\"%s\",\"message\":\"%s\",\"datSanId\":%d,\"retryable\":%b,\"fallbackAvailable\":true}",
+                        linkResult.errorCode, jsonEscape(linkResult.message), newDatSanId, linkResult.retryable));
+            } else {
+                session.setAttribute("error", linkResult.message);
+                session.setAttribute("errorCode", linkResult.errorCode);
+                session.setAttribute("errorDatSanId", newDatSanId);
+                session.setAttribute("errorRetryable", linkResult.retryable);
+                resp.sendRedirect(req.getContextPath() + "/customer/dat-san");
+            }
+        }
     }
 
     // =========================================================================
@@ -1095,149 +677,25 @@ public class DatSanServlet extends HttpServlet {
             resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Chưa đăng nhập\"}");
             return;
         }
-        String paramId = req.getParameter("datSanId");
-        if (paramId == null || paramId.isBlank()) {
+        Integer datSanId = parseIntParam(req.getParameter("datSanId"));
+        if (datSanId == null) {
             resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
             return;
         }
-        int datSanId;
-        try {
-            datSanId = Integer.parseInt(paramId.trim());
-        } catch (NumberFormatException e) {
-            resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Thiếu datSanId\"}");
-            return;
-        }
-        // Chống IDOR: booking phải thuộc đúng Customer đang đăng nhập.
-        org.example.model.Lichdatsan lich = lichDatSanDAO.getLichById(datSanId);
-        if (lich == null || lich.getAccountId() == null || !lich.getAccountId().equals(user.getAccountId())) {
+
+        // Toàn bộ nghiệp vụ kiểm tra/finalize nằm trong Service dùng chung với REST API mobile.
+        org.example.service.payos.BookingPaymentStatusService.Status status =
+                paymentStatusService.check(datSanId, user.getAccountId());
+
+        if (status.isNotFound()) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             resp.getWriter().write("{\"success\":false,\"status\":\"error\",\"error\":\"Không tìm thấy đơn\"}");
             return;
         }
 
-        String trangThai = lich.getTrangThai();
-        // Nếu DB đã xác nhận (do webhook hoặc lần kiểm tra trước đã finalize) -> trả ngay, không
-        // gọi PayOS dư thừa (mục 5.4 spec).
-        if (Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN.equals(trangThai)) {
-            writePayOSStatusJson(resp, true, "paid", trangThai, 0,
-                    req.getContextPath() + "/customer/gio-hang", null);
-            return;
-        }
-        if (Constants.TRANG_THAI_DAT_SAN_DA_HUY.equals(trangThai)) {
-            writePayOSStatusJson(resp, true, "cancelled", trangThai, 0, null, null);
-            return;
-        }
-
-        LocalDateTime holdExpiresAt = lich.getHoldExpiresAt();
-        // HoldExpiresAt lưu UTC → so sánh bằng Instant UTC (TimeUtil), không dùng giờ JVM/VN.
-        boolean holdExpired = org.example.util.TimeUtil.isPastUtc(holdExpiresAt);
-        boolean isExpiredStatus = Constants.TRANG_THAI_DAT_SAN_QUA_HAN.equals(trangThai)
-                || (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai) && holdExpired);
-
-        if (!Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai) && !isExpiredStatus) {
-            // "Chờ xác nhận" (trả tại quầy) hoặc trạng thái khác -> không áp dụng luồng QR PayOS.
-            writePayOSStatusJson(resp, true, "settled", trangThai, 0, null, null);
-            return;
-        }
-        if (isExpiredStatus) {
-            // Hết hạn giữ chỗ theo policy nội bộ (không phụ thuộc PayOS) -> không cần query PayOS.
-            writePayOSStatusJson(resp, true, "expired", trangThai, 0, null, null);
-            return;
-        }
-
-        // Còn "Chờ thanh toán" và chưa hết hạn giữ chỗ -> query PayOS server-to-server bằng orderCode.
-        Integer coSoId = findCoSoIdByDatSanId(datSanId);
-        if (coSoId == null) {
-            LOGGER.warning("PAYOS_STATUS_CHECK: không tìm thấy CoSoID cho DatSanID=" + datSanId);
-            writePayOSStatusJson(resp, true, "pending", trangThai,
-                    org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
-                    "Chưa nhận được thanh toán.");
-            return;
-        }
-        org.example.dto.payment.PayOSCredentials credentials =
-                new PayOSConfigurationService().getCredentialsForPayment(coSoId);
-        if (credentials == null) {
-            LOGGER.warning("PAYOS_STATUS_CHECK: CoSoID=" + coSoId + " chưa cấu hình PayOS, DatSanID=" + datSanId);
-            writePayOSStatusJson(resp, true, "pending", trangThai,
-                    org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
-                    "Chưa nhận được thanh toán.");
-            return;
-        }
-
-        vn.payos.model.v2.paymentRequests.PaymentLink link;
-        PayOS client = PayOSClientFactory.create(credentials);
-        try {
-            link = client.paymentRequests().get((long) datSanId);
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "PAYOS_STATUS_CHECK_FAILED datSanId=" + datSanId + " coSoId=" + coSoId
-                    + " loại lỗi=" + e.getClass().getSimpleName(), e);
-            writePayOSStatusJson(resp, true, "pending", trangThai,
-                    org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
-                    "Không thể kiểm tra trạng thái lúc này. Vui lòng thử lại.");
-            return;
-        } finally {
-            client.close();
-        }
-
-        LOGGER.info(String.format(
-                "PAYOS_STATUS_CHECK datSanId=%d coSoId=%d payosStatus=%s amountPaid=%d",
-                datSanId, coSoId, link.getStatus(), link.getAmountPaid()));
-
-        if (link.getStatus() == vn.payos.model.v2.paymentRequests.PaymentLinkStatus.PAID) {
-            String reference = (link.getTransactions() != null && !link.getTransactions().isEmpty())
-                    ? link.getTransactions().get(0).getReference() : null;
-            // Finalizer DÙNG CHUNG với PayOSWebhookServlet (PayOSLegacyBookingFinalizationService) -
-            // idempotent, chạy trong transaction có khóa, không tạo bộ logic cập nhật thứ hai.
-            org.example.service.payos.PayOSLegacyBookingFinalizationService.Result result =
-                    legacyFinalizationService.confirmPaid(datSanId, BigDecimal.valueOf(link.getAmountPaid()), reference);
-
-            LOGGER.info("PAYOS_STATUS_CHECK_FINALIZE_RESULT datSanId=" + datSanId + " result=" + result.code());
-
-            switch (result.code()) {
-                case CONFIRMED, ALREADY_CONFIRMED -> {
-                    if (result.code() == org.example.service.payos.PayOSLegacyBookingFinalizationService.ResultCode.CONFIRMED
-                            && result.accountId() != null && result.hoaDonId() != null) {
-                        notificationService.notifyPaymentSuccess(result.accountId(), result.hoaDonId(),
-                                String.valueOf(link.getAmountPaid()));
-                    }
-                    writePayOSStatusJson(resp, true, "paid",
-                            Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN, 0,
-                            req.getContextPath() + "/customer/gio-hang", null);
-                }
-                case AMOUNT_MISMATCH -> {
-                    // Không finalize khi số tiền không khớp — không lộ raw exception, chỉ log đủ chi tiết.
-                    writePayOSStatusJson(resp, true, "pending", trangThai,
-                            org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
-                            "Số tiền chuyển khoản chưa khớp. Vui lòng kiểm tra lại nội dung và số tiền.");
-                }
-                case CANCELLED -> writePayOSStatusJson(resp, true, "cancelled",
-                        Constants.TRANG_THAI_DAT_SAN_DA_HUY, 0, null, null);
-                case NOT_FOUND, UNEXPECTED_STATUS, DATABASE_ERROR -> writePayOSStatusJson(resp, true, "pending",
-                        trangThai, org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
-                        "Không thể xác nhận thanh toán lúc này. Vui lòng thử lại.");
-            }
-            return;
-        }
-
-        // PayOS chưa ghi nhận thanh toán (PENDING/PROCESSING/UNDERPAID/...) -> vẫn đang chờ thật sự.
-        writePayOSStatusJson(resp, true, "pending", trangThai,
-                org.example.util.TimeUtil.secondsUntilUtc(holdExpiresAt), null,
-                "Chưa nhận được thanh toán.");
-    }
-
-    /** CoSoID của một DatSanID — dùng để lấy đúng credentials PayOS theo cơ sở (không tin client). */
-    private Integer findCoSoIdByDatSanId(int datSanId) {
-        String sql = "SELECT s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
-        try (java.sql.Connection c = DBUtil.getConnection();
-             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, datSanId);
-            try (java.sql.ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getInt("CoSoID") : null;
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "findCoSoIdByDatSanId lỗi datSanId=" + datSanId, e);
-            return null;
-        }
+        String redirectUrl = status.paid ? req.getContextPath() + "/customer/gio-hang" : null;
+        writePayOSStatusJson(resp, true, status.status, status.bookingStatus,
+                status.remainingSeconds, redirectUrl, status.message);
     }
 
     private void writePayOSStatusJson(HttpServletResponse resp, boolean success, String status,
@@ -1250,19 +708,9 @@ public class DatSanServlet extends HttpServlet {
             .append(",\"bookingStatus\":\"").append(jsonEscape(bookingStatus != null ? bookingStatus : "")).append("\"")
             .append(",\"remainingSeconds\":").append(remainingSeconds);
         json.append(",\"redirectUrl\":").append(redirectUrl != null ? "\"" + jsonEscape(redirectUrl) + "\"" : "null");
-        json.append(",\"message\":\"").append(jsonEscape(message != null ? message : defaultMessageFor(status))).append("\"");
+        json.append(",\"message\":\"").append(jsonEscape(message != null ? message : "")).append("\"");
         json.append("}");
         resp.getWriter().write(json.toString());
-    }
-
-    private String defaultMessageFor(String status) {
-        return switch (status) {
-            case "paid" -> "Thanh toán đã được xác nhận.";
-            case "cancelled" -> "Đơn đã được hủy.";
-            case "expired" -> "Mã thanh toán đã hết hạn.";
-            case "settled" -> "Đơn đã được xử lý.";
-            default -> "Chưa nhận được thanh toán.";
-        };
     }
 
     private void handlePayOSReturn(HttpServletRequest req, HttpServletResponse resp,
@@ -1329,18 +777,7 @@ public class DatSanServlet extends HttpServlet {
 
     /** Hủy payment link PayOS (best-effort) cho một booking; không ném lỗi ra ngoài. */
     private void cancelPayosLinkQuietly(int coSoId, long datSanId) {
-        try {
-            PayOSCredentials credentials = new PayOSConfigurationService().getCredentialsForPayment(coSoId);
-            if (credentials == null) return;
-            PayOS client = PayOSClientFactory.create(credentials);
-            try {
-                client.paymentRequests().cancel(datSanId, "Khách hủy thanh toán");
-            } finally {
-                client.close();
-            }
-        } catch (Exception ignored) {
-            // Không có link treo / PayOS lỗi - state nội bộ vẫn được xử lý an toàn ở caller.
-        }
+        paymentLinkService.cancelLinkQuietly(coSoId, datSanId, "Khách hủy thanh toán");
     }
 
     // =========================================================================
@@ -1391,7 +828,7 @@ public class DatSanServlet extends HttpServlet {
             java.time.Instant holdInstant = org.example.util.TimeUtil.fromDb(holdExpiresAt);
             if (holdInstant == null || holdInstant.isBefore(java.time.Instant.now())) {
                 resp.getWriter().write(String.format(
-                        "{\"success\":false,\"errorCode\":\"HOLD_EXPIRED\",\"message\":\"%s\"}", jsonEscape(MSG_EXPIRED)));
+                        "{\"success\":false,\"errorCode\":\"HOLD_EXPIRED\",\"message\":\"%s\"}", jsonEscape(org.example.service.payos.BookingPaymentLinkService.MSG_EXPIRED)));
                 return;
             }
 
@@ -1401,11 +838,12 @@ public class DatSanServlet extends HttpServlet {
             String returnUrl = baseUrl + "/customer/payos-return?datSanId=" + datSanId;
             String cancelUrl = baseUrl + "/customer/payos-cancel?datSanId=" + datSanId;
 
-            PayOSLinkResult linkResult = createFacilityPayOSLink(coSoId, (long) datSanId, amount, description, returnUrl, cancelUrl, true);
+            org.example.service.payos.BookingPaymentLinkService.LinkResult linkResult =
+                    paymentLinkService.createLink(coSoId, datSanId, amount, description, returnUrl, cancelUrl, true);
             if (linkResult.success) {
                 PayOSCheckoutSession s = linkResult.session;
                 // Cập nhật cache QR mới (session + DB) rồi để frontend nạp lại trang QR nhúng.
-                stashAndPersistQr(req.getSession(), datSanId, s, amount, description);
+                paymentLinkService.persistQr(req.getSession(), datSanId, s, amount, description);
                 String qrPageUrl = req.getContextPath() + "/customer/thanh-toan-qr?datSanId=" + datSanId;
                 resp.getWriter().write(String.format(
                         "{\"success\":true,\"datSanId\":%d,\"redirectUrl\":\"%s\"}",
@@ -1503,157 +941,6 @@ public class DatSanServlet extends HttpServlet {
         try { return Integer.parseInt(s.trim()); } catch (NumberFormatException e) { return null; }
     }
 
-    /**
-     * Lưu snapshot QR PayOS cho một booking để trang QR nhúng của V-SPORT render lại được mà không
-     * gọi lại PayOS: (1) HttpSession holder — dùng ngay, không phụ thuộc migration; (2) best-effort
-     * UPDATE các cột cache trên LichDatSan — bền vững qua reload/đa tab, BỎ QUA êm nếu cột chưa tồn
-     * tại (chưa chạy migrate_customer_embedded_payos_payment.sql). Chạy trên connection RIÊNG (auto-
-     * commit) nên không ảnh hưởng transaction đặt sân. Không bao giờ log payload/secret.
-     */
-    private void stashAndPersistQr(HttpSession session, int datSanId, PayOSCheckoutSession s,
-                                   long amount, String description) {
-        Long orderCode = s.orderCode != null ? s.orderCode : (long) datSanId;
-        PayosQrData data = new PayosQrData(datSanId, orderCode, s.paymentLinkId, s.qrCode, s.checkoutUrl,
-                s.bin, s.accountNumber, s.accountName, amount, description, s.expiredAt);
-        session.setAttribute(PayosQrData.sessionKey(datSanId), data);
-
-        String sql = "UPDATE LichDatSan SET PayosOrderCode=?, PayosPaymentLinkId=?, PayosQrPayload=?, "
-                + "PayosCheckoutUrl=?, PayosBin=?, PayosAccountNumber=?, PayosAccountName=?, PayosAmount=?, "
-                + "PayosDescription=?, PayosExpiresAt=? WHERE DatSanID=?";
-        try (java.sql.Connection c = DBUtil.getConnection();
-             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setLong(1, orderCode);
-            ps.setString(2, s.paymentLinkId);
-            ps.setString(3, s.qrCode);
-            ps.setString(4, s.checkoutUrl);
-            ps.setString(5, s.bin);
-            ps.setString(6, s.accountNumber);
-            ps.setString(7, s.accountName);
-            ps.setBigDecimal(8, BigDecimal.valueOf(amount));
-            ps.setString(9, description);
-            // PayosExpiresAt là instant → lưu UTC nhất quán với HoldExpiresAt (qua TimeUtil).
-            ps.setTimestamp(10, s.expiredAt != null
-                    ? org.example.util.TimeUtil.toDb(java.time.Instant.ofEpochSecond(s.expiredAt)) : null);
-            ps.setInt(11, datSanId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            // Cột cache chưa tồn tại (chưa migrate) hoặc lỗi ghi cache - không nghiêm trọng: session
-            // holder vẫn cho trang QR hoạt động trong phiên hiện tại.
-            LOGGER.fine("QR cache persist bỏ qua (có thể chưa chạy migration) datSanId=" + datSanId);
-        }
-    }
-
-    // =========================================================================
-    // PHẦN 5C: TẠO PAYMENT LINK PAYOS THEO CƠ SỞ (thay thế PayOSService singleton dùng biến môi trường)
-    // =========================================================================
-
-    private static final String MSG_NOT_CONFIGURED = "Thanh toán trực tuyến hiện chưa khả dụng tại cơ sở này. Bạn có thể chọn thanh toán tại quầy.";
-    private static final String MSG_PROVIDER_ERROR = "PayOS đang tạm thời không phản hồi. Vui lòng thử lại sau hoặc chọn thanh toán tại quầy.";
-    private static final String MSG_NETWORK_ERROR = "Không thể kết nối đến cổng thanh toán PayOS. Vui lòng thử lại hoặc chọn thanh toán tại quầy.";
-    private static final String MSG_EXPIRED = "Phiên thanh toán đã hết hạn. Vui lòng tạo lại yêu cầu thanh toán.";
-    private static final String MSG_UNKNOWN = "Không thể tạo liên kết thanh toán lúc này. Vui lòng thử lại hoặc chọn thanh toán tại quầy.";
-
-    /** Kết quả nội bộ khi thử tạo/tái tạo payment link PayOS cho một booking cụ thể. */
-    private static final class PayOSLinkResult {
-        final boolean success;
-        final PayOSCheckoutSession session;
-        final String errorCode;
-        final String message;
-        final boolean retryable;
-
-        private PayOSLinkResult(boolean success, PayOSCheckoutSession session, String errorCode, String message, boolean retryable) {
-            this.success = success;
-            this.session = session;
-            this.errorCode = errorCode;
-            this.message = message;
-            this.retryable = retryable;
-        }
-
-        static PayOSLinkResult ok(PayOSCheckoutSession session) { return new PayOSLinkResult(true, session, null, null, false); }
-        static PayOSLinkResult fail(String errorCode, String message, boolean retryable) {
-            return new PayOSLinkResult(false, null, errorCode, message, retryable);
-        }
-    }
-
-    /**
-     * Tạo (hoặc, nếu cancelExistingFirst=true, hủy link cũ rồi tạo lại) payment link PayOS cho
-     * một booking, dùng credentials RIÊNG của cơ sở (coSoId) đọc từ database qua
-     * PayOSConfigurationService — KHÔNG dùng biến môi trường toàn cục
-     * (PAYOS_CLIENT_ID/PAYOS_API_KEY/PAYOS_CHECKSUM_KEY không còn được đọc ở đây). Không bao giờ
-     * log Client ID/API Key/Checksum Key - chỉ log trạng thái có/không cấu hình.
-     */
-    private PayOSLinkResult createFacilityPayOSLink(int coSoId, long orderCode, long amount, String description,
-                                                      String returnUrl, String cancelUrl, boolean cancelExistingFirst) {
-        PayOSCredentials credentials = new PayOSConfigurationService().getCredentialsForPayment(coSoId);
-        if (credentials == null) {
-            LOGGER.warning(String.format("PAYOS_NOT_CONFIGURED facilityId=%d orderCode=%d", coSoId, orderCode));
-            return PayOSLinkResult.fail("PAYOS_NOT_CONFIGURED", MSG_NOT_CONFIGURED, false);
-        }
-
-        PayOS client = PayOSClientFactory.create(credentials);
-        try {
-            if (cancelExistingFirst) {
-                try {
-                    client.paymentRequests().cancel(orderCode, "Khách yêu cầu tạo lại liên kết thanh toán");
-                } catch (Exception ignoredNoExistingLink) {
-                    // Không có link cũ để hủy (chưa từng tạo, hoặc đã hết hạn/hủy sẵn) - bỏ qua, tiếp tục tạo mới.
-                }
-            }
-            CreatePaymentLinkRequest request = CreatePaymentLinkRequest.builder()
-                    .orderCode(orderCode)
-                    .amount(amount)
-                    .description(description)
-                    .returnUrl(returnUrl)
-                    .cancelUrl(cancelUrl)
-                    .build();
-            CreatePaymentLinkResponse result = client.paymentRequests().create(request);
-            return PayOSLinkResult.ok(new PayOSCheckoutSession(
-                    result.getCheckoutUrl(), result.getQrCode(), result.getExpiredAt(), result.getAmount(),
-                    result.getBin(), result.getAccountNumber(), result.getAccountName(),
-                    result.getDescription(), result.getOrderCode(), result.getPaymentLinkId()));
-        } catch (ConnectionTimeoutException | ConnectionException e) {
-            logPayOSFailure("PAYOS_NETWORK_ERROR", coSoId, orderCode, amount, e, null);
-            return PayOSLinkResult.fail("PAYOS_NETWORK_ERROR", MSG_NETWORK_ERROR, true);
-        } catch (APIException e) {
-            Integer status = e.getStatusCode().orElse(null);
-            String payosCode = e.getErrorCode().orElse(null);
-            String payosDesc = e.getErrorDesc().orElse(null);
-            String bucket; String customerMsg; boolean retryable;
-            if (status != null && (status == 401 || status == 403)) {
-                // Sai/hết hạn Client ID hoặc API Key - KHÔNG lộ chi tiết cho khách, chỉ ghi log server.
-                bucket = "PAYOS_INVALID_CREDENTIAL"; customerMsg = MSG_PROVIDER_ERROR; retryable = true;
-            } else if (status != null && status == 400) {
-                // Best-effort: PayOS thường trả 400 kèm mô tả nhắc "order code" khi orderCode đã tồn tại/trùng.
-                boolean looksLikeDuplicateOrderCode = payosDesc != null
-                        && (payosDesc.toLowerCase().contains("order") || payosDesc.toLowerCase().contains("code"));
-                bucket = looksLikeDuplicateOrderCode ? "PAYOS_DUPLICATE_ORDER_CODE" : "PAYOS_REQUEST_INVALID";
-                customerMsg = looksLikeDuplicateOrderCode ? MSG_EXPIRED : MSG_UNKNOWN;
-                retryable = !looksLikeDuplicateOrderCode;
-            } else if (status != null && (status == 429 || status >= 500)) {
-                bucket = "PAYOS_PROVIDER_ERROR"; customerMsg = MSG_PROVIDER_ERROR; retryable = true;
-            } else {
-                bucket = "PAYOS_PROVIDER_ERROR"; customerMsg = MSG_PROVIDER_ERROR; retryable = true;
-            }
-            logPayOSFailure(bucket, coSoId, orderCode, amount, e,
-                    String.format("httpStatus=%s payosErrorCode=%s payosErrorDesc=%s", status, payosCode, payosDesc));
-            return PayOSLinkResult.fail(bucket, customerMsg, retryable);
-        } catch (Exception e) {
-            logPayOSFailure("PAYOS_UNKNOWN_ERROR", coSoId, orderCode, amount, e, null);
-            return PayOSLinkResult.fail("PAYOS_UNKNOWN_ERROR", MSG_UNKNOWN, true);
-        } finally {
-            client.close();
-        }
-    }
-
-    /** Log an toàn: loại lỗi + facilityId + orderCode + amount + tên class exception + chi tiết PayOS
-     * (status/errorCode/errorDesc do PayOS trả về - KHÔNG PHẢI secret). Không bao giờ log Client
-     * ID/API Key/Checksum Key. */
-    private void logPayOSFailure(String errorCode, int coSoId, long orderCode, long amount, Exception e, String payosDetail) {
-        LOGGER.log(Level.SEVERE, String.format(
-                "PAYOS_CREATE_FAILED errorCode=%s facilityId=%d orderCode=%d amount=%d exceptionType=%s%s",
-                errorCode, coSoId, orderCode, amount, e.getClass().getSimpleName(),
-                payosDetail != null ? " " + payosDetail : ""));
-    }
 
     private static String jsonEscape(String s) {
         return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
