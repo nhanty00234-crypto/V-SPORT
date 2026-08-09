@@ -27,7 +27,7 @@ Dự án đã hỗ trợ tự động nạp cấu hình từ file `.env` ở th�
    ```
 2. Mở file `.env` vừa tạo và điền mật khẩu cơ sở dữ liệu thật của bạn vào biến `DB_PASSWORD`:
    ```env
-   DB_URL=jdbc:sqlserver://14.225.217.109:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;
+   DB_URL=jdbc:sqlserver://14.225.217.109:1433;databaseName=V_SPORT;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;
    DB_USERNAME=sa
    DB_PASSWORD=mật_khẩu_cơ_sở_dữ_liệu_thật
    ```
@@ -48,7 +48,7 @@ Nếu bạn khởi chạy Tomcat trực tiếp từ IntelliJ IDEA bằng plugin 
 2. Chọn cấu hình **SmartTomcat** tương ứng của dự án V-SPORT.
 3. Tại trường **VM Options**, thêm chuỗi cấu hình sau (thay thế mật khẩu thật của bạn):
    ```bash
-   -Ddb.url="jdbc:sqlserver://14.225.217.109:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;" -Ddb.username="sa" -Ddb.password="mật_khẩu_của_bạn"
+   -Ddb.url="jdbc:sqlserver://14.225.217.109:1433;databaseName=V_SPORT;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;" -Ddb.username="sa" -Ddb.password="mật_khẩu_của_bạn"
    ```
 4. Nhấn **Apply** và chạy dự án.
 
@@ -56,7 +56,7 @@ Nếu bạn khởi chạy Tomcat trực tiếp từ IntelliJ IDEA bằng plugin 
 1. Trong cửa sổ **Edit Configurations...** của SmartTomcat.
 2. Tìm mục **Environment variables** (nếu phiên bản SmartTomcat của bạn hỗ trợ).
 3. Thêm các cặp key-value sau:
-   - `DB_URL` = `jdbc:sqlserver://14.225.217.109:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;`
+   - `DB_URL` = `jdbc:sqlserver://14.225.217.109:1433;databaseName=V_SPORT;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;`
    - `DB_USERNAME` = `sa`
    - `DB_PASSWORD` = `mật_khẩu_của_bạn`
 4. Lưu và khởi chạy Tomcat.
@@ -69,7 +69,7 @@ Nếu bạn chạy ứng dụng từ terminal PowerShell và gọi Tomcat thủ 
 
 ```powershell
 # Thiết lập biến môi trường trên phiên PowerShell hiện tại
-$env:DB_URL="jdbc:sqlserver://14.225.217.109:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;"
+$env:DB_URL="jdbc:sqlserver://14.225.217.109:1433;databaseName=V_SPORT;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;"
 $env:DB_USERNAME="sa"
 $env:DB_PASSWORD="mật_khẩu_thật_của_bạn"
 
@@ -78,7 +78,7 @@ $env:DB_PASSWORD="mật_khẩu_thật_của_bạn"
 ```
 Với Command Prompt (CMD) truyền thống:
 ```cmd
-set DB_URL=jdbc:sqlserver://14.225.217.109:1433;databaseName=QuanLiSport;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;
+set DB_URL=jdbc:sqlserver://14.225.217.109:1433;databaseName=V_SPORT;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;
 set DB_USERNAME=sa
 set DB_PASSWORD=mật_khẩu_thật_của_bạn
 call catalina.bat start
