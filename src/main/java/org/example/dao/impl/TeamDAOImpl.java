@@ -29,7 +29,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public int createTeamWithCaptain(Team team) throws Exception {
-        String sqlTeam = "INSERT INTO dbo.teams (team_name, Description, sport_id, captain_account_id, location_text, avatar_path, cover_image_path, max_members, Status) " +
+        String sqlTeam = "INSERT INTO dbo.teams (team_name, description, sport_id, captain_account_id, location_text, avatar_path, cover_image_path, max_members, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String sqlMember = "INSERT INTO dbo.team_members (team_id, account_id, member_role, member_status) VALUES (?, ?, ?, ?)";
 
@@ -74,8 +74,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public Team getTeamById(int teamId) {
-        String sql = "SELECT team_id, team_name, Description, sport_id, captain_account_id, location_text, avatar_path, cover_image_path, " +
-                "max_members, Status, created_at, updated_at, is_deleted, deleted_at, deleted_by FROM dbo.teams WHERE team_id = ?";
+        String sql = "SELECT team_id, team_name, description, sport_id, captain_account_id, location_text, avatar_path, cover_image_path, " +
+                "max_members, status, created_at, updated_at, is_deleted, deleted_at, deleted_by FROM dbo.teams WHERE team_id = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, teamId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -91,7 +91,7 @@ public class TeamDAOImpl implements TeamDAO {
     public boolean isTeamNameTakenForCaptain(int captainAccountId, String teamName, Integer excludeTeamId) {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) FROM dbo.teams WHERE captain_account_id = ? AND LOWER(team_name) = LOWER(?) " +
-                        "AND Status = 'ACTIVE' AND (is_deleted = 0 OR is_deleted IS NULL)");
+                        "AND status = 'ACTIVE' AND (is_deleted = 0 OR is_deleted IS NULL)");
         if (excludeTeamId != null) sql.append(" AND TeamID <> ?");
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             ps.setInt(1, captainAccountId);
@@ -107,7 +107,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean updateTeam(Team team) {
-        String sql = "UPDATE dbo.teams SET team_name = ?, Description = ?, sport_id = ?, location_text = ?, max_members = ?, updated_at = SYSUTCDATETIME() " +
+        String sql = "UPDATE dbo.teams SET team_name = ?, description = ?, sport_id = ?, location_text = ?, max_members = ?, updated_at = SYSUTCDATETIME() " +
                 "WHERE team_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, team.getTeamName());
@@ -147,8 +147,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public List<TeamSummaryDTO> getMyTeams(int accountId) {
-        String sql = "SELECT t.team_id, t.team_name, t.Description, t.sport_id, mt.sport_name AS SportName, t.location_text, t.avatar_path, " +
-                "t.max_members, t.Status, tm.member_role, " +
+        String sql = "SELECT t.team_id, t.team_name, t.description, t.sport_id, mt.sport_name AS SportName, t.location_text, t.avatar_path, " +
+                "t.max_members, t.status, tm.member_role, " +
                 "(SELECT COUNT(*) FROM dbo.team_members x WHERE x.team_id = t.team_id AND x.member_status = 'ACTIVE') AS MemberCount " +
                 "FROM dbo.teams t " +
                 "JOIN dbo.team_members tm ON tm.team_id = t.team_id AND tm.account_id = ? AND tm.member_status = 'ACTIVE' " +
@@ -174,14 +174,14 @@ public class TeamDAOImpl implements TeamDAO {
     @Override
     public List<TeamSummaryDTO> discoverTeams(int accountId, String keyword, Integer sportId, boolean onlyOpenSlots) {
         StringBuilder sql = new StringBuilder(
-                "SELECT t.team_id, t.team_name, t.Description, t.sport_id, mt.sport_name AS SportName, t.location_text, t.avatar_path, " +
-                        "t.max_members, t.Status, " +
+                "SELECT t.team_id, t.team_name, t.description, t.sport_id, mt.sport_name AS SportName, t.location_text, t.avatar_path, " +
+                        "t.max_members, t.status, " +
                         "(SELECT COUNT(*) FROM dbo.team_members x WHERE x.team_id = t.team_id AND x.member_status = 'ACTIVE') AS MemberCount, " +
-                        "CASE WHEN EXISTS (SELECT 1 FROM dbo.team_join_requests jr WHERE jr.team_id = t.team_id AND jr.requester_account_id = ? AND jr.Status = 'PENDING') " +
+                        "CASE WHEN EXISTS (SELECT 1 FROM dbo.team_join_requests jr WHERE jr.team_id = t.team_id AND jr.requester_account_id = ? AND jr.status = 'PENDING') " +
                         "     THEN 1 ELSE 0 END AS HasPendingJoinRequest " +
                         "FROM dbo.teams t " +
                         "LEFT JOIN sports mt ON mt.sport_id = t.sport_id " +
-                        "WHERE t.Status = 'ACTIVE' AND (t.is_deleted = 0 OR t.is_deleted IS NULL) " +
+                        "WHERE t.status = 'ACTIVE' AND (t.is_deleted = 0 OR t.is_deleted IS NULL) " +
                         "  AND NOT EXISTS (SELECT 1 FROM dbo.team_members tm WHERE tm.team_id = t.team_id AND tm.account_id = ? AND tm.member_status = 'ACTIVE')");
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         if (hasKeyword) {
@@ -225,8 +225,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public TeamDetailDTO getTeamDetail(int teamId, int viewerAccountId) {
-        String sql = "SELECT t.team_id, t.team_name, t.Description, t.sport_id, mt.sport_name AS SportName, t.location_text, t.avatar_path, " +
-                "t.cover_image_path, t.max_members, t.Status, t.created_at, t.captain_account_id, cap.full_name AS CaptainName, " +
+        String sql = "SELECT t.team_id, t.team_name, t.description, t.sport_id, mt.sport_name AS SportName, t.location_text, t.avatar_path, " +
+                "t.cover_image_path, t.max_members, t.status, t.created_at, t.captain_account_id, cap.full_name AS CaptainName, " +
                 "(SELECT COUNT(*) FROM dbo.team_members x WHERE x.team_id = t.team_id AND x.member_status = 'ACTIVE') AS MemberCount, " +
                 "viewer.member_role AS ViewerRole " +
                 "FROM dbo.teams t " +
@@ -242,14 +242,14 @@ public class TeamDAOImpl implements TeamDAO {
                 TeamDetailDTO dto = new TeamDetailDTO();
                 dto.setTeamId(rs.getInt("team_id"));
                 dto.setTeamName(rs.getString("team_name"));
-                dto.setDescription(rs.getString("Description"));
+                dto.setDescription(rs.getString("description"));
                 dto.setSportId(rs.getInt("sport_id"));
                 dto.setSportName(rs.getString("SportName"));
                 dto.setLocationText(rs.getString("location_text"));
                 dto.setAvatarPath(rs.getString("avatar_path"));
                 dto.setCoverImagePath(rs.getString("cover_image_path"));
                 dto.setMaxMembers(rs.getInt("max_members"));
-                dto.setStatus(rs.getString("Status"));
+                dto.setStatus(rs.getString("status"));
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 dto.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime().toString() : null);
                 dto.setCaptainAccountId(rs.getInt("captain_account_id"));
@@ -410,7 +410,7 @@ public class TeamDAOImpl implements TeamDAO {
             conn.setAutoCommit(false);
             try {
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE dbo.teams SET Status = ?, is_deleted = 1, deleted_at = SYSUTCDATETIME(), deleted_by = ?, updated_at = SYSUTCDATETIME() " +
+                        "UPDATE dbo.teams SET status = ?, is_deleted = 1, deleted_at = SYSUTCDATETIME(), deleted_by = ?, updated_at = SYSUTCDATETIME() " +
                                 "WHERE team_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)")) {
                     ps.setString(1, Team.STATUS_DISBANDED);
                     ps.setInt(2, actorAccountId);
@@ -427,12 +427,12 @@ public class TeamDAOImpl implements TeamDAO {
                     ps.executeUpdate();
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE dbo.team_invitations SET Status = 'CANCELLED', responded_at = SYSUTCDATETIME() WHERE team_id = ? AND Status = 'PENDING'")) {
+                        "UPDATE dbo.team_invitations SET status = 'CANCELLED', responded_at = SYSUTCDATETIME() WHERE team_id = ? AND status = 'PENDING'")) {
                     ps.setInt(1, teamId);
                     ps.executeUpdate();
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE dbo.team_join_requests SET Status = 'CANCELLED', reviewed_at = SYSUTCDATETIME(), reviewed_by_account_id = ? WHERE team_id = ? AND Status = 'PENDING'")) {
+                        "UPDATE dbo.team_join_requests SET status = 'CANCELLED', reviewed_at = SYSUTCDATETIME(), reviewed_by_account_id = ? WHERE team_id = ? AND status = 'PENDING'")) {
                     ps.setInt(1, actorAccountId);
                     ps.setInt(2, teamId);
                     ps.executeUpdate();
@@ -450,7 +450,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public int createInvitation(TeamInvitation invitation) {
-        String sql = "INSERT INTO dbo.team_invitations (team_id, invited_account_id, invited_by_account_id, proposed_role, Status, Message, expires_at) " +
+        String sql = "INSERT INTO dbo.team_invitations (team_id, invited_account_id, invited_by_account_id, proposed_role, status, message, expires_at) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, invitation.getTeamId());
@@ -475,7 +475,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean hasPendingInvitation(int teamId, int invitedAccountId) {
-        String sql = "SELECT COUNT(*) FROM dbo.team_invitations WHERE team_id = ? AND invited_account_id = ? AND Status = 'PENDING'";
+        String sql = "SELECT COUNT(*) FROM dbo.team_invitations WHERE team_id = ? AND invited_account_id = ? AND status = 'PENDING'";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, teamId);
             ps.setInt(2, invitedAccountId);
@@ -490,11 +490,11 @@ public class TeamDAOImpl implements TeamDAO {
     @Override
     public List<TeamInvitationDTO> getPendingInvitationsForAccount(int accountId) {
         String sql = "SELECT inv.invitation_id, inv.team_id, t.team_name, t.avatar_path AS TeamAvatarPath, " +
-                "inv.invited_by_account_id, a.full_name AS InvitedByName, inv.proposed_role, inv.Status, inv.Message, inv.created_at, inv.expires_at " +
+                "inv.invited_by_account_id, a.full_name AS InvitedByName, inv.proposed_role, inv.status, inv.message, inv.created_at, inv.expires_at " +
                 "FROM dbo.team_invitations inv " +
                 "JOIN dbo.teams t ON t.team_id = inv.team_id " +
                 "JOIN accounts a ON a.account_id = inv.invited_by_account_id " +
-                "WHERE inv.invited_account_id = ? AND inv.Status = 'PENDING' AND (t.is_deleted = 0 OR t.is_deleted IS NULL) " +
+                "WHERE inv.invited_account_id = ? AND inv.status = 'PENDING' AND (t.is_deleted = 0 OR t.is_deleted IS NULL) " +
                 "ORDER BY inv.created_at DESC";
         List<TeamInvitationDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -509,8 +509,8 @@ public class TeamDAOImpl implements TeamDAO {
                     dto.setInvitedByAccountId(rs.getInt("invited_by_account_id"));
                     dto.setInvitedByName(rs.getString("InvitedByName"));
                     dto.setProposedRole(rs.getString("proposed_role"));
-                    dto.setStatus(rs.getString("Status"));
-                    dto.setMessage(rs.getString("Message"));
+                    dto.setStatus(rs.getString("status"));
+                    dto.setMessage(rs.getString("message"));
                     Timestamp createdAt = rs.getTimestamp("created_at");
                     dto.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime().toString() : null);
                     Timestamp expiresAt = rs.getTimestamp("expires_at");
@@ -526,7 +526,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public TeamInvitation getInvitationById(int invitationId) {
-        String sql = "SELECT invitation_id, team_id, invited_account_id, invited_by_account_id, proposed_role, Status, Message, created_at, expires_at, responded_at " +
+        String sql = "SELECT invitation_id, team_id, invited_account_id, invited_by_account_id, proposed_role, status, message, created_at, expires_at, responded_at " +
                 "FROM dbo.team_invitations WHERE invitation_id = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, invitationId);
@@ -545,14 +545,14 @@ public class TeamDAOImpl implements TeamDAO {
             conn.setAutoCommit(false);
             try {
                 int teamId;
-                String sqlLockInv = "SELECT team_id, invited_account_id, proposed_role, Status FROM dbo.team_invitations WITH (UPDLOCK, ROWLOCK) WHERE invitation_id = ?";
+                String sqlLockInv = "SELECT team_id, invited_account_id, proposed_role, status FROM dbo.team_invitations WITH (UPDLOCK, ROWLOCK) WHERE invitation_id = ?";
                 String proposedRole;
                 try (PreparedStatement ps = conn.prepareStatement(sqlLockInv)) {
                     ps.setInt(1, invitationId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Lời mời không tồn tại."); }
                         if (rs.getInt("invited_account_id") != accountId) { conn.rollback(); throw new IllegalStateException("Lời mời này không dành cho bạn."); }
-                        if (!TeamInvitation.STATUS_PENDING.equals(rs.getString("Status"))) { conn.rollback(); throw new IllegalStateException("Lời mời đã được xử lý trước đó."); }
+                        if (!TeamInvitation.STATUS_PENDING.equals(rs.getString("status"))) { conn.rollback(); throw new IllegalStateException("Lời mời đã được xử lý trước đó."); }
                         teamId = rs.getInt("team_id");
                         proposedRole = rs.getString("proposed_role");
                     }
@@ -561,11 +561,11 @@ public class TeamDAOImpl implements TeamDAO {
                 // Khóa hàng Teams để kiểm tra MaxMembers dưới điều kiện đua (race-safe).
                 int maxMembers;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT max_members, Status FROM dbo.teams WITH (UPDLOCK, ROWLOCK) WHERE team_id = ?")) {
+                        "SELECT max_members, status FROM dbo.teams WITH (UPDLOCK, ROWLOCK) WHERE team_id = ?")) {
                     ps.setInt(1, teamId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Đội không còn tồn tại."); }
-                        if (!Team.STATUS_ACTIVE.equals(rs.getString("Status"))) { conn.rollback(); throw new IllegalStateException("Đội hiện không hoạt động."); }
+                        if (!Team.STATUS_ACTIVE.equals(rs.getString("status"))) { conn.rollback(); throw new IllegalStateException("Đội hiện không hoạt động."); }
                         maxMembers = rs.getInt("max_members");
                     }
                 }
@@ -598,7 +598,7 @@ public class TeamDAOImpl implements TeamDAO {
                     ps.executeUpdate();
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE dbo.team_invitations SET Status = 'ACCEPTED', responded_at = SYSUTCDATETIME() WHERE invitation_id = ?")) {
+                        "UPDATE dbo.team_invitations SET status = 'ACCEPTED', responded_at = SYSUTCDATETIME() WHERE invitation_id = ?")) {
                     ps.setInt(1, invitationId);
                     ps.executeUpdate();
                 }
@@ -613,8 +613,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean rejectInvitation(int invitationId, int accountId) {
-        String sql = "UPDATE dbo.team_invitations SET Status = 'REJECTED', responded_at = SYSUTCDATETIME() " +
-                "WHERE invitation_id = ? AND invited_account_id = ? AND Status = 'PENDING'";
+        String sql = "UPDATE dbo.team_invitations SET status = 'REJECTED', responded_at = SYSUTCDATETIME() " +
+                "WHERE invitation_id = ? AND invited_account_id = ? AND status = 'PENDING'";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, invitationId);
             ps.setInt(2, accountId);
@@ -626,8 +626,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean cancelInvitation(int invitationId, int teamId) {
-        String sql = "UPDATE dbo.team_invitations SET Status = 'CANCELLED', responded_at = SYSUTCDATETIME() " +
-                "WHERE invitation_id = ? AND team_id = ? AND Status = 'PENDING'";
+        String sql = "UPDATE dbo.team_invitations SET status = 'CANCELLED', responded_at = SYSUTCDATETIME() " +
+                "WHERE invitation_id = ? AND team_id = ? AND status = 'PENDING'";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, invitationId);
             ps.setInt(2, teamId);
@@ -641,7 +641,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public int createJoinRequest(TeamJoinRequest joinRequest) {
-        String sql = "INSERT INTO dbo.team_join_requests (team_id, requester_account_id, Message, Status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO dbo.team_join_requests (team_id, requester_account_id, message, status) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, joinRequest.getTeamId());
             ps.setInt(2, joinRequest.getRequesterAccountId());
@@ -658,7 +658,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean hasPendingJoinRequest(int teamId, int accountId) {
-        String sql = "SELECT COUNT(*) FROM dbo.team_join_requests WHERE team_id = ? AND requester_account_id = ? AND Status = 'PENDING'";
+        String sql = "SELECT COUNT(*) FROM dbo.team_join_requests WHERE team_id = ? AND requester_account_id = ? AND status = 'PENDING'";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, teamId);
             ps.setInt(2, accountId);
@@ -673,9 +673,9 @@ public class TeamDAOImpl implements TeamDAO {
     @Override
     public List<TeamJoinRequestDTO> getPendingJoinRequests(int teamId) {
         String sql = "SELECT jr.join_request_id, jr.team_id, jr.requester_account_id, a.full_name AS RequesterName, a.avatar_url AS RequesterAvatarUrl, " +
-                "jr.Message, jr.Status, jr.created_at " +
+                "jr.message, jr.status, jr.created_at " +
                 "FROM dbo.team_join_requests jr JOIN accounts a ON a.account_id = jr.requester_account_id " +
-                "WHERE jr.team_id = ? AND jr.Status = 'PENDING' ORDER BY jr.created_at ASC";
+                "WHERE jr.team_id = ? AND jr.status = 'PENDING' ORDER BY jr.created_at ASC";
         List<TeamJoinRequestDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, teamId);
@@ -687,8 +687,8 @@ public class TeamDAOImpl implements TeamDAO {
                     dto.setRequesterAccountId(rs.getInt("requester_account_id"));
                     dto.setRequesterName(rs.getString("RequesterName"));
                     dto.setRequesterAvatarUrl(rs.getString("RequesterAvatarUrl"));
-                    dto.setMessage(rs.getString("Message"));
-                    dto.setStatus(rs.getString("Status"));
+                    dto.setMessage(rs.getString("message"));
+                    dto.setStatus(rs.getString("status"));
                     Timestamp createdAt = rs.getTimestamp("created_at");
                     dto.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime().toString() : null);
                     result.add(dto);
@@ -702,7 +702,7 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public TeamJoinRequest getJoinRequestById(int joinRequestId) {
-        String sql = "SELECT join_request_id, team_id, requester_account_id, Message, Status, created_at, reviewed_at, reviewed_by_account_id " +
+        String sql = "SELECT join_request_id, team_id, requester_account_id, message, status, created_at, reviewed_at, reviewed_by_account_id " +
                 "FROM dbo.team_join_requests WHERE join_request_id = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, joinRequestId);
@@ -723,11 +723,11 @@ public class TeamDAOImpl implements TeamDAO {
                 int teamId;
                 int requesterAccountId;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT team_id, requester_account_id, Status FROM dbo.team_join_requests WITH (UPDLOCK, ROWLOCK) WHERE join_request_id = ?")) {
+                        "SELECT team_id, requester_account_id, status FROM dbo.team_join_requests WITH (UPDLOCK, ROWLOCK) WHERE join_request_id = ?")) {
                     ps.setInt(1, joinRequestId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Yêu cầu tham gia không tồn tại."); }
-                        if (!TeamJoinRequest.STATUS_PENDING.equals(rs.getString("Status"))) { conn.rollback(); throw new IllegalStateException("Yêu cầu đã được xử lý trước đó."); }
+                        if (!TeamJoinRequest.STATUS_PENDING.equals(rs.getString("status"))) { conn.rollback(); throw new IllegalStateException("Yêu cầu đã được xử lý trước đó."); }
                         teamId = rs.getInt("team_id");
                         requesterAccountId = rs.getInt("requester_account_id");
                     }
@@ -735,11 +735,11 @@ public class TeamDAOImpl implements TeamDAO {
 
                 int maxMembers;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT max_members, Status FROM dbo.teams WITH (UPDLOCK, ROWLOCK) WHERE team_id = ?")) {
+                        "SELECT max_members, status FROM dbo.teams WITH (UPDLOCK, ROWLOCK) WHERE team_id = ?")) {
                     ps.setInt(1, teamId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Đội không còn tồn tại."); }
-                        if (!Team.STATUS_ACTIVE.equals(rs.getString("Status"))) { conn.rollback(); throw new IllegalStateException("Đội hiện không hoạt động."); }
+                        if (!Team.STATUS_ACTIVE.equals(rs.getString("status"))) { conn.rollback(); throw new IllegalStateException("Đội hiện không hoạt động."); }
                         maxMembers = rs.getInt("max_members");
                     }
                 }
@@ -770,7 +770,7 @@ public class TeamDAOImpl implements TeamDAO {
                     ps.executeUpdate();
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE dbo.team_join_requests SET Status = 'APPROVED', reviewed_at = SYSUTCDATETIME(), reviewed_by_account_id = ? WHERE join_request_id = ?")) {
+                        "UPDATE dbo.team_join_requests SET status = 'APPROVED', reviewed_at = SYSUTCDATETIME(), reviewed_by_account_id = ? WHERE join_request_id = ?")) {
                     ps.setInt(1, reviewerAccountId);
                     ps.setInt(2, joinRequestId);
                     ps.executeUpdate();
@@ -786,8 +786,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean rejectJoinRequest(int joinRequestId, int reviewerAccountId) {
-        String sql = "UPDATE dbo.team_join_requests SET Status = 'REJECTED', reviewed_at = SYSUTCDATETIME(), reviewed_by_account_id = ? " +
-                "WHERE join_request_id = ? AND Status = 'PENDING'";
+        String sql = "UPDATE dbo.team_join_requests SET status = 'REJECTED', reviewed_at = SYSUTCDATETIME(), reviewed_by_account_id = ? " +
+                "WHERE join_request_id = ? AND status = 'PENDING'";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reviewerAccountId);
             ps.setInt(2, joinRequestId);
@@ -799,8 +799,8 @@ public class TeamDAOImpl implements TeamDAO {
 
     @Override
     public boolean cancelJoinRequest(int joinRequestId, int requesterAccountId) {
-        String sql = "UPDATE dbo.team_join_requests SET Status = 'CANCELLED', reviewed_at = SYSUTCDATETIME() " +
-                "WHERE join_request_id = ? AND requester_account_id = ? AND Status = 'PENDING'";
+        String sql = "UPDATE dbo.team_join_requests SET status = 'CANCELLED', reviewed_at = SYSUTCDATETIME() " +
+                "WHERE join_request_id = ? AND requester_account_id = ? AND status = 'PENDING'";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, joinRequestId);
             ps.setInt(2, requesterAccountId);
@@ -816,14 +816,14 @@ public class TeamDAOImpl implements TeamDAO {
         Team t = new Team();
         t.setTeamId(rs.getInt("team_id"));
         t.setTeamName(rs.getString("team_name"));
-        t.setDescription(rs.getString("Description"));
+        t.setDescription(rs.getString("description"));
         t.setSportId(rs.getInt("sport_id"));
         t.setCaptainAccountId(rs.getInt("captain_account_id"));
         t.setLocationText(rs.getString("location_text"));
         t.setAvatarPath(rs.getString("avatar_path"));
         t.setCoverImagePath(rs.getString("cover_image_path"));
         t.setMaxMembers(rs.getInt("max_members"));
-        t.setStatus(rs.getString("Status"));
+        t.setStatus(rs.getString("status"));
         t.setCreatedAt(toLocalDateTime(rs.getTimestamp("created_at")));
         t.setUpdatedAt(toLocalDateTime(rs.getTimestamp("updated_at")));
         t.setDeleted(rs.getBoolean("is_deleted"));
@@ -837,14 +837,14 @@ public class TeamDAOImpl implements TeamDAO {
         TeamSummaryDTO dto = new TeamSummaryDTO();
         dto.setTeamId(rs.getInt("team_id"));
         dto.setTeamName(rs.getString("team_name"));
-        dto.setDescription(rs.getString("Description"));
+        dto.setDescription(rs.getString("description"));
         dto.setSportId(rs.getInt("sport_id"));
         dto.setSportName(rs.getString("SportName"));
         dto.setLocationText(rs.getString("location_text"));
         dto.setAvatarPath(rs.getString("avatar_path"));
         dto.setMemberCount(rs.getInt("MemberCount"));
         dto.setMaxMembers(rs.getInt("max_members"));
-        dto.setStatus(rs.getString("Status"));
+        dto.setStatus(rs.getString("status"));
         return dto;
     }
 
@@ -869,8 +869,8 @@ public class TeamDAOImpl implements TeamDAO {
         inv.setInvitedAccountId(rs.getInt("invited_account_id"));
         inv.setInvitedByAccountId(rs.getInt("invited_by_account_id"));
         inv.setProposedRole(rs.getString("proposed_role"));
-        inv.setStatus(rs.getString("Status"));
-        inv.setMessage(rs.getString("Message"));
+        inv.setStatus(rs.getString("status"));
+        inv.setMessage(rs.getString("message"));
         inv.setCreatedAt(toLocalDateTime(rs.getTimestamp("created_at")));
         inv.setExpiresAt(toLocalDateTime(rs.getTimestamp("expires_at")));
         inv.setRespondedAt(toLocalDateTime(rs.getTimestamp("responded_at")));
@@ -882,8 +882,8 @@ public class TeamDAOImpl implements TeamDAO {
         jr.setJoinRequestId(rs.getInt("join_request_id"));
         jr.setTeamId(rs.getInt("team_id"));
         jr.setRequesterAccountId(rs.getInt("requester_account_id"));
-        jr.setMessage(rs.getString("Message"));
-        jr.setStatus(rs.getString("Status"));
+        jr.setMessage(rs.getString("message"));
+        jr.setStatus(rs.getString("status"));
         jr.setCreatedAt(toLocalDateTime(rs.getTimestamp("created_at")));
         jr.setReviewedAt(toLocalDateTime(rs.getTimestamp("reviewed_at")));
         int reviewedBy = rs.getInt("reviewed_by_account_id");

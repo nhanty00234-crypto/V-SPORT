@@ -35,7 +35,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public int insert(Connection conn, ThongBao thongBao) throws SQLException {
-        String sql = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan, is_deleted) " +
+        String sql = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, link_url, is_deleted) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -72,7 +72,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean update(ThongBao thongBao) {
-        String sql = "UPDATE notifications SET account_id=?, title=?, content=?, notification_type=?, is_read=?, sent_at=?, reference_id=?, DuongDan=? WHERE notification_id=?";
+        String sql = "UPDATE notifications SET account_id=?, title=?, content=?, notification_type=?, is_read=?, sent_at=?, reference_id=?, link_url=? WHERE notification_id=?";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -304,7 +304,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
         tb.setDaDoc(rs.getBoolean("is_read"));
         tb.setThoiGianGui(rs.getTimestamp("sent_at"));
         tb.setMaBanGhi(rs.getString("reference_id"));
-        tb.setDuongDan(rs.getString("DuongDan"));
+        tb.setDuongDan(rs.getString("link_url"));
         tb.setDeleted(rs.getBoolean("is_deleted"));
         Timestamp deletedAtTs = rs.getTimestamp("deleted_at");
         if (deletedAtTs != null) {

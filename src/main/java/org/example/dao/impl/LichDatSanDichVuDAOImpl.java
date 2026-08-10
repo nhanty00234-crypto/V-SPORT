@@ -17,7 +17,7 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
     @Override
     public void insertPreOrder(Connection conn, int datSanId, int sanPhamId, int quantity,
                                 BigDecimal unitPrice, BigDecimal totalPrice) throws SQLException {
-        String sql = "INSERT INTO booking_services (booking_id, product_id, Quantity, UnitPrice, TotalPrice, Status) " +
+        String sql = "INSERT INTO booking_services (booking_id, product_id, quantity, unit_price, total_price, status) " +
                 "VALUES (?, ?, ?, ?, ?, N'Chờ chuẩn bị')";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
@@ -32,7 +32,7 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
     @Override
     public int insertPreOrderReturningId(Connection conn, int datSanId, int sanPhamId, int quantity,
                                           BigDecimal unitPrice, BigDecimal totalPrice) throws SQLException {
-        String sql = "INSERT INTO booking_services (booking_id, product_id, Quantity, UnitPrice, TotalPrice, Status) " +
+        String sql = "INSERT INTO booking_services (booking_id, product_id, quantity, unit_price, total_price, status) " +
                 "VALUES (?, ?, ?, ?, ?, N'Chờ chuẩn bị')";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, datSanId);
@@ -66,7 +66,7 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
         String sql = "SELECT ldv.*, sp.product_name, sp.unit_of_measure " +
                 "FROM booking_services ldv " +
                 "INNER JOIN products_services sp ON ldv.product_id = sp.product_id " +
-                "WHERE ldv.booking_id = ? ORDER BY ldv.Id ASC";
+                "WHERE ldv.booking_id = ? ORDER BY ldv.booking_service_id ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
@@ -82,8 +82,8 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
     @Override
     public List<Map<String, Object>> findTodayByCoSo(int coSoId) throws SQLException {
         List<Map<String, Object>> result = new ArrayList<>();
-        String sql = "SELECT ldv.Id, ldv.booking_id, ldv.product_id, ldv.Quantity, ldv.UnitPrice, ldv.TotalPrice, " +
-                "ldv.Status, ldv.Note, ldv.created_at, ldv.DeliveredAt, ldv.DeliveredBy, " +
+        String sql = "SELECT ldv.booking_service_id, ldv.booking_id, ldv.product_id, ldv.quantity, ldv.unit_price, ldv.total_price, " +
+                "ldv.status, ldv.Note, ldv.created_at, ldv.delivered_at, ldv.delivered_by, " +
                 "sp.product_name, sp.unit_of_measure, " +
                 "lds.booking_date, lds.start_time, lds.end_time, " +
                 "s.court_name, acc.full_name AS TenKhachHang " +
@@ -93,7 +93,7 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
                 "INNER JOIN courts s ON lds.court_id = s.court_id " +
                 "LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
                 "WHERE s.facility_id = ? AND lds.booking_date = ? " +
-                "ORDER BY lds.start_time ASC, ldv.Id ASC";
+                "ORDER BY lds.start_time ASC, ldv.booking_service_id ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -101,15 +101,15 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> m = new HashMap<>();
-                    m.put("id", rs.getInt("Id"));
+                    m.put("id", rs.getInt("booking_service_id"));
                     m.put("datSanId", rs.getInt("booking_id"));
                     m.put("sanPhamId", rs.getInt("product_id"));
                     m.put("tenSanPham", rs.getString("product_name"));
                     m.put("donViTinh", rs.getString("unit_of_measure"));
-                    m.put("quantity", rs.getInt("Quantity"));
-                    m.put("unitPrice", rs.getBigDecimal("UnitPrice"));
-                    m.put("totalPrice", rs.getBigDecimal("TotalPrice"));
-                    m.put("status", rs.getString("Status"));
+                    m.put("quantity", rs.getInt("quantity"));
+                    m.put("unitPrice", rs.getBigDecimal("unit_price"));
+                    m.put("totalPrice", rs.getBigDecimal("total_price"));
+                    m.put("status", rs.getString("status"));
                     m.put("note", rs.getString("Note"));
                     m.put("tenSan", rs.getString("court_name"));
                     String tenKhach = rs.getString("TenKhachHang");
@@ -118,7 +118,7 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
                     Time gioKetThuc = rs.getTime("end_time");
                     m.put("gioBatDau", gioBatDau != null ? gioBatDau.toLocalTime().toString() : null);
                     m.put("gioKetThuc", gioKetThuc != null ? gioKetThuc.toLocalTime().toString() : null);
-                    Timestamp deliveredAt = rs.getTimestamp("DeliveredAt");
+                    Timestamp deliveredAt = rs.getTimestamp("delivered_at");
                     m.put("deliveredAt", deliveredAt != null ? deliveredAt.toString() : null);
                     result.add(m);
                 }
@@ -133,11 +133,11 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
 
         if (!setDelivered) {
             // Hủy: chỉ cập nhật trạng thái, không cần tạo hóa đơn/trừ kho
-            String sql = "UPDATE ldv SET ldv.Status = ? " +
+            String sql = "UPDATE ldv SET ldv.status = ? " +
                     "FROM booking_services ldv " +
                     "INNER JOIN bookings lds ON ldv.booking_id = lds.booking_id " +
                     "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                    "WHERE ldv.Id = ? AND s.facility_id = ? AND ldv.Status = N'Chờ chuẩn bị'";
+                    "WHERE ldv.booking_service_id = ? AND s.facility_id = ? AND ldv.status = N'Chờ chuẩn bị'";
             try (Connection conn = DBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, newStatus);
@@ -154,12 +154,12 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
             conn.setAutoCommit(false);
 
             // 1. Lấy thông tin dịch vụ và khóa dòng
-            String sqlSelect = "SELECT ldv.booking_id, ldv.product_id, ldv.Quantity, ldv.UnitPrice, ldv.TotalPrice, " +
+            String sqlSelect = "SELECT ldv.booking_id, ldv.product_id, ldv.quantity, ldv.unit_price, ldv.total_price, " +
                     "s.facility_id, lds.account_id " +
                     "FROM booking_services ldv WITH (UPDLOCK, ROWLOCK) " +
                     "INNER JOIN bookings lds ON ldv.booking_id = lds.booking_id " +
                     "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                    "WHERE ldv.Id = ? AND s.facility_id = ? AND ldv.Status = N'Chờ chuẩn bị'";
+                    "WHERE ldv.booking_service_id = ? AND s.facility_id = ? AND ldv.status = N'Chờ chuẩn bị'";
             int datSanId, sanPhamId, quantity;
             BigDecimal unitPrice, totalPrice;
             Integer customerAccountId = null;
@@ -173,16 +173,16 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
                     }
                     datSanId = rs.getInt("booking_id");
                     sanPhamId = rs.getInt("product_id");
-                    quantity = rs.getInt("Quantity");
-                    unitPrice = rs.getBigDecimal("UnitPrice");
-                    totalPrice = rs.getBigDecimal("TotalPrice");
+                    quantity = rs.getInt("quantity");
+                    unitPrice = rs.getBigDecimal("unit_price");
+                    totalPrice = rs.getBigDecimal("total_price");
                     int accId = rs.getInt("account_id");
                     if (!rs.wasNull()) customerAccountId = accId;
                 }
             }
 
             // 2. Cập nhật trạng thái "Đã giao"
-            String sqlUpdate = "UPDATE booking_services SET Status = N'Đã giao', DeliveredAt = SYSDATETIME(), DeliveredBy = ? WHERE Id = ? AND Status = N'Chờ chuẩn bị'";
+            String sqlUpdate = "UPDATE booking_services SET status = N'Đã giao', delivered_at = SYSDATETIME(), delivered_by = ? WHERE booking_service_id = ? AND status = N'Chờ chuẩn bị'";
             try (PreparedStatement ps = conn.prepareStatement(sqlUpdate)) {
                 if (staffAccountId != null) ps.setInt(1, staffAccountId);
                 else ps.setNull(1, Types.INTEGER);
@@ -291,19 +291,19 @@ public class LichDatSanDichVuDAOImpl implements LichDatSanDichVuDAO {
 
     private LichDatSanDichVu mapRow(ResultSet rs) throws SQLException {
         LichDatSanDichVu dv = new LichDatSanDichVu();
-        dv.setId(rs.getInt("Id"));
+        dv.setId(rs.getInt("booking_service_id"));
         dv.setDatSanId(rs.getInt("booking_id"));
         dv.setSanPhamId(rs.getInt("product_id"));
-        dv.setQuantity(rs.getInt("Quantity"));
-        dv.setUnitPrice(rs.getBigDecimal("UnitPrice"));
-        dv.setTotalPrice(rs.getBigDecimal("TotalPrice"));
-        dv.setStatus(rs.getString("Status"));
+        dv.setQuantity(rs.getInt("quantity"));
+        dv.setUnitPrice(rs.getBigDecimal("unit_price"));
+        dv.setTotalPrice(rs.getBigDecimal("total_price"));
+        dv.setStatus(rs.getString("status"));
         dv.setNote(rs.getString("Note"));
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) dv.setCreatedAt(createdAt.toLocalDateTime());
-        Timestamp deliveredAt = rs.getTimestamp("DeliveredAt");
+        Timestamp deliveredAt = rs.getTimestamp("delivered_at");
         if (deliveredAt != null) dv.setDeliveredAt(deliveredAt.toLocalDateTime());
-        int deliveredBy = rs.getInt("DeliveredBy");
+        int deliveredBy = rs.getInt("delivered_by");
         if (!rs.wasNull()) dv.setDeliveredBy(deliveredBy);
         dv.setTenSanPham(rs.getString("product_name"));
         dv.setDonViTinh(rs.getString("unit_of_measure"));

@@ -25,7 +25,7 @@ public class CustomerReputationHistoryDAOImpl implements CustomerReputationHisto
     public List<CustomerReputationHistory> getByAccountIdAndAction(int accountId, String actionType) {
         List<CustomerReputationHistory> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT reputation_history_id, account_id, booking_id, action_type, score_delta, score_before, score_after, Reason, created_by, created_at, ip_address " +
+                "SELECT reputation_history_id, account_id, booking_id, action_type, score_delta, score_before, score_after, reason, created_by, created_at, ip_address " +
                 "FROM customer_reputation_history WHERE account_id = ? ");
         if (actionType != null && !actionType.isBlank() && !"ALL".equalsIgnoreCase(actionType)) {
             sql.append("AND ActionType = ? ");
@@ -50,7 +50,7 @@ public class CustomerReputationHistoryDAOImpl implements CustomerReputationHisto
                     h.setScoreDelta(rs.getInt("score_delta"));
                     h.setScoreBefore(rs.getInt("score_before"));
                     h.setScoreAfter(rs.getInt("score_after"));
-                    h.setReason(rs.getNString("Reason"));
+                    h.setReason(rs.getNString("reason"));
                     int createdBy = rs.getInt("created_by");
                     if (!rs.wasNull()) h.setCreatedBy(createdBy);
                     java.sql.Timestamp ts = rs.getTimestamp("created_at");

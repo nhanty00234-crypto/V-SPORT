@@ -132,7 +132,7 @@ public class ServiceBillSeparationService {
 
     private void notifyCustomerAboutSplitBill(int datSanId, int splitHoaDonId) {
         String sqlFindCustomer = "SELECT account_id FROM bookings WHERE booking_id = ?";
-        String sqlInsertNotification = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan) " +
+        String sqlInsertNotification = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, link_url) " +
                                         "VALUES (?, N'Hóa đơn dịch vụ mới', ?, N'HE_THONG', 0, GETDATE(), ?, ?)";
         try (Connection conn = DBUtil.getConnection()) {
             Integer customerId = null;

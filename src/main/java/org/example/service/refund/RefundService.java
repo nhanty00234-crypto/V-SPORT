@@ -260,7 +260,7 @@ public class RefundService {
     }
 
     private void notifyCustomer(Connection conn, int customerId, String title, String body, String refCode) {
-        String sqlInsert = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan) " +
+        String sqlInsert = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, link_url) " +
                            "VALUES (?, ?, ?, N'HE_THONG', 0, GETDATE(), ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
             ps.setInt(1, customerId);

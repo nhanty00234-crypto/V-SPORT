@@ -17,7 +17,7 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
     @Override
     public boolean log(String entityType, int entityId, String displayName, String sourceTable,
                         String oldStatus, Integer deletedBy, String reason) {
-        String sql = "INSERT INTO admin_trash (entity_type, entity_id, display_name, source_table, old_status, deleted_by, Reason) " +
+        String sql = "INSERT INTO admin_trash (entity_type, entity_id, display_name, source_table, old_status, deleted_by, reason) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -114,7 +114,7 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
         t.setDeletedByName(rs.getString("DeletedByName"));
         Timestamp deletedAt = rs.getTimestamp("deleted_at");
         if (deletedAt != null) t.setDeletedAt(deletedAt.toLocalDateTime());
-        t.setReason(rs.getString("Reason"));
+        t.setReason(rs.getString("reason"));
         t.setRestored(rs.getBoolean("is_restored"));
         int restoredBy = rs.getInt("restored_by");
         t.setRestoredBy(rs.wasNull() ? null : restoredBy);

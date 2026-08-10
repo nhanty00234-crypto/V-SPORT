@@ -299,7 +299,7 @@ public class CheckoutService {
                 BigDecimal service = nz(rs.getBigDecimal("service_total")), parking = nz(rs.getBigDecimal("parking_fee")), discount = nz(rs.getBigDecimal("discount_amount"));
                 BigDecimal total = court.add(service).add(parking).subtract(discount).max(BigDecimal.ZERO).setScale(0, RoundingMode.HALF_UP);
                 try (PreparedStatement del = c.prepareStatement("DELETE FROM court_charge_segments WHERE invoice_id=?")) { del.setInt(1, invoiceId); del.executeUpdate(); }
-                try (PreparedStatement ins = c.prepareStatement("INSERT INTO court_charge_segments(invoice_id,booking_id,segment_order,start_at,end_at,duration_minutes,rate_type,hourly_rate,Amount) VALUES(?,?,?,?,?,?,?,?,?)")) {
+                try (PreparedStatement ins = c.prepareStatement("INSERT INTO court_charge_segments(invoice_id,booking_id,segment_order,start_at,end_at,duration_minutes,rate_type,hourly_rate,amount) VALUES(?,?,?,?,?,?,?,?,?)")) {
                     int order=1; for (CourtPriceSegment s : segments) { ins.setInt(1,invoiceId);ins.setInt(2,datSanId);ins.setInt(3,order++);ins.setTimestamp(4,Timestamp.valueOf(s.segmentStart()));ins.setTimestamp(5,Timestamp.valueOf(s.segmentEnd()));ins.setLong(6,s.durationMinutes());ins.setNString(7,s.rateType().name());ins.setBigDecimal(8,s.hourlyRate());ins.setBigDecimal(9,s.amount());ins.addBatch(); } ins.executeBatch();
                 }
                 try (PreparedStatement up = c.prepareStatement("UPDATE bookings SET actual_ended_at=?,actual_end_time_of_day=?,pricing_finalized_at=GETDATE(),estimated_total=? WHERE booking_id=? AND actual_ended_at IS NULL")) { up.setTimestamp(1,Timestamp.valueOf(now));up.setTime(2,Time.valueOf(now.toLocalTime()));up.setBigDecimal(3,court);up.setInt(4,datSanId);if(up.executeUpdate()!=1)throw new IllegalStateException("Ca chơi đã được chốt đồng thời."); }
@@ -329,7 +329,7 @@ public class CheckoutService {
         try(PreparedStatement p=c.prepareStatement("SELECT * FROM court_charge_segments WHERE invoice_id=? ORDER BY segment_order")){
             p.setInt(1, invoiceId);
             try(ResultSet r=p.executeQuery()){
-                while(r.next()) ss.add(new CourtPriceSegment(r.getTimestamp("start_at").toLocalDateTime(),r.getTimestamp("end_at").toLocalDateTime(),r.getLong("duration_minutes"),CourtRateType.valueOf(r.getNString("rate_type")),r.getBigDecimal("hourly_rate"),r.getBigDecimal("Amount")));
+                while(r.next()) ss.add(new CourtPriceSegment(r.getTimestamp("start_at").toLocalDateTime(),r.getTimestamp("end_at").toLocalDateTime(),r.getLong("duration_minutes"),CourtRateType.valueOf(r.getNString("rate_type")),r.getBigDecimal("hourly_rate"),r.getBigDecimal("amount")));
             }
         }
         try(PreparedStatement p=c.prepareStatement("SELECT court_total,service_total,parking_fee,discount_amount,grand_total FROM invoices WHERE invoice_id=?")){

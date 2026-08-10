@@ -701,7 +701,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             // Gửi thông báo trùng lịch cho các khách hàng bị hủy
             if (!overlapNotifs.isEmpty()) {
-                String insertNotifSql = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan, is_deleted) " +
+                String insertNotifSql = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, link_url, is_deleted) " +
                                         "VALUES (?, ?, ?, ?, 0, GETDATE(), ?, ?, 0)";
                 try (PreparedStatement psInsNotif = conn.prepareStatement(insertNotifSql)) {
                     for (OverlapNotifInfo tb : overlapNotifs) {

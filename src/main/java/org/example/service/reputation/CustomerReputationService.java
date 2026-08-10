@@ -73,7 +73,7 @@ public final class CustomerReputationService {
 
         try (PreparedStatement insert = conn.prepareStatement(
                 "INSERT INTO customer_reputation_history " +
-                "(account_id, booking_id, action_type, score_delta, score_before, score_after, Reason, created_by, ip_address) " +
+                "(account_id, booking_id, action_type, score_delta, score_before, score_after, reason, created_by, ip_address) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             insert.setInt(1, accountId);
             if (datSanId != null) {
@@ -106,7 +106,7 @@ public final class CustomerReputationService {
         // Tự động tạo ThongBao khi bị trừ điểm uy tín (A4 spec requirement)
         if (scoreDelta < 0) {
             try (PreparedStatement insertTb = conn.prepareStatement(
-                    "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan) " +
+                    "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, link_url) " +
                     "VALUES (?, N'Cập nhật điểm uy tín', ?, N'HE_THONG', 0, GETDATE(), ?, ?)")) {
                 insertTb.setInt(1, accountId);
                 String reasonStr = reason != null ? reason.trim() : "vi phạm quy định";

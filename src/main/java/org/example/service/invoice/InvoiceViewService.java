@@ -164,7 +164,7 @@ public class InvoiceViewService {
 
     private List<InvoiceCourtSegmentView> loadSegments(int hoaDonId) throws SQLException {
         List<InvoiceCourtSegmentView> rows = new ArrayList<>();
-        String sql = "SELECT start_at,end_at,duration_minutes,rate_type,hourly_rate,Amount FROM court_charge_segments " +
+        String sql = "SELECT start_at,end_at,duration_minutes,rate_type,hourly_rate,amount FROM court_charge_segments " +
                 "WHERE invoice_id=? ORDER BY segment_order";
         try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, hoaDonId);

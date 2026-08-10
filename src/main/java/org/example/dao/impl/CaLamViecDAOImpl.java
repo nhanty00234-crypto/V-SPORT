@@ -100,7 +100,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean addCaLamViec(CaLamViec ca) {
-        String sql = "INSERT INTO work_shifts (account_id, facility_id, work_date, start_time, end_time, note, Thu, is_published, shift_name, ViTri, status, break_minutes, is_custom_time, custom_time_reason) " +
+        String sql = "INSERT INTO work_shifts (account_id, facility_id, work_date, start_time, end_time, note, day_of_week, is_published, shift_name, position, status, break_minutes, is_custom_time, custom_time_reason) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBUtil.getConnection();
@@ -139,7 +139,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public int addCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException {
-        String sql = "INSERT INTO work_shifts (account_id, facility_id, work_date, start_time, end_time, note, Thu, is_published, shift_name, ViTri, status, break_minutes, is_custom_time, custom_time_reason) " +
+        String sql = "INSERT INTO work_shifts (account_id, facility_id, work_date, start_time, end_time, note, day_of_week, is_published, shift_name, position, status, break_minutes, is_custom_time, custom_time_reason) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, ca.getAccountId());
@@ -185,7 +185,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean updateCaLamViec(CaLamViec ca) {
-        String sql = "UPDATE work_shifts SET account_id=?, facility_id=?, work_date=?, start_time=?, end_time=?, note=?, Thu=?, is_published=?, shift_name=?, ViTri=?, status=?, break_minutes=?, is_custom_time=?, custom_time_reason=? WHERE work_shift_id=?";
+        String sql = "UPDATE work_shifts SET account_id=?, facility_id=?, work_date=?, start_time=?, end_time=?, note=?, day_of_week=?, is_published=?, shift_name=?, position=?, status=?, break_minutes=?, is_custom_time=?, custom_time_reason=? WHERE work_shift_id=?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -361,7 +361,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getRecurringShiftsByAccountID(int accountId) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM work_shifts WHERE account_id = ? AND Thu IS NOT NULL AND is_deleted = 0 ORDER BY Thu, start_time";
+        String sql = "SELECT * FROM work_shifts WHERE account_id = ? AND day_of_week IS NOT NULL AND is_deleted = 0 ORDER BY day_of_week, start_time";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -482,14 +482,14 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
         ca.setGhiChu(rs.getNString("note"));
 
         // Đọc trường Thu (có thể null)
-        int thu = rs.getInt("Thu");
+        int thu = rs.getInt("day_of_week");
         if (!rs.wasNull()) {
             ca.setThu(thu);
         }
 
         ca.setPublished(rs.getBoolean("is_published"));
         ca.setTenCa(rs.getNString("shift_name"));
-        ca.setViTri(rs.getNString("ViTri"));
+        ca.setViTri(rs.getNString("position"));
         ca.setTrangThai(rs.getString("status"));
         ca.setGioNghi(rs.getInt("break_minutes"));
         ca.setCustomTime(rs.getBoolean("is_custom_time"));
@@ -515,7 +515,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean updateCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException {
-        String sql = "UPDATE work_shifts SET account_id=?, facility_id=?, work_date=?, start_time=?, end_time=?, note=?, Thu=?, is_published=?, shift_name=?, ViTri=?, status=?, break_minutes=?, is_custom_time=?, custom_time_reason=? WHERE work_shift_id=?";
+        String sql = "UPDATE work_shifts SET account_id=?, facility_id=?, work_date=?, start_time=?, end_time=?, note=?, day_of_week=?, is_published=?, shift_name=?, position=?, status=?, break_minutes=?, is_custom_time=?, custom_time_reason=? WHERE work_shift_id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, ca.getAccountId());
             ps.setInt(2, ca.getCoSoId());

@@ -143,7 +143,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
     @Override
     public int insert(Connection conn, KhuyenMaiHinhAnh img) {
         String sql = "INSERT INTO promotion_images " +
-                "(promotion_id, DuongDan, original_file_name, mime_type, file_size, width, height, display_order, is_cover) " +
+                "(promotion_id, file_path, original_file_name, mime_type, file_size, width, height, display_order, is_cover) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, img.getKhuyenMaiId());
@@ -244,7 +244,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
         KhuyenMaiHinhAnh img = new KhuyenMaiHinhAnh();
         img.setHinhAnhId(rs.getInt("image_id"));
         img.setKhuyenMaiId(rs.getInt("promotion_id"));
-        img.setDuongDan(rs.getString("DuongDan"));
+        img.setDuongDan(rs.getString("file_path"));
         img.setTenFileGoc(rs.getString("original_file_name"));
         img.setMimeType(rs.getString("mime_type"));
         long dungLuong = rs.getLong("file_size");

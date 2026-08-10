@@ -72,7 +72,7 @@ public class FacilityTrashService {
 
                 int paymentPending = 0;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM payos_payment_attempts WHERE facility_id = ? AND Status = N'PENDING'")) {
+                        "SELECT COUNT(*) FROM payos_payment_attempts WHERE facility_id = ? AND status = N'PENDING'")) {
                     ps.setInt(1, coSoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) paymentPending = rs.getInt(1);
