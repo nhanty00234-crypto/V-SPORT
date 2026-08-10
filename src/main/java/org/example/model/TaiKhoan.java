@@ -50,7 +50,7 @@ public class TaiKhoan {
     private String avatarUrl;
 
     @Column(name = "RoleID")
-    private int roleId;
+    private Integer roleId;
 
     @Column(name = "CoSoID")
     private Integer coSoId;
@@ -167,7 +167,7 @@ public class TaiKhoan {
     public TaiKhoan(int accountId, String username, String password, String passwordSalt, 
                    int failedLoginCount, boolean isLocked, Date lastLogin, 
                    String googleId, String facebookId, String fullName, String phoneNumber, 
-                   String email, int roleId, int coSoId, String zaloId, String messengerId, 
+                   String email, Integer roleId, int coSoId, String zaloId, String messengerId,
                    int diemUyTin, int diemTrinhDo, String maNganHang, String soTaiKhoan, 
                    String viTriSoTruong, boolean nhanThongBaoSos, Date ngaySinh, String gioiTinh, 
                    Date createdAt) {
@@ -302,11 +302,11 @@ public class TaiKhoan {
         this.avatarUrl = avatarUrl;
     }
 
-    public int getRoleId() {
+    public Integer getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(int roleId) {
+    public void setRoleId(Integer roleId) {
         this.roleId = roleId;
     }
 
@@ -471,7 +471,7 @@ public class TaiKhoan {
                 '}';
     }
 
-    public void setRoleID(int roleID) {
+    public void setRoleID(Integer roleID) {
         this.roleId = roleID;
     }
 }

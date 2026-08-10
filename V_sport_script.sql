@@ -923,6 +923,33 @@ ALTER TABLE dbo.ThongBao ADD CONSTRAINT FK_ThongBao_DeletedBy FOREIGN KEY (Delet
 GO
 
 -- ============================================================================
+-- SEED DATA
+-- ============================================================================
+
+-- ---------- Roles ----------
+IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE RoleName = N'Admin')
+    INSERT INTO dbo.Roles (RoleName) VALUES (N'Admin');
+GO
+
+-- ---------- Admin account ----------
+IF NOT EXISTS (SELECT 1 FROM dbo.Accounts WHERE Email = 'nhanntty00234@gmail.com')
+    INSERT INTO dbo.Accounts (Email, Password, FullName, RoleID, IsLocked, IsDeleted)
+    VALUES (
+        'nhanntty00234@gmail.com',
+        '$2a$12$mQlGT.OEufrGid.HI7ZfGuIdVz3XTxFzNQSmhlmAlWYMTRfL6Ne/G',
+        N'Admin',
+        (SELECT RoleID FROM dbo.Roles WHERE RoleName = N'Admin'),
+        0,
+        0
+    );
+ELSE
+    -- Fix nếu account đã tồn tại nhưng RoleID bị NULL
+    UPDATE dbo.Accounts
+    SET RoleID = (SELECT RoleID FROM dbo.Roles WHERE RoleName = N'Admin')
+    WHERE Email = 'nhanntty00234@gmail.com' AND RoleID IS NULL;
+GO
+
+-- ============================================================================
 -- CHECK CONSTRAINTS
 -- ============================================================================
 ALTER TABLE dbo.Accounts ADD CONSTRAINT CK_Accounts_CanNangKg CHECK (CanNangKg IS NULL OR CanNangKg BETWEEN 20 AND 300);
