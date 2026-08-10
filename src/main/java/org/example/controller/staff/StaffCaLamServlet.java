@@ -2,7 +2,6 @@ package org.example.controller.staff;
 
 import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;
-import org.example.model.CaLamViecAvailability;
 import org.example.model.CaLamViecSwapRequest;
 import org.example.service.manager.CaLamService;
 import org.example.dao.CaLamViecDAO;
@@ -63,15 +62,12 @@ public class StaffCaLamServlet extends HttpServlet {
                         .filter(st -> st.getAccountId() != accountId)
                         .collect(Collectors.toList());
 
-                // 3. Current staff's registered availability (Removed)
-                List<CaLamViecAvailability> avails = List.of();
-
-                // 4. Swap requests involving this staff
+                // 3. Swap requests involving this staff
                 List<CaLamViecSwapRequest> swaps = caLamService.getSwapRequestsForStaff(accountId);
 
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                resp.getWriter().write(buildJsonResponse(shifts, coworkers, avails, swaps));
+                resp.getWriter().write(buildJsonResponse(shifts, coworkers, swaps));
             } catch (Exception e) {
                 logger.error("Error loading staff shifts data: {}", e.getMessage(), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -127,7 +123,7 @@ public class StaffCaLamServlet extends HttpServlet {
     }
 
     private String buildJsonResponse(List<CaLamViec> shifts, List<TaiKhoan> coworkers,
-                                      List<CaLamViecAvailability> avails, List<CaLamViecSwapRequest> swaps) {
+                                      List<CaLamViecSwapRequest> swaps) {
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         
         java.util.List<java.util.Map<String, Object>> shiftsList = new java.util.ArrayList<>();
@@ -162,20 +158,8 @@ public class StaffCaLamServlet extends HttpServlet {
         }
         data.put("coworkers", coworkersList);
 
-        java.util.List<java.util.Map<String, Object>> availsList = new java.util.ArrayList<>();
-        for (CaLamViecAvailability av : avails) {
-            java.util.Map<String, Object> m = new java.util.HashMap<>();
-            m.put("availabilityId", av.getAvailabilityId());
-            m.put("ngay", av.getNgay() != null ? av.getNgay().toString() : "");
-            m.put("gioBatDau", av.getGioBatDau() != null ? av.getGioBatDau().toString() : "");
-            m.put("gioKetThuc", av.getGioKetThuc() != null ? av.getGioKetThuc().toString() : "");
-            m.put("trangThai", av.getTrangThai());
-            m.put("ghiChu", av.getGhiChu());
-            m.put("duyetTrangThai", av.getDuyetTrangThai());
-            m.put("phanHoi", av.getPhanHoi());
-            availsList.add(m);
-        }
-        data.put("avails", availsList);
+        // Đăng ký giờ rảnh đã bị gỡ khỏi schema V2 — giữ khoá rỗng để JS phía client không lỗi.
+        data.put("avails", new java.util.ArrayList<>());
 
         java.util.List<java.util.Map<String, Object>> swapsList = new java.util.ArrayList<>();
         for (CaLamViecSwapRequest sw : swaps) {

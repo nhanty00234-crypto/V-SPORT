@@ -2,18 +2,15 @@ package org.example.service.manager;
 
 import org.example.dao.CaLamViecDAO;
 import org.example.dao.TaiKhoanDAO;
-import org.example.dao.CaLamViecAvailabilityDAO;
 import org.example.dao.CaLamViecSwapRequestDAO;
 import org.example.dao.CaLamViecAuditDAO;
 import org.example.dao.impl.CaLamViecDAOImpl;
 import org.example.dao.impl.TaiKhoanDAOImpl;
-import org.example.dao.impl.CaLamViecAvailabilityDAOImpl;
 import org.example.dao.impl.CaLamViecSwapRequestDAOImpl;
 import org.example.dao.impl.CaLamViecAuditDAOImpl;
 import org.example.model.CaLamViec;
 import org.example.model.TaiKhoan;
 import org.example.exception.*;
-import org.example.model.CaLamViecAvailability;
 import org.example.model.CaLamViecSwapRequest;
 import org.example.model.CaLamViecAudit;
 import org.example.util.BranchSecurityUtils;
@@ -54,7 +51,6 @@ public class CaLamService {
 
     private final CaLamViecDAO caLamViecDAO;
     private final TaiKhoanDAO taiKhoanDAO;
-    private final CaLamViecAvailabilityDAO availabilityDAO;
     private final CaLamViecSwapRequestDAO swapRequestDAO;
     private final CaLamViecAuditDAO auditDAO;
     private final org.example.dao.CoSoDAO coSoDAO;
@@ -63,7 +59,6 @@ public class CaLamService {
     public CaLamService() {
         this.caLamViecDAO = new CaLamViecDAOImpl();
         this.taiKhoanDAO = new TaiKhoanDAOImpl();
-        this.availabilityDAO = new CaLamViecAvailabilityDAOImpl();
         this.swapRequestDAO = new CaLamViecSwapRequestDAOImpl();
         this.auditDAO = new CaLamViecAuditDAOImpl();
         this.coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
@@ -73,7 +68,6 @@ public class CaLamService {
     public CaLamService(CaLamViecDAO caLamViecDAO, TaiKhoanDAO taiKhoanDAO) {
         this.caLamViecDAO = caLamViecDAO;
         this.taiKhoanDAO = taiKhoanDAO;
-        this.availabilityDAO = new CaLamViecAvailabilityDAOImpl();
         this.swapRequestDAO = new CaLamViecSwapRequestDAOImpl();
         this.auditDAO = new CaLamViecAuditDAOImpl();
         this.coSoDAO = new org.example.dao.impl.CoSoDAOImpl();
@@ -1193,25 +1187,6 @@ public class CaLamService {
         return auditDAO.getByCoSo(coSoId);
     }
 
-    /**
-     * Lấy nguyện vọng rảnh bận của nhân viên
-     */
-    public List<CaLamViecAvailability> getAvailabilityByBranch(int coSoId, LocalDate start, LocalDate end) {
-        return availabilityDAO.getByCoSoAndDateRange(coSoId, start, end);
-    }
-
-    public List<CaLamViecAvailability> getAvailabilityByStaff(int accountId) {
-        return availabilityDAO.getByAccount(accountId);
-    }
-
-    public void addAvailability(CaLamViecAvailability avail) {
-        availabilityDAO.insert(avail);
-    }
-
-    public void deleteAvailability(int id) {
-        availabilityDAO.delete(id);
-    }
-
     // ==================== SHIFT SWAPPING WORKFLOW ====================
 
     public List<CaLamViecSwapRequest> getSwapRequestsByBranch(int coSoId) {
@@ -1654,18 +1629,10 @@ public class CaLamService {
             throw new IllegalArgumentException("Không tìm thấy ca làm việc nào trong khoảng thời gian này để sắp lịch.");
         }
 
-        // 2. Lấy tất cả nguyện vọng Ranh đã được duyệt của nhân viên trong cơ sở
-        List<CaLamViecAvailability> avails = availabilityDAO.getByCoSoAndDateRange(coSoId, startDate, endDate);
-        // Lọc các nguyện vọng 'Ranh' và đã 'DaDuyet' VÀ ngay của ngày đó chưa qua
-        LocalDate today = LocalDate.now();
-        List<CaLamViecAvailability> freeAvails = avails.stream()
-                .filter(a -> "Ranh".equalsIgnoreCase(a.getTrangThai()) && 
-                             "DaDuyet".equalsIgnoreCase(a.getDuyetTrangThai()) &&
-                             a.getNgay() != null &&
-                             !a.getNgay().isBefore(today))
-                .toList();
-
-        // 3. Lấy danh sách nhân viên của cơ sở
+        // 2. Lấy danh sách nhân viên của cơ sở
+        // Ghi chú: bảng đăng ký giờ rảnh đã bị gỡ khỏi schema V2,
+        // nên mọi nhân viên đều là ứng viên. Việc chặn phân công sai vẫn do
+        // validationEngine đảm nhiệm (trùng ca, quá giờ, không đủ thời gian nghỉ...).
         List<TaiKhoan> staffs = getStaffAvailableForShift(coSoId);
 
         int scheduledCount = 0;
@@ -1684,23 +1651,14 @@ public class CaLamService {
                 continue;
             }
 
-            // Tìm các nhân viên có nguyện vọng rảnh bao phủ khung giờ của ca này
+            // Tìm các nhân viên hợp lệ cho khung giờ của ca này
             List<TaiKhoan> candidateStaffs = new ArrayList<>();
             for (TaiKhoan staff : staffs) {
-                boolean isAvailable = freeAvails.stream().anyMatch(a ->
-                    a.getAccountId() == staff.getAccountId() &&
-                    a.getNgay().equals(shift.getNgayLam()) &&
-                    !shift.getGioBatDau().isBefore(a.getGioBatDau()) &&
-                    !shift.getGioKetThuc().isAfter(a.getGioKetThuc())
+                CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
+                        staff.getAccountId(), shift.getNgayLam(), shift.getGioBatDau(), shift.getGioKetThuc(), shift.getGioNghi(), shift.getCaLamViecId(), shift.getCoSoId()
                 );
-
-                if (isAvailable) {
-                    CaLamValidationEngine.ValidationResult valRes = validationEngine.validateShift(
-                            staff.getAccountId(), shift.getNgayLam(), shift.getGioBatDau(), shift.getGioKetThuc(), shift.getGioNghi(), shift.getCaLamViecId(), shift.getCoSoId()
-                    );
-                    if (valRes.isValid()) {
-                        candidateStaffs.add(staff);
-                    }
+                if (valRes.isValid()) {
+                    candidateStaffs.add(staff);
                 }
             }
 

@@ -273,15 +273,7 @@ public class CoSoDAOImpl implements CoSoDAO {
                         .setParameter(1, id)
                         .executeUpdate();
 
-                // 3. SOS requests
-                em.createNativeQuery("DELETE FROM NhatKySOSGui WHERE YeuCauSOSID IN (SELECT YeuCauSOSID FROM YeuCauSOS WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)))")
-                        .setParameter(1, id)
-                        .executeUpdate();
-                em.createNativeQuery("DELETE FROM YeuCauSOS WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
-                        .setParameter(1, id)
-                        .executeUpdate();
-
-                // 4. Matchmaking
+                // 3. Matchmaking
                 em.createNativeQuery("DELETE FROM ChiTietGhepKeo WHERE KeoID IN (SELECT KeoID FROM GhepKeo WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)))")
                         .setParameter(1, id)
                         .executeUpdate();
@@ -289,22 +281,12 @@ public class CoSoDAOImpl implements CoSoDAO {
                         .setParameter(1, id)
                         .executeUpdate();
 
-                // 5. Reviews
+                // 4. Reviews
                 em.createNativeQuery("DELETE FROM DanhGia WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
                         .setParameter(1, id)
                         .executeUpdate();
 
-                // 6. ELO
-                em.createNativeQuery("DELETE FROM LichSuELO WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
-                        .setParameter(1, id)
-                        .executeUpdate();
-
-                // 7. Parking card logs for bookings
-                em.createNativeQuery("DELETE FROM LichXeRaVao WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
-                        .setParameter(1, id)
-                        .executeUpdate();
-
-                // 8. Invoices
+                // 5. Invoices
                 em.createNativeQuery("DELETE FROM ChiTietHoaDon WHERE HoaDonID IN (SELECT HoaDonID FROM HoaDon WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)))")
                         .setParameter(1, id)
                         .executeUpdate();
@@ -333,20 +315,12 @@ public class CoSoDAOImpl implements CoSoDAO {
                         .setParameter(1, id)
                         .executeUpdate();
 
-                // 12. Parking Cards
-                em.createNativeQuery("DELETE FROM LichXeRaVao WHERE TheID IN (SELECT TheID FROM TheGiuXe WHERE CoSoID = ?)")
-                        .setParameter(1, id)
-                        .executeUpdate();
-                em.createNativeQuery("DELETE FROM TheGiuXe WHERE CoSoID = ?")
-                        .setParameter(1, id)
-                        .executeUpdate();
-
-                // 13. Promo Codes
+                // 12. Promo Codes
                 em.createNativeQuery("DELETE FROM KhuyenMai WHERE CoSoID = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
-                // 14. Accounts references cleanup
+                // 13. Accounts references cleanup
                 em.createNativeQuery("UPDATE CoSo SET AccountID_QuanLy = NULL WHERE AccountID_QuanLy IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
@@ -357,13 +331,7 @@ public class CoSoDAOImpl implements CoSoDAO {
                 em.createNativeQuery("DELETE FROM MonTheThaoYeuThich WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM NhatKyChat WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
-                        .setParameter(1, id)
-                        .executeUpdate();
                 em.createNativeQuery("DELETE FROM ThongBao WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
-                        .setParameter(1, id)
-                        .executeUpdate();
-                em.createNativeQuery("DELETE FROM LichXeRaVao WHERE AccountID_NhanVien IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
                 em.createNativeQuery("UPDATE HoaDon SET AccountID_NhanVien = NULL WHERE AccountID_NhanVien IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
@@ -372,21 +340,12 @@ public class CoSoDAOImpl implements CoSoDAO {
                 em.createNativeQuery("UPDATE HoaDon SET AccountID_KhachHang = NULL WHERE AccountID_KhachHang IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM LichSuELO WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
-                        .setParameter(1, id)
-                        .executeUpdate();
                 em.createNativeQuery("DELETE FROM HoanTien WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
                 em.createNativeQuery("DELETE FROM DanhGia WHERE AccountID_NguoiDanhGia IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?) OR AccountID_NguoiBiDanhGia IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
                         .setParameter(1, id)
                         .setParameter(2, id)
-                        .executeUpdate();
-                em.createNativeQuery("DELETE FROM NhatKySOSGui WHERE AccountID_NhanGui IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
-                        .setParameter(1, id)
-                        .executeUpdate();
-                em.createNativeQuery("DELETE FROM YeuCauSOS WHERE AccountID_Tao IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
-                        .setParameter(1, id)
                         .executeUpdate();
 
                 // 15. Delete Accounts associated with the branch

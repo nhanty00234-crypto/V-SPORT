@@ -73,13 +73,12 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
             String format = req.getParameter("format");
             if ("json".equals(format)) {
                 List<org.example.model.CaLamViecAudit> audits = caLamService.getAuditLogs(managerCoSoId);
-                List<org.example.model.CaLamViecAvailability> avails = caLamService.getAvailabilityByBranch(managerCoSoId, LocalDate.now().minusDays(30), LocalDate.now().plusDays(30));
                 List<org.example.model.CaLamViecSwapRequest> swaps = caLamService.getSwapRequestsByBranch(managerCoSoId);
                 List<org.example.model.CoSo> coSos = caLamService.getAllCoSo();
 
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
-                String json = buildJsonResponse(shifts, staffs, audits, avails, swaps, coSos);
+                String json = buildJsonResponse(shifts, staffs, audits, swaps, coSos);
                 resp.getWriter().write(json);
                 return;
             }
@@ -587,14 +586,14 @@ public class QuanLyCaLamManagerServlet extends HttpServlet {
 
     private String buildJsonResponse(List<CaLamViec> shifts, List<TaiKhoan> staffs,
                                       List<org.example.model.CaLamViecAudit> audits,
-                                      List<org.example.model.CaLamViecAvailability> avails,
                                       List<org.example.model.CaLamViecSwapRequest> swaps,
                                       List<org.example.model.CoSo> branches) throws Exception {
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         data.put("shifts", shifts);
         data.put("staffs", staffs);
         data.put("audits", audits);
-        data.put("avails", avails);
+        // Đăng ký giờ rảnh đã bị gỡ khỏi schema V2 — giữ khoá rỗng để JS phía client không lỗi.
+        data.put("avails", new java.util.ArrayList<>());
         data.put("swaps", swaps);
         data.put("branches", branches);
         return createGson().toJson(data);

@@ -197,10 +197,6 @@ public final class Constants {
     public static final String TRANG_THAI_HOAN_TIEN_TU_CHOI = "Từ chối";
     public static final String TRANG_THAI_HOAN_TIEN_DA_HOAN = "Đã hoàn tiền";
 
-    // ========== SOS REQUEST (YeuCauSOS) STATUS ==========
-    public static final String TRANG_THAI_SOS_DANG_TIM = "Đang tìm";
-    public static final String TRANG_THAI_SOS_DA_TIM_DUOC = "Đã tìm đủ";
-    public static final String TRANG_THAI_SOS_HET_HAN = "Hết hạn";
 
     // ========== SHIFT (CaLamViec) DEFAULT ==========
     public static final int DEFAULT_SHIFT_DURATION_HOURS = 8;
