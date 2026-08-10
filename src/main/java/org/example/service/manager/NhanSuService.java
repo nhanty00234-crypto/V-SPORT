@@ -615,27 +615,21 @@ public class NhanSuService {
             throw new IllegalArgumentException("Giờ kết thúc phải sau giờ bắt đầu");
         }
 
-        // Kiểm tra xung đột với các ca định kỳ khác của nhân viên
-        // (Cùng thứ và thời gian trùng lặp)
-        jakarta.persistence.EntityManager em = org.example.util.JPAUtil.getEntityManager();
-        try {
-            List<CaLamViec> conflicts = em.createQuery(
-                "SELECT c FROM CaLamViec c WHERE c.accountId = :accountId AND c.thu = :thu " +
-                "AND c.gioBatDau < :end AND c.gioKetThuc > :start AND c.ngayLam IS NULL", CaLamViec.class)
-                .setParameter("accountId", accountId)
-                .setParameter("thu", thu)
-                .setParameter("start", gioBatDau)
-                .setParameter("end", gioKetThuc)
-                .getResultList();
-            if (!conflicts.isEmpty()) {
-                CaLamViec conflict = conflicts.get(0);
-                throw new IllegalArgumentException(String.format(
-                    "Ca làm vào thứ %d (%s - %s) bị trùng với ca đã có (%s - %s)",
-                    thu, gioBatDau, gioKetThuc, conflict.getGioBatDau(), conflict.getGioKetThuc()
-                ));
-            }
-        } finally {
-            em.close();
+        // Kiểm tra xung đột với các ca định kỳ khác của nhân viên (cùng thứ, giờ chồng nhau).
+        // Dùng DAO thay vì JPQL: CaLamViec là POJO thuần, không phải @Entity, nên
+        // em.createQuery("... FROM CaLamViec c ...") luôn ném "Not an entity" lúc chạy.
+        // deleteShiftPattern/getShiftPatternsByStaff bên dưới cũng đi qua DAO này.
+        CaLamViec conflict = caLamViecDAO.getRecurringShiftsByAccountID(accountId).stream()
+                .filter(c -> c.getThu() != null && c.getThu() == thu)
+                .filter(c -> c.getGioBatDau() != null && c.getGioKetThuc() != null)
+                .filter(c -> c.getGioBatDau().isBefore(gioKetThuc) && c.getGioKetThuc().isAfter(gioBatDau))
+                .findFirst()
+                .orElse(null);
+        if (conflict != null) {
+            throw new IllegalArgumentException(String.format(
+                "Ca làm vào thứ %d (%s - %s) bị trùng với ca đã có (%s - %s)",
+                thu, gioBatDau, gioKetThuc, conflict.getGioBatDau(), conflict.getGioKetThuc()
+            ));
         }
 
         CaLamViec newShift = new CaLamViec();

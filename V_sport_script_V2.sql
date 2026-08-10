@@ -783,7 +783,10 @@ CREATE TABLE dbo.work_shifts (
     work_shift_id                INT                IDENTITY(1,1) NOT NULL,
     account_id                   INT                NOT NULL,
     facility_id                  INT                NOT NULL,
-    work_date                    DATE               NOT NULL,
+    -- NULL = ca làm ĐỊNH KỲ (lặp theo day_of_week, không gắn ngày cụ thể).
+    -- CaLamViecDAOImpl.addCaLamViec ghi thẳng NULL vào cột này cho ca định kỳ;
+    -- V1 để NOT NULL nên tính năng "ca làm định kỳ" chưa bao giờ chèn được.
+    work_date                    DATE               NULL,
     start_time                   TIME               NOT NULL,
     end_time                     TIME               NOT NULL,
     day_of_week                  INT                NULL,
