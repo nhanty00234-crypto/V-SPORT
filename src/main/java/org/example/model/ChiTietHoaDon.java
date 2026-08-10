@@ -3,35 +3,35 @@ package org.example.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "ChiTietHoaDon")
+@Table(name = "invoice_items")
 public class ChiTietHoaDon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ChiTietID")
+    @Column(name = "invoice_item_id")
     private int ChiTietID;
 
-    @Column(name = "HoaDonID")
+    @Column(name = "invoice_id")
     private int HoaDonID;
 
-    @Column(name = "SanPhamID")
+    @Column(name = "product_id")
     private int SanPhamID;
 
-    @Column(name = "SoLuong", nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int SoLuong;
 
-    @Column(name = "DonGiaTaiThoiDiemBan")
+    @Column(name = "unit_price_at_sale")
     private double DonGiaTaiThoiDiemBan;
 
-    @Column(name = "ThanhTien")
+    @Column(name = "line_total")
     private double ThanhTien;
 
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "HoaDonID", insertable = false, updatable = false)
+    @JoinColumn(name = "invoice_id", insertable = false, updatable = false)
     private HoaDon hoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SanPhamID", insertable = false, updatable = false)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private SanPham_DichVu sanPham;
 
     public ChiTietHoaDon() {}

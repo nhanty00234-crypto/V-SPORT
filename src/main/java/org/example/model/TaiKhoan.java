@@ -5,100 +5,94 @@ import java.util.Date;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Accounts")
+@Table(name = "accounts")
 public class TaiKhoan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "AccountID")
+    @Column(name = "account_id")
     private int accountId;
 
-    @Column(name = "Username")
+    @Column(name = "username")
     private String username;
 
-    @Column(name = "Password")
+    @Column(name = "password_hash")
     private String password;
 
     @Transient // Not in DB schema based on SQL provided
     private String passwordSalt;
 
-    @Column(name = "FailedLoginCount")
+    @Column(name = "failed_login_count")
     private Integer failedLoginCount = 0;
 
-    @Column(name = "IsLocked")
+    @Column(name = "is_locked")
     private boolean isLocked;
 
-    @Column(name = "LastLogin")
+    @Column(name = "last_login_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLogin;
 
-    @Column(name = "GoogleID")
+    @Column(name = "google_id")
     private String googleId;
 
-    @Column(name = "FacebookID")
+    @Column(name = "facebook_id")
     private String facebookId;
 
-    @Column(name = "FullName")
+    @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "PhoneNumber")
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "Email")
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "AvatarUrl")
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @Column(name = "RoleID")
+    @Column(name = "role_id")
     private Integer roleId;
 
-    @Column(name = "CoSoID")
+    @Column(name = "facility_id")
     private Integer coSoId;
 
-    @Column(name = "ZaloID")
+    @Column(name = "zalo_id")
     private String zaloId;
 
-    @Column(name = "MessengerID")
+    @Column(name = "messenger_id")
     private String messengerId;
 
-    @Column(name = "DiemUyTin", columnDefinition = "int default 100")
+    @Column(name = "reputation_score", columnDefinition = "int default 100")
     private int diemUyTin = 100;
 
-    @Column(name = "DiemTrinhDo", columnDefinition = "int default 1000")
-    private int diemTrinhDo = 1000;
-
-    @Column(name = "LateCancelCount", columnDefinition = "int default 0")
+    @Column(name = "late_cancel_count", columnDefinition = "int default 0")
     private int lateCancelCount = 0;
 
-    @Column(name = "NoShowCount", columnDefinition = "int default 0")
+    @Column(name = "no_show_count", columnDefinition = "int default 0")
     private int noShowCount = 0;
 
-    @Column(name = "CompletedBookingCount", columnDefinition = "int default 0")
+    @Column(name = "completed_booking_count", columnDefinition = "int default 0")
     private int completedBookingCount = 0;
 
-    @Column(name = "MaNganHang")
+    @Column(name = "bank_code")
     private String maNganHang;
 
-    @Column(name = "SoTaiKhoan")
+    @Column(name = "bank_account_number")
     private String soTaiKhoan;
 
-    @Column(name = "QrImagePath")
+    @Column(name = "qr_image_path")
     private String qrImagePath;
 
-    @Column(name = "ViTriSoTruong")
+    @Column(name = "preferred_position")
     private String viTriSoTruong;
 
-    @Column(name = "NhanThongBaoSOS", columnDefinition = "bit default 1")
-    private boolean nhanThongBaoSos = true;
-
-    @Column(name = "NgaySinh")
+    @Column(name = "date_of_birth")
     @Temporal(TemporalType.DATE)
     private Date ngaySinh;
 
-    @Column(name = "GioiTinh")
+    @Column(name = "gender")
     private String gioiTinh;
 
-    @Column(name = "CreatedAt", insertable = false, updatable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
@@ -108,13 +102,13 @@ public class TaiKhoan {
     @Transient // First preferred sport ID, populated at login from MonTheThaoYeuThich table
     private Integer monTheThaoYeuThichId;
 
-    @Column(name = "IsDeleted", columnDefinition = "bit default 0")
+    @Column(name = "is_deleted", columnDefinition = "bit default 0")
     private Boolean isDeleted = false;
 
-    @Column(name = "DeletedAt")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "DeletedBy")
+    @Column(name = "deleted_by")
     private Integer deletedBy;
 
     public Boolean isDeleted() {
@@ -141,10 +135,6 @@ public class TaiKhoan {
         isLocked = locked;
     }
 
-    public boolean isNhanThongBaoSos() {
-        return nhanThongBaoSos;
-    }
-
     public String getMonTheThaoYeuThich() {
         return monTheThaoYeuThich;
     }
@@ -168,8 +158,8 @@ public class TaiKhoan {
                    int failedLoginCount, boolean isLocked, Date lastLogin, 
                    String googleId, String facebookId, String fullName, String phoneNumber, 
                    String email, Integer roleId, int coSoId, String zaloId, String messengerId,
-                   int diemUyTin, int diemTrinhDo, String maNganHang, String soTaiKhoan, 
-                   String viTriSoTruong, boolean nhanThongBaoSos, Date ngaySinh, String gioiTinh, 
+                   int diemUyTin, String maNganHang, String soTaiKhoan,
+                   String viTriSoTruong, Date ngaySinh, String gioiTinh,
                    Date createdAt) {
         this.accountId = accountId;
         this.username = username;
@@ -188,11 +178,9 @@ public class TaiKhoan {
         this.zaloId = zaloId;
         this.messengerId = messengerId;
         this.diemUyTin = diemUyTin;
-        this.diemTrinhDo = diemTrinhDo;
         this.maNganHang = maNganHang;
         this.soTaiKhoan = soTaiKhoan;
         this.viTriSoTruong = viTriSoTruong;
-        this.nhanThongBaoSos = nhanThongBaoSos;
         this.ngaySinh = ngaySinh;
         this.gioiTinh = gioiTinh;
         this.createdAt = createdAt;
@@ -342,14 +330,6 @@ public class TaiKhoan {
         this.diemUyTin = diemUyTin;
     }
 
-    public int getDiemTrinhDo() {
-        return diemTrinhDo;
-    }
-
-    public void setDiemTrinhDo(int diemTrinhDo) {
-        this.diemTrinhDo = diemTrinhDo;
-    }
-
     public int getLateCancelCount() {
         return lateCancelCount;
     }
@@ -407,14 +387,6 @@ public class TaiKhoan {
         this.viTriSoTruong = viTriSoTruong;
     }
 
-    public boolean getNhanThongBaoSos() {
-        return nhanThongBaoSos;
-    }
-
-    public void setNhanThongBaoSos(boolean nhanThongBaoSos) {
-        this.nhanThongBaoSos = nhanThongBaoSos;
-    }
-
     public Date getNgaySinh() {
         return ngaySinh;
     }
@@ -460,11 +432,9 @@ public class TaiKhoan {
                 ", zaloId='" + zaloId + '\'' +
                 ", messengerId='" + messengerId + '\'' +
                 ", diemUyTin=" + diemUyTin +
-                ", diemTrinhDo=" + diemTrinhDo +
                 ", maNganHang='" + maNganHang + '\'' +
                 ", soTaiKhoan='" + soTaiKhoan + '\'' +
                 ", viTriSoTruong='" + viTriSoTruong + '\'' +
-                ", nhanThongBaoSos=" + nhanThongBaoSos +
                 ", ngaySinh=" + ngaySinh +
                 ", gioiTinh='" + gioiTinh + '\'' +
                 ", createdAt=" + createdAt +

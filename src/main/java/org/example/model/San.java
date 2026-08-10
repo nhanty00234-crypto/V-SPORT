@@ -4,38 +4,38 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "San")
+@Table(name = "courts")
 public class San {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SanID")
+    @Column(name = "court_id")
     private int sanID;
 
-    @Column(name = "TenSan")
+    @Column(name = "court_name")
     private String tenSan;
 
-    @Column(name = "LoaiSanID")
+    @Column(name = "court_type_id")
     private int loaiSanID;
 
-    @Column(name = "CoSoID")
+    @Column(name = "facility_id")
     private int coSoID;
 
-    @Column(name = "TrangThai")
+    @Column(name = "status")
     private String trangThai;
 
-    @Column(name = "MoTa")
+    @Column(name = "description")
     private String moTa;
 
-    @Column(name = "HinhAnh")
+    @Column(name = "image_path")
     private String hinhAnh;
 
-    @Column(name = "IsDeleted")
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(name = "DeletedAt")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "DeletedBy")
+    @Column(name = "deleted_by")
     private Integer deletedBy;
 
     @Transient

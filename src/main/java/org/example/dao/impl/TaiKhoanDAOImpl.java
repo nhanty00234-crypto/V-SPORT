@@ -35,8 +35,6 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
         try {
             trans.begin();
             TaiKhoan.setDiemUyTin(100);
-            TaiKhoan.setDiemTrinhDo(1000);
-            TaiKhoan.setNhanThongBaoSos(true);
             em.persist(TaiKhoan);
             trans.commit();
             return true;
@@ -236,8 +234,6 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             
             acc.setRoleId(3);
             acc.setDiemUyTin(100);
-            acc.setDiemTrinhDo(1000);
-            acc.setNhanThongBaoSos(true);
             acc.setIsLocked(false);
             
             em.persist(acc);

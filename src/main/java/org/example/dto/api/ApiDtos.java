@@ -49,7 +49,6 @@ public final class ApiDtos {
         public LocalDate dateOfBirth;
         public int reputationScore;
         public String reputationLabel;
-        public int skillScore;
         public Integer favoriteSportId;
         public boolean canBook;
     }

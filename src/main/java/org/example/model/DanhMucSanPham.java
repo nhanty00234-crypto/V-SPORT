@@ -3,14 +3,14 @@ package org.example.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "DanhMucSanPham")
+@Table(name = "product_categories")
 public class DanhMucSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DanhMucID")
+    @Column(name = "category_id")
     private int DanhMucID;
 
-    @Column(name = "TenDanhMuc", nullable = false, length = 100)
+    @Column(name = "category_name", nullable = false, length = 100)
     private String TenDanhMuc;
 
     public DanhMucSanPham(int danhMucID, String tenDanhMuc) {

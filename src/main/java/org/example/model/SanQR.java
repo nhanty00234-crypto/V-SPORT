@@ -11,7 +11,7 @@ import java.util.UUID;
  * mới) - token cũ được lưu lại ở SanQRTokenHistory và đánh dấu REVOKED.
  */
 @Entity
-@Table(name = "SanQR")
+@Table(name = "court_qr_codes")
 public class SanQR {
 
     public static final String ACTIVE = "ACTIVE";
@@ -20,13 +20,13 @@ public class SanQR {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SanQRID")
+    @Column(name = "court_qr_id")
     private int sanQRId;
 
-    @Column(name = "SanID", nullable = false)
+    @Column(name = "court_id", nullable = false)
     private int sanId;
 
-    @Column(name = "Token", nullable = false, columnDefinition = "uniqueidentifier")
+    @Column(name = "token", nullable = false, columnDefinition = "uniqueidentifier")
     private UUID token;
 
     /**
@@ -35,25 +35,25 @@ public class SanQR {
      * KHÔNG suy ra được từ SanID/token. Có thể null tạm thời cho các bản ghi
      * tạo trước khi có hardening này - Service tự backfill khi phát hiện null.
      */
-    @Column(name = "ShortCode", length = 12)
+    @Column(name = "short_code", length = 12)
     private String shortCode;
 
-    @Column(name = "TrangThai", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 20)
     private String trangThai;
 
-    @Column(name = "CreatedAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "CreatedBy")
+    @Column(name = "created_by")
     private Integer createdBy;
 
-    @Column(name = "UpdatedAt", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "UpdatedBy")
+    @Column(name = "updated_by")
     private Integer updatedBy;
 
-    @Column(name = "RegenerateCount", nullable = false)
+    @Column(name = "regenerate_count", nullable = false)
     private int regenerateCount;
 
     @PrePersist

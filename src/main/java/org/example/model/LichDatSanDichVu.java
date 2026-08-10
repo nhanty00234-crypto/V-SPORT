@@ -10,41 +10,41 @@ import java.time.LocalDateTime;
  * không đụng tồn kho, không đụng kế toán. Thanh toán tại quầy.
  */
 @Entity
-@Table(name = "LichDatSan_DichVu")
+@Table(name = "booking_services")
 public class LichDatSanDichVu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id")
+    @Column(name = "booking_service_id")
     private int id;
 
-    @Column(name = "DatSanID", nullable = false)
+    @Column(name = "booking_id", nullable = false)
     private int datSanId;
 
-    @Column(name = "SanPhamID", nullable = false)
+    @Column(name = "product_id", nullable = false)
     private int sanPhamId;
 
-    @Column(name = "Quantity", nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "UnitPrice", nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "TotalPrice", nullable = false)
+    @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
 
-    @Column(name = "Status", length = 50)
+    @Column(name = "status", length = 50)
     private String status;
 
-    @Column(name = "Note", length = 255)
+    @Column(name = "note", length = 255)
     private String note;
 
-    @Column(name = "CreatedAt", insertable = false, updatable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "DeliveredAt")
+    @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
 
-    @Column(name = "DeliveredBy")
+    @Column(name = "delivered_by")
     private Integer deliveredBy;
 
     // Không map trong DB — chỉ dùng để render (JOIN thủ công ở tầng DAO/servlet)

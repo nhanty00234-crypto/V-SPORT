@@ -7,128 +7,128 @@ import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "LichDatSan")
+@Table(name = "bookings")
 public class Lichdatsan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DatSanID")
+    @Column(name = "booking_id")
     private int datSanId;
 
-    @Column(name = "AccountID")
+    @Column(name = "account_id")
     private Integer accountId;
 
-    @Column(name = "SanID")
+    @Column(name = "court_id")
     private Integer sanId;
 
-    @Column(name = "NgayDat", nullable = false)
+    @Column(name = "booking_date", nullable = false)
     private LocalDate ngayDat;
 
-    @Column(name = "GioBatDau", nullable = false)
+    @Column(name = "start_time", nullable = false)
     private LocalTime gioBatDau;
 
-    @Column(name = "GioKetThuc", nullable = false)
+    @Column(name = "end_time", nullable = false)
     private LocalTime gioKetThuc;
 
-    @Column(name = "ApDungGiaCoDen")
+    @Column(name = "apply_light_price")
     private boolean apDungGiaCoDen;
 
-    @Column(name = "TongTienDuKien")
+    @Column(name = "estimated_total")
     private BigDecimal tongTienDuKien;
 
-    @Column(name = "TrangThai", length = 50)
+    @Column(name = "status", length = 50)
     private String trangThai;
 
-    @Column(name = "GhiChu", length = 255)
+    @Column(name = "note", length = 255)
     private String ghiChu;
 
-    @Column(name = "NguonDatSan", length = 50)
+    @Column(name = "booking_source", length = 50)
     private String nguonDatSan;
 
-    @Column(name = "CreatedTime", insertable = false, updatable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdTime;
 
-    @Column(name = "IsDeleted")
+    @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column(name = "DeletedAt")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "DeletedBy")
+    @Column(name = "deleted_by")
     private Integer deletedBy;
 
-    @Column(name = "TimeMode", length = 30)
+    @Column(name = "time_mode", length = 30)
     private String timeMode;
 
-    @Column(name = "ReservedDurationMinutes")
+    @Column(name = "reserved_duration_minutes")
     private Integer reservedDurationMinutes;
 
-    @Column(name = "actual_end_time")
+    @Column(name = "actual_end_time_of_day")
     private LocalTime actualEndTime;
 
-    @Column(name = "actual_start_time")
+    @Column(name = "actual_start_time_of_day")
     private LocalTime actualStartTime;
 
-    @Column(name = "ActualStartAt")
+    @Column(name = "actual_started_at")
     private LocalDateTime actualStartAt;
 
-    @Column(name = "ActualEndAt")
+    @Column(name = "actual_ended_at")
     private LocalDateTime actualEndAt;
 
-    @Column(name = "PricingFinalizedAt")
+    @Column(name = "pricing_finalized_at")
     private LocalDateTime pricingFinalizedAt;
 
-    @Column(name = "EarlyCheckoutReason", length = 255)
+    @Column(name = "early_checkout_reason", length = 255)
     private String earlyCheckoutReason;
 
-    @Column(name = "EarlyCheckoutDiscount")
+    @Column(name = "early_checkout_discount")
     private BigDecimal earlyCheckoutDiscount;
 
-    @Column(name = "HoldExpiresAt")
+    @Column(name = "hold_expires_at")
     private LocalDateTime holdExpiresAt;
 
-    @Column(name = "DepositAmount")
+    @Column(name = "deposit_amount")
     private BigDecimal depositAmount;
 
-    @Column(name = "PaymentMethodConfirmed", length = 50)
+    @Column(name = "payment_method_confirmed", length = 50)
     private String paymentMethodConfirmed;
 
-    @Column(name = "TransactionCode", length = 100)
+    @Column(name = "transaction_code", length = 100)
     private String transactionCode;
 
-    @Column(name = "ConfirmedAt")
+    @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;
 
-    @Column(name = "ConfirmedBy")
+    @Column(name = "confirmed_by")
     private Integer confirmedBy;
 
-    @Column(name = "ConfirmSource", length = 20)
+    @Column(name = "confirm_source", length = 20)
     private String confirmSource;
 
-    @Column(name = "NoShowAt")
+    @Column(name = "no_show_at")
     private LocalDateTime noShowAt;
 
-    @Column(name = "CancelType", length = 20)
+    @Column(name = "cancel_type", length = 20)
     private String cancelType;
 
-    @Column(name = "CancelReason", length = 255)
+    @Column(name = "cancel_reason", length = 255)
     private String cancelReason;
 
-    @Column(name = "CancelledAt")
+    @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
-    @Column(name = "CancelledBy")
+    @Column(name = "cancelled_by")
     private Integer cancelledBy;
 
-    @Column(name = "RequiresRefundReview")
+    @Column(name = "requires_refund_review")
     private boolean requiresRefundReview;
 
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SanID", insertable = false, updatable = false)
+    @JoinColumn(name = "court_id", insertable = false, updatable = false)
     private San san;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AccountID", insertable = false, updatable = false)
+    @JoinColumn(name = "account_id", insertable = false, updatable = false)
     private TaiKhoan account;
 
     public Lichdatsan() {

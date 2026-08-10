@@ -6,59 +6,59 @@ import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "CoSo")
+@Table(name = "facilities")
 public class CoSo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CoSoID")
+    @Column(name = "facility_id")
     private int CoSoID;
 
-    @Column(name = "TenCoSo")
+    @Column(name = "facility_name")
     private String TenCoSo;
 
-    @Column(name = "DiaChi")
+    @Column(name = "address")
     private String DiaChi;
 
-    @Column(name = "SoDienThoai")
+    @Column(name = "phone_number")
     private String SoDienThoai;
 
-    @Column(name = "TrangThai")
+    @Column(name = "status")
     private String TrangThai;
 
-    @Column(name = "GioMoCua")
+    @Column(name = "opening_time")
     private LocalTime GioMoCua;
 
-    @Column(name = "GioDongCua")
+    @Column(name = "closing_time")
     private LocalTime GioDongCua;
 
-    @Column(name = "HinhAnh")
+    @Column(name = "image_path")
     private String HinhAnh;
 
-    @Column(name = "MoTa")
+    @Column(name = "description")
     private String MoTa;
 
-    @Column(name = "LoaiHinhKinhDoanh")
+    @Column(name = "business_type")
     private String LoaiHinhKinhDoanh;
 
-    @Column(name = "SoLuongSanDuKien")
+    @Column(name = "planned_court_count")
     private int SoLuongSanDuKien;
 
-    @Column(name = "AccountID_QuanLy")
+    @Column(name = "manager_account_id")
     private Integer AccountID_QuanLy;
 
-    @Column(name = "IsDeleted")
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(name = "DeletedAt")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "DeletedBy")
+    @Column(name = "deleted_by")
     private Integer deletedBy;
 
-    @Column(name = "ViDo")
+    @Column(name = "latitude")
     private BigDecimal viDo;
 
-    @Column(name = "KinhDo")
+    @Column(name = "longitude")
     private BigDecimal kinhDo;
 
     public CoSo() {

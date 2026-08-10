@@ -4,74 +4,74 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "HoaDon")
+@Table(name = "invoices")
 public class HoaDon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "HoaDonID")
+    @Column(name = "invoice_id")
     private int hoaDonId;
 
-    @Column(name = "DatSanID")
+    @Column(name = "booking_id")
     private Integer datSanId;
 
-    @Column(name = "AccountID_KhachHang")
+    @Column(name = "customer_account_id")
     private Integer accountIdKhachHang;
 
-    @Column(name = "AccountID_NhanVien")
+    @Column(name = "staff_account_id")
     private Integer accountIdNhanVien;
 
-    @Column(name = "NgayLap")
+    @Column(name = "issued_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayLap;
 
-    @Column(name = "TongTienSan")
+    @Column(name = "court_total")
     private double tongTienSan;
 
-    @Column(name = "TongTienDichVu")
+    @Column(name = "service_total")
     private double tongTienDichVu;
 
-    @Column(name = "PhiGuiXe")
+    @Column(name = "parking_fee")
     private double phiGuiXe;
 
-    @Column(name = "KhuyenMaiID")
+    @Column(name = "promotion_id")
     private Integer khuyenMaiId;
 
-    @Column(name = "GiamGia")
+    @Column(name = "discount_amount")
     private double giamGia;
 
-    @Column(name = "TongThanhToan")
+    @Column(name = "grand_total")
     private double tongThanhToan;
 
-    @Column(name = "PhuongThucThanhToan")
+    @Column(name = "payment_method")
     private String phuongThucThanhToan;
 
-    @Column(name = "TrangThaiThanhToan")
+    @Column(name = "payment_status")
     private String trangThaiThanhToan;
 
-    @Column(name = "LoaiHoaDon")
+    @Column(name = "invoice_type")
     private String loaiHoaDon;
 
-    @Column(name = "ParentHoaDonID")
+    @Column(name = "parent_invoice_id")
     private Integer parentHoaDonId;
 
-    @Column(name = "GhiChu")
+    @Column(name = "note")
     private String ghiChu;
 
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DatSanID", insertable = false, updatable = false)
+    @JoinColumn(name = "booking_id", insertable = false, updatable = false)
     private Lichdatsan datSan;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AccountID_KhachHang", insertable = false, updatable = false)
+    @JoinColumn(name = "customer_account_id", insertable = false, updatable = false)
     private TaiKhoan khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AccountID_NhanVien", insertable = false, updatable = false)
+    @JoinColumn(name = "staff_account_id", insertable = false, updatable = false)
     private TaiKhoan nhanVien;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "KhuyenMaiID", insertable = false, updatable = false)
+    @JoinColumn(name = "promotion_id", insertable = false, updatable = false)
     private KhuyenMai khuyenMai;
 
     public HoaDon() {}

@@ -4,53 +4,53 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "SanPham_DichVu")
+@Table(name = "products_services")
 public class SanPham_DichVu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SanPhamID")
+    @Column(name = "product_id")
     private int SanPhamID;
 
-    @Column(name = "DanhMucID", nullable = false)
+    @Column(name = "category_id", nullable = false)
     private int DanhMucID;
 
-    @Column(name = "CoSoID", nullable = false)
+    @Column(name = "facility_id", nullable = false)
     private int CoSoID;
 
-    @Column(name = "TenSanPham", nullable = false, length = 100)
+    @Column(name = "product_name", nullable = false, length = 100)
     private String TenSanPham;
 
-    @Column(name = "DonGia", nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private double DonGia;
 
-    @Column(name = "DonViTinh", length = 20)
+    @Column(name = "unit_of_measure", length = 20)
     private String DonViTinh;
 
-    @Column(name = "SoLuongTon")
+    @Column(name = "stock_quantity")
     private int SoLuongTon;
 
-    @Column(name = "TrangThai", length = 50)
+    @Column(name = "status", length = 50)
     private String TrangThai;
 
-    @Column(name = "SkuCode", length = 50)
+    @Column(name = "sku_code", length = 50)
     private String SkuCode;
 
-    @Column(name = "GiaNhap")
+    @Column(name = "cost_price")
     private double GiaNhap;
 
-    @Column(name = "MoTa", length = 255)
+    @Column(name = "description", length = 255)
     private String MoTa;
 
-    @Column(name = "HinhAnh", length = 500)
+    @Column(name = "image_path", length = 500)
     private String HinhAnh;
 
-    @Column(name = "IsDeleted")
+    @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column(name = "DeletedAt")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "DeletedBy")
+    @Column(name = "deleted_by")
     private Integer deletedBy;
 
     public SanPham_DichVu() {}

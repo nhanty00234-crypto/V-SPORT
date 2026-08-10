@@ -4,29 +4,29 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "DanhGia")
+@Table(name = "reviews")
 public class DanhGia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DanhGiaID")
+    @Column(name = "review_id")
     private int danhGiaId;
 
-    @Column(name = "DatSanID")
+    @Column(name = "booking_id")
     private int datSanId;
 
-    @Column(name = "AccountID_NguoiDanhGia")
+    @Column(name = "reviewer_account_id")
     private int accountIdNguoiDanhGia;
 
-    @Column(name = "AccountID_NguoiBiDanhGia")
+    @Column(name = "reviewed_account_id")
     private Integer accountIdNguoiBiDanhGia;
 
-    @Column(name = "SoSao")
+    @Column(name = "rating")
     private int soSao;
 
-    @Column(name = "BinhLuan", length = 255)
+    @Column(name = "comment", length = 255)
     private String binhLuan;
 
-    @Column(name = "NgayDanhGia")
+    @Column(name = "created_at")
     private LocalDateTime ngayDanhGia;
 
     @jakarta.persistence.Transient

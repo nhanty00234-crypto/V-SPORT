@@ -37,7 +37,6 @@ public final class ApiMappers {
         dto.dateOfBirth = toLocalDate(tk.getNgaySinh());
         dto.reputationScore = tk.getDiemUyTin();
         dto.reputationLabel = ReputationLabel.of(tk.getDiemUyTin());
-        dto.skillScore = tk.getDiemTrinhDo();
         dto.favoriteSportId = tk.getMonTheThaoYeuThichId();
         dto.canBook = tk.getDiemUyTin() >= Constants.REPUTATION_BOOKING_BLOCK_THRESHOLD;
         return dto;

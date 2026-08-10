@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "QRRequest")
+@Table(name = "qr_requests")
 public class QRRequest {
     public static final String TYPE_CALL_STAFF = "CALL_STAFF";
     public static final String TYPE_ORDER_ITEM = "ORDER_ITEM";
@@ -21,40 +21,40 @@ public class QRRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "RequestID")
+    @Column(name = "request_id")
     private int requestId;
 
-    @Column(name = "SanID", nullable = false)
+    @Column(name = "court_id", nullable = false)
     private int sanId;
 
-    @Column(name = "CoSoID", nullable = false)
+    @Column(name = "facility_id", nullable = false)
     private int coSoId;
 
-    @Column(name = "GuestToken", nullable = false, length = 64)
+    @Column(name = "guest_token", nullable = false, length = 64)
     private String guestToken;
 
-    @Column(name = "CustomerID")
+    @Column(name = "customer_account_id")
     private Integer customerId;
 
-    @Column(name = "RequestType", nullable = false, length = 20)
+    @Column(name = "request_type", nullable = false, length = 20)
     private String requestType;
 
-    @Column(name = "ItemsJson", columnDefinition = "nvarchar(max)")
+    @Column(name = "items_json", columnDefinition = "nvarchar(max)")
     private String itemsJson;
 
-    @Column(name = "Note", length = 255)
+    @Column(name = "note", length = 255)
     private String note;
 
-    @Column(name = "Status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 20)
     private String status;
 
-    @Column(name = "CreatedAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "UpdatedAt", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "HandledByStaffID")
+    @Column(name = "handled_by_staff_id")
     private Integer handledByStaffId;
 
     @PrePersist
