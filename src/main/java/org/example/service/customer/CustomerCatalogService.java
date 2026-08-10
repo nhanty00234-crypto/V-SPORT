@@ -75,25 +75,25 @@ public class CustomerCatalogService {
      * Không trả môn "rỗng" để app không dẫn khách vào màn hình không có sân nào.
      */
     public List<SportSummary> listAvailableSports() {
-        String sql = "SELECT mt.MonTheThaoID, mt.TenMon, "
-                + "       COUNT(DISTINCT s.SanID)  AS CourtCount, "
-                + "       COUNT(DISTINCT s.CoSoID) AS FacilityCount "
-                + "FROM MonTheThao mt "
-                + "JOIN LoaiSan ls ON ls.MonTheThaoID = mt.MonTheThaoID AND ISNULL(ls.IsDeleted, 0) = 0 "
-                + "JOIN San s      ON s.LoaiSanID = ls.LoaiSanID AND ISNULL(s.IsDeleted, 0) = 0 "
-                + "JOIN CoSo c     ON c.CoSoID = s.CoSoID AND ISNULL(c.IsDeleted, 0) = 0 "
-                + "                AND c.TrangThai NOT IN (N'Chờ duyệt', N'Từ chối') "
-                + "GROUP BY mt.MonTheThaoID, mt.TenMon "
-                + "HAVING COUNT(DISTINCT s.SanID) > 0 "
-                + "ORDER BY COUNT(DISTINCT s.SanID) DESC, mt.TenMon";
+        String sql = "SELECT mt.sport_id, mt.sport_name, "
+                + "       COUNT(DISTINCT s.court_id)  AS CourtCount, "
+                + "       COUNT(DISTINCT s.facility_id) AS FacilityCount "
+                + "FROM sports mt "
+                + "JOIN court_types ls ON ls.sport_id = mt.sport_id AND ISNULL(ls.is_deleted, 0) = 0 "
+                + "JOIN courts s      ON s.court_type_id = ls.court_type_id AND ISNULL(s.is_deleted, 0) = 0 "
+                + "JOIN facilities c     ON c.facility_id = s.facility_id AND ISNULL(c.is_deleted, 0) = 0 "
+                + "                AND c.status NOT IN (N'Chờ duyệt', N'Từ chối') "
+                + "GROUP BY mt.sport_id, mt.sport_name "
+                + "HAVING COUNT(DISTINCT s.court_id) > 0 "
+                + "ORDER BY COUNT(DISTINCT s.court_id) DESC, mt.sport_name";
         List<SportSummary> out = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 SportSummary s = new SportSummary();
-                s.sportId = rs.getInt("MonTheThaoID");
-                s.name = rs.getString("TenMon");
+                s.sportId = rs.getInt("sport_id");
+                s.name = rs.getString("sport_name");
                 s.courtCount = rs.getInt("CourtCount");
                 s.facilityCount = rs.getInt("FacilityCount");
                 out.add(s);
@@ -131,22 +131,22 @@ public class CustomerCatalogService {
         if (facilityIds == null || facilityIds.isEmpty()) return result;
 
         String placeholders = String.join(",", java.util.Collections.nCopies(facilityIds.size(), "?"));
-        String sql = "SELECT s.CoSoID, s.TrangThai AS SanTrangThai, mt.MonTheThaoID, mt.TenMon, ls.GiaKhongDen "
-                + "FROM San s "
-                + "JOIN LoaiSan ls   ON ls.LoaiSanID = s.LoaiSanID AND ISNULL(ls.IsDeleted, 0) = 0 "
-                + "JOIN MonTheThao mt ON mt.MonTheThaoID = ls.MonTheThaoID "
-                + "WHERE ISNULL(s.IsDeleted, 0) = 0 AND s.CoSoID IN (" + placeholders + ")";
+        String sql = "SELECT s.facility_id, s.status AS SanTrangThai, mt.sport_id, mt.sport_name, ls.price_without_light "
+                + "FROM courts s "
+                + "JOIN court_types ls   ON ls.court_type_id = s.court_type_id AND ISNULL(ls.is_deleted, 0) = 0 "
+                + "JOIN sports mt ON mt.sport_id = ls.sport_id "
+                + "WHERE ISNULL(s.is_deleted, 0) = 0 AND s.facility_id IN (" + placeholders + ")";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             int i = 1;
             for (Integer id : facilityIds) ps.setInt(i++, id);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int coSoId = rs.getInt("CoSoID");
+                    int coSoId = rs.getInt("facility_id");
                     FacilityStats st = result.computeIfAbsent(coSoId, k -> new FacilityStats());
-                    st.sportNames.add(rs.getString("TenMon"));
-                    st.sportIds.add(rs.getInt("MonTheThaoID"));
-                    double gia = rs.getDouble("GiaKhongDen");
+                    st.sportNames.add(rs.getString("sport_name"));
+                    st.sportIds.add(rs.getInt("sport_id"));
+                    double gia = rs.getDouble("price_without_light");
                     if (gia > 0 && (st.minPrice == 0 || gia < st.minPrice)) st.minPrice = gia;
                     if ("Sẵn sàng".equals(rs.getString("SanTrangThai"))) st.readyCourtCount++;
                 }
@@ -231,13 +231,13 @@ public class CustomerCatalogService {
         Map<Integer, CourtContext> out = new HashMap<>();
         if (courtIds == null || courtIds.isEmpty()) return out;
         String placeholders = String.join(",", java.util.Collections.nCopies(courtIds.size(), "?"));
-        String sql = "SELECT s.SanID, s.TenSan, s.HinhAnh AS SanHinhAnh, "
-                + "       c.CoSoID, c.TenCoSo, c.DiaChi, c.HinhAnh AS CoSoHinhAnh, mt.TenMon "
-                + "FROM San s "
-                + "LEFT JOIN CoSo c        ON c.CoSoID = s.CoSoID "
-                + "LEFT JOIN LoaiSan ls    ON ls.LoaiSanID = s.LoaiSanID "
-                + "LEFT JOIN MonTheThao mt ON mt.MonTheThaoID = ls.MonTheThaoID "
-                + "WHERE s.SanID IN (" + placeholders + ")";
+        String sql = "SELECT s.court_id, s.court_name, s.image_path AS SanHinhAnh, "
+                + "       c.facility_id, c.facility_name, c.address, c.image_path AS CoSoHinhAnh, mt.sport_name "
+                + "FROM courts s "
+                + "LEFT JOIN facilities c        ON c.facility_id = s.facility_id "
+                + "LEFT JOIN court_types ls    ON ls.court_type_id = s.court_type_id "
+                + "LEFT JOIN sports mt ON mt.sport_id = ls.sport_id "
+                + "WHERE s.court_id IN (" + placeholders + ")";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             int i = 1;
@@ -245,14 +245,14 @@ public class CustomerCatalogService {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     CourtContext ctx = new CourtContext();
-                    ctx.courtId = rs.getInt("SanID");
-                    ctx.courtName = rs.getString("TenSan");
+                    ctx.courtId = rs.getInt("court_id");
+                    ctx.courtName = rs.getString("court_name");
                     ctx.courtImage = rs.getString("SanHinhAnh");
-                    ctx.facilityId = rs.getInt("CoSoID");
-                    ctx.facilityName = rs.getString("TenCoSo");
-                    ctx.facilityAddress = rs.getString("DiaChi");
+                    ctx.facilityId = rs.getInt("facility_id");
+                    ctx.facilityName = rs.getString("facility_name");
+                    ctx.facilityAddress = rs.getString("address");
                     ctx.facilityImage = rs.getString("CoSoHinhAnh");
-                    ctx.sportName = rs.getString("TenMon");
+                    ctx.sportName = rs.getString("sport_name");
                     out.put(ctx.courtId, ctx);
                 }
             }

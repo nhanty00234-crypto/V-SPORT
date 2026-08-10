@@ -249,7 +249,7 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
         String reason = req.getParameter("reason");
         OwnerApprovalService.ApprovalResult result = ownerApprovalService.reject(id);
         if (result.success) {
-            adminTrashDAO.log("OwnerRequest", id, coSoName, "CoSo", "Chờ duyệt",
+            adminTrashDAO.log("OwnerRequest", id, coSoName, "facilities", "Chờ duyệt",
                     admin.getAccountId(), null);
             AuditLogService.log(req, admin, id, AuditLogService.ACTION_REJECT,
                     AuditLogService.ENTITY_CO_SO, String.valueOf(id), coSoName,
@@ -276,19 +276,19 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
 
             // 1. Get mapping of Sport Name -> LoaiSanID
             Map<String, Integer> sportToTypeMap = new HashMap<>();
-            String queryTypesSql = "SELECT m.TenMon, l.LoaiSanID FROM LoaiSan l JOIN MonTheThao m ON l.MonTheThaoID = m.MonTheThaoID ORDER BY CASE WHEN l.CoSoID = ? THEN 1 ELSE 0 END ASC";
+            String queryTypesSql = "SELECT m.sport_name, l.court_type_id FROM court_types l JOIN sports m ON l.sport_id = m.sport_id ORDER BY CASE WHEN l.facility_id = ? THEN 1 ELSE 0 END ASC";
             try (PreparedStatement ps = conn.prepareStatement(queryTypesSql)) {
                 ps.setInt(1, coSoId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        sportToTypeMap.put(rs.getNString("TenMon"), rs.getInt("LoaiSanID"));
+                        sportToTypeMap.put(rs.getNString("sport_name"), rs.getInt("court_type_id"));
                     }
                 }
             }
 
             // Get fallback default type (first type available in database)
             int defaultType = 1;
-            try (PreparedStatement ps = conn.prepareStatement("SELECT TOP 1 LoaiSanID FROM LoaiSan");
+            try (PreparedStatement ps = conn.prepareStatement("SELECT TOP 1 court_type_id FROM court_types");
                  ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     defaultType = rs.getInt(1);
@@ -306,11 +306,11 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
 
                 // Get existing courts for this sport at this branch
                 List<Integer> existingSanIds = new ArrayList<>();
-                String querySanSql = "SELECT s.SanID FROM San s " +
-                        "JOIN LoaiSan l ON s.LoaiSanID = l.LoaiSanID " +
-                        "JOIN MonTheThao m ON l.MonTheThaoID = m.MonTheThaoID " +
-                        "WHERE s.CoSoID = ? AND m.TenMon = ? " +
-                        "ORDER BY s.SanID ASC";
+                String querySanSql = "SELECT s.court_id FROM courts s " +
+                        "JOIN court_types l ON s.court_type_id = l.court_type_id " +
+                        "JOIN sports m ON l.sport_id = m.sport_id " +
+                        "WHERE s.facility_id = ? AND m.sport_name = ? " +
+                        "ORDER BY s.court_id ASC";
                 try (PreparedStatement ps = conn.prepareStatement(querySanSql)) {
                     ps.setInt(1, coSoId);
                     ps.setNString(2, sport);
@@ -326,7 +326,7 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                 if (currentCount < expectedCount) {
                     // Insert missing courts
                     int toAdd = expectedCount - currentCount;
-                    String insertSql = "INSERT INTO San (TenSan, LoaiSanID, CoSoID, TrangThai, MoTa, HinhAnh) VALUES (?, ?, ?, ?, ?, ?)";
+                    String insertSql = "INSERT INTO courts (court_name, court_type_id, facility_id, status, description, image_path) VALUES (?, ?, ?, ?, ?, ?)";
                     try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
                         for (int i = 0; i < toAdd; i++) {
                             int courtIndex = currentCount + i + 1;
@@ -347,14 +347,14 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                 } else if (currentCount > expectedCount) {
                     // Delete excess courts
                     int toDelete = currentCount - expectedCount;
-                    String deleteSql = "DELETE FROM San WHERE SanID = ?";
+                    String deleteSql = "DELETE FROM courts WHERE court_id = ?";
                     try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
                         for (int i = 0; i < toDelete; i++) {
                             int sanIdToDelete = existingSanIds.get(existingSanIds.size() - 1 - i);
 
                             // Delete bookings
                             try (PreparedStatement psDelBook = conn
-                                    .prepareStatement("DELETE FROM LichDatSan WHERE SanID = ?")) {
+                                    .prepareStatement("DELETE FROM bookings WHERE court_id = ?")) {
                                 psDelBook.setInt(1, sanIdToDelete);
                                 psDelBook.executeUpdate();
                             }
@@ -377,14 +377,14 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
                 return;
 
             // Delete associated bookings
-            String delBookSql = "DELETE FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)";
+            String delBookSql = "DELETE FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?)";
             try (PreparedStatement ps = conn.prepareStatement(delBookSql)) {
                 ps.setInt(1, coSoId);
                 ps.executeUpdate();
             }
 
             // Delete courts
-            String delSanSql = "DELETE FROM San WHERE CoSoID = ?";
+            String delSanSql = "DELETE FROM courts WHERE facility_id = ?";
             try (PreparedStatement ps = conn.prepareStatement(delSanSql)) {
                 ps.setInt(1, coSoId);
                 ps.executeUpdate();
@@ -466,7 +466,7 @@ public class QuanLyChiNhanhServlet extends HttpServlet {
             String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12));
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
                  java.sql.PreparedStatement ps = conn.prepareStatement(
-                         "UPDATE Accounts SET Password = ? WHERE AccountID = ?")) {
+                         "UPDATE accounts SET password_hash = ? WHERE account_id = ?")) {
                 ps.setString(1, hashed);
                 ps.setInt(2, account.getAccountId());
                 ps.executeUpdate();

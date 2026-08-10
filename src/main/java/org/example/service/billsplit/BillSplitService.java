@@ -404,19 +404,19 @@ public class BillSplitService {
     }
 
     private BookingInvoiceInfo loadBookingInvoiceInfo(int datSanId) {
-        String sql = "SELECT h.HoaDonID, lds.AccountID, h.TongThanhToan, h.TrangThaiThanhToan " +
-                     "FROM LichDatSan lds JOIN HoaDon h ON lds.DatSanID = h.DatSanID " +
-                     "WHERE lds.DatSanID = ? AND (h.LoaiHoaDon IS NULL OR h.LoaiHoaDon = 'MAIN')";
+        String sql = "SELECT h.invoice_id, lds.account_id, h.grand_total, h.payment_status " +
+                     "FROM bookings lds JOIN invoices h ON lds.booking_id = h.booking_id " +
+                     "WHERE lds.booking_id = ? AND (h.invoice_type IS NULL OR h.invoice_type = 'MAIN')";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     BookingInvoiceInfo info = new BookingInvoiceInfo();
-                    info.hoaDonId = rs.getInt("HoaDonID");
-                    info.ownerAccountId = rs.getInt("AccountID");
-                    info.tongThanhToan = rs.getDouble("TongThanhToan");
-                    info.trangThaiThanhToan = rs.getString("TrangThaiThanhToan");
+                    info.hoaDonId = rs.getInt("invoice_id");
+                    info.ownerAccountId = rs.getInt("account_id");
+                    info.tongThanhToan = rs.getDouble("grand_total");
+                    info.trangThaiThanhToan = rs.getString("payment_status");
                     return info;
                 }
             }
@@ -428,18 +428,18 @@ public class BillSplitService {
 
     /** Phiên đã kết thúc hoặc hóa đơn đã chốt — dùng LichDatSan.TrangThai/ActualEndAt làm nguồn sự thật. */
     private boolean isBookingFinished(int datSanId) {
-        String sql = "SELECT TrangThai, ActualEndAt, GioKetThuc, NgayDat FROM LichDatSan WHERE DatSanID = ?";
+        String sql = "SELECT status, actual_ended_at, end_time, booking_date FROM bookings WHERE booking_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return false;
-                String trangThai = rs.getString("TrangThai");
-                if (rs.getTimestamp("ActualEndAt") != null) return true;
+                String trangThai = rs.getString("status");
+                if (rs.getTimestamp("actual_ended_at") != null) return true;
                 if (Constants.TRANG_THAI_DAT_SAN_DA_HOAN_THANH.equals(trangThai)) return true;
                 // Fallback: giờ kết thúc theo lịch đã qua.
-                java.sql.Date ngayDat = rs.getDate("NgayDat");
-                java.sql.Time gioKetThuc = rs.getTime("GioKetThuc");
+                java.sql.Date ngayDat = rs.getDate("booking_date");
+                java.sql.Time gioKetThuc = rs.getTime("end_time");
                 if (ngayDat != null && gioKetThuc != null) {
                     java.time.LocalDateTime end = java.time.LocalDateTime.of(ngayDat.toLocalDate(), gioKetThuc.toLocalTime());
                     return end.isBefore(java.time.LocalDateTime.now());
@@ -455,7 +455,7 @@ public class BillSplitService {
     /** Cập nhật TrangThaiThanhToan của HoaDon gốc theo tiến độ chia tiền (mục 9 spec). */
     private void updateHoaDonPaymentStatus(Connection conn, int hoaDonId, boolean fullyPaid) throws SQLException {
         String newStatus = fullyPaid ? Constants.TRANG_THAI_HOA_DON_DA_TT : Constants.TRANG_THAI_HOA_DON_MOT_PHAN;
-        String sql = "UPDATE HoaDon SET TrangThaiThanhToan = ? WHERE HoaDonID = ? AND TrangThaiThanhToan <> ?";
+        String sql = "UPDATE invoices SET payment_status = ? WHERE invoice_id = ? AND payment_status <> ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, newStatus);
             ps.setInt(2, hoaDonId);

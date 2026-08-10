@@ -89,17 +89,17 @@ public class ServiceBillSeparationService {
         BillSummaryDTO summary = new BillSummaryDTO();
         summary.datSanId = datSanId;
 
-        String sqlMain = "SELECT HoaDonID, TongThanhToan, TrangThaiThanhToan FROM HoaDon WHERE DatSanID = ? AND (LoaiHoaDon IS NULL OR LoaiHoaDon = 'MAIN')";
-        String sqlSplits = "SELECT HoaDonID, TongThanhToan, TrangThaiThanhToan, PhuongThucThanhToan, NgayLap, GhiChu " +
-                           "FROM HoaDon WHERE DatSanID = ? AND LoaiHoaDon = 'SPLIT' ORDER BY NgayLap DESC";
+        String sqlMain = "SELECT invoice_id, grand_total, payment_status FROM invoices WHERE booking_id = ? AND (invoice_type IS NULL OR invoice_type = 'MAIN')";
+        String sqlSplits = "SELECT invoice_id, grand_total, payment_status, payment_method, issued_at, note " +
+                           "FROM invoices WHERE booking_id = ? AND invoice_type = 'SPLIT' ORDER BY issued_at DESC";
 
         try (Connection conn = DBUtil.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(sqlMain)) {
                 ps.setInt(1, datSanId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        summary.mainBillAmount = rs.getDouble("TongThanhToan");
-                        summary.mainBillStatus = rs.getString("TrangThaiThanhToan");
+                        summary.mainBillAmount = rs.getDouble("grand_total");
+                        summary.mainBillStatus = rs.getString("payment_status");
                     }
                 }
             }
@@ -109,14 +109,14 @@ public class ServiceBillSeparationService {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         HoaDon h = new HoaDon();
-                        h.setHoaDonId(rs.getInt("HoaDonID"));
+                        h.setHoaDonId(rs.getInt("invoice_id"));
                         h.setDatSanId(datSanId);
-                        h.setTongThanhToan(rs.getDouble("TongThanhToan"));
-                        h.setTrangThaiThanhToan(rs.getString("TrangThaiThanhToan"));
-                        h.setPhuongThucThanhToan(rs.getString("PhuongThucThanhToan"));
-                        h.setNgayLap(rs.getTimestamp("NgayLap"));
+                        h.setTongThanhToan(rs.getDouble("grand_total"));
+                        h.setTrangThaiThanhToan(rs.getString("payment_status"));
+                        h.setPhuongThucThanhToan(rs.getString("payment_method"));
+                        h.setNgayLap(rs.getTimestamp("issued_at"));
                         h.setLoaiHoaDon("SPLIT");
-                        h.setGhiChu(rs.getNString("GhiChu"));
+                        h.setGhiChu(rs.getNString("note"));
                         summary.splitBills.add(h);
                         summary.splitBillsTotal += h.getTongThanhToan();
                     }
@@ -131,8 +131,8 @@ public class ServiceBillSeparationService {
     }
 
     private void notifyCustomerAboutSplitBill(int datSanId, int splitHoaDonId) {
-        String sqlFindCustomer = "SELECT AccountID FROM LichDatSan WHERE DatSanID = ?";
-        String sqlInsertNotification = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
+        String sqlFindCustomer = "SELECT account_id FROM bookings WHERE booking_id = ?";
+        String sqlInsertNotification = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan) " +
                                         "VALUES (?, N'Hóa đơn dịch vụ mới', ?, N'HE_THONG', 0, GETDATE(), ?, ?)";
         try (Connection conn = DBUtil.getConnection()) {
             Integer customerId = null;
@@ -140,7 +140,7 @@ public class ServiceBillSeparationService {
                 ps.setInt(1, datSanId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        int accId = rs.getInt("AccountID");
+                        int accId = rs.getInt("account_id");
                         if (!rs.wasNull()) customerId = accId;
                     }
                 }

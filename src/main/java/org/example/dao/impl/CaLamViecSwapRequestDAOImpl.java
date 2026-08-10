@@ -17,7 +17,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
 
     @Override
     public boolean insert(CaLamViecSwapRequest sr) {
-        String sql = "INSERT INTO CaLamViec_SwapRequest (AccountID_Gui, CaLamViecID_Gui, AccountID_Nhan, CaLamViecID_Nhan, LyDo, TrangThai) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO work_shift_swap_requests (requester_account_id, requester_work_shift_id, target_account_id, target_work_shift_id, reason, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, sr.getAccountIdGui());
@@ -48,7 +48,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
 
     @Override
     public boolean update(CaLamViecSwapRequest sr) {
-        String sql = "UPDATE CaLamViec_SwapRequest SET TrangThai = ?, NguoiDuyet = ?, NgayDuyet = ?, GhiChuQuanLy = ? WHERE SwapRequestID = ?";
+        String sql = "UPDATE work_shift_swap_requests SET status = ?, approver_account_id = ?, approved_at = ?, manager_note = ? WHERE swap_request_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sr.getTrangThai());
@@ -73,7 +73,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
 
     @Override
     public CaLamViecSwapRequest getById(int swapRequestId) {
-        String sql = getSelectQuery() + " WHERE sr.SwapRequestID = ?";
+        String sql = getSelectQuery() + " WHERE sr.swap_request_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, swapRequestId);
@@ -92,7 +92,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
     public List<CaLamViecSwapRequest> getByCoSo(int coSoId) {
         List<CaLamViecSwapRequest> list = new ArrayList<>();
         // Query requests where sender belongs to the branch
-        String sql = getSelectQuery() + " JOIN Accounts s_acc ON sr.AccountID_Gui = s_acc.AccountID WHERE s_acc.CoSoID = ? ORDER BY sr.NgayGui DESC";
+        String sql = getSelectQuery() + " JOIN accounts s_acc ON sr.requester_account_id = s_acc.account_id WHERE s_acc.facility_id = ? ORDER BY sr.requested_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -111,7 +111,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
     public List<CaLamViecSwapRequest> getByAccount(int accountId) {
         List<CaLamViecSwapRequest> list = new ArrayList<>();
         // Query requests where user is either sender or receiver
-        String sql = getSelectQuery() + " WHERE sr.AccountID_Gui = ? OR sr.AccountID_Nhan = ? ORDER BY sr.NgayGui DESC";
+        String sql = getSelectQuery() + " WHERE sr.requester_account_id = ? OR sr.target_account_id = ? ORDER BY sr.requested_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -129,7 +129,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
 
     @Override
     public boolean updateWithConnection(CaLamViecSwapRequest sr, Connection conn) throws SQLException {
-        String sql = "UPDATE CaLamViec_SwapRequest SET TrangThai = ?, NguoiDuyet = ?, NgayDuyet = ?, GhiChuQuanLy = ? WHERE SwapRequestID = ?";
+        String sql = "UPDATE work_shift_swap_requests SET status = ?, approver_account_id = ?, approved_at = ?, manager_note = ? WHERE swap_request_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sr.getTrangThai());
             if (sr.getNguoiDuyet() != null) {
@@ -150,7 +150,7 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
 
     @Override
     public boolean hasPendingForShift(int caLamViecId) {
-        String sql = "SELECT 1 FROM CaLamViec_SwapRequest WHERE CaLamViecID_Gui = ? AND TrangThai IN ('ChoXacNhan', 'ChoQuanLyDuyet')";
+        String sql = "SELECT 1 FROM work_shift_swap_requests WHERE requester_work_shift_id = ? AND status IN ('ChoXacNhan', 'ChoQuanLyDuyet')";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, caLamViecId);
@@ -164,43 +164,43 @@ public class CaLamViecSwapRequestDAOImpl implements CaLamViecSwapRequestDAO {
     }
 
     private String getSelectQuery() {
-        return "SELECT sr.*, acc1.FullName as SenderName, acc2.FullName as ReceiverName, " +
-               "c1.NgayLam as GuiNgay, c1.GioBatDau as GuiBD, c1.GioKetThuc as GuiKT, " +
-               "c2.NgayLam as NhanNgay, c2.GioBatDau as NhanBD, c2.GioKetThuc as NhanKT " +
-               "FROM CaLamViec_SwapRequest sr " +
-               "JOIN Accounts acc1 ON sr.AccountID_Gui = acc1.AccountID " +
-               "JOIN Accounts acc2 ON sr.AccountID_Nhan = acc2.AccountID " +
-               "JOIN CaLamViec c1 ON sr.CaLamViecID_Gui = c1.CaLamViecID " +
-               "LEFT JOIN CaLamViec c2 ON sr.CaLamViecID_Nhan = c2.CaLamViecID";
+        return "SELECT sr.*, acc1.full_name as SenderName, acc2.full_name as ReceiverName, " +
+               "c1.work_date as GuiNgay, c1.start_time as GuiBD, c1.end_time as GuiKT, " +
+               "c2.work_date as NhanNgay, c2.start_time as NhanBD, c2.end_time as NhanKT " +
+               "FROM work_shift_swap_requests sr " +
+               "JOIN accounts acc1 ON sr.requester_account_id = acc1.account_id " +
+               "JOIN accounts acc2 ON sr.target_account_id = acc2.account_id " +
+               "JOIN work_shifts c1 ON sr.requester_work_shift_id = c1.work_shift_id " +
+               "LEFT JOIN work_shifts c2 ON sr.target_work_shift_id = c2.work_shift_id";
     }
 
     private CaLamViecSwapRequest mapResultSet(ResultSet rs) throws SQLException {
         CaLamViecSwapRequest sr = new CaLamViecSwapRequest();
-        sr.setSwapRequestId(rs.getInt("SwapRequestID"));
-        sr.setAccountIdGui(rs.getInt("AccountID_Gui"));
-        sr.setCaLamViecIdGui(rs.getInt("CaLamViecID_Gui"));
-        sr.setAccountIdNhan(rs.getInt("AccountID_Nhan"));
+        sr.setSwapRequestId(rs.getInt("swap_request_id"));
+        sr.setAccountIdGui(rs.getInt("requester_account_id"));
+        sr.setCaLamViecIdGui(rs.getInt("requester_work_shift_id"));
+        sr.setAccountIdNhan(rs.getInt("target_account_id"));
         
-        int nhanId = rs.getInt("CaLamViecID_Nhan");
+        int nhanId = rs.getInt("target_work_shift_id");
         if (!rs.wasNull()) {
             sr.setCaLamViecIdNhan(nhanId);
         }
         
-        sr.setLyDo(rs.getNString("LyDo"));
-        sr.setTrangThai(rs.getString("TrangThai"));
+        sr.setLyDo(rs.getNString("reason"));
+        sr.setTrangThai(rs.getString("status"));
         
-        int nd = rs.getInt("NguoiDuyet");
+        int nd = rs.getInt("approver_account_id");
         if (!rs.wasNull()) {
             sr.setNguoiDuyet(nd);
         }
         
-        Timestamp ng = rs.getTimestamp("NgayGui");
+        Timestamp ng = rs.getTimestamp("requested_at");
         if (ng != null) sr.setNgayGui(ng.toLocalDateTime());
         
-        Timestamp ndt = rs.getTimestamp("NgayDuyet");
+        Timestamp ndt = rs.getTimestamp("approved_at");
         if (ndt != null) sr.setNgayDuyet(ndt.toLocalDateTime());
         
-        sr.setGhiChuQuanLy(rs.getNString("GhiChuQuanLy"));
+        sr.setGhiChuQuanLy(rs.getNString("manager_note"));
         
         sr.setTenNguoiGui(rs.getNString("SenderName"));
         sr.setTenNguoiNhan(rs.getNString("ReceiverName"));

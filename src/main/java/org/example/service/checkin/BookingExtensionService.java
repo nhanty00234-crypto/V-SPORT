@@ -48,13 +48,13 @@ public class BookingExtensionService {
         preview.datSanId = datSanId;
         preview.canExtend = false;
 
-        String sqlBooking = "SELECT l.DatSanID, l.SanID, l.NgayDat, l.GioBatDau, l.GioKetThuc, l.TrangThai, l.TimeMode, " +
-                "l.actual_start_time, l.ActualStartAt, l.ReservedDurationMinutes, " +
-                "s.TenSan, s.CoSoID, s.TrangThai AS SanTrangThai, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen " +
-                "FROM LichDatSan l " +
-                "JOIN San s ON l.SanID = s.SanID " +
-                "JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
-                "WHERE l.DatSanID = ? AND l.IsDeleted = 0";
+        String sqlBooking = "SELECT l.booking_id, l.court_id, l.booking_date, l.start_time, l.end_time, l.status, l.time_mode, " +
+                "l.actual_start_time_of_day, l.actual_started_at, l.reserved_duration_minutes, " +
+                "s.court_name, s.facility_id, s.status AS SanTrangThai, ls.price_without_light, ls.price_with_light, ls.light_start_time, ls.light_end_time " +
+                "FROM bookings l " +
+                "JOIN courts s ON l.court_id = s.court_id " +
+                "JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
+                "WHERE l.booking_id = ? AND l.is_deleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sqlBooking)) {
@@ -65,45 +65,45 @@ public class BookingExtensionService {
                     return preview;
                 }
 
-                int bookingCoSoId = rs.getInt("CoSoID");
+                int bookingCoSoId = rs.getInt("facility_id");
                 if (bookingCoSoId != coSoId) {
                     preview.message = "Đơn đặt sân không thuộc cơ sở của bạn.";
                     return preview;
                 }
 
-                String bookingTrangThai = rs.getString("TrangThai");
+                String bookingTrangThai = rs.getString("status");
                 if (!"Đang sử dụng".equals(bookingTrangThai)) {
                     preview.message = "Chỉ ca chơi ở trạng thái 'Đang sử dụng' mới có thể gia hạn.";
                     return preview;
                 }
 
-                String timeMode = rs.getString("TimeMode");
+                String timeMode = rs.getString("time_mode");
                 if ("OPEN_ENDED".equals(timeMode)) {
                     preview.message = "Walk-in không cố định chạy đến khi dừng, không cần gia hạn.";
                     return preview;
                 }
 
-                int sanId = rs.getInt("SanID");
+                int sanId = rs.getInt("court_id");
                 preview.sanId = sanId;
-                preview.tenSan = rs.getString("TenSan");
-                LocalDate date = rs.getDate("NgayDat").toLocalDate();
-                LocalTime oldGioKetThuc = rs.getTime("GioKetThuc").toLocalTime();
+                preview.tenSan = rs.getString("court_name");
+                LocalDate date = rs.getDate("booking_date").toLocalDate();
+                LocalTime oldGioKetThuc = rs.getTime("end_time").toLocalTime();
                 preview.oldGioKetThuc = oldGioKetThuc;
 
                 // 1. Xác định startAt
                 LocalDateTime startAt = null;
-                Timestamp ts = rs.getTimestamp("ActualStartAt");
+                Timestamp ts = rs.getTimestamp("actual_started_at");
                 if (ts != null) {
                     startAt = ts.toLocalDateTime();
                 }
                 if (startAt == null) {
-                    Time t = rs.getTime("actual_start_time");
+                    Time t = rs.getTime("actual_start_time_of_day");
                     if (t != null) {
                         startAt = date.atTime(t.toLocalTime());
                     }
                 }
                 if (startAt == null) {
-                    startAt = date.atTime(rs.getTime("GioBatDau").toLocalTime());
+                    startAt = date.atTime(rs.getTime("start_time").toLocalTime());
                 }
 
                 // 2. Xác định oldPlannedEnd
@@ -115,11 +115,11 @@ public class BookingExtensionService {
 
                 // 3. Tìm limitDateTime (booking tiếp theo hoặc đóng cửa)
                 LocalDateTime nextBookingStart = null;
-                String sqlNext = "SELECT DatSanID, NgayDat, GioBatDau, GioKetThuc, TrangThai, HoldExpiresAt FROM LichDatSan " +
-                        "WHERE SanID = ? AND IsDeleted = 0 AND DatSanID <> ? " +
-                        "AND (NgayDat = ? OR NgayDat = ?) " +
-                        "AND (TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                        "     OR (TrangThai = N'Chờ thanh toán' AND HoldExpiresAt > SYSUTCDATETIME()))";
+                String sqlNext = "SELECT booking_id, booking_date, start_time, end_time, status, hold_expires_at FROM bookings " +
+                        "WHERE court_id = ? AND is_deleted = 0 AND booking_id <> ? " +
+                        "AND (booking_date = ? OR booking_date = ?) " +
+                        "AND (status IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
+                        "     OR (status = N'Chờ thanh toán' AND hold_expires_at > SYSUTCDATETIME()))";
                 try (PreparedStatement psNext = conn.prepareStatement(sqlNext)) {
                     psNext.setInt(1, sanId);
                     psNext.setInt(2, datSanId);
@@ -127,8 +127,8 @@ public class BookingExtensionService {
                     psNext.setDate(4, Date.valueOf(date.plusDays(1)));
                     try (ResultSet rsNext = psNext.executeQuery()) {
                         while (rsNext.next()) {
-                            LocalDate nextDate = rsNext.getDate("NgayDat").toLocalDate();
-                            LocalTime nextStartTime = rsNext.getTime("GioBatDau").toLocalTime();
+                            LocalDate nextDate = rsNext.getDate("booking_date").toLocalDate();
+                            LocalTime nextStartTime = rsNext.getTime("start_time").toLocalTime();
                             LocalDateTime startTemp = nextDate.atTime(nextStartTime);
                             if (!startTemp.isBefore(oldPlannedEnd)) {
                                 if (nextBookingStart == null || startTemp.isBefore(nextBookingStart)) {
@@ -140,12 +140,12 @@ public class BookingExtensionService {
                 }
 
                 LocalDateTime closeTime = null;
-                String sqlCoSo = "SELECT GioDongCua FROM CoSo WHERE CoSoID = ?";
+                String sqlCoSo = "SELECT closing_time FROM facilities WHERE facility_id = ?";
                 try (PreparedStatement psCoSo = conn.prepareStatement(sqlCoSo)) {
                     psCoSo.setInt(1, coSoId);
                     try (ResultSet rsCoSo = psCoSo.executeQuery()) {
                         if (rsCoSo.next()) {
-                            Time dbClose = rsCoSo.getTime("GioDongCua");
+                            Time dbClose = rsCoSo.getTime("closing_time");
                             if (dbClose != null) {
                                 closeTime = date.atTime(dbClose.toLocalTime());
                                 if (dbClose.toLocalTime().isBefore(startAt.toLocalTime())) {
@@ -213,10 +213,10 @@ public class BookingExtensionService {
                 }
 
                 // 8. Tính tiền
-                LocalTime lightingStart = rs.getTime("GioBatDauLenDen") != null ? rs.getTime("GioBatDauLenDen").toLocalTime() : null;
-                LocalTime lightingEnd = rs.getTime("GioKetThucLenDen") != null ? rs.getTime("GioKetThucLenDen").toLocalTime() : null;
-                BigDecimal rateWithoutLight = rs.getBigDecimal("GiaKhongDen");
-                BigDecimal rateWithLight = rs.getBigDecimal("GiaCoDen");
+                LocalTime lightingStart = rs.getTime("light_start_time") != null ? rs.getTime("light_start_time").toLocalTime() : null;
+                LocalTime lightingEnd = rs.getTime("light_end_time") != null ? rs.getTime("light_end_time").toLocalTime() : null;
+                BigDecimal rateWithoutLight = rs.getBigDecimal("price_without_light");
+                BigDecimal rateWithLight = rs.getBigDecimal("price_with_light");
 
                 CourtPriceResult oldPricing = courtPricingService.calculate(startAt, oldPlannedEnd, lightingStart, lightingEnd, rateWithoutLight, rateWithLight);
                 CourtPriceResult newPricing = courtPricingService.calculate(startAt, newPlannedEnd, lightingStart, lightingEnd, rateWithoutLight, rateWithLight);
@@ -247,13 +247,13 @@ public class BookingExtensionService {
             conn.setAutoCommit(false);
 
             // 1. Khóa hàng LichDatSan
-            String sqlLockBooking = "SELECT l.DatSanID, l.SanID, l.NgayDat, l.GioBatDau, l.GioKetThuc, l.TrangThai, l.TimeMode, " +
-                    "l.actual_start_time, l.ActualStartAt, l.ReservedDurationMinutes, " +
-                    "s.TenSan, s.CoSoID, s.TrangThai AS SanTrangThai, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen " +
-                    "FROM LichDatSan l WITH (UPDLOCK, ROWLOCK) " +
-                    "JOIN San s ON l.SanID = s.SanID " +
-                    "JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
-                    "WHERE l.DatSanID = ? AND l.IsDeleted = 0";
+            String sqlLockBooking = "SELECT l.booking_id, l.court_id, l.booking_date, l.start_time, l.end_time, l.status, l.time_mode, " +
+                    "l.actual_start_time_of_day, l.actual_started_at, l.reserved_duration_minutes, " +
+                    "s.court_name, s.facility_id, s.status AS SanTrangThai, ls.price_without_light, ls.price_with_light, ls.light_start_time, ls.light_end_time " +
+                    "FROM bookings l WITH (UPDLOCK, ROWLOCK) " +
+                    "JOIN courts s ON l.court_id = s.court_id " +
+                    "JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
+                    "WHERE l.booking_id = ? AND l.is_deleted = 0";
 
             int sanId;
             LocalDate date;
@@ -275,43 +275,43 @@ public class BookingExtensionService {
                         return result;
                     }
 
-                    int bookingCoSoId = rs.getInt("CoSoID");
+                    int bookingCoSoId = rs.getInt("facility_id");
                     if (bookingCoSoId != coSoId) {
                         result.message = "Đơn đặt sân không thuộc cơ sở của bạn.";
                         conn.rollback();
                         return result;
                     }
 
-                    String bookingTrangThai = rs.getString("TrangThai");
+                    String bookingTrangThai = rs.getString("status");
                     if (!"Đang sử dụng".equals(bookingTrangThai)) {
                         result.message = "Chỉ ca chơi ở trạng thái 'Đang sử dụng' mới có thể gia hạn.";
                         conn.rollback();
                         return result;
                     }
 
-                    String timeMode = rs.getString("TimeMode");
+                    String timeMode = rs.getString("time_mode");
                     if ("OPEN_ENDED".equals(timeMode)) {
                         result.message = "Walk-in không cố định chạy đến khi dừng, không cần gia hạn.";
                         conn.rollback();
                         return result;
                     }
 
-                    sanId = rs.getInt("SanID");
-                    date = rs.getDate("NgayDat").toLocalDate();
-                    oldGioKetThuc = rs.getTime("GioKetThuc").toLocalTime();
+                    sanId = rs.getInt("court_id");
+                    date = rs.getDate("booking_date").toLocalDate();
+                    oldGioKetThuc = rs.getTime("end_time").toLocalTime();
 
-                    Timestamp ts = rs.getTimestamp("ActualStartAt");
+                    Timestamp ts = rs.getTimestamp("actual_started_at");
                     if (ts != null) {
                         startAt = ts.toLocalDateTime();
                     }
                     if (startAt == null) {
-                        Time t = rs.getTime("actual_start_time");
+                        Time t = rs.getTime("actual_start_time_of_day");
                         if (t != null) {
                             startAt = date.atTime(t.toLocalTime());
                         }
                     }
                     if (startAt == null) {
-                        startAt = date.atTime(rs.getTime("GioBatDau").toLocalTime());
+                        startAt = date.atTime(rs.getTime("start_time").toLocalTime());
                     }
 
                     oldPlannedEnd = date.atTime(oldGioKetThuc);
@@ -319,12 +319,12 @@ public class BookingExtensionService {
                         oldPlannedEnd = oldPlannedEnd.plusDays(1);
                     }
 
-                    lightingStart = rs.getTime("GioBatDauLenDen") != null ? rs.getTime("GioBatDauLenDen").toLocalTime() : null;
-                    lightingEnd = rs.getTime("GioKetThucLenDen") != null ? rs.getTime("GioKetThucLenDen").toLocalTime() : null;
-                    rateWithoutLight = rs.getBigDecimal("GiaKhongDen");
-                    rateWithLight = rs.getBigDecimal("GiaCoDen");
+                    lightingStart = rs.getTime("light_start_time") != null ? rs.getTime("light_start_time").toLocalTime() : null;
+                    lightingEnd = rs.getTime("light_end_time") != null ? rs.getTime("light_end_time").toLocalTime() : null;
+                    rateWithoutLight = rs.getBigDecimal("price_without_light");
+                    rateWithLight = rs.getBigDecimal("price_with_light");
 
-                    int resMin = rs.getInt("ReservedDurationMinutes");
+                    int resMin = rs.getInt("reserved_duration_minutes");
                     if (!rs.wasNull()) {
                         oldReservedMinutes = resMin;
                     }
@@ -332,12 +332,12 @@ public class BookingExtensionService {
             }
 
             // 2. Khóa hàng Sân
-            String sqlLockSan = "SELECT TrangThai FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
+            String sqlLockSan = "SELECT status FROM courts WITH (UPDLOCK, ROWLOCK) WHERE court_id = ?";
             try (PreparedStatement psSan = conn.prepareStatement(sqlLockSan)) {
                 psSan.setInt(1, sanId);
                 try (ResultSet rsSan = psSan.executeQuery()) {
                     if (rsSan.next()) {
-                        String sanStatus = rsSan.getString("TrangThai");
+                        String sanStatus = rsSan.getString("status");
                         if ("Bảo trì".equals(sanStatus) || "Tạm đóng".equals(sanStatus)) {
                             result.message = "Không thể gia hạn chơi vì sân đang ở trạng thái: " + sanStatus;
                             conn.rollback();
@@ -349,11 +349,11 @@ public class BookingExtensionService {
 
             // 3. Tìm limitDateTime
             LocalDateTime nextBookingStart = null;
-            String sqlNext = "SELECT DatSanID, NgayDat, GioBatDau, GioKetThuc, TrangThai, HoldExpiresAt FROM LichDatSan " +
-                    "WHERE SanID = ? AND IsDeleted = 0 AND DatSanID <> ? " +
-                    "AND (NgayDat = ? OR NgayDat = ?) " +
-                    "AND (TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                    "     OR (TrangThai = N'Chờ thanh toán' AND HoldExpiresAt > SYSUTCDATETIME()))";
+            String sqlNext = "SELECT booking_id, booking_date, start_time, end_time, status, hold_expires_at FROM bookings " +
+                    "WHERE court_id = ? AND is_deleted = 0 AND booking_id <> ? " +
+                    "AND (booking_date = ? OR booking_date = ?) " +
+                    "AND (status IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
+                    "     OR (status = N'Chờ thanh toán' AND hold_expires_at > SYSUTCDATETIME()))";
             try (PreparedStatement psNext = conn.prepareStatement(sqlNext)) {
                 psNext.setInt(1, sanId);
                 psNext.setInt(2, datSanId);
@@ -361,8 +361,8 @@ public class BookingExtensionService {
                 psNext.setDate(4, Date.valueOf(date.plusDays(1)));
                 try (ResultSet rsNext = psNext.executeQuery()) {
                     while (rsNext.next()) {
-                        LocalDate nextDate = rsNext.getDate("NgayDat").toLocalDate();
-                        LocalTime nextStartTime = rsNext.getTime("GioBatDau").toLocalTime();
+                        LocalDate nextDate = rsNext.getDate("booking_date").toLocalDate();
+                        LocalTime nextStartTime = rsNext.getTime("start_time").toLocalTime();
                         LocalDateTime startTemp = nextDate.atTime(nextStartTime);
                         if (!startTemp.isBefore(oldPlannedEnd)) {
                             if (nextBookingStart == null || startTemp.isBefore(nextBookingStart)) {
@@ -374,12 +374,12 @@ public class BookingExtensionService {
             }
 
             LocalDateTime closeTime = null;
-            String sqlCoSo = "SELECT GioDongCua FROM CoSo WHERE CoSoID = ?";
+            String sqlCoSo = "SELECT closing_time FROM facilities WHERE facility_id = ?";
             try (PreparedStatement psCoSo = conn.prepareStatement(sqlCoSo)) {
                 psCoSo.setInt(1, coSoId);
                 try (ResultSet rsCoSo = psCoSo.executeQuery()) {
                     if (rsCoSo.next()) {
-                        Time dbClose = rsCoSo.getTime("GioDongCua");
+                        Time dbClose = rsCoSo.getTime("closing_time");
                         if (dbClose != null) {
                             closeTime = date.atTime(dbClose.toLocalTime());
                             if (dbClose.toLocalTime().isBefore(startAt.toLocalTime())) {
@@ -445,9 +445,9 @@ public class BookingExtensionService {
                 newReservedMinutes = oldReservedMinutes + (int) extendDurationMin;
             }
 
-            String sqlUpdateBooking = "UPDATE LichDatSan SET GioKetThuc = ?, TongTienDuKien = ?" +
-                    (newReservedMinutes != null ? ", ReservedDurationMinutes = ?" : "") +
-                    " WHERE DatSanID = ?";
+            String sqlUpdateBooking = "UPDATE bookings SET end_time = ?, estimated_total = ?" +
+                    (newReservedMinutes != null ? ", reserved_duration_minutes = ?" : "") +
+                    " WHERE booking_id = ?";
             try (PreparedStatement psUpdateB = conn.prepareStatement(sqlUpdateBooking)) {
                 psUpdateB.setTime(1, Time.valueOf(newPlannedEnd.toLocalTime()));
                 psUpdateB.setBigDecimal(2, newTotalCourtAmount);
@@ -461,16 +461,16 @@ public class BookingExtensionService {
             }
 
             // 8. Cập nhật hóa đơn chính (MAIN)
-            String sqlSelectInvoice = "SELECT HoaDonID, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan FROM HoaDon WITH (UPDLOCK, ROWLOCK) " +
-                    "WHERE DatSanID = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
+            String sqlSelectInvoice = "SELECT invoice_id, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status FROM invoices WITH (UPDLOCK, ROWLOCK) " +
+                    "WHERE booking_id = ? AND (invoice_type = N'MAIN' OR invoice_type IS NULL)";
             try (PreparedStatement psSelInv = conn.prepareStatement(sqlSelectInvoice)) {
                 psSelInv.setInt(1, datSanId);
                 try (ResultSet rsInv = psSelInv.executeQuery()) {
                     if (rsInv.next()) {
-                        int hoaDonId = rsInv.getInt("HoaDonID");
-                        BigDecimal serviceAmt = rsInv.getBigDecimal("TongTienDichVu");
-                        BigDecimal parkingAmt = rsInv.getBigDecimal("PhiGuiXe");
-                        BigDecimal discountAmt = rsInv.getBigDecimal("GiamGia");
+                        int hoaDonId = rsInv.getInt("invoice_id");
+                        BigDecimal serviceAmt = rsInv.getBigDecimal("service_total");
+                        BigDecimal parkingAmt = rsInv.getBigDecimal("parking_fee");
+                        BigDecimal discountAmt = rsInv.getBigDecimal("discount_amount");
 
                         BigDecimal newTotalInvoice = newTotalCourtAmount.add(serviceAmt != null ? serviceAmt : BigDecimal.ZERO)
                                 .add(parkingAmt != null ? parkingAmt : BigDecimal.ZERO)
@@ -480,7 +480,7 @@ public class BookingExtensionService {
                         }
 
                         // Cập nhật hóa đơn và chuyển về Chưa thanh toán
-                        String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = ?, TongThanhToan = ?, TrangThaiThanhToan = N'Chưa thanh toán' WHERE HoaDonID = ?";
+                        String sqlUpdateInvoice = "UPDATE invoices SET court_total = ?, grand_total = ?, payment_status = N'Chưa thanh toán' WHERE invoice_id = ?";
                         try (PreparedStatement psUpInv = conn.prepareStatement(sqlUpdateInvoice)) {
                             psUpInv.setBigDecimal(1, newTotalCourtAmount);
                             psUpInv.setBigDecimal(2, newTotalInvoice);
@@ -492,7 +492,7 @@ public class BookingExtensionService {
             }
 
             // 9. Ghi lịch sử gia hạn
-            String sqlHistory = "INSERT INTO BookingExtension (DatSanID, OldGioKetThuc, NewGioKetThuc, OldGioKetThucDateTime, NewGioKetThucDateTime, AdditionalAmount, OperatorAccountID, CreatedAt) " +
+            String sqlHistory = "INSERT INTO booking_extensions (booking_id, old_end_time, new_end_time, old_end_at, new_end_at, additional_amount, operator_account_id, created_at) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
             try (PreparedStatement psHist = conn.prepareStatement(sqlHistory)) {
                 psHist.setInt(1, datSanId);

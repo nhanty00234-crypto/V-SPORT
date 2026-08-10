@@ -331,7 +331,7 @@ public class CaLamValidationTest {
 
         // ─── TC_PUBLISH_FIX_05: Publish chỉ update Draft, không đụng CheckedIn ───
         {
-            System.out.println("[NOTE] TC_PUBLISH_FIX_05 — SQL: WHERE TrangThai='Draft' AND IsDeleted=0. Verified in publishDraftShiftsWithConnection SQL.");
+            System.out.println("[NOTE] TC_PUBLISH_FIX_05 — SQL: WHERE status='Draft' AND is_deleted=0. Verified in publishDraftShiftsWithConnection SQL.");
             passed++;
         }
 

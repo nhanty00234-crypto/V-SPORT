@@ -31,14 +31,14 @@ public class CheckInDAO {
     }
 
     private String mainInvoiceWhereClause(Connection conn, String datSanColumnExpression) throws SQLException {
-        if (columnExists(conn, "HoaDon", "LoaiHoaDon")) {
+        if (columnExists(conn, "invoices", "invoice_type")) {
             return datSanColumnExpression + " = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
         }
         return datSanColumnExpression + " = ?";
     }
 
     private String mainInvoiceJoinCondition(Connection conn) throws SQLException {
-        if (columnExists(conn, "HoaDon", "LoaiHoaDon")) {
+        if (columnExists(conn, "invoices", "invoice_type")) {
             return "lds.DatSanID = hd.DatSanID AND (hd.LoaiHoaDon = N'MAIN' OR hd.LoaiHoaDon IS NULL)";
         }
         return "lds.DatSanID = hd.DatSanID";
@@ -110,8 +110,8 @@ public class CheckInDAO {
             conn.setAutoCommit(false);
 
             // 1. Lấy thông tin đơn đặt lịch + join San để xác minh cơ sở
-            String sqlSelectBooking = "SELECT l.SanID, l.NgayDat, l.GioBatDau, l.GioKetThuc, l.TrangThai, l.TongTienDuKien, l.GhiChu, l.AccountID, s.CoSoID " +
-                    "FROM LichDatSan l WITH (UPDLOCK, ROWLOCK) JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            String sqlSelectBooking = "SELECT l.court_id, l.booking_date, l.start_time, l.end_time, l.status, l.estimated_total, l.note, l.account_id, s.facility_id " +
+                    "FROM bookings l WITH (UPDLOCK, ROWLOCK) JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
             psSelectBooking = conn.prepareStatement(sqlSelectBooking);
             psSelectBooking.setInt(1, datSanId);
             rsBooking = psSelectBooking.executeQuery();
@@ -120,19 +120,19 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy thông tin đơn đặt sân có ID: " + datSanId);
             }
 
-            int bookingCoSoId = rsBooking.getInt("CoSoID");
+            int bookingCoSoId = rsBooking.getInt("facility_id");
             if (bookingCoSoId != requiredCoSoId) {
                 throw new SecurityException("Đơn đặt sân không thuộc cơ sở của bạn.");
             }
 
-            int sanId = rsBooking.getInt("SanID");
-            int khachHangAccountId = rsBooking.getInt("AccountID");
-            Date ngayDat = rsBooking.getDate("NgayDat");
-            Time gioBatDau = rsBooking.getTime("GioBatDau");
-            Time gioKetThuc = rsBooking.getTime("GioKetThuc");
-            String trangThaiBooking = rsBooking.getString("TrangThai");
-            BigDecimal tongTienDuKien = rsBooking.getBigDecimal("TongTienDuKien");
-            String ghiChu = rsBooking.getString("GhiChu");
+            int sanId = rsBooking.getInt("court_id");
+            int khachHangAccountId = rsBooking.getInt("account_id");
+            Date ngayDat = rsBooking.getDate("booking_date");
+            Time gioBatDau = rsBooking.getTime("start_time");
+            Time gioKetThuc = rsBooking.getTime("end_time");
+            String trangThaiBooking = rsBooking.getString("status");
+            BigDecimal tongTienDuKien = rsBooking.getBigDecimal("estimated_total");
+            String ghiChu = rsBooking.getString("note");
 
             LocalDate localNgayDat = ngayDat.toLocalDate();
             LocalTime localGioBatDau = gioBatDau.toLocalTime();
@@ -165,7 +165,7 @@ public class CheckInDAO {
             }
 
             // 2. Kiểm tra trạng thái thanh toán (Payment Lock)
-            String sqlCheckPayment = "SELECT HoaDonID, TrangThaiThanhToan, TongThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlCheckPayment = "SELECT invoice_id, payment_status, grand_total FROM invoices WHERE " + mainInvoiceWhereClause(conn, "booking_id");
             psCheckPayment = conn.prepareStatement(sqlCheckPayment);
             psCheckPayment.setInt(1, datSanId);
             rsPayment = psCheckPayment.executeQuery();
@@ -175,9 +175,9 @@ public class CheckInDAO {
             BigDecimal tongThanhToan = BigDecimal.ZERO;
 
             if (rsPayment.next()) {
-                hoaDonId = rsPayment.getInt("HoaDonID");
-                trangThaiThanhToan = rsPayment.getString("TrangThaiThanhToan");
-                tongThanhToan = rsPayment.getBigDecimal("TongThanhToan");
+                hoaDonId = rsPayment.getInt("invoice_id");
+                trangThaiThanhToan = rsPayment.getString("payment_status");
+                tongThanhToan = rsPayment.getBigDecimal("grand_total");
             }
 
             // Nếu đơn chưa thanh toán hoặc chưa cọc
@@ -189,10 +189,10 @@ public class CheckInDAO {
                     // KHÔNG được tiếp tục với sentinel -1 (UPDATE ... WHERE HoaDonID = -1 trước đây
                     // no-op nhưng vẫn báo "đã thanh toán" dù hóa đơn không hề tồn tại).
                     BigDecimal amount = tongTienDuKien != null ? tongTienDuKien : BigDecimal.ZERO;
-                    boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
-                    String sqlInsertInvoice = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
-                            "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, PhuongThucThanhToan, TrangThaiThanhToan" +
-                            (hasLoaiHoaDon ? ", LoaiHoaDon" : "") + ") VALUES (?, ?, ?, GETDATE(), ?, 0, 0, 0, ?, N'Tiền mặt', ?" +
+                    boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
+                    String sqlInsertInvoice = "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, " +
+                            "court_total, service_total, parking_fee, discount_amount, grand_total, payment_method, payment_status" +
+                            (hasLoaiHoaDon ? ", invoice_type" : "") + ") VALUES (?, ?, ?, GETDATE(), ?, 0, 0, 0, ?, N'Tiền mặt', ?" +
                             (hasLoaiHoaDon ? ", N'MAIN'" : "") + ")";
                     psInsertInvoice = conn.prepareStatement(sqlInsertInvoice, Statement.RETURN_GENERATED_KEYS);
                     psInsertInvoice.setInt(1, datSanId);
@@ -210,7 +210,7 @@ public class CheckInDAO {
                     logger.info("Đã tạo MAIN invoice mới ID " + hoaDonId + " cho đơn đặt sân #" + datSanId + " (thu tiền mặt tại check-in, dữ liệu cũ chưa có hóa đơn).");
                 } else {
                     // Nếu lễ tân tích chọn đã thu tiền mặt, cập nhật trạng thái hóa đơn ngay lập tức
-                    String sqlUpdateInvoiceStatus = "UPDATE HoaDon SET TrangThaiThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE HoaDonID = ?";
+                    String sqlUpdateInvoiceStatus = "UPDATE invoices SET payment_status = ?, staff_account_id = ?, issued_at = GETDATE() WHERE invoice_id = ?";
                     psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoiceStatus);
                     psUpdateInvoice.setString(1, PAYMENT_STATUS_PAID);
                     psUpdateInvoice.setInt(2, staffAccountId);
@@ -222,7 +222,7 @@ public class CheckInDAO {
             }
 
             // 3. Kiểm tra trạng thái sân bãi thực tế
-            String sqlSelectField = "SELECT TenSan, TrangThai FROM San WHERE SanID = ?";
+            String sqlSelectField = "SELECT court_name, status FROM courts WHERE court_id = ?";
             psSelectField = conn.prepareStatement(sqlSelectField);
             psSelectField.setInt(1, sanId);
             rsField = psSelectField.executeQuery();
@@ -231,8 +231,8 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy thông tin sân có ID: " + sanId);
             }
             
-            String tenSan = rsField.getString("TenSan");
-            String trangThaiSan = rsField.getString("TrangThai");
+            String tenSan = rsField.getString("court_name");
+            String trangThaiSan = rsField.getString("status");
 
             // Kiểm tra xem sân có đang bị chiếm dụng không
             if (!FIELD_STATUS_AVAILABLE.equals(trangThaiSan)) {
@@ -269,7 +269,7 @@ public class CheckInDAO {
 
             // 5. Thực hiện cập nhật trạng thái đơn đặt sân - giữ điều kiện WHERE TrangThai nguồn để
             // affected-row check phát hiện race (đơn vừa bị đổi trạng thái bởi request khác).
-            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, actual_start_time = ?, TongTienDuKien = TongTienDuKien + ?, GhiChu = ?, TimeMode = ?, ReservedDurationMinutes = ? WHERE DatSanID = ? AND TrangThai = N'Đã xác nhận'";
+            String sqlUpdateBooking = "UPDATE bookings SET status = ?, actual_start_time_of_day = ?, estimated_total = estimated_total + ?, note = ?, time_mode = ?, reserved_duration_minutes = ? WHERE booking_id = ? AND status = N'Đã xác nhận'";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
             psUpdateBooking.setString(1, BOOKING_STATUS_IN_USE);
             psUpdateBooking.setTime(2, Time.valueOf(now));
@@ -284,7 +284,7 @@ public class CheckInDAO {
 
             // Cập nhật lại số tiền trên hóa đơn (nếu có phụ thu đến sớm)
             if (phuThu.compareTo(BigDecimal.ZERO) > 0 && hoaDonId != -1) {
-                String sqlUpdateInvoiceAmount = "UPDATE HoaDon SET TongTienSan = TongTienSan + ?, TongThanhToan = TongThanhToan + ? WHERE HoaDonID = ?";
+                String sqlUpdateInvoiceAmount = "UPDATE invoices SET court_total = court_total + ?, grand_total = grand_total + ? WHERE invoice_id = ?";
                 try (PreparedStatement psUpdateInvAmt = conn.prepareStatement(sqlUpdateInvoiceAmount)) {
                     psUpdateInvAmt.setBigDecimal(1, phuThu);
                     psUpdateInvAmt.setBigDecimal(2, phuThu);
@@ -295,7 +295,7 @@ public class CheckInDAO {
 
             // 6. Cập nhật trạng thái sân (Điều kiện UPDATE ngặt nghèo - Optimistic/Pessimistic Concurrency Check)
             // Câu lệnh cập nhật trạng thái Sân phải có điều kiện WHERE TrangThai = 'Sẵn sàng'
-            String sqlUpdateField = "UPDATE San SET TrangThai = ? WHERE SanID = ? AND TrangThai = ?";
+            String sqlUpdateField = "UPDATE courts SET status = ? WHERE court_id = ? AND status = ?";
             psUpdateField = conn.prepareStatement(sqlUpdateField);
             psUpdateField.setString(1, FIELD_STATUS_OCCUPIED);
             psUpdateField.setInt(2, sanId);
@@ -370,7 +370,7 @@ public class CheckInDAO {
             LocalTime endTime = now.plusMinutes(durationMinutes);
 
             // 1. Kiểm tra trạng thái sân bãi thực tế trước
-            String sqlSelectField = "SELECT TenSan, TrangThai FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
+            String sqlSelectField = "SELECT court_name, status FROM courts WITH (UPDLOCK, ROWLOCK) WHERE court_id = ?";
             psSelectField = conn.prepareStatement(sqlSelectField);
             psSelectField.setInt(1, sanId);
             rsField = psSelectField.executeQuery();
@@ -379,8 +379,8 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy thông tin sân có ID: " + sanId);
             }
             
-            String tenSan = rsField.getString("TenSan");
-            String trangThaiSan = rsField.getString("TrangThai");
+            String tenSan = rsField.getString("court_name");
+            String trangThaiSan = rsField.getString("status");
 
             if (!FIELD_STATUS_AVAILABLE.equals(trangThaiSan)) {
                 throw new FieldOccupiedException("Sân '" + tenSan + "' đang bận hoặc bảo trì (Trạng thái: " + trangThaiSan + "). Không thể mở cho khách vãng lai.");
@@ -390,10 +390,10 @@ public class CheckInDAO {
             // Hệ thống kiểm tra xem trong khoảng thời gian khách chơi [now, endTime] có lịch đặt nào đã xác nhận không.
             // Công thức: GioBatDau < endTime AND GioKetThuc > now
             // Dùng HoldExpiresAt (cơ chế mới) cho "Chờ thanh toán", đồng bộ với DatSanServlet.
-            String sqlCheckConflict = "SELECT DatSanID, GioBatDau, GioKetThuc, TrangThai FROM LichDatSan " +
-                                      "WHERE SanID = ? AND NgayDat = ? " +
-                                      "AND (TrangThai IN (?, ?) OR (TrangThai = ? AND HoldExpiresAt > SYSUTCDATETIME())) " +
-                                      "AND GioBatDau < CAST(? AS time) AND GioKetThuc > CAST(? AS time)";
+            String sqlCheckConflict = "SELECT booking_id, start_time, end_time, status FROM bookings " +
+                                      "WHERE court_id = ? AND booking_date = ? " +
+                                      "AND (status IN (?, ?) OR (status = ? AND hold_expires_at > SYSUTCDATETIME())) " +
+                                      "AND start_time < CAST(? AS time) AND end_time > CAST(? AS time)";
             psCheckConflict = conn.prepareStatement(sqlCheckConflict);
             psCheckConflict.setInt(1, sanId);
             psCheckConflict.setDate(2, Date.valueOf(today));
@@ -405,8 +405,8 @@ public class CheckInDAO {
 
             rsConflict = psCheckConflict.executeQuery();
             if (rsConflict.next()) {
-                Time conflictStart = rsConflict.getTime("GioBatDau");
-                Time conflictEnd = rsConflict.getTime("GioKetThuc");
+                Time conflictStart = rsConflict.getTime("start_time");
+                Time conflictEnd = rsConflict.getTime("end_time");
                 throw new BookingConflictException("Sân '" + tenSan + "' đã có khách đặt online từ " + 
                         conflictStart.toLocalTime().toString().substring(0, 5) + " đến " + 
                         conflictEnd.toLocalTime().toString().substring(0, 5) + ". Không thể mở cho khách vãng lai lúc này!");
@@ -434,7 +434,7 @@ public class CheckInDAO {
                 reservedMinutes = null;
             }
 
-            String sqlInsertBooking = "INSERT INTO LichDatSan (AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, actual_start_time, TrangThai, GhiChu, NguonDatSan, TongTienDuKien, TimeMode, ReservedDurationMinutes) " +
+            String sqlInsertBooking = "INSERT INTO bookings (account_id, court_id, booking_date, start_time, end_time, actual_start_time_of_day, status, note, booking_source, estimated_total, time_mode, reserved_duration_minutes) " +
                                       "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             psInsertBooking = conn.prepareStatement(sqlInsertBooking, Statement.RETURN_GENERATED_KEYS);
             psInsertBooking.setInt(1, sanId);
@@ -465,11 +465,11 @@ public class CheckInDAO {
 
             // 4. Khởi tạo Hóa đơn MAIN ngay tại quầy cho khách vãng lai.
             // Lưu ý: luôn để Chưa thanh toán cho đến khi thao tác trả sân/thanh toán hoàn tất.
-            boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+            boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
             String sqlInsertInvoice = hasLoaiHoaDon
-                    ? "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon) " +
+                    ? "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status, payment_method, invoice_type) " +
                       "VALUES (?, NULL, ?, GETDATE(), ?, 0, 0, 0, ?, ?, NULL, N'MAIN')"
-                    : "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, PhuongThucThanhToan) " +
+                    : "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status, payment_method) " +
                       "VALUES (?, NULL, ?, GETDATE(), ?, 0, 0, 0, ?, ?, NULL)";
             psInsertInvoice = conn.prepareStatement(sqlInsertInvoice);
             psInsertInvoice.setInt(1, newDatSanId);
@@ -480,7 +480,7 @@ public class CheckInDAO {
             psInsertInvoice.executeUpdate();
 
             // 5. Cập nhật trạng thái sân (Điều kiện UPDATE ngặt nghèo chống Race Conditions)
-            String sqlUpdateField = "UPDATE San SET TrangThai = ? WHERE SanID = ? AND TrangThai = ?";
+            String sqlUpdateField = "UPDATE courts SET status = ? WHERE court_id = ? AND status = ?";
             psUpdateField = conn.prepareStatement(sqlUpdateField);
             psUpdateField.setString(1, FIELD_STATUS_OCCUPIED);
             psUpdateField.setInt(2, sanId);
@@ -560,8 +560,8 @@ public class CheckInDAO {
             conn.setAutoCommit(false); // Quản lý Transaction thủ công
 
             // 1. Khóa đơn đặt lịch + join San để xác minh cơ sở
-            String sqlSelect = "SELECT l.TrangThai, l.GhiChu, l.NgayDat, l.GioBatDau, l.AccountID, s.CoSoID " +
-                    "FROM LichDatSan l WITH (UPDLOCK, ROWLOCK) JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            String sqlSelect = "SELECT l.status, l.note, l.booking_date, l.start_time, l.account_id, s.facility_id " +
+                    "FROM bookings l WITH (UPDLOCK, ROWLOCK) JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
             rs = psSelect.executeQuery();
@@ -570,17 +570,17 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy thông tin đơn đặt sân có ID: " + datSanId);
             }
 
-            int bookingCoSoId = rs.getInt("CoSoID");
+            int bookingCoSoId = rs.getInt("facility_id");
             if (bookingCoSoId != requiredCoSoId) {
                 throw new SecurityException("Đơn đặt sân không thuộc cơ sở của bạn.");
             }
 
-            String trangThaiBooking = rs.getString("TrangThai");
-            int customerAccountId = rs.getInt("AccountID");
+            String trangThaiBooking = rs.getString("status");
+            int customerAccountId = rs.getInt("account_id");
             boolean hasCustomerAccount = !rs.wasNull();
-            String ghiChu = rs.getString("GhiChu");
-            java.time.LocalDate ngayDat = rs.getDate("NgayDat").toLocalDate();
-            java.time.LocalTime gioBatDau = rs.getTime("GioBatDau").toLocalTime();
+            String ghiChu = rs.getString("note");
+            java.time.LocalDate ngayDat = rs.getDate("booking_date").toLocalDate();
+            java.time.LocalTime gioBatDau = rs.getTime("start_time").toLocalTime();
 
             org.example.service.checkin.NoShowEligibility.Result eligibility =
                     org.example.service.checkin.NoShowEligibility.check(trangThaiBooking, ngayDat, gioBatDau, java.time.LocalDateTime.now());
@@ -592,8 +592,8 @@ public class CheckInDAO {
 
             // 2. Cập nhật đơn đặt sân thành 'Không đến' - điều kiện WHERE giữ nguyên trạng thái nguồn
             // để chống race (đơn có thể vừa được check-in/hủy bởi request khác giữa lúc SELECT và UPDATE).
-            String sqlUpdateBooking = "UPDATE LichDatSan SET TrangThai = ?, NoShowAt = GETDATE(), GhiChu = ? " +
-                    "WHERE DatSanID = ? AND TrangThai = N'Đã xác nhận'";
+            String sqlUpdateBooking = "UPDATE bookings SET status = ?, no_show_at = GETDATE(), note = ? " +
+                    "WHERE booking_id = ? AND status = N'Đã xác nhận'";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
             psUpdateBooking.setString(1, org.example.util.Constants.TRANG_THAI_DAT_SAN_KHONG_DEN);
             psUpdateBooking.setString(2, logGhiChu.trim());
@@ -612,25 +612,25 @@ public class CheckInDAO {
 
             // 3. Hóa đơn MAIN: chỉ tự hủy nếu THỰC SỰ chưa thu tiền gì - nếu đã thanh toán/cọc,
             // không được tự đổi trạng thái, chỉ ghi chú để xử lý hoàn tiền/giữ cọc thủ công.
-            String sqlSelectInvoice = "SELECT HoaDonID, TrangThaiThanhToan, GhiChu FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlSelectInvoice = "SELECT invoice_id, payment_status, note FROM invoices WHERE " + mainInvoiceWhereClause(conn, "booking_id");
             psSelectInvoice = conn.prepareStatement(sqlSelectInvoice);
             psSelectInvoice.setInt(1, datSanId);
             rsInvoice = psSelectInvoice.executeQuery();
             if (rsInvoice.next()) {
-                int hoaDonId = rsInvoice.getInt("HoaDonID");
-                String invoiceStatus = rsInvoice.getString("TrangThaiThanhToan");
-                String invoiceGhiChu = rsInvoice.getString("GhiChu");
+                int hoaDonId = rsInvoice.getInt("invoice_id");
+                String invoiceStatus = rsInvoice.getString("payment_status");
+                String invoiceGhiChu = rsInvoice.getString("note");
                 boolean unpaid = invoiceStatus == null
                         || PAYMENT_STATUS_UNPAID.equals(invoiceStatus)
                         || "Chưa cọc".equals(invoiceStatus);
                 if (unpaid) {
-                    String sqlCancelInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã hủy', AccountID_NhanVien = ?, NgayLap = GETDATE() WHERE HoaDonID = ?";
+                    String sqlCancelInvoice = "UPDATE invoices SET payment_status = N'Đã hủy', staff_account_id = ?, issued_at = GETDATE() WHERE invoice_id = ?";
                     psUpdateInvoice = conn.prepareStatement(sqlCancelInvoice);
                     psUpdateInvoice.setInt(1, staffAccountId);
                     psUpdateInvoice.setInt(2, hoaDonId);
                     psUpdateInvoice.executeUpdate();
                 } else {
-                    String sqlFlagInvoice = "UPDATE HoaDon SET GhiChu = ? WHERE HoaDonID = ?";
+                    String sqlFlagInvoice = "UPDATE invoices SET note = ? WHERE invoice_id = ?";
                     psUpdateInvoice = conn.prepareStatement(sqlFlagInvoice);
                     psUpdateInvoice.setString(1, ((invoiceGhiChu != null ? invoiceGhiChu.trim() : "") +
                             " [Khách bùng - đã thu tiền, cần xử lý hoàn tiền/giữ cọc thủ công]").trim());
@@ -638,7 +638,7 @@ public class CheckInDAO {
                     psUpdateInvoice.executeUpdate();
 
                     try (PreparedStatement psFlagBooking = conn.prepareStatement(
-                            "UPDATE LichDatSan SET RequiresRefundReview = 1 WHERE DatSanID = ?")) {
+                            "UPDATE bookings SET requires_refund_review = 1 WHERE booking_id = ?")) {
                         psFlagBooking.setInt(1, datSanId);
                         psFlagBooking.executeUpdate();
                     }
@@ -690,65 +690,65 @@ public class CheckInDAO {
         // Ngưỡng "sắp có lịch đặt" dùng chung với cửa sổ check-in hợp lệ (CheckInWindow.MAX_EARLY_MINUTES) -
         // một sân không được coi là AVAILABLE nếu có booking "Đã xác nhận" sắp bắt đầu trong ngưỡng này.
         int upcomingWindowMinutes = org.example.service.checkin.CheckInWindow.MAX_EARLY_MINUTES;
-        String sql = "SELECT s.SanID, s.TenSan, s.LoaiSanID, s.CoSoID, s.TrangThai, s.MoTa, s.HinhAnh, " +
-                     "ls.TenLoai AS TenLoaiSan, ls.GiaKhongDen, ls.GiaCoDen, ls.GioBatDauLenDen, ls.GioKetThucLenDen, " +
-                     "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS DatSanIDActive, " +
-                     "(SELECT TOP 1 CONVERT(VARCHAR(8), COALESCE(lds.actual_start_time, lds.GioBatDau), 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioBatDauActive, " +
-                     "(SELECT TOP 1 CONVERT(VARCHAR(8), lds.GioKetThuc, 108) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GioKetThucActive, " +
-                     "(SELECT TOP 1 lds.GhiChu FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS GhiChuActive, " +
-                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioKetThuc AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS ScheduledEndActive, " +
-                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(COALESCE(lds.actual_start_time, lds.GioBatDau) AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS ActualStartActive, " +
-                     "(SELECT TOP 1 lds.NguonDatSan FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS NguonDatSanActive, " +
-                     "(SELECT TOP 1 acc.FullName FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS TenKhachHangActive, " +
-                     "(SELECT TOP 1 acc.PhoneNumber FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đang sử dụng') AS SoDienThoaiActive, " +
-                     "(SELECT TOP 1 lds.DatSanID FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
-                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
-                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
-                     "   ORDER BY lds.GioBatDau ASC) AS NextDatSanId, " +
-                     "(SELECT TOP 1 COALESCE(acc.FullName, N'Khách vãng lai') FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
-                     "   WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' AND lds.NgayDat = CAST(GETDATE() AS DATE) " +
-                     "   AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
-                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
-                     "   ORDER BY lds.GioBatDau ASC) AS NextTenKhachHang, " +
-                     "(SELECT TOP 1 acc.PhoneNumber FROM LichDatSan lds LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
-                     "   WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' AND lds.NgayDat = CAST(GETDATE() AS DATE) " +
-                     "   AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
-                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
-                     "   ORDER BY lds.GioBatDau ASC) AS NextSoDienThoai, " +
-                     "(SELECT TOP 1 lds.NguonDatSan FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
-                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
-                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
-                     "   ORDER BY lds.GioBatDau ASC) AS NextNguonDatSan, " +
-                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
-                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
-                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
-                     "   ORDER BY lds.GioBatDau ASC) AS NextGioBatDau, " +
-                     "(SELECT TOP 1 CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioKetThuc AS DATETIME) FROM LichDatSan lds WHERE lds.SanID = s.SanID AND lds.TrangThai = N'Đã xác nhận' " +
-                     "   AND lds.NgayDat = CAST(GETDATE() AS DATE) AND CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME) >= GETDATE() " +
-                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.NgayDat AS DATETIME) + CAST(lds.GioBatDau AS DATETIME)) <= " + upcomingWindowMinutes +
-                     "   ORDER BY lds.GioBatDau ASC) AS NextGioKetThuc " +
-                     "FROM San s " +
-                     "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
-                     "WHERE s.CoSoID = ? AND s.IsDeleted = 0 " +
-                     "ORDER BY s.SanID";
+        String sql = "SELECT s.court_id, s.court_name, s.court_type_id, s.facility_id, s.status, s.description, s.image_path, " +
+                     "ls.type_name AS TenLoaiSan, ls.price_without_light, ls.price_with_light, ls.light_start_time, ls.light_end_time, " +
+                     "(SELECT TOP 1 lds.booking_id FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS DatSanIDActive, " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(8), COALESCE(lds.actual_start_time_of_day, lds.start_time), 108) FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS GioBatDauActive, " +
+                     "(SELECT TOP 1 CONVERT(VARCHAR(8), lds.end_time, 108) FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS GioKetThucActive, " +
+                     "(SELECT TOP 1 lds.note FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS GhiChuActive, " +
+                     "(SELECT TOP 1 CAST(lds.booking_date AS DATETIME) + CAST(lds.end_time AS DATETIME) FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS ScheduledEndActive, " +
+                     "(SELECT TOP 1 CAST(lds.booking_date AS DATETIME) + CAST(COALESCE(lds.actual_start_time_of_day, lds.start_time) AS DATETIME) FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS ActualStartActive, " +
+                     "(SELECT TOP 1 lds.booking_source FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS NguonDatSanActive, " +
+                     "(SELECT TOP 1 acc.full_name FROM bookings lds LEFT JOIN accounts acc ON lds.account_id = acc.account_id WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS TenKhachHangActive, " +
+                     "(SELECT TOP 1 acc.phone_number FROM bookings lds LEFT JOIN accounts acc ON lds.account_id = acc.account_id WHERE lds.court_id = s.court_id AND lds.status = N'Đang sử dụng') AS SoDienThoaiActive, " +
+                     "(SELECT TOP 1 lds.booking_id FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đã xác nhận' " +
+                     "   AND lds.booking_date = CAST(GETDATE() AS DATE) AND CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.start_time ASC) AS NextDatSanId, " +
+                     "(SELECT TOP 1 COALESCE(acc.full_name, N'Khách vãng lai') FROM bookings lds LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
+                     "   WHERE lds.court_id = s.court_id AND lds.status = N'Đã xác nhận' AND lds.booking_date = CAST(GETDATE() AS DATE) " +
+                     "   AND CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.start_time ASC) AS NextTenKhachHang, " +
+                     "(SELECT TOP 1 acc.phone_number FROM bookings lds LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
+                     "   WHERE lds.court_id = s.court_id AND lds.status = N'Đã xác nhận' AND lds.booking_date = CAST(GETDATE() AS DATE) " +
+                     "   AND CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.start_time ASC) AS NextSoDienThoai, " +
+                     "(SELECT TOP 1 lds.booking_source FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đã xác nhận' " +
+                     "   AND lds.booking_date = CAST(GETDATE() AS DATE) AND CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.start_time ASC) AS NextNguonDatSan, " +
+                     "(SELECT TOP 1 CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đã xác nhận' " +
+                     "   AND lds.booking_date = CAST(GETDATE() AS DATE) AND CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.start_time ASC) AS NextGioBatDau, " +
+                     "(SELECT TOP 1 CAST(lds.booking_date AS DATETIME) + CAST(lds.end_time AS DATETIME) FROM bookings lds WHERE lds.court_id = s.court_id AND lds.status = N'Đã xác nhận' " +
+                     "   AND lds.booking_date = CAST(GETDATE() AS DATE) AND CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME) >= GETDATE() " +
+                     "   AND DATEDIFF(MINUTE, GETDATE(), CAST(lds.booking_date AS DATETIME) + CAST(lds.start_time AS DATETIME)) <= " + upcomingWindowMinutes +
+                     "   ORDER BY lds.start_time ASC) AS NextGioKetThuc " +
+                     "FROM courts s " +
+                     "LEFT JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
+                     "WHERE s.facility_id = ? AND s.is_deleted = 0 " +
+                     "ORDER BY s.court_id";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     San s = new San();
-                    s.setSanID(rs.getInt("SanID"));
-                    s.setTenSan(rs.getString("TenSan"));
-                    s.setLoaiSanID(rs.getInt("LoaiSanID"));
-                    s.setCoSoID(rs.getInt("CoSoID"));
-                    s.setTrangThai(rs.getString("TrangThai"));
-                    s.setMoTa(rs.getString("MoTa"));
-                    s.setHinhAnh(rs.getString("HinhAnh"));
+                    s.setSanID(rs.getInt("court_id"));
+                    s.setTenSan(rs.getString("court_name"));
+                    s.setLoaiSanID(rs.getInt("court_type_id"));
+                    s.setCoSoID(rs.getInt("facility_id"));
+                    s.setTrangThai(rs.getString("status"));
+                    s.setMoTa(rs.getString("description"));
+                    s.setHinhAnh(rs.getString("image_path"));
                     s.setTenLoaiSan(rs.getString("TenLoaiSan"));
-                    s.setGiaKhongDen(rs.getDouble("GiaKhongDen"));
-                    s.setGiaCoDen(rs.getDouble("GiaCoDen"));
-                    s.setGioBatDauLenDen(rs.getTime("GioBatDauLenDen") != null ? rs.getTime("GioBatDauLenDen").toLocalTime() : null);
-                    s.setGioKetThucLenDen(rs.getTime("GioKetThucLenDen") != null ? rs.getTime("GioKetThucLenDen").toLocalTime() : null);
+                    s.setGiaKhongDen(rs.getDouble("price_without_light"));
+                    s.setGiaCoDen(rs.getDouble("price_with_light"));
+                    s.setGioBatDauLenDen(rs.getTime("light_start_time") != null ? rs.getTime("light_start_time").toLocalTime() : null);
+                    s.setGioKetThucLenDen(rs.getTime("light_end_time") != null ? rs.getTime("light_end_time").toLocalTime() : null);
                     s.setDatSanIdActive(rs.getObject("DatSanIDActive") != null ? rs.getInt("DatSanIDActive") : null);
                     s.setGioBatDauActive(rs.getString("GioBatDauActive"));
                     s.setGioKetThucActive(rs.getString("GioKetThucActive"));
@@ -781,60 +781,60 @@ public class CheckInDAO {
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<BookingViewDTO> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection()) {
-            String invoiceJoin = columnExists(conn, "HoaDon", "LoaiHoaDon")
-                    ? "LEFT JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID AND (hd.LoaiHoaDon = N'MAIN' OR hd.LoaiHoaDon IS NULL) "
-                    : "LEFT JOIN HoaDon hd ON lds.DatSanID = hd.DatSanID ";
-            String sql = "SELECT lds.DatSanID, s.SanID, s.TenSan, acc.FullName AS TenKhachHang, acc.PhoneNumber AS SoDienThoai, " +
-                         "ls.TenLoai AS TenLoaiSan, " +
-                         "lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.TongTienDuKien, " +
-                         "lds.TrangThai, lds.GhiChu, hd.TrangThaiThanhToan, lds.NguonDatSan, " +
-                         "acc.DiemUyTin, acc.LateCancelCount, acc.NoShowCount " +
-                         "FROM LichDatSan lds " +
-                         "INNER JOIN San s ON lds.SanID = s.SanID " +
-                         "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
-                         "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
+            String invoiceJoin = columnExists(conn, "invoices", "invoice_type")
+                    ? "LEFT JOIN invoices hd ON lds.booking_id = hd.booking_id AND (hd.invoice_type = N'MAIN' OR hd.invoice_type IS NULL) "
+                    : "LEFT JOIN invoices hd ON lds.booking_id = hd.booking_id ";
+            String sql = "SELECT lds.booking_id, s.court_id, s.court_name, acc.full_name AS TenKhachHang, acc.phone_number AS phone_number, " +
+                         "ls.type_name AS TenLoaiSan, " +
+                         "lds.booking_date, lds.start_time, lds.end_time, lds.estimated_total, " +
+                         "lds.status, lds.note, hd.payment_status, lds.booking_source, " +
+                         "acc.reputation_score, acc.late_cancel_count, acc.no_show_count " +
+                         "FROM bookings lds " +
+                         "INNER JOIN courts s ON lds.court_id = s.court_id " +
+                         "LEFT JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
+                         "LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
                          invoiceJoin +
-                         "WHERE lds.NgayDat = ? AND s.CoSoID = ? " +
+                         "WHERE lds.booking_date = ? AND s.facility_id = ? " +
                          // Check-in chỉ hiển thị đơn đủ điều kiện vận hành. LOẠI TRỪ triệt để:
                          //  - N'Chờ thanh toán' (PayOS chưa xác nhận qua webhook) — không được lộ ở quầy.
                          //  - N'Đã hủy' và N'Quá hạn' — đơn đã kết thúc, không có gì để check-in.
                          // GIỮ N'Chờ xác nhận' (trả tại quầy) để nhân viên mở sân/duyệt tại chỗ theo luồng hiện có.
-                         "AND lds.TrangThai IN (" +
+                         "AND lds.status IN (" +
                          "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "', " +
                          "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
                          "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
                          "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_HOAN_THANH + "', " +
                          "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_KHONG_DEN + "') " +
-                         "ORDER BY lds.GioBatDau ASC";
+                         "ORDER BY lds.start_time ASC";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
                 ps.setInt(2, coSoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     BookingViewDTO dto = new BookingViewDTO();
-                    dto.setDatSanId(rs.getInt("DatSanID"));
-                    dto.setSanId(rs.getInt("SanID"));
-                    dto.setTenSan(rs.getString("TenSan"));
+                    dto.setDatSanId(rs.getInt("booking_id"));
+                    dto.setSanId(rs.getInt("court_id"));
+                    dto.setTenSan(rs.getString("court_name"));
                     String guestName = rs.getString("TenKhachHang");
                     dto.setTenKhachHang(guestName != null ? guestName : "Khách vãng lai");
-                    dto.setSoDienThoai(rs.getString("SoDienThoai"));
+                    dto.setSoDienThoai(rs.getString("phone_number"));
                     dto.setTenLoaiSan(rs.getString("TenLoaiSan"));
-                    dto.setNgayDat(rs.getDate("NgayDat").toLocalDate());
-                    dto.setGioBatDau(rs.getTime("GioBatDau").toLocalTime());
-                    dto.setGioKetThuc(rs.getTime("GioKetThuc").toLocalTime());
-                    dto.setTongTien(rs.getBigDecimal("TongTienDuKien"));
-                    dto.setTrangThai(rs.getString("TrangThai"));
-                    dto.setGhiChu(rs.getString("GhiChu"));
-                    String paymentStatus = rs.getString("TrangThaiThanhToan");
+                    dto.setNgayDat(rs.getDate("booking_date").toLocalDate());
+                    dto.setGioBatDau(rs.getTime("start_time").toLocalTime());
+                    dto.setGioKetThuc(rs.getTime("end_time").toLocalTime());
+                    dto.setTongTien(rs.getBigDecimal("estimated_total"));
+                    dto.setTrangThai(rs.getString("status"));
+                    dto.setGhiChu(rs.getString("note"));
+                    String paymentStatus = rs.getString("payment_status");
                     dto.setTrangThaiThanhToan(paymentStatus != null ? paymentStatus : PAYMENT_STATUS_UNPAID);
-                    String nguonDat = rs.getString("NguonDatSan");
+                    String nguonDat = rs.getString("booking_source");
                     dto.setNguonDatSan(nguonDat != null ? nguonDat : "Walk-in");
-                    int diemUyTin = rs.getInt("DiemUyTin");
+                    int diemUyTin = rs.getInt("reputation_score");
                     if (!rs.wasNull()) {
                         dto.setReputationScore(diemUyTin);
                         dto.setReputationLabel(org.example.service.reputation.ReputationLabel.of(diemUyTin));
-                        dto.setLateCancelCount(rs.getInt("LateCancelCount"));
-                        dto.setNoShowCount(rs.getInt("NoShowCount"));
+                        dto.setLateCancelCount(rs.getInt("late_cancel_count"));
+                        dto.setNoShowCount(rs.getInt("no_show_count"));
                     }
                     list.add(dto);
                 }
@@ -949,41 +949,41 @@ public class CheckInDAO {
             // 1. Xác minh booking đang sử dụng và thuộc chi nhánh
             int coSoIdFromDB;
             Integer customerAccountId = null;
-            String sqlBooking = "SELECT s.CoSoID, lds.AccountID, lds.TrangThai " +
-                                "FROM LichDatSan lds INNER JOIN San s ON lds.SanID = s.SanID " +
-                                "WHERE lds.DatSanID = ?";
+            String sqlBooking = "SELECT s.facility_id, lds.account_id, lds.status " +
+                                "FROM bookings lds INNER JOIN courts s ON lds.court_id = s.court_id " +
+                                "WHERE lds.booking_id = ?";
             try (PreparedStatement ps = conn.prepareStatement(sqlBooking)) {
                 ps.setInt(1, datSanId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) throw new CheckInException("Không tìm thấy đơn đặt sân.");
-                    coSoIdFromDB = rs.getInt("CoSoID");
+                    coSoIdFromDB = rs.getInt("facility_id");
                     if (coSoIdFromDB != requiredCoSoId) {
                         throw new CheckInException("Đơn đặt sân không thuộc cơ sở của bạn.");
                     }
-                    if (!"Đang sử dụng".equals(rs.getString("TrangThai"))) {
+                    if (!"Đang sử dụng".equals(rs.getString("status"))) {
                         throw new CheckInException("Chỉ thêm dịch vụ khi sân đang sử dụng.");
                     }
-                    int accId = rs.getInt("AccountID");
+                    int accId = rs.getInt("account_id");
                     if (!rs.wasNull()) customerAccountId = accId;
                 }
             }
 
             // 2. Lấy HoaDonID của main invoice để làm ParentHoaDonID
             int parentHoaDonId = -1;
-            boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
-            boolean hasParentHoaDonID = columnExists(conn, "HoaDon", "ParentHoaDonID");
-            boolean hasGhiChu = columnExists(conn, "HoaDon", "GhiChu");
+            boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
+            boolean hasParentHoaDonID = columnExists(conn, "invoices", "parent_invoice_id");
+            boolean hasGhiChu = columnExists(conn, "invoices", "note");
             if (!hasLoaiHoaDon) {
                 throw new CheckInException("Database chưa có cột LoaiHoaDon nên chưa hỗ trợ tách bill dịch vụ. Vui lòng chạy script /sql/migration_hoadon_loai.sql hoặc thêm dịch vụ vào hóa đơn chính.");
             }
 
-            String sqlMain = "SELECT HoaDonID, TrangThaiThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlMain = "SELECT invoice_id, payment_status FROM invoices WHERE " + mainInvoiceWhereClause(conn, "booking_id");
             try (PreparedStatement ps = conn.prepareStatement(sqlMain)) {
                 ps.setInt(1, datSanId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        parentHoaDonId = rs.getInt("HoaDonID");
-                        String mainStatus = rs.getString("TrangThaiThanhToan");
+                        parentHoaDonId = rs.getInt("invoice_id");
+                        String mainStatus = rs.getString("payment_status");
                         if ("Đã thanh toán".equals(mainStatus)) {
                             throw new CheckInException("Hóa đơn sân đã được thanh toán. Không thể thêm dịch vụ sau khi hóa đơn đã thanh toán.");
                         }
@@ -996,8 +996,8 @@ public class CheckInDAO {
             int[][] validItems = new int[productIds.length][2]; // [qty, confirmed]
             double[] donGias = new double[productIds.length];
 
-            String sqlGetProduct = "SELECT TenSanPham, DonGia, SoLuongTon, CoSoID, TrangThai " +
-                                   "FROM SanPham_DichVu WITH (UPDLOCK, ROWLOCK) WHERE SanPhamID = ?";
+            String sqlGetProduct = "SELECT product_name, unit_price, stock_quantity, facility_id, status " +
+                                   "FROM products_services WITH (UPDLOCK, ROWLOCK) WHERE product_id = ?";
             try (PreparedStatement psGetProd = conn.prepareStatement(sqlGetProduct)) {
                 for (int i = 0; i < productIds.length; i++) {
                     int qty = quantities[i];
@@ -1005,15 +1005,15 @@ public class CheckInDAO {
                     psGetProd.setInt(1, productIds[i]);
                     try (ResultSet rs = psGetProd.executeQuery()) {
                         if (!rs.next()) throw new CheckInException("Không tìm thấy sản phẩm ID: " + productIds[i]);
-                        String tenSp = rs.getNString("TenSanPham");
-                        if (rs.getInt("CoSoID") != coSoIdFromDB)
+                        String tenSp = rs.getNString("product_name");
+                        if (rs.getInt("facility_id") != coSoIdFromDB)
                             throw new CheckInException("Sản phẩm '" + tenSp + "' không thuộc chi nhánh này.");
-                        if (!"Đang kinh doanh".equals(rs.getString("TrangThai")))
+                        if (!"Đang kinh doanh".equals(rs.getString("status")))
                             throw new CheckInException("Sản phẩm '" + tenSp + "' ngừng kinh doanh.");
-                        int stock = rs.getInt("SoLuongTon");
+                        int stock = rs.getInt("stock_quantity");
                         if (stock < qty)
                             throw new CheckInException("Sản phẩm '" + tenSp + "' không đủ tồn kho (còn: " + stock + ").");
-                        donGias[i] = rs.getDouble("DonGia");
+                        donGias[i] = rs.getDouble("unit_price");
                         totalDichVu += qty * donGias[i];
                         validItems[i][0] = qty;
                         validItems[i][1] = 1;
@@ -1030,19 +1030,19 @@ public class CheckInDAO {
 
             String sqlInsertHD;
             if (parentHoaDonId > 0 && hasParentHoaDonID && hasGhiChu) {
-                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
-                              "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, " +
-                              "TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon, ParentHoaDonID, GhiChu) " +
+                sqlInsertHD = "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, " +
+                              "court_total, service_total, parking_fee, discount_amount, grand_total, " +
+                              "payment_status, payment_method, invoice_type, parent_invoice_id, note) " +
                               "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, ?, ?, N'SPLIT', ?, ?)";
             } else if (hasGhiChu) {
-                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
-                              "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, " +
-                              "TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon, GhiChu) " +
+                sqlInsertHD = "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, " +
+                              "court_total, service_total, parking_fee, discount_amount, grand_total, " +
+                              "payment_status, payment_method, invoice_type, note) " +
                               "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, ?, ?, N'SPLIT', ?)";
             } else {
-                sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
-                              "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, " +
-                              "TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon) " +
+                sqlInsertHD = "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, " +
+                              "court_total, service_total, parking_fee, discount_amount, grand_total, " +
+                              "payment_status, payment_method, invoice_type) " +
                               "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, ?, ?, N'SPLIT')";
             }
 
@@ -1071,9 +1071,9 @@ public class CheckInDAO {
             }
 
             // 5. Thêm chi tiết và giảm tồn kho
-            String sqlInsertCT = "INSERT INTO ChiTietHoaDon (HoaDonID, SanPhamID, SoLuong, DonGiaTaiThoiDiemBan, ThanhTien) " +
+            String sqlInsertCT = "INSERT INTO invoice_items (invoice_id, product_id, quantity, unit_price_at_sale, line_total) " +
                                   "VALUES (?, ?, ?, ?, ?)";
-            String sqlStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon - ? WHERE SanPhamID = ?";
+            String sqlStock = "UPDATE products_services SET stock_quantity = stock_quantity - ? WHERE product_id = ?";
             try (PreparedStatement psInsertCT = conn.prepareStatement(sqlInsertCT);
                  PreparedStatement psStock = conn.prepareStatement(sqlStock)) {
                 for (int i = 0; i < productIds.length; i++) {
@@ -1118,31 +1118,31 @@ public class CheckInDAO {
 
             // Xác minh hóa đơn thuộc chi nhánh, chưa thanh toán và là SPLIT bill dịch vụ.
             // Hóa đơn MAIN của tiền sân phải đi qua processPayment để cập nhật đồng bộ booking + sân.
-            boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
-            String sqlCheck = "SELECT hd.TrangThaiThanhToan, s.CoSoID, " +
-                              (hasLoaiHoaDon ? "hd.LoaiHoaDon" : "CAST(NULL AS NVARCHAR(50))") + " AS LoaiHoaDon " +
-                              "FROM HoaDon hd " +
-                              "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
-                              "INNER JOIN San s ON lds.SanID = s.SanID " +
-                              "WHERE hd.HoaDonID = ?";
+            boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
+            String sqlCheck = "SELECT hd.payment_status, s.facility_id, " +
+                              (hasLoaiHoaDon ? "hd.invoice_type" : "CAST(NULL AS NVARCHAR(50))") + " AS invoice_type " +
+                              "FROM invoices hd " +
+                              "INNER JOIN bookings lds ON hd.booking_id = lds.booking_id " +
+                              "INNER JOIN courts s ON lds.court_id = s.court_id " +
+                              "WHERE hd.invoice_id = ?";
             try (PreparedStatement ps = conn.prepareStatement(sqlCheck)) {
                 ps.setInt(1, hoaDonId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) throw new CheckInException("Không tìm thấy hóa đơn #" + hoaDonId);
-                    if (rs.getInt("CoSoID") != requiredCoSoId)
+                    if (rs.getInt("facility_id") != requiredCoSoId)
                         throw new CheckInException("Hóa đơn không thuộc cơ sở của bạn.");
-                    if ("Đã thanh toán".equals(rs.getString("TrangThaiThanhToan")))
+                    if ("Đã thanh toán".equals(rs.getString("payment_status")))
                         throw new CheckInException("Hóa đơn này đã được thanh toán.");
-                    String loaiHoaDon = rs.getString("LoaiHoaDon");
+                    String loaiHoaDon = rs.getString("invoice_type");
                     if (!hasLoaiHoaDon || loaiHoaDon == null || !"SPLIT".equalsIgnoreCase(loaiHoaDon)) {
                         throw new CheckInException("Hóa đơn sân chính phải thanh toán bằng nút Trả sân/Thanh toán để cập nhật đồng bộ trạng thái sân và lịch đặt.");
                     }
                 }
             }
 
-            String sqlPay = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', " +
-                            "PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() " +
-                            "WHERE HoaDonID = ?";
+            String sqlPay = "UPDATE invoices SET payment_status = N'Đã thanh toán', " +
+                            "payment_method = ?, staff_account_id = ?, issued_at = GETDATE() " +
+                            "WHERE invoice_id = ?";
             try (PreparedStatement ps = conn.prepareStatement(sqlPay)) {
                 ps.setString(1, paymentMethod.trim());
                 ps.setInt(2, staffAccountId);
@@ -1166,10 +1166,10 @@ public class CheckInDAO {
      */
     public boolean hasUnpaidSplitBills(int datSanId) {
         try (Connection conn = DBUtil.getConnection()) {
-            if (!columnExists(conn, "HoaDon", "LoaiHoaDon")) {
+            if (!columnExists(conn, "invoices", "invoice_type")) {
                 return false;
             }
-            String sql = "SELECT COUNT(*) FROM HoaDon WHERE DatSanID = ? AND LoaiHoaDon = N'SPLIT' AND TrangThaiThanhToan = N'Chưa thanh toán'";
+            String sql = "SELECT COUNT(*) FROM invoices WHERE booking_id = ? AND invoice_type = N'SPLIT' AND payment_status = N'Chưa thanh toán'";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -1194,10 +1194,10 @@ public class CheckInDAO {
             conn.setAutoCommit(false);
 
             // 1. Kiểm tra ca chơi và cơ sở
-            String sqlSelect = "SELECT lds.SanID, lds.TrangThai, lds.TongTienDuKien, s.CoSoID " +
-                               "FROM LichDatSan lds " +
-                               "INNER JOIN San s ON lds.SanID = s.SanID " +
-                               "WHERE lds.DatSanID = ?";
+            String sqlSelect = "SELECT lds.court_id, lds.status, lds.estimated_total, s.facility_id " +
+                               "FROM bookings lds " +
+                               "INNER JOIN courts s ON lds.court_id = s.court_id " +
+                               "WHERE lds.booking_id = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
             rs = psSelect.executeQuery();
@@ -1206,9 +1206,9 @@ public class CheckInDAO {
                 throw new CheckInException("Không tìm thấy ca chơi có ID: " + datSanId);
             }
 
-            String trangThai = rs.getString("TrangThai");
-            int sanCoSoId = rs.getInt("CoSoID");
-            BigDecimal tongTienDuKien = rs.getBigDecimal("TongTienDuKien");
+            String trangThai = rs.getString("status");
+            int sanCoSoId = rs.getInt("facility_id");
+            BigDecimal tongTienDuKien = rs.getBigDecimal("estimated_total");
 
             if (sanCoSoId != coSoId) {
                 throw new CheckInException("Bạn không có quyền quản lý ca chơi thuộc cơ sở khác.");
@@ -1224,7 +1224,7 @@ public class CheckInDAO {
             }
 
             // 2. Cập nhật giảm trừ trong LichDatSan
-            String sqlUpdateBooking = "UPDATE LichDatSan SET EarlyCheckoutDiscount = ?, EarlyCheckoutReason = ?, TongTienDuKien = TongTienDuKien - ? WHERE DatSanID = ?";
+            String sqlUpdateBooking = "UPDATE bookings SET early_checkout_discount = ?, early_checkout_reason = ?, estimated_total = estimated_total - ? WHERE booking_id = ?";
             psUpdateBooking = conn.prepareStatement(sqlUpdateBooking);
             psUpdateBooking.setBigDecimal(1, BigDecimal.valueOf(discountAmount));
             psUpdateBooking.setNString(2, reason);
@@ -1233,7 +1233,7 @@ public class CheckInDAO {
             psUpdateBooking.executeUpdate();
 
             // 3. Cập nhật tổng tiền trong HoaDon
-            String sqlUpdateInvoice = "UPDATE HoaDon SET TongTienSan = TongTienSan - ?, GiamGia = GiamGia + ?, TongThanhToan = TongThanhToan - ? WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlUpdateInvoice = "UPDATE invoices SET court_total = court_total - ?, discount_amount = discount_amount + ?, grand_total = grand_total - ? WHERE " + mainInvoiceWhereClause(conn, "booking_id");
             psUpdateInvoice = conn.prepareStatement(sqlUpdateInvoice);
             psUpdateInvoice.setBigDecimal(1, BigDecimal.valueOf(discountAmount));
             psUpdateInvoice.setBigDecimal(2, BigDecimal.valueOf(discountAmount));

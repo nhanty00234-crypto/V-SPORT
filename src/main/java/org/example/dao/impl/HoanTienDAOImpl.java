@@ -19,9 +19,9 @@ public class HoanTienDAOImpl implements HoanTienDAO {
     private static final Logger logger = LogManager.getLogger(HoanTienDAOImpl.class);
 
     private static final String INSERT_SQL =
-        "INSERT INTO HoanTien (HoaDonID, DatSanID, CoSoID, AccountID, SoTienHoan, SoTienDaThanhToan, " +
-        "SoTienDeNghiHoan, LyDo, GhiChuKhachHang, TrangThai, ThoiGianYeuCau, UpdatedAt, " +
-        "NganHangNhan, SoTaiKhoanNhan, ChuTaiKhoanNhan, QrNhanTienPath) " +
+        "INSERT INTO refunds (invoice_id, booking_id, facility_id, account_id, refunded_amount, paid_amount, " +
+        "requested_amount, reason, customer_note, status, requested_at, updated_at, " +
+        "receiving_bank_name, receiving_account_number, receiving_account_holder, receiving_qr_path) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE(), ?, ?, ?, ?)";
 
     @Override
@@ -68,9 +68,9 @@ public class HoanTienDAOImpl implements HoanTienDAO {
 
     @Override
     public Hoantien findById(int hoanTienId) {
-        String sql = "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-                     "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-                     "WHERE ht.HoanTienID = ?";
+        String sql = "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+                     "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+                     "WHERE ht.refund_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hoanTienId);
@@ -85,9 +85,9 @@ public class HoanTienDAOImpl implements HoanTienDAO {
 
     @Override
     public Hoantien findByIdAndAccountId(int hoanTienId, int accountId) {
-        String sql = "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-                     "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-                     "WHERE ht.HoanTienID = ? AND ht.AccountID = ?";
+        String sql = "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+                     "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+                     "WHERE ht.refund_id = ? AND ht.account_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hoanTienId);
@@ -103,9 +103,9 @@ public class HoanTienDAOImpl implements HoanTienDAO {
 
     @Override
     public Hoantien findByIdAndCoSoId(int hoanTienId, int coSoId) {
-        String sql = "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-                     "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-                     "WHERE ht.HoanTienID = ? AND ht.CoSoID = ?";
+        String sql = "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+                     "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+                     "WHERE ht.refund_id = ? AND ht.facility_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hoanTienId);
@@ -121,7 +121,7 @@ public class HoanTienDAOImpl implements HoanTienDAO {
 
     @Override
     public boolean existsActiveByHoaDonId(int hoaDonId) {
-        String sql = "SELECT 1 FROM HoanTien WHERE HoaDonID = ? AND TrangThai NOT IN (?, ?)";
+        String sql = "SELECT 1 FROM refunds WHERE invoice_id = ? AND status NOT IN (?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hoaDonId);
@@ -141,10 +141,10 @@ public class HoanTienDAOImpl implements HoanTienDAO {
         List<Hoantien> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
         String sql =
-            "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-            "WHERE ht.CoSoID = ? " +
-            "ORDER BY ht.ThoiGianYeuCau DESC " +
+            "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+            "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+            "WHERE ht.facility_id = ? " +
+            "ORDER BY ht.requested_at DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -165,10 +165,10 @@ public class HoanTienDAOImpl implements HoanTienDAO {
         List<Hoantien> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
         String sql =
-            "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-            "WHERE ht.CoSoID = ? AND ht.TrangThai = ? " +
-            "ORDER BY ht.ThoiGianYeuCau DESC " +
+            "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+            "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+            "WHERE ht.facility_id = ? AND ht.status = ? " +
+            "ORDER BY ht.requested_at DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -190,10 +190,10 @@ public class HoanTienDAOImpl implements HoanTienDAO {
         List<Hoantien> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
         String sql =
-            "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-            "WHERE ht.AccountID = ? " +
-            "ORDER BY ht.ThoiGianYeuCau DESC " +
+            "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+            "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+            "WHERE ht.account_id = ? " +
+            "ORDER BY ht.requested_at DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -212,10 +212,10 @@ public class HoanTienDAOImpl implements HoanTienDAO {
     @Override
     public Hoantien findActiveByDatSanId(int datSanId) {
         String sql =
-            "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-            "WHERE (ht.DatSanID = ? OR hd.DatSanID = ?) AND ht.TrangThai NOT IN (?, ?) " +
-            "ORDER BY ht.ThoiGianYeuCau DESC";
+            "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+            "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+            "WHERE (ht.booking_id = ? OR hd.booking_id = ?) AND ht.status NOT IN (?, ?) " +
+            "ORDER BY ht.requested_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
@@ -235,10 +235,10 @@ public class HoanTienDAOImpl implements HoanTienDAO {
     public Map<Integer, Hoantien> findActiveMapByAccountId(int accountId) {
         Map<Integer, Hoantien> map = new HashMap<>();
         String sql =
-            "SELECT ht.*, hd.DatSanID AS HD_DatSanID FROM HoanTien ht " +
-            "LEFT JOIN HoaDon hd ON ht.HoaDonID = hd.HoaDonID " +
-            "WHERE ht.AccountID = ? AND ht.TrangThai NOT IN (?, ?) " +
-            "ORDER BY ht.ThoiGianYeuCau DESC";
+            "SELECT ht.*, hd.booking_id AS HD_DatSanID FROM refunds ht " +
+            "LEFT JOIN invoices hd ON ht.invoice_id = hd.invoice_id " +
+            "WHERE ht.account_id = ? AND ht.status NOT IN (?, ?) " +
+            "ORDER BY ht.requested_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -268,7 +268,7 @@ public class HoanTienDAOImpl implements HoanTienDAO {
             return false;
         }
 
-        StringBuilder sql = new StringBuilder("UPDATE HoanTien SET TrangThai = ?, UpdatedAt = GETDATE()");
+        StringBuilder sql = new StringBuilder("UPDATE refunds SET status = ?, updated_at = GETDATE()");
         List<Object> params = new ArrayList<>();
         params.add(trangThaiMoi);
 
@@ -299,7 +299,7 @@ public class HoanTienDAOImpl implements HoanTienDAO {
         if (RefundStatus.DA_HOAN_TIEN.equals(trangThaiMoi)) {
             sql.append(", ThoiGianHoan = GETDATE(), CompletedAt = GETDATE()");
         }
-        sql.append(" WHERE HoanTienID = ? AND TrangThai = ?");
+        sql.append(" WHERE refund_id = ? AND status = ?");
         params.add(hoanTienId);
         params.add(trangThaiCu);
 
@@ -318,10 +318,10 @@ public class HoanTienDAOImpl implements HoanTienDAO {
                                    String nganHangNhan, String soTaiKhoanNhan, String chuTaiKhoanNhan,
                                    String qrNhanTienPath) {
         String sql =
-            "UPDATE HoanTien SET NganHangNhan = ?, SoTaiKhoanNhan = ?, ChuTaiKhoanNhan = ?, " +
-            "QrNhanTienPath = ?, UpdatedAt = GETDATE(), " +
-            "TrangThai = CASE WHEN TrangThai = ? THEN ? ELSE TrangThai END " +
-            "WHERE HoanTienID = ? AND AccountID = ? AND TrangThai IN (?, ?)";
+            "UPDATE refunds SET receiving_bank_name = ?, receiving_account_number = ?, receiving_account_holder = ?, " +
+            "receiving_qr_path = ?, updated_at = GETDATE(), " +
+            "status = CASE WHEN status = ? THEN ? ELSE status END " +
+            "WHERE refund_id = ? AND account_id = ? AND status IN (?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, truncate(nganHangNhan, 100));
@@ -345,8 +345,8 @@ public class HoanTienDAOImpl implements HoanTienDAO {
     @Override
     public boolean updateQrPath(int hoanTienId, int accountId, String qrNhanTienPath) {
         String sql =
-            "UPDATE HoanTien SET QrNhanTienPath = ?, UpdatedAt = GETDATE() " +
-            "WHERE HoanTienID = ? AND AccountID = ? AND TrangThai IN (?, ?)";
+            "UPDATE refunds SET receiving_qr_path = ?, updated_at = GETDATE() " +
+            "WHERE refund_id = ? AND account_id = ? AND status IN (?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, truncate(qrNhanTienPath, 300));
@@ -363,41 +363,41 @@ public class HoanTienDAOImpl implements HoanTienDAO {
 
     private Hoantien map(ResultSet rs) throws SQLException {
         Hoantien ht = new Hoantien();
-        ht.setHoanTienId(rs.getInt("HoanTienID"));
-        ht.setHoaDonId(rs.getInt("HoaDonID"));
-        ht.setAccountId(rs.getInt("AccountID"));
-        BigDecimal st = rs.getBigDecimal("SoTienHoan");
+        ht.setHoanTienId(rs.getInt("refund_id"));
+        ht.setHoaDonId(rs.getInt("invoice_id"));
+        ht.setAccountId(rs.getInt("account_id"));
+        BigDecimal st = rs.getBigDecimal("refunded_amount");
         ht.setSoTienHoan(st != null ? st : BigDecimal.ZERO);
-        ht.setLyDo(rs.getString("LyDo"));
-        ht.setTrangThai(rs.getString("TrangThai"));
-        ht.setThoiGianYeuCau(rs.getTimestamp("ThoiGianYeuCau"));
-        ht.setThoiGianHoan(rs.getTimestamp("ThoiGianHoan"));
+        ht.setLyDo(rs.getString("reason"));
+        ht.setTrangThai(rs.getString("status"));
+        ht.setThoiGianYeuCau(rs.getTimestamp("requested_at"));
+        ht.setThoiGianHoan(rs.getTimestamp("refunded_at"));
 
-        int xuLy = rs.getInt("AccountID_NguoiXuLy");
+        int xuLy = rs.getInt("processor_account_id");
         if (!rs.wasNull()) ht.setAccountIdNguoiXuLy(xuLy);
-        ht.setGhiChuXuLy(rs.getString("GhiChuXuLy"));
-        ht.setMaGiaoDichHoan(rs.getString("MaGiaoDichHoan"));
-        ht.setThoiGianXuLy(rs.getTimestamp("ThoiGianXuLy"));
-        ht.setNganHangNhan(rs.getString("NganHangNhan"));
-        ht.setSoTaiKhoanNhan(rs.getString("SoTaiKhoanNhan"));
-        ht.setChuTaiKhoanNhan(rs.getString("ChuTaiKhoanNhan"));
+        ht.setGhiChuXuLy(rs.getString("processing_note"));
+        ht.setMaGiaoDichHoan(rs.getString("refund_transaction_code"));
+        ht.setThoiGianXuLy(rs.getTimestamp("processed_at"));
+        ht.setNganHangNhan(rs.getString("receiving_bank_name"));
+        ht.setSoTaiKhoanNhan(rs.getString("receiving_account_number"));
+        ht.setChuTaiKhoanNhan(rs.getString("receiving_account_holder"));
 
-        int datSanId = getNullableInt(rs, "DatSanID");
+        int datSanId = getNullableInt(rs, "booking_id");
         if (datSanId == 0) datSanId = getNullableInt(rs, "HD_DatSanID");
         if (datSanId != 0) ht.setDatSanId(datSanId);
 
-        int coSoId = getNullableInt(rs, "CoSoID");
+        int coSoId = getNullableInt(rs, "facility_id");
         if (coSoId != 0) ht.setCoSoId(coSoId);
 
-        ht.setSoTienDaThanhToan(rs.getBigDecimal("SoTienDaThanhToan"));
-        ht.setSoTienDeNghiHoan(rs.getBigDecimal("SoTienDeNghiHoan"));
-        ht.setSoTienDuocDuyet(rs.getBigDecimal("SoTienDuocDuyet"));
-        ht.setQrNhanTienPath(rs.getString("QrNhanTienPath"));
-        ht.setGhiChuKhachHang(rs.getString("GhiChuKhachHang"));
-        ht.setLyDoTuChoi(rs.getString("LyDoTuChoi"));
-        ht.setApprovedAt(rs.getTimestamp("ApprovedAt"));
-        ht.setCompletedAt(rs.getTimestamp("CompletedAt"));
-        ht.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+        ht.setSoTienDaThanhToan(rs.getBigDecimal("paid_amount"));
+        ht.setSoTienDeNghiHoan(rs.getBigDecimal("requested_amount"));
+        ht.setSoTienDuocDuyet(rs.getBigDecimal("approved_amount"));
+        ht.setQrNhanTienPath(rs.getString("receiving_qr_path"));
+        ht.setGhiChuKhachHang(rs.getString("customer_note"));
+        ht.setLyDoTuChoi(rs.getString("reject_reason"));
+        ht.setApprovedAt(rs.getTimestamp("approved_at"));
+        ht.setCompletedAt(rs.getTimestamp("completed_at"));
+        ht.setUpdatedAt(rs.getTimestamp("updated_at"));
         return ht;
     }
 

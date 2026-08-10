@@ -245,7 +245,7 @@ public class CoSoDAOImpl implements CoSoDAO {
         try {
             trans.begin();
             // Check if branch exists first using a count native query to be safe
-            Number count = (Number) em.createNativeQuery("SELECT COUNT(*) FROM CoSo WHERE CoSoID = ?")
+            Number count = (Number) em.createNativeQuery("SELECT COUNT(*) FROM facilities WHERE facility_id = ?")
                     .setParameter(1, id)
                     .getSingleResult();
 
@@ -253,7 +253,7 @@ public class CoSoDAOImpl implements CoSoDAO {
                 // 0. Get the manager account ID first to delete it robustly later
                 Integer managerAccountId = null;
                 try {
-                    Object managerIdObj = em.createNativeQuery("SELECT AccountID_QuanLy FROM CoSo WHERE CoSoID = ?")
+                    Object managerIdObj = em.createNativeQuery("SELECT manager_account_id FROM facilities WHERE facility_id = ?")
                             .setParameter(1, id)
                             .getSingleResult();
                     if (managerIdObj != null) {
@@ -264,102 +264,102 @@ public class CoSoDAOImpl implements CoSoDAO {
                 }
 
                 // 1. Break circular dependency first
-                em.createNativeQuery("UPDATE CoSo SET AccountID_QuanLy = NULL WHERE CoSoID = ?")
+                em.createNativeQuery("UPDATE facilities SET manager_account_id = NULL WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 2. Clean up bookings referencing courts of this branch
-                em.createNativeQuery("DELETE FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 3. Matchmaking
-                em.createNativeQuery("DELETE FROM ChiTietGhepKeo WHERE KeoID IN (SELECT KeoID FROM GhepKeo WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)))")
+                em.createNativeQuery("DELETE FROM match_participants WHERE match_id IN (SELECT match_id FROM matches WHERE booking_id IN (SELECT booking_id FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?)))")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM GhepKeo WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
+                em.createNativeQuery("DELETE FROM matches WHERE booking_id IN (SELECT booking_id FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?))")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 4. Reviews
-                em.createNativeQuery("DELETE FROM DanhGia WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
+                em.createNativeQuery("DELETE FROM reviews WHERE booking_id IN (SELECT booking_id FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?))")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 5. Invoices
-                em.createNativeQuery("DELETE FROM ChiTietHoaDon WHERE HoaDonID IN (SELECT HoaDonID FROM HoaDon WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)))")
+                em.createNativeQuery("DELETE FROM invoice_items WHERE invoice_id IN (SELECT invoice_id FROM invoices WHERE booking_id IN (SELECT booking_id FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?)))")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM HoanTien WHERE HoaDonID IN (SELECT HoaDonID FROM HoaDon WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?)))")
+                em.createNativeQuery("DELETE FROM refunds WHERE invoice_id IN (SELECT invoice_id FROM invoices WHERE booking_id IN (SELECT booking_id FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?)))")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM HoaDon WHERE DatSanID IN (SELECT DatSanID FROM LichDatSan WHERE SanID IN (SELECT SanID FROM San WHERE CoSoID = ?))")
+                em.createNativeQuery("DELETE FROM invoices WHERE booking_id IN (SELECT booking_id FROM bookings WHERE court_id IN (SELECT court_id FROM courts WHERE facility_id = ?))")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 9. Courts
-                em.createNativeQuery("DELETE FROM San WHERE CoSoID = ?")
+                em.createNativeQuery("DELETE FROM courts WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 10. Court Types
-                em.createNativeQuery("DELETE FROM LoaiSan WHERE CoSoID = ?")
+                em.createNativeQuery("DELETE FROM court_types WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 11. Products and Services
-                em.createNativeQuery("DELETE FROM ChiTietHoaDon WHERE SanPhamID IN (SELECT SanPhamID FROM SanPham_DichVu WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM invoice_items WHERE product_id IN (SELECT product_id FROM products_services WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM SanPham_DichVu WHERE CoSoID = ?")
+                em.createNativeQuery("DELETE FROM products_services WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 12. Promo Codes
-                em.createNativeQuery("DELETE FROM KhuyenMai WHERE CoSoID = ?")
+                em.createNativeQuery("DELETE FROM promotions WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
                 // 13. Accounts references cleanup
-                em.createNativeQuery("UPDATE CoSo SET AccountID_QuanLy = NULL WHERE AccountID_QuanLy IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("UPDATE facilities SET manager_account_id = NULL WHERE manager_account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM CaLamViec WHERE CoSoID = ? OR AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM work_shifts WHERE facility_id = ? OR account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .setParameter(2, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM MonTheThaoYeuThich WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM favorite_sports WHERE account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM ThongBao WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM notifications WHERE account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("UPDATE HoaDon SET AccountID_NhanVien = NULL WHERE AccountID_NhanVien IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("UPDATE invoices SET staff_account_id = NULL WHERE staff_account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("UPDATE HoaDon SET AccountID_KhachHang = NULL WHERE AccountID_KhachHang IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("UPDATE invoices SET customer_account_id = NULL WHERE customer_account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM HoanTien WHERE AccountID IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM refunds WHERE account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .executeUpdate();
-                em.createNativeQuery("DELETE FROM DanhGia WHERE AccountID_NguoiDanhGia IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?) OR AccountID_NguoiBiDanhGia IN (SELECT AccountID FROM Accounts WHERE CoSoID = ?)")
+                em.createNativeQuery("DELETE FROM reviews WHERE reviewer_account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?) OR reviewed_account_id IN (SELECT account_id FROM accounts WHERE facility_id = ?)")
                         .setParameter(1, id)
                         .setParameter(2, id)
                         .executeUpdate();
 
                 // 15. Delete Accounts associated with the branch
-                em.createNativeQuery("DELETE FROM Accounts WHERE CoSoID = ?")
+                em.createNativeQuery("DELETE FROM accounts WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
                 if (managerAccountId != null) {
-                    em.createNativeQuery("DELETE FROM Accounts WHERE AccountID = ?")
+                    em.createNativeQuery("DELETE FROM accounts WHERE account_id = ?")
                             .setParameter(1, managerAccountId)
                             .executeUpdate();
                 }
 
                 // 16. Finally delete the branch itself
-                em.createNativeQuery("DELETE FROM CoSo WHERE CoSoID = ?")
+                em.createNativeQuery("DELETE FROM facilities WHERE facility_id = ?")
                         .setParameter(1, id)
                         .executeUpdate();
 
@@ -425,22 +425,22 @@ public class CoSoDAOImpl implements CoSoDAO {
         List<FacilityMapDTO> result = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
-                "SELECT c.CoSoID, c.TenCoSo, c.DiaChi, c.SoDienThoai, c.ViDo, c.KinhDo, c.HinhAnh, " +
-                "       c.GioMoCua, c.GioDongCua, c.TrangThai, c.LoaiHinhKinhDoanh, " +
-                "       (SELECT MIN(ls.GiaKhongDen) FROM LoaiSan ls WHERE ls.CoSoID = c.CoSoID) AS MinPrice, " +
-                "       (SELECT COUNT(*) FROM San s WHERE s.CoSoID = c.CoSoID AND s.TrangThai = N'Sẵn sàng' " +
-                "               AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL)) AS ReadyCourtCount " +
-                "FROM CoSo c " +
-                "WHERE (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
-                "  AND c.TrangThai = N'Đang hoạt động' " +
-                "  AND c.ViDo IS NOT NULL AND c.KinhDo IS NOT NULL " +
-                "  AND c.ViDo BETWEEN -90 AND 90 AND c.KinhDo BETWEEN -180 AND 180");
+                "SELECT c.facility_id, c.facility_name, c.address, c.phone_number, c.latitude, c.longitude, c.image_path, " +
+                "       c.opening_time, c.closing_time, c.status, c.business_type, " +
+                "       (SELECT MIN(ls.price_without_light) FROM court_types ls WHERE ls.facility_id = c.facility_id) AS MinPrice, " +
+                "       (SELECT COUNT(*) FROM courts s WHERE s.facility_id = c.facility_id AND s.status = N'Sẵn sàng' " +
+                "               AND (s.is_deleted = 0 OR s.is_deleted IS NULL)) AS ReadyCourtCount " +
+                "FROM facilities c " +
+                "WHERE (c.is_deleted = 0 OR c.is_deleted IS NULL) " +
+                "  AND c.status = N'Đang hoạt động' " +
+                "  AND c.latitude IS NOT NULL AND c.longitude IS NOT NULL " +
+                "  AND c.latitude BETWEEN -90 AND 90 AND c.longitude BETWEEN -180 AND 180");
 
         if (facilityId != null) {
             sql.append(" AND c.CoSoID = ?");
         }
         if (sportId != null) {
-            sql.append(" AND c.CoSoID IN (SELECT DISTINCT ls.CoSoID FROM LoaiSan ls WHERE ls.MonTheThaoID = ?)");
+            sql.append(" AND c.facility_id IN (SELECT DISTINCT ls.facility_id FROM court_types ls WHERE ls.sport_id = ?)");
         }
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         if (hasKeyword) {
@@ -470,23 +470,23 @@ public class CoSoDAOImpl implements CoSoDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     FacilityMapDTO dto = new FacilityMapDTO();
-                    dto.setCoSoId(rs.getInt("CoSoID"));
-                    dto.setTenCoSo(rs.getString("TenCoSo"));
-                    dto.setDiaChi(rs.getString("DiaChi"));
-                    dto.setSoDienThoai(rs.getString("SoDienThoai"));
+                    dto.setCoSoId(rs.getInt("facility_id"));
+                    dto.setTenCoSo(rs.getString("facility_name"));
+                    dto.setDiaChi(rs.getString("address"));
+                    dto.setSoDienThoai(rs.getString("phone_number"));
 
-                    BigDecimal viDo = rs.getBigDecimal("ViDo");
-                    BigDecimal kinhDo = rs.getBigDecimal("KinhDo");
+                    BigDecimal viDo = rs.getBigDecimal("latitude");
+                    BigDecimal kinhDo = rs.getBigDecimal("longitude");
                     dto.setViDo(viDo.doubleValue());
                     dto.setKinhDo(kinhDo.doubleValue());
 
-                    Time gioMo = rs.getTime("GioMoCua");
-                    Time gioDong = rs.getTime("GioDongCua");
+                    Time gioMo = rs.getTime("opening_time");
+                    Time gioDong = rs.getTime("closing_time");
                     dto.setGioMoCua(gioMo != null ? gioMo.toString().substring(0, 5) : null);
                     dto.setGioDongCua(gioDong != null ? gioDong.toString().substring(0, 5) : null);
 
-                    dto.setTrangThai(rs.getString("TrangThai"));
-                    String hinhAnh = rs.getString("HinhAnh");
+                    dto.setTrangThai(rs.getString("status"));
+                    String hinhAnh = rs.getString("image_path");
                     dto.setHinhAnh(hinhAnh != null ? hinhAnh.trim() : "");
 
                     double minPrice = rs.getDouble("MinPrice");
@@ -494,7 +494,7 @@ public class CoSoDAOImpl implements CoSoDAO {
                     dto.setReadyCourtCount(rs.getInt("ReadyCourtCount"));
 
                     List<String> sportsList = new ArrayList<>();
-                    String loaiHinh = rs.getString("LoaiHinhKinhDoanh");
+                    String loaiHinh = rs.getString("business_type");
                     if (loaiHinh != null && !loaiHinh.trim().isEmpty()) {
                         for (String s : loaiHinh.split(",")) {
                             if (!s.trim().isEmpty()) {

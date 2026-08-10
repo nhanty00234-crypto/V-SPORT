@@ -100,12 +100,12 @@ public class PayOSWebhookServlet extends HttpServlet {
 
     /** Luồng cũ: orderCode = DatSanID. Tra CoSoID qua LichDatSan -> San (không tin field khác của webhook). */
     private Integer lookupLegacyBookingCoSoId(long datSanId) {
-        String sql = "SELECT s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+        String sql = "SELECT s.facility_id FROM bookings l JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
         try (java.sql.Connection c = DBUtil.getConnection();
              java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, datSanId);
             try (java.sql.ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getInt("CoSoID") : null;
+                return rs.next() ? rs.getInt("facility_id") : null;
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "PayOS webhook (legacy): lỗi tra CoSoID cho DatSanID=" + datSanId, e);

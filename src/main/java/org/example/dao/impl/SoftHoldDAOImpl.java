@@ -15,7 +15,7 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
     private static final Logger logger = LogManager.getLogger(SoftHoldDAOImpl.class);
 
     public static void deleteExpiredHoldsStatic() {
-        String sql = "DELETE FROM SoftHold WHERE DATEDIFF(minute, CreatedTime, GETDATE()) > "
+        String sql = "DELETE FROM soft_holds WHERE DATEDIFF(minute, created_at, GETDATE()) > "
                 + org.example.util.Constants.SOFT_HOLD_TIMEOUT_MINUTES;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -41,7 +41,7 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
             }
             conn.setAutoCommit(false);
             try {
-                String lockSql = "SELECT SanID FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
+                String lockSql = "SELECT court_id FROM courts WITH (UPDLOCK, ROWLOCK) WHERE court_id = ?";
                 try (PreparedStatement lockPs = conn.prepareStatement(lockSql)) {
                     lockPs.setInt(1, sanId);
                     try (ResultSet rs = lockPs.executeQuery()) {
@@ -63,11 +63,11 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
                             "BOOKING_LIMIT_REACHED", null);
                 }
 
-                String checkSql = "SELECT COUNT(*) FROM SoftHold " +
-                        "WHERE SanID = ? AND NgayDat = ? AND AccountID <> ? " +
-                        "AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " +
+                String checkSql = "SELECT COUNT(*) FROM soft_holds " +
+                        "WHERE court_id = ? AND booking_date = ? AND account_id <> ? " +
+                        "AND DATEDIFF(minute, created_at, GETDATE()) <= " +
                         org.example.util.Constants.SOFT_HOLD_TIMEOUT_MINUTES + " " +
-                        "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+                        "AND NOT (end_time <= CAST(? AS time) OR start_time >= CAST(? AS time))";
                 try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
                     checkPs.setInt(1, sanId);
                     checkPs.setDate(2, Date.valueOf(ngayDat));
@@ -89,13 +89,13 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
                 // chặn khi còn hạn giữ chỗ thật (HoldExpiresAt > SYSUTCDATETIME(), không phải DATEDIFF(CreatedTime)
                 // - hold có thể được gia hạn/khác PENDING_PAYMENT_TIMEOUT_MINUTES). Đã hoàn thành/Quá
                 // hạn/Đã hủy/Không đến KHÔNG được chặn.
-                String checkBookingSql = "SELECT COUNT(*) FROM LichDatSan " +
-                        "WHERE SanID = ? AND NgayDat = ? " +
-                        "AND (TrangThai IN (N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
+                String checkBookingSql = "SELECT COUNT(*) FROM bookings " +
+                        "WHERE court_id = ? AND booking_date = ? " +
+                        "AND (status IN (N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', " +
                         "N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') " +
-                        "     OR (TrangThai = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND HoldExpiresAt > SYSUTCDATETIME())) " +
-                        "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+                        "     OR (status = N'" + org.example.util.Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND hold_expires_at > SYSUTCDATETIME())) " +
+                        "AND NOT (end_time <= CAST(? AS time) OR start_time >= CAST(? AS time))";
                 try (PreparedStatement bkPs = conn.prepareStatement(checkBookingSql)) {
                     bkPs.setInt(1, sanId);
                     bkPs.setDate(2, Date.valueOf(ngayDat));
@@ -111,7 +111,7 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
                     }
                 }
 
-                String insertSql = "INSERT INTO SoftHold (AccountID, SanID, NgayDat, GioBatDau, GioKetThuc) " +
+                String insertSql = "INSERT INTO soft_holds (account_id, court_id, booking_date, start_time, end_time) " +
                         "VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
                     insertPs.setInt(1, accountId);
@@ -140,7 +140,7 @@ public class SoftHoldDAOImpl implements SoftHoldDAO {
 
     @Override
     public void deleteHoldsByAccountAndSan(int accountId, int sanId, LocalDate ngayDat) {
-        String sql = "DELETE FROM SoftHold WHERE AccountID = ? AND SanID = ? AND NgayDat = ?";
+        String sql = "DELETE FROM soft_holds WHERE account_id = ? AND court_id = ? AND booking_date = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);

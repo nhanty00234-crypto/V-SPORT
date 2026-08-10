@@ -31,23 +31,23 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
     private static final String P_STATUS_REJECTED = "Đã từ chối";
 
     private static final String SELECT_SUMMARY_BASE =
-            "SELECT g.KeoID, g.TeamIDNguoiTao, t.TeamName AS TeamNameNguoiTao, g.DatSanID, " +
-                    "l.NgayDat, l.GioBatDau, l.GioKetThuc, s.TenSan, c.TenCoSo, c.DiaChi, " +
-                    "g.MonTheThaoID, mt.TenMon, g.TrinhDo, g.TrangThai, g.MoTa AS Note, " +
-                    "opp.TeamID AS OpponentTeamId, opp.TeamName AS OpponentTeamName, " +
-                    "(SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_PENDING + "') AS PendingChallengeCount " +
-                    "FROM GhepKeo g " +
-                    "JOIN Teams t ON t.TeamID = g.TeamIDNguoiTao " +
-                    "JOIN LichDatSan l ON l.DatSanID = g.DatSanID " +
-                    "JOIN San s ON s.SanID = l.SanID " +
-                    "JOIN CoSo c ON c.CoSoID = s.CoSoID " +
-                    "LEFT JOIN MonTheThao mt ON mt.MonTheThaoID = g.MonTheThaoID " +
-                    "LEFT JOIN ChiTietGhepKeo matched ON matched.KeoID = g.KeoID AND matched.TrangThaiThamGia = N'" + P_STATUS_JOINED + "' " +
-                    "LEFT JOIN Teams opp ON opp.TeamID = matched.TeamIDNguoiThamGia ";
+            "SELECT g.match_id, g.creator_team_id, t.team_name AS TeamNameNguoiTao, g.booking_id, " +
+                    "l.booking_date, l.start_time, l.end_time, s.court_name, c.facility_name, c.address, " +
+                    "g.sport_id, mt.sport_name, g.skill_level, g.status, g.description AS Note, " +
+                    "opp.team_id AS OpponentTeamId, opp.team_name AS OpponentTeamName, " +
+                    "(SELECT COUNT(*) FROM match_participants p WHERE p.match_id = g.match_id AND p.participation_status = N'" + P_STATUS_PENDING + "') AS PendingChallengeCount " +
+                    "FROM matches g " +
+                    "JOIN teams t ON t.team_id = g.creator_team_id " +
+                    "JOIN bookings l ON l.booking_id = g.booking_id " +
+                    "JOIN courts s ON s.court_id = l.court_id " +
+                    "JOIN facilities c ON c.facility_id = s.facility_id " +
+                    "LEFT JOIN sports mt ON mt.sport_id = g.sport_id " +
+                    "LEFT JOIN match_participants matched ON matched.match_id = g.match_id AND matched.participation_status = N'" + P_STATUS_JOINED + "' " +
+                    "LEFT JOIN teams opp ON opp.team_id = matched.participant_team_id ";
 
     @Override
     public int createTeamMatch(int teamId, int captainAccountId, int datSanId, Integer monTheThaoId, String trinhDo, String note) throws Exception {
-        String sql = "INSERT INTO GhepKeo (DatSanID, AccountIDNguoiTao, MonTheThaoID, MoTa, TrinhDo, TrangThai, TeamIDNguoiTao) " +
+        String sql = "INSERT INTO matches (booking_id, AccountIDNguoiTao, sport_id, description, skill_level, status, creator_team_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -69,10 +69,10 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
     @Override
     public List<TeamMatchSummaryDTO> listOpenTeamMatches(Integer sportId, Integer excludeTeamId) {
         StringBuilder sql = new StringBuilder(SELECT_SUMMARY_BASE);
-        sql.append("WHERE g.TeamIDNguoiTao IS NOT NULL AND g.TrangThai = N'").append(KEO_STATUS_OPEN).append("'");
+        sql.append("WHERE g.creator_team_id IS NOT NULL AND g.status = N'").append(KEO_STATUS_OPEN).append("'");
         if (sportId != null) sql.append(" AND g.MonTheThaoID = ?");
         if (excludeTeamId != null) sql.append(" AND g.TeamIDNguoiTao <> ?");
-        sql.append(" ORDER BY l.NgayDat ASC, l.GioBatDau ASC");
+        sql.append(" ORDER BY l.booking_date ASC, l.start_time ASC");
 
         List<TeamMatchSummaryDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -90,7 +90,7 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
     @Override
     public List<TeamMatchSummaryDTO> listMyTeamMatches(int teamId) {
-        String sql = SELECT_SUMMARY_BASE + "WHERE g.TeamIDNguoiTao = ? ORDER BY g.KeoID DESC";
+        String sql = SELECT_SUMMARY_BASE + "WHERE g.creator_team_id = ? ORDER BY g.match_id DESC";
         List<TeamMatchSummaryDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, teamId);
@@ -105,7 +105,7 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
     @Override
     public TeamMatchSummaryDTO getTeamMatchDetail(int keoId) {
-        String sql = SELECT_SUMMARY_BASE + "WHERE g.KeoID = ?";
+        String sql = SELECT_SUMMARY_BASE + "WHERE g.match_id = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, keoId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -125,24 +125,24 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
                 int ownerTeamId;
                 Integer sportId;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT TeamIDNguoiTao, MonTheThaoID, TrangThai FROM GhepKeo WITH (UPDLOCK, ROWLOCK) WHERE KeoID = ?")) {
+                        "SELECT creator_team_id, sport_id, status FROM matches WITH (UPDLOCK, ROWLOCK) WHERE match_id = ?")) {
                     ps.setInt(1, keoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Kèo đội không tồn tại."); }
-                        ownerTeamId = rs.getInt("TeamIDNguoiTao");
+                        ownerTeamId = rs.getInt("creator_team_id");
                         if (rs.wasNull()) { conn.rollback(); throw new IllegalStateException("Đây không phải kèo đội."); }
-                        int sid = rs.getInt("MonTheThaoID");
+                        int sid = rs.getInt("sport_id");
                         sportId = rs.wasNull() ? null : sid;
-                        if (!KEO_STATUS_OPEN.equals(rs.getString("TrangThai"))) { conn.rollback(); throw new IllegalStateException("Kèo hiện không nhận thách đấu."); }
+                        if (!KEO_STATUS_OPEN.equals(rs.getString("status"))) { conn.rollback(); throw new IllegalStateException("Kèo hiện không nhận thách đấu."); }
                     }
                 }
                 if (ownerTeamId == challengerTeamId) { conn.rollback(); throw new IllegalStateException("Đội không thể tự thách đấu chính mình."); }
 
                 if (sportId != null) {
-                    try (PreparedStatement ps = conn.prepareStatement("SELECT SportID FROM Teams WHERE TeamID = ?")) {
+                    try (PreparedStatement ps = conn.prepareStatement("SELECT sport_id FROM teams WHERE team_id = ?")) {
                         ps.setInt(1, challengerTeamId);
                         try (ResultSet rs = ps.executeQuery()) {
-                            if (rs.next() && rs.getInt("SportID") != sportId) {
+                            if (rs.next() && rs.getInt("sport_id") != sportId) {
                                 conn.rollback();
                                 throw new IllegalStateException("Môn thể thao của đội bạn không khớp với kèo này.");
                             }
@@ -151,7 +151,7 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
                 }
 
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM ChiTietGhepKeo WHERE KeoID = ? AND TeamIDNguoiThamGia = ? AND TrangThaiThamGia IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "')")) {
+                        "SELECT COUNT(*) FROM match_participants WHERE match_id = ? AND participant_team_id = ? AND participation_status IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "')")) {
                     ps.setInt(1, keoId);
                     ps.setInt(2, challengerTeamId);
                     try (ResultSet rs = ps.executeQuery()) {
@@ -161,7 +161,7 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
                 int newId;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO ChiTietGhepKeo (KeoID, AccountIDNguoiThamGia, TrangThaiThamGia, ViTriThamGia, TeamIDNguoiThamGia) VALUES (?, ?, ?, ?, ?)",
+                        "INSERT INTO match_participants (match_id, AccountIDNguoiThamGia, participation_status, participation_position, participant_team_id) VALUES (?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS)) {
                     ps.setInt(1, keoId);
                     ps.setInt(2, captainAccountId);
@@ -185,21 +185,21 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
     @Override
     public List<TeamChallengeDTO> getPendingChallenges(int keoId) {
-        String sql = "SELECT c.ChiTietKeoID, c.KeoID, c.TeamIDNguoiThamGia, t.TeamName, t.AvatarPath, c.TrangThaiThamGia " +
-                "FROM ChiTietGhepKeo c JOIN Teams t ON t.TeamID = c.TeamIDNguoiThamGia " +
-                "WHERE c.KeoID = ? AND c.TrangThaiThamGia = N'" + P_STATUS_PENDING + "' ORDER BY c.ChiTietKeoID ASC";
+        String sql = "SELECT c.participant_id, c.match_id, c.participant_team_id, t.team_name, t.avatar_path, c.participation_status " +
+                "FROM match_participants c JOIN teams t ON t.team_id = c.participant_team_id " +
+                "WHERE c.match_id = ? AND c.participation_status = N'" + P_STATUS_PENDING + "' ORDER BY c.participant_id ASC";
         List<TeamChallengeDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, keoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     TeamChallengeDTO dto = new TeamChallengeDTO();
-                    dto.setChiTietKeoId(rs.getInt("ChiTietKeoID"));
-                    dto.setKeoId(rs.getInt("KeoID"));
-                    dto.setChallengerTeamId(rs.getInt("TeamIDNguoiThamGia"));
-                    dto.setChallengerTeamName(rs.getString("TeamName"));
-                    dto.setChallengerTeamAvatarPath(rs.getString("AvatarPath"));
-                    dto.setStatus(rs.getString("TrangThaiThamGia"));
+                    dto.setChiTietKeoId(rs.getInt("participant_id"));
+                    dto.setKeoId(rs.getInt("match_id"));
+                    dto.setChallengerTeamId(rs.getInt("participant_team_id"));
+                    dto.setChallengerTeamName(rs.getString("team_name"));
+                    dto.setChallengerTeamAvatarPath(rs.getString("avatar_path"));
+                    dto.setStatus(rs.getString("participation_status"));
                     result.add(dto);
                 }
             }
@@ -216,32 +216,32 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
             try {
                 int keoId;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT KeoID, TrangThaiThamGia FROM ChiTietGhepKeo WITH (UPDLOCK, ROWLOCK) WHERE ChiTietKeoID = ?")) {
+                        "SELECT match_id, participation_status FROM match_participants WITH (UPDLOCK, ROWLOCK) WHERE participant_id = ?")) {
                     ps.setInt(1, chiTietKeoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Thách đấu không tồn tại."); }
-                        if (!P_STATUS_PENDING.equals(rs.getString("TrangThaiThamGia"))) { conn.rollback(); throw new IllegalStateException("Thách đấu đã được xử lý trước đó."); }
-                        keoId = rs.getInt("KeoID");
+                        if (!P_STATUS_PENDING.equals(rs.getString("participation_status"))) { conn.rollback(); throw new IllegalStateException("Thách đấu đã được xử lý trước đó."); }
+                        keoId = rs.getInt("match_id");
                     }
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT TeamIDNguoiTao, TrangThai FROM GhepKeo WITH (UPDLOCK, ROWLOCK) WHERE KeoID = ?")) {
+                        "SELECT creator_team_id, status FROM matches WITH (UPDLOCK, ROWLOCK) WHERE match_id = ?")) {
                     ps.setInt(1, keoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) { conn.rollback(); throw new IllegalStateException("Kèo đội không tồn tại."); }
-                        if (rs.getInt("TeamIDNguoiTao") != ownerTeamId) { conn.rollback(); throw new IllegalStateException("Thách đấu này không thuộc kèo của đội bạn."); }
-                        if (!KEO_STATUS_OPEN.equals(rs.getString("TrangThai"))) { conn.rollback(); throw new IllegalStateException("Kèo đã được xử lý (đã đủ đội hoặc đã hủy)."); }
+                        if (rs.getInt("creator_team_id") != ownerTeamId) { conn.rollback(); throw new IllegalStateException("Thách đấu này không thuộc kèo của đội bạn."); }
+                        if (!KEO_STATUS_OPEN.equals(rs.getString("status"))) { conn.rollback(); throw new IllegalStateException("Kèo đã được xử lý (đã đủ đội hoặc đã hủy)."); }
                     }
                 }
 
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE ChiTietKeoID = ?")) {
+                        "UPDATE match_participants SET participation_status = ? WHERE participant_id = ?")) {
                     ps.setNString(1, P_STATUS_JOINED);
                     ps.setInt(2, chiTietKeoId);
                     ps.executeUpdate();
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE KeoID = ? AND ChiTietKeoID <> ? AND TrangThaiThamGia = ?")) {
+                        "UPDATE match_participants SET participation_status = ? WHERE match_id = ? AND participant_id <> ? AND participation_status = ?")) {
                     ps.setNString(1, P_STATUS_REJECTED);
                     ps.setInt(2, keoId);
                     ps.setInt(3, chiTietKeoId);
@@ -249,7 +249,7 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
                     ps.executeUpdate();
                 }
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ?")) {
+                        "UPDATE matches SET status = ? WHERE match_id = ?")) {
                     ps.setNString(1, KEO_STATUS_FULL);
                     ps.setInt(2, keoId);
                     ps.executeUpdate();
@@ -265,9 +265,9 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
     @Override
     public boolean rejectChallenge(int chiTietKeoId, int ownerTeamId) {
-        String sql = "UPDATE c SET c.TrangThaiThamGia = ? " +
-                "FROM ChiTietGhepKeo c JOIN GhepKeo g ON g.KeoID = c.KeoID " +
-                "WHERE c.ChiTietKeoID = ? AND g.TeamIDNguoiTao = ? AND c.TrangThaiThamGia = ?";
+        String sql = "UPDATE c SET c.participation_status = ? " +
+                "FROM match_participants c JOIN matches g ON g.match_id = c.match_id " +
+                "WHERE c.participant_id = ? AND g.creator_team_id = ? AND c.participation_status = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, P_STATUS_REJECTED);
             ps.setInt(2, chiTietKeoId);
@@ -281,7 +281,7 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
     @Override
     public boolean cancelTeamMatch(int keoId, int ownerTeamId) {
-        String sql = "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND TeamIDNguoiTao = ? AND TrangThai = ?";
+        String sql = "UPDATE matches SET status = ? WHERE match_id = ? AND creator_team_id = ? AND status = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, KEO_STATUS_CANCELLED);
             ps.setInt(2, keoId);
@@ -295,24 +295,24 @@ public class TeamMatchDAOImpl implements TeamMatchDAO {
 
     private TeamMatchSummaryDTO mapSummary(ResultSet rs) throws SQLException {
         TeamMatchSummaryDTO dto = new TeamMatchSummaryDTO();
-        dto.setKeoId(rs.getInt("KeoID"));
-        dto.setTeamIdNguoiTao(rs.getInt("TeamIDNguoiTao"));
+        dto.setKeoId(rs.getInt("match_id"));
+        dto.setTeamIdNguoiTao(rs.getInt("creator_team_id"));
         dto.setTeamNameNguoiTao(rs.getString("TeamNameNguoiTao"));
-        dto.setDatSanId(rs.getInt("DatSanID"));
-        java.sql.Date ngayDat = rs.getDate("NgayDat");
+        dto.setDatSanId(rs.getInt("booking_id"));
+        java.sql.Date ngayDat = rs.getDate("booking_date");
         dto.setNgayDat(ngayDat != null ? ngayDat.toLocalDate().toString() : null);
-        java.sql.Time gioBatDau = rs.getTime("GioBatDau");
+        java.sql.Time gioBatDau = rs.getTime("start_time");
         dto.setGioBatDau(gioBatDau != null ? gioBatDau.toLocalTime().toString().substring(0, 5) : null);
-        java.sql.Time gioKetThuc = rs.getTime("GioKetThuc");
+        java.sql.Time gioKetThuc = rs.getTime("end_time");
         dto.setGioKetThuc(gioKetThuc != null ? gioKetThuc.toLocalTime().toString().substring(0, 5) : null);
-        dto.setTenSan(rs.getString("TenSan"));
-        dto.setTenCoSo(rs.getString("TenCoSo"));
-        dto.setDiaChi(rs.getString("DiaChi"));
-        int monTheThaoId = rs.getInt("MonTheThaoID");
+        dto.setTenSan(rs.getString("court_name"));
+        dto.setTenCoSo(rs.getString("facility_name"));
+        dto.setDiaChi(rs.getString("address"));
+        int monTheThaoId = rs.getInt("sport_id");
         dto.setMonTheThaoId(rs.wasNull() ? null : monTheThaoId);
-        dto.setTenMon(rs.getString("TenMon"));
-        dto.setTrinhDo(rs.getString("TrinhDo"));
-        dto.setTrangThai(rs.getString("TrangThai"));
+        dto.setTenMon(rs.getString("sport_name"));
+        dto.setTrinhDo(rs.getString("skill_level"));
+        dto.setTrangThai(rs.getString("status"));
         dto.setNote(rs.getString("Note"));
         int opponentTeamId = rs.getInt("OpponentTeamId");
         dto.setOpponentTeamId(rs.wasNull() ? null : opponentTeamId);

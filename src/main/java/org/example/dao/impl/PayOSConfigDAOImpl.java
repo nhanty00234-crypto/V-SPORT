@@ -19,7 +19,7 @@ public class PayOSConfigDAOImpl implements PayOSConfigDAO {
     private static final Logger logger = LogManager.getLogger(PayOSConfigDAOImpl.class);
 
     private static final String SELECT_SQL =
-            "SELECT PayOS_ClientID, PayOS_ApiKey, PayOS_ChecksumKey FROM CoSo WHERE CoSoID = ?";
+            "SELECT payos_client_id, payos_api_key, payos_checksum_key FROM facilities WHERE facility_id = ?";
 
     @Override
     public PayOSCredentials findPayOSConfigurationStatusByCoSoId(int coSoId) {
@@ -38,9 +38,9 @@ public class PayOSConfigDAOImpl implements PayOSConfigDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
                 return new PayOSCredentials(
-                        rs.getString("PayOS_ClientID"),
-                        rs.getString("PayOS_ApiKey"),
-                        rs.getString("PayOS_ChecksumKey"));
+                        rs.getString("payos_client_id"),
+                        rs.getString("payos_api_key"),
+                        rs.getString("payos_checksum_key"));
             }
         } catch (SQLException e) {
             logger.error("Lỗi khi đọc cấu hình PayOS cho CoSoID {}: {}", coSoId, e.getMessage());
@@ -50,7 +50,7 @@ public class PayOSConfigDAOImpl implements PayOSConfigDAO {
 
     @Override
     public boolean updatePayOSConfiguration(int coSoId, String clientId, String apiKey, String checksumKey) {
-        String sql = "UPDATE CoSo SET PayOS_ClientID = ?, PayOS_ApiKey = ?, PayOS_ChecksumKey = ? WHERE CoSoID = ?";
+        String sql = "UPDATE facilities SET payos_client_id = ?, payos_api_key = ?, payos_checksum_key = ? WHERE facility_id = ?";
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -80,18 +80,18 @@ public class PayOSConfigDAOImpl implements PayOSConfigDAO {
 
     @Override
     public Map<Integer, PayOSConfigState> findStatusForAllCoSo() {
-        String sql = "SELECT CoSoID, PayOS_ClientID, PayOS_ApiKey, PayOS_ChecksumKey FROM CoSo " +
-                "WHERE IsDeleted = 0 OR IsDeleted IS NULL";
+        String sql = "SELECT facility_id, payos_client_id, payos_api_key, payos_checksum_key FROM facilities " +
+                "WHERE is_deleted = 0 OR is_deleted IS NULL";
         Map<Integer, PayOSConfigState> result = new HashMap<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                int coSoId = rs.getInt("CoSoID");
+                int coSoId = rs.getInt("facility_id");
                 PayOSConfigState state = PayOSConfigState.fromRawValues(
-                        rs.getString("PayOS_ClientID"),
-                        rs.getString("PayOS_ApiKey"),
-                        rs.getString("PayOS_ChecksumKey"));
+                        rs.getString("payos_client_id"),
+                        rs.getString("payos_api_key"),
+                        rs.getString("payos_checksum_key"));
                 result.put(coSoId, state);
             }
         } catch (SQLException e) {

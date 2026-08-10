@@ -72,7 +72,7 @@ public class BillSplitStaffServlet extends HttpServlet {
     }
 
     private Integer findCoSoIdByDatSanId(int datSanId) {
-        String sql = "SELECT s.CoSoID FROM LichDatSan lds JOIN San s ON lds.SanID = s.SanID WHERE lds.DatSanID = ?";
+        String sql = "SELECT s.facility_id FROM bookings lds JOIN courts s ON lds.court_id = s.court_id WHERE lds.booking_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);

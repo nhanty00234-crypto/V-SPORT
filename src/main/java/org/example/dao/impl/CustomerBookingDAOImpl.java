@@ -19,16 +19,16 @@ public class CustomerBookingDAOImpl implements CustomerBookingDAO {
     @Override
     public List<CustomerBookingHistoryItem> getBookingHistory(int accountId) {
         List<CustomerBookingHistoryItem> list = new ArrayList<>();
-        String sql = "SELECT lds.DatSanID, lds.SanID, hd.HoaDonID, s.TenSan, cs.TenCoSo, cs.DiaChi, " +
-                     "lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.TrangThai, " +
-                     "hd.PhuongThucThanhToan, hd.TongThanhToan, ht.TrangThai AS RefundStatus, ht.SoTienDaThanhToan " +
-                     "FROM LichDatSan lds " +
-                     "LEFT JOIN San s ON s.SanID = lds.SanID " +
-                     "LEFT JOIN CoSo cs ON cs.CoSoID = s.CoSoID " +
-                     "LEFT JOIN HoaDon hd ON hd.DatSanID = lds.DatSanID " +
-                     "LEFT JOIN HoanTien ht ON ht.DatSanID = lds.DatSanID " +
-                     "WHERE lds.AccountID = ? " +
-                     "ORDER BY lds.NgayDat DESC, lds.GioBatDau DESC";
+        String sql = "SELECT lds.booking_id, lds.court_id, hd.invoice_id, s.court_name, cs.facility_name, cs.address, " +
+                     "lds.booking_date, lds.start_time, lds.end_time, lds.status, " +
+                     "hd.payment_method, hd.grand_total, ht.status AS RefundStatus, ht.paid_amount " +
+                     "FROM bookings lds " +
+                     "LEFT JOIN courts s ON s.court_id = lds.court_id " +
+                     "LEFT JOIN facilities cs ON cs.facility_id = s.facility_id " +
+                     "LEFT JOIN invoices hd ON hd.booking_id = lds.booking_id " +
+                     "LEFT JOIN refunds ht ON ht.booking_id = lds.booking_id " +
+                     "WHERE lds.account_id = ? " +
+                     "ORDER BY lds.booking_date DESC, lds.start_time DESC";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -46,15 +46,15 @@ public class CustomerBookingDAOImpl implements CustomerBookingDAO {
 
     @Override
     public CustomerBookingHistoryItem getBookingByDatSanId(int datSanId, int accountId) {
-        String sql = "SELECT lds.DatSanID, lds.SanID, hd.HoaDonID, s.TenSan, cs.TenCoSo, cs.DiaChi, " +
-                     "lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.TrangThai, " +
-                     "hd.PhuongThucThanhToan, hd.TongThanhToan, ht.TrangThai AS RefundStatus, ht.SoTienDaThanhToan, lds.TongTienDuKien " +
-                     "FROM LichDatSan lds " +
-                     "LEFT JOIN San s ON s.SanID = lds.SanID " +
-                     "LEFT JOIN CoSo cs ON cs.CoSoID = s.CoSoID " +
-                     "LEFT JOIN HoaDon hd ON hd.DatSanID = lds.DatSanID " +
-                     "LEFT JOIN HoanTien ht ON ht.DatSanID = lds.DatSanID " +
-                     "WHERE lds.DatSanID = ? AND lds.AccountID = ?";
+        String sql = "SELECT lds.booking_id, lds.court_id, hd.invoice_id, s.court_name, cs.facility_name, cs.address, " +
+                     "lds.booking_date, lds.start_time, lds.end_time, lds.status, " +
+                     "hd.payment_method, hd.grand_total, ht.status AS RefundStatus, ht.paid_amount, lds.estimated_total " +
+                     "FROM bookings lds " +
+                     "LEFT JOIN courts s ON s.court_id = lds.court_id " +
+                     "LEFT JOIN facilities cs ON cs.facility_id = s.facility_id " +
+                     "LEFT JOIN invoices hd ON hd.booking_id = lds.booking_id " +
+                     "LEFT JOIN refunds ht ON ht.booking_id = lds.booking_id " +
+                     "WHERE lds.booking_id = ? AND lds.account_id = ?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -66,7 +66,7 @@ public class CustomerBookingDAOImpl implements CustomerBookingDAO {
 
                     // Fallback to TongTienDuKien if hd.TongThanhToan is null/zero but a total estimate exists.
                     if (item.getAmountPaid() == null || item.getAmountPaid().compareTo(BigDecimal.ZERO) == 0) {
-                        item.setAmountPaid(rs.getBigDecimal("TongTienDuKien"));
+                        item.setAmountPaid(rs.getBigDecimal("estimated_total"));
                     }
                     return item;
                 }
@@ -79,31 +79,31 @@ public class CustomerBookingDAOImpl implements CustomerBookingDAO {
 
     private CustomerBookingHistoryItem mapRowToItem(ResultSet rs) throws Exception {
         CustomerBookingHistoryItem item = new CustomerBookingHistoryItem();
-        item.setDatSanId(rs.getInt("DatSanID"));
-        item.setSanId(rs.getInt("SanID"));
+        item.setDatSanId(rs.getInt("booking_id"));
+        item.setSanId(rs.getInt("court_id"));
         
-        int hoaDonId = rs.getInt("HoaDonID");
+        int hoaDonId = rs.getInt("invoice_id");
         if (!rs.wasNull()) {
             item.setHoaDonId(hoaDonId);
         }
         
-        item.setTenSan(rs.getString("TenSan"));
-        item.setTenCoSo(rs.getString("TenCoSo"));
-        item.setDiaChi(rs.getString("DiaChi"));
+        item.setTenSan(rs.getString("court_name"));
+        item.setTenCoSo(rs.getString("facility_name"));
+        item.setDiaChi(rs.getString("address"));
         
-        if (rs.getDate("NgayDat") != null) {
-            item.setNgayDat(rs.getDate("NgayDat").toString());
+        if (rs.getDate("booking_date") != null) {
+            item.setNgayDat(rs.getDate("booking_date").toString());
         }
-        if (rs.getTime("GioBatDau") != null) {
-            item.setGioBatDau(rs.getTime("GioBatDau").toString());
+        if (rs.getTime("start_time") != null) {
+            item.setGioBatDau(rs.getTime("start_time").toString());
         }
-        if (rs.getTime("GioKetThuc") != null) {
-            item.setGioKetThuc(rs.getTime("GioKetThuc").toString());
+        if (rs.getTime("end_time") != null) {
+            item.setGioKetThuc(rs.getTime("end_time").toString());
         }
         
-        item.setBookingStatus(rs.getString("TrangThai"));
+        item.setBookingStatus(rs.getString("status"));
         
-        BigDecimal tongThanhToan = rs.getBigDecimal("TongThanhToan");
+        BigDecimal tongThanhToan = rs.getBigDecimal("grand_total");
         if (tongThanhToan != null && tongThanhToan.compareTo(BigDecimal.ZERO) > 0) {
             item.setPaid(true);
             item.setAmountPaid(tongThanhToan);
@@ -112,14 +112,14 @@ public class CustomerBookingDAOImpl implements CustomerBookingDAO {
             item.setAmountPaid(BigDecimal.ZERO);
             
             // Check if HoanTien has SoTienDaThanhToan
-            BigDecimal st = rs.getBigDecimal("SoTienDaThanhToan");
+            BigDecimal st = rs.getBigDecimal("paid_amount");
             if (st != null && st.compareTo(BigDecimal.ZERO) > 0) {
                 item.setPaid(true);
                 item.setAmountPaid(st);
             }
         }
         
-        item.setPaymentMethod(rs.getString("PhuongThucThanhToan"));
+        item.setPaymentMethod(rs.getString("payment_method"));
         item.setRefundStatus(rs.getString("RefundStatus"));
         
         return item;

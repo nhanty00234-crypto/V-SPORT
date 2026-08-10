@@ -171,9 +171,9 @@ public class BookingPaymentLinkService {
             session.setAttribute(PayosQrData.sessionKey(datSanId), data);
         }
 
-        String sql = "UPDATE LichDatSan SET PayosOrderCode=?, PayosPaymentLinkId=?, PayosQrPayload=?, "
-                + "PayosCheckoutUrl=?, PayosBin=?, PayosAccountNumber=?, PayosAccountName=?, PayosAmount=?, "
-                + "PayosDescription=?, PayosExpiresAt=? WHERE DatSanID=?";
+        String sql = "UPDATE bookings SET payos_order_code=?, payos_payment_link_id=?, payos_qr_payload=?, "
+                + "payos_checkout_url=?, payos_bin=?, payos_account_number=?, payos_account_name=?, payos_amount=?, "
+                + "payos_description=?, payos_expires_at=? WHERE booking_id=?";
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, orderCode);

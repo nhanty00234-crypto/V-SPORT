@@ -675,27 +675,27 @@ public class VisualBookingServlet extends HttpServlet {
      */
     private List<BookingSlot> loadBlockingBookings(int coSoId, LocalDate date) throws SQLException {
         List<BookingSlot> result = new ArrayList<>();
-        String sql = "SELECT l.DatSanID, l.AccountID, l.SanID, l.GioBatDau, l.GioKetThuc, l.TrangThai " +
-                "FROM LichDatSan l JOIN San s ON l.SanID = s.SanID " +
-                "WHERE s.CoSoID = ? AND l.NgayDat = ? AND l.IsDeleted = 0 " +
-                "AND (l.TrangThai IN (N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "', " +
+        String sql = "SELECT l.booking_id, l.account_id, l.court_id, l.start_time, l.end_time, l.status " +
+                "FROM bookings l JOIN courts s ON l.court_id = s.court_id " +
+                "WHERE s.facility_id = ? AND l.booking_date = ? AND l.is_deleted = 0 " +
+                "AND (l.status IN (N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "', " +
                 "N'" + Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', " +
                 "N'" + Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "') " +
-                "OR (l.TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND l.HoldExpiresAt > SYSUTCDATETIME()))";
+                "OR (l.status = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "' AND l.hold_expires_at > SYSUTCDATETIME()))";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
             ps.setDate(2, java.sql.Date.valueOf(date));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int acc = rs.getInt("AccountID");
+                    int acc = rs.getInt("account_id");
                     result.add(new BookingSlot(
-                            rs.getInt("SanID"),
-                            rs.getTime("GioBatDau").toLocalTime(),
-                            rs.getTime("GioKetThuc").toLocalTime(),
-                            rs.getString("TrangThai"),
+                            rs.getInt("court_id"),
+                            rs.getTime("start_time").toLocalTime(),
+                            rs.getTime("end_time").toLocalTime(),
+                            rs.getString("status"),
                             rs.wasNull() ? null : acc,
-                            rs.getInt("DatSanID")));
+                            rs.getInt("booking_id")));
                 }
             }
         }
@@ -708,11 +708,11 @@ public class VisualBookingServlet extends HttpServlet {
     /** Như loadBlockingBookings: lỗi DB phải nổi lên, không âm thầm trả rỗng. */
     private List<BookingSlot> loadActiveSoftHolds(int coSoId, LocalDate date, Integer excludeAccountId) throws SQLException {
         List<BookingSlot> result = new ArrayList<>();
-        String sql = "SELECT h.SanID, h.GioBatDau, h.GioKetThuc " +
-                "FROM SoftHold h JOIN San s ON h.SanID = s.SanID " +
-                "WHERE s.CoSoID = ? AND h.NgayDat = ? " +
-                "AND (? IS NULL OR h.AccountID <> ?) " +
-                "AND DATEDIFF(minute, h.CreatedTime, GETDATE()) <= " + Constants.SOFT_HOLD_TIMEOUT_MINUTES;
+        String sql = "SELECT h.court_id, h.start_time, h.end_time " +
+                "FROM soft_holds h JOIN courts s ON h.court_id = s.court_id " +
+                "WHERE s.facility_id = ? AND h.booking_date = ? " +
+                "AND (? IS NULL OR h.account_id <> ?) " +
+                "AND DATEDIFF(minute, h.created_at, GETDATE()) <= " + Constants.SOFT_HOLD_TIMEOUT_MINUTES;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -727,9 +727,9 @@ public class VisualBookingServlet extends HttpServlet {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     result.add(new BookingSlot(
-                            rs.getInt("SanID"),
-                            rs.getTime("GioBatDau").toLocalTime(),
-                            rs.getTime("GioKetThuc").toLocalTime(),
+                            rs.getInt("court_id"),
+                            rs.getTime("start_time").toLocalTime(),
+                            rs.getTime("end_time").toLocalTime(),
                             "HOLD"));
                 }
             }

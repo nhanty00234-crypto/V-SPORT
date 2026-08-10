@@ -209,14 +209,14 @@ public class BookingCreationService {
         String sanTrangThai;
         int sanCoSoID;
         try (PreparedStatement lockPs = conn.prepareStatement(
-                "SELECT SanID, TrangThai, CoSoID FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?")) {
+                "SELECT court_id, status, facility_id FROM courts WITH (UPDLOCK, ROWLOCK) WHERE court_id = ?")) {
             lockPs.setInt(1, cmd.sanId);
             try (ResultSet rs = lockPs.executeQuery()) {
                 if (!rs.next()) {
                     return Result.fail(ERR_NOT_FOUND, "Sân không tồn tại trong hệ thống.");
                 }
-                sanTrangThai = rs.getString("TrangThai");
-                sanCoSoID = rs.getInt("CoSoID");
+                sanTrangThai = rs.getString("status");
+                sanCoSoID = rs.getInt("facility_id");
             }
         }
 
@@ -240,13 +240,13 @@ public class BookingCreationService {
         LocalTime branchClose = DEFAULT_CLOSE_TIME;
         String branchName = "Cơ Sở";
         try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT TenCoSo, GioMoCua, GioDongCua FROM CoSo WHERE CoSoID = ?")) {
+                "SELECT facility_name, opening_time, closing_time FROM facilities WHERE facility_id = ?")) {
             ps.setInt(1, sanCoSoID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    branchName = rs.getString("TenCoSo");
-                    java.sql.Time dbOpen = rs.getTime("GioMoCua");
-                    java.sql.Time dbClose = rs.getTime("GioDongCua");
+                    branchName = rs.getString("facility_name");
+                    java.sql.Time dbOpen = rs.getTime("opening_time");
+                    java.sql.Time dbClose = rs.getTime("closing_time");
                     if (dbOpen != null) branchOpen = dbOpen.toLocalTime();
                     if (dbClose != null) branchClose = dbClose.toLocalTime();
                 }
@@ -291,9 +291,9 @@ public class BookingCreationService {
                 : "NULL";
 
         int newDatSanId = -1;
-        String insertSql = "INSERT INTO LichDatSan "
-                + "(AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, "
-                + " ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan, HoldExpiresAt) "
+        String insertSql = "INSERT INTO bookings "
+                + "(account_id, court_id, booking_date, start_time, end_time, "
+                + " apply_light_price, estimated_total, status, note, booking_source, hold_expires_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + holdExpiresAtExpr + ")";
         try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, user.getAccountId());
@@ -317,7 +317,7 @@ public class BookingCreationService {
         if (serviceError != null) return serviceError;
 
         try (PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM SoftHold WHERE AccountID = ? AND SanID = ? AND NgayDat = ?")) {
+                "DELETE FROM soft_holds WHERE account_id = ? AND court_id = ? AND booking_date = ?")) {
             ps.setInt(1, user.getAccountId());
             ps.setInt(2, cmd.sanId);
             ps.setDate(3, java.sql.Date.valueOf(cmd.ngayDat));
@@ -331,14 +331,14 @@ public class BookingCreationService {
                                LocalTime batDau, LocalTime ketThuc) throws SQLException {
         // "Chờ xác nhận" (COD) chặn slot cho tới khi được duyệt/từ chối/tự hết hạn.
         // "Chờ thanh toán" chỉ chặn khi còn hạn giữ chỗ thật (HoldExpiresAt).
-        String sql = "SELECT COUNT(*) FROM LichDatSan "
-                + "WHERE SanID = ? AND NgayDat = ? "
-                + "AND (TrangThai IN (N'" + Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', "
+        String sql = "SELECT COUNT(*) FROM bookings "
+                + "WHERE court_id = ? AND booking_date = ? "
+                + "AND (status IN (N'" + Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', "
                 + "N'" + Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', "
                 + "N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') "
-                + "     OR (TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
-                + "' AND HoldExpiresAt > SYSUTCDATETIME())) "
-                + "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+                + "     OR (status = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
+                + "' AND hold_expires_at > SYSUTCDATETIME())) "
+                + "AND NOT (end_time <= CAST(? AS time) OR start_time >= CAST(? AS time))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sanId);
             ps.setDate(2, java.sql.Date.valueOf(ngayDat));
@@ -352,10 +352,10 @@ public class BookingCreationService {
 
     private boolean hasActiveHoldFromOther(Connection conn, int sanId, LocalDate ngayDat, LocalTime batDau,
                                            LocalTime ketThuc, int accountId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM SoftHold "
-                + "WHERE SanID = ? AND NgayDat = ? AND AccountID <> ? "
-                + "AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + Constants.SOFT_HOLD_TIMEOUT_MINUTES + " "
-                + "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+        String sql = "SELECT COUNT(*) FROM soft_holds "
+                + "WHERE court_id = ? AND booking_date = ? AND account_id <> ? "
+                + "AND DATEDIFF(minute, created_at, GETDATE()) <= " + Constants.SOFT_HOLD_TIMEOUT_MINUTES + " "
+                + "AND NOT (end_time <= CAST(? AS time) OR start_time >= CAST(? AS time))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sanId);
             ps.setDate(2, java.sql.Date.valueOf(ngayDat));
@@ -380,16 +380,16 @@ public class BookingCreationService {
         LocalTime lenDen = null;
         LocalTime tatDen = null;
         try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen, GioKetThucLenDen "
-                        + "FROM LoaiSan WHERE LoaiSanID = (SELECT LoaiSanID FROM San WHERE SanID = ?)")) {
+                "SELECT price_without_light, price_with_light, light_start_time, light_end_time "
+                        + "FROM court_types WHERE court_type_id = (SELECT court_type_id FROM courts WHERE court_id = ?)")) {
             ps.setInt(1, sanId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    giaKhongDen = BigDecimal.valueOf(rs.getDouble("GiaKhongDen"));
-                    giaCoDen = BigDecimal.valueOf(rs.getDouble("GiaCoDen"));
-                    java.sql.Time s = rs.getTime("GioBatDauLenDen");
+                    giaKhongDen = BigDecimal.valueOf(rs.getDouble("price_without_light"));
+                    giaCoDen = BigDecimal.valueOf(rs.getDouble("price_with_light"));
+                    java.sql.Time s = rs.getTime("light_start_time");
                     if (s != null) lenDen = s.toLocalTime();
-                    java.sql.Time e = rs.getTime("GioKetThucLenDen");
+                    java.sql.Time e = rs.getTime("light_end_time");
                     if (e != null) tatDen = e.toLocalTime();
                 }
             }
@@ -408,8 +408,8 @@ public class BookingCreationService {
     private Result insertPreOrderedServices(Connection conn, Command cmd, int sanCoSoID, int datSanId)
             throws SQLException {
         if (cmd.serviceIds.length == 0) return null;
-        String sql = "SELECT SanPhamID, TenSanPham, DonGia, SoLuongTon, TrangThai, CoSoID "
-                + "FROM SanPham_DichVu WHERE SanPhamID = ?";
+        String sql = "SELECT product_id, product_name, unit_price, stock_quantity, status, facility_id "
+                + "FROM products_services WHERE product_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < cmd.serviceIds.length; i++) {
                 int spId = cmd.serviceIds[i];
@@ -419,11 +419,11 @@ public class BookingCreationService {
                     if (!rs.next()) {
                         return Result.fail(ERR_NOT_FOUND, "Một dịch vụ bạn chọn không tồn tại. Vui lòng thử lại.");
                     }
-                    int spCoSoId = rs.getInt("CoSoID");
-                    String spTrangThai = rs.getString("TrangThai");
-                    int soLuongTon = rs.getInt("SoLuongTon");
-                    String tenSp = rs.getString("TenSanPham");
-                    BigDecimal donGia = rs.getBigDecimal("DonGia");
+                    int spCoSoId = rs.getInt("facility_id");
+                    String spTrangThai = rs.getString("status");
+                    int soLuongTon = rs.getInt("stock_quantity");
+                    String tenSp = rs.getString("product_name");
+                    BigDecimal donGia = rs.getBigDecimal("unit_price");
 
                     if (spCoSoId != sanCoSoID) {
                         return Result.fail(ERR_VALIDATION,

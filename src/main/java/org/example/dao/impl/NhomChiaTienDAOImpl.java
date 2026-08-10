@@ -17,7 +17,7 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
     private static final Logger logger = LogManager.getLogger(NhomChiaTienDAOImpl.class);
 
     private static final String INSERT_SQL =
-        "INSERT INTO NhomChiaTien (HoaDonID, DatSanID, CreatedByAccountID, SplitType, TongTien, TrangThai, ExpiresAt, CreatedAt, UpdatedAt) " +
+        "INSERT INTO bill_split_groups (invoice_id, booking_id, created_by_account_id, split_type, total_amount, status, expires_at, created_at, updated_at) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
 
     @Override
@@ -46,7 +46,7 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
 
     @Override
     public NhomChiaTien findById(int nhomChiaTienId) {
-        String sql = "SELECT * FROM NhomChiaTien WHERE NhomChiaTienID = ?";
+        String sql = "SELECT * FROM bill_split_groups WHERE split_group_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nhomChiaTienId);
@@ -61,7 +61,7 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
 
     @Override
     public NhomChiaTien findByIdAndCreatedBy(int nhomChiaTienId, int accountId) {
-        String sql = "SELECT * FROM NhomChiaTien WHERE NhomChiaTienID = ? AND CreatedByAccountID = ?";
+        String sql = "SELECT * FROM bill_split_groups WHERE split_group_id = ? AND created_by_account_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nhomChiaTienId);
@@ -77,7 +77,7 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
 
     @Override
     public NhomChiaTien findActiveByHoaDonId(int hoaDonId) {
-        String sql = "SELECT * FROM NhomChiaTien WHERE HoaDonID = ? AND TrangThai IN (?, ?)";
+        String sql = "SELECT * FROM bill_split_groups WHERE invoice_id = ? AND status IN (?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hoaDonId);
@@ -95,7 +95,7 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
     @Override
     public List<NhomChiaTien> findByDatSanId(int datSanId) {
         List<NhomChiaTien> list = new ArrayList<>();
-        String sql = "SELECT * FROM NhomChiaTien WHERE DatSanID = ? ORDER BY CreatedAt DESC";
+        String sql = "SELECT * FROM bill_split_groups WHERE booking_id = ? ORDER BY created_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
@@ -114,7 +114,7 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
             logger.warn("updateTrangThai NhomChiaTien: trạng thái không hợp lệ cũ='{}' mới='{}'", trangThaiCu, trangThaiMoi);
             return false;
         }
-        String sql = "UPDATE NhomChiaTien SET TrangThai = ?, UpdatedAt = GETDATE() WHERE NhomChiaTienID = ? AND TrangThai = ?";
+        String sql = "UPDATE bill_split_groups SET status = ?, updated_at = GETDATE() WHERE split_group_id = ? AND status = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, trangThaiMoi);
             ps.setInt(2, nhomChiaTienId);
@@ -138,17 +138,17 @@ public class NhomChiaTienDAOImpl implements NhomChiaTienDAO {
 
     private NhomChiaTien map(ResultSet rs) throws SQLException {
         NhomChiaTien nct = new NhomChiaTien();
-        nct.setNhomChiaTienId(rs.getInt("NhomChiaTienID"));
-        nct.setHoaDonId(rs.getInt("HoaDonID"));
-        nct.setDatSanId(rs.getInt("DatSanID"));
-        nct.setCreatedByAccountId(rs.getInt("CreatedByAccountID"));
-        nct.setSplitType(rs.getString("SplitType"));
-        BigDecimal tt = rs.getBigDecimal("TongTien");
+        nct.setNhomChiaTienId(rs.getInt("split_group_id"));
+        nct.setHoaDonId(rs.getInt("invoice_id"));
+        nct.setDatSanId(rs.getInt("booking_id"));
+        nct.setCreatedByAccountId(rs.getInt("created_by_account_id"));
+        nct.setSplitType(rs.getString("split_type"));
+        BigDecimal tt = rs.getBigDecimal("total_amount");
         nct.setTongTien(tt != null ? tt : BigDecimal.ZERO);
-        nct.setTrangThai(rs.getString("TrangThai"));
-        nct.setExpiresAt(rs.getTimestamp("ExpiresAt"));
-        nct.setCreatedAt(rs.getTimestamp("CreatedAt"));
-        nct.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+        nct.setTrangThai(rs.getString("status"));
+        nct.setExpiresAt(rs.getTimestamp("expires_at"));
+        nct.setCreatedAt(rs.getTimestamp("created_at"));
+        nct.setUpdatedAt(rs.getTimestamp("updated_at"));
         return nct;
     }
 }

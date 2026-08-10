@@ -17,7 +17,7 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
     @Override
     public boolean log(String entityType, int entityId, String displayName, String sourceTable,
                         String oldStatus, Integer deletedBy, String reason) {
-        String sql = "INSERT INTO AdminTrash (EntityType, EntityID, DisplayName, SourceTable, OldStatus, DeletedBy, Reason) " +
+        String sql = "INSERT INTO admin_trash (entity_type, entity_id, display_name, source_table, old_status, deleted_by, Reason) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -37,8 +37,8 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
 
     @Override
     public AdminTrash getById(int trashId) {
-        String sql = "SELECT t.*, a.FullName AS DeletedByName FROM AdminTrash t " +
-                     "LEFT JOIN Accounts a ON a.AccountID = t.DeletedBy WHERE t.TrashID = ?";
+        String sql = "SELECT t.*, a.full_name AS DeletedByName FROM admin_trash t " +
+                     "LEFT JOIN accounts a ON a.account_id = t.deleted_by WHERE t.trash_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, trashId);
@@ -54,8 +54,8 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
     @Override
     public List<AdminTrash> search(String entityType, String restoredFilter, Integer deletedBy) {
         StringBuilder sql = new StringBuilder(
-                "SELECT t.*, a.FullName AS DeletedByName FROM AdminTrash t " +
-                "LEFT JOIN Accounts a ON a.AccountID = t.DeletedBy WHERE 1=1");
+                "SELECT t.*, a.full_name AS DeletedByName FROM admin_trash t " +
+                "LEFT JOIN accounts a ON a.account_id = t.deleted_by WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (entityType != null && !entityType.isEmpty() && !"all".equalsIgnoreCase(entityType)) {
@@ -71,7 +71,7 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
             sql.append(" AND t.DeletedBy = ?");
             params.add(deletedBy);
         }
-        sql.append(" ORDER BY t.DeletedAt DESC");
+        sql.append(" ORDER BY t.deleted_at DESC");
 
         List<AdminTrash> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
@@ -88,8 +88,8 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
 
     @Override
     public boolean markRestored(int trashId, int restoredBy) {
-        String sql = "UPDATE AdminTrash SET IsRestored = 1, RestoredBy = ?, RestoredAt = SYSUTCDATETIME() " +
-                     "WHERE TrashID = ? AND IsRestored = 0";
+        String sql = "UPDATE admin_trash SET is_restored = 1, restored_by = ?, restored_at = SYSUTCDATETIME() " +
+                     "WHERE trash_id = ? AND is_restored = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, restoredBy);
@@ -103,22 +103,22 @@ public class AdminTrashDAOImpl implements AdminTrashDAO {
 
     private AdminTrash map(ResultSet rs) throws SQLException {
         AdminTrash t = new AdminTrash();
-        t.setTrashId(rs.getInt("TrashID"));
-        t.setEntityType(rs.getString("EntityType"));
-        t.setEntityId(rs.getInt("EntityID"));
-        t.setDisplayName(rs.getString("DisplayName"));
-        t.setSourceTable(rs.getString("SourceTable"));
-        t.setOldStatus(rs.getString("OldStatus"));
-        int deletedBy = rs.getInt("DeletedBy");
+        t.setTrashId(rs.getInt("trash_id"));
+        t.setEntityType(rs.getString("entity_type"));
+        t.setEntityId(rs.getInt("entity_id"));
+        t.setDisplayName(rs.getString("display_name"));
+        t.setSourceTable(rs.getString("source_table"));
+        t.setOldStatus(rs.getString("old_status"));
+        int deletedBy = rs.getInt("deleted_by");
         t.setDeletedBy(rs.wasNull() ? null : deletedBy);
         t.setDeletedByName(rs.getString("DeletedByName"));
-        Timestamp deletedAt = rs.getTimestamp("DeletedAt");
+        Timestamp deletedAt = rs.getTimestamp("deleted_at");
         if (deletedAt != null) t.setDeletedAt(deletedAt.toLocalDateTime());
         t.setReason(rs.getString("Reason"));
-        t.setRestored(rs.getBoolean("IsRestored"));
-        int restoredBy = rs.getInt("RestoredBy");
+        t.setRestored(rs.getBoolean("is_restored"));
+        int restoredBy = rs.getInt("restored_by");
         t.setRestoredBy(rs.wasNull() ? null : restoredBy);
-        Timestamp restoredAt = rs.getTimestamp("RestoredAt");
+        Timestamp restoredAt = rs.getTimestamp("restored_at");
         if (restoredAt != null) t.setRestoredAt(restoredAt.toLocalDateTime());
         return t;
     }

@@ -35,7 +35,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public int insert(Connection conn, ThongBao thongBao) throws SQLException {
-        String sql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan, IsDeleted) " +
+        String sql = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan, is_deleted) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -72,7 +72,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean update(ThongBao thongBao) {
-        String sql = "UPDATE ThongBao SET AccountID=?, TieuDe=?, NoiDung=?, LoaiThongBao=?, DaDoc=?, ThoiGianGui=?, MaBanGhi=?, DuongDan=? WHERE ThongBaoID=?";
+        String sql = "UPDATE notifications SET account_id=?, title=?, content=?, notification_type=?, is_read=?, sent_at=?, reference_id=?, DuongDan=? WHERE notification_id=?";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -96,7 +96,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean hardDelete(int thongBaoId) {
-        String sql = "DELETE FROM ThongBao WHERE ThongBaoID = ?";
+        String sql = "DELETE FROM notifications WHERE notification_id = ?";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -111,7 +111,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public ThongBao findById(int thongBaoId) {
-        String sql = "SELECT * FROM ThongBao WHERE ThongBaoID = ? AND IsDeleted = 0";
+        String sql = "SELECT * FROM notifications WHERE notification_id = ? AND is_deleted = 0";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -131,7 +131,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     @Override
     public List<ThongBao> findAll() {
         List<ThongBao> list = new ArrayList<>();
-        String sql = "SELECT * FROM ThongBao WHERE IsDeleted = 0 ORDER BY ThoiGianGui DESC";
+        String sql = "SELECT * FROM notifications WHERE is_deleted = 0 ORDER BY sent_at DESC";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -149,7 +149,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     @Override
     public List<ThongBao> findByAccountID(int accountId) {
         List<ThongBao> list = new ArrayList<>();
-        String sql = "SELECT * FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0 ORDER BY ThoiGianGui DESC";
+        String sql = "SELECT * FROM notifications WHERE account_id = ? AND is_deleted = 0 ORDER BY sent_at DESC";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -170,7 +170,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     public List<ThongBao> findLatestByAccountId(int accountId, int limit) {
         List<ThongBao> list = new ArrayList<>();
         int safeLimit = Math.max(1, limit);
-        String sql = "SELECT TOP (?) * FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0 ORDER BY ThoiGianGui DESC";
+        String sql = "SELECT TOP (?) * FROM notifications WHERE account_id = ? AND is_deleted = 0 ORDER BY sent_at DESC";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, safeLimit);
@@ -186,7 +186,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public int countByAccountId(int accountId) {
-        String sql = "SELECT COUNT(*) FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0";
+        String sql = "SELECT COUNT(*) FROM notifications WHERE account_id = ? AND is_deleted = 0";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -203,8 +203,8 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     public List<ThongBao> findByAccountId(int accountId, int page, int pageSize) {
         List<ThongBao> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
-        String sql = "SELECT * FROM ThongBao WHERE AccountID = ? AND IsDeleted = 0 " +
-                     "ORDER BY ThoiGianGui DESC " +
+        String sql = "SELECT * FROM notifications WHERE account_id = ? AND is_deleted = 0 " +
+                     "ORDER BY sent_at DESC " +
                      "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -222,7 +222,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public int countUnread(int accountId) {
-        String sql = "SELECT COUNT(*) FROM ThongBao WHERE AccountID = ? AND DaDoc = 0 AND IsDeleted = 0";
+        String sql = "SELECT COUNT(*) FROM notifications WHERE account_id = ? AND is_read = 0 AND is_deleted = 0";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -237,7 +237,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean markAsRead(int thongBaoId, int accountId) {
-        String sql = "UPDATE ThongBao SET DaDoc = 1 WHERE ThongBaoID = ? AND AccountID = ? AND IsDeleted = 0";
+        String sql = "UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND account_id = ? AND is_deleted = 0";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, thongBaoId);
@@ -251,7 +251,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public int markAllAsRead(int accountId) {
-        String sql = "UPDATE ThongBao SET DaDoc = 1 WHERE AccountID = ? AND DaDoc = 0 AND IsDeleted = 0";
+        String sql = "UPDATE notifications SET is_read = 1 WHERE account_id = ? AND is_read = 0 AND is_deleted = 0";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -264,7 +264,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean existsByAccountIdAndLoaiAndMaBanGhi(int accountId, String loaiThongBao, String maBanGhi) {
-        String sql = "SELECT 1 FROM ThongBao WHERE AccountID = ? AND LoaiThongBao = ? AND MaBanGhi = ? AND IsDeleted = 0";
+        String sql = "SELECT 1 FROM notifications WHERE account_id = ? AND notification_type = ? AND reference_id = ? AND is_deleted = 0";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -281,7 +281,7 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean markAsRead(int thongBaoId) {
-        String sql = "UPDATE ThongBao SET DaDoc = 1 WHERE ThongBaoID = ?";
+        String sql = "UPDATE notifications SET is_read = 1 WHERE notification_id = ?";
 
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -296,21 +296,21 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     private ThongBao mapResultSetToThongBao(ResultSet rs) throws SQLException {
         ThongBao tb = new ThongBao();
-        tb.setThongBaoId(rs.getInt("ThongBaoID"));
-        tb.setAccountId(rs.getInt("AccountID"));
-        tb.setTieuDe(rs.getString("TieuDe"));
-        tb.setNoiDung(rs.getString("NoiDung"));
-        tb.setLoaiThongBao(rs.getString("LoaiThongBao"));
-        tb.setDaDoc(rs.getBoolean("DaDoc"));
-        tb.setThoiGianGui(rs.getTimestamp("ThoiGianGui"));
-        tb.setMaBanGhi(rs.getString("MaBanGhi"));
+        tb.setThongBaoId(rs.getInt("notification_id"));
+        tb.setAccountId(rs.getInt("account_id"));
+        tb.setTieuDe(rs.getString("title"));
+        tb.setNoiDung(rs.getString("content"));
+        tb.setLoaiThongBao(rs.getString("notification_type"));
+        tb.setDaDoc(rs.getBoolean("is_read"));
+        tb.setThoiGianGui(rs.getTimestamp("sent_at"));
+        tb.setMaBanGhi(rs.getString("reference_id"));
         tb.setDuongDan(rs.getString("DuongDan"));
-        tb.setDeleted(rs.getBoolean("IsDeleted"));
-        Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
+        tb.setDeleted(rs.getBoolean("is_deleted"));
+        Timestamp deletedAtTs = rs.getTimestamp("deleted_at");
         if (deletedAtTs != null) {
             tb.setDeletedAt(deletedAtTs.toLocalDateTime());
         }
-        int deletedBy = rs.getInt("DeletedBy");
+        int deletedBy = rs.getInt("deleted_by");
         if (!rs.wasNull()) {
             tb.setDeletedBy(deletedBy);
         }
@@ -319,8 +319,8 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean softDelete(int thongBaoId, int actorId) {
-        String sql = "UPDATE ThongBao SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
-                     "WHERE ThongBaoID = ? AND IsDeleted = 0";
+        String sql = "UPDATE notifications SET is_deleted = 1, deleted_at = GETDATE(), deleted_by = ? " +
+                     "WHERE notification_id = ? AND is_deleted = 0";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, actorId);
@@ -334,8 +334,8 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
 
     @Override
     public boolean restore(int thongBaoId) {
-        String sql = "UPDATE ThongBao SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
-                     "WHERE ThongBaoID = ? AND IsDeleted = 1";
+        String sql = "UPDATE notifications SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL " +
+                     "WHERE notification_id = ? AND is_deleted = 1";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, thongBaoId);
@@ -349,10 +349,10 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     @Override
     public List<ThongBao> findDeletedByCoSo(int coSoId) {
         List<ThongBao> list = new ArrayList<>();
-        String sql = "SELECT t.* FROM ThongBao t " +
-                     "JOIN Accounts a ON t.AccountID = a.AccountID " +
-                     "WHERE a.CoSoID = ? AND t.IsDeleted = 1 " +
-                     "ORDER BY t.DeletedAt DESC";
+        String sql = "SELECT t.* FROM notifications t " +
+                     "JOIN accounts a ON t.account_id = a.account_id " +
+                     "WHERE a.facility_id = ? AND t.is_deleted = 1 " +
+                     "ORDER BY t.deleted_at DESC";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -370,14 +370,14 @@ public class ThongBaoDAOImpl implements ThongBaoDAO {
     @Override
     public List<Integer> findDeletedIdsOlderThan(int days) {
         List<Integer> ids = new ArrayList<>();
-        String sql = "SELECT ThongBaoID FROM ThongBao " +
-                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        String sql = "SELECT notification_id FROM notifications " +
+                     "WHERE is_deleted = 1 AND deleted_at < DATEADD(day, -?, GETDATE())";
         try (Connection conn = org.example.util.DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, days);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    ids.add(rs.getInt("ThongBaoID"));
+                    ids.add(rs.getInt("notification_id"));
                 }
             }
         } catch (SQLException e) {

@@ -222,7 +222,7 @@ public class RefundCancelServlet extends HttpServlet {
                 
                 try {
                     // Update booking status
-                    String updateLich = "UPDATE LichDatSan SET TrangThai = N'Đã hủy', GhiChu = ? WHERE DatSanID = ? AND AccountID = ?";
+                    String updateLich = "UPDATE bookings SET status = N'Đã hủy', note = ? WHERE booking_id = ? AND account_id = ?";
                     try (PreparedStatement ps = conn.prepareStatement(updateLich)) {
                         ps.setString(1, lyDoHuy);
                         ps.setInt(2, datSanId);
@@ -236,20 +236,20 @@ public class RefundCancelServlet extends HttpServlet {
                     if (paid && refundRequested && refundableAmount.compareTo(BigDecimal.ZERO) > 0) {
                         // Create refund record
                         // First check if already exists
-                        String checkHt = "SELECT HoanTienID FROM HoanTien WHERE DatSanID = ?";
+                        String checkHt = "SELECT refund_id FROM refunds WHERE booking_id = ?";
                         try (PreparedStatement ps = conn.prepareStatement(checkHt)) {
                             ps.setInt(1, datSanId);
                             try (ResultSet rs = ps.executeQuery()) {
                                 if (rs.next()) {
-                                    hoanTienId = rs.getInt("HoanTienID");
+                                    hoanTienId = rs.getInt("refund_id");
                                     refundCreated = true;
                                 }
                             }
                         }
                         
                         if (!refundCreated && booking.getHoaDonId() != null) {
-                            String insertHt = "INSERT INTO HoanTien (DatSanID, AccountID, HoaDonID, CoSoID, SoTienHoan, SoTienDaThanhToan, SoTienDeNghiHoan, TrangThai, LyDo, ThoiGianYeuCau) " +
-                                              "VALUES (?, ?, ?, (SELECT CoSoID FROM San WHERE SanID = ?), ?, ?, ?, 'CHO_BO_SUNG_THONG_TIN', ?, GETDATE())";
+                            String insertHt = "INSERT INTO refunds (booking_id, account_id, invoice_id, facility_id, refunded_amount, paid_amount, requested_amount, status, reason, requested_at) " +
+                                              "VALUES (?, ?, ?, (SELECT facility_id FROM courts WHERE court_id = ?), ?, ?, ?, 'CHO_BO_SUNG_THONG_TIN', ?, GETDATE())";
                             try (PreparedStatement ps = conn.prepareStatement(insertHt, PreparedStatement.RETURN_GENERATED_KEYS)) {
                                 ps.setInt(1, datSanId);
                                 ps.setInt(2, accountId);

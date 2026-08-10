@@ -414,7 +414,7 @@ public class SanService {
      */
     private void checkActiveBookingsForStatusChange(int sanId, String newStatus) {
         if ("Sẵn sàng".equals(newStatus)) {
-            String sql = "SELECT COUNT(*) FROM LichDatSan WHERE SanID = ? AND TrangThai = N'Đang sử dụng'";
+            String sql = "SELECT COUNT(*) FROM bookings WHERE court_id = ? AND status = N'Đang sử dụng'";
             try (Connection conn = DBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, sanId);
@@ -429,9 +429,9 @@ public class SanService {
             }
         }
         if ("Tạm đóng".equals(newStatus) || "Bảo trì".equals(newStatus)) {
-            String sql = "SELECT COUNT(*) FROM LichDatSan " +
-                         "WHERE SanID = ? AND TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                         "AND DATEADD(second, DATEDIFF(second, '00:00:00', GioKetThuc), DATEADD(day, CASE WHEN GioKetThuc < GioBatDau THEN 1 ELSE 0 END, CAST(NgayDat AS datetime))) > GETDATE()";
+            String sql = "SELECT COUNT(*) FROM bookings " +
+                         "WHERE court_id = ? AND status IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
+                         "AND DATEADD(second, DATEDIFF(second, '00:00:00', end_time), DATEADD(day, CASE WHEN end_time < start_time THEN 1 ELSE 0 END, CAST(booking_date AS datetime))) > GETDATE()";
             try (Connection conn = DBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, sanId);
@@ -459,9 +459,9 @@ public class SanService {
         BranchSecurityUtils.checkBranchAccess(san.getCoSoID(), managerCoSoId);
 
         // Chặn xóa sân nếu đang có ca đặt sân hoạt động hoặc chưa hoàn thành
-        String sql = "SELECT COUNT(*) FROM LichDatSan " +
-                     "WHERE SanID = ? AND TrangThai IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
-                     "AND DATEADD(second, DATEDIFF(second, '00:00:00', GioKetThuc), DATEADD(day, CASE WHEN GioKetThuc < GioBatDau THEN 1 ELSE 0 END, CAST(NgayDat AS datetime))) > GETDATE()";
+        String sql = "SELECT COUNT(*) FROM bookings " +
+                     "WHERE court_id = ? AND status IN (N'Đã xác nhận', N'Chờ xác nhận', N'Đang sử dụng') " +
+                     "AND DATEADD(second, DATEDIFF(second, '00:00:00', end_time), DATEADD(day, CASE WHEN end_time < start_time THEN 1 ELSE 0 END, CAST(booking_date AS datetime))) > GETDATE()";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sanId);

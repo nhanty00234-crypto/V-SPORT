@@ -19,14 +19,14 @@ public class VaiTroDAOImpl implements VaiTroDAO {
     @Override
     public List<VaiTro> getAllRoles() {
         List<VaiTro> roles = new ArrayList<>();
-        String sql = "SELECT * FROM Roles ORDER BY RoleID ASC";
+        String sql = "SELECT * FROM roles ORDER BY role_id ASC";
         
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                int id = rs.getInt("RoleID");
-                String name = rs.getNString("RoleName");
+                int id = rs.getInt("role_id");
+                String name = rs.getNString("role_name");
                 
               
                 

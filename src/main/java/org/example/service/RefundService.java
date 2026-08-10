@@ -188,7 +188,7 @@ public class RefundService {
                 managerAccountId, ghiChu, null, null, null);
         if (!ok) return RefundResult.fail("Không thể chuyển trạng thái — đã bị thay đổi trước đó.");
 
-        AuditLogService.log(req, null, "REFUND_REQUEST_MORE_INFO", "HoanTien",
+        AuditLogService.log(req, null, "REFUND_REQUEST_MORE_INFO", "refunds",
                 String.valueOf(hoanTienId), "HoanTien #" + hoanTienId,
                 "Manager yêu cầu bổ sung thông tin: " + (ghiChu != null ? ghiChu : ""));
 
@@ -216,7 +216,7 @@ public class RefundService {
                 managerAccountId, ghiChu, null, null, soTienDuocDuyet);
         if (!ok) return RefundResult.fail("Không thể duyệt — trạng thái không hợp lệ hoặc đã thay đổi.");
 
-        AuditLogService.log(req, null, "APPROVE_REFUND", "HoanTien",
+        AuditLogService.log(req, null, "APPROVE_REFUND", "refunds",
                 String.valueOf(hoanTienId), "HoanTien #" + hoanTienId,
                 "Manager duyệt hoàn tiền " + soTienDuocDuyet + ". Ghi chú: " + (ghiChu != null ? ghiChu : ""));
 
@@ -240,7 +240,7 @@ public class RefundService {
                 managerAccountId, null, null, lyDo.trim(), null);
         if (!ok) return RefundResult.fail("Không thể từ chối — trạng thái không hợp lệ.");
 
-        AuditLogService.log(req, null, "REJECT_REFUND", "HoanTien",
+        AuditLogService.log(req, null, "REJECT_REFUND", "refunds",
                 String.valueOf(hoanTienId), "HoanTien #" + hoanTienId,
                 "Manager từ chối: " + lyDo.trim());
 
@@ -259,7 +259,7 @@ public class RefundService {
                 managerAccountId, null, null, null, null);
         if (!ok) return RefundResult.fail("Không thể chuyển trạng thái — đã bị thay đổi trước đó.");
 
-        AuditLogService.log(req, null, "REFUND_START_PROCESSING", "HoanTien",
+        AuditLogService.log(req, null, "REFUND_START_PROCESSING", "refunds",
                 String.valueOf(hoanTienId), "HoanTien #" + hoanTienId, "Manager bắt đầu xử lý hoàn tiền.");
 
         notificationService.notifyRefundProcessing(ht.getAccountId(), hoanTienId);
@@ -283,7 +283,7 @@ public class RefundService {
                 managerAccountId, ghiChu, maGiaoDich.trim(), null, null);
         if (!ok) return RefundResult.fail("Không thể xác nhận — trạng thái không hợp lệ.");
 
-        AuditLogService.log(req, null, "COMPLETE_REFUND", "HoanTien",
+        AuditLogService.log(req, null, "COMPLETE_REFUND", "refunds",
                 String.valueOf(hoanTienId), "HoanTien #" + hoanTienId,
                 "Hoàn tiền thành công. Mã GD: " + maGiaoDich.trim());
 
@@ -321,14 +321,14 @@ public class RefundService {
      * Trả về null nếu hóa đơn không tồn tại / chưa thanh toán.
      */
     public static BigDecimal loadPaidAmount(int hoaDonId) {
-        String sql = "SELECT TongThanhToan FROM HoaDon " +
-                     "WHERE HoaDonID = ? AND TrangThaiThanhToan = N'Đã thanh toán'";
+        String sql = "SELECT grand_total FROM invoices " +
+                     "WHERE invoice_id = ? AND payment_status = N'Đã thanh toán'";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hoaDonId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    double v = rs.getDouble("TongThanhToan");
+                    double v = rs.getDouble("grand_total");
                     return BigDecimal.valueOf(v);
                 }
             }
@@ -343,14 +343,14 @@ public class RefundService {
      * Trả về -1 nếu không tìm thấy.
      */
     public static int findPaidHoaDonId(int datSanId) {
-        String sql = "SELECT HoaDonID FROM HoaDon " +
-                     "WHERE DatSanID = ? AND TrangThaiThanhToan = N'Đã thanh toán' " +
-                     "AND (LoaiHoaDon IS NULL OR LoaiHoaDon = N'MAIN')";
+        String sql = "SELECT invoice_id FROM invoices " +
+                     "WHERE booking_id = ? AND payment_status = N'Đã thanh toán' " +
+                     "AND (invoice_type IS NULL OR invoice_type = N'MAIN')";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("HoaDonID");
+                if (rs.next()) return rs.getInt("invoice_id");
             }
         } catch (SQLException e) {
             logger.error("findPaidHoaDonId datSanId={}: {}", datSanId, e.getMessage(), e);
@@ -360,12 +360,12 @@ public class RefundService {
 
     /** Lấy CoSoID từ DatSanID (qua San) — dùng để denormalize vào HoanTien.CoSoID lúc tạo. */
     public static Integer findCoSoIdByDatSanId(int datSanId) {
-        String sql = "SELECT s.CoSoID FROM LichDatSan lds JOIN San s ON lds.SanID = s.SanID WHERE lds.DatSanID = ?";
+        String sql = "SELECT s.facility_id FROM bookings lds JOIN courts s ON lds.court_id = s.court_id WHERE lds.booking_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("CoSoID");
+                if (rs.next()) return rs.getInt("facility_id");
             }
         } catch (SQLException e) {
             logger.error("findCoSoIdByDatSanId datSanId={}: {}", datSanId, e.getMessage(), e);

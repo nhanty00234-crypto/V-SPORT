@@ -10,7 +10,7 @@ public class TestDB3 {
     public static void main(String[] args) {
         try (Connection conn = DBUtil.getConnection()) {
             System.out.println("Connected to DB!");
-            String sanSql = "SELECT SanID, TenSan, LoaiSanID, CoSoID, TrangThai, MoTa, HinhAnh FROM San WHERE IsDeleted = 0 OR IsDeleted IS NULL ORDER BY CoSoID, SanID";
+            String sanSql = "SELECT court_id, court_name, court_type_id, facility_id, status, description, image_path FROM courts WHERE is_deleted = 0 OR is_deleted IS NULL ORDER BY facility_id, court_id";
             try (PreparedStatement ps = conn.prepareStatement(sanSql);
                  ResultSet rs = ps.executeQuery()) {
                 int count = 0;
@@ -23,7 +23,7 @@ public class TestDB3 {
                 e.printStackTrace();
             }
 
-            try (PreparedStatement ps2 = conn.prepareStatement("SELECT TOP 1 * FROM San");
+            try (PreparedStatement ps2 = conn.prepareStatement("SELECT TOP 1 * FROM courts");
                  ResultSet rs2 = ps2.executeQuery()) {
                 ResultSetMetaData meta = rs2.getMetaData();
                 for (int i = 1; i <= meta.getColumnCount(); i++) {

@@ -290,7 +290,7 @@ public class QuanLySanManagerServlet extends HttpServlet {
 
         session.setAttribute("message", "Đã thêm môn " + mon.getTenMon() + " vào cơ sở thành công!");
         AuditLogService.log(req, manager,
-            AuditLogService.ACTION_UPDATE, "CoSo",
+            AuditLogService.ACTION_UPDATE, "facilities",
             String.valueOf(coSoId), coSo.getTenCoSo(),
             "Manager thêm môn thể thao: " + mon.getTenMon());
     }

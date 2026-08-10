@@ -37,9 +37,9 @@ public class AppStartupListener implements ServletContextListener {
      * Chỉ ghi log cảnh báo (warn) nếu thiếu, không tự động sửa bảng.
      */
     private void checkAccountsReputationSchema() {
-        String[] columns = {"DiemUyTin", "LateCancelCount", "NoShowCount", "CompletedBookingCount"};
+        String[] columns = {"reputation_score", "late_cancel_count", "no_show_count", "completed_booking_count"};
         for (String col : columns) {
-            String checkSql = "SELECT COL_LENGTH('dbo.Accounts', '" + col + "') AS col_len";
+            String checkSql = "SELECT COL_LENGTH('dbo.accounts', '" + col + "') AS col_len";
             try (Connection conn = DBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(checkSql);
                  ResultSet rs = ps.executeQuery()) {
@@ -55,7 +55,7 @@ public class AppStartupListener implements ServletContextListener {
         }
 
         // Kiểm tra bảng CustomerReputationHistory
-        String checkTableSql = "SELECT OBJECT_ID('dbo.CustomerReputationHistory') AS table_id";
+        String checkTableSql = "SELECT OBJECT_ID('dbo.customer_reputation_history') AS table_id";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(checkTableSql);
              ResultSet rs = ps.executeQuery()) {
@@ -76,7 +76,7 @@ public class AppStartupListener implements ServletContextListener {
      * khiến Hibernate ném "Invalid column name 'GhiChu'" khi em.find(HoaDon.class, id).
      */
     private void addHoaDonGhiChuColumn() {
-        String checkSql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.HoaDon') AND name = 'GhiChu'";
+        String checkSql = "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.invoices') AND name = 'note'";
         String alterSql = "ALTER TABLE dbo.HoaDon ADD GhiChu NVARCHAR(500) NULL";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(checkSql);

@@ -27,7 +27,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getAllCaLamViec() {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE IsDeleted = 0";
+        String sql = "SELECT * FROM work_shifts WHERE is_deleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -50,7 +50,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getCaByCoSo(int coSoId) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND IsDeleted = 0";
+        String sql = "SELECT * FROM work_shifts WHERE facility_id = ? AND is_deleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -75,7 +75,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public CaLamViec getCaById(int id) {
-        String sql = "SELECT * FROM CaLamViec WHERE CaLamViecID = ? AND IsDeleted = 0";
+        String sql = "SELECT * FROM work_shifts WHERE work_shift_id = ? AND is_deleted = 0";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -100,7 +100,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean addCaLamViec(CaLamViec ca) {
-        String sql = "INSERT INTO CaLamViec (AccountID, CoSoID, NgayLam, GioBatDau, GioKetThuc, GhiChu, Thu, IsPublished, TenCa, ViTri, TrangThai, GioNghi, IsCustomTime, CustomTimeReason) " +
+        String sql = "INSERT INTO work_shifts (account_id, facility_id, work_date, start_time, end_time, note, Thu, is_published, shift_name, ViTri, status, break_minutes, is_custom_time, custom_time_reason) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBUtil.getConnection();
@@ -139,7 +139,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public int addCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException {
-        String sql = "INSERT INTO CaLamViec (AccountID, CoSoID, NgayLam, GioBatDau, GioKetThuc, GhiChu, Thu, IsPublished, TenCa, ViTri, TrangThai, GioNghi, IsCustomTime, CustomTimeReason) " +
+        String sql = "INSERT INTO work_shifts (account_id, facility_id, work_date, start_time, end_time, note, Thu, is_published, shift_name, ViTri, status, break_minutes, is_custom_time, custom_time_reason) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, ca.getAccountId());
@@ -185,7 +185,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean updateCaLamViec(CaLamViec ca) {
-        String sql = "UPDATE CaLamViec SET AccountID=?, CoSoID=?, NgayLam=?, GioBatDau=?, GioKetThuc=?, GhiChu=?, Thu=?, IsPublished=?, TenCa=?, ViTri=?, TrangThai=?, GioNghi=?, IsCustomTime=?, CustomTimeReason=? WHERE CaLamViecID=?";
+        String sql = "UPDATE work_shifts SET account_id=?, facility_id=?, work_date=?, start_time=?, end_time=?, note=?, Thu=?, is_published=?, shift_name=?, ViTri=?, status=?, break_minutes=?, is_custom_time=?, custom_time_reason=? WHERE work_shift_id=?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -229,7 +229,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean hardDelete(int id) {
-        String sql = "DELETE FROM CaLamViec WHERE CaLamViecID = ?";
+        String sql = "DELETE FROM work_shifts WHERE work_shift_id = ?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -245,8 +245,8 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean softDelete(int id, int actorId) {
-        String sql = "UPDATE CaLamViec SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
-                     "WHERE CaLamViecID = ? AND IsDeleted = 0";
+        String sql = "UPDATE work_shifts SET is_deleted = 1, deleted_at = GETDATE(), deleted_by = ? " +
+                     "WHERE work_shift_id = ? AND is_deleted = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, actorId);
@@ -260,8 +260,8 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean restore(int id) {
-        String sql = "UPDATE CaLamViec SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
-                     "WHERE CaLamViecID = ? AND IsDeleted = 1";
+        String sql = "UPDATE work_shifts SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL " +
+                     "WHERE work_shift_id = ? AND is_deleted = 1";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -275,7 +275,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> findDeletedByCoSo(int coSoId) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND IsDeleted = 1 ORDER BY DeletedAt DESC";
+        String sql = "SELECT * FROM work_shifts WHERE facility_id = ? AND is_deleted = 1 ORDER BY deleted_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -293,14 +293,14 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<Integer> findDeletedIdsOlderThan(int days) {
         List<Integer> ids = new ArrayList<>();
-        String sql = "SELECT CaLamViecID FROM CaLamViec " +
-                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        String sql = "SELECT work_shift_id FROM work_shifts " +
+                     "WHERE is_deleted = 1 AND deleted_at < DATEADD(day, -?, GETDATE())";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, days);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    ids.add(rs.getInt("CaLamViecID"));
+                    ids.add(rs.getInt("work_shift_id"));
                 }
             }
         } catch (SQLException e) {
@@ -317,7 +317,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean deleteByAccountIDAndNgayLam(int accountId, LocalDate ngayLam) {
-        String sql = "DELETE FROM CaLamViec WHERE AccountID = ? AND NgayLam = ?";
+        String sql = "DELETE FROM work_shifts WHERE account_id = ? AND work_date = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -333,7 +333,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getCaByAccountIDAndDateRange(int accountId, LocalDate startDate, LocalDate endDate) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND NgayLam BETWEEN ? AND ? AND IsDeleted = 0 ORDER BY NgayLam, GioBatDau";
+        String sql = "SELECT * FROM work_shifts WHERE account_id = ? AND work_date BETWEEN ? AND ? AND is_deleted = 0 ORDER BY work_date, start_time";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -361,7 +361,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getRecurringShiftsByAccountID(int accountId) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND Thu IS NOT NULL AND IsDeleted = 0 ORDER BY Thu, GioBatDau";
+        String sql = "SELECT * FROM work_shifts WHERE account_id = ? AND Thu IS NOT NULL AND is_deleted = 0 ORDER BY Thu, start_time";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -381,7 +381,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public long getTotalCaLamViec() {
-        String sql = "SELECT COUNT(*) FROM CaLamViec WHERE IsDeleted = 0";
+        String sql = "SELECT COUNT(*) FROM work_shifts WHERE is_deleted = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -413,7 +413,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     @Override
     public boolean checkShiftConflict(int accountId, LocalDate ngayLam, LocalTime gioBatDau, LocalTime gioKetThuc, Integer excludeCaLamViecId) {
-        String sql = "SELECT * FROM CaLamViec WHERE AccountID = ? AND NgayLam = ? AND IsDeleted = 0";
+        String sql = "SELECT * FROM work_shifts WHERE account_id = ? AND work_date = ? AND is_deleted = 0";
 
         // Nếu đang update, bỏ qua chính record đang update
         if (excludeCaLamViecId != null) {
@@ -458,28 +458,28 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
      */
     private CaLamViec mapResultSetToCaLamViec(ResultSet rs) throws SQLException {
         CaLamViec ca = new CaLamViec();
-        ca.setCaLamViecId(rs.getInt("CaLamViecID"));
-        ca.setAccountId(rs.getInt("AccountID"));
-        ca.setCoSoId(rs.getInt("CoSoID"));
+        ca.setCaLamViecId(rs.getInt("work_shift_id"));
+        ca.setAccountId(rs.getInt("account_id"));
+        ca.setCoSoId(rs.getInt("facility_id"));
 
         // Chuyển đổi từ SQL Date sang LocalDate
-        Date ngayLamSql = rs.getDate("NgayLam");
+        Date ngayLamSql = rs.getDate("work_date");
         if (ngayLamSql != null) {
             ca.setNgayLam(ngayLamSql.toLocalDate());
         }
 
         // Chuyển đổi từ SQL Time sang LocalTime
-        Time gioBatDauSql = rs.getTime("GioBatDau");
+        Time gioBatDauSql = rs.getTime("start_time");
         if (gioBatDauSql != null) {
             ca.setGioBatDau(gioBatDauSql.toLocalTime());
         }
 
-        Time gioKetThucSql = rs.getTime("GioKetThuc");
+        Time gioKetThucSql = rs.getTime("end_time");
         if (gioKetThucSql != null) {
             ca.setGioKetThuc(gioKetThucSql.toLocalTime());
         }
 
-        ca.setGhiChu(rs.getNString("GhiChu"));
+        ca.setGhiChu(rs.getNString("note"));
 
         // Đọc trường Thu (có thể null)
         int thu = rs.getInt("Thu");
@@ -487,26 +487,26 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
             ca.setThu(thu);
         }
 
-        ca.setPublished(rs.getBoolean("IsPublished"));
-        ca.setTenCa(rs.getNString("TenCa"));
+        ca.setPublished(rs.getBoolean("is_published"));
+        ca.setTenCa(rs.getNString("shift_name"));
         ca.setViTri(rs.getNString("ViTri"));
-        ca.setTrangThai(rs.getString("TrangThai"));
-        ca.setGioNghi(rs.getInt("GioNghi"));
-        ca.setCustomTime(rs.getBoolean("IsCustomTime"));
-        ca.setCustomTimeReason(rs.getNString("CustomTimeReason"));
-        ca.setDeleted(rs.getBoolean("IsDeleted"));
-        Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
+        ca.setTrangThai(rs.getString("status"));
+        ca.setGioNghi(rs.getInt("break_minutes"));
+        ca.setCustomTime(rs.getBoolean("is_custom_time"));
+        ca.setCustomTimeReason(rs.getNString("custom_time_reason"));
+        ca.setDeleted(rs.getBoolean("is_deleted"));
+        Timestamp deletedAtTs = rs.getTimestamp("deleted_at");
         if (deletedAtTs != null) {
             ca.setDeletedAt(deletedAtTs.toLocalDateTime());
         }
-        int deletedBy = rs.getInt("DeletedBy");
+        int deletedBy = rs.getInt("deleted_by");
         if (!rs.wasNull()) {
             ca.setDeletedBy(deletedBy);
         }
         try {
-            Timestamp vaoThuc = rs.getTimestamp("GioVaoThuc");
+            Timestamp vaoThuc = rs.getTimestamp("actual_check_in_at");
             if (vaoThuc != null) ca.setGioVaoThuc(vaoThuc.toLocalDateTime());
-            Timestamp raThuc = rs.getTimestamp("GioRaThuc");
+            Timestamp raThuc = rs.getTimestamp("actual_check_out_at");
             if (raThuc != null) ca.setGioRaThuc(raThuc.toLocalDateTime());
         } catch (SQLException ignored) {}
 
@@ -515,7 +515,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean updateCaLamViecWithConnection(CaLamViec ca, Connection conn) throws SQLException {
-        String sql = "UPDATE CaLamViec SET AccountID=?, CoSoID=?, NgayLam=?, GioBatDau=?, GioKetThuc=?, GhiChu=?, Thu=?, IsPublished=?, TenCa=?, ViTri=?, TrangThai=?, GioNghi=?, IsCustomTime=?, CustomTimeReason=? WHERE CaLamViecID=?";
+        String sql = "UPDATE work_shifts SET account_id=?, facility_id=?, work_date=?, start_time=?, end_time=?, note=?, Thu=?, is_published=?, shift_name=?, ViTri=?, status=?, break_minutes=?, is_custom_time=?, custom_time_reason=? WHERE work_shift_id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, ca.getAccountId());
             ps.setInt(2, ca.getCoSoId());
@@ -546,8 +546,8 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public int publishDraftShiftsWithConnection(LocalDate startOfWeek, LocalDate endOfWeek, int coSoId, Connection conn) throws SQLException {
-        String sql = "UPDATE CaLamViec SET TrangThai = 'Published', IsPublished = 1 " +
-                     "WHERE CoSoID = ? AND NgayLam BETWEEN ? AND ? AND TrangThai = 'Draft' AND IsDeleted = 0";
+        String sql = "UPDATE work_shifts SET status = 'Published', is_published = 1 " +
+                     "WHERE facility_id = ? AND work_date BETWEEN ? AND ? AND status = 'Draft' AND is_deleted = 0";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
             ps.setDate(2, Date.valueOf(startOfWeek));
@@ -558,7 +558,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
 
     @Override
     public boolean publishWeekShifts(LocalDate startOfWeek, LocalDate endOfWeek, int coSoId) {
-        String sql = "UPDATE CaLamViec SET IsPublished = 1 WHERE CoSoID = ? AND NgayLam BETWEEN ? AND ?";
+        String sql = "UPDATE work_shifts SET is_published = 1 WHERE facility_id = ? AND work_date BETWEEN ? AND ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -574,7 +574,7 @@ public class CaLamViecDAOImpl implements CaLamViecDAO {
     @Override
     public List<CaLamViec> getShiftsByCoSoAndDateRange(int coSoId, LocalDate start, LocalDate end) {
         List<CaLamViec> list = new ArrayList<>();
-        String sql = "SELECT * FROM CaLamViec WHERE CoSoID = ? AND NgayLam BETWEEN ? AND ? AND IsDeleted = 0 ORDER BY NgayLam, GioBatDau";
+        String sql = "SELECT * FROM work_shifts WHERE facility_id = ? AND work_date BETWEEN ? AND ? AND is_deleted = 0 ORDER BY work_date, start_time";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);

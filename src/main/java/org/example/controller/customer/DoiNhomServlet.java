@@ -169,8 +169,8 @@ public class DoiNhomServlet extends HttpServlet {
         while (t != null) {
             if (t instanceof SQLException se) {
                 String msg = se.getMessage() != null ? se.getMessage() : "";
-                if (msg.contains("Invalid object name") && (msg.contains("Teams") || msg.contains("TeamMembers")
-                        || msg.contains("TeamInvitations") || msg.contains("TeamJoinRequests"))) {
+                if (msg.contains("Invalid object name") && (msg.contains("teams") || msg.contains("team_members")
+                        || msg.contains("team_invitations") || msg.contains("team_join_requests"))) {
                     return "Bảng dữ liệu Đội nhóm chưa được khởi tạo trên database — cần chạy sql/migration_team_management.sql. Chi tiết SQL: " + msg;
                 }
                 return "SQLException (SQLState=" + se.getSQLState() + ", ErrorCode=" + se.getErrorCode() + "): " + msg;

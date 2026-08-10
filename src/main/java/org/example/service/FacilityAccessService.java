@@ -37,7 +37,7 @@ public class FacilityAccessService {
     }
 
     public FacilityStatus getFacilityStatus(int coSoId) {
-        String sql = "SELECT ISNULL(IsDeleted, 0) AS IsDeleted FROM CoSo WHERE CoSoID = ?";
+        String sql = "SELECT ISNULL(is_deleted, 0) AS is_deleted FROM facilities WHERE facility_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -45,7 +45,7 @@ public class FacilityAccessService {
                 if (!rs.next()) {
                     return FacilityStatus.NOT_FOUND;
                 }
-                return rs.getBoolean("IsDeleted") ? FacilityStatus.DELETED : FacilityStatus.ACTIVE;
+                return rs.getBoolean("is_deleted") ? FacilityStatus.DELETED : FacilityStatus.ACTIVE;
             }
         } catch (Exception e) {
             logger.error("Lỗi kiểm tra trạng thái cơ sở CoSoID={}: {}", coSoId, e.getMessage(), e);

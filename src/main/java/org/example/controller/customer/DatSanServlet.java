@@ -733,15 +733,15 @@ public class DatSanServlet extends HttpServlet {
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
             // Kiểm tra quyền sở hữu + trạng thái TRƯỚC khi hủy (không cho đoán DatSanID của người khác).
             int ownerAccountId = -1, coSoId = -1; String trangThai = null;
-            String checkSql = "SELECT l.AccountID, l.TrangThai, s.CoSoID FROM LichDatSan l " +
-                    "JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            String checkSql = "SELECT l.account_id, l.status, s.facility_id FROM bookings l " +
+                    "JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
             try (java.sql.PreparedStatement ps = conn.prepareStatement(checkSql)) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        ownerAccountId = rs.getInt("AccountID");
-                        trangThai = rs.getString("TrangThai");
-                        coSoId = rs.getInt("CoSoID");
+                        ownerAccountId = rs.getInt("account_id");
+                        trangThai = rs.getString("status");
+                        coSoId = rs.getInt("facility_id");
                     }
                 }
             }
@@ -755,10 +755,10 @@ public class DatSanServlet extends HttpServlet {
             if (Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN.equals(trangThai)) {
                 // Hủy link PayOS còn treo (best-effort) rồi giải phóng slot + đánh dấu hủy trong 1 UPDATE.
                 cancelPayosLinkQuietly(coSoId, datSanId);
-                String sql = "UPDATE LichDatSan SET TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_DA_HUY + "', " +
-                        "HoldExpiresAt = NULL, " +
-                        "GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Người dùng hủy thanh toán PayOS]') " +
-                        "WHERE DatSanID = ? AND TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "'";
+                String sql = "UPDATE bookings SET status = N'" + Constants.TRANG_THAI_DAT_SAN_DA_HUY + "', " +
+                        "hold_expires_at = NULL, " +
+                        "note = CONCAT(ISNULL(note, N''), N' [Người dùng hủy thanh toán PayOS]') " +
+                        "WHERE booking_id = ? AND status = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "'";
                 try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, datSanId);
                     cancelled = ps.executeUpdate() == 1;
@@ -799,8 +799,8 @@ public class DatSanServlet extends HttpServlet {
         }
 
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
-            String sql = "SELECT l.AccountID, l.TrangThai, l.TongTienDuKien, l.HoldExpiresAt, s.CoSoID " +
-                    "FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            String sql = "SELECT l.account_id, l.status, l.estimated_total, l.hold_expires_at, s.facility_id " +
+                    "FROM bookings l JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
             int accountId, coSoId; String trangThai; java.math.BigDecimal amountDb; java.sql.Timestamp holdExpiresAt;
             try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, datSanId);
@@ -809,11 +809,11 @@ public class DatSanServlet extends HttpServlet {
                         resp.getWriter().write("{\"success\":false,\"errorCode\":\"NOT_FOUND\",\"message\":\"Không tìm thấy đơn đặt sân.\"}");
                         return;
                     }
-                    accountId = rs.getInt("AccountID");
-                    trangThai = rs.getString("TrangThai");
-                    amountDb = rs.getBigDecimal("TongTienDuKien");
-                    holdExpiresAt = rs.getTimestamp("HoldExpiresAt");
-                    coSoId = rs.getInt("CoSoID");
+                    accountId = rs.getInt("account_id");
+                    trangThai = rs.getString("status");
+                    amountDb = rs.getBigDecimal("estimated_total");
+                    holdExpiresAt = rs.getTimestamp("hold_expires_at");
+                    coSoId = rs.getInt("facility_id");
                 }
             }
             if (accountId != user.getAccountId()) {
@@ -873,7 +873,7 @@ public class DatSanServlet extends HttpServlet {
         }
 
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
-            String sql = "SELECT l.AccountID, l.TrangThai, s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
+            String sql = "SELECT l.account_id, l.status, s.facility_id FROM bookings l JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
             int accountId, coSoId; String trangThai;
             try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, datSanId);
@@ -882,9 +882,9 @@ public class DatSanServlet extends HttpServlet {
                         resp.getWriter().write("{\"success\":false,\"errorCode\":\"NOT_FOUND\",\"message\":\"Không tìm thấy đơn đặt sân.\"}");
                         return;
                     }
-                    accountId = rs.getInt("AccountID");
-                    trangThai = rs.getString("TrangThai");
-                    coSoId = rs.getInt("CoSoID");
+                    accountId = rs.getInt("account_id");
+                    trangThai = rs.getString("status");
+                    coSoId = rs.getInt("facility_id");
                 }
             }
             if (accountId != user.getAccountId()) {
@@ -908,9 +908,9 @@ public class DatSanServlet extends HttpServlet {
                 }
             }
 
-            String updateSql = "UPDATE LichDatSan SET TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN +
-                    "', HoldExpiresAt = NULL, GhiChu = ISNULL(GhiChu, N'') + N' [Khách chuyển sang thanh toán tại quầy]' " +
-                    "WHERE DatSanID = ? AND TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "'";
+            String updateSql = "UPDATE bookings SET status = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN +
+                    "', hold_expires_at = NULL, note = ISNULL(note, N'') + N' [Khách chuyển sang thanh toán tại quầy]' " +
+                    "WHERE booking_id = ? AND status = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN + "'";
             try (java.sql.PreparedStatement up = conn.prepareStatement(updateSql)) {
                 up.setInt(1, datSanId);
                 int updated = up.executeUpdate();
@@ -1036,11 +1036,11 @@ public class DatSanServlet extends HttpServlet {
             org.example.dao.HoaDonDAO hdDao = new org.example.dao.impl.HoaDonDAOImpl();
             int hoaDonId = -1;
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
-                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT HoaDonID FROM HoaDon WHERE DatSanID = ? AND LoaiHoaDon = 'MAIN'")) {
+                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT invoice_id FROM invoices WHERE booking_id = ? AND invoice_type = 'MAIN'")) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        hoaDonId = rs.getInt("HoaDonID");
+                        hoaDonId = rs.getInt("invoice_id");
                     }
                 }
             }
@@ -1054,19 +1054,19 @@ public class DatSanServlet extends HttpServlet {
             List<java.util.Map<String, Object>> productMaps = new java.util.ArrayList<>();
             for (org.example.model.SanPham_DichVu sp : products) {
                 java.util.Map<String, Object> m = new java.util.HashMap<>();
-                m.put("SanPhamID", sp.getSanPhamID());
-                m.put("TenSanPham", sp.getTenSanPham());
-                m.put("DonGia", sp.getDonGia());
-                m.put("DonViTinh", sp.getDonViTinh());
-                m.put("SoLuongTon", sp.getSoLuongTon());
+                m.put("product_id", sp.getSanPhamID());
+                m.put("product_name", sp.getTenSanPham());
+                m.put("unit_price", sp.getDonGia());
+                m.put("unit_of_measure", sp.getDonViTinh());
+                m.put("stock_quantity", sp.getSoLuongTon());
                 productMaps.add(m);
             }
 
             List<java.util.Map<String, Object>> orderedMaps = new java.util.ArrayList<>();
             for (org.example.model.ChiTietHoaDon ct : ordered) {
                 java.util.Map<String, Object> m = new java.util.HashMap<>();
-                m.put("SanPhamID", ct.getSanPhamID());
-                m.put("SoLuong", ct.getSoLuong());
+                m.put("product_id", ct.getSanPhamID());
+                m.put("quantity", ct.getSoLuong());
                 orderedMaps.add(m);
             }
 

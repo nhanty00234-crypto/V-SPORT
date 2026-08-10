@@ -188,27 +188,27 @@ public class CustomerPayosQrServlet extends HttpServlet {
 
     /** Đọc các cột cache PayOS trên LichDatSan. Trả null nếu chưa có payload HOẶC cột chưa tồn tại. */
     private PayosQrData loadQrCacheFromDb(int datSanId, Booking booking) {
-        String sql = "SELECT PayosOrderCode, PayosPaymentLinkId, PayosQrPayload, PayosCheckoutUrl, "
-                + "PayosBin, PayosAccountNumber, PayosAccountName, PayosAmount, PayosDescription, PayosExpiresAt "
-                + "FROM LichDatSan WHERE DatSanID = ?";
+        String sql = "SELECT payos_order_code, payos_payment_link_id, payos_qr_payload, payos_checkout_url, "
+                + "payos_bin, payos_account_number, payos_account_name, payos_amount, payos_description, payos_expires_at "
+                + "FROM bookings WHERE booking_id = ?";
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
-                String payload = rs.getString("PayosQrPayload");
+                String payload = rs.getString("payos_qr_payload");
                 if (payload == null || payload.isBlank()) return null;
-                long orderCode = rs.getLong("PayosOrderCode");
-                BigDecimal amt = rs.getBigDecimal("PayosAmount");
+                long orderCode = rs.getLong("payos_order_code");
+                BigDecimal amt = rs.getBigDecimal("payos_amount");
                 // PayosExpiresAt lưu UTC → đọc thành Instant UTC (TimeUtil.fromDb), không lệ thuộc giờ JVM.
-                java.time.Instant expInstant = org.example.util.TimeUtil.fromDb(rs.getTimestamp("PayosExpiresAt"));
+                java.time.Instant expInstant = org.example.util.TimeUtil.fromDb(rs.getTimestamp("payos_expires_at"));
                 Long expEpoch = expInstant != null ? expInstant.getEpochSecond() : null;
                 return new PayosQrData(datSanId,
                         rs.wasNull() ? null : orderCode,
-                        rs.getString("PayosPaymentLinkId"), payload, rs.getString("PayosCheckoutUrl"),
-                        rs.getString("PayosBin"), rs.getString("PayosAccountNumber"), rs.getString("PayosAccountName"),
+                        rs.getString("payos_payment_link_id"), payload, rs.getString("payos_checkout_url"),
+                        rs.getString("payos_bin"), rs.getString("payos_account_number"), rs.getString("payos_account_name"),
                         amt != null ? amt.longValue() : (booking.tongTien != null ? booking.tongTien.longValue() : 0L),
-                        rs.getString("PayosDescription"), expEpoch);
+                        rs.getString("payos_description"), expEpoch);
             }
         } catch (SQLException e) {
             // Cột chưa tồn tại (chưa chạy migration) hoặc lỗi đọc — coi như không có cache, dùng session.
@@ -218,31 +218,31 @@ public class CustomerPayosQrServlet extends HttpServlet {
     }
 
     private Booking loadBooking(int datSanId) {
-        String sql = "SELECT l.AccountID, l.TrangThai, l.NgayDat, l.GioBatDau, l.GioKetThuc, l.TongTienDuKien, "
-                + "l.HoldExpiresAt, s.TenSan, cs.TenCoSo, cs.DiaChi "
-                + "FROM LichDatSan l JOIN San s ON s.SanID = l.SanID JOIN CoSo cs ON cs.CoSoID = s.CoSoID "
-                + "WHERE l.DatSanID = ?";
+        String sql = "SELECT l.account_id, l.status, l.booking_date, l.start_time, l.end_time, l.estimated_total, "
+                + "l.hold_expires_at, s.court_name, cs.facility_name, cs.address "
+                + "FROM bookings l JOIN courts s ON s.court_id = l.court_id JOIN facilities cs ON cs.facility_id = s.facility_id "
+                + "WHERE l.booking_id = ?";
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
                 Booking b = new Booking();
-                int acc = rs.getInt("AccountID");
+                int acc = rs.getInt("account_id");
                 b.accountId = rs.wasNull() ? null : acc;
-                b.trangThai = rs.getString("TrangThai");
-                java.sql.Date d = rs.getDate("NgayDat");
+                b.trangThai = rs.getString("status");
+                java.sql.Date d = rs.getDate("booking_date");
                 b.ngayDat = d != null ? d.toLocalDate() : null;
-                java.sql.Time t1 = rs.getTime("GioBatDau");
+                java.sql.Time t1 = rs.getTime("start_time");
                 b.gioBatDau = t1 != null ? t1.toLocalTime() : null;
-                java.sql.Time t2 = rs.getTime("GioKetThuc");
+                java.sql.Time t2 = rs.getTime("end_time");
                 b.gioKetThuc = t2 != null ? t2.toLocalTime() : null;
-                b.tongTien = rs.getBigDecimal("TongTienDuKien");
-                Timestamp h = rs.getTimestamp("HoldExpiresAt");
+                b.tongTien = rs.getBigDecimal("estimated_total");
+                Timestamp h = rs.getTimestamp("hold_expires_at");
                 b.holdExpiresAt = h != null ? h.toLocalDateTime() : null;
-                b.tenSan = rs.getString("TenSan");
-                b.tenCoSo = rs.getString("TenCoSo");
-                b.diaChi = rs.getString("DiaChi");
+                b.tenSan = rs.getString("court_name");
+                b.tenCoSo = rs.getString("facility_name");
+                b.diaChi = rs.getString("address");
                 return b;
             }
         } catch (SQLException e) {

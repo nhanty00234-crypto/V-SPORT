@@ -17,7 +17,7 @@ public class CaLamViecAuditDAOImpl implements CaLamViecAuditDAO {
 
     @Override
     public boolean insert(CaLamViecAudit audit) {
-        String sql = "INSERT INTO CaLamViec_Audit (CaLamViecID, ThaoTac, NguoiThucHien, GiaTriCu, GiaTriMoi, LyDo) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO work_shift_audits (work_shift_id, action, performed_by, old_value, new_value, reason) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, audit.getCaLamViecId());
@@ -35,7 +35,7 @@ public class CaLamViecAuditDAOImpl implements CaLamViecAuditDAO {
 
     @Override
     public boolean insertWithConnection(CaLamViecAudit audit, Connection conn) throws SQLException {
-        String sql = "INSERT INTO CaLamViec_Audit (CaLamViecID, ThaoTac, NguoiThucHien, GiaTriCu, GiaTriMoi, LyDo) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO work_shift_audits (work_shift_id, action, performed_by, old_value, new_value, reason) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, audit.getCaLamViecId());
             ps.setString(2, audit.getThaoTac());
@@ -50,7 +50,7 @@ public class CaLamViecAuditDAOImpl implements CaLamViecAuditDAO {
     @Override
     public List<CaLamViecAudit> getByCaLamViec(int caLamViecId) {
         List<CaLamViecAudit> list = new ArrayList<>();
-        String sql = "SELECT au.*, acc.FullName as ActorName FROM CaLamViec_Audit au JOIN Accounts acc ON au.NguoiThucHien = acc.AccountID WHERE au.CaLamViecID = ? ORDER BY au.ThoiGian DESC";
+        String sql = "SELECT au.*, acc.full_name as actor_name FROM work_shift_audits au JOIN accounts acc ON au.performed_by = acc.account_id WHERE au.work_shift_id = ? ORDER BY au.performed_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, caLamViecId);
@@ -68,11 +68,11 @@ public class CaLamViecAuditDAOImpl implements CaLamViecAuditDAO {
     @Override
     public List<CaLamViecAudit> getByCoSo(int coSoId) {
         List<CaLamViecAudit> list = new ArrayList<>();
-        String sql = "SELECT au.*, acc.FullName as ActorName FROM CaLamViec_Audit au " +
-                     "JOIN Accounts acc ON au.NguoiThucHien = acc.AccountID " +
-                     "JOIN CaLamViec c ON au.CaLamViecID = c.CaLamViecID " +
-                     "WHERE c.CoSoID = ? " +
-                     "ORDER BY au.ThoiGian DESC";
+        String sql = "SELECT au.*, acc.full_name as actor_name FROM work_shift_audits au " +
+                     "JOIN accounts acc ON au.performed_by = acc.account_id " +
+                     "JOIN work_shifts c ON au.work_shift_id = c.work_shift_id " +
+                     "WHERE c.facility_id = ? " +
+                     "ORDER BY au.performed_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -89,20 +89,20 @@ public class CaLamViecAuditDAOImpl implements CaLamViecAuditDAO {
 
     private CaLamViecAudit mapResultSet(ResultSet rs) throws SQLException {
         CaLamViecAudit au = new CaLamViecAudit();
-        au.setAuditId(rs.getInt("AuditID"));
-        au.setCaLamViecId(rs.getInt("CaLamViecID"));
-        au.setThaoTac(rs.getString("ThaoTac"));
-        au.setNguoiThucHien(rs.getInt("NguoiThucHien"));
+        au.setAuditId(rs.getInt("audit_id"));
+        au.setCaLamViecId(rs.getInt("work_shift_id"));
+        au.setThaoTac(rs.getString("action"));
+        au.setNguoiThucHien(rs.getInt("performed_by"));
         
-        Timestamp ts = rs.getTimestamp("ThoiGian");
+        Timestamp ts = rs.getTimestamp("performed_at");
         if (ts != null) {
             au.setThoiGian(ts.toLocalDateTime());
         }
         
-        au.setGiaTriCu(rs.getNString("GiaTriCu"));
-        au.setGiaTriMoi(rs.getNString("GiaTriMoi"));
-        au.setLyDo(rs.getNString("LyDo"));
-        au.setTenNguoiThucHien(rs.getNString("ActorName"));
+        au.setGiaTriCu(rs.getNString("old_value"));
+        au.setGiaTriMoi(rs.getNString("new_value"));
+        au.setLyDo(rs.getNString("reason"));
+        au.setTenNguoiThucHien(rs.getNString("actor_name"));
         return au;
     }
 }

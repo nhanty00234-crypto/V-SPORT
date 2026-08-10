@@ -49,13 +49,13 @@ public final class CustomerReputationService {
                                   int scoreDelta, String reason, Integer actorId, String ipAddress) throws SQLException {
         int scoreBefore;
         try (PreparedStatement lock = conn.prepareStatement(
-                "SELECT DiemUyTin FROM Accounts WITH (UPDLOCK, ROWLOCK) WHERE AccountID = ?")) {
+                "SELECT reputation_score FROM accounts WITH (UPDLOCK, ROWLOCK) WHERE account_id = ?")) {
             lock.setInt(1, accountId);
             try (ResultSet rs = lock.executeQuery()) {
                 if (!rs.next()) {
                     throw new SQLException("Không tìm thấy tài khoản khách hàng AccountID=" + accountId);
                 }
-                scoreBefore = rs.getInt("DiemUyTin");
+                scoreBefore = rs.getInt("reputation_score");
             }
         }
 
@@ -63,8 +63,8 @@ public final class CustomerReputationService {
 
         String counterColumn = counterColumnFor(actionType);
         String updateSql = counterColumn != null
-                ? "UPDATE Accounts SET DiemUyTin = ?, " + counterColumn + " = " + counterColumn + " + 1 WHERE AccountID = ?"
-                : "UPDATE Accounts SET DiemUyTin = ? WHERE AccountID = ?";
+                ? "UPDATE accounts SET reputation_score = ?, " + counterColumn + " = " + counterColumn + " + 1 WHERE account_id = ?"
+                : "UPDATE accounts SET reputation_score = ? WHERE account_id = ?";
         try (PreparedStatement update = conn.prepareStatement(updateSql)) {
             update.setInt(1, scoreAfter);
             update.setInt(2, accountId);
@@ -72,8 +72,8 @@ public final class CustomerReputationService {
         }
 
         try (PreparedStatement insert = conn.prepareStatement(
-                "INSERT INTO CustomerReputationHistory " +
-                "(AccountID, DatSanID, ActionType, ScoreDelta, ScoreBefore, ScoreAfter, Reason, CreatedBy, IpAddress) " +
+                "INSERT INTO customer_reputation_history " +
+                "(account_id, booking_id, action_type, score_delta, score_before, score_after, Reason, created_by, ip_address) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             insert.setInt(1, accountId);
             if (datSanId != null) {
@@ -106,7 +106,7 @@ public final class CustomerReputationService {
         // Tự động tạo ThongBao khi bị trừ điểm uy tín (A4 spec requirement)
         if (scoreDelta < 0) {
             try (PreparedStatement insertTb = conn.prepareStatement(
-                    "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
+                    "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan) " +
                     "VALUES (?, N'Cập nhật điểm uy tín', ?, N'HE_THONG', 0, GETDATE(), ?, ?)")) {
                 insertTb.setInt(1, accountId);
                 String reasonStr = reason != null ? reason.trim() : "vi phạm quy định";
@@ -127,13 +127,13 @@ public final class CustomerReputationService {
 
     private static String counterColumnFor(String actionType) {
         if (Constants.REPUTATION_ACTION_LATE_CANCEL.equals(actionType) || Constants.REPUTATION_ACTION_CANCEL_6_TO_24.equals(actionType)) {
-            return "LateCancelCount";
+            return "late_cancel_count";
         }
         if (Constants.REPUTATION_ACTION_NO_SHOW.equals(actionType)) {
-            return "NoShowCount";
+            return "no_show_count";
         }
         if (Constants.REPUTATION_ACTION_COMPLETED_BOOKING.equals(actionType)) {
-            return "CompletedBookingCount";
+            return "completed_booking_count";
         }
         return null;
     }

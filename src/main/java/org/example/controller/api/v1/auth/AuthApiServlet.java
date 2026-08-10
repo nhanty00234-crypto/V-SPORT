@@ -163,10 +163,10 @@ public class AuthApiServlet extends BaseApiServlet {
     private void loadPreferredSportId(TaiKhoan user) {
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(
-                     "SELECT TOP 1 MonTheThaoID FROM MonTheThaoYeuThich WHERE AccountID = ?")) {
+                     "SELECT TOP 1 sport_id FROM favorite_sports WHERE account_id = ?")) {
             ps.setInt(1, user.getAccountId());
             try (java.sql.ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) user.setMonTheThaoYeuThichId(rs.getInt("MonTheThaoID"));
+                if (rs.next()) user.setMonTheThaoYeuThichId(rs.getInt("sport_id"));
             }
         } catch (Exception e) {
             logger.warn("loadPreferredSportId accountId={}: {}", user.getAccountId(), e.getMessage());

@@ -81,17 +81,17 @@ public class CourtAvailabilityService {
 
             String courtStatus;
             try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT s.TenSan, s.TrangThai, s.CoSoID, c.GioMoCua, c.GioDongCua "
-                            + "FROM San s JOIN CoSo c ON c.CoSoID = s.CoSoID "
-                            + "WHERE s.SanID = ? AND ISNULL(s.IsDeleted, 0) = 0")) {
+                    "SELECT s.court_name, s.status, s.facility_id, c.opening_time, c.closing_time "
+                            + "FROM courts s JOIN facilities c ON c.facility_id = s.facility_id "
+                            + "WHERE s.court_id = ? AND ISNULL(s.is_deleted, 0) = 0")) {
                 ps.setInt(1, courtId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) throw new CourtNotFoundException("Không tìm thấy sân.");
-                    out.courtName = rs.getString("TenSan");
-                    courtStatus = rs.getString("TrangThai");
-                    out.facilityId = rs.getInt("CoSoID");
-                    java.sql.Time open = rs.getTime("GioMoCua");
-                    java.sql.Time close = rs.getTime("GioDongCua");
+                    out.courtName = rs.getString("court_name");
+                    courtStatus = rs.getString("status");
+                    out.facilityId = rs.getInt("facility_id");
+                    java.sql.Time open = rs.getTime("opening_time");
+                    java.sql.Time close = rs.getTime("closing_time");
                     out.openTime = open != null ? open.toLocalTime() : DEFAULT_OPEN_TIME;
                     out.closeTime = close != null ? close.toLocalTime() : DEFAULT_CLOSE_TIME;
                 }
@@ -147,13 +147,13 @@ public class CourtAvailabilityService {
     private List<TimeRange> loadBlockedRanges(Connection conn, int courtId, LocalDate date) throws SQLException {
         List<TimeRange> ranges = new ArrayList<>();
         // Cùng điều kiện trạng thái với overlap check khi tạo booking (BookingCreationService).
-        String bookingSql = "SELECT GioBatDau, GioKetThuc FROM LichDatSan "
-                + "WHERE SanID = ? AND NgayDat = ? "
-                + "AND (TrangThai IN (N'" + Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', "
+        String bookingSql = "SELECT start_time, end_time FROM bookings "
+                + "WHERE court_id = ? AND booking_date = ? "
+                + "AND (status IN (N'" + Constants.TRANG_THAI_DAT_SAN_DA_XAC_NHAN + "', "
                 + "N'" + Constants.TRANG_THAI_DAT_SAN_DANG_SU_DUNG + "', "
                 + "N'" + Constants.TRANG_THAI_DAT_SAN_CHO_XAC_NHAN + "') "
-                + "     OR (TrangThai = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
-                + "' AND HoldExpiresAt > SYSUTCDATETIME()))";
+                + "     OR (status = N'" + Constants.TRANG_THAI_DAT_SAN_CHO_THANH_TOAN
+                + "' AND hold_expires_at > SYSUTCDATETIME()))";
         try (PreparedStatement ps = conn.prepareStatement(bookingSql)) {
             ps.setInt(1, courtId);
             ps.setDate(2, java.sql.Date.valueOf(date));
@@ -163,9 +163,9 @@ public class CourtAvailabilityService {
                 }
             }
         }
-        String holdSql = "SELECT GioBatDau, GioKetThuc FROM SoftHold "
-                + "WHERE SanID = ? AND NgayDat = ? "
-                + "AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + Constants.SOFT_HOLD_TIMEOUT_MINUTES;
+        String holdSql = "SELECT start_time, end_time FROM soft_holds "
+                + "WHERE court_id = ? AND booking_date = ? "
+                + "AND DATEDIFF(minute, created_at, GETDATE()) <= " + Constants.SOFT_HOLD_TIMEOUT_MINUTES;
         try (PreparedStatement ps = conn.prepareStatement(holdSql)) {
             ps.setInt(1, courtId);
             ps.setDate(2, java.sql.Date.valueOf(date));

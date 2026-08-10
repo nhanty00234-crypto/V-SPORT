@@ -29,7 +29,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     }
 
     private String mainInvoiceWhereClause(Connection conn, String datSanColumnExpression) throws SQLException {
-        if (columnExists(conn, "HoaDon", "LoaiHoaDon")) {
+        if (columnExists(conn, "invoices", "invoice_type")) {
             return datSanColumnExpression + " = ? AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)";
         }
         return datSanColumnExpression + " = ?";
@@ -46,7 +46,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
      */
     public static int countActiveBookingsForAccountAndDate(Connection conn, int accountId, java.time.LocalDate ngayDat)
             throws SQLException {
-        String sql = "SELECT COUNT(*) FROM LichDatSan WHERE AccountID = ? AND NgayDat = ? AND TrangThai IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đang sử dụng')";
+        String sql = "SELECT COUNT(*) FROM bookings WHERE account_id = ? AND booking_date = ? AND status IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đang sử dụng')";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
             ps.setDate(2, Date.valueOf(ngayDat));
@@ -66,15 +66,15 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
      *   2. Tự hủy "Chờ xác nhận" quá hạn duyệt (COD_APPROVAL_EXPIRE_HOURS).
      */
     public static void updateExpiredBookingsAndFields() {
-        String sqlUpdateSan = "UPDATE San SET TrangThai = N'Sẵn sàng' " +
-                             "WHERE TrangThai = N'Đang sử dụng' " +
-                             "AND SanID NOT IN (SELECT DISTINCT SanID FROM LichDatSan WHERE TrangThai = N'Đang sử dụng')";
-        String sqlExpirePending = "UPDATE LichDatSan " +
-                                  "SET TrangThai = N'Đã hủy', " +
-                                  "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Tự động hủy: Hết hạn chờ xác nhận (" +
+        String sqlUpdateSan = "UPDATE courts SET status = N'Sẵn sàng' " +
+                             "WHERE status = N'Đang sử dụng' " +
+                             "AND court_id NOT IN (SELECT DISTINCT court_id FROM bookings WHERE status = N'Đang sử dụng')";
+        String sqlExpirePending = "UPDATE bookings " +
+                                  "SET status = N'Đã hủy', " +
+                                  "    note = CONCAT(ISNULL(note, N''), N' [Tự động hủy: Hết hạn chờ xác nhận (" +
                                   org.example.util.Constants.COD_APPROVAL_EXPIRE_HOURS + " giờ)]') " +
-                                  "WHERE TrangThai = N'Chờ xác nhận' " +
-                                  "AND DATEDIFF(hour, CreatedTime, GETDATE()) >= " + org.example.util.Constants.COD_APPROVAL_EXPIRE_HOURS;
+                                  "WHERE status = N'Chờ xác nhận' " +
+                                  "AND DATEDIFF(hour, created_at, GETDATE()) >= " + org.example.util.Constants.COD_APPROVAL_EXPIRE_HOURS;
 
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -97,7 +97,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         updateExpiredBookingsAndFields();
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT * FROM LichDatSan WHERE IsDeleted = 0 ORDER BY NgayDat DESC, GioBatDau DESC";
+        String sql = "SELECT * FROM bookings WHERE is_deleted = 0 ORDER BY booking_date DESC, start_time DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -115,7 +115,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         updateExpiredBookingsAndFields();
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT * FROM LichDatSan WHERE AccountID = ? AND IsDeleted = 0 ORDER BY ISNULL(CreatedTime, CAST('1900-01-01' AS DATETIME)) DESC, DatSanID DESC";
+        String sql = "SELECT * FROM bookings WHERE account_id = ? AND is_deleted = 0 ORDER BY ISNULL(created_at, CAST('1900-01-01' AS DATETIME)) DESC, booking_id DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -132,7 +132,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public Lichdatsan getLichById(int id) {
-        String sql = "SELECT * FROM LichDatSan WHERE DatSanID = ? AND IsDeleted = 0";
+        String sql = "SELECT * FROM bookings WHERE booking_id = ? AND is_deleted = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -149,7 +149,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean addLichDatSan(Lichdatsan lich) {
-        String sql = "INSERT INTO LichDatSan (AccountID, SanID, NgayDat, GioBatDau, GioKetThuc, ApDungGiaCoDen, TongTienDuKien, TrangThai, GhiChu, NguonDatSan) " +
+        String sql = "INSERT INTO bookings (account_id, court_id, booking_date, start_time, end_time, apply_light_price, estimated_total, status, note, booking_source) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -172,7 +172,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean updateTrangThai(int id, String trangThai) {
-        String sql = "UPDATE LichDatSan SET TrangThai = ? WHERE DatSanID = ?";
+        String sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, trangThai);
@@ -186,12 +186,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public int cancelByCustomer(Connection conn, int datSanId, int accountId, String cancelType, String cancelReason) throws SQLException {
-        String sql = "UPDATE LichDatSan SET TrangThai = N'Đã hủy', CancelType = ?, CancelReason = ?, " +
-                "CancelledAt = GETDATE(), CancelledBy = ? " +
-                "WHERE DatSanID = ? AND AccountID = ? AND (" +
-                "TrangThai = N'Chờ xác nhận' " +
-                "OR TrangThai = N'Đã xác nhận' " +
-                "OR (TrangThai = N'Chờ thanh toán' AND (HoldExpiresAt IS NULL OR HoldExpiresAt > SYSUTCDATETIME())))";
+        String sql = "UPDATE bookings SET status = N'Đã hủy', cancel_type = ?, cancel_reason = ?, " +
+                "cancelled_at = GETDATE(), cancelled_by = ? " +
+                "WHERE booking_id = ? AND account_id = ? AND (" +
+                "status = N'Chờ xác nhận' " +
+                "OR status = N'Đã xác nhận' " +
+                "OR (status = N'Chờ thanh toán' AND (hold_expires_at IS NULL OR hold_expires_at > SYSUTCDATETIME())))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, cancelType);
             ps.setString(2, cancelReason);
@@ -204,7 +204,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean updateGhiChu(int id, String ghiChu) {
-        String sql = "UPDATE LichDatSan SET GhiChu = ? WHERE DatSanID = ?";
+        String sql = "UPDATE bookings SET note = ? WHERE booking_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, ghiChu);
@@ -218,7 +218,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean hardDelete(int id) {
-        String sql = "DELETE FROM LichDatSan WHERE DatSanID = ?";
+        String sql = "DELETE FROM bookings WHERE booking_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -231,8 +231,8 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean softDelete(int id, int actorId) {
-        String sql = "UPDATE LichDatSan SET IsDeleted = 1, DeletedAt = GETDATE(), DeletedBy = ? " +
-                     "WHERE DatSanID = ? AND IsDeleted = 0";
+        String sql = "UPDATE bookings SET is_deleted = 1, deleted_at = GETDATE(), deleted_by = ? " +
+                     "WHERE booking_id = ? AND is_deleted = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, actorId);
@@ -246,8 +246,8 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     @Override
     public boolean restore(int id) {
-        String sql = "UPDATE LichDatSan SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL " +
-                     "WHERE DatSanID = ? AND IsDeleted = 1";
+        String sql = "UPDATE bookings SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL " +
+                     "WHERE booking_id = ? AND is_deleted = 1";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -261,10 +261,10 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     @Override
     public List<Lichdatsan> findDeletedByCoSo(int coSoId) {
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT b.*, s.TenSan, s.CoSoID " +
-                     "FROM LichDatSan b JOIN San s ON b.SanID = s.SanID " +
-                     "WHERE s.CoSoID = ? AND b.IsDeleted = 1 " +
-                     "ORDER BY b.DeletedAt DESC";
+        String sql = "SELECT b.*, s.court_name, s.facility_id " +
+                     "FROM bookings b JOIN courts s ON b.court_id = s.court_id " +
+                     "WHERE s.facility_id = ? AND b.is_deleted = 1 " +
+                     "ORDER BY b.deleted_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -282,14 +282,14 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
     @Override
     public List<Integer> findDeletedIdsOlderThan(int days) {
         List<Integer> ids = new ArrayList<>();
-        String sql = "SELECT DatSanID FROM LichDatSan " +
-                     "WHERE IsDeleted = 1 AND DeletedAt < DATEADD(day, -?, GETDATE())";
+        String sql = "SELECT booking_id FROM bookings " +
+                     "WHERE is_deleted = 1 AND deleted_at < DATEADD(day, -?, GETDATE())";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, days);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    ids.add(rs.getInt("DatSanID"));
+                    ids.add(rs.getInt("booking_id"));
                 }
             }
         } catch (SQLException e) {
@@ -300,30 +300,30 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
     private Lichdatsan mapResultSetToLichDatSan(ResultSet rs) throws SQLException {
         Lichdatsan lich = new Lichdatsan();
-        lich.setDatSanId(rs.getInt("DatSanID"));
-        lich.setAccountId(rs.getInt("AccountID"));
-        lich.setSanId(rs.getInt("SanID"));
-        lich.setNgayDat(rs.getDate("NgayDat").toLocalDate());
-        lich.setGioBatDau(rs.getTime("GioBatDau").toLocalTime());
-        lich.setGioKetThuc(rs.getTime("GioKetThuc").toLocalTime());
-        lich.setApDungGiaCoDen(rs.getBoolean("ApDungGiaCoDen"));
-        lich.setTongTienDuKien(rs.getBigDecimal("TongTienDuKien"));
-        lich.setTrangThai(rs.getNString("TrangThai"));
-        lich.setGhiChu(rs.getNString("GhiChu"));
-        lich.setNguonDatSan(rs.getNString("NguonDatSan"));
+        lich.setDatSanId(rs.getInt("booking_id"));
+        lich.setAccountId(rs.getInt("account_id"));
+        lich.setSanId(rs.getInt("court_id"));
+        lich.setNgayDat(rs.getDate("booking_date").toLocalDate());
+        lich.setGioBatDau(rs.getTime("start_time").toLocalTime());
+        lich.setGioKetThuc(rs.getTime("end_time").toLocalTime());
+        lich.setApDungGiaCoDen(rs.getBoolean("apply_light_price"));
+        lich.setTongTienDuKien(rs.getBigDecimal("estimated_total"));
+        lich.setTrangThai(rs.getNString("status"));
+        lich.setGhiChu(rs.getNString("note"));
+        lich.setNguonDatSan(rs.getNString("booking_source"));
 
-        Timestamp createdTs = rs.getTimestamp("CreatedTime");
+        Timestamp createdTs = rs.getTimestamp("created_at");
         if (createdTs != null) {
             lich.setCreatedTime(createdTs.toLocalDateTime());
         }
 
         try {
-            lich.setDeleted(rs.getBoolean("IsDeleted"));
-            Timestamp deletedAtTs = rs.getTimestamp("DeletedAt");
+            lich.setDeleted(rs.getBoolean("is_deleted"));
+            Timestamp deletedAtTs = rs.getTimestamp("deleted_at");
             if (deletedAtTs != null) {
                 lich.setDeletedAt(deletedAtTs.toLocalDateTime());
             }
-            int deletedBy = rs.getInt("DeletedBy");
+            int deletedBy = rs.getInt("deleted_by");
             if (!rs.wasNull()) {
                 lich.setDeletedBy(deletedBy);
             }
@@ -332,25 +332,25 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         }
 
         try {
-            lich.setTimeMode(rs.getString("TimeMode"));
-            int reserved = rs.getInt("ReservedDurationMinutes");
+            lich.setTimeMode(rs.getString("time_mode"));
+            int reserved = rs.getInt("reserved_duration_minutes");
             if (!rs.wasNull()) {
                 lich.setReservedDurationMinutes(reserved);
             }
-            Time actualStart = rs.getTime("actual_start_time");
+            Time actualStart = rs.getTime("actual_start_time_of_day");
             if (actualStart != null) {
                 lich.setActualStartTime(actualStart.toLocalTime());
             }
-            Time actualEnd = rs.getTime("actual_end_time");
+            Time actualEnd = rs.getTime("actual_end_time_of_day");
             if (actualEnd != null) {
                 lich.setActualEndTime(actualEnd.toLocalTime());
             }
-            lich.setEarlyCheckoutReason(rs.getNString("EarlyCheckoutReason"));
-            BigDecimal earlyDisc = rs.getBigDecimal("EarlyCheckoutDiscount");
+            lich.setEarlyCheckoutReason(rs.getNString("early_checkout_reason"));
+            BigDecimal earlyDisc = rs.getBigDecimal("early_checkout_discount");
             if (earlyDisc != null) {
                 lich.setEarlyCheckoutDiscount(earlyDisc);
             }
-            java.sql.Timestamp holdExpiresTs = rs.getTimestamp("HoldExpiresAt");
+            java.sql.Timestamp holdExpiresTs = rs.getTimestamp("hold_expires_at");
             if (holdExpiresTs != null) {
                 lich.setHoldExpiresAt(holdExpiresTs.toLocalDateTime());
             }
@@ -359,17 +359,17 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         }
 
         try {
-            lich.setCancelType(rs.getNString("CancelType"));
-            lich.setCancelReason(rs.getNString("CancelReason"));
-            java.sql.Timestamp cancelledAtTs = rs.getTimestamp("CancelledAt");
+            lich.setCancelType(rs.getNString("cancel_type"));
+            lich.setCancelReason(rs.getNString("cancel_reason"));
+            java.sql.Timestamp cancelledAtTs = rs.getTimestamp("cancelled_at");
             if (cancelledAtTs != null) {
                 lich.setCancelledAt(cancelledAtTs.toLocalDateTime());
             }
-            int cancelledBy = rs.getInt("CancelledBy");
+            int cancelledBy = rs.getInt("cancelled_by");
             if (!rs.wasNull()) {
                 lich.setCancelledBy(cancelledBy);
             }
-            lich.setRequiresRefundReview(rs.getBoolean("RequiresRefundReview"));
+            lich.setRequiresRefundReview(rs.getBoolean("requires_refund_review"));
         } catch (SQLException e) {
             // New columns might not be present in some select statements
         }
@@ -377,7 +377,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         // Map DepositAmount & PaymentMethodConfirmed — cần thiết để calculatePreview()
         // có thể lấy số tiền đặt cọc khi HoaDon chưa tồn tại.
         try {
-            BigDecimal depositAmt = rs.getBigDecimal("DepositAmount");
+            BigDecimal depositAmt = rs.getBigDecimal("deposit_amount");
             if (depositAmt != null) {
                 lich.setDepositAmount(depositAmt);
             }
@@ -385,7 +385,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             // Column might not be present in all queries
         }
         try {
-            String pmConfirmed = rs.getNString("PaymentMethodConfirmed");
+            String pmConfirmed = rs.getNString("payment_method_confirmed");
             if (pmConfirmed != null) {
                 lich.setPaymentMethodConfirmed(pmConfirmed);
             }
@@ -394,12 +394,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         }
 
         try {
-            String tenSan = rs.getNString("TenSan");
+            String tenSan = rs.getNString("court_name");
             if (tenSan != null) {
                 org.example.model.San san = new org.example.model.San();
-                san.setSanID(rs.getInt("SanID"));
+                san.setSanID(rs.getInt("court_id"));
                 san.setTenSan(tenSan);
-                san.setCoSoID(rs.getInt("CoSoID"));
+                san.setCoSoID(rs.getInt("facility_id"));
                 lich.setSan(san);
             }
         } catch (SQLException e) {
@@ -407,17 +407,17 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         }
 
         try {
-            String fullName = rs.getNString("FullName");
+            String fullName = rs.getNString("full_name");
             if (fullName != null) {
                 org.example.model.TaiKhoan acc = new org.example.model.TaiKhoan();
-                acc.setAccountId(rs.getInt("AccountID"));
+                acc.setAccountId(rs.getInt("account_id"));
                 acc.setFullName(fullName);
-                acc.setPhoneNumber(rs.getString("PhoneNumber"));
-                acc.setEmail(rs.getString("Email"));
+                acc.setPhoneNumber(rs.getString("phone_number"));
+                acc.setEmail(rs.getString("email"));
                 try {
-                    acc.setDiemUyTin(rs.getInt("DiemUyTin"));
-                    acc.setLateCancelCount(rs.getInt("LateCancelCount"));
-                    acc.setNoShowCount(rs.getInt("NoShowCount"));
+                    acc.setDiemUyTin(rs.getInt("reputation_score"));
+                    acc.setLateCancelCount(rs.getInt("late_cancel_count"));
+                    acc.setNoShowCount(rs.getInt("no_show_count"));
                 } catch (SQLException ignoredReputationCols) {
                     // Query didn't select reputation columns (e.g. getLichDatSanTodayByCoSo) — leave defaults
                 }
@@ -435,11 +435,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         updateExpiredBookingsAndFields();
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT l.*, s.TenSan, s.CoSoID " +
-                     "FROM LichDatSan l " +
-                     "JOIN San s ON l.SanID = s.SanID " +
-                     "WHERE s.CoSoID = ? AND l.NgayDat = ? AND l.IsDeleted = 0 " +
-                     "ORDER BY l.GioBatDau ASC";
+        String sql = "SELECT l.*, s.court_name, s.facility_id " +
+                     "FROM bookings l " +
+                     "JOIN courts s ON l.court_id = s.court_id " +
+                     "WHERE s.facility_id = ? AND l.booking_date = ? AND l.is_deleted = 0 " +
+                     "ORDER BY l.start_time ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -460,13 +460,13 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
         updateExpiredBookingsAndFields();
         org.example.service.BookingLifecycleService.runExpirySweep();
         List<Lichdatsan> list = new ArrayList<>();
-        String sql = "SELECT l.*, s.TenSan, s.CoSoID, a.FullName, a.PhoneNumber, a.Email, " +
-                     "a.DiemUyTin, a.LateCancelCount, a.NoShowCount " +
-                     "FROM LichDatSan l " +
-                     "JOIN San s ON l.SanID = s.SanID " +
-                     "LEFT JOIN Accounts a ON l.AccountID = a.AccountID " +
-                     "WHERE s.CoSoID = ? AND l.IsDeleted = 0 " +
-                     "ORDER BY ISNULL(l.CreatedTime, CAST('1900-01-01' AS DATETIME)) DESC, l.DatSanID DESC";
+        String sql = "SELECT l.*, s.court_name, s.facility_id, a.full_name, a.phone_number, a.email, " +
+                     "a.reputation_score, a.late_cancel_count, a.no_show_count " +
+                     "FROM bookings l " +
+                     "JOIN courts s ON l.court_id = s.court_id " +
+                     "LEFT JOIN accounts a ON l.account_id = a.account_id " +
+                     "WHERE s.facility_id = ? AND l.is_deleted = 0 " +
+                     "ORDER BY ISNULL(l.created_at, CAST('1900-01-01' AS DATETIME)) DESC, l.booking_id DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -511,7 +511,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             conn.setAutoCommit(false);
 
             // 1. Kiểm tra trạng thái đơn hiện tại
-            String sqlSelect = "SELECT SanID, NgayDat, GioBatDau, GioKetThuc, TrangThai, TongTienDuKien, AccountID, GhiChu FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?";
+            String sqlSelect = "SELECT court_id, booking_date, start_time, end_time, status, estimated_total, account_id, note FROM bookings WITH (UPDLOCK, ROWLOCK) WHERE booking_id = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
             rsSelect = psSelect.executeQuery();
@@ -520,14 +520,14 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 throw new Exception("Không tìm thấy thông tin đơn đặt sân.");
             }
 
-            int sanId = rsSelect.getInt("SanID");
-            Date ngayDat = rsSelect.getDate("NgayDat");
-            Time gioBatDau = rsSelect.getTime("GioBatDau");
-            Time gioKetThuc = rsSelect.getTime("GioKetThuc");
-            String trangThai = rsSelect.getString("TrangThai");
-            BigDecimal tongTienDuKien = rsSelect.getBigDecimal("TongTienDuKien");
-            String currentGhiChu = rsSelect.getString("GhiChu");
-            Integer customerAccountId = rsSelect.getInt("AccountID");
+            int sanId = rsSelect.getInt("court_id");
+            Date ngayDat = rsSelect.getDate("booking_date");
+            Time gioBatDau = rsSelect.getTime("start_time");
+            Time gioKetThuc = rsSelect.getTime("end_time");
+            String trangThai = rsSelect.getString("status");
+            BigDecimal tongTienDuKien = rsSelect.getBigDecimal("estimated_total");
+            String currentGhiChu = rsSelect.getString("note");
+            Integer customerAccountId = rsSelect.getInt("account_id");
             if (rsSelect.wasNull()) {
                 customerAccountId = null;
             }
@@ -548,29 +548,29 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 2. Vá lỗi IDOR & Tránh Race Condition bằng cách khóa hàng Sân (row lock)
-            String sqlLockSan = "SELECT CoSoID FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
+            String sqlLockSan = "SELECT facility_id FROM courts WITH (UPDLOCK, ROWLOCK) WHERE court_id = ?";
             psLockSan = conn.prepareStatement(sqlLockSan);
             psLockSan.setInt(1, sanId);
             rsLockSan = psLockSan.executeQuery();
             if (!rsLockSan.next()) {
                 throw new Exception("Không tìm thấy thông tin sân bóng tương ứng.");
             }
-            int sanCoSoId = rsLockSan.getInt("CoSoID");
+            int sanCoSoId = rsLockSan.getInt("facility_id");
             if (sanCoSoId != coSoId) {
                 throw new Exception("Bạn không có quyền quản lý đơn đặt sân thuộc cơ sở khác.");
             }
 
             // 3. Tính lại giá sân thực tế tại thời điểm duyệt để cập nhật/verify (Tránh trượt giá)
             double hourlyPrice = 100_000; // Fallback
-            String loaiSanSql = "SELECT GiaKhongDen, GiaCoDen, GioBatDauLenDen FROM LoaiSan WHERE LoaiSanID = (SELECT LoaiSanID FROM San WHERE SanID = ?)";
+            String loaiSanSql = "SELECT price_without_light, price_with_light, light_start_time FROM court_types WHERE court_type_id = (SELECT court_type_id FROM courts WHERE court_id = ?)";
             try (PreparedStatement psLoai = conn.prepareStatement(loaiSanSql)) {
                 psLoai.setInt(1, sanId);
                 try (ResultSet rsLoai = psLoai.executeQuery()) {
                     if (rsLoai.next()) {
-                        double giaKhongDen = rsLoai.getDouble("GiaKhongDen");
-                        double giaCoDen = rsLoai.getDouble("GiaCoDen");
+                        double giaKhongDen = rsLoai.getDouble("price_without_light");
+                        double giaCoDen = rsLoai.getDouble("price_with_light");
                         LocalTime gioLenDen = LocalTime.of(17, 30);
-                        Time sqlLenDen = rsLoai.getTime("GioBatDauLenDen");
+                        Time sqlLenDen = rsLoai.getTime("light_start_time");
                         if (sqlLenDen != null) {
                             gioLenDen = sqlLenDen.toLocalTime();
                         }
@@ -589,11 +589,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             String priceWarning = "";
 
             // 4. Kiểm xem có đơn trùng lịch đã được xác nhận/sử dụng không
-            String sqlCheckConflict = "SELECT COUNT(*) FROM LichDatSan " +
-                                      "WHERE SanID = ? AND NgayDat = ? AND DatSanID != ? " +
-                                      "AND (TrangThai IN (N'Đã xác nhận', N'Đang sử dụng', N'Đã hoàn thành') " +
-                                      "     OR (TrangThai = N'Chờ thanh toán' AND DATEDIFF(minute, CreatedTime, GETDATE()) <= " + org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
-                                      "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+            String sqlCheckConflict = "SELECT COUNT(*) FROM bookings " +
+                                      "WHERE court_id = ? AND booking_date = ? AND booking_id != ? " +
+                                      "AND (status IN (N'Đã xác nhận', N'Đang sử dụng', N'Đã hoàn thành') " +
+                                      "     OR (status = N'Chờ thanh toán' AND DATEDIFF(minute, created_at, GETDATE()) <= " + org.example.util.Constants.PENDING_PAYMENT_TIMEOUT_MINUTES + ")) " +
+                                      "AND NOT (end_time <= CAST(? AS time) OR start_time >= CAST(? AS time))";
             psCheckConflict = conn.prepareStatement(sqlCheckConflict);
             psCheckConflict.setInt(1, sanId);
             psCheckConflict.setDate(2, ngayDat);
@@ -608,7 +608,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             // 5. Cập nhật trạng thái đơn hiện tại thành "Đã xác nhận"
             String newApprovedGhiChu = (currentGhiChu != null ? currentGhiChu.trim() : "") + priceWarning;
-            String sqlUpdateApproved = "UPDATE LichDatSan SET TrangThai = N'Đã xác nhận', TongTienDuKien = ?, GhiChu = ? WHERE DatSanID = ?";
+            String sqlUpdateApproved = "UPDATE bookings SET status = N'Đã xác nhận', estimated_total = ?, note = ? WHERE booking_id = ?";
             psUpdateApproved = conn.prepareStatement(sqlUpdateApproved);
             psUpdateApproved.setBigDecimal(1, tongTienDuKien);
             psUpdateApproved.setNString(2, newApprovedGhiChu.trim());
@@ -616,16 +616,16 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             psUpdateApproved.executeUpdate();
 
             // 6. Khởi tạo hóa đơn "Chưa thanh toán" cho khách hàng đặt trước để tương thích với luồng CheckInDAO
-            String sqlCheckInvoice = "SELECT COUNT(*) FROM HoaDon WHERE DatSanID = ?";
+            String sqlCheckInvoice = "SELECT COUNT(*) FROM invoices WHERE booking_id = ?";
             try (PreparedStatement psCheckInv = conn.prepareStatement(sqlCheckInvoice)) {
                 psCheckInv.setInt(1, datSanId);
                 try (ResultSet rsInv = psCheckInv.executeQuery()) {
                     if (rsInv.next() && rsInv.getInt(1) == 0) {
-                        boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                        boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
                         String sqlInsertInvoice = hasLoaiHoaDon
-                                ? "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, LoaiHoaDon) " +
+                                ? "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status, invoice_type) " +
                                   "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán', N'MAIN')"
-                                : "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
+                                : "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status) " +
                                   "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán')";
                         psInsertInvoice = conn.prepareStatement(sqlInsertInvoice);
                         psInsertInvoice.setInt(1, datSanId);
@@ -642,11 +642,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 7. Lấy danh sách các đơn trùng lịch để hủy và chuẩn bị thông báo gửi cho khách hàng
-            String selectOverlapSql = "SELECT l.DatSanID, l.AccountID, l.NgayDat, l.GioBatDau, l.GioKetThuc, s.TenSan " +
-                                      "FROM LichDatSan l " +
-                                      "JOIN San s ON l.SanID = s.SanID " +
-                                      "WHERE l.SanID = ? AND l.NgayDat = ? AND l.DatSanID != ? AND l.TrangThai = N'Chờ xác nhận' " +
-                                      "AND NOT (l.GioKetThuc <= CAST(? AS time) OR l.GioBatDau >= CAST(? AS time))";
+            String selectOverlapSql = "SELECT l.booking_id, l.account_id, l.booking_date, l.start_time, l.end_time, s.court_name " +
+                                      "FROM bookings l " +
+                                      "JOIN courts s ON l.court_id = s.court_id " +
+                                      "WHERE l.court_id = ? AND l.booking_date = ? AND l.booking_id != ? AND l.status = N'Chờ xác nhận' " +
+                                      "AND NOT (l.end_time <= CAST(? AS time) OR l.start_time >= CAST(? AS time))";
 
             class OverlapNotifInfo {
                 int overlapDatSanId;
@@ -664,12 +664,12 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 psOverlapSel.setString(5, gioKetThuc.toString());
                 try (ResultSet rsOverlap = psOverlapSel.executeQuery()) {
                     while (rsOverlap.next()) {
-                        int overlapDatSanId = rsOverlap.getInt("DatSanID");
-                        int customerId = rsOverlap.getInt("AccountID");
-                        String tenSan = rsOverlap.getNString("TenSan");
-                        Date oNgayDat = rsOverlap.getDate("NgayDat");
-                        Time oStart = rsOverlap.getTime("GioBatDau");
-                        Time oEnd = rsOverlap.getTime("GioKetThuc");
+                        int overlapDatSanId = rsOverlap.getInt("booking_id");
+                        int customerId = rsOverlap.getInt("account_id");
+                        String tenSan = rsOverlap.getNString("court_name");
+                        Date oNgayDat = rsOverlap.getDate("booking_date");
+                        Time oStart = rsOverlap.getTime("start_time");
+                        Time oEnd = rsOverlap.getTime("end_time");
 
                         String title = "Đơn đặt sân #" + overlapDatSanId + " bị hủy";
                         String content = "Đơn đặt sân " + tenSan + " ngày " + oNgayDat + " (" + oStart.toString().substring(0, 5) + " - " + oEnd.toString().substring(0, 5) + ") đã bị tự động hủy do trùng lịch với ca đặt sân #" + datSanId + " đã được phê duyệt.";
@@ -685,11 +685,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // Tự động từ chối (hủy) các đơn Chờ xác nhận bị trùng lịch chéo
-            String sqlUpdateOverlap = "UPDATE LichDatSan " +
-                                      "SET TrangThai = N'Đã hủy', " +
-                                      "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Hệ thống tự động hủy do trùng lịch với đơn #', CAST(? AS varchar), N' đã được duyệt]') " +
-                                      "WHERE SanID = ? AND NgayDat = ? AND DatSanID != ? AND TrangThai = N'Chờ xác nhận' " +
-                                      "AND NOT (GioKetThuc <= CAST(? AS time) OR GioBatDau >= CAST(? AS time))";
+            String sqlUpdateOverlap = "UPDATE bookings " +
+                                      "SET status = N'Đã hủy', " +
+                                      "    note = CONCAT(ISNULL(note, N''), N' [Hệ thống tự động hủy do trùng lịch với đơn #', CAST(? AS varchar), N' đã được duyệt]') " +
+                                      "WHERE court_id = ? AND booking_date = ? AND booking_id != ? AND status = N'Chờ xác nhận' " +
+                                      "AND NOT (end_time <= CAST(? AS time) OR start_time >= CAST(? AS time))";
             psUpdateOverlap = conn.prepareStatement(sqlUpdateOverlap);
             psUpdateOverlap.setInt(1, datSanId);
             psUpdateOverlap.setInt(2, sanId);
@@ -701,7 +701,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             // Gửi thông báo trùng lịch cho các khách hàng bị hủy
             if (!overlapNotifs.isEmpty()) {
-                String insertNotifSql = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan, IsDeleted) " +
+                String insertNotifSql = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, DuongDan, is_deleted) " +
                                         "VALUES (?, ?, ?, ?, 0, GETDATE(), ?, ?, 0)";
                 try (PreparedStatement psInsNotif = conn.prepareStatement(insertNotifSql)) {
                     for (OverlapNotifInfo tb : overlapNotifs) {
@@ -756,7 +756,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             conn.setAutoCommit(false);
 
             // 1. Kiểm tra trạng thái hiện tại
-            String sqlSelect = "SELECT SanID, TrangThai, GhiChu, AccountID FROM LichDatSan WHERE DatSanID = ?";
+            String sqlSelect = "SELECT court_id, status, note, account_id FROM bookings WHERE booking_id = ?";
             psSelect = conn.prepareStatement(sqlSelect);
             psSelect.setInt(1, datSanId);
             rsSelect = psSelect.executeQuery();
@@ -765,11 +765,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                 throw new Exception("Không tìm thấy thông tin đơn đặt sân.");
             }
 
-            int sanId = rsSelect.getInt("SanID");
-            String trangThai = rsSelect.getString("TrangThai");
-            String oldGhiChu = rsSelect.getString("GhiChu");
+            int sanId = rsSelect.getInt("court_id");
+            String trangThai = rsSelect.getString("status");
+            String oldGhiChu = rsSelect.getString("note");
             if (oldGhiChu == null) oldGhiChu = "";
-            Integer customerAccountId = rsSelect.getInt("AccountID");
+            Integer customerAccountId = rsSelect.getInt("account_id");
             if (rsSelect.wasNull()) {
                 customerAccountId = null;
             }
@@ -779,41 +779,41 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 2. Vá lỗi IDOR: Kiểm tra sân có thuộc coSoId của người từ chối không
-            String sqlLockSan = "SELECT CoSoID FROM San WITH (UPDLOCK, ROWLOCK) WHERE SanID = ?";
+            String sqlLockSan = "SELECT facility_id FROM courts WITH (UPDLOCK, ROWLOCK) WHERE court_id = ?";
             psLockSan = conn.prepareStatement(sqlLockSan);
             psLockSan.setInt(1, sanId);
             rsLockSan = psLockSan.executeQuery();
             if (!rsLockSan.next()) {
                 throw new Exception("Không tìm thấy thông tin sân bóng tương ứng.");
             }
-            int sanCoSoId = rsLockSan.getInt("CoSoID");
+            int sanCoSoId = rsLockSan.getInt("facility_id");
             if (sanCoSoId != coSoId) {
                 throw new Exception("Bạn không có quyền quản lý đơn đặt sân thuộc cơ sở khác.");
             }
 
             // 3. Cập nhật đơn thành Đã hủy
             String newGhiChu = oldGhiChu + (ghiChu != null && !ghiChu.isEmpty() ? " [Từ chối: " + ghiChu + "]" : " [Bị từ chối bởi quản lý]");
-            String sqlUpdate = "UPDATE LichDatSan SET TrangThai = N'Đã hủy', GhiChu = ? WHERE DatSanID = ?";
+            String sqlUpdate = "UPDATE bookings SET status = N'Đã hủy', note = ? WHERE booking_id = ?";
             psUpdate = conn.prepareStatement(sqlUpdate);
             psUpdate.setNString(1, newGhiChu.trim());
             psUpdate.setInt(2, datSanId);
             psUpdate.executeUpdate();
 
             // 4. Kiểm tra và cập nhật hóa đơn liên quan nếu có
-            String sqlCheckInvoice = "SELECT HoaDonID, TrangThaiThanhToan, TongThanhToan, AccountID_KhachHang FROM HoaDon WHERE DatSanID = ?";
+            String sqlCheckInvoice = "SELECT invoice_id, payment_status, grand_total, customer_account_id FROM invoices WHERE booking_id = ?";
             try (PreparedStatement psCheckInv = conn.prepareStatement(sqlCheckInvoice)) {
                 psCheckInv.setInt(1, datSanId);
                 try (ResultSet rsInv = psCheckInv.executeQuery()) {
                     if (rsInv.next()) {
-                        int hoaDonId = rsInv.getInt("HoaDonID");
-                        String trangThaiThanhToan = rsInv.getString("TrangThaiThanhToan");
-                        BigDecimal tongThanhToan = rsInv.getBigDecimal("TongThanhToan");
-                        Integer khachHangId = rsInv.getInt("AccountID_KhachHang");
+                        int hoaDonId = rsInv.getInt("invoice_id");
+                        String trangThaiThanhToan = rsInv.getString("payment_status");
+                        BigDecimal tongThanhToan = rsInv.getBigDecimal("grand_total");
+                        Integer khachHangId = rsInv.getInt("customer_account_id");
                         boolean wasNullKhach = rsInv.wasNull();
 
                         if ("Đã thanh toán".equals(trangThaiThanhToan) || "Đã cọc".equals(trangThaiThanhToan)) {
                             // Tạo yêu cầu Hoàn tiền
-                            String sqlInsertRefund = "INSERT INTO HoanTien (HoaDonID, AccountID, SoTienHoan, LyDo, TrangThai, ThoiGianYeuCau) " +
+                            String sqlInsertRefund = "INSERT INTO refunds (invoice_id, account_id, refunded_amount, reason, status, requested_at) " +
                                                      "VALUES (?, ?, ?, ?, ?, GETDATE())";
                             try (PreparedStatement psRefund = conn.prepareStatement(sqlInsertRefund)) {
                                 psRefund.setInt(1, hoaDonId);
@@ -827,13 +827,13 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                                 psRefund.setString(5, "Chờ xử lý");
                                 psRefund.executeUpdate();
                             }
-                            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Hoàn tiền', NgayLap = GETDATE() WHERE HoaDonID = ?";
+                            String sqlUpdateInvoice = "UPDATE invoices SET payment_status = N'Hoàn tiền', issued_at = GETDATE() WHERE invoice_id = ?";
                             try (PreparedStatement psUpdateInv = conn.prepareStatement(sqlUpdateInvoice)) {
                                 psUpdateInv.setInt(1, hoaDonId);
                                 psUpdateInv.executeUpdate();
                             }
                         } else {
-                            String sqlUpdateInvoice = "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã hủy', NgayLap = GETDATE() WHERE HoaDonID = ?";
+                            String sqlUpdateInvoice = "UPDATE invoices SET payment_status = N'Đã hủy', issued_at = GETDATE() WHERE invoice_id = ?";
                             try (PreparedStatement psUpdateInv = conn.prepareStatement(sqlUpdateInvoice)) {
                                 psUpdateInv.setInt(1, hoaDonId);
                                 psUpdateInv.executeUpdate();
@@ -893,21 +893,21 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             conn.setAutoCommit(false);
 
             // 1. Lấy thông tin booking và khóa dòng
-            String sqlSelectBooking = "SELECT lds.SanID, lds.TongTienDuKien, lds.AccountID, lds.TrangThai, s.CoSoID FROM LichDatSan lds INNER JOIN San s ON lds.SanID = s.SanID WITH (UPDLOCK, ROWLOCK) WHERE lds.DatSanID = ?";
+            String sqlSelectBooking = "SELECT lds.court_id, lds.estimated_total, lds.account_id, lds.status, s.facility_id FROM bookings lds INNER JOIN courts s ON lds.court_id = s.court_id WITH (UPDLOCK, ROWLOCK) WHERE lds.booking_id = ?";
             psSelectBooking = conn.prepareStatement(sqlSelectBooking);
             psSelectBooking.setInt(1, datSanId);
             rsBooking = psSelectBooking.executeQuery();
             if (!rsBooking.next()) {
                 throw new Exception("Không tìm thấy thông tin đơn đặt sân.");
             }
-            int sanId = rsBooking.getInt("SanID");
-            BigDecimal tongTienDuKien = rsBooking.getBigDecimal("TongTienDuKien");
-            Integer customerAccountId = rsBooking.getInt("AccountID");
+            int sanId = rsBooking.getInt("court_id");
+            BigDecimal tongTienDuKien = rsBooking.getBigDecimal("estimated_total");
+            Integer customerAccountId = rsBooking.getInt("account_id");
             if (rsBooking.wasNull()) {
                 customerAccountId = null;
             }
-            String trangThaiBooking = rsBooking.getString("TrangThai");
-            int coSoId = rsBooking.getInt("CoSoID");
+            String trangThaiBooking = rsBooking.getString("status");
+            int coSoId = rsBooking.getInt("facility_id");
 
             if (requiredCoSoId != null && coSoId != requiredCoSoId) {
                 throw new SecurityException("Đơn đặt sân không thuộc cơ sở của bạn.");
@@ -919,22 +919,22 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
 
             // 2. Kiểm tra/Tạo hóa đơn nếu chưa có
             int hoaDonId = -1;
-            String sqlCheckInvoice = "SELECT HoaDonID, TrangThaiThanhToan FROM HoaDon WHERE " + mainInvoiceWhereClause(conn, "DatSanID");
+            String sqlCheckInvoice = "SELECT invoice_id, payment_status FROM invoices WHERE " + mainInvoiceWhereClause(conn, "booking_id");
             psCheckInvoice = conn.prepareStatement(sqlCheckInvoice);
             psCheckInvoice.setInt(1, datSanId);
             rsInv = psCheckInvoice.executeQuery();
             if (rsInv.next()) {
-                hoaDonId = rsInv.getInt("HoaDonID");
-                String invoiceStatus = rsInv.getString("TrangThaiThanhToan");
+                hoaDonId = rsInv.getInt("invoice_id");
+                String invoiceStatus = rsInv.getString("payment_status");
                 if ("Đã thanh toán".equals(invoiceStatus)) {
                     throw new Exception("Hóa đơn đã được thanh toán. Không thể thêm hoặc sửa dịch vụ sau khi thanh toán.");
                 }
             } else {
-                boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
                 String sqlInsertInvoice = hasLoaiHoaDon
-                        ? "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, LoaiHoaDon) " +
+                        ? "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status, invoice_type) " +
                           "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán', N'MAIN')"
-                        : "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan) " +
+                        : "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_status) " +
                           "VALUES (?, ?, NULL, GETDATE(), ?, 0, 0, 0, ?, N'Chưa thanh toán')";
                 psInsertInvoice = conn.prepareStatement(sqlInsertInvoice, Statement.RETURN_GENERATED_KEYS);
                 psInsertInvoice.setInt(1, datSanId);
@@ -959,14 +959,14 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 3. Hoàn trả lại số lượng tồn cũ của các chi tiết hóa đơn cũ trước khi xóa
-            String sqlGetOldChiTiet = "SELECT SanPhamID, SoLuong FROM ChiTietHoaDon WHERE HoaDonID = ?";
+            String sqlGetOldChiTiet = "SELECT product_id, quantity FROM invoice_items WHERE invoice_id = ?";
             try (PreparedStatement psOld = conn.prepareStatement(sqlGetOldChiTiet)) {
                 psOld.setInt(1, hoaDonId);
                 try (ResultSet rsOld = psOld.executeQuery()) {
                     while (rsOld.next()) {
-                        int spId = rsOld.getInt("SanPhamID");
-                        int qty = rsOld.getInt("SoLuong");
-                        String sqlRestoreStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon + ? WHERE SanPhamID = ?";
+                        int spId = rsOld.getInt("product_id");
+                        int qty = rsOld.getInt("quantity");
+                        String sqlRestoreStock = "UPDATE products_services SET stock_quantity = stock_quantity + ? WHERE product_id = ?";
                         try (PreparedStatement psRestore = conn.prepareStatement(sqlRestoreStock)) {
                             psRestore.setInt(1, qty);
                             psRestore.setInt(2, spId);
@@ -977,20 +977,20 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 4. Xóa toàn bộ chi tiết hóa đơn cũ của hóa đơn này
-            String sqlDeleteChiTiet = "DELETE FROM ChiTietHoaDon WHERE HoaDonID = ?";
+            String sqlDeleteChiTiet = "DELETE FROM invoice_items WHERE invoice_id = ?";
             psDeleteChiTiet = conn.prepareStatement(sqlDeleteChiTiet);
             psDeleteChiTiet.setInt(1, hoaDonId);
             psDeleteChiTiet.executeUpdate();
 
             // 5. Thêm các chi tiết mới, kiểm tra tồn kho và giảm số lượng tồn kho
             double totalDichVu = 0.0;
-            String sqlInsertChiTiet = "INSERT INTO ChiTietHoaDon (HoaDonID, SanPhamID, SoLuong, DonGiaTaiThoiDiemBan, ThanhTien) VALUES (?, ?, ?, ?, ?)";
+            String sqlInsertChiTiet = "INSERT INTO invoice_items (invoice_id, product_id, quantity, unit_price_at_sale, line_total) VALUES (?, ?, ?, ?, ?)";
             psInsertChiTiet = conn.prepareStatement(sqlInsertChiTiet);
 
-            String sqlGetProduct = "SELECT TenSanPham, DonGia, SoLuongTon, CoSoID, TrangThai FROM SanPham_DichVu WITH (UPDLOCK, ROWLOCK) WHERE SanPhamID = ?";
+            String sqlGetProduct = "SELECT product_name, unit_price, stock_quantity, facility_id, status FROM products_services WITH (UPDLOCK, ROWLOCK) WHERE product_id = ?";
             psGetProductDetails = conn.prepareStatement(sqlGetProduct);
 
-            String sqlUpdateStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon - ? WHERE SanPhamID = ?";
+            String sqlUpdateStock = "UPDATE products_services SET stock_quantity = stock_quantity - ? WHERE product_id = ?";
             psUpdateProductStock = conn.prepareStatement(sqlUpdateStock);
 
             if (productIds != null && quantities != null) {
@@ -1004,11 +1004,11 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
                         if (!rsProd.next()) {
                             throw new Exception("Không tìm thấy sản phẩm có ID: " + spId);
                         }
-                        String tenSp = rsProd.getNString("TenSanPham");
-                        double donGia = rsProd.getDouble("DonGia");
-                        int stock = rsProd.getInt("SoLuongTon");
-                        int prodCoSoId = rsProd.getInt("CoSoID");
-                        String prodStatus = rsProd.getString("TrangThai");
+                        String tenSp = rsProd.getNString("product_name");
+                        double donGia = rsProd.getDouble("unit_price");
+                        int stock = rsProd.getInt("stock_quantity");
+                        int prodCoSoId = rsProd.getInt("facility_id");
+                        String prodStatus = rsProd.getString("status");
 
                         if (prodCoSoId != coSoId) {
                             throw new Exception("Sản phẩm '" + tenSp + "' không thuộc cùng chi nhánh với sân bóng.");
@@ -1041,7 +1041,7 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             }
 
             // 6. Cập nhật lại tổng tiền trên Hóa đơn
-            String sqlUpdateInvoiceTotals = "UPDATE HoaDon SET TongTienDichVu = ?, TongThanhToan = TongTienSan + ? - GiamGia + PhiGuiXe WHERE HoaDonID = ?";
+            String sqlUpdateInvoiceTotals = "UPDATE invoices SET service_total = ?, grand_total = court_total + ? - discount_amount + parking_fee WHERE invoice_id = ?";
             psUpdateInvoiceTotals = conn.prepareStatement(sqlUpdateInvoiceTotals);
             psUpdateInvoiceTotals.setDouble(1, totalDichVu);
             psUpdateInvoiceTotals.setDouble(2, totalDichVu);
@@ -1049,15 +1049,15 @@ public class LichDatSanDAOImpl implements LichDatSanDAO {
             psUpdateInvoiceTotals.executeUpdate();
 
             // Cập nhật lại tổng tiền dự kiến trong LichDatSan
-            String sqlUpdateLichTien = "UPDATE LichDatSan SET TongTienDuKien = ? WHERE DatSanID = ?";
+            String sqlUpdateLichTien = "UPDATE bookings SET estimated_total = ? WHERE booking_id = ?";
             try (PreparedStatement psLichTien = conn.prepareStatement(sqlUpdateLichTien)) {
                 double finalTotal = 0.0;
-                String sqlGetTotal = "SELECT TongThanhToan FROM HoaDon WHERE HoaDonID = ?";
+                String sqlGetTotal = "SELECT grand_total FROM invoices WHERE invoice_id = ?";
                 try (PreparedStatement psGetTotal = conn.prepareStatement(sqlGetTotal)) {
                     psGetTotal.setInt(1, hoaDonId);
                     try (ResultSet rsGetTotal = psGetTotal.executeQuery()) {
                         if (rsGetTotal.next()) {
-                            finalTotal = rsGetTotal.getDouble("TongThanhToan");
+                            finalTotal = rsGetTotal.getDouble("grand_total");
                         }
                     }
                 }
