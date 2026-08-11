@@ -695,32 +695,18 @@
             setTimeout(() => document.getElementById('vsmLoadingVeil').classList.add('is-hidden'), 260);
         }
 
-        function addTileLayer(preferMapTiler) {
-            if (window.vsmActiveTileLayer) {
-                map.removeLayer(window.vsmActiveTileLayer);
-            }
-            let url, attribution;
-            if (preferMapTiler && MAPTILER_KEY) {
-                url = 'https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=' + MAPTILER_KEY;
-                attribution = '&copy; <a href="https://www.maptiler.com/" target="_blank" rel="noopener">MapTiler</a> &copy; OpenStreetMap';
-                usingOsmTiles = false;
-            } else {
-                url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-                attribution = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
-                usingOsmTiles = true;
-            }
-            const layer = L.tileLayer(url, { maxZoom: 19, attribution: attribution });
-            let tileErrorCount = 0;
-            layer.on('tileerror', function () {
-                if (usingOsmTiles) return;
-                tileErrorCount++;
-                if (tileErrorCount > 3) {
-                    addTileLayer(false);
-                }
-            });
-            layer.addTo(map);
-            window.vsmActiveTileLayer = layer;
-        }
+        function addTileLayer() {
+    if (window.vsmActiveTileLayer) {
+        map.removeLayer(window.vsmActiveTileLayer);
+    }
+    // Sử dụng Tile Server của Esri World Street Map (Chuẩn xác, giao diện đẹp, miễn phí)
+    const url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+    const attribution = 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom';
+    
+    const layer = L.tileLayer(url, { maxZoom: 19, attribution: attribution });
+    layer.addTo(map);
+    window.vsmActiveTileLayer = layer;
+}
 
         document.getElementById('vsmLayersBtn').addEventListener('click', function () {
             addTileLayer(usingOsmTiles);

@@ -15,13 +15,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- MapLibre GL JS (Google/Mapbox Vector Style Renderer) -->
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 
 <style>
 /* =====================================================
    V-SPORT OWNER LANDING — Orange Theme
-   Inspired by ThanhTruc_Project / Nhiệt Đới Xanh design
    ===================================================== */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
@@ -197,7 +198,7 @@ ul{list-style:none}
 .order-form-wrapper{background:var(--white);border-radius:28px;padding:clamp(24px,4vw,40px);box-shadow:0 24px 60px rgba(0,0,0,0.18)}
 .order-form-title{font-size:1.05rem;font-weight:800;color:var(--text-dark);padding-bottom:16px;border-bottom:2px solid var(--cream-warm);margin-bottom:22px;display:flex;align-items:center;gap:10px}
 
-/* FORM ELEMENTS (kept from original) */
+/* FORM ELEMENTS */
 .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px}
 .field input,.field textarea,.field select{width:100%;padding:12px 15px;border:1px solid var(--border);border-radius:11px;font-size:.92rem;font-family:var(--font);color:var(--text-dark);background:var(--cream);transition:all .15s}
 .field input::placeholder,.field textarea::placeholder{color:#b5a99a}
@@ -273,6 +274,12 @@ ul{list-style:none}
 .footer-col a{display:block;padding:5px 0;font-size:0.88rem;color:rgba(255,255,255,0.55);transition:color .2s}
 .footer-col a:hover{color:var(--accent)}
 .footer-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);font-size:0.8rem;color:rgba(255,255,255,0.3)}
+
+/* ẨN HOÀN TOÀN LOGO VÀ DÒNG CHỮ LEAFLET/ATTRIBUTION */
+.maplibregl-ctrl-bottom-right, 
+.maplibregl-ctrl-attrib {
+    display: none !important;
+}
 </style>
 </head>
 <body>
@@ -786,7 +793,6 @@ ul{list-style:none}
           <textarea id="regDescription" rows="3" placeholder="Dịch vụ đi kèm, tiện ích, lưu ý đặc biệt..." class="resize-vertical"></textarea>
         </div>
 
-
         <div class="flex gap-3">
           <button type="button" onclick="goToStep2Back()" class="btn-outline flex-shrink-0 py-3.5">
             <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại
@@ -871,13 +877,13 @@ ul{list-style:none}
     @keyframes geoSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     #geoModal:not(.hidden) { animation: geoFadeIn 180ms ease-out forwards; }
     #geoModalBox { animation: geoSlideUp 260ms cubic-bezier(.16,1,.3,1) forwards; }
-    #geoMapEl { height: 340px; border-radius: 12px; overflow: hidden; z-index: 0; }
-    @media (min-height: 700px) { #geoMapEl { height: 400px; } }
+    #geoMapEl { height: 360px; border-radius: 16px; overflow: hidden; z-index: 0; }
+    @media (min-height: 700px) { #geoMapEl { height: 420px; } }
     .geo-search-wrap { position: relative; }
-    .geo-search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 9999; max-height: 200px; overflow-y: auto; }
-    .geo-search-item { padding: 10px 14px; font-size: 13px; cursor: pointer; color: #1e293b; border-bottom: 1px solid #f1f5f9; transition: background 120ms; }
+    .geo-search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.15); z-index: 9999; max-height: 220px; overflow-y: auto; }
+    .geo-search-item { padding: 10px 14px; font-size: 13px; cursor: pointer; color: #1e293b; border-bottom: 1px solid #f1f5f9; transition: background 120ms; display: flex; align-items: flex-start; gap: 8px; }
     .geo-search-item:last-child { border-bottom: none; }
-    .geo-search-item:hover { background: #f8fafc; }
+    .geo-search-item:hover { background: #fff7ed; color: #ea580c; }
     .geo-coord-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #ea580c14; border: 1px solid #ea580c30; border-radius: 999px; font-size: 12px; font-weight: 700; color: #9a3412; }
   </style>
   <div id="geoModalBox" class="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col" style="max-height:92vh;">
@@ -892,7 +898,7 @@ ul{list-style:none}
     </div>
     <div class="px-5 pb-3 flex-shrink-0">
       <div class="geo-search-wrap">
-        <input type="text" id="geoSearchInput" placeholder="Tìm địa chỉ hoặc tên cơ sở..."
+        <input type="text" id="geoSearchInput" placeholder="Nhập từ khóa tìm kiếm địa điểm (VD: Sân bóng Tân Bình, Q.1...)"
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c] transition-colors" autocomplete="off"/>
         <div id="geoSearchResults" class="geo-search-results hidden"></div>
       </div>
@@ -927,11 +933,11 @@ ul{list-style:none}
     // GLOBAL STATE
     // ==========================================
     let currentStep = 1;
-    let serverOtp = ''; // OTP returned from server
+    let serverOtp = ''; 
     let otpAttempts = 0;
     let resendCount = 0;
     let resendTimer = null;
-    let selectedSports = []; // [{name, icon}]
+    let selectedSports = []; 
     let emailVerified = false;
 
     if (typeof window.ownerServerFormHasData === 'undefined') {
@@ -986,7 +992,7 @@ ul{list-style:none}
     function hideError() { document.getElementById('errorAlert').classList.add('hidden'); }
 
     // ==========================================
-    // GEO MAP MODAL
+    // GEO MAP MODAL (MAPLIBRE GL VECTOR MAP)
     // ==========================================
     let geoMap = null;
     let geoMarker = null;
@@ -994,12 +1000,12 @@ ul{list-style:none}
     let geoPendingLng = null;
     let geoSearchTimer = null;
 
-    const GEO_DEFAULT = [10.776530, 106.700981];
+    const GEO_DEFAULT = [106.698021, 10.772561]; // [Lng, Lat] TP.HCM
 
     function autoFillAddress() {
         document.getElementById('geoModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-        setTimeout(initGeoMap, 80);
+        setTimeout(initGeoMap, 100);
     }
     window.autoFillAddress = autoFillAddress;
 
@@ -1013,36 +1019,52 @@ ul{list-style:none}
 
     function initGeoMap() {
         if (geoMap) {
-            geoMap.invalidateSize();
+            geoMap.resize();
             return;
         }
         const savedLat = parseFloat(document.getElementById('viDo').value);
         const savedLng = parseFloat(document.getElementById('kinhDo').value);
-        const center = (savedLat && savedLng) ? [savedLat, savedLng] : GEO_DEFAULT;
+        const center = (savedLat && savedLng) ? [savedLng, savedLat] : [108.206230, 16.047079]; // [Lng, Lat] Đà Nẵng
         const zoom   = (savedLat && savedLng) ? 16 : 6;
 
-        geoMap = L.map('geoMapEl', { zoomControl: true, attributionControl: true });
-        geoMap.setView(center, zoom);
+        // Giới hạn bản đồ trong lãnh thổ Việt Nam [West, South, East, North]
+        const vnBounds = [
+            [102.14, 8.18],  // Tây Nam
+            [109.46, 23.39]  // Đông Bắc
+        ];
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Khởi tạo bản đồ Vector MapLibre
+        geoMap = new maplibregl.Map({
+            container: 'geoMapEl',
+            style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', // Style giao diện siêu nét giống Google Maps
+            center: center,
+            zoom: zoom,
+            minZoom: 5,
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-        }).addTo(geoMap);
+            maxBounds: vnBounds
+        });
+
+        geoMap.addControl(new maplibregl.NavigationControl(), 'top-right');
 
         if (savedLat && savedLng) {
             geoSetPin(savedLat, savedLng, false);
         }
 
+        // Click trên bản đồ để cắm mốc vị trí
         geoMap.on('click', function(e) {
-            geoSetPin(e.latlng.lat, e.latlng.lng, true);
+            geoSetPin(e.lngLat.lat, e.lngLat.lng, true);
         });
 
+        // Bắt sự kiện gõ tìm kiếm dạng gợi ý (Autocomplete)
         const inp = document.getElementById('geoSearchInput');
         inp.addEventListener('input', function() {
             clearTimeout(geoSearchTimer);
             const q = inp.value.trim();
-            if (q.length < 3) { document.getElementById('geoSearchResults').classList.add('hidden'); return; }
-            geoSearchTimer = setTimeout(function() { geoSearchAddress(q); }, 400);
+            if (q.length < 2) { 
+                document.getElementById('geoSearchResults').classList.add('hidden'); 
+                return; 
+            }
+            geoSearchTimer = setTimeout(function() { geoSearchAddress(q); }, 300);
         });
         inp.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeGeoModal(); });
 
@@ -1059,23 +1081,21 @@ ul{list-style:none}
         geoPendingLat = lat;
         geoPendingLng = lng;
 
-        const icon = L.divIcon({
-            className: '',
-            html: '<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin-left:-16px;margin-top:-32px"><svg viewBox="0 0 24 24" width="32" height="32" fill="#ea580c" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>',
-            iconSize: [32, 32], iconAnchor: [0, 0]
-        });
-
         if (geoMarker) {
-            geoMarker.setLatLng([lat, lng]);
+            geoMarker.setLngLat([lng, lat]);
         } else {
-            geoMarker = L.marker([lat, lng], { icon: icon, draggable: true }).addTo(geoMap);
-            geoMarker.on('dragend', function(e) {
-                const ll = e.target.getLatLng();
-                geoSetPin(ll.lat, ll.lng, true);
+            // Marker ghim màu cam nổi bật
+            geoMarker = new maplibregl.Marker({ color: '#ea580c', draggable: true })
+                .setLngLat([lng, lat])
+                .addTo(geoMap);
+
+            geoMarker.on('dragend', function() {
+                const lngLat = geoMarker.getLngLat();
+                geoSetPin(lngLat.lat, lngLat.lng, true);
             });
         }
 
-        geoMap.panTo([lat, lng]);
+        geoMap.flyTo({ center: [lng, lat], zoom: Math.max(geoMap.getZoom(), 15), speed: 1.2 });
         document.getElementById('geoCoordText').textContent = lat + ', ' + lng;
         document.getElementById('geoCoordPill').classList.remove('hidden');
         document.getElementById('geoCoordNone').classList.add('hidden');
@@ -1086,13 +1106,13 @@ ul{list-style:none}
         btn.style.cursor = 'pointer';
 
         if (reverseGeocode) {
-            document.getElementById('geoCoordText').textContent = lat + ', ' + lng + ' — đang lấy địa chỉ...';
+            document.getElementById('geoCoordText').textContent = lat + ', ' + lng + ' — đang tra địa chỉ...';
             fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&accept-language=vi')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     const addr = data && data.display_name ? data.display_name : '';
                     document.getElementById('geoCoordText').textContent = lat + ', ' + lng + (addr ? ' — ' + addr.substring(0, 60) + '…' : '');
-                    if (addr) document.getElementById('geoSearchInput').value = addr.substring(0, 80);
+                    if (addr) document.getElementById('geoSearchInput').value = addr;
                 })
                 .catch(function() {
                     document.getElementById('geoCoordText').textContent = lat + ', ' + lng;
@@ -1100,8 +1120,9 @@ ul{list-style:none}
         }
     }
 
+    // Hàm gọi API gợi ý vị trí địa điểm (Autocomplete Live Search)
     function geoSearchAddress(q) {
-        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&countrycodes=vn&limit=5&accept-language=vi')
+        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&countrycodes=vn&limit=6&accept-language=vi')
             .then(function(r) { return r.json(); })
             .then(function(results) {
                 const box = document.getElementById('geoSearchResults');
@@ -1110,13 +1131,15 @@ ul{list-style:none}
                 results.forEach(function(item) {
                     const div = document.createElement('div');
                     div.className = 'geo-search-item';
-                    div.textContent = item.display_name;
+                    div.innerHTML = '<span class="material-symbols-outlined text-[#ea580c] text-base flex-shrink-0 mt-0.5">location_on</span>' +
+                                    '<span class="flex-1">' + item.display_name + '</span>';
                     div.addEventListener('click', function() {
                         document.getElementById('geoSearchInput').value = item.display_name;
                         box.classList.add('hidden');
-                        geoSetPin(parseFloat(item.lat), parseFloat(item.lon), false);
-                        geoMap.setView([parseFloat(item.lat), parseFloat(item.lon)], 17);
-                        document.getElementById('geoCoordText').textContent = parseFloat(item.lat).toFixed(6) + ', ' + parseFloat(item.lon).toFixed(6) + ' — ' + item.display_name.substring(0, 60) + '…';
+                        const lat = parseFloat(item.lat);
+                        const lng = parseFloat(item.lon);
+                        geoSetPin(lat, lng, false);
+                        document.getElementById('geoCoordText').textContent = lat.toFixed(6) + ', ' + lng.toFixed(6) + ' — ' + item.display_name.substring(0, 60) + '…';
                     });
                     box.appendChild(div);
                 });
@@ -1137,7 +1160,6 @@ ul{list-style:none}
             function(pos) {
                 btn.disabled = false;
                 btn.innerHTML = '<span class="material-symbols-outlined text-base">my_location</span> Vị trí hiện tại';
-                geoMap.setView([pos.coords.latitude, pos.coords.longitude], 17);
                 geoSetPin(pos.coords.latitude, pos.coords.longitude, true);
             },
             function(err) {
@@ -1896,7 +1918,7 @@ ul{list-style:none}
     });
 
     // ==========================================
-    // NAVBAR + REVEAL + PARALLAX (ThanhTruc patterns)
+    // NAVBAR + REVEAL + PARALLAX
     // ==========================================
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
