@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080/Backend_java'
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
@@ -38,12 +40,12 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/dang-nhap"
+          <a
+            href={`${BACKEND}/dangnhap`}
             className="text-slate-300 hover:text-white text-sm transition-colors px-3 py-1.5"
           >
             Đăng nhập
-          </Link>
+          </a>
           <Link
             href="/owner-register"
             className="bg-vs-blue hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"

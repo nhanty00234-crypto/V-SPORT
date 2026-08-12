@@ -10,7 +10,7 @@ const STEPS = [
 
 export default function ProgressBar({ currentStep }: Props) {
   return (
-    <nav aria-label="Các bước đăng ký" className="bg-white border-b border-slate-100">
+    <nav aria-label="Các bước đăng ký" className="bg-white">
       <ol className="max-w-2xl mx-auto px-4 py-4 flex items-center">
         {STEPS.map((step, i) => {
           const isActive = step.num === currentStep

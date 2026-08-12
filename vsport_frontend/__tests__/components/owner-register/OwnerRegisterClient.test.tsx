@@ -4,11 +4,7 @@ const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }))
-jest.mock('@/components/owner-landing/Navbar', () => ({
-  __esModule: true,
-  default: () => <nav>Navbar</nav>,
-}))
-jest.mock('@/components/owner-register/ProgressBar', () => ({
+jest.mock('@/components/owner-register/RegisterHeader', () => ({
   __esModule: true,
   default: ({ currentStep }: { currentStep: number }) => (
     <div data-testid="progress">{currentStep}</div>

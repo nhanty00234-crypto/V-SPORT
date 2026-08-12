@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 
-jest.mock('@/components/owner-landing/Navbar', () => ({
+jest.mock('@/components/owner-register/RegisterHeader', () => ({
   __esModule: true,
-  default: () => <nav>Navbar</nav>,
+  default: () => <div />,
 }))
 
 import SuccessPageClient from '@/components/owner-register/SuccessPageClient'

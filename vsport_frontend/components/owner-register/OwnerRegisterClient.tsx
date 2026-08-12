@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/components/owner-landing/Navbar'
-import ProgressBar from './ProgressBar'
+import RegisterHeader from './RegisterHeader'
 import Step1EmailPhone from './Step1EmailPhone'
 import Step2OTP from './Step2OTP'
 import Step3Details from './Step3Details'
@@ -22,8 +21,7 @@ export default function OwnerRegisterClient() {
 
   return (
     <>
-      <Navbar />
-      <ProgressBar currentStep={step} />
+      <RegisterHeader currentStep={step} />
       {step === 1 && <Step1EmailPhone onSuccess={handleStep1Success} />}
       {step === 2 && (
         <Step2OTP

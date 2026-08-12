@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { CheckCircle, ArrowLeft } from 'lucide-react'
-import Navbar from '@/components/owner-landing/Navbar'
+import RegisterHeader from './RegisterHeader'
 
 export default function SuccessPageClient() {
   return (
     <>
-      <Navbar />
+      <RegisterHeader currentStep={3} />
       <main className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-16 text-center">
         <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
           <CheckCircle className="w-10 h-10 text-green-600" />
