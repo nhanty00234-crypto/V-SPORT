@@ -102,6 +102,8 @@ Submit → `POST /owner/send-otp`. Hiển thị lỗi inline nếu `success: fal
 
 ### Step2OTP
 
+> OTP được gửi đến **email** (không phải SMS). Backend gọi `sendRegistrationOTP(email, "Chủ sân")`.
+
 - 6 ô `<input>` riêng biệt (type="text", maxLength=1)
 - Gõ ký tự → auto-focus ô tiếp theo
 - Xóa → focus ô trước
