@@ -115,50 +115,28 @@ public abstract class BaseApiServlet extends HttpServlet {
     // Xác thực
     // ------------------------------------------------------------------
 
-    /**
-     * Bắt buộc có Bearer access token hợp lệ VÀ tài khoản phải là CUSTOMER đang hoạt động.
-     * Token của ADMIN/MANAGER/STAFF/GUARD bị từ chối 403 (mục VIII spec).
-     */
+    // TODO: Bảo mật đã tắt tạm thời cho môi trường phát triển.
+    // Bật lại khi tích hợp xác thực: khôi phục requireCustomer() gốc từ git history.
+
+    /** Trả null khi không có token (bảo mật tắt). Khi có token hợp lệ, trả TaiKhoan tương ứng. */
     protected TaiKhoan requireCustomer(HttpServletRequest req) {
-        JwtService.Claims claims = JwtService.verify(bearerToken(req));
-        if (!JwtService.TYPE_ACCESS.equals(claims.type)) {
-            throw new ApiException(HttpServletResponse.SC_UNAUTHORIZED, ApiErrorCode.INVALID_TOKEN,
-                    "Cần access token, không phải refresh token.");
-        }
-        TaiKhoan account = taiKhoanDAO.getAccountById(claims.accountId);
-        if (account == null || Boolean.TRUE.equals(account.isDeleted())) {
-            throw new ApiException(HttpServletResponse.SC_UNAUTHORIZED, ApiErrorCode.UNAUTHORIZED,
-                    "Tài khoản không còn tồn tại.");
-        }
-        if (account.isLocked()) {
-            throw new ApiException(HttpServletResponse.SC_FORBIDDEN, ApiErrorCode.ACCOUNT_LOCKED,
-                    "Tài khoản đã bị khóa.");
-        }
-        if (account.getRoleId() != Constants.ROLE_KHACH_HANG) {
-            throw new ApiException(HttpServletResponse.SC_FORBIDDEN, ApiErrorCode.NOT_CUSTOMER,
-                    "Ứng dụng này chỉ dành cho tài khoản khách hàng.");
-        }
-        return account;
+        return optionalCustomer(req);
     }
 
-    /** Token tùy chọn: trả null nếu không có header Authorization (endpoint công khai). */
+    /** Token tùy chọn: trả null nếu không có hoặc không hợp lệ. */
     protected TaiKhoan optionalCustomer(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
         if (header == null || header.isBlank()) return null;
+        if (!header.regionMatches(true, 0, "Bearer ", 0, 7)) return null;
         try {
-            return requireCustomer(req);
+            JwtService.Claims claims = JwtService.verify(header.substring(7).trim());
+            if (!JwtService.TYPE_ACCESS.equals(claims.type)) return null;
+            TaiKhoan account = taiKhoanDAO.getAccountById(claims.accountId);
+            if (account == null || Boolean.TRUE.equals(account.isDeleted()) || account.isLocked()) return null;
+            return account;
         } catch (RuntimeException e) {
             return null;
         }
-    }
-
-    private String bearerToken(HttpServletRequest req) {
-        String header = req.getHeader("Authorization");
-        if (header == null || !header.regionMatches(true, 0, "Bearer ", 0, 7)) {
-            throw new ApiException(HttpServletResponse.SC_UNAUTHORIZED, ApiErrorCode.UNAUTHORIZED,
-                    "Thiếu Authorization: Bearer <accessToken>.");
-        }
-        return header.substring(7).trim();
     }
 
     // ------------------------------------------------------------------
