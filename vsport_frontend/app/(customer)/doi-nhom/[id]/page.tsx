@@ -1,15 +1,7 @@
-const BASE = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080/Backend_java'
+import DoiNhomChiTietClient from './DoiNhomChiTietClient'
+
 export const metadata = { title: 'Chi tiết đội nhóm | V-SPORT' }
+
 export default function DoiNhomChiTietPage({ params }: { params: { id: string } }) {
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8">
-        <div className="text-5xl mb-4">🏆</div>
-        <h1 className="text-xl font-bold text-vs-navy mb-2">Chi tiết đội nhóm</h1>
-        <a href={`${BASE}/customer/doi-nhom-chi-tiet?doiNhomId=${params.id}`} className="inline-block px-6 py-3 bg-vs-blue text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
-          Xem chi tiết →
-        </a>
-      </div>
-    </div>
-  )
+  return <DoiNhomChiTietClient id={params.id} />
 }

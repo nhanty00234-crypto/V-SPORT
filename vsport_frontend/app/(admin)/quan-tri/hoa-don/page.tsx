@@ -1,24 +1,72 @@
-const BASE = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080/Backend_java'
+import { getAdminInvoices } from '@/lib/api/admin-pages'
+
 export const metadata = { title: 'Hóa đơn | V-SPORT Admin' }
-export default function Page() {
+
+const STATUS_COLOR: Record<string, string> = {
+  'Đã thanh toán': 'bg-green-100 text-green-700',
+  'Chờ thanh toán': 'bg-yellow-100 text-yellow-700',
+  'Đã hoàn tiền': 'bg-blue-100 text-blue-700',
+  'Hủy': 'bg-red-100 text-red-700',
+}
+
+export default async function AdminHoaDonPage() {
+  const data = await getAdminInvoices()
+  const invoices = data?.invoices ?? []
+  const totalRevenue = data?.totalRevenue ?? 0
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-slate-800">Hóa đơn</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Xem lịch sử giao dịch toàn hệ thống.</p>
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <p className="text-2xl font-black text-blue-700">{invoices.length}</p>
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">Tổng hóa đơn</p>
         </div>
-        <a href={`${BASE}/admin/hoa-don`}
-           className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
-          Mở giao diện đầy đủ →
-        </a>
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <p className="text-lg font-black text-emerald-700">{totalRevenue.toLocaleString('vi-VN')}đ</p>
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">Tổng doanh thu</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <p className="text-2xl font-black text-green-700">{invoices.filter(i => i.status === 'Đã thanh toán').length}</p>
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">Đã thanh toán</p>
+        </div>
       </div>
-      <div className="p-6 text-center text-slate-400 py-16">
-        <div className="text-5xl mb-3">🧾</div>
-        <p className="font-medium">Giao diện Hóa đơn.</p>
-        <a href={`${BASE}/admin/hoa-don`} className="mt-4 inline-block text-blue-600 text-sm hover:underline">
-          Nhấn vào đây nếu không tự chuyển →
-        </a>
+
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800">Hóa đơn toàn hệ thống (200 gần nhất)</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-slate-500 text-xs">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold">ID</th>
+                <th className="px-4 py-3 text-left font-semibold">ĐS #</th>
+                <th className="px-4 py-3 text-left font-semibold">KH #</th>
+                <th className="px-4 py-3 text-left font-semibold">Ngày</th>
+                <th className="px-4 py-3 text-right font-semibold">Tổng tiền</th>
+                <th className="px-4 py-3 text-left font-semibold">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {invoices.length === 0 ? (
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400">Không có hóa đơn</td></tr>
+              ) : invoices.map(inv => (
+                <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-slate-500">#{inv.id}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-400">#{inv.datSanId}</td>
+                  <td className="px-4 py-3 text-slate-500">#{inv.accountId}</td>
+                  <td className="px-4 py-3 text-slate-600">{inv.date}</td>
+                  <td className="px-4 py-3 text-right font-bold text-slate-800">{inv.total.toLocaleString('vi-VN')}đ</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${STATUS_COLOR[inv.status] ?? 'bg-slate-100 text-slate-600'}`}>
+                      {inv.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

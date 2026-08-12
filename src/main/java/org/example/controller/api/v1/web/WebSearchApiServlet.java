@@ -69,7 +69,7 @@ public class WebSearchApiServlet extends HttpServlet {
             if (i > 0) sb.append(",");
             MonTheThao m = sports.get(i);
             sb.append("{\"id\":").append(m.getMonTheThaoID())
-                    .append(",\"name\":").append(jsonStr(m.getTenMonTheThao())).append("}");
+                    .append(",\"name\":").append(jsonStr(m.getTenMon())).append("}");
         }
         sb.append("],");
 
