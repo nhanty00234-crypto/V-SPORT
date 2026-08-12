@@ -50,8 +50,9 @@ public class ApiCorsFilter implements Filter {
         String origin = req.getHeader("Origin");
         if (origin != null && isAllowed(origin)) {
             resp.setHeader("Access-Control-Allow-Origin", origin);
+            resp.setHeader("Access-Control-Allow-Credentials", "true");
             resp.setHeader("Vary", "Origin");
-            resp.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
+            resp.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, X-Requested-With");
             resp.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
             resp.setHeader("Access-Control-Max-Age", "600");
         }
