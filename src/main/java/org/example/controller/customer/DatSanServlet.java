@@ -252,7 +252,7 @@ public class DatSanServlet extends HttpServlet {
     }
 
     /**
-     * Tải lịch sử đặt sân cá nhân và chuyển tiếp đến LichSuDatSan.jsp.
+     * Tải lịch sử đặt sân cá nhân và chuyển tiếp đến GioHang.jsp.
      */
     private void loadHistoryPage(HttpServletRequest req, HttpServletResponse resp, TaiKhoan user)
             throws ServletException, IOException {

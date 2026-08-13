@@ -4,29 +4,33 @@
    ============================================================= */
 
 /* ── Root ─────────────────────────────────────────────────── */
+/* "Line & Scoreboard" palette — see docs/design/stitch-customer-redesign-prompt.md.
+   Renamed in spirit from the old mint-green "commerce" theme; token NAMES kept
+   stable (--vs-primary etc.) since every rule below already references them. */
 :root {
-  --vs-bg:       #FAF8F2;
-  --vs-surface:  #FFFFFF;
-  --vs-text:     #17211E;
-  --vs-muted:    #6E746F;
-  --vs-primary:  #287A58;
-  --vs-ph:       #1e5e42;
-  --vs-dark:     #173C2D;
-  --vs-sage:     #A7B9A8;
+  --vs-bg:       #E9EDE7; /* apron-stone — page background */
+  --vs-surface:  #FFFFFF; /* apron-card */
+  --vs-text:     #12201B; /* text-ink */
+  --vs-muted:    #5C6B64; /* text-muted */
+  --vs-primary:  #0E6E6A; /* court-teal */
+  --vs-ph:       #0A5652; /* court-teal-dark (hover/pressed) */
+  --vs-dark:     #10241F; /* night-ink */
+  --vs-sage:     #4E8880; /* muted teal, used for small category icons */
   --vs-beige:    #E8DDCA;
-  --vs-coral:    #D85B45;
-  --vs-border:   #E8E5DE;
-  --vs-overlay:  rgba(0,0,0,.44);
+  --vs-coral:    #D6572B; /* clay-orange — urgency/promo */
+  --vs-border:   #E2E5E0;
+  --vs-overlay:  rgba(8,18,15,.5);
   --vs-r:        12px;
   --vs-r-sm:     8px;
   --vs-r-lg:     20px;
-  --vs-shadow:   0 4px 24px rgba(23,33,30,.08);
-  --vs-shadow-lg:0 12px 48px rgba(23,33,30,.14);
+  --vs-shadow:   0 4px 24px rgba(18,32,27,.08);
+  --vs-shadow-lg:0 12px 48px rgba(18,32,27,.14);
   --vs-t:        0.22s cubic-bezier(.4,0,.2,1);
-  --vs-header-h: 68px;
+  --vs-header-h: 72px;
   --vs-ann-h:    38px;
   --vs-ease:     cubic-bezier(.16,1,.3,1);
   --vs-spring:   cubic-bezier(.34,1.56,.64,1);
+  --vs-scoreboard-font: 'Space Mono', 'Roboto Mono', monospace;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -124,13 +128,13 @@ body { background: var(--vs-bg); color: var(--vs-text); }
    ═══════════════════════════════════════════════════════════ */
 .vs-header-wrap {
   position: sticky; top: 0; z-index: 900;
-  background: var(--vs-surface);
-  border-bottom: 1px solid var(--vs-border);
+  background: var(--vs-dark);
+  border-bottom: 1px solid rgba(252,250,244,.12);
   transition: box-shadow var(--vs-t), background var(--vs-t);
 }
 .vs-header-wrap.is-scrolled {
-  box-shadow: 0 2px 20px rgba(23,33,30,.1);
-  background: rgba(255,255,255,.93);
+  box-shadow: 0 2px 20px rgba(8,18,15,.35);
+  background: rgba(16,36,31,.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -147,7 +151,7 @@ body { background: var(--vs-bg); color: var(--vs-text); }
 .vs-header__logo {
   display: flex; align-items: center; gap: 8px;
   text-decoration: none; font-weight: 900; font-size: 20px;
-  color: var(--vs-text); letter-spacing: -.02em;
+  color: #FCFAF4; letter-spacing: -.02em;
   flex-shrink: 0; font-family: 'Outfit', sans-serif;
   transition: opacity var(--vs-t);
 }
@@ -157,13 +161,13 @@ body { background: var(--vs-bg); color: var(--vs-text); }
 
 /* Desktop nav */
 .vs-header__nav { flex: 1; display: flex; align-items: center; justify-content: center; height: 100%; }
-.vs-nav__list { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; height: 100%; gap: 0; }
+.vs-nav__list { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; height: 100%; gap: 4px; }
 .vs-nav__item { position: relative; height: 100%; display: flex; align-items: center; }
 .vs-nav__link {
   display: flex; align-items: center; gap: 5px;
   padding: 0 13px; height: 100%;
   font-size: 14px; font-weight: 600;
-  color: var(--vs-text); text-decoration: none;
+  color: rgba(252,250,244,.78); text-decoration: none;
   white-space: nowrap; position: relative;
   transition: color var(--vs-t);
   font-family: 'Outfit', sans-serif;
@@ -171,12 +175,12 @@ body { background: var(--vs-bg); color: var(--vs-text); }
 .vs-nav__link::after {
   content: ''; position: absolute;
   bottom: 0; left: 13px; right: 13px;
-  height: 2px; background: var(--vs-primary);
+  height: 3px; background: var(--vs-primary);
   border-radius: 2px 2px 0 0;
   transform: scaleX(0); transform-origin: center;
   transition: transform var(--vs-t);
 }
-.vs-nav__link:hover, .vs-nav__link.is-active { color: var(--vs-primary); }
+.vs-nav__link:hover, .vs-nav__link.is-active { color: #FCFAF4; }
 .vs-nav__link:hover::after, .vs-nav__link.is-active::after { transform: scaleX(1); }
 .vs-nav__badge {
   background: var(--vs-coral); color: #fff;
@@ -239,33 +243,34 @@ body { background: var(--vs-bg); color: var(--vs-text); }
 
 /* Header right actions */
 .vs-header__actions {
-  display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 20px; flex-shrink: 0;
 }
 .vs-hdr-icon {
   width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--vs-text); font-size: 17px; text-decoration: none;
+  color: #FCFAF4; font-size: 17px; text-decoration: none;
   background: none; border: none; cursor: pointer;
   position: relative; transition: background var(--vs-t), color var(--vs-t);
 }
-.vs-hdr-icon:hover { background: #F0F7F3; color: var(--vs-primary); }
+.vs-hdr-icon:hover { background: rgba(252,250,244,.1); color: var(--vs-primary); }
 .vs-hdr-icon .vs-badge {
   position: absolute; top: 2px; right: 2px;
   min-width: 16px; height: 16px; padding: 0 4px;
   background: var(--vs-coral); color: #fff; border-radius: 999px;
   font-size: 9.5px; font-weight: 800;
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1.5px solid #fff;
+  border: 1.5px solid var(--vs-dark);
 }
 .vs-header__cta {
   display: inline-flex; align-items: center; gap: 7px;
   background: var(--vs-primary); color: #fff;
   font-family: 'Outfit', sans-serif; font-size: 13.5px; font-weight: 700;
-  padding: 9px 20px; border-radius: 999px; text-decoration: none;
-  transition: background var(--vs-t), transform var(--vs-t);
-  margin-left: 6px; border: none; cursor: pointer; white-space: nowrap;
+  padding: 10px 22px; border-radius: 999px; text-decoration: none;
+  box-shadow: 0 0 16px rgba(14,110,106,.55);
+  transition: background var(--vs-t), transform var(--vs-t), box-shadow var(--vs-t);
+  margin-left: 16px; border: none; cursor: pointer; white-space: nowrap;
 }
-.vs-header__cta:hover { background: var(--vs-ph); transform: translateY(-1px); }
+.vs-header__cta:hover { background: var(--vs-ph); transform: translateY(-1px); box-shadow: 0 0 24px rgba(14,110,106,.75); }
 
 /* Hamburger */
 .vs-hamburger {
@@ -275,7 +280,7 @@ body { background: var(--vs-bg); color: var(--vs-text); }
   flex-direction: column; justify-content: center; gap: 5px;
 }
 .vs-hamburger span {
-  display: block; height: 2px; background: var(--vs-text);
+  display: block; height: 2px; background: #FCFAF4;
   border-radius: 2px; transition: transform var(--vs-t), opacity var(--vs-t);
 }
 
