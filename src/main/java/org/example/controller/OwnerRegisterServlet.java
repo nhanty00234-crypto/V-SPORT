@@ -39,30 +39,8 @@ public class OwnerRegisterServlet extends HttpServlet {
     private final org.example.service.admin.CapabilityApprovalService capabilityApprovalService =
             new org.example.service.admin.CapabilityApprovalService();
 
-    // Dev-only CORS: allows Next.js frontend (localhost:3000) to call backend (localhost:8080) with credentials
-    private void addCorsHeaders(HttpServletRequest req, HttpServletResponse resp) {
-        String origin = req.getHeader("Origin");
-        if (origin == null) return;
-        String lower = origin.toLowerCase();
-        if (lower.startsWith("http://localhost:") || lower.startsWith("http://127.0.0.1:")) {
-            resp.setHeader("Access-Control-Allow-Origin", origin);
-            resp.setHeader("Access-Control-Allow-Credentials", "true");
-            resp.setHeader("Vary", "Origin");
-            resp.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
-            resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        }
-    }
-
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        addCorsHeaders(req, resp);
-        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        addCorsHeaders(req, resp);
         if ("/owner/otp-status".equals(req.getServletPath())) {
             handleOtpStatus(req, resp);
         } else {
@@ -115,7 +93,6 @@ public class OwnerRegisterServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        addCorsHeaders(req, resp);
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=UTF-8");
 
