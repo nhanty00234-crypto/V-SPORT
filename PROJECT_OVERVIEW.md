@@ -6,7 +6,7 @@
 
 ## 1. Giới thiệu
 
-**V-SPORT** là hệ thống quản lý và đặt sân thể thao trực tuyến, hỗ trợ nhiều vai trò người dùng, tích hợp thanh toán QR (PayOS/VietQR), ghép đội, và mobile app Flutter.
+**V-SPORT** là hệ thống quản lý và đặt sân thể thao trực tuyến, hỗ trợ nhiều vai trò người dùng, tích hợp thanh toán QR (PayOS/VietQR), ghép đội.
 
 ---
 
@@ -18,11 +18,10 @@
 | View | JSP + JSTL 3.0 (server-side rendering) |
 | Database | MySQL 8.x (primary) / MSSQL (legacy support) |
 | Connection Pool | HikariCP 5.1 |
-| Security | BCrypt (mật khẩu), JWT (mobile API), Session-based (web) |
+| Security | BCrypt (mật khẩu), Session-based (web) |
 | Email | Jakarta Mail (OTP, thông báo) |
 | Thanh toán | PayOS (QR động), VietQR (tĩnh) |
 | Ảnh | Cloudinary |
-| Mobile | Flutter (package `vsport_mobile`) |
 | Build | Maven, deploy trên Tomcat (context `/Backend_java`) |
 | Design | Be Vietnam Pro font, CSS custom tokens `--vs-*` |
 
@@ -160,28 +159,7 @@
 
 ---
 
-## 5. REST API Mobile (`/api/v1/*`)
-
-Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorization: Bearer <token>`).
-
-| Endpoint group | Servlet | Chức năng |
-|---|---|---|
-| `/api/v1/auth/*` | `AuthApiServlet` | Đăng nhập, refresh token |
-| `/api/v1/booking/*` | `BookingApiServlet` | Đặt sân, hủy, lịch sử |
-| `/api/v1/customer/*` | `CustomerApiServlet` | Hồ sơ khách hàng |
-| `/api/v1/home` | `HomeApiServlet` | Dữ liệu trang chủ mobile |
-| `/api/v1/facility/*` | `FacilityApiServlet` | Danh sách cơ sở |
-| `/api/v1/courts/*` | `CourtApiServlet` | Thông tin sân |
-| `/api/v1/sports/*` | `SportApiServlet` | Môn thể thao |
-| `/api/v1/promotions/*` | `PromotionApiServlet` | Khuyến mãi |
-| `/api/v1/notifications/*` | `NotificationApiServlet` | Thông báo |
-| `/api/v1/qr/*` | `QrApiServlet` | QR sân |
-| `/api/v1/service-requests/*` | `ServiceRequestApiServlet` | Yêu cầu dịch vụ |
-| `/api/v1/refunds/*` | `RefundApiServlet` | Hoàn tiền |
-
----
-
-## 6. Domain Models (Entities)
+## 5. Domain Models (Entities)
 
 | Model | Mô tả |
 |---|---|
@@ -222,7 +200,7 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 
 ---
 
-## 7. Các Service nghiệp vụ chính
+## 6. Các Service nghiệp vụ chính
 
 | Service | Mô tả |
 |---|---|
@@ -252,7 +230,7 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 
 ---
 
-## 8. Bảo mật & Filter
+## 7. Bảo mật & Filter
 
 | Filter | Mục đích |
 |---|---|
@@ -266,11 +244,10 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 | `EncodingAndCacheControlFilter` | UTF-8 + cache headers |
 | `BookingRateLimitFilter` | Rate limit đặt sân |
 | `ActiveFacilityFilter` | Chặn cơ sở không hoạt động |
-| `ApiCorsFilter` | CORS cho REST API mobile |
 
 ---
 
-## 9. Thanh toán (PayOS)
+## 8. Thanh toán (PayOS)
 
 - **Flow**: Customer chọn sân → Tạo `PayOSCheckoutSession` → Redirect `ThanhToanQR.jsp` → Hiển thị QR nhúng → Webhook `PayOSWebhookServlet` xác nhận → Finalize booking
 - `orderCode` = `DatSanID` (ID đặt sân)
@@ -279,7 +256,7 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 
 ---
 
-## 10. QR Sân
+## 9. QR Sân
 
 - Manager tạo QR cho từng sân (`SanQR`)
 - In đơn lẻ hoặc hàng loạt (PDF)
@@ -289,7 +266,7 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 
 ---
 
-## 11. Scheduler
+## 10. Scheduler
 
 | Scheduler | Mô tả |
 |---|---|
@@ -298,7 +275,7 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 
 ---
 
-## 12. Design System
+## 11. Design System
 
 - Font: **Be Vietnam Pro** (web), Barlow Condensed (legacy, đang dọn)
 - CSS tokens: `--vs-*` (màu, spacing) — định nghĩa trong `vsport-theme.jsp`
@@ -308,19 +285,17 @@ Dùng cho Flutter app (`vsport_mobile`). Auth bằng **JWT** (header `Authorizat
 
 ---
 
-## 13. Cấu trúc thư mục nguồn
+## 12. Cấu trúc thư mục nguồn
 
 ```
 src/main/
 ├── java/org/example/
-│   ├── api/          # Base classes REST API
-│   ├── controller/   # Servlets (admin, manager, staff, customer, api/v1)
+│   ├── controller/   # Servlets (admin, manager, staff, customer)
 │   ├── dao/          # Data Access Objects + impl/
 │   ├── dto/          # Data Transfer Objects
 │   ├── filter/       # Servlet Filters
 │   ├── model/        # JPA Entities
 │   ├── scheduler/    # Background jobs
-│   ├── security/     # JWT
 │   ├── service/      # Business logic
 │   └── util/         # Tiện ích
 └── webapp/
@@ -334,11 +309,10 @@ src/main/
 
 ---
 
-## 14. Biến môi trường cần thiết
+## 13. Biến môi trường cần thiết
 
 | Biến | Dùng cho |
 |---|---|
-| `JWT_SECRET` | Ký JWT token mobile API |
 | DB credentials | Kết nối MySQL |
 | Cloudinary keys | Upload ảnh |
 | PayOS API keys | Thanh toán |
