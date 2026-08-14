@@ -11,22 +11,43 @@
         data-coso-id / data-facility-name / data-card-image attributes, and a
         [data-book-trigger] button with data-coso-id / data-facility-name.
       - jsp:include of customer/common/vsport-theme.jsp (design tokens).
-    Provides to the including page: window.showHomeToast(msg), window.VSPORT_CONTEXT_PATH.
+    Provides to the including page: window.showHomeToast(msg), window.VSPORT_CONTEXT_PATH,
+    window.openFacilitySheet(cardOrElWithDataAttrs), window.selectSheetTab('overview'|'courts'|...).
+    Pages without a real .facility-card grid (e.g. BanDo.jsp) can still open the sheet by
+    building a detached element with data-coso-id/data-facility-name and passing it to
+    openFacilitySheet(), then optionally window.selectSheetTab('courts') to land on booking.
 --%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <style>
     :root {
         --vsx-font: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif;
-        --vs-mint-100: var(--vs-cyan-100, #DDF8FC);
-        --vs-mint-50: var(--vs-cyan-50, #F0FCFE);
+        --vsx-scoreboard-font: 'Space Mono', 'Roboto Mono', monospace;
+        /* Line & Scoreboard palette — see docs/design/stitch-customer-redesign-prompt.md.
+           These pages don't include vsport-theme.jsp, so the old --vs-mint-*/--vs-pink-*
+           names below are kept only so nothing else breaks, but repointed to the new colors. */
+        --vs-mint-100: #DCEEEC;
+        --vs-mint-50: #EAF3F2;
         --vs-pink-100: #fae8f8;
         --vs-pink-600: #c83db3;
-        --vs-overlay: rgba(7, 26, 47, 0.68);
-        --vsx-border: var(--vs-border, #DCE5EF);
-        --vsx-text: var(--vs-text, #102A43);
-        --vsx-muted: var(--vs-text-secondary, #486581);
+        --vsx-primary: #0E6E6A;
+        --vsx-primary-dark: #0A5652;
+        --vsx-orange: #D6572B;
+        --vsx-orange-dark: #B8431E;
+        --vs-overlay: rgba(8, 18, 15, 0.55);
+        --vsx-border: #E2E5E0;
+        --vsx-text: #12201B;
+        --vsx-muted: #5C6B64;
     }
     .lci { width: 20px; height: 20px; flex-shrink: 0; }
+    .vsx-lbracket { position: relative; }
+    .vsx-lbracket::before, .vsx-lbracket::after {
+        content: ''; position: absolute; width: 18px; height: 18px; z-index: 3; pointer-events: none;
+    }
+    .vsx-lbracket::before { top: 0; left: 0; border-top: 3px solid #0E6E6A; border-left: 3px solid #0E6E6A; }
+    .vsx-lbracket::after { bottom: 0; right: 0; border-bottom: 3px solid #0E6E6A; border-right: 3px solid #0E6E6A; }
+    .vsx-scoreboard {
+        font-family: var(--vsx-scoreboard-font); letter-spacing: .02em;
+    }
 
     /* [hidden] phải thắng cả các class có display:flex/inline-flex */
     [hidden] { display: none !important; }
@@ -103,8 +124,8 @@
     .vsbc-option + .vsbc-option { margin-top: 16px; }
     /* Hover: chỉ đổi màu viền — tuyệt đối không chuyển động/scale/shadow animation. */
     .vsbc-option:hover { transform: none; }
-    .vsbc-option-direct:hover { border-color: var(--vs-primary-600, #1677D2); }
-    .vsbc-option-match:hover { border-color: var(--vs-orange-500, #F07820); }
+    .vsbc-option-direct:hover { border-color: var(--vsx-primary, #0E6E6A); }
+    .vsbc-option-match:hover { border-color: var(--vsx-orange, #D6572B); }
     /* Press: card lún nhẹ xuống với inset shadow (giữ hiệu ứng qua class, không chỉ :active). */
     .vsbc-option:active,
     .vsbc-option.is-pressed {
@@ -142,14 +163,14 @@
         .vsx-loading-ring { animation-duration: 2.4s; }
     }
     .vsbc-option-direct { background: #EBF5FF; border-color: rgba(22, 119, 210, 0.2); }
-    .vsbc-option-direct .vsbc-opt-title { color: #1677D2; }
+    .vsbc-option-direct .vsbc-opt-title { color: #0E6E6A; }
     .vsbc-option-match { background: #FFF2E8; border-color: rgba(240, 120, 32, 0.2); }
-    .vsbc-option-match .vsbc-opt-title { color: #F07820; }
+    .vsbc-option-match .vsbc-opt-title { color: #D6572B; }
     .vsbc-opt-title { font-size: 19px; font-weight: 800; line-height: 1.25; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .vsbc-opt-desc { font-size: 14px; font-weight: 500; color: #475569; line-height: 1.45; }
     .vsbc-badge {
         font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
-        background: var(--vs-orange-500, #F07820); color: #fff; padding: 2px 8px; border-radius: 9999px;
+        background: var(--vsx-orange, #D6572B); color: #fff; padding: 2px 8px; border-radius: 9999px;
     }
     .vsbc-arrow {
         width: 44px; height: 44px; border-radius: 50%;
@@ -160,8 +181,8 @@
     }
     .vsbc-arrow .lci { width: 22px; height: 22px; }
     .vsbc-option:hover .vsbc-arrow { transform: translateY(-50%) translateX(4px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18); }
-    .vsbc-option-direct .vsbc-arrow { background: var(--vs-primary-600, #1677D2); }
-    .vsbc-option-match .vsbc-arrow { background: var(--vs-orange-500, #F07820); }
+    .vsbc-option-direct .vsbc-arrow { background: var(--vsx-primary, #0E6E6A); }
+    .vsbc-option-match .vsbc-arrow { background: var(--vsx-orange, #D6572B); }
     @media (max-width: 389px) {
         .vsbc-opt-title { font-size: 17px; }
         .vsbc-opt-desc { font-size: 14px; }
@@ -200,6 +221,7 @@
         position: relative; border-radius: 16px; overflow: hidden; background: #eef4f1;
         aspect-ratio: 16 / 10;
     }
+    .vsfs-hero.vsx-lbracket::before, .vsfs-hero.vsx-lbracket::after { width: 22px; height: 22px; }
     .vsfs-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
     /* carousel */
     .vsfs-carousel { position: relative; width: 100%; height: 100%; }
@@ -223,14 +245,14 @@
     .vsfs-chip {
         display: inline-flex; align-items: center; gap: 5px;
         font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 9999px;
-        background: var(--vs-cyan-100, #DDF8FC); color: var(--vs-primary-700, #185A9D); border: 1px solid var(--vs-cyan-100, #DDF8FC);
+        background: var(--vs-mint-100); color: var(--vsx-primary-dark); border: 1px solid var(--vs-mint-100);
     }
     .vsfs-chip.is-warn { background: #fff7e6; color: #b45309; border-color: #fde4b8; }
     .vsfs-chip.is-ready { background: var(--vs-success-bg, #E5F7EF); color: var(--vs-success, #16A36A); border-color: var(--vs-success-bg, #E5F7EF); }
     .vsfs-meta { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .vsfs-meta-row { display: flex; align-items: flex-start; gap: 9px; font-size: 14px; color: #3c5a4b; }
-    .vsfs-meta-row .lci { width: 18px; height: 18px; color: var(--vs-primary-600, #1677D2); margin-top: 1px; }
-    .vsfs-price { font-size: 15px; font-weight: 800; color: var(--vs-primary-700, #185A9D); margin-top: 10px; }
+    .vsfs-meta-row { display: flex; align-items: flex-start; gap: 9px; font-size: 14px; color: var(--vsx-muted); }
+    .vsfs-meta-row .lci { width: 18px; height: 18px; color: var(--vsx-primary); margin-top: 1px; }
+    .vsfs-price { font-size: 15px; font-weight: 800; color: var(--vsx-primary-dark); margin-top: 10px; font-family: var(--vsx-scoreboard-font); letter-spacing: .02em; }
     .vsfs-tabs {
         display: flex; gap: 4px; margin-top: 18px; border-bottom: 1px solid var(--vsx-border);
         overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
@@ -244,17 +266,18 @@
         min-height: 44px;
     }
     .vsfs-tab:hover { color: var(--vsx-text); }
-    .vsfs-tab:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(24, 200, 232, 0.35)); outline-offset: -2px; }
-    .vsfs-tab[aria-selected="true"] { color: var(--vs-primary-600, #1677D2); border-bottom-color: var(--vs-primary-600, #1677D2); }
-    .vsfs-panel { padding: 14px 2px 4px; font-size: 14px; line-height: 1.6; color: #3c5a4b; }
+    .vsfs-tab:focus-visible { outline: 3px solid rgba(14,110,106,.35); outline-offset: -2px; }
+    .vsfs-tab[aria-selected="true"] { color: var(--vsx-primary); border-bottom-color: var(--vsx-primary); }
+    .vsfs-panel { padding: 14px 2px 4px; font-size: 14px; line-height: 1.6; color: var(--vsx-muted); }
     .vsfs-court {
         display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
         border: 1px solid var(--vsx-border); border-radius: 12px; padding: 12px 14px;
+        position: relative;
     }
     .vsfs-court + .vsfs-court { margin-top: 8px; }
     .vsfs-court-name { font-size: 14.5px; font-weight: 800; color: var(--vsx-text); }
     .vsfs-court-sub { font-size: 12.5px; color: var(--vsx-muted); margin-top: 2px; }
-    .vsfs-court-price { font-size: 13.5px; font-weight: 800; color: var(--vs-primary-700, #185A9D); white-space: nowrap; }
+    .vsfs-court-price { font-size: 13.5px; font-weight: 800; color: var(--vsx-primary-dark); white-space: nowrap; font-family: var(--vsx-scoreboard-font); letter-spacing: .02em; }
     .vsfs-status {
         display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px;
         border-radius: 9999px; margin-left: 8px; vertical-align: 2px;
@@ -264,17 +287,106 @@
     .vsfs-court-cta {
         display: inline-flex; align-items: center; gap: 6px;
         font-size: 12.5px; font-weight: 800; text-decoration: none;
-        color: #fff; border: 1px solid var(--vs-orange-500, #FF8A24); background: var(--vs-orange-500, #FF8A24);
+        color: #fff; border: 1px solid var(--vsx-primary); background: var(--vsx-primary);
         padding: 8px 14px; border-radius: 8px; white-space: nowrap;
         transition: background-color .15s ease; min-height: 38px;
     }
-    .vsfs-court-cta:hover { background: var(--vs-orange-600, #F97316); border-color: var(--vs-orange-600, #F97316); }
+    .vsfs-court-cta:hover { background: var(--vsx-primary-dark); border-color: var(--vsx-primary-dark); }
     .vsfs-court-cta.vsfs-cta-green {
         color: #fff; border-color: var(--vs-success, #16A36A); background: var(--vs-success, #16A36A);
     }
     .vsfs-court-cta.vsfs-cta-green:hover { background: var(--vs-success-dark, #12854F); border-color: var(--vs-success-dark, #12854F); }
+
+    /* ---- Đặt lịch trực tiếp (ported from DatLichTrucQuan.jsp step 2) ---- */
+    .fsbk-back {
+        display: inline-flex; align-items: center; gap: 6px;
+        border: none; background: transparent; color: var(--vsx-primary); cursor: pointer;
+        font-family: inherit; font-size: 13px; font-weight: 700; padding: 6px 2px; margin-bottom: 10px;
+    }
+    .fsbk-back:hover { text-decoration: underline; }
+    .fsbk-court-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        padding: 10px 12px; border-radius: 10px; background: var(--vs-mint-50); margin-bottom: 12px;
+    }
+    .fsbk-court-name { font-size: 14px; font-weight: 800; color: var(--vsx-text); }
+    .fsbk-court-price { font-size: 13px; font-weight: 800; color: var(--vsx-primary-dark); font-family: var(--vsx-scoreboard-font); }
+    .fsbk-datebar {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 4px; border-radius: 10px; background: #f4f6f5; margin-bottom: 12px; max-width: 220px;
+    }
+    .fsbk-icon-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--vsx-border);
+        background: #fff; color: var(--vsx-text); cursor: pointer;
+    }
+    .fsbk-icon-btn:hover { border-color: var(--vsx-primary); color: var(--vsx-primary); }
+    .fsbk-date-input {
+        flex: 1; padding: 6px 8px; height: 30px; border: none; border-radius: 7px;
+        background: #fff; font-size: 12.5px; font-weight: 700; color: var(--vsx-text);
+        font-family: inherit; text-align: center; cursor: pointer;
+    }
+    .fsbk-legend { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    .fsbk-legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--vsx-muted); }
+    .fsbk-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+    .fsbk-legend-swatch.avail { background: #fff; border: 2px solid #cbd5e1; }
+    .fsbk-legend-swatch.select { background: rgba(14,110,106,.22); border: 2px solid var(--vsx-primary); }
+    .fsbk-legend-swatch.booked { background: #e2e8f0; }
+    .fsbk-legend-swatch.hold { background: #fde68a; }
+    .fsbk-note {
+        padding: 7px 10px; border-radius: 8px; margin-bottom: 10px;
+        background: linear-gradient(90deg,#fffbeb,#fef9c3); border: 1px solid #fde68a;
+        font-size: 11px; font-weight: 700; color: #92400e; text-align: center;
+    }
+    .fsbk-tl-scroll { overflow: auto; border: 1px solid var(--vsx-border); border-radius: 12px; max-height: 220px; background: #fff; }
+    .fsbk-tl { display: flex; flex-direction: column; min-width: max-content; font-size: 12px; user-select: none; --fsbk-slot-w: 56px; }
+    .fsbk-tl-head { display: flex; position: sticky; top: 0; z-index: 2; background: #f8fafc; border-bottom: 2px solid var(--vsx-border); }
+    .fsbk-tl-head-cell {
+        width: var(--fsbk-slot-w); height: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        font-size: 10.5px; font-weight: 800; color: var(--vsx-muted); border-right: 1px solid #e8edf2; position: relative;
+    }
+    .fsbk-tl-head-cell.is-hour { border-right-color: #cbd5e1; color: var(--vsx-text); }
+    .fsbk-tl-row { display: flex; align-items: stretch; }
+    .fsbk-slot {
+        width: var(--fsbk-slot-w); height: 46px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; border-right: 1px solid #eef0f4; border-bottom: 1px solid #eef0f4; background: #fff;
+        position: relative; transition: background 80ms;
+    }
+    .fsbk-slot.is-hour { border-right-color: #dde3eb; }
+    .fsbk-slot:hover:not(.is-blocked):not(.is-selected) { background: var(--vs-mint-50); }
+    .fsbk-slot.is-selected { background: rgba(14,110,106,.18); box-shadow: inset 0 0 0 2px var(--vsx-primary); }
+    .fsbk-slot.is-hover { background: rgba(14,110,106,.08); }
+    .fsbk-slot.is-blocked { cursor: not-allowed; }
+    .fsbk-slot.is-past { background: #f8fafc; }
+    .fsbk-slot.is-booked { background: #f1f5f9; }
+    .fsbk-slot.is-hold { background: #fef3c7; }
+    .fsbk-slot.is-hold_self { background: rgba(14,110,106,.1); box-shadow: inset 0 0 0 2px var(--vsx-primary); cursor: pointer; }
+    .fsbk-slot.is-locked { background: #f8fafc; }
+    .fsbk-slot.is-merged { padding: 0 6px; }
+    .fsbk-slot-label { font-size: 9.5px; font-weight: 700; color: var(--vsx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-align: center; }
+    .fsbk-sel-label { position: absolute; left: 0; top: 0; bottom: 0; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 900; color: var(--vsx-primary-dark); white-space: nowrap; pointer-events: none; }
+    .fsbk-now-marker { position: absolute; top: 0; bottom: 0; width: 2px; background: #ef4444; pointer-events: none; z-index: 3; }
+    .fsbk-skel-row { padding: 12px; }
+    .fsbk-empty { text-align: center; padding: 24px 12px; }
+    .fsbk-empty p { color: var(--vsx-muted); font-size: 13px; font-weight: 600; margin: 0 0 10px; }
+    .fsbk-footer { margin-top: 14px; }
+    .fsbk-footer-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .fsbk-stat { display: flex; flex-direction: column; gap: 1px; }
+    .fsbk-stat span { font-size: 9.5px; color: var(--vsx-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .fsbk-stat strong { font-size: 15px; font-weight: 900; color: var(--vsx-text); }
+    .fsbk-stat.total strong { font-size: 19px; color: var(--vsx-primary-dark); letter-spacing: .02em; }
+    .fsbk-cta {
+        width: 100%; min-height: 48px; border: none; border-radius: 12px;
+        background: var(--vsx-primary); color: #fff; font-size: 14.5px; font-weight: 800;
+        font-family: inherit; cursor: pointer; box-shadow: 0 0 16px rgba(14,110,106,.4);
+        transition: background .15s ease, transform 90ms;
+    }
+    .fsbk-cta:hover:not(:disabled) { background: var(--vsx-primary-dark); }
+    .fsbk-cta:active:not(:disabled) { transform: translateY(1px); }
+    .fsbk-cta:disabled { background: #e2e5e0; color: #9aa2a0; cursor: not-allowed; box-shadow: none; }
+    @media (max-width: 480px) { .fsbk-tl { --fsbk-slot-w: 48px; } }
+
     .vsfs-service { display: flex; justify-content: space-between; gap: 12px; padding: 9px 2px; border-bottom: 1px solid #edf4f0; font-size: 13.5px; }
-    .vsfs-service b { font-weight: 800; color: var(--vs-primary-700, #185A9D); white-space: nowrap; }
+    .vsfs-service b { font-weight: 800; color: var(--vsx-primary-dark); white-space: nowrap; font-family: var(--vsx-scoreboard-font); letter-spacing: .02em; }
     .vsfs-imggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
     .vsfs-imggrid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: #eef4f1; }
 
@@ -287,7 +399,7 @@
     .vsfs-product-body { padding: 10px 11px 11px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
     .vsfs-product-cat { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--vsx-muted); }
     .vsfs-product-name { font-size: 13.5px; font-weight: 800; color: var(--vsx-text); line-height: 1.3; }
-    .vsfs-product-price { font-size: 13.5px; font-weight: 800; color: var(--vs-primary-700, #185A9D); margin-top: auto; }
+    .vsfs-product-price { font-size: 13.5px; font-weight: 800; color: var(--vsx-primary-dark); margin-top: auto; font-family: var(--vsx-scoreboard-font); letter-spacing: .02em; }
     .vsfs-product-stock { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; align-self: flex-start; }
     .vsfs-product-stock.is-in { background: var(--vs-success-bg, #E5F7EF); color: var(--vs-success, #16A36A); }
     .vsfs-product-stock.is-low { background: #fff7e6; color: #b45309; }
@@ -296,10 +408,10 @@
         display: inline-flex; align-items: center; justify-content: center;
         margin-top: 6px; padding: 7px 10px; border-radius: 8px;
         font-size: 12px; font-weight: 700; text-align: center; text-decoration: none;
-        color: var(--vs-primary-700, #185A9D); background: var(--vs-mint-50);
-        border: 1px solid var(--vs-cyan-100, #DDF8FC);
+        color: var(--vsx-primary-dark); background: var(--vs-mint-50);
+        border: 1px solid var(--vs-mint-100);
     }
-    a.vsfs-product-contact:hover { background: var(--vs-cyan-100, #DDF8FC); }
+    a.vsfs-product-contact:hover { background: var(--vs-mint-100); }
 
     /* ---- Tab Ưu đãi ---- */
     .vsfs-promo-empty { text-align: center; padding: 28px 12px; color: var(--vsx-muted); font-size: 13.5px; font-weight: 600; }
@@ -325,23 +437,23 @@
     .vsfs-promo-dot.is-active { background: #fff; }
     .vsfs-promo-badge {
         position: absolute; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 5px;
-        background: var(--vs-green-500, #01E281); color: var(--vs-navy, #122D40);
+        background: var(--vsx-orange); color: #fff;
         font-size: 12.5px; font-weight: 800; padding: 5px 11px; border-radius: 9999px;
     }
     .vsfs-promo-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 8px; }
     .vsfs-promo-title { font-size: 15px; font-weight: 800; color: var(--vsx-text); line-height: 1.3; }
     .vsfs-promo-code-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .vsfs-promo-code {
-        font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 13.5px; font-weight: 800;
-        letter-spacing: .03em; color: var(--vs-primary-700, #185A9D); background: var(--vs-mint-50);
-        border: 1px dashed var(--vs-cyan-100, #DDF8FC); border-radius: 8px; padding: 4px 10px;
+        font-family: var(--vsx-scoreboard-font); font-size: 13.5px; font-weight: 700;
+        letter-spacing: .03em; color: var(--vsx-primary-dark); background: var(--vs-mint-50);
+        border: 1px dashed var(--vs-mint-100); border-radius: 8px; padding: 4px 10px;
     }
     .vsfs-promo-copy {
         border: none; background: transparent; color: var(--vsx-muted); cursor: pointer;
         display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700;
         padding: 4px 6px; border-radius: 6px; transition: background-color .15s ease, color .15s ease;
     }
-    .vsfs-promo-copy:hover { background: var(--vs-mint-50); color: var(--vs-primary-700, #185A9D); }
+    .vsfs-promo-copy:hover { background: var(--vs-mint-50); color: var(--vsx-primary-dark); }
     .vsfs-promo-copy .lci { width: 14px; height: 14px; }
     .vsfs-promo-condlist { font-size: 12.5px; color: var(--vsx-muted); line-height: 1.7; }
     .vsfs-promo-condlist span + span::before { content: ' · '; }
@@ -357,14 +469,14 @@
         font-size: 13px; font-weight: 800; cursor: pointer; text-decoration: none;
         border: 1.5px solid transparent; transition: background-color .15s ease, border-color .15s ease;
     }
-    .vsfs-promo-btn-use { background: var(--vs-green-500, #01E281); color: var(--vs-navy, #122D40); }
-    .vsfs-promo-btn-use:hover { background: var(--vs-green-600, #01C771); }
-    .vsfs-promo-btn-book { background: #fff; color: var(--vs-navy, #122D40); border-color: var(--vs-navy, #122D40); }
-    .vsfs-promo-btn-book:hover { background: var(--vs-mint-50); }
+    .vsfs-promo-btn-use { background: var(--vsx-primary); color: #fff; }
+    .vsfs-promo-btn-use:hover { background: var(--vsx-primary-dark); }
+    .vsfs-promo-btn-book { background: #fff; color: var(--vsx-text); border-color: var(--vsx-border); }
+    .vsfs-promo-btn-book:hover { background: var(--vs-mint-50); border-color: var(--vsx-primary); }
 
     .vsfs-policy-item { display: flex; gap: 9px; align-items: flex-start; }
     .vsfs-policy-item + .vsfs-policy-item { margin-top: 9px; }
-    .vsfs-policy-item .lci { width: 17px; height: 17px; color: var(--vs-primary-600, #1677D2); margin-top: 2px; }
+    .vsfs-policy-item .lci { width: 17px; height: 17px; color: var(--vsx-primary); margin-top: 2px; }
     .vsfs-actionbar {
         flex-shrink: 0; border-top: 1px solid var(--vsx-border); background: #fff;
         padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
@@ -374,13 +486,13 @@
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         min-height: 46px; padding: 0 22px; border-radius: 10px; cursor: pointer;
         font-family: inherit; font-size: 14.5px; font-weight: 800; text-decoration: none;
-        border: 1px solid transparent; transition: background-color .15s ease;
+        border: 1px solid transparent; transition: background-color .15s ease, box-shadow .15s ease;
     }
-    .vsfs-btn:focus-visible { outline: 3px solid var(--vs-focus-ring, rgba(24, 200, 232, 0.35)); outline-offset: 2px; }
-    .vsfs-btn-primary { background: var(--vs-green-500, #01E281); color: var(--vs-navy, #122D40); }
-    .vsfs-btn-primary:hover { background: var(--vs-green-600, #01C771); }
-    .vsfs-btn-ghost { background: #fff; color: var(--vs-navy, #122D40); border-color: var(--vs-navy, #122D40); }
-    .vsfs-btn-ghost:hover { background: var(--vs-mint-50); }
+    .vsfs-btn:focus-visible { outline: 3px solid rgba(14,110,106,.35); outline-offset: 2px; }
+    .vsfs-btn-primary { background: var(--vsx-primary); color: #fff; box-shadow: 0 0 16px rgba(14,110,106,.4); }
+    .vsfs-btn-primary:hover { background: var(--vsx-primary-dark); }
+    .vsfs-btn-ghost { background: #fff; color: var(--vsx-text); border-color: var(--vsx-border); }
+    .vsfs-btn-ghost:hover { background: var(--vs-mint-50); border-color: var(--vsx-primary); }
     @media (max-width: 767px) {
         .vsfs-sheet { max-height: 92dvh; border-radius: 22px 22px 0 0; }
         .vsfs-actionbar-inner { justify-content: stretch; }
@@ -424,7 +536,7 @@
     }
     .vslr-backdrop.is-open .vslr-modal { transform: scale(1); }
     .vslr-icon { font-size: 40px; margin-bottom: 12px; }
-    .vslr-title { font-size: 20px; font-weight: 800; color: var(--navy, #122D40); margin-bottom: 8px; }
+    .vslr-title { font-size: 20px; font-weight: 800; color: var(--vsx-text, #12201B); margin-bottom: 8px; }
     .vslr-desc { font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 22px; line-height: 1.5; }
     .vslr-actions { display: flex; gap: 10px; }
     .vslr-btn {
@@ -435,8 +547,8 @@
     }
     .vslr-btn-cancel { background: #f1f5f9; color: #475569; }
     .vslr-btn-cancel:hover { background: #e2e8f0; }
-    .vslr-btn-login { background: var(--primary, #01E281); color: var(--navy, #122D40); }
-    .vslr-btn-login:hover { background: #01C771; }
+    .vslr-btn-login { background: var(--vsx-primary, #0E6E6A); color: #fff; }
+    .vslr-btn-login:hover { background: #0A5652; }
     @media (max-width: 400px) { .vslr-actions { flex-direction: column-reverse; } }
 </style>
 <div id="vsLoginRequiredModal" class="vslr-backdrop" hidden>
@@ -533,7 +645,7 @@
             <!-- Loaded content -->
             <div id="fsContent" hidden>
                 <div class="vsfs-cols">
-                    <div class="vsfs-hero" id="fsHero">
+                    <div class="vsfs-hero vsx-lbracket" id="fsHero">
                         <div class="vsfs-carousel" id="fsCarousel">
                             <div class="vsfs-carousel-track" id="fsCarouselTrack"></div>
                             <button class="vsfs-carousel-btn prev" id="fsPrev" onclick="carouselMove(-1)" hidden>&#8249;</button>
@@ -559,7 +671,61 @@
                     <button type="button" class="vsfs-tab" role="tab" id="fsTab-policy" aria-controls="fsPanel-policy" aria-selected="false" data-fstab="policy">Chính sách</button>
                 </div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-overview" aria-labelledby="fsTab-overview" tabindex="0"></div>
-                <div class="vsfs-panel" role="tabpanel" id="fsPanel-courts" aria-labelledby="fsTab-courts" tabindex="0" hidden></div>
+                <div class="vsfs-panel" role="tabpanel" id="fsPanel-courts" aria-labelledby="fsTab-courts" tabindex="0" hidden>
+                    <div id="fsCourtList"></div>
+                    <a id="fsGhepKeoLink" class="fsbk-back" href="#" style="margin-top:6px;">
+                        Không tìm được giờ phù hợp? Tạo kèo tìm người chơi tại đây
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </a>
+
+                    <%-- ── Đặt lịch trực tiếp (ported from DatLichTrucQuan.jsp, restyled) ── --%>
+                    <div id="fsBookStep2" class="fsbk-step2" hidden>
+                        <button type="button" class="fsbk-back" id="fsbkBackBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            Đổi sân
+                        </button>
+                        <div class="fsbk-court-bar">
+                            <span class="fsbk-court-name" id="fsbkCourtName">—</span>
+                            <span class="fsbk-court-price" id="fsbkCourtPrice"></span>
+                        </div>
+                        <div class="fsbk-datebar">
+                            <button type="button" class="fsbk-icon-btn" id="fsbkPrevDay" aria-label="Ngày trước">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            </button>
+                            <input type="date" id="fsbkDateInput" class="fsbk-date-input" aria-label="Chọn ngày">
+                            <button type="button" class="fsbk-icon-btn" id="fsbkNextDay" aria-label="Ngày sau">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                            </button>
+                        </div>
+                        <div class="fsbk-legend">
+                            <span class="fsbk-legend-item"><span class="fsbk-legend-swatch avail"></span>Trống</span>
+                            <span class="fsbk-legend-item"><span class="fsbk-legend-swatch select"></span>Đang chọn</span>
+                            <span class="fsbk-legend-item"><span class="fsbk-legend-swatch booked"></span>Đã đặt</span>
+                            <span class="fsbk-legend-item"><span class="fsbk-legend-swatch hold"></span>Giữ chỗ</span>
+                        </div>
+                        <div class="fsbk-note">Chọn các khung giờ <b>liền nhau</b>. Bấm ô đầu rồi bấm ô cuối.</div>
+                        <div class="fsbk-tl-scroll" id="fsbkTlScroll">
+                            <div id="fsbkTlLoading" class="fsbk-skel-row"><div class="vsx-skel" style="height:32px;margin-bottom:4px;"></div><div class="vsx-skel" style="height:52px;"></div></div>
+                            <div id="fsbkTlError" class="fsbk-empty" hidden><p>Không tải được lịch sân.</p><button type="button" class="vsfs-btn vsfs-btn-ghost" id="fsbkTlRetry">Thử lại</button></div>
+                            <div id="fsbkTlEmpty" class="fsbk-empty" hidden><p>Không có khung giờ trống trong ngày này.</p></div>
+                            <div class="fsbk-tl" id="fsbkTl" hidden></div>
+                        </div>
+                        <form id="fsbkForm" action="${ctx}/customer/dat-lich-truc-quan/xac-nhan" method="get" class="fsbk-footer">
+                            <input type="hidden" name="coSoId" id="fsbkInputCoSoId">
+                            <input type="hidden" name="sanId" id="fsbkInputSanId">
+                            <input type="hidden" name="ngayDat" id="fsbkInputNgayDat">
+                            <input type="hidden" name="gioBatDau" id="fsbkInputGioBatDau">
+                            <input type="hidden" name="gioKetThuc" id="fsbkInputGioKetThuc">
+                            <div class="fsbk-footer-row">
+                                <div class="fsbk-stat"><span>Thời lượng</span><strong id="fsbkDuration">0h00</strong></div>
+                                <div class="fsbk-stat total"><span>Tổng tiền</span><strong id="fsbkTotal" class="vsx-scoreboard">0 đ</strong></div>
+                            </div>
+                            <button type="submit" class="fsbk-cta" id="fsbkSubmitBtn" disabled>
+                                <span id="fsbkSubmitLabel">Chọn khung giờ để tiếp tục</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-promotions" aria-labelledby="fsTab-promotions" tabindex="0" hidden></div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-services" aria-labelledby="fsTab-services" tabindex="0" hidden></div>
                 <div class="vsfs-panel" role="tabpanel" id="fsPanel-shop" aria-labelledby="fsTab-shop" tabindex="0" hidden>
@@ -871,6 +1037,7 @@
             if (!fsOpen) return;
             fsOpen = false;
             stopFsPoll();
+            fsbkCloseStep2();
             if (fsAbort) { fsAbort.abort(); fsAbort = null; }
             if (fsShopAbort) { fsShopAbort.abort(); fsShopAbort = null; }
             fsOverlay.classList.remove('is-open');
@@ -1009,11 +1176,15 @@
             mapLink.style.display = 'inline-flex';
             ov.appendChild(mapLink);
 
-            const courtsPanel = document.getElementById('fsPanel-courts');
+            const ghepKeoLink = document.getElementById('fsGhepKeoLink');
+            ghepKeoLink.href = CTX + '/customer/ghep-keo?tab=tao-keo&coSoId=' + encodeURIComponent(fsCurrentId || '');
+
+            const courtsPanel = document.getElementById('fsCourtList');
             courtsPanel.textContent = '';
-            const courts = Array.isArray(data.courts) ? data.courts : [];
-            if (courts.length) {
-                courts.forEach(c => {
+            fsbkCourts = Array.isArray(data.courts) ? data.courts : [];
+            fsbkCloseStep2();
+            if (fsbkCourts.length) {
+                fsbkCourts.forEach(c => {
                     const row = el('div', 'vsfs-court');
                     const left = el('div');
                     left.style.minWidth = '0';
@@ -1039,8 +1210,9 @@
                         right.appendChild(el('span', 'vsfs-court-price',
                             giaDen && giaDen !== gia ? gia + ' - ' + giaDen + '/giờ' : gia + '/giờ'));
                     }
-                    const cta = el('a', 'vsfs-court-cta', 'Đặt sân');
-                    cta.href = CTX + '/customer/chi-tiet-san?id=' + encodeURIComponent(c.sanId);
+                    const cta = el('button', 'vsfs-court-cta', 'Đặt sân');
+                    cta.type = 'button';
+                    cta.addEventListener('click', () => fsbkOpenStep2(c));
                     right.appendChild(cta);
                     row.appendChild(right);
                     courtsPanel.appendChild(row);
@@ -1431,11 +1603,11 @@
                 useBtn.addEventListener('click', () => usePromoCode(promo));
                 actions.appendChild(useBtn);
             }
-            const bookLink = document.createElement('a');
+            const bookLink = document.createElement('button');
+            bookLink.type = 'button';
             bookLink.className = 'vsfs-promo-btn vsfs-promo-btn-book';
             bookLink.textContent = 'Đặt sân';
-            bookLink.href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(promo.coSoId || fsCurrentId || '');
-            bookLink.addEventListener('click', () => usePromoCode(promo));
+            bookLink.addEventListener('click', () => { usePromoCode(promo); selectSheetTab('courts'); });
             actions.appendChild(bookLink);
             body.appendChild(actions);
 
@@ -1471,6 +1643,7 @@
             });
             if (key === 'shop' && fsCurrentId) loadShopProducts(fsCurrentId);
         }
+        window.selectSheetTab = selectSheetTab;
         tabButtons.forEach((btn, idx) => {
             btn.addEventListener('click', () => selectSheetTab(btn.getAttribute('data-fstab')));
             btn.addEventListener('keydown', e => {
@@ -1503,13 +1676,10 @@
             }
         });
         document.getElementById('fsBookBtn').addEventListener('click', function () {
-            const cosoId = fsCurrentId;
-            const name = fsCurrentName;
-            const sportId = fsCurrentSportId;
-            const returnTo = fsReturnFocus;
-            closeFacilitySheet(false);
-            const wait = reduceMotion ? 0 : 240;
-            setTimeout(() => openBookingChoice(cosoId, name, returnTo, sportId), wait);
+            // Was: close sheet → reopen "Chọn hình thức đặt" modal. Now: the sheet is already
+            // open on this facility, just jump straight to the booking tab.
+            selectSheetTab('courts');
+            document.getElementById('fsTab-courts').scrollIntoView({ block: 'nearest', inline: 'center' });
         });
 
         // ---- Login-required modal ------------------------------------------
@@ -1578,12 +1748,10 @@
                 const bookBtn = e.target.closest('[data-book-trigger]');
                 if (bookBtn) {
                     e.stopPropagation();
-                    openBookingChoice(
-                        bookBtn.getAttribute('data-coso-id'),
-                        bookBtn.getAttribute('data-facility-name'),
-                        bookBtn,
-                        bookBtn.getAttribute('data-sport-id') || null
-                    );
+                    // Was: openBookingChoice(...) → "Chọn hình thức đặt" modal → DatLichTrucQuan.jsp
+                    // full-page nav. Now: open the bottom sheet directly on the booking tab.
+                    openFacilitySheet(bookBtn);
+                    selectSheetTab('courts');
                     return;
                 }
                 if (e.target.closest('button, a')) return; // favorite/share/other controls
@@ -1646,6 +1814,332 @@
             document.querySelectorAll('#fsDots .vsfs-dot').forEach((d, i) => d.classList.toggle('active', i === _carouselIdx));
         }
         window.carouselMove = function(dir) { carouselGo(_carouselIdx + dir); };
+
+        // ==========================================================================
+        // Đặt lịch trực tiếp — ported from customer/DatLichTrucQuan.jsp (step 2 only;
+        // court picking is now the existing "Sân & bảng giá" list above). Same APIs,
+        // same submit target, restyled with fsbk-* classes. See Task #7 in
+        // memory/vsport-customer-redesign-brief.md for context.
+        // ==========================================================================
+        var FSBK_SLOT_MIN = 30, FSBK_MIN_DUR = 30, FSBK_MAX_DUR = 240, FSBK_MAX_AHEAD = 30;
+        var fsbkCourts = [];
+        var fsbkState = {
+            court: null, date: null, openMin: 0, closeMin: 0, nowMinutes: -1,
+            selectedStart: null, selectedEnd: null, priceResult: null,
+            abortCtrl: null, priceAbort: null, pendingSubmit: false
+        };
+
+        function fsbkTodayStr() {
+            var d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        function fsbkHhmmToMin(s) { var p = s.split(':'); return (+p[0]) * 60 + (+p[1]); }
+        function fsbkMinToHhmm(m) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+        function fsbkFmtDur(mins) { return Math.floor(mins / 60) + 'h' + String(mins % 60).padStart(2, '0'); }
+
+        var fsbkStep2El = document.getElementById('fsBookStep2');
+        var fsbkDateInput = document.getElementById('fsbkDateInput');
+
+        function fsbkOpenStep2(court) {
+            fsbkState.court = court;
+            fsbkState.date = fsbkState.date || fsbkTodayStr();
+            fsbkState.selectedStart = null; fsbkState.selectedEnd = null; fsbkState.priceResult = null;
+            document.getElementById('fsCourtList').hidden = true;
+            document.getElementById('fsGhepKeoLink').hidden = true;
+            fsbkStep2El.hidden = false;
+            document.getElementById('fsbkCourtName').textContent = court.tenSan || ('Sân #' + court.sanId);
+            document.getElementById('fsbkCourtPrice').textContent = court.giaKhongDen ? fmtVnd(court.giaKhongDen) + '/giờ' : '';
+            fsbkDateInput.value = fsbkState.date;
+            fsbkDateInput.min = fsbkTodayStr();
+            var maxD = new Date(); maxD.setDate(maxD.getDate() + FSBK_MAX_AHEAD);
+            fsbkDateInput.max = maxD.getFullYear() + '-' + String(maxD.getMonth() + 1).padStart(2, '0') + '-' + String(maxD.getDate()).padStart(2, '0');
+            document.getElementById('fsbkPrevDay').disabled = (fsbkState.date === fsbkTodayStr());
+            fsbkLoadAvailability();
+            fsbkUpdateSummary();
+        }
+
+        function fsbkCloseStep2() {
+            if (fsbkState.abortCtrl) { fsbkState.abortCtrl.abort(); fsbkState.abortCtrl = null; }
+            if (fsbkState.priceAbort) { fsbkState.priceAbort.abort(); fsbkState.priceAbort = null; }
+            fsbkState.court = null; fsbkState.date = null;
+            fsbkState.selectedStart = null; fsbkState.selectedEnd = null; fsbkState.priceResult = null;
+            fsbkState.pendingSubmit = false;
+            if (fsbkStep2El) fsbkStep2El.hidden = true;
+            var list = document.getElementById('fsCourtList');
+            if (list) list.hidden = false;
+            var ghepKeoLink = document.getElementById('fsGhepKeoLink');
+            if (ghepKeoLink) ghepKeoLink.hidden = false;
+        }
+        document.getElementById('fsbkBackBtn').addEventListener('click', fsbkCloseStep2);
+
+        function fsbkChangeDate(deltaOrValue) {
+            var s;
+            if (typeof deltaOrValue === 'number') {
+                var nd = new Date(fsbkState.date + 'T00:00:00');
+                nd.setDate(nd.getDate() + deltaOrValue);
+                s = nd.getFullYear() + '-' + String(nd.getMonth() + 1).padStart(2, '0') + '-' + String(nd.getDate()).padStart(2, '0');
+            } else {
+                s = deltaOrValue;
+            }
+            if (s < fsbkDateInput.min || s > fsbkDateInput.max) return;
+            fsbkState.date = s; fsbkDateInput.value = s;
+            fsbkState.selectedStart = null; fsbkState.selectedEnd = null; fsbkState.priceResult = null;
+            document.getElementById('fsbkPrevDay').disabled = (s === fsbkTodayStr());
+            fsbkLoadAvailability();
+            fsbkUpdateSummary();
+        }
+        document.getElementById('fsbkPrevDay').addEventListener('click', () => fsbkChangeDate(-1));
+        document.getElementById('fsbkNextDay').addEventListener('click', () => fsbkChangeDate(1));
+        fsbkDateInput.addEventListener('change', function () {
+            if (!this.value) return;
+            fsbkChangeDate(this.value);
+        });
+        document.getElementById('fsbkTlRetry').addEventListener('click', fsbkLoadAvailability);
+
+        function fsbkLoadAvailability() {
+            if (!fsCurrentId || !fsbkState.court) return;
+            if (fsbkState.abortCtrl) fsbkState.abortCtrl.abort();
+            fsbkState.abortCtrl = new AbortController();
+            document.getElementById('fsbkTlLoading').hidden = false;
+            document.getElementById('fsbkTlError').hidden = true;
+            document.getElementById('fsbkTlEmpty').hidden = true;
+            document.getElementById('fsbkTl').hidden = true;
+            fetch(CTX + '/customer/api/timetable-availability?coSoId=' + encodeURIComponent(fsCurrentId) + '&date=' + encodeURIComponent(fsbkState.date),
+                { signal: fsbkState.abortCtrl.signal, headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(data => {
+                    if (!data.success) throw new Error(data.error || 'load-failed');
+                    fsbkState.openMin = fsbkHhmmToMin(data.openTime);
+                    fsbkState.closeMin = fsbkHhmmToMin(data.closeTime);
+                    fsbkState.nowMinutes = data.nowMinutes;
+                    var courts = data.courts || [];
+                    var match = courts.find(c => c.sanId == fsbkState.court.sanId);
+                    document.getElementById('fsbkTlLoading').hidden = true;
+                    if (!match || !match.slots || !match.slots.length) {
+                        document.getElementById('fsbkTlEmpty').hidden = false;
+                        return;
+                    }
+                    fsbkState.court.slots = match.slots;
+                    fsbkRenderTimeline(match);
+                })
+                .catch(err => {
+                    if (err && err.name === 'AbortError') return;
+                    document.getElementById('fsbkTlLoading').hidden = true;
+                    document.getElementById('fsbkTlError').hidden = false;
+                });
+        }
+
+        function fsbkRenderTimeline(court) {
+            var tl = document.getElementById('fsbkTl');
+            tl.hidden = false;
+            tl.innerHTML = '';
+            var slotCount = Math.floor((fsbkState.closeMin - fsbkState.openMin) / FSBK_SLOT_MIN);
+            if (!slotCount) { tl.hidden = true; document.getElementById('fsbkTlEmpty').hidden = false; return; }
+
+            var head = document.createElement('div');
+            head.className = 'fsbk-tl-head';
+            for (var i = 0; i < slotCount; i++) {
+                var min = fsbkState.openMin + i * FSBK_SLOT_MIN;
+                var hc = document.createElement('div');
+                hc.className = 'fsbk-tl-head-cell';
+                if (min % 60 === 0) { hc.classList.add('is-hour'); hc.textContent = fsbkMinToHhmm(min); }
+                else { hc.style.color = '#c4c9d4'; hc.textContent = ':' + String(min % 60).padStart(2, '0'); }
+                fsbkAddNowMarker(hc, min, FSBK_SLOT_MIN);
+                head.appendChild(hc);
+            }
+            tl.appendChild(head);
+
+            var row = document.createElement('div');
+            row.className = 'fsbk-tl-row';
+            var j = 0;
+            while (j < court.slots.length) {
+                var slot = court.slots[j];
+                if (slot.status === 'AVAILABLE') { row.appendChild(fsbkBuildAvailSlot(court, slot)); j++; }
+                else {
+                    var k = j + 1;
+                    while (k < court.slots.length && court.slots[k].status === slot.status) k++;
+                    row.appendChild(fsbkBuildBlockedRun(court, court.slots.slice(j, k)));
+                    j = k;
+                }
+            }
+            tl.appendChild(row);
+            if (fsbkState.selectedStart != null) fsbkRefreshSelVis();
+        }
+
+        function fsbkAddNowMarker(cell, startMin, spanMin) {
+            if (fsbkState.nowMinutes < startMin || fsbkState.nowMinutes >= startMin + spanMin) return;
+            var m = document.createElement('div');
+            m.className = 'fsbk-now-marker';
+            m.style.left = ((fsbkState.nowMinutes - startMin) / spanMin * 100) + '%';
+            cell.appendChild(m);
+        }
+
+        function fsbkBuildAvailSlot(court, slot) {
+            var cell = document.createElement('div');
+            cell.className = 'fsbk-slot';
+            if (slot.startMinute % 60 === 0) cell.classList.add('is-hour');
+            cell.dataset.start = slot.start; cell.dataset.end = slot.end;
+            cell.dataset.startMinute = slot.startMinute; cell.dataset.status = slot.status;
+            cell.setAttribute('role', 'button'); cell.setAttribute('tabindex', '0');
+            cell.addEventListener('click', () => fsbkOnSlotClick(slot));
+            cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fsbkOnSlotClick(slot); } });
+            fsbkAddNowMarker(cell, slot.startMinute, FSBK_SLOT_MIN);
+            return cell;
+        }
+
+        function fsbkBuildBlockedRun(court, run) {
+            var first = run[0], last = run[run.length - 1], span = run.length;
+            var cell = document.createElement('div');
+            var st = first.status.toLowerCase();
+            cell.className = 'fsbk-slot is-blocked is-' + st;
+            if (span > 1) cell.classList.add('is-merged');
+            if (first.startMinute % 60 === 0) cell.classList.add('is-hour');
+            cell.style.width = 'calc(var(--fsbk-slot-w) * ' + span + ')'; cell.style.flexShrink = '0';
+            cell.dataset.startMinute = first.startMinute; cell.dataset.status = first.status;
+            var statusTxt = fsbkStatusLabel(first.status);
+            cell.title = statusTxt + ' · ' + first.start + '–' + last.end;
+            if (span >= 2) {
+                var lbl = document.createElement('span'); lbl.className = 'fsbk-slot-label';
+                lbl.textContent = span >= 3 ? (statusTxt + ' · ' + first.start + '–' + last.end) : statusTxt;
+                cell.appendChild(lbl);
+            }
+            if (first.status === 'HOLD_SELF' && first.datSanId) {
+                cell.style.cursor = 'pointer';
+                cell.addEventListener('click', () => { window.location.href = CTX + '/customer/thanh-toan-qr?datSanId=' + first.datSanId; });
+            }
+            fsbkAddNowMarker(cell, first.startMinute, span * FSBK_SLOT_MIN);
+            return cell;
+        }
+
+        function fsbkStatusLabel(s) {
+            switch (s) {
+                case 'AVAILABLE': return 'Trống';
+                case 'BOOKED': return 'Đã đặt';
+                case 'HOLD': return 'Đang giữ';
+                case 'HOLD_SELF': return 'Chờ thanh toán';
+                case 'LOCKED': return 'Khóa';
+                case 'PAST': return 'Đã qua';
+                default: return s;
+            }
+        }
+
+        function fsbkCheckContiguous(from, to) {
+            var court = fsbkState.court;
+            if (!court || !court.slots) return false;
+            for (var m = from; m < to; m += FSBK_SLOT_MIN) {
+                var s = court.slots.find(sl => sl.startMinute === m);
+                if (!s || s.status !== 'AVAILABLE') return false;
+            }
+            return true;
+        }
+        function fsbkIsSelValid(s, e) { return fsbkCheckContiguous(s, e) && (e - s) >= FSBK_SLOT_MIN; }
+
+        function fsbkOnSlotClick(slot) {
+            if (slot.status !== 'AVAILABLE') {
+                if (slot.status === 'HOLD_SELF' && slot.datSanId) { window.location.href = CTX + '/customer/thanh-toan-qr?datSanId=' + slot.datSanId; return; }
+                var msg = 'Khung giờ này không khả dụng.';
+                if (slot.status === 'BOOKED') msg = 'Khung giờ này đã được đặt.';
+                else if (slot.status === 'HOLD') msg = 'Khung giờ đang được người khác giữ chỗ.';
+                showHomeToast(msg);
+                return;
+            }
+            var startM = slot.startMinute, endM = startM + FSBK_SLOT_MIN;
+            if (fsbkState.selectedStart == null) { fsbkState.selectedStart = startM; fsbkState.selectedEnd = endM; }
+            else if (startM >= fsbkState.selectedStart && startM < fsbkState.selectedEnd) {
+                fsbkState.selectedEnd = startM;
+                if (fsbkState.selectedEnd - fsbkState.selectedStart <= 0) { fsbkState.selectedStart = null; fsbkState.selectedEnd = null; fsbkState.priceResult = null; fsbkRefreshSelVis(); fsbkUpdateSummary(); return; }
+            } else if (startM === fsbkState.selectedEnd) {
+                if (fsbkCheckContiguous(fsbkState.selectedEnd, endM)) fsbkState.selectedEnd = endM;
+                else { showHomeToast('Chỉ chọn các khung giờ liền nhau.'); return; }
+            } else if (startM === fsbkState.selectedStart - FSBK_SLOT_MIN) {
+                if (fsbkCheckContiguous(startM, fsbkState.selectedStart)) fsbkState.selectedStart = startM;
+                else { showHomeToast('Chỉ chọn các khung giờ liền nhau.'); return; }
+            } else { fsbkState.selectedStart = startM; fsbkState.selectedEnd = endM; }
+            if (fsbkState.selectedEnd - fsbkState.selectedStart > FSBK_MAX_DUR) {
+                fsbkState.selectedEnd = fsbkState.selectedStart + FSBK_MAX_DUR;
+                showHomeToast('Tối đa ' + (FSBK_MAX_DUR / 60) + ' giờ. Đã tự cắt bớt.');
+            }
+            if (!fsbkIsSelValid(fsbkState.selectedStart, fsbkState.selectedEnd)) {
+                showHomeToast('Khoảng chọn chứa giờ không khả dụng. Hãy chọn lại.');
+                fsbkState.selectedStart = null; fsbkState.selectedEnd = null; fsbkState.priceResult = null;
+                fsbkRefreshSelVis(); fsbkUpdateSummary(); return;
+            }
+            fsbkRefreshSelVis(); fsbkState.priceResult = null; fsbkUpdateSummary(); fsbkFetchPrice();
+        }
+
+        function fsbkRefreshSelVis() {
+            document.querySelectorAll('.fsbk-slot').forEach(c => c.classList.remove('is-selected'));
+            document.querySelectorAll('.fsbk-sel-label').forEach(l => l.remove());
+            if (fsbkState.selectedStart == null) return;
+            var startCell = null, cnt = 0;
+            document.querySelectorAll('.fsbk-slot').forEach(c => {
+                var m = parseInt(c.dataset.startMinute, 10);
+                if (m >= fsbkState.selectedStart && m < fsbkState.selectedEnd) { c.classList.add('is-selected'); cnt++; if (m === fsbkState.selectedStart) startCell = c; }
+            });
+            if (startCell && cnt > 0) {
+                var lbl = document.createElement('span'); lbl.className = 'fsbk-sel-label';
+                lbl.textContent = fsbkMinToHhmm(fsbkState.selectedStart) + '–' + fsbkMinToHhmm(fsbkState.selectedEnd);
+                lbl.style.width = 'calc(var(--fsbk-slot-w) * ' + cnt + ')';
+                startCell.appendChild(lbl);
+            }
+        }
+
+        function fsbkFetchPrice() {
+            if (fsbkState.selectedStart == null) { fsbkState.priceResult = null; fsbkUpdateSummary(); return; }
+            if (fsbkState.priceAbort) fsbkState.priceAbort.abort();
+            fsbkState.priceAbort = new AbortController();
+            var p = new URLSearchParams();
+            p.set('sanId', fsbkState.court.sanId); p.set('date', fsbkState.date);
+            p.set('start', fsbkMinToHhmm(fsbkState.selectedStart)); p.set('end', fsbkMinToHhmm(fsbkState.selectedEnd));
+            fetch(CTX + '/customer/api/timetable-price?' + p.toString(), { signal: fsbkState.priceAbort.signal, headers: { 'Accept': 'application/json' } })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) { fsbkState.priceResult = null; showHomeToast(data.error || 'Không thể tính giá.'); }
+                    else fsbkState.priceResult = data;
+                    fsbkUpdateSummary();
+                })
+                .catch(err => { if (err && err.name === 'AbortError') return; fsbkState.priceResult = null; fsbkUpdateSummary(); });
+        }
+
+        function fsbkSetCta(disabled, label) {
+            var btn = document.getElementById('fsbkSubmitBtn');
+            btn.disabled = disabled;
+            document.getElementById('fsbkSubmitLabel').textContent = label;
+        }
+
+        function fsbkUpdateSummary() {
+            var dur = (fsbkState.selectedStart != null) ? fsbkState.selectedEnd - fsbkState.selectedStart : 0;
+            document.getElementById('fsbkDuration').textContent = dur ? fsbkFmtDur(dur) : '0h00';
+            if (dur <= 0) {
+                document.getElementById('fsbkTotal').textContent = '0 đ';
+                fsbkSetCta(true, 'Chọn khung giờ để tiếp tục');
+                return;
+            }
+            if (dur < FSBK_MIN_DUR) {
+                document.getElementById('fsbkTotal').textContent = '0 đ';
+                fsbkSetCta(true, 'Chọn thêm thời gian');
+                return;
+            }
+            if (fsbkState.priceResult) {
+                document.getElementById('fsbkTotal').textContent = fmtVnd(parseFloat(fsbkState.priceResult.totalAmount)) || '0 đ';
+                fsbkSetCta(fsbkState.pendingSubmit, fsbkState.pendingSubmit ? 'Đang kiểm tra lịch...' : 'Đặt sân ngay');
+            } else {
+                document.getElementById('fsbkTotal').textContent = '...';
+                fsbkSetCta(true, 'Đang tính giá...');
+            }
+        }
+
+        document.getElementById('fsbkForm').addEventListener('submit', function (e) {
+            if (fsbkState.pendingSubmit) { e.preventDefault(); return; }
+            if (fsbkState.selectedStart == null) { e.preventDefault(); showHomeToast('Vui lòng chọn khung giờ.'); return; }
+            document.getElementById('fsbkInputCoSoId').value = fsCurrentId;
+            document.getElementById('fsbkInputSanId').value = fsbkState.court.sanId;
+            document.getElementById('fsbkInputNgayDat').value = fsbkState.date;
+            document.getElementById('fsbkInputGioBatDau').value = fsbkMinToHhmm(fsbkState.selectedStart);
+            document.getElementById('fsbkInputGioKetThuc').value = fsbkMinToHhmm(fsbkState.selectedEnd);
+            fsbkState.pendingSubmit = true;
+            fsbkSetCta(true, 'Đang kiểm tra lịch...');
+        });
 
     })();
 </script>

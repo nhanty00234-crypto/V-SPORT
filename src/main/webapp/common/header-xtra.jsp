@@ -278,8 +278,8 @@
 <style>
 /* ---- Notification bell (header-xtra, kept unchanged) ---- */
 .vs-notif-wrap{position:relative;display:inline-flex;align-items:center;overflow:visible!important;}
-.vs-notif-btn{position:relative;border:none!important;outline:none!important;background:transparent!important;box-shadow:none!important;cursor:pointer;color:var(--vs-text,#17211E);font-size:20px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s;overflow:visible!important;}
-.vs-notif-btn:hover{background:#F0F7F3!important;}
+.vs-notif-btn{position:relative;border:none!important;outline:none!important;background:transparent!important;box-shadow:none!important;cursor:pointer;color:#FCFAF4;font-size:20px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s;overflow:visible!important;}
+.vs-notif-btn:hover{background:rgba(252,250,244,.1)!important;}
 .vs-notif-btn:focus{outline:none!important;box-shadow:none!important;}
 .vs-notif-badge{position:absolute!important;top:2px!important;right:2px!important;z-index:10!important;min-width:16px!important;height:16px!important;padding:0 4px!important;border-radius:999px!important;background:#E5484D!important;color:#fff!important;font-size:9.5px!important;font-weight:800!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;pointer-events:none!important;line-height:1!important;box-shadow:0 0 0 2px var(--vs-surface,#fff)!important;white-space:nowrap!important;}
 .vs-notif-dropdown{position:absolute;top:calc(100% + 10px);right:0;z-index:2000;width:360px;max-width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 100px);background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(7,26,47,.18),0 2px 8px rgba(7,26,47,.1);border:1px solid #DCE5EF;display:flex;flex-direction:column;overflow:hidden;animation:vsNotifFadeIn .18s ease;}
@@ -310,11 +310,11 @@
 /* User dropdown */
 .vs-user-wrap{position:relative;}
 .vs-user-btn{cursor:pointer;border:none!important;outline:none!important;font-family:inherit;appearance:none;-webkit-appearance:none;background:transparent!important;transition:background .15s;}
-.vs-user-btn:hover{background:#F0F7F3!important;}
-.vs-user-btn[aria-expanded="true"]{background:#F0F7F3!important;}
-.vs-user-avatar{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--vs-primary,#287A58);color:#fff;font-size:13px;flex-shrink:0;}
-.vs-user-name{font-size:13.5px;font-weight:700;color:var(--vs-text,#17211E);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.vs-user-chevron{font-size:10px;color:var(--vs-muted,#6E746F);transition:transform .15s;}
+.vs-user-btn:hover{background:rgba(252,250,244,.1)!important;}
+.vs-user-btn[aria-expanded="true"]{background:rgba(252,250,244,.1)!important;}
+.vs-user-avatar{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--vs-primary,#0E6E6A);color:#fff;font-size:13px;flex-shrink:0;}
+.vs-user-name{font-size:13.5px;font-weight:700;color:#FCFAF4;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vs-user-chevron{font-size:10px;color:rgba(252,250,244,.6);transition:transform .15s;}
 .vs-user-btn[aria-expanded="true"] .vs-user-chevron{transform:rotate(180deg);}
 .vs-user-dropdown{position:absolute;top:calc(100% + 10px);right:0;z-index:2000;width:260px;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(7,26,47,.18),0 2px 8px rgba(7,26,47,.1);border:1px solid #DCE5EF;padding:8px;display:flex;flex-direction:column;animation:vsNotifFadeIn .18s ease;}
 .vs-user-dropdown[hidden]{display:none!important;}

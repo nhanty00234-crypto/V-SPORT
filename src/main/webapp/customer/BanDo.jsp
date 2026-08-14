@@ -1078,8 +1078,30 @@
             img.src = fac.hinhAnh || (CTX + '/assets/images/vsport-fallback.svg');
             img.alt = fac.tenCoSo || '';
 
-            document.getElementById('vsmCtaBook').href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(fac.coSoId);
-            document.getElementById('vsmCtaView').href = CTX + '/customer/dat-lich-truc-quan?coSoId=' + encodeURIComponent(fac.coSoId);
+            // Was: both CTAs linked to DatLichTrucQuan.jsp's full-page flow. Now: open the
+            // shared bottom sheet (customer/common/facility-interactions.jsp) instead — Book
+            // jumps straight to the booking tab, View opens on the overview tab.
+            var vsmCtaBook = document.getElementById('vsmCtaBook');
+            var vsmCtaView = document.getElementById('vsmCtaView');
+            vsmCtaBook.href = '#';
+            vsmCtaView.href = '#';
+            vsmCtaBook.onclick = function (e) {
+                e.preventDefault();
+                if (typeof window.openFacilitySheet !== 'function') return;
+                var fakeCard = document.createElement('div');
+                fakeCard.setAttribute('data-coso-id', fac.coSoId);
+                fakeCard.setAttribute('data-facility-name', fac.tenCoSo || '');
+                window.openFacilitySheet(fakeCard);
+                if (typeof window.selectSheetTab === 'function') window.selectSheetTab('courts');
+            };
+            vsmCtaView.onclick = function (e) {
+                e.preventDefault();
+                if (typeof window.openFacilitySheet !== 'function') return;
+                var fakeCard = document.createElement('div');
+                fakeCard.setAttribute('data-coso-id', fac.coSoId);
+                fakeCard.setAttribute('data-facility-name', fac.tenCoSo || '');
+                window.openFacilitySheet(fakeCard);
+            };
 
             const callBtn = document.getElementById('vsmCtaCall');
             if (fac.soDienThoai) {
@@ -1314,5 +1336,7 @@
         });
     })();
 </script>
+
+<jsp:include page="/customer/common/facility-interactions.jsp" />
 </body>
 </html>
