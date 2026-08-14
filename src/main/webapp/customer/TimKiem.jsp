@@ -26,21 +26,47 @@
             flex: 1 0 auto;
         }
 
+        /* ===== Line & Scoreboard restyle — scoped to this page's search/card UI only,
+           does NOT touch global --primary/--navy tokens (those are shared by ~17 pages).
+           See docs/design/stitch-customer-redesign-prompt.md ===== */
+        .tk-searchbar {
+            display: flex; align-items: center; gap: 10px;
+            background: #fff; border: 1px solid #E2E5E0; border-radius: 10px;
+            padding: 12px 16px; margin-bottom: 20px; max-width: 420px;
+        }
+        .tk-searchbar i { color: #6e7978; flex-shrink: 0; }
+        .tk-searchbar input {
+            border: none; outline: none; flex: 1; min-width: 0;
+            font-family: 'Outfit', sans-serif; font-size: 15px; color: #12201B;
+            background: transparent;
+        }
+        .tk-searchbar:focus-within { border-color: #0E6E6A; box-shadow: 0 0 0 3px rgba(14,110,106,.12); }
+        .tk-toolbar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 8px; }
+        .tk-toolbar .filter-chips { flex: 1; margin-bottom: 0; padding-bottom: 4px; }
+        .tk-advfilter-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 10px;
+            background: #fff; border: 2px solid #0E6E6A; color: #0E6E6A;
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px;
+            cursor: pointer; white-space: nowrap; transition: background .16s ease, color .16s ease;
+        }
+        .tk-advfilter-btn:hover { background: #0E6E6A; color: #fff; }
+
         /* Chips */
         .filter-chips {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             overflow-x: auto;
             padding-bottom: 20px;
             margin-bottom: 20px;
         }
         .filter-chips::-webkit-scrollbar { display: none; }
         .chip {
-            padding: 10px 24px;
-            border-radius: 50px;
-            border: 1px solid var(--border);
-            background-color: var(--surface);
-            color: var(--body-text);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #E2E5E0;
+            background-color: #fff;
+            color: #12201B;
             font-family: 'Outfit', sans-serif;
             font-weight: 600;
             cursor: pointer;
@@ -48,13 +74,23 @@
             white-space: nowrap;
         }
         .chip:hover {
-            border-color: var(--navy);
-            color: var(--navy);
+            border-color: #0E6E6A;
+            color: #0E6E6A;
         }
         .chip.active {
-            background-color: var(--navy);
-            border-color: var(--navy);
-            color: var(--surface);
+            background-color: #0E6E6A;
+            border-color: #0E6E6A;
+            color: #fff;
+        }
+
+        .tk-results-head {
+            border-bottom: 2px dashed rgba(92,107,100,.3);
+            padding-bottom: 16px; margin-bottom: 28px;
+        }
+        .tk-results-head h1 {
+            font-family: 'Be Vietnam Pro', 'Outfit', sans-serif;
+            font-size: clamp(24px, 3vw, 36px); font-weight: 900;
+            color: #0E6E6A; letter-spacing: -.01em; margin: 0;
         }
 
         .active-filters {
@@ -62,47 +98,66 @@
             gap: 10px;
             align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
+        .active-filters__label { font-size: 14px; color: #5C6B64; margin-right: 2px; }
         .active-chip {
-            background-color: rgba(18, 45, 64, 0.1);
-            color: var(--navy);
-            padding: 6px 16px;
-            border-radius: 50px;
+            background-color: #DCEEEC;
+            color: #0A5652;
+            padding: 6px 14px;
+            border-radius: 999px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .active-chip a { color: var(--navy); }
+        .active-chip a { color: #0A5652; }
         .active-chip a:hover { opacity: 0.7; }
         .clear-filters {
             font-size: 14px;
-            color: var(--muted-text);
+            color: #5C6B64;
             text-decoration: underline;
         }
         .clear-filters:hover { color: var(--danger); }
 
         /* Facility Card */
         .facility-card {
-            background-color: var(--surface);
-            border-radius: var(--radius-large);
+            background-color: #fff;
+            border: 1px solid #E2E5E0;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: var(--shadow-small);
-            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(18,32,27,.05);
+            transition: var(--transition), border-color .18s ease;
             display: flex;
             flex-direction: column;
             height: 100%;
             cursor: pointer;
+            position: relative;
         }
         .facility-card:hover {
             transform: translateY(-5px);
+            border-color: #0E6E6A;
             box-shadow: var(--shadow-large);
         }
         .facility-card:focus-visible {
-            outline: 3px solid var(--primary);
+            outline: 3px solid #0E6E6A;
             outline-offset: 2px;
         }
+        /* Line-marking corner brackets — alternate cards, matches the design system's
+           "reserve the signature for emphasis, not every row" rule */
+        .product-grid .facility-card:nth-child(4n+1)::before,
+        .product-grid .facility-card:nth-child(4n+1)::after {
+            content: ''; position: absolute; width: 16px; height: 16px; z-index: 5;
+        }
+        .product-grid .facility-card:nth-child(4n+1)::before { top: -1px; right: -1px; border-top: 3px solid #0E6E6A; border-right: 3px solid #0E6E6A; }
+        .product-grid .facility-card:nth-child(4n+1)::after { bottom: -1px; left: -1px; border-bottom: 3px solid #0E6E6A; border-left: 3px solid #0E6E6A; }
+        .product-grid .facility-card:nth-child(4n+3)::before,
+        .product-grid .facility-card:nth-child(4n+3)::after {
+            content: ''; position: absolute; width: 16px; height: 16px; z-index: 5;
+        }
+        .product-grid .facility-card:nth-child(4n+3)::before { top: -1px; left: -1px; border-top: 3px solid #0E6E6A; border-left: 3px solid #0E6E6A; }
+        .product-grid .facility-card:nth-child(4n+3)::after { bottom: -1px; right: -1px; border-bottom: 3px solid #0E6E6A; border-right: 3px solid #0E6E6A; }
         .fc-image {
             position: relative;
             height: 200px;
@@ -121,13 +176,14 @@
             position: absolute;
             top: 15px;
             left: 15px;
-            background-color: var(--primary);
-            color: var(--navy);
+            background-color: rgba(14,110,106,.14);
+            color: #0A5652;
             font-size: 12px;
             font-weight: 700;
             padding: 4px 12px;
             border-radius: 20px;
             box-shadow: var(--shadow-small);
+            backdrop-filter: blur(4px);
         }
 
         /* Promotion badge: sits top-right so it never collides with the sport badge (top-left) */
@@ -196,38 +252,48 @@
             flex-direction: column;
         }
         .fc-title {
+            font-family: 'Be Vietnam Pro', 'Outfit', sans-serif;
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 10px;
-            color: var(--navy);
+            color: #12201B;
             line-height: 1.4;
         }
         .fc-address {
             font-size: 14px;
-            color: var(--muted-text);
+            color: #5C6B64;
             margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
             gap: 8px;
         }
-        .fc-address i { margin-top: 3px; color: var(--primary); }
+        .fc-address i { margin-top: 3px; color: #0E6E6A; }
         .fc-footer {
             margin-top: auto;
             padding-top: 15px;
-            border-top: 1px dashed var(--border);
+            border-top: 1px dashed #E2E5E0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .fc-time {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--body-text);
+            font-family: var(--vs-scoreboard-font, 'Space Mono', monospace);
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: .02em;
+            color: #0A5652;
+            background: rgba(14,110,106,.08);
+            padding: 4px 8px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .fc-time i { color: var(--primary); }
+        .fc-time i { color: #0E6E6A; font-family: 'Font Awesome 6 Free'; }
+        .facility-card .fc-footer .btn.btn-primary {
+            background: #0E6E6A; border-color: #0E6E6A;
+        }
+        .facility-card .fc-footer .btn.btn-primary:hover { background: #0A5652; border-color: #0A5652; }
         
         /* Empty State */
         .empty-state {
@@ -331,29 +397,36 @@
     <jsp:include page="/common/header-xtra.jsp" />
 
     <main class="main-content container">
-        <div class="products-header">
-            <h2 class="section-title">Khám Phá Sân</h2>
-        </div>
-        
-        <form id="tkSearchForm" action="${ctx}/customer/tim-kiem" method="GET">
-            <input type="hidden" name="q" value="<c:out value='${query}'/>">
 
-            <div class="filter-chips">
-                <button type="button" class="chip <c:if test='${empty sportId}'>active</c:if>" onclick="selectSport('')">
-                    Tất cả
-                </button>
-                <c:forEach var="m" items="${dsMon}">
-                    <button type="button" class="chip <c:if test='${sportId == m.monTheThaoID}'>active</c:if>" onclick="selectSport('${m.monTheThaoID}')">
-                        <c:out value="${m.tenMon}"/>
+        <form id="tkSearchForm" action="${ctx}/customer/tim-kiem" method="GET">
+            <div class="tk-searchbar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="q" placeholder="Tìm kiếm sân, địa điểm..." value="<c:out value='${query}'/>" autocomplete="off">
+            </div>
+
+            <div class="tk-toolbar">
+                <div class="filter-chips">
+                    <button type="button" class="chip <c:if test='${empty sportId}'>active</c:if>" onclick="selectSport('')">
+                        Tất cả
                     </button>
-                </c:forEach>
-                <button type="button" class="chip chip-promo <c:if test='${hasPromotion}'>active</c:if>" onclick="toggleHasPromotion()">
-                    <i class="fa-solid fa-tag" style="margin-right:6px;"></i>Có khuyến mãi
+                    <c:forEach var="m" items="${dsMon}">
+                        <button type="button" class="chip <c:if test='${sportId == m.monTheThaoID}'>active</c:if>" onclick="selectSport('${m.monTheThaoID}')">
+                            <c:out value="${m.tenMon}"/>
+                        </button>
+                    </c:forEach>
+                    <button type="button" class="chip chip-promo <c:if test='${hasPromotion}'>active</c:if>" onclick="toggleHasPromotion()">
+                        <i class="fa-solid fa-tag" style="margin-right:6px;"></i>Có khuyến mãi
+                    </button>
+                </div>
+                <button type="button" class="tk-advfilter-btn" onclick="openFilterModal()">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Bộ lọc nâng cao</span>
                 </button>
             </div>
 
             <c:if test="${not empty sportId or openNow or hasPromotion}">
                 <div class="active-filters">
+                    <span class="active-filters__label">Đang lọc theo:</span>
                     <c:if test="${not empty sportId}">
                         <c:forEach var="m" items="${dsMon}">
                             <c:if test="${m.monTheThaoID == sportId}">
@@ -429,6 +502,9 @@
                 </div>
             </c:when>
             <c:otherwise>
+                <div class="tk-results-head">
+                    <h1>Tìm thấy <c:out value="${fn:length(tkVisibleResults)}"/> sân phù hợp</h1>
+                </div>
                 <div class="product-grid" id="facilityGrid">
                     <%
                         List<CoSo> tkResults = tkVisibleResults;

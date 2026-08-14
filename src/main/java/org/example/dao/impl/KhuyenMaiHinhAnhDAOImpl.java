@@ -16,7 +16,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
     @Override
     public List<KhuyenMaiHinhAnh> findByKhuyenMaiId(int khuyenMaiId) {
         List<KhuyenMaiHinhAnh> list = new ArrayList<>();
-        String sql = "SELECT * FROM promotion_images WHERE promotion_id = ? ORDER BY display_order ASC, image_id ASC";
+        String sql = "SELECT * FROM KhuyenMaiHinhAnh WHERE KhuyenMaiID = ? ORDER BY ThuTu ASC, HinhAnhID ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
@@ -35,8 +35,8 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
         if (khuyenMaiIds == null || khuyenMaiIds.isEmpty()) return result;
         List<Integer> ids = new ArrayList<>(new LinkedHashSet<>(khuyenMaiIds));
         String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
-        String sql = "SELECT * FROM promotion_images WHERE promotion_id IN (" + placeholders + ") " +
-                     "ORDER BY promotion_id ASC, display_order ASC, image_id ASC";
+        String sql = "SELECT * FROM KhuyenMaiHinhAnh WHERE KhuyenMaiID IN (" + placeholders + ") " +
+                     "ORDER BY KhuyenMaiID ASC, ThuTu ASC, HinhAnhID ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < ids.size(); i++) ps.setInt(i + 1, ids.get(i));
@@ -54,7 +54,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public KhuyenMaiHinhAnh findByIdAndKhuyenMaiId(int hinhAnhId, int khuyenMaiId) {
-        String sql = "SELECT * FROM promotion_images WHERE image_id = ? AND promotion_id = ?";
+        String sql = "SELECT * FROM KhuyenMaiHinhAnh WHERE HinhAnhID = ? AND KhuyenMaiID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hinhAnhId);
@@ -70,7 +70,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public int countByKhuyenMaiId(int khuyenMaiId) {
-        String sql = "SELECT COUNT(*) FROM promotion_images WHERE promotion_id = ?";
+        String sql = "SELECT COUNT(*) FROM KhuyenMaiHinhAnh WHERE KhuyenMaiID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
@@ -85,7 +85,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public long sumDungLuongByKhuyenMaiId(int khuyenMaiId) {
-        String sql = "SELECT COALESCE(SUM(file_size), 0) FROM promotion_images WHERE promotion_id = ?";
+        String sql = "SELECT COALESCE(SUM(DungLuong), 0) FROM KhuyenMaiHinhAnh WHERE KhuyenMaiID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
@@ -100,7 +100,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public int countByKhuyenMaiIdForUpdate(Connection conn, int khuyenMaiId) {
-        String sql = "SELECT COUNT(*) FROM promotion_images WITH (UPDLOCK, HOLDLOCK) WHERE promotion_id = ?";
+        String sql = "SELECT COUNT(*) FROM KhuyenMaiHinhAnh WITH (UPDLOCK, HOLDLOCK) WHERE KhuyenMaiID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -114,7 +114,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public long sumDungLuongByKhuyenMaiIdForUpdate(Connection conn, int khuyenMaiId) {
-        String sql = "SELECT COALESCE(SUM(file_size), 0) FROM promotion_images WITH (UPDLOCK, HOLDLOCK) WHERE promotion_id = ?";
+        String sql = "SELECT COALESCE(SUM(DungLuong), 0) FROM KhuyenMaiHinhAnh WITH (UPDLOCK, HOLDLOCK) WHERE KhuyenMaiID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -128,7 +128,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public int maxThuTu(Connection conn, int khuyenMaiId) {
-        String sql = "SELECT COALESCE(MAX(display_order), -1) FROM promotion_images WITH (UPDLOCK, HOLDLOCK) WHERE promotion_id = ?";
+        String sql = "SELECT COALESCE(MAX(ThuTu), -1) FROM KhuyenMaiHinhAnh WITH (UPDLOCK, HOLDLOCK) WHERE KhuyenMaiID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -142,8 +142,8 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public int insert(Connection conn, KhuyenMaiHinhAnh img) {
-        String sql = "INSERT INTO promotion_images " +
-                "(promotion_id, file_path, original_file_name, mime_type, file_size, width, height, display_order, is_cover) " +
+        String sql = "INSERT INTO KhuyenMaiHinhAnh " +
+                "(KhuyenMaiID, DuongDan, TenFileGoc, MimeType, DungLuong, ChieuRong, ChieuCao, ThuTu, LaAnhBia) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, img.getKhuyenMaiId());
@@ -169,7 +169,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public boolean delete(Connection conn, int hinhAnhId, int khuyenMaiId) {
-        String sql = "DELETE FROM promotion_images WHERE image_id = ? AND promotion_id = ?";
+        String sql = "DELETE FROM KhuyenMaiHinhAnh WHERE HinhAnhID = ? AND KhuyenMaiID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hinhAnhId);
             ps.setInt(2, khuyenMaiId);
@@ -182,7 +182,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public boolean clearCover(Connection conn, int khuyenMaiId) {
-        String sql = "UPDATE promotion_images SET is_cover = 0, updated_at = SYSDATETIME() WHERE promotion_id = ? AND is_cover = 1";
+        String sql = "UPDATE KhuyenMaiHinhAnh SET LaAnhBia = 0, UpdatedAt = SYSDATETIME() WHERE KhuyenMaiID = ? AND LaAnhBia = 1";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
             ps.executeUpdate();
@@ -195,7 +195,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public boolean setCover(Connection conn, int hinhAnhId, int khuyenMaiId) {
-        String sql = "UPDATE promotion_images SET is_cover = 1, updated_at = SYSDATETIME() WHERE image_id = ? AND promotion_id = ?";
+        String sql = "UPDATE KhuyenMaiHinhAnh SET LaAnhBia = 1, UpdatedAt = SYSDATETIME() WHERE HinhAnhID = ? AND KhuyenMaiID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, hinhAnhId);
             ps.setInt(2, khuyenMaiId);
@@ -208,7 +208,7 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     @Override
     public boolean updateThuTu(Connection conn, int hinhAnhId, int khuyenMaiId, int thuTu) {
-        String sql = "UPDATE promotion_images SET display_order = ?, updated_at = SYSDATETIME() WHERE image_id = ? AND promotion_id = ?";
+        String sql = "UPDATE KhuyenMaiHinhAnh SET ThuTu = ?, UpdatedAt = SYSDATETIME() WHERE HinhAnhID = ? AND KhuyenMaiID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, thuTu);
             ps.setInt(2, hinhAnhId);
@@ -223,8 +223,8 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
     @Override
     public List<KhuyenMaiHinhAnh> deleteAllByKhuyenMaiId(Connection conn, int khuyenMaiId) {
         List<KhuyenMaiHinhAnh> removed = new ArrayList<>();
-        String selectSql = "SELECT * FROM promotion_images WHERE promotion_id = ?";
-        String deleteSql = "DELETE FROM promotion_images WHERE promotion_id = ?";
+        String selectSql = "SELECT * FROM KhuyenMaiHinhAnh WHERE KhuyenMaiID = ?";
+        String deleteSql = "DELETE FROM KhuyenMaiHinhAnh WHERE KhuyenMaiID = ?";
         try (PreparedStatement selectPs = conn.prepareStatement(selectSql)) {
             selectPs.setInt(1, khuyenMaiId);
             try (ResultSet rs = selectPs.executeQuery()) {
@@ -242,22 +242,22 @@ public class KhuyenMaiHinhAnhDAOImpl implements KhuyenMaiHinhAnhDAO {
 
     private KhuyenMaiHinhAnh map(ResultSet rs) throws SQLException {
         KhuyenMaiHinhAnh img = new KhuyenMaiHinhAnh();
-        img.setHinhAnhId(rs.getInt("image_id"));
-        img.setKhuyenMaiId(rs.getInt("promotion_id"));
-        img.setDuongDan(rs.getString("file_path"));
-        img.setTenFileGoc(rs.getString("original_file_name"));
-        img.setMimeType(rs.getString("mime_type"));
-        long dungLuong = rs.getLong("file_size");
+        img.setHinhAnhId(rs.getInt("HinhAnhID"));
+        img.setKhuyenMaiId(rs.getInt("KhuyenMaiID"));
+        img.setDuongDan(rs.getString("DuongDan"));
+        img.setTenFileGoc(rs.getString("TenFileGoc"));
+        img.setMimeType(rs.getString("MimeType"));
+        long dungLuong = rs.getLong("DungLuong");
         if (!rs.wasNull()) img.setDungLuong(dungLuong);
-        int chieuRong = rs.getInt("width");
+        int chieuRong = rs.getInt("ChieuRong");
         if (!rs.wasNull()) img.setChieuRong(chieuRong);
-        int chieuCao = rs.getInt("height");
+        int chieuCao = rs.getInt("ChieuCao");
         if (!rs.wasNull()) img.setChieuCao(chieuCao);
-        img.setThuTu(rs.getInt("display_order"));
-        img.setLaAnhBia(rs.getBoolean("is_cover"));
-        Timestamp createdAt = rs.getTimestamp("created_at");
+        img.setThuTu(rs.getInt("ThuTu"));
+        img.setLaAnhBia(rs.getBoolean("LaAnhBia"));
+        Timestamp createdAt = rs.getTimestamp("CreatedAt");
         if (createdAt != null) img.setCreatedAt(createdAt.toLocalDateTime());
-        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        Timestamp updatedAt = rs.getTimestamp("UpdatedAt");
         if (updatedAt != null) img.setUpdatedAt(updatedAt.toLocalDateTime());
         return img;
     }

@@ -4,41 +4,41 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "customer_reputation_history")
+@Table(name = "CustomerReputationHistory")
 public class CustomerReputationHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reputation_history_id")
+    @Column(name = "ReputationHistoryID")
     private long reputationHistoryId;
 
-    @Column(name = "account_id")
+    @Column(name = "AccountID")
     private int accountId;
 
-    @Column(name = "booking_id")
+    @Column(name = "DatSanID")
     private Integer datSanId;
 
-    @Column(name = "action_type", length = 30)
+    @Column(name = "ActionType", length = 30)
     private String actionType;
 
-    @Column(name = "score_delta")
+    @Column(name = "ScoreDelta")
     private int scoreDelta;
 
-    @Column(name = "score_before")
+    @Column(name = "ScoreBefore")
     private int scoreBefore;
 
-    @Column(name = "score_after")
+    @Column(name = "ScoreAfter")
     private int scoreAfter;
 
-    @Column(name = "reason", length = 255)
+    @Column(name = "Reason", length = 255)
     private String reason;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "CreatedAt", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "created_by")
+    @Column(name = "CreatedBy")
     private Integer createdBy;
 
-    @Column(name = "ip_address", length = 50)
+    @Column(name = "IpAddress", length = 50)
     private String ipAddress;
 
     public long getReputationHistoryId() { return reputationHistoryId; }

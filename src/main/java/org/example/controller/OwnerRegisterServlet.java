@@ -376,6 +376,8 @@ public class OwnerRegisterServlet extends HttpServlet {
                 managerAcc.setCoSoId(coSo.getCoSoID());
                 managerAcc.setIsLocked(true);
                 managerAcc.setDiemUyTin(100);
+                managerAcc.setDiemTrinhDo(1000);
+                managerAcc.setNhanThongBaoSos(true);
                 em.persist(managerAcc);
                 em.flush();
             }

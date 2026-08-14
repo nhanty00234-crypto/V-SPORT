@@ -47,12 +47,12 @@ public class BookingLifecycleService {
      * - Thấp. Chỉ tác động tới những bản ghi thỏa mãn điều kiện quá hạn.
      */
     public static void runExpirySweep() {
-        String sql = "UPDATE bookings " +
-                "SET status = ?, " +
-                "    note = CONCAT(ISNULL(note, N''), N' [Tự động: Quá hạn giữ chỗ thanh toán]') " +
-                "WHERE status = ? " +
-                "AND hold_expires_at IS NOT NULL " +
-                "AND hold_expires_at < SYSUTCDATETIME()";
+        String sql = "UPDATE LichDatSan " +
+                "SET TrangThai = ?, " +
+                "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Tự động: Quá hạn giữ chỗ thanh toán]') " +
+                "WHERE TrangThai = ? " +
+                "AND HoldExpiresAt IS NOT NULL " +
+                "AND HoldExpiresAt < SYSUTCDATETIME()";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -70,12 +70,12 @@ public class BookingLifecycleService {
         // giữ chỗ có hạn được thêm vào) không bao giờ được sweep ở trên nên kẹt vĩnh viễn, vô hình
         // với Manager. Không chặn overlap (HoldExpiresAt IS NULL đã bị loại ở mọi query overlap),
         // nhưng vẫn cần dọn để không tồn đọng mãi - dùng giờ kết thúc theo lịch làm mốc hết hạn dự phòng.
-        String legacySql = "UPDATE bookings " +
-                "SET status = ?, " +
-                "    note = CONCAT(ISNULL(note, N''), N' [Tự động: Quá hạn giữ chỗ thanh toán - dữ liệu cũ không có hold_expires_at]') " +
-                "WHERE status = ? " +
-                "AND hold_expires_at IS NULL " +
-                "AND CAST(booking_date AS DATETIME) + CAST(end_time AS DATETIME) < GETDATE()";
+        String legacySql = "UPDATE LichDatSan " +
+                "SET TrangThai = ?, " +
+                "    GhiChu = CONCAT(ISNULL(GhiChu, N''), N' [Tự động: Quá hạn giữ chỗ thanh toán - dữ liệu cũ không có HoldExpiresAt]') " +
+                "WHERE TrangThai = ? " +
+                "AND HoldExpiresAt IS NULL " +
+                "AND CAST(NgayDat AS DATETIME) + CAST(GioKetThuc AS DATETIME) < GETDATE()";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(legacySql)) {
             ps.setNString(1, Constants.TRANG_THAI_DAT_SAN_QUA_HAN);

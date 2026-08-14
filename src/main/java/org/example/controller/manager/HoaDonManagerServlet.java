@@ -57,9 +57,9 @@ public class HoaDonManagerServlet extends HttpServlet {
         Map<String, Object> stats = new HashMap<>();
 
         try (Connection conn = DBUtil.getConnection()) {
-            boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
-            boolean hasParentHoaDonID = columnExists(conn, "invoices", "parent_invoice_id");
-            boolean hasGhiChu = columnExists(conn, "invoices", "note");
+            boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+            boolean hasParentHoaDonID = columnExists(conn, "HoaDon", "ParentHoaDonID");
+            boolean hasGhiChu = columnExists(conn, "HoaDon", "GhiChu");
             // Stats
             String sqlStats = buildStatsSql(hasLoaiHoaDon);
             try (PreparedStatement ps = conn.prepareStatement(sqlStats)) {
@@ -76,12 +76,12 @@ public class HoaDonManagerServlet extends HttpServlet {
 
             // Build WHERE clause
             StringBuilder where = new StringBuilder(
-                "WHERE s.facility_id = ? ");
+                "WHERE s.CoSoID = ? ");
             List<Object> params = new ArrayList<>();
             params.add(user.getCoSoId());
 
             if (filterStatus != null && !filterStatus.isEmpty()) {
-                where.append("AND hd.payment_status = ? ");
+                where.append("AND hd.TrangThaiThanhToan = ? ");
                 params.add(filterStatus);
             }
             if (filterLoai != null && !filterLoai.isEmpty()) {
@@ -90,32 +90,32 @@ public class HoaDonManagerServlet extends HttpServlet {
                         where.append("AND 1 = 0 ");
                     }
                 } else if ("MAIN".equals(filterLoai)) {
-                    where.append("AND (hd.invoice_type = N'MAIN' OR hd.invoice_type IS NULL) ");
+                    where.append("AND (hd.LoaiHoaDon = N'MAIN' OR hd.LoaiHoaDon IS NULL) ");
                 } else {
-                    where.append("AND hd.invoice_type = ? ");
+                    where.append("AND hd.LoaiHoaDon = ? ");
                     params.add(filterLoai);
                 }
             }
             if (filterFrom != null && !filterFrom.isEmpty()) {
-                where.append("AND CAST(hd.issued_at AS DATE) >= ? ");
+                where.append("AND CAST(hd.NgayLap AS DATE) >= ? ");
                 params.add(filterFrom);
             }
             if (filterTo != null && !filterTo.isEmpty()) {
-                where.append("AND CAST(hd.issued_at AS DATE) <= ? ");
+                where.append("AND CAST(hd.NgayLap AS DATE) <= ? ");
                 params.add(filterTo);
             }
             if (filterSearch != null && !filterSearch.trim().isEmpty()) {
-                where.append("AND (CAST(hd.invoice_id AS NVARCHAR) LIKE ? OR acc.full_name LIKE ? OR s.court_name LIKE ?) ");
+                where.append("AND (CAST(hd.HoaDonID AS NVARCHAR) LIKE ? OR acc.FullName LIKE ? OR s.TenSan LIKE ?) ");
                 String like = "%" + filterSearch.trim() + "%";
                 params.add(like); params.add(like); params.add(like);
             }
 
             String baseQuery =
-                "FROM invoices hd " +
-                "INNER JOIN bookings lds ON hd.booking_id = lds.booking_id " +
-                "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                "LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
-                "LEFT JOIN accounts nv ON hd.staff_account_id = nv.account_id " +
+                "FROM HoaDon hd " +
+                "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
+                "INNER JOIN San s ON lds.SanID = s.SanID " +
+                "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
+                "LEFT JOIN Accounts nv ON hd.AccountID_NhanVien = nv.AccountID " +
                 where;
 
             // Count
@@ -131,15 +131,15 @@ public class HoaDonManagerServlet extends HttpServlet {
 
             // Data
             String sqlList =
-                "SELECT hd.invoice_id, hd.booking_id, hd.issued_at, hd.court_total, hd.service_total, " +
-                "hd.grand_total, hd.payment_status, hd.payment_method, " +
-                (hasLoaiHoaDon ? "hd.invoice_type" : "CAST(N'MAIN' AS NVARCHAR(50))") + " AS invoice_type, " +
-                (hasGhiChu ? "hd.note" : "CAST(NULL AS NVARCHAR(500))") + " AS note, " +
-                (hasParentHoaDonID ? "hd.parent_invoice_id" : "CAST(NULL AS INT)") + " AS parent_invoice_id, " +
-                "s.court_name, lds.booking_date, lds.start_time, lds.end_time, " +
-                "acc.full_name AS TenKhachHang, nv.full_name AS TenNhanVien " +
+                "SELECT hd.HoaDonID, hd.DatSanID, hd.NgayLap, hd.TongTienSan, hd.TongTienDichVu, " +
+                "hd.TongThanhToan, hd.TrangThaiThanhToan, hd.PhuongThucThanhToan, " +
+                (hasLoaiHoaDon ? "hd.LoaiHoaDon" : "CAST(N'MAIN' AS NVARCHAR(50))") + " AS LoaiHoaDon, " +
+                (hasGhiChu ? "hd.GhiChu" : "CAST(NULL AS NVARCHAR(500))") + " AS GhiChu, " +
+                (hasParentHoaDonID ? "hd.ParentHoaDonID" : "CAST(NULL AS INT)") + " AS ParentHoaDonID, " +
+                "s.TenSan, lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, " +
+                "acc.FullName AS TenKhachHang, nv.FullName AS TenNhanVien " +
                 baseQuery +
-                "ORDER BY hd.issued_at DESC " +
+                "ORDER BY hd.NgayLap DESC " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             List<Object> listParams = new ArrayList<>(params);
             listParams.add(offset);
@@ -151,23 +151,23 @@ public class HoaDonManagerServlet extends HttpServlet {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> row = new LinkedHashMap<>();
-                        row.put("hoaDonId",          rs.getInt("invoice_id"));
-                        row.put("datSanId",           rs.getInt("booking_id"));
-                        row.put("ngayLap",            rs.getTimestamp("issued_at") != null
-                                ? rs.getTimestamp("issued_at").toString().substring(0, 16) : "");
-                        row.put("tongTienSan",        rs.getDouble("court_total"));
-                        row.put("tongTienDichVu",     rs.getDouble("service_total"));
-                        row.put("tongThanhToan",      rs.getDouble("grand_total"));
-                        row.put("trangThai",          rs.getString("payment_status"));
-                        row.put("phuongThuc",         rs.getString("payment_method"));
-                        String loai = rs.getString("invoice_type");
+                        row.put("hoaDonId",          rs.getInt("HoaDonID"));
+                        row.put("datSanId",           rs.getInt("DatSanID"));
+                        row.put("ngayLap",            rs.getTimestamp("NgayLap") != null
+                                ? rs.getTimestamp("NgayLap").toString().substring(0, 16) : "");
+                        row.put("tongTienSan",        rs.getDouble("TongTienSan"));
+                        row.put("tongTienDichVu",     rs.getDouble("TongTienDichVu"));
+                        row.put("tongThanhToan",      rs.getDouble("TongThanhToan"));
+                        row.put("trangThai",          rs.getString("TrangThaiThanhToan"));
+                        row.put("phuongThuc",         rs.getString("PhuongThucThanhToan"));
+                        String loai = rs.getString("LoaiHoaDon");
                         row.put("loaiHoaDon",         loai == null ? "MAIN" : loai);
-                        row.put("ghiChu",             rs.getString("note"));
-                        row.put("parentHoaDonId",     rs.getObject("parent_invoice_id"));
-                        row.put("tenSan",             rs.getString("court_name"));
-                        row.put("ngayDat",            rs.getDate("booking_date") != null ? rs.getDate("booking_date").toString() : "");
-                        row.put("gioBatDau",          rs.getTime("start_time") != null ? rs.getTime("start_time").toString().substring(0,5) : "");
-                        row.put("gioKetThuc",         rs.getTime("end_time") != null ? rs.getTime("end_time").toString().substring(0,5) : "");
+                        row.put("ghiChu",             rs.getString("GhiChu"));
+                        row.put("parentHoaDonId",     rs.getObject("ParentHoaDonID"));
+                        row.put("tenSan",             rs.getString("TenSan"));
+                        row.put("ngayDat",            rs.getDate("NgayDat") != null ? rs.getDate("NgayDat").toString() : "");
+                        row.put("gioBatDau",          rs.getTime("GioBatDau") != null ? rs.getTime("GioBatDau").toString().substring(0,5) : "");
+                        row.put("gioKetThuc",         rs.getTime("GioKetThuc") != null ? rs.getTime("GioKetThuc").toString().substring(0,5) : "");
                         row.put("tenKhachHang",       rs.getString("TenKhachHang"));
                         row.put("tenNhanVien",        rs.getString("TenNhanVien"));
                         invoices.add(row);
@@ -253,23 +253,23 @@ public class HoaDonManagerServlet extends HttpServlet {
             Map<String, Object> detail = new LinkedHashMap<>();
 
             try (Connection conn = DBUtil.getConnection()) {
-                boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
-                boolean hasParentHoaDonID = columnExists(conn, "invoices", "parent_invoice_id");
-                boolean hasGhiChu = columnExists(conn, "invoices", "note");
+                boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                boolean hasParentHoaDonID = columnExists(conn, "HoaDon", "ParentHoaDonID");
+                boolean hasGhiChu = columnExists(conn, "HoaDon", "GhiChu");
                 String sql =
-                    "SELECT hd.invoice_id, hd.booking_id, hd.issued_at, hd.court_total, hd.service_total, " +
-                    "hd.parking_fee, hd.discount_amount, hd.grand_total, hd.payment_status, hd.payment_method, " +
-                    (hasLoaiHoaDon ? "hd.invoice_type" : "CAST(N'MAIN' AS NVARCHAR(50))") + " AS invoice_type, " +
-                    (hasGhiChu ? "hd.note" : "CAST(NULL AS NVARCHAR(500))") + " AS note, " +
-                    (hasParentHoaDonID ? "hd.parent_invoice_id" : "CAST(NULL AS INT)") + " AS parent_invoice_id, " +
-                    "s.court_name, s.facility_id, lds.booking_date, lds.start_time, lds.end_time, " +
-                    "acc.full_name AS TenKhachHang, nv.full_name AS TenNhanVien " +
-                    "FROM invoices hd " +
-                    "INNER JOIN bookings lds ON hd.booking_id = lds.booking_id " +
-                    "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                    "LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
-                    "LEFT JOIN accounts nv ON hd.staff_account_id = nv.account_id " +
-                    "WHERE hd.invoice_id = ? AND s.facility_id = ?";
+                    "SELECT hd.HoaDonID, hd.DatSanID, hd.NgayLap, hd.TongTienSan, hd.TongTienDichVu, " +
+                    "hd.PhiGuiXe, hd.GiamGia, hd.TongThanhToan, hd.TrangThaiThanhToan, hd.PhuongThucThanhToan, " +
+                    (hasLoaiHoaDon ? "hd.LoaiHoaDon" : "CAST(N'MAIN' AS NVARCHAR(50))") + " AS LoaiHoaDon, " +
+                    (hasGhiChu ? "hd.GhiChu" : "CAST(NULL AS NVARCHAR(500))") + " AS GhiChu, " +
+                    (hasParentHoaDonID ? "hd.ParentHoaDonID" : "CAST(NULL AS INT)") + " AS ParentHoaDonID, " +
+                    "s.TenSan, s.CoSoID, lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, " +
+                    "acc.FullName AS TenKhachHang, nv.FullName AS TenNhanVien " +
+                    "FROM HoaDon hd " +
+                    "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
+                    "INNER JOIN San s ON lds.SanID = s.SanID " +
+                    "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
+                    "LEFT JOIN Accounts nv ON hd.AccountID_NhanVien = nv.AccountID " +
+                    "WHERE hd.HoaDonID = ? AND s.CoSoID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, hoaDonId);
                     ps.setInt(2, user.getCoSoId());
@@ -278,25 +278,25 @@ public class HoaDonManagerServlet extends HttpServlet {
                             resp.getWriter().write("{\"ok\":false,\"msg\":\"Không tìm thấy hóa đơn.\"}");
                             return;
                         }
-                        String loai = rs.getString("invoice_type");
-                        detail.put("hoaDonId",         rs.getInt("invoice_id"));
-                        detail.put("datSanId",          rs.getInt("booking_id"));
-                        detail.put("ngayLap",           rs.getTimestamp("issued_at") != null
-                                ? rs.getTimestamp("issued_at").toString().substring(0, 16) : "");
-                        detail.put("tongTienSan",       rs.getDouble("court_total"));
-                        detail.put("tongTienDichVu",    rs.getDouble("service_total"));
-                        detail.put("phiGuiXe",          rs.getDouble("parking_fee"));
-                        detail.put("giamGia",           rs.getDouble("discount_amount"));
-                        detail.put("tongThanhToan",     rs.getDouble("grand_total"));
-                        detail.put("trangThai",         rs.getString("payment_status"));
-                        detail.put("phuongThuc",        rs.getString("payment_method"));
+                        String loai = rs.getString("LoaiHoaDon");
+                        detail.put("hoaDonId",         rs.getInt("HoaDonID"));
+                        detail.put("datSanId",          rs.getInt("DatSanID"));
+                        detail.put("ngayLap",           rs.getTimestamp("NgayLap") != null
+                                ? rs.getTimestamp("NgayLap").toString().substring(0, 16) : "");
+                        detail.put("tongTienSan",       rs.getDouble("TongTienSan"));
+                        detail.put("tongTienDichVu",    rs.getDouble("TongTienDichVu"));
+                        detail.put("phiGuiXe",          rs.getDouble("PhiGuiXe"));
+                        detail.put("giamGia",           rs.getDouble("GiamGia"));
+                        detail.put("tongThanhToan",     rs.getDouble("TongThanhToan"));
+                        detail.put("trangThai",         rs.getString("TrangThaiThanhToan"));
+                        detail.put("phuongThuc",        rs.getString("PhuongThucThanhToan"));
                         detail.put("loaiHoaDon",        loai == null ? "MAIN" : loai);
-                        detail.put("ghiChu",            rs.getString("note"));
-                        detail.put("parentHoaDonId",    rs.getObject("parent_invoice_id"));
-                        detail.put("tenSan",            rs.getString("court_name"));
-                        detail.put("ngayDat",           rs.getDate("booking_date") != null ? rs.getDate("booking_date").toString() : "");
-                        detail.put("gioBatDau",         rs.getTime("start_time") != null ? rs.getTime("start_time").toString().substring(0,5) : "");
-                        detail.put("gioKetThuc",        rs.getTime("end_time") != null ? rs.getTime("end_time").toString().substring(0,5) : "");
+                        detail.put("ghiChu",            rs.getString("GhiChu"));
+                        detail.put("parentHoaDonId",    rs.getObject("ParentHoaDonID"));
+                        detail.put("tenSan",            rs.getString("TenSan"));
+                        detail.put("ngayDat",           rs.getDate("NgayDat") != null ? rs.getDate("NgayDat").toString() : "");
+                        detail.put("gioBatDau",         rs.getTime("GioBatDau") != null ? rs.getTime("GioBatDau").toString().substring(0,5) : "");
+                        detail.put("gioKetThuc",        rs.getTime("GioKetThuc") != null ? rs.getTime("GioKetThuc").toString().substring(0,5) : "");
                         detail.put("tenKhachHang",      rs.getString("TenKhachHang"));
                         detail.put("tenNhanVien",       rs.getString("TenNhanVien"));
                     }
@@ -304,20 +304,20 @@ public class HoaDonManagerServlet extends HttpServlet {
 
                 // Line items
                 String sqlItems =
-                    "SELECT sp.product_name, ct.quantity, ct.unit_price_at_sale, ct.line_total " +
-                    "FROM invoice_items ct " +
-                    "INNER JOIN products_services sp ON ct.product_id = sp.product_id " +
-                    "WHERE ct.invoice_id = ?";
+                    "SELECT sp.TenSanPham, ct.SoLuong, ct.DonGiaTaiThoiDiemBan, ct.ThanhTien " +
+                    "FROM ChiTietHoaDon ct " +
+                    "INNER JOIN SanPham_DichVu sp ON ct.SanPhamID = sp.SanPhamID " +
+                    "WHERE ct.HoaDonID = ?";
                 List<Map<String, Object>> items = new ArrayList<>();
                 try (PreparedStatement ps = conn.prepareStatement(sqlItems)) {
                     ps.setInt(1, hoaDonId);
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
                             Map<String, Object> item = new LinkedHashMap<>();
-                            item.put("tenSanPham", rs.getString("product_name"));
-                            item.put("soLuong",    rs.getInt("quantity"));
-                            item.put("donGia",     rs.getDouble("unit_price_at_sale"));
-                            item.put("thanhTien",  rs.getDouble("line_total"));
+                            item.put("tenSanPham", rs.getString("TenSanPham"));
+                            item.put("soLuong",    rs.getInt("SoLuong"));
+                            item.put("donGia",     rs.getDouble("DonGiaTaiThoiDiemBan"));
+                            item.put("thanhTien",  rs.getDouble("ThanhTien"));
                             items.add(item);
                         }
                     }
@@ -336,7 +336,7 @@ public class HoaDonManagerServlet extends HttpServlet {
             throws IOException {
         resp.setContentType("application/json;charset=UTF-8");
         try (Connection conn = DBUtil.getConnection()) {
-            String sql = buildStatsSql(columnExists(conn, "invoices", "invoice_type"));
+            String sql = buildStatsSql(columnExists(conn, "HoaDon", "LoaiHoaDon"));
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, user.getCoSoId());
                 try (ResultSet rs = ps.executeQuery()) {
@@ -360,21 +360,21 @@ public class HoaDonManagerServlet extends HttpServlet {
 
     private List<Map<String, Object>> loadServiceProducts(int coSoId) {
         List<Map<String, Object>> products = new ArrayList<>();
-        String sql = "SELECT product_id, product_name, unit_price, unit_of_measure, stock_quantity " +
-                     "FROM products_services " +
-                     "WHERE facility_id = ? AND (status IS NULL OR status <> N'Ngừng kinh doanh') " +
-                     "AND ISNULL(is_deleted, 0) = 0 " +
-                     "ORDER BY product_name";
+        String sql = "SELECT SanPhamID, TenSanPham, DonGia, DonViTinh, SoLuongTon " +
+                     "FROM SanPham_DichVu " +
+                     "WHERE CoSoID = ? AND (TrangThai IS NULL OR TrangThai <> N'Ngừng kinh doanh') " +
+                     "AND ISNULL(IsDeleted, 0) = 0 " +
+                     "ORDER BY TenSanPham";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new LinkedHashMap<>();
-                    row.put("sanPhamId", rs.getInt("product_id"));
-                    row.put("tenSanPham", rs.getString("product_name"));
-                    row.put("donGia", rs.getDouble("unit_price"));
-                    row.put("donViTinh", rs.getString("unit_of_measure"));
-                    row.put("soLuongTon", rs.getInt("stock_quantity"));
+                    row.put("sanPhamId", rs.getInt("SanPhamID"));
+                    row.put("tenSanPham", rs.getString("TenSanPham"));
+                    row.put("donGia", rs.getDouble("DonGia"));
+                    row.put("donViTinh", rs.getString("DonViTinh"));
+                    row.put("soLuongTon", rs.getInt("SoLuongTon"));
                     products.add(row);
                 }
             }
@@ -386,25 +386,25 @@ public class HoaDonManagerServlet extends HttpServlet {
 
     private List<Map<String, Object>> loadPayableBookings(int coSoId) {
         List<Map<String, Object>> bookings = new ArrayList<>();
-        String sql = "SELECT TOP 80 lds.booking_id, lds.booking_date, lds.start_time, lds.end_time, lds.account_id, " +
-                     "s.court_name, acc.full_name AS TenKhachHang " +
-                     "FROM bookings lds " +
-                     "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                     "LEFT JOIN accounts acc ON lds.account_id = acc.account_id " +
-                     "WHERE s.facility_id = ? AND ISNULL(lds.is_deleted, 0) = 0 " +
-                     "AND lds.status NOT IN (N'Đã hủy', N'Từ chối') " +
-                     "ORDER BY lds.booking_date DESC, lds.start_time DESC";
+        String sql = "SELECT TOP 80 lds.DatSanID, lds.NgayDat, lds.GioBatDau, lds.GioKetThuc, lds.AccountID, " +
+                     "s.TenSan, acc.FullName AS TenKhachHang " +
+                     "FROM LichDatSan lds " +
+                     "INNER JOIN San s ON lds.SanID = s.SanID " +
+                     "LEFT JOIN Accounts acc ON lds.AccountID = acc.AccountID " +
+                     "WHERE s.CoSoID = ? AND ISNULL(lds.IsDeleted, 0) = 0 " +
+                     "AND lds.TrangThai NOT IN (N'Đã hủy', N'Từ chối') " +
+                     "ORDER BY lds.NgayDat DESC, lds.GioBatDau DESC";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new LinkedHashMap<>();
-                    row.put("datSanId", rs.getInt("booking_id"));
-                    row.put("accountId", rs.getObject("account_id"));
-                    row.put("label", "#" + rs.getInt("booking_id") + " · " + rs.getString("court_name") + " · " +
-                            (rs.getDate("booking_date") != null ? rs.getDate("booking_date").toString() : "") + " " +
-                            (rs.getTime("start_time") != null ? rs.getTime("start_time").toString().substring(0, 5) : "") + "-" +
-                            (rs.getTime("end_time") != null ? rs.getTime("end_time").toString().substring(0, 5) : "") +
+                    row.put("datSanId", rs.getInt("DatSanID"));
+                    row.put("accountId", rs.getObject("AccountID"));
+                    row.put("label", "#" + rs.getInt("DatSanID") + " · " + rs.getString("TenSan") + " · " +
+                            (rs.getDate("NgayDat") != null ? rs.getDate("NgayDat").toString() : "") + " " +
+                            (rs.getTime("GioBatDau") != null ? rs.getTime("GioBatDau").toString().substring(0, 5) : "") + "-" +
+                            (rs.getTime("GioKetThuc") != null ? rs.getTime("GioKetThuc").toString().substring(0, 5) : "") +
                             " · " + (rs.getString("TenKhachHang") != null ? rs.getString("TenKhachHang") : "Khách vãng lai"));
                     bookings.add(row);
                 }
@@ -433,24 +433,24 @@ public class HoaDonManagerServlet extends HttpServlet {
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                if (!columnExists(conn, "invoices", "invoice_type") || !columnExists(conn, "invoices", "note")) {
+                if (!columnExists(conn, "HoaDon", "LoaiHoaDon") || !columnExists(conn, "HoaDon", "GhiChu")) {
                     throw new Exception("Database chưa có cột LoaiHoaDon/GhiChu cho hóa đơn dịch vụ. Vui lòng chạy script /sql/migration_hoadon_loai.sql rồi thử lại.");
                 }
                 Integer customerAccountId = null;
-                String sqlBooking = "SELECT lds.account_id, s.facility_id FROM bookings lds INNER JOIN courts s ON lds.court_id = s.court_id WHERE lds.booking_id = ?";
+                String sqlBooking = "SELECT lds.AccountID, s.CoSoID FROM LichDatSan lds INNER JOIN San s ON lds.SanID = s.SanID WHERE lds.DatSanID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlBooking)) {
                     ps.setInt(1, datSanId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) throw new Exception("Không tìm thấy đơn đặt sân #" + datSanId);
-                        if (rs.getInt("facility_id") != user.getCoSoId()) throw new Exception("Đơn đặt sân không thuộc cơ sở của bạn.");
-                        Object accObj = rs.getObject("account_id");
+                        if (rs.getInt("CoSoID") != user.getCoSoId()) throw new Exception("Đơn đặt sân không thuộc cơ sở của bạn.");
+                        Object accObj = rs.getObject("AccountID");
                         if (accObj != null) customerAccountId = ((Number) accObj).intValue();
                     }
                 }
 
                 double total = 0;
                 List<int[]> validItems = new ArrayList<>();
-                String sqlProduct = "SELECT product_name, unit_price, stock_quantity FROM products_services WHERE product_id = ? AND facility_id = ? AND ISNULL(is_deleted, 0) = 0";
+                String sqlProduct = "SELECT TenSanPham, DonGia, SoLuongTon FROM SanPham_DichVu WHERE SanPhamID = ? AND CoSoID = ? AND ISNULL(IsDeleted, 0) = 0";
                 try (PreparedStatement ps = conn.prepareStatement(sqlProduct)) {
                     for (int i = 0; i < productIds.length; i++) {
                         int productId;
@@ -466,9 +466,9 @@ public class HoaDonManagerServlet extends HttpServlet {
                         ps.setInt(2, user.getCoSoId());
                         try (ResultSet rs = ps.executeQuery()) {
                             if (!rs.next()) throw new Exception("Sản phẩm #" + productId + " không thuộc cơ sở của bạn.");
-                            int stock = rs.getInt("stock_quantity");
-                            double price = rs.getDouble("unit_price");
-                            if (stock < qty) throw new Exception("Sản phẩm " + rs.getString("product_name") + " chỉ còn " + stock + ".");
+                            int stock = rs.getInt("SoLuongTon");
+                            double price = rs.getDouble("DonGia");
+                            if (stock < qty) throw new Exception("Sản phẩm " + rs.getString("TenSanPham") + " chỉ còn " + stock + ".");
                             validItems.add(new int[]{productId, qty, (int) Math.round(price)});
                             total += price * qty;
                         }
@@ -477,8 +477,8 @@ public class HoaDonManagerServlet extends HttpServlet {
                 if (validItems.isEmpty() || total <= 0) throw new Exception("Vui lòng nhập số lượng dịch vụ lớn hơn 0.");
 
                 String status = payNow ? "Đã thanh toán" : "Chưa thanh toán";
-                String sqlInsertHD = "INSERT INTO invoices (booking_id, customer_account_id, staff_account_id, issued_at, " +
-                        "court_total, service_total, parking_fee, discount_amount, grand_total, payment_status, payment_method, invoice_type, note) " +
+                String sqlInsertHD = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, AccountID_NhanVien, NgayLap, " +
+                        "TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, TrangThaiThanhToan, PhuongThucThanhToan, LoaiHoaDon, GhiChu) " +
                         "VALUES (?, ?, ?, GETDATE(), 0, ?, 0, 0, ?, ?, ?, N'SPLIT', ?)";
                 int hoaDonId;
                 try (PreparedStatement ps = conn.prepareStatement(sqlInsertHD, Statement.RETURN_GENERATED_KEYS)) {
@@ -497,8 +497,8 @@ public class HoaDonManagerServlet extends HttpServlet {
                     }
                 }
 
-                String sqlInsertCT = "INSERT INTO invoice_items (invoice_id, product_id, quantity, unit_price_at_sale, line_total) VALUES (?, ?, ?, ?, ?)";
-                String sqlStock = "UPDATE products_services SET stock_quantity = stock_quantity - ? WHERE product_id = ? AND facility_id = ? AND stock_quantity >= ?";
+                String sqlInsertCT = "INSERT INTO ChiTietHoaDon (HoaDonID, SanPhamID, SoLuong, DonGiaTaiThoiDiemBan, ThanhTien) VALUES (?, ?, ?, ?, ?)";
+                String sqlStock = "UPDATE SanPham_DichVu SET SoLuongTon = SoLuongTon - ? WHERE SanPhamID = ? AND CoSoID = ? AND SoLuongTon >= ?";
                 try (PreparedStatement psCT = conn.prepareStatement(sqlInsertCT);
                      PreparedStatement psStock = conn.prepareStatement(sqlStock)) {
                     for (int[] item : validItems) {
@@ -537,32 +537,32 @@ public class HoaDonManagerServlet extends HttpServlet {
             conn.setAutoCommit(false);
             try {
                 // Verify invoice belongs to this coSo and is unpaid
-                boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
+                boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
                 String sqlCheck =
-                    "SELECT hd.payment_status, s.facility_id, lds.status AS TrangThaiDatSan, " +
-                    (hasLoaiHoaDon ? "hd.invoice_type" : "CAST(NULL AS NVARCHAR(50))") + " AS invoice_type " +
-                    "FROM invoices hd " +
-                    "INNER JOIN bookings lds ON hd.booking_id = lds.booking_id " +
-                    "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                    "WHERE hd.invoice_id = ?";
+                    "SELECT hd.TrangThaiThanhToan, s.CoSoID, lds.TrangThai AS TrangThaiDatSan, " +
+                    (hasLoaiHoaDon ? "hd.LoaiHoaDon" : "CAST(NULL AS NVARCHAR(50))") + " AS LoaiHoaDon " +
+                    "FROM HoaDon hd " +
+                    "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
+                    "INNER JOIN San s ON lds.SanID = s.SanID " +
+                    "WHERE hd.HoaDonID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlCheck)) {
                     ps.setInt(1, hoaDonId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) throw new Exception("Không tìm thấy hóa đơn #" + hoaDonId);
-                        if (rs.getInt("facility_id") != user.getCoSoId())
+                        if (rs.getInt("CoSoID") != user.getCoSoId())
                             throw new Exception("Hóa đơn không thuộc cơ sở của bạn.");
-                        if ("Đã thanh toán".equals(rs.getString("payment_status")))
+                        if ("Đã thanh toán".equals(rs.getString("TrangThaiThanhToan")))
                             throw new Exception("Hóa đơn này đã được thanh toán trước đó.");
-                        String loaiHoaDon = rs.getString("invoice_type");
+                        String loaiHoaDon = rs.getString("LoaiHoaDon");
                         if (hasLoaiHoaDon && (loaiHoaDon == null || "MAIN".equalsIgnoreCase(loaiHoaDon))) {
                             throw new Exception("Hóa đơn sân chính phải thanh toán tại màn hình Mở sân/Check-in để cập nhật đồng bộ trạng thái sân và lịch đặt.");
                         }
                     }
                 }
                 String sqlPay =
-                    "UPDATE invoices SET payment_status = N'Đã thanh toán', " +
-                    "payment_method = ?, staff_account_id = ?, issued_at = GETDATE() " +
-                    "WHERE invoice_id = ?";
+                    "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', " +
+                    "PhuongThucThanhToan = ?, AccountID_NhanVien = ?, NgayLap = GETDATE() " +
+                    "WHERE HoaDonID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlPay)) {
                     ps.setString(1, paymentMethod.trim());
                     ps.setInt(2, user.getAccountId());
@@ -584,24 +584,24 @@ public class HoaDonManagerServlet extends HttpServlet {
             conn.setAutoCommit(false);
             try {
                 String sqlCheck =
-                    "SELECT hd.payment_status, s.facility_id " +
-                    "FROM invoices hd " +
-                    "INNER JOIN bookings lds ON hd.booking_id = lds.booking_id " +
-                    "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                    "WHERE hd.invoice_id = ?";
+                    "SELECT hd.TrangThaiThanhToan, s.CoSoID " +
+                    "FROM HoaDon hd " +
+                    "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
+                    "INNER JOIN San s ON lds.SanID = s.SanID " +
+                    "WHERE hd.HoaDonID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlCheck)) {
                     ps.setInt(1, hoaDonId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) throw new Exception("Không tìm thấy hóa đơn #" + hoaDonId);
-                        if (rs.getInt("facility_id") != user.getCoSoId())
+                        if (rs.getInt("CoSoID") != user.getCoSoId())
                             throw new Exception("Hóa đơn không thuộc cơ sở của bạn.");
-                        if ("Đã thanh toán".equals(rs.getString("payment_status")))
+                        if ("Đã thanh toán".equals(rs.getString("TrangThaiThanhToan")))
                             throw new Exception("Không thể hủy hóa đơn đã thanh toán.");
                     }
                 }
                 String sqlCancel =
-                    "UPDATE invoices SET payment_status = N'Đã hủy', staff_account_id = ? " +
-                    "WHERE invoice_id = ?";
+                    "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã hủy', AccountID_NhanVien = ? " +
+                    "WHERE HoaDonID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlCancel)) {
                     ps.setInt(1, user.getAccountId());
                     ps.setInt(2, hoaDonId);
@@ -641,12 +641,12 @@ public class HoaDonManagerServlet extends HttpServlet {
 
         return "SELECT " +
                 "  COUNT(*) AS totalCount, " +
-                "  SUM(CASE WHEN " + paidMainCondition + " THEN grand_total ELSE 0 END) AS tongDoanhThu, " +
+                "  SUM(CASE WHEN " + paidMainCondition + " THEN TongThanhToan ELSE 0 END) AS tongDoanhThu, " +
                 "  SUM(CASE WHEN " + unpaidMainCondition + " THEN 1 ELSE 0 END) AS mainChuaTT, " +
                 "  SUM(CASE WHEN " + unpaidSplitCondition + " THEN 1 ELSE 0 END) AS splitChuaTT " +
-                "FROM invoices hd " +
-                "INNER JOIN bookings lds ON hd.booking_id = lds.booking_id " +
-                "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                "WHERE s.facility_id = ?";
+                "FROM HoaDon hd " +
+                "INNER JOIN LichDatSan lds ON hd.DatSanID = lds.DatSanID " +
+                "INNER JOIN San s ON lds.SanID = s.SanID " +
+                "WHERE s.CoSoID = ?";
     }
 }

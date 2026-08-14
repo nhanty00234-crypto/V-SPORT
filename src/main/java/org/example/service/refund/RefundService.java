@@ -45,11 +45,11 @@ public class RefundService {
             return RefundResult.fail("Số tiền hoàn phải lớn hơn 0.");
         }
 
-        String sqlCheckBooking = "SELECT lds.account_id, h.invoice_id, h.grand_total, h.payment_status " +
-                                 "FROM bookings lds INNER JOIN invoices h ON lds.booking_id = h.booking_id " +
-                                 "WHERE lds.booking_id = ?";
-        String sqlCheckDoubleRefund = "SELECT COUNT(*) FROM refunds WHERE booking_id = ? AND status IN (N'CHO_XU_LY', N'DA_DUYET')";
-        String sqlInsertRefund = "INSERT INTO refunds (booking_id, invoice_id, account_id, refunded_amount, reason, status, requested_at) " +
+        String sqlCheckBooking = "SELECT lds.AccountID, h.HoaDonID, h.TongThanhToan, h.TrangThaiThanhToan " +
+                                 "FROM LichDatSan lds INNER JOIN HoaDon h ON lds.DatSanID = h.DatSanID " +
+                                 "WHERE lds.DatSanID = ?";
+        String sqlCheckDoubleRefund = "SELECT COUNT(*) FROM HoanTien WHERE DatSanID = ? AND TrangThai IN (N'CHO_XU_LY', N'DA_DUYET')";
+        String sqlInsertRefund = "INSERT INTO HoanTien (DatSanID, HoaDonID, AccountID, SoTienHoan, LyDo, TrangThai, ThoiGianYeuCau) " +
                                  "VALUES (?, ?, ?, ?, ?, N'CHO_XU_LY', GETDATE())";
 
         try (Connection conn = DBUtil.getConnection()) {
@@ -62,16 +62,16 @@ public class RefundService {
                     if (!rs.next()) {
                         return RefundResult.fail("Không tìm thấy đơn đặt sân hoặc hóa đơn tương ứng.");
                     }
-                    int accOwner = rs.getInt("account_id");
+                    int accOwner = rs.getInt("AccountID");
                     if (accOwner != customerAccountId) {
                         return RefundResult.fail("Bạn không có quyền yêu cầu hoàn tiền cho đơn đặt sân này.");
                     }
-                    String paymentStatus = rs.getString("payment_status");
+                    String paymentStatus = rs.getString("TrangThaiThanhToan");
                     if (!"Đã thanh toán".equalsIgnoreCase(paymentStatus)) {
                         return RefundResult.fail("Đơn đặt sân chưa được thanh toán nên không thể yêu cầu hoàn tiền.");
                     }
-                    hoaDonId = rs.getInt("invoice_id");
-                    paidAmount = rs.getBigDecimal("grand_total");
+                    hoaDonId = rs.getInt("HoaDonID");
+                    paidAmount = rs.getBigDecimal("TongThanhToan");
                 }
             }
 
@@ -113,8 +113,8 @@ public class RefundService {
      * Phê duyệt yêu cầu hoàn tiền bởi Manager/Admin.
      */
     public RefundResult approveRefund(int refundId, int managerAccountId, String note) {
-        String sqlSelect = "SELECT booking_id, account_id, refunded_amount, status FROM refunds WITH (UPDLOCK, ROWLOCK) WHERE refund_id = ?";
-        String sqlUpdate = "UPDATE refunds SET status = N'DA_DUYET', approver_account_id = ?, refunded_at = GETDATE(), note = ? WHERE refund_id = ?";
+        String sqlSelect = "SELECT DatSanID, AccountID, SoTienHoan, TrangThai FROM HoanTien WITH (UPDLOCK, ROWLOCK) WHERE HoanTienID = ?";
+        String sqlUpdate = "UPDATE HoanTien SET TrangThai = N'DA_DUYET', NguoiDuyetID = ?, ThoiGianHoan = GETDATE(), GhiChu = ? WHERE HoanTienID = ?";
 
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -131,10 +131,10 @@ public class RefundService {
                             conn.rollback();
                             return RefundResult.fail("Không tìm thấy yêu cầu hoàn tiền #" + refundId);
                         }
-                        datSanId = rs.getInt("booking_id");
-                        customerId = rs.getInt("account_id");
-                        refundAmount = rs.getBigDecimal("refunded_amount");
-                        currentStatus = rs.getString("status");
+                        datSanId = rs.getInt("DatSanID");
+                        customerId = rs.getInt("AccountID");
+                        refundAmount = rs.getBigDecimal("SoTienHoan");
+                        currentStatus = rs.getString("TrangThai");
                     }
                 }
 
@@ -176,8 +176,8 @@ public class RefundService {
             return RefundResult.fail("Vui lòng cung cấp lý do từ chối cụ thể (tối thiểu 5 ký tự).");
         }
 
-        String sqlSelect = "SELECT booking_id, account_id, status FROM refunds WHERE refund_id = ?";
-        String sqlUpdate = "UPDATE refunds SET status = N'TU_CHUOI', approver_account_id = ?, refunded_at = GETDATE(), note = ? WHERE refund_id = ?";
+        String sqlSelect = "SELECT DatSanID, AccountID, TrangThai FROM HoanTien WHERE HoanTienID = ?";
+        String sqlUpdate = "UPDATE HoanTien SET TrangThai = N'TU_CHUOI', NguoiDuyetID = ?, ThoiGianHoan = GETDATE(), GhiChu = ? WHERE HoanTienID = ?";
 
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -193,9 +193,9 @@ public class RefundService {
                             conn.rollback();
                             return RefundResult.fail("Không tìm thấy yêu cầu hoàn tiền #" + refundId);
                         }
-                        datSanId = rs.getInt("booking_id");
-                        customerId = rs.getInt("account_id");
-                        currentStatus = rs.getString("status");
+                        datSanId = rs.getInt("DatSanID");
+                        customerId = rs.getInt("AccountID");
+                        currentStatus = rs.getString("TrangThai");
                     }
                 }
 
@@ -234,8 +234,8 @@ public class RefundService {
      */
     public List<Hoantien> getRefundsByAccount(int accountId) {
         List<Hoantien> list = new ArrayList<>();
-        String sql = "SELECT refund_id, booking_id, invoice_id, account_id, refunded_amount, reason, status, requested_at, refunded_at, note " +
-                     "FROM refunds WHERE account_id = ? ORDER BY requested_at DESC";
+        String sql = "SELECT HoanTienID, DatSanID, HoaDonID, AccountID, SoTienHoan, LyDo, TrangThai, ThoiGianYeuCau, ThoiGianHoan, GhiChu " +
+                     "FROM HoanTien WHERE AccountID = ? ORDER BY ThoiGianYeuCau DESC";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -243,13 +243,13 @@ public class RefundService {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Hoantien h = new Hoantien();
-                    h.setHoanTienId(rs.getInt("refund_id"));
-                    h.setAccountId(rs.getInt("account_id"));
-                    h.setSoTienHoan(rs.getBigDecimal("refunded_amount"));
-                    h.setLyDo(rs.getNString("reason"));
-                    h.setTrangThai(rs.getString("status"));
-                    h.setThoiGianYeuCau(rs.getTimestamp("requested_at"));
-                    h.setThoiGianHoan(rs.getTimestamp("refunded_at"));
+                    h.setHoanTienId(rs.getInt("HoanTienID"));
+                    h.setAccountId(rs.getInt("AccountID"));
+                    h.setSoTienHoan(rs.getBigDecimal("SoTienHoan"));
+                    h.setLyDo(rs.getNString("LyDo"));
+                    h.setTrangThai(rs.getString("TrangThai"));
+                    h.setThoiGianYeuCau(rs.getTimestamp("ThoiGianYeuCau"));
+                    h.setThoiGianHoan(rs.getTimestamp("ThoiGianHoan"));
                     list.add(h);
                 }
             }
@@ -260,7 +260,7 @@ public class RefundService {
     }
 
     private void notifyCustomer(Connection conn, int customerId, String title, String body, String refCode) {
-        String sqlInsert = "INSERT INTO notifications (account_id, title, content, notification_type, is_read, sent_at, reference_id, link_url) " +
+        String sqlInsert = "INSERT INTO ThongBao (AccountID, TieuDe, NoiDung, LoaiThongBao, DaDoc, ThoiGianGui, MaBanGhi, DuongDan) " +
                            "VALUES (?, ?, ?, N'HE_THONG', 0, GETDATE(), ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
             ps.setInt(1, customerId);

@@ -48,16 +48,16 @@ public class AuditLogService {
 
     // Các hằng số loại thực thể
     public static final String ENTITY_ACCOUNT    = "TaiKhoan";
-    public static final String ENTITY_SAN        = "courts";
-    public static final String ENTITY_LOAI_SAN   = "court_types";
+    public static final String ENTITY_SAN        = "San";
+    public static final String ENTITY_LOAI_SAN   = "LoaiSan";
     public static final String ENTITY_SAN_PHAM   = "SanPham";
-    public static final String ENTITY_CO_SO      = "facilities";
+    public static final String ENTITY_CO_SO      = "CoSo";
     public static final String ENTITY_PAYOS_CONFIG = "PayOSConfig";
-    public static final String ENTITY_CA_LAM     = "work_shifts";
-    public static final String ENTITY_DAT_SAN    = "bookings";
+    public static final String ENTITY_CA_LAM     = "CaLamViec";
+    public static final String ENTITY_DAT_SAN    = "LichDatSan";
     public static final String ENTITY_REPUTATION = "CustomerReputation";
-    public static final String ENTITY_HOA_DON    = "invoices";
-    public static final String ENTITY_CAPABILITY = "facility_capabilities";
+    public static final String ENTITY_HOA_DON    = "HoaDon";
+    public static final String ENTITY_CAPABILITY = "CoSoCapability";
 
     /**
      * Ghi một bản ghi audit log. Không ném exception ra ngoài — lỗi log không được phá request chính.

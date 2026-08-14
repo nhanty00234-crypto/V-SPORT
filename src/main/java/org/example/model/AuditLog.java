@@ -4,45 +4,45 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "audit_logs")
+@Table(name = "AuditLog")
 public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "audit_log_id")
+    @Column(name = "AuditLogID")
     private long auditLogId;
 
-    @Column(name = "actor_account_id")
+    @Column(name = "ActorAccountID")
     private Integer actorAccountId;
 
-    @Column(name = "actor_name", nullable = false)
+    @Column(name = "ActorName", nullable = false)
     private String actorName;
 
-    @Column(name = "actor_role_id", nullable = false)
+    @Column(name = "ActorRole", nullable = false)
     private int actorRole;
 
-    @Column(name = "facility_id")
+    @Column(name = "CoSoID")
     private Integer coSoId;
 
-    @Column(name = "action", nullable = false, length = 100)
+    @Column(name = "Action", nullable = false, length = 100)
     private String action;
 
-    @Column(name = "entity_type", nullable = false, length = 100)
+    @Column(name = "EntityType", nullable = false, length = 100)
     private String entityType;
 
-    @Column(name = "entity_id", length = 50)
+    @Column(name = "EntityID", length = 50)
     private String entityId;
 
-    @Column(name = "entity_name", length = 500)
+    @Column(name = "EntityName", length = 500)
     private String entityName;
 
-    @Column(name = "details", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Details", columnDefinition = "NVARCHAR(MAX)")
     private String details;
 
-    @Column(name = "ip_address", length = 50)
+    @Column(name = "IpAddress", length = 50)
     private String ipAddress;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "CreatedAt", nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

@@ -184,7 +184,7 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
 
         boolean exists = (excludeId != null && excludeId > 0) ? khuyenMaiDAO.existsByCodeExcluding(maCode, excludeId) : khuyenMaiDAO.existsByCode(maCode);
         if (exists) return "Mã khuyến mãi '" + maCode + "' đã tồn tại.";
-        if (loaiGiam == null || (!loaiGiam.equals("PERCENT") && !loaiGiam.equals("FIXED") && !loaiGiam.equals("PhanTram") && !loaiGiam.equals("amount"))) return "Vui lòng chọn hình thức giảm.";
+        if (loaiGiam == null || (!loaiGiam.equals("PERCENT") && !loaiGiam.equals("FIXED") && !loaiGiam.equals("PhanTram") && !loaiGiam.equals("SoTien"))) return "Vui lòng chọn hình thức giảm.";
 
         double giaTriGiam;
         try {
@@ -267,7 +267,7 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
             String imageWarning = tryAttachUploadedImages(req, newId);
             String msg = "Đã tạo mã khuyến mãi '" + km.getMaCode() + "'.";
             session.setAttribute("successMsg", imageWarning == null ? msg : msg + " " + imageWarning);
-            AuditLogService.log(req, user, AuditLogService.ACTION_CREATE, "promotions",
+            AuditLogService.log(req, user, AuditLogService.ACTION_CREATE, "KhuyenMai",
                     String.valueOf(newId), km.getMaCode(), "Manager tạo mã khuyến mãi");
         } else {
             session.setAttribute("errorMsg", "Không thể tạo mã khuyến mãi. Vui lòng thử lại.");
@@ -331,7 +331,7 @@ public class KhuyenMaiManagerServlet extends HttpServlet {
             String imageWarning = tryAttachUploadedImages(req, id);
             String msg = "Đã cập nhật mã khuyến mãi '" + km.getMaCode() + "'.";
             session.setAttribute("successMsg", imageWarning == null ? msg : msg + " " + imageWarning);
-            AuditLogService.log(req, user, AuditLogService.ACTION_UPDATE, "promotions",
+            AuditLogService.log(req, user, AuditLogService.ACTION_UPDATE, "KhuyenMai",
                     String.valueOf(id), km.getMaCode(), "Manager cập nhật mã khuyến mãi");
         } else {
             session.setAttribute("errorMsg", "Không thể cập nhật mã khuyến mãi. Vui lòng thử lại.");

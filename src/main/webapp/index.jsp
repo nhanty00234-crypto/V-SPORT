@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <jsp:include page="/common/xtra-head.jsp" />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
 <body>
 
     <!-- Header -->
@@ -33,52 +34,91 @@
 
                 <!-- Slide 1 – Sân bóng đá -->
                 <div class="vs-slide is-active">
+                    <div class="vs-slide__content">
+                        <span class="vs-slide__eyebrow">Nền tảng thể thao số 1</span>
+                        <h1 class="vs-slide__title">Đặt Sân Nhanh<br>Chơi Ngay Hôm Nay</h1>
+                        <p class="vs-slide__desc">Hàng trăm sân bóng đá, cầu lông, pickleball chất lượng cao — đặt sân chỉ trong 30 giây, xác nhận tức thì.</p>
+                        <div class="vs-slide__actions">
+                            <a href="${pageContext.request.contextPath}/customer/dat-san" class="vs-slide__cta">
+                                Đặt sân ngay
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="vs-slide__cta vs-slide__cta--ghost">Tìm đối thủ</a>
+                        </div>
+                        <div class="vs-hero__stats">
+                            <div class="vs-hero__stat">
+                                <div class="vs-hero__stat-label"><span class="vs-hero__stat-dot"></span>Sân đã đặt hôm nay</div>
+                                <div class="vs-hero__stat-value"><span>1</span><span>2</span><span>0</span><span>4</span></div>
+                            </div>
+                            <div class="vs-hero__stat vs-hero__stat--warn">
+                                <div class="vs-hero__stat-label"><span class="vs-hero__stat-dot"></span>Trận đang diễn ra</div>
+                                <div class="vs-hero__stat-value"><span>1</span><span>2</span><span>8</span></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="vs-slide__bg">
                         <img src="${pageContext.request.contextPath}/assets/images/vsport/courts/court-football.jpg" alt="Sân bóng đá V-SPORT" loading="eager">
                         <div class="vs-slide__overlay"></div>
-                    </div>
-                    <div class="vs-slide__content">
-                        <span class="vs-slide__eyebrow">V-Sport · Đặt sân thông minh</span>
-                        <h1 class="vs-slide__title">Đặt Sân Nhanh<br>Chơi Ngay Hôm Nay</h1>
-                        <p class="vs-slide__desc">Hàng trăm sân bóng đá, cầu lông, pickleball chất lượng cao — đặt sân chỉ trong 30 giây, xác nhận tức thì.</p>
-                        <a href="${pageContext.request.contextPath}/customer/dat-san" class="vs-slide__cta">
-                            Đặt sân ngay
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                        </a>
                     </div>
                 </div>
 
                 <!-- Slide 2 – Cộng đồng -->
                 <div class="vs-slide">
-                    <div class="vs-slide__bg">
-                        <img src="${pageContext.request.contextPath}/assets/images/vsport/experience/experience-playing.jpg" alt="Cộng đồng V-SPORT" loading="lazy">
-                        <div class="vs-slide__overlay"></div>
-                    </div>
                     <div class="vs-slide__content">
                         <span class="vs-slide__eyebrow">Cộng đồng thể thao</span>
                         <h1 class="vs-slide__title">Ghép Kèo<br>Kết Nối Đồng Đội</h1>
                         <p class="vs-slide__desc">Không đủ người? Tìm ngay đối thủ hoặc đồng đội phù hợp trình độ, gần khu vực của bạn chỉ với vài cú chạm.</p>
-                        <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="vs-slide__cta">
-                            Ghép kèo ngay
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                        </a>
+                        <div class="vs-slide__actions">
+                            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="vs-slide__cta">
+                                Ghép kèo ngay
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/customer/dat-san" class="vs-slide__cta vs-slide__cta--ghost">Đặt sân ngay</a>
+                        </div>
+                        <div class="vs-hero__stats">
+                            <div class="vs-hero__stat">
+                                <div class="vs-hero__stat-label"><span class="vs-hero__stat-dot"></span>Sân đã đặt hôm nay</div>
+                                <div class="vs-hero__stat-value"><span>1</span><span>2</span><span>0</span><span>4</span></div>
+                            </div>
+                            <div class="vs-hero__stat vs-hero__stat--warn">
+                                <div class="vs-hero__stat-label"><span class="vs-hero__stat-dot"></span>Trận đang diễn ra</div>
+                                <div class="vs-hero__stat-value"><span>1</span><span>2</span><span>8</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vs-slide__bg">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/experience/experience-playing.jpg" alt="Cộng đồng V-SPORT" loading="lazy">
+                        <div class="vs-slide__overlay"></div>
                     </div>
                 </div>
 
                 <!-- Slide 3 – Cầu lông -->
                 <div class="vs-slide">
-                    <div class="vs-slide__bg">
-                        <img src="${pageContext.request.contextPath}/assets/images/vsport/courts/court-badminton.jpg" alt="Sân cầu lông V-SPORT" loading="lazy">
-                        <div class="vs-slide__overlay"></div>
-                    </div>
                     <div class="vs-slide__content">
                         <span class="vs-slide__eyebrow">Khám phá hệ thống sân</span>
                         <h1 class="vs-slide__title">Đa Dạng Bộ Môn<br>Đẳng Cấp Dịch Vụ</h1>
                         <p class="vs-slide__desc">Từ bóng đá, cầu lông đến pickleball — hệ thống sân trải dài khắp thành phố, sẵn sàng cho mọi lịch trình của bạn.</p>
-                        <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="vs-slide__cta">
-                            Khám phá ngay
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                        </a>
+                        <div class="vs-slide__actions">
+                            <a href="${pageContext.request.contextPath}/customer/tim-kiem" class="vs-slide__cta">
+                                Khám phá ngay
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/customer/ghep-keo" class="vs-slide__cta vs-slide__cta--ghost">Tìm đối thủ</a>
+                        </div>
+                        <div class="vs-hero__stats">
+                            <div class="vs-hero__stat">
+                                <div class="vs-hero__stat-label"><span class="vs-hero__stat-dot"></span>Sân đã đặt hôm nay</div>
+                                <div class="vs-hero__stat-value"><span>1</span><span>2</span><span>0</span><span>4</span></div>
+                            </div>
+                            <div class="vs-hero__stat vs-hero__stat--warn">
+                                <div class="vs-hero__stat-label"><span class="vs-hero__stat-dot"></span>Trận đang diễn ra</div>
+                                <div class="vs-hero__stat-value"><span>1</span><span>2</span><span>8</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vs-slide__bg">
+                        <img src="${pageContext.request.contextPath}/assets/images/vsport/courts/court-badminton.jpg" alt="Sân cầu lông V-SPORT" loading="lazy">
+                        <div class="vs-slide__overlay"></div>
                     </div>
                 </div>
             </div>

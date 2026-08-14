@@ -177,7 +177,7 @@ public class AdminOwnerServlet extends HttpServlet {
                 String coSoName = coSo.getTenCoSo();
                 OwnerApprovalService.ApprovalResult result = ownerApprovalService.reject(coSoId);
                 if (result.success) {
-                    adminTrashDAO.log("OwnerRequest", coSoId, coSoName, "facilities", "Chờ duyệt",
+                    adminTrashDAO.log("OwnerRequest", coSoId, coSoName, "CoSo", "Chờ duyệt",
                             admin.getAccountId(), null);
                     if (result.account != null) {
                         sendRejectionEmail(result.account, coSoName);
@@ -273,7 +273,7 @@ public class AdminOwnerServlet extends HttpServlet {
             String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12));
             try (Connection conn = DBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(
-                         "UPDATE accounts SET password_hash = ? WHERE account_id = ?")) {
+                         "UPDATE Accounts SET Password = ? WHERE AccountID = ?")) {
                 ps.setString(1, hashed);
                 ps.setInt(2, account.getAccountId());
                 ps.executeUpdate();
@@ -308,12 +308,12 @@ public class AdminOwnerServlet extends HttpServlet {
             if (conn == null) return;
             Map<String, Integer> sportTypeMap = new HashMap<>();
             try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT m.sport_name, l.court_type_id FROM court_types l JOIN sports m ON l.sport_id = m.sport_id");
+                    "SELECT m.TenMon, l.LoaiSanID FROM LoaiSan l JOIN MonTheThao m ON l.MonTheThaoID = m.MonTheThaoID");
                  ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) sportTypeMap.put(rs.getNString(1), rs.getInt(2));
             }
             int defaultType = 1;
-            try (PreparedStatement ps = conn.prepareStatement("SELECT TOP 1 court_type_id FROM court_types");
+            try (PreparedStatement ps = conn.prepareStatement("SELECT TOP 1 LoaiSanID FROM LoaiSan");
                  ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) defaultType = rs.getInt(1);
             }
@@ -322,15 +322,15 @@ public class AdminOwnerServlet extends HttpServlet {
                 int typeId = sportTypeMap.getOrDefault(sport, defaultType);
                 List<Integer> existing = new ArrayList<>();
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT s.court_id FROM courts s JOIN court_types l ON s.court_type_id=l.court_type_id " +
-                        "JOIN sports m ON l.sport_id=m.sport_id WHERE s.facility_id=? AND m.sport_name=? ORDER BY s.court_id")) {
+                        "SELECT s.SanID FROM San s JOIN LoaiSan l ON s.LoaiSanID=l.LoaiSanID " +
+                        "JOIN MonTheThao m ON l.MonTheThaoID=m.MonTheThaoID WHERE s.CoSoID=? AND m.TenMon=? ORDER BY s.SanID")) {
                     ps.setInt(1, coSoId); ps.setNString(2, sport);
                     try (ResultSet rs = ps.executeQuery()) { while (rs.next()) existing.add(rs.getInt(1)); }
                 }
                 int cur = existing.size();
                 if (cur < expected) {
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO courts(court_name,court_type_id,facility_id,status,description,image_path) VALUES(?,?,?,?,?,?)")) {
+                            "INSERT INTO San(TenSan,LoaiSanID,CoSoID,TrangThai,MoTa,HinhAnh) VALUES(?,?,?,?,?,?)")) {
                         for (int i = cur; i < expected; i++) {
                             int idx = i + 1;
                             ps.setNString(1, sport + " " + (idx < 10 ? "0" + idx : idx));

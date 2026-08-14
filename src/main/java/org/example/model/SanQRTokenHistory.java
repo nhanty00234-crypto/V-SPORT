@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  * đọc lại giá trị gốc để làm gì khác.
  */
 @Entity
-@Table(name = "court_qr_token_history")
+@Table(name = "SanQRTokenHistory")
 public class SanQRTokenHistory {
 
     public static final String ISSUED = "ISSUED";
@@ -25,34 +25,34 @@ public class SanQRTokenHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "history_id")
+    @Column(name = "HistoryID")
     private int historyId;
 
-    @Column(name = "court_qr_id", nullable = false)
+    @Column(name = "SanQRID", nullable = false)
     private int sanQRId;
 
-    @Column(name = "court_id", nullable = false)
+    @Column(name = "SanID", nullable = false)
     private int sanId;
 
-    @Column(name = "token_hash", length = 64)
+    @Column(name = "TokenHash", length = 64)
     private String tokenHash;
 
-    @Column(name = "short_code", length = 12)
+    @Column(name = "ShortCode", length = 12)
     private String shortCode;
 
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "TrangThai", nullable = false, length = 20)
     private String trangThai;
 
-    @Column(name = "issued_at", nullable = false)
+    @Column(name = "IssuedAt", nullable = false)
     private LocalDateTime issuedAt;
 
-    @Column(name = "revoked_at")
+    @Column(name = "RevokedAt")
     private LocalDateTime revokedAt;
 
-    @Column(name = "revoked_by")
+    @Column(name = "RevokedBy")
     private Integer revokedBy;
 
-    @Column(name = "revoke_reason", length = 200)
+    @Column(name = "RevokeReason", length = 200)
     private String revokeReason;
 
     @PrePersist

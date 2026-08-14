@@ -5,105 +5,105 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Table(name = "refunds")
+@Table(name = "HoanTien")
 public class Hoantien {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "refund_id")
+    @Column(name = "HoanTienID")
     private int hoanTienId;
 
-    @Column(name = "invoice_id", nullable = false)
+    @Column(name = "HoaDonID", nullable = false)
     private int hoaDonId;
 
-    @Column(name = "account_id", nullable = false)
+    @Column(name = "AccountID", nullable = false)
     private int accountId;
 
-    @Column(name = "refunded_amount", nullable = false)
+    @Column(name = "SoTienHoan", nullable = false)
     private BigDecimal soTienHoan;
 
-    @Column(name = "reason", length = 255)
+    @Column(name = "LyDo", length = 255)
     private String lyDo;
 
-    @Column(name = "status", length = 50)
+    @Column(name = "TrangThai", length = 50)
     private String trangThai;
 
-    @Column(name = "requested_at")
+    @Column(name = "ThoiGianYeuCau")
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianYeuCau;
 
-    @Column(name = "refunded_at")
+    @Column(name = "ThoiGianHoan")
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianHoan;
 
     // --- Các trường bổ sung quản lý xử lý hoàn tiền ---
 
-    @Column(name = "processor_account_id")
+    @Column(name = "AccountID_NguoiXuLy")
     private Integer accountIdNguoiXuLy;
 
-    @Column(name = "processing_note", length = 500)
+    @Column(name = "GhiChuXuLy", length = 500)
     private String ghiChuXuLy;
 
-    @Column(name = "refund_transaction_code", length = 100)
+    @Column(name = "MaGiaoDichHoan", length = 100)
     private String maGiaoDichHoan;
 
-    @Column(name = "processed_at")
+    @Column(name = "ThoiGianXuLy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianXuLy;
 
-    @Column(name = "receiving_bank_name", length = 100)
+    @Column(name = "NganHangNhan", length = 100)
     private String nganHangNhan;
 
-    @Column(name = "receiving_account_number", length = 30)
+    @Column(name = "SoTaiKhoanNhan", length = 30)
     private String soTaiKhoanNhan;
 
-    @Column(name = "receiving_account_holder", length = 100)
+    @Column(name = "ChuTaiKhoanNhan", length = 100)
     private String chuTaiKhoanNhan;
 
     // --- Mở rộng cho luồng Hoàn tiền Customer self-service ---
 
-    @Column(name = "booking_id")
+    @Column(name = "DatSanID")
     private Integer datSanId;
 
-    @Column(name = "facility_id")
+    @Column(name = "CoSoID")
     private Integer coSoId;
 
-    @Column(name = "paid_amount")
+    @Column(name = "SoTienDaThanhToan")
     private BigDecimal soTienDaThanhToan;
 
-    @Column(name = "requested_amount")
+    @Column(name = "SoTienDeNghiHoan")
     private BigDecimal soTienDeNghiHoan;
 
-    @Column(name = "approved_amount")
+    @Column(name = "SoTienDuocDuyet")
     private BigDecimal soTienDuocDuyet;
 
-    @Column(name = "receiving_qr_path", length = 300)
+    @Column(name = "QrNhanTienPath", length = 300)
     private String qrNhanTienPath;
 
-    @Column(name = "customer_note", length = 500)
+    @Column(name = "GhiChuKhachHang", length = 500)
     private String ghiChuKhachHang;
 
-    @Column(name = "reject_reason", length = 500)
+    @Column(name = "LyDoTuChoi", length = 500)
     private String lyDoTuChoi;
 
-    @Column(name = "approved_at")
+    @Column(name = "ApprovedAt")
     @Temporal(TemporalType.TIMESTAMP)
     private Date approvedAt;
 
-    @Column(name = "completed_at")
+    @Column(name = "CompletedAt")
     @Temporal(TemporalType.TIMESTAMP)
     private Date completedAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "UpdatedAt")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id", insertable = false, updatable = false)
+    @JoinColumn(name = "HoaDonID", insertable = false, updatable = false)
     private HoaDon hoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    @JoinColumn(name = "AccountID", insertable = false, updatable = false)
     private TaiKhoan khachHang;
 
     public Hoantien() {

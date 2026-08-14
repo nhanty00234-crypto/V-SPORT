@@ -75,28 +75,28 @@ public class FacilityDetailApiServlet extends HttpServlet {
         Set<String> images = new LinkedHashSet<>();
         Set<String> sportsSet = new LinkedHashSet<>();
 
-        String facilitySql = "SELECT c.facility_id, c.facility_name, c.address, c.phone_number, c.description, c.latitude, c.longitude, c.image_path, " +
-                "       c.opening_time, c.closing_time, " +
-                "       (SELECT MIN(ls.price_without_light) FROM court_types ls WHERE ls.facility_id = c.facility_id AND (ls.is_deleted = 0 OR ls.is_deleted IS NULL)) AS MinPrice, " +
-                "       (SELECT COUNT(*) FROM courts s WHERE s.facility_id = c.facility_id AND s.status = N'Sẵn sàng' AND (s.is_deleted = 0 OR s.is_deleted IS NULL)) AS ReadyCourtCount " +
-                "FROM facilities c " +
-                "WHERE c.facility_id = ? AND (c.is_deleted = 0 OR c.is_deleted IS NULL) AND c.status = N'Đang hoạt động'";
+        String facilitySql = "SELECT c.CoSoID, c.TenCoSo, c.DiaChi, c.SoDienThoai, c.MoTa, c.ViDo, c.KinhDo, c.HinhAnh, " +
+                "       c.GioMoCua, c.GioDongCua, " +
+                "       (SELECT MIN(ls.GiaKhongDen) FROM LoaiSan ls WHERE ls.CoSoID = c.CoSoID AND (ls.IsDeleted = 0 OR ls.IsDeleted IS NULL)) AS MinPrice, " +
+                "       (SELECT COUNT(*) FROM San s WHERE s.CoSoID = c.CoSoID AND s.TrangThai = N'Sẵn sàng' AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL)) AS ReadyCourtCount " +
+                "FROM CoSo c " +
+                "WHERE c.CoSoID = ? AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) AND c.TrangThai = N'Đang hoạt động'";
 
-        String courtsSql = "SELECT s.court_id, s.court_name, s.status, s.image_path, s.description, " +
-                "       ls.type_name, ls.price_without_light, ls.price_with_light, mt.sport_name " +
-                "FROM courts s " +
-                "LEFT JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
-                "LEFT JOIN sports mt ON ls.sport_id = mt.sport_id " +
-                "WHERE s.facility_id = ? " +
-                "  AND (s.is_deleted = 0 OR s.is_deleted IS NULL) " +
-                "  AND (ls.is_deleted = 0 OR ls.is_deleted IS NULL)" +
-                (sportIdFilter != null ? " AND ls.sport_id = ?" : "") +
-                " ORDER BY s.court_name";
+        String courtsSql = "SELECT s.SanID, s.TenSan, s.TrangThai, s.HinhAnh, s.MoTa, " +
+                "       ls.TenLoai, ls.GiaKhongDen, ls.GiaCoDen, mt.TenMon " +
+                "FROM San s " +
+                "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                "LEFT JOIN MonTheThao mt ON ls.MonTheThaoID = mt.MonTheThaoID " +
+                "WHERE s.CoSoID = ? " +
+                "  AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL) " +
+                "  AND (ls.IsDeleted = 0 OR ls.IsDeleted IS NULL)" +
+                (sportIdFilter != null ? " AND ls.MonTheThaoID = ?" : "") +
+                " ORDER BY s.TenSan";
 
-        String servicesSql = "SELECT TOP 30 sp.product_name, sp.unit_price, sp.unit_of_measure " +
-                "FROM products_services sp " +
-                "WHERE sp.facility_id = ? AND (sp.is_deleted = 0 OR sp.is_deleted IS NULL) AND sp.stock_quantity > 0 " +
-                "ORDER BY sp.product_name";
+        String servicesSql = "SELECT TOP 30 sp.TenSanPham, sp.DonGia, sp.DonViTinh " +
+                "FROM SanPham_DichVu sp " +
+                "WHERE sp.CoSoID = ? AND (sp.IsDeleted = 0 OR sp.IsDeleted IS NULL) AND sp.SoLuongTon > 0 " +
+                "ORDER BY sp.TenSanPham";
 
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
 
@@ -107,19 +107,19 @@ public class FacilityDetailApiServlet extends HttpServlet {
                         sendErrorResponse(resp, HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy cơ sở hoặc cơ sở đã ngừng hoạt động.");
                         return;
                     }
-                    java.sql.Time gioMo = rs.getTime("opening_time");
-                    java.sql.Time gioDong = rs.getTime("closing_time");
+                    java.sql.Time gioMo = rs.getTime("GioMoCua");
+                    java.sql.Time gioDong = rs.getTime("GioDongCua");
                     LocalTime openLocal = gioMo != null ? gioMo.toLocalTime() : null;
                     LocalTime closeLocal = gioDong != null ? gioDong.toLocalTime() : null;
                     LocalTime nowTime = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalTime();
 
-                    facility.put("coSoId", rs.getInt("facility_id"));
-                    facility.put("tenCoSo", rs.getString("facility_name"));
-                    facility.put("address", rs.getString("address"));
-                    facility.put("phone", emptyToNull(rs.getString("phone_number")));
-                    facility.put("description", emptyToNull(rs.getString("description")));
-                    java.math.BigDecimal viDo = rs.getBigDecimal("latitude");
-                    java.math.BigDecimal kinhDo = rs.getBigDecimal("longitude");
+                    facility.put("coSoId", rs.getInt("CoSoID"));
+                    facility.put("tenCoSo", rs.getString("TenCoSo"));
+                    facility.put("address", rs.getString("DiaChi"));
+                    facility.put("phone", emptyToNull(rs.getString("SoDienThoai")));
+                    facility.put("description", emptyToNull(rs.getString("MoTa")));
+                    java.math.BigDecimal viDo = rs.getBigDecimal("ViDo");
+                    java.math.BigDecimal kinhDo = rs.getBigDecimal("KinhDo");
                     facility.put("latitude", viDo != null ? viDo.doubleValue() : null);
                     facility.put("longitude", kinhDo != null ? kinhDo.doubleValue() : null);
                     facility.put("openingTime", gioMo != null ? gioMo.toString().substring(0, 5) : "");
@@ -129,7 +129,7 @@ public class FacilityDetailApiServlet extends HttpServlet {
                     facility.put("minPrice", rs.wasNull() ? null : minPrice);
                     facility.put("readyCourtCount", rs.getInt("ReadyCourtCount"));
 
-                    String hinhAnh = rs.getString("image_path");
+                    String hinhAnh = rs.getString("HinhAnh");
                     List<String> coSoImages = org.example.controller.manager.CoSoGalleryServlet.parseJson(hinhAnh);
                     String firstImage = coSoImages.isEmpty() ? "" : coSoImages.get(0);
                     facility.put("imageUrl", firstImage);
@@ -149,18 +149,18 @@ public class FacilityDetailApiServlet extends HttpServlet {
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> court = new HashMap<>();
-                        court.put("sanId", rs.getInt("court_id"));
-                        court.put("tenSan", rs.getString("court_name"));
-                        court.put("trangThai", rs.getString("status"));
-                        court.put("loaiSan", rs.getString("type_name"));
-                        String tenMon = emptyToNull(rs.getString("sport_name"));
+                        court.put("sanId", rs.getInt("SanID"));
+                        court.put("tenSan", rs.getString("TenSan"));
+                        court.put("trangThai", rs.getString("TrangThai"));
+                        court.put("loaiSan", rs.getString("TenLoai"));
+                        String tenMon = emptyToNull(rs.getString("TenMon"));
                         court.put("monTheThao", tenMon);
                         if (tenMon != null) sportsSet.add(tenMon);
-                        court.put("giaKhongDen", rs.getDouble("price_without_light"));
-                        court.put("giaCoDen", rs.getDouble("price_with_light"));
-                        court.put("moTa", emptyToNull(rs.getString("description")));
+                        court.put("giaKhongDen", rs.getDouble("GiaKhongDen"));
+                        court.put("giaCoDen", rs.getDouble("GiaCoDen"));
+                        court.put("moTa", emptyToNull(rs.getString("MoTa")));
                         courts.add(court);
-                        addImage(images, rs.getString("image_path"));
+                        addImage(images, rs.getString("HinhAnh"));
                     }
                 }
             }
@@ -171,9 +171,9 @@ public class FacilityDetailApiServlet extends HttpServlet {
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> sv = new HashMap<>();
-                        sv.put("tenSanPham", rs.getString("product_name"));
-                        sv.put("donGia", rs.getDouble("unit_price"));
-                        sv.put("donViTinh", emptyToNull(rs.getString("unit_of_measure")));
+                        sv.put("tenSanPham", rs.getString("TenSanPham"));
+                        sv.put("donGia", rs.getDouble("DonGia"));
+                        sv.put("donViTinh", emptyToNull(rs.getString("DonViTinh")));
                         services.add(sv);
                     }
                 }

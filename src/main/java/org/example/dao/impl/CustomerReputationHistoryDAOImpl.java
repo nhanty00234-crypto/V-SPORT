@@ -25,12 +25,12 @@ public class CustomerReputationHistoryDAOImpl implements CustomerReputationHisto
     public List<CustomerReputationHistory> getByAccountIdAndAction(int accountId, String actionType) {
         List<CustomerReputationHistory> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT reputation_history_id, account_id, booking_id, action_type, score_delta, score_before, score_after, reason, created_by, created_at, ip_address " +
-                "FROM customer_reputation_history WHERE account_id = ? ");
+                "SELECT ReputationHistoryID, AccountID, DatSanID, ActionType, ScoreDelta, ScoreBefore, ScoreAfter, Reason, CreatedBy, CreatedAt, IpAddress " +
+                "FROM CustomerReputationHistory WHERE AccountID = ? ");
         if (actionType != null && !actionType.isBlank() && !"ALL".equalsIgnoreCase(actionType)) {
             sql.append("AND ActionType = ? ");
         }
-        sql.append("ORDER BY created_at DESC");
+        sql.append("ORDER BY CreatedAt DESC");
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -42,20 +42,20 @@ public class CustomerReputationHistoryDAOImpl implements CustomerReputationHisto
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     CustomerReputationHistory h = new CustomerReputationHistory();
-                    h.setReputationHistoryId(rs.getLong("reputation_history_id"));
-                    h.setAccountId(rs.getInt("account_id"));
-                    int datSanId = rs.getInt("booking_id");
+                    h.setReputationHistoryId(rs.getLong("ReputationHistoryID"));
+                    h.setAccountId(rs.getInt("AccountID"));
+                    int datSanId = rs.getInt("DatSanID");
                     if (!rs.wasNull()) h.setDatSanId(datSanId);
-                    h.setActionType(rs.getString("action_type"));
-                    h.setScoreDelta(rs.getInt("score_delta"));
-                    h.setScoreBefore(rs.getInt("score_before"));
-                    h.setScoreAfter(rs.getInt("score_after"));
-                    h.setReason(rs.getNString("reason"));
-                    int createdBy = rs.getInt("created_by");
+                    h.setActionType(rs.getString("ActionType"));
+                    h.setScoreDelta(rs.getInt("ScoreDelta"));
+                    h.setScoreBefore(rs.getInt("ScoreBefore"));
+                    h.setScoreAfter(rs.getInt("ScoreAfter"));
+                    h.setReason(rs.getNString("Reason"));
+                    int createdBy = rs.getInt("CreatedBy");
                     if (!rs.wasNull()) h.setCreatedBy(createdBy);
-                    java.sql.Timestamp ts = rs.getTimestamp("created_at");
+                    java.sql.Timestamp ts = rs.getTimestamp("CreatedAt");
                     if (ts != null) h.setCreatedAt(ts.toLocalDateTime());
-                    h.setIpAddress(rs.getString("ip_address"));
+                    h.setIpAddress(rs.getString("IpAddress"));
                     list.add(h);
                 }
             }

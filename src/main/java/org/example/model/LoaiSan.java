@@ -5,41 +5,41 @@ import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "court_types")
+@Table(name = "LoaiSan")
 public class LoaiSan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "court_type_id")
+    @Column(name = "LoaiSanID")
     private int loaiSanID;
 
-    @Column(name = "sport_id")
+    @Column(name = "MonTheThaoID")
     private int monTheThaoID;
 
-    @Column(name = "type_name")
+    @Column(name = "TenLoai")
     private String tenLoai;
 
-    @Column(name = "price_without_light")
+    @Column(name = "GiaKhongDen")
     private double giaKhongDen;
 
-    @Column(name = "price_with_light")
+    @Column(name = "GiaCoDen")
     private double giaCoDen;
 
-    @Column(name = "light_start_time")
+    @Column(name = "GioBatDauLenDen")
     private LocalTime gioBatDauLenDen;
 
-    @Column(name = "light_end_time")
+    @Column(name = "GioKetThucLenDen")
     private LocalTime gioKetThucLenDen;
 
-    @Column(name = "facility_id")
+    @Column(name = "CoSoID")
     private Integer coSoID;
 
-    @Column(name = "is_deleted")
+    @Column(name = "IsDeleted")
     private boolean isDeleted;
 
-    @Column(name = "deleted_at")
+    @Column(name = "DeletedAt")
     private LocalDateTime deletedAt;
 
-    @Column(name = "deleted_by")
+    @Column(name = "DeletedBy")
     private Integer deletedBy;
 
     public LoaiSan(int loaiSanID, int monTheThaoID, String tenLoai, double giaKhongDen, double giaCoDen, LocalTime gioBatDauLenDen) {

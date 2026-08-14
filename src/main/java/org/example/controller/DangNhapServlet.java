@@ -397,10 +397,10 @@ public class DangNhapServlet extends HttpServlet {
         if (user == null) return;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
-                     "SELECT TOP 1 sport_id FROM favorite_sports WHERE account_id = ?")) {
+                     "SELECT TOP 1 MonTheThaoID FROM MonTheThaoYeuThich WHERE AccountID = ?")) {
             ps.setInt(1, user.getAccountId());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) user.setMonTheThaoYeuThichId(rs.getInt("sport_id"));
+                if (rs.next()) user.setMonTheThaoYeuThichId(rs.getInt("MonTheThaoID"));
             }
         } catch (Exception e) {
             LOGGER.warn("loadPreferredSportId accountId={}: {}", user.getAccountId(), e.getMessage());

@@ -17,7 +17,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
     private static final Logger logger = LogManager.getLogger(NhomChiaTienChiTietDAOImpl.class);
 
     private static final String INSERT_SQL =
-        "INSERT INTO bill_split_shares (split_group_id, account_id, display_name, share_token, amount, status, created_at, updated_at) " +
+        "INSERT INTO NhomChiaTienChiTiet (NhomChiaTienID, AccountID, DisplayName, ShareToken, SoTien, TrangThai, CreatedAt, UpdatedAt) " +
         "VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
 
     @Override
@@ -46,7 +46,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
     @Override
     public List<NhomChiaTienChiTiet> findByNhomChiaTienId(int nhomChiaTienId) {
         List<NhomChiaTienChiTiet> list = new ArrayList<>();
-        String sql = "SELECT * FROM bill_split_shares WHERE split_group_id = ? ORDER BY share_id ASC";
+        String sql = "SELECT * FROM NhomChiaTienChiTiet WHERE NhomChiaTienID = ? ORDER BY ChiTietID ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nhomChiaTienId);
@@ -61,7 +61,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     @Override
     public NhomChiaTienChiTiet findById(int chiTietId) {
-        String sql = "SELECT * FROM bill_split_shares WHERE share_id = ?";
+        String sql = "SELECT * FROM NhomChiaTienChiTiet WHERE ChiTietID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, chiTietId);
@@ -77,7 +77,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
     @Override
     public NhomChiaTienChiTiet findByShareToken(String shareToken) {
         if (shareToken == null || shareToken.isBlank()) return null;
-        String sql = "SELECT * FROM bill_split_shares WHERE share_token = ?";
+        String sql = "SELECT * FROM NhomChiaTienChiTiet WHERE ShareToken = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, shareToken);
@@ -92,7 +92,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     @Override
     public NhomChiaTienChiTiet findByIdAndNhomChiaTienId(int chiTietId, int nhomChiaTienId) {
-        String sql = "SELECT * FROM bill_split_shares WHERE share_id = ? AND split_group_id = ?";
+        String sql = "SELECT * FROM NhomChiaTienChiTiet WHERE ChiTietID = ? AND NhomChiaTienID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, chiTietId);
@@ -108,7 +108,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     @Override
     public int countByNhomChiaTienId(int nhomChiaTienId) {
-        String sql = "SELECT COUNT(*) FROM bill_split_shares WHERE split_group_id = ?";
+        String sql = "SELECT COUNT(*) FROM NhomChiaTienChiTiet WHERE NhomChiaTienID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nhomChiaTienId);
@@ -123,7 +123,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     @Override
     public int countPaidByNhomChiaTienId(int nhomChiaTienId) {
-        String sql = "SELECT COUNT(*) FROM bill_split_shares WHERE split_group_id = ? AND status = ?";
+        String sql = "SELECT COUNT(*) FROM NhomChiaTienChiTiet WHERE NhomChiaTienID = ? AND TrangThai = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nhomChiaTienId);
@@ -139,7 +139,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     @Override
     public BigDecimal sumPaidByNhomChiaTienId(int nhomChiaTienId) {
-        String sql = "SELECT SUM(amount) FROM bill_split_shares WHERE split_group_id = ? AND status = ?";
+        String sql = "SELECT SUM(SoTien) FROM NhomChiaTienChiTiet WHERE NhomChiaTienID = ? AND TrangThai = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nhomChiaTienId);
@@ -164,7 +164,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
             logger.warn("updateTrangThai ChiTiet: trạng thái không hợp lệ cũ='{}' mới='{}'", trangThaiCu, trangThaiMoi);
             return false;
         }
-        StringBuilder sql = new StringBuilder("UPDATE bill_split_shares SET status = ?, updated_at = GETDATE()");
+        StringBuilder sql = new StringBuilder("UPDATE NhomChiaTienChiTiet SET TrangThai = ?, UpdatedAt = GETDATE()");
         List<Object> params = new ArrayList<>();
         params.add(trangThaiMoi);
 
@@ -187,7 +187,7 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
         if (BillSplitShareStatus.PAID.equals(trangThaiMoi)) {
             sql.append(", PaidAt = GETDATE()");
         }
-        sql.append(" WHERE share_id = ? AND status = ?");
+        sql.append(" WHERE ChiTietID = ? AND TrangThai = ?");
         params.add(chiTietId);
         params.add(trangThaiCu);
 
@@ -215,8 +215,8 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     @Override
     public int cancelAllByNhomChiaTienId(Connection conn, int nhomChiaTienId) {
-        String sql = "UPDATE bill_split_shares SET status = ?, updated_at = GETDATE() " +
-                     "WHERE split_group_id = ? AND status IN (?, ?)";
+        String sql = "UPDATE NhomChiaTienChiTiet SET TrangThai = ?, UpdatedAt = GETDATE() " +
+                     "WHERE NhomChiaTienID = ? AND TrangThai IN (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, BillSplitShareStatus.CANCELLED);
             ps.setInt(2, nhomChiaTienId);
@@ -241,24 +241,24 @@ public class NhomChiaTienChiTietDAOImpl implements NhomChiaTienChiTietDAO {
 
     private NhomChiaTienChiTiet map(ResultSet rs) throws SQLException {
         NhomChiaTienChiTiet ct = new NhomChiaTienChiTiet();
-        ct.setChiTietId(rs.getInt("share_id"));
-        ct.setNhomChiaTienId(rs.getInt("split_group_id"));
-        int accId = rs.getInt("account_id");
+        ct.setChiTietId(rs.getInt("ChiTietID"));
+        ct.setNhomChiaTienId(rs.getInt("NhomChiaTienID"));
+        int accId = rs.getInt("AccountID");
         if (!rs.wasNull()) ct.setAccountId(accId);
-        ct.setDisplayName(rs.getNString("display_name"));
-        ct.setShareToken(rs.getString("share_token"));
-        BigDecimal st = rs.getBigDecimal("amount");
+        ct.setDisplayName(rs.getNString("DisplayName"));
+        ct.setShareToken(rs.getString("ShareToken"));
+        BigDecimal st = rs.getBigDecimal("SoTien");
         ct.setSoTien(st != null ? st : BigDecimal.ZERO);
-        ct.setTrangThai(rs.getString("status"));
-        ct.setPaymentMethod(rs.getString("payment_method"));
-        ct.setPaymentTransactionId(rs.getString("payment_transaction_id"));
-        int payerId = rs.getInt("payer_account_id");
+        ct.setTrangThai(rs.getString("TrangThai"));
+        ct.setPaymentMethod(rs.getString("PaymentMethod"));
+        ct.setPaymentTransactionId(rs.getString("PaymentTransactionID"));
+        int payerId = rs.getInt("PayerAccountID");
         if (!rs.wasNull()) ct.setPayerAccountId(payerId);
-        ct.setPaidAt(rs.getTimestamp("paid_at"));
-        int staffId = rs.getInt("confirmed_by_staff_id");
+        ct.setPaidAt(rs.getTimestamp("PaidAt"));
+        int staffId = rs.getInt("ConfirmedByStaffID");
         if (!rs.wasNull()) ct.setConfirmedByStaffId(staffId);
-        ct.setCreatedAt(rs.getTimestamp("created_at"));
-        ct.setUpdatedAt(rs.getTimestamp("updated_at"));
+        ct.setCreatedAt(rs.getTimestamp("CreatedAt"));
+        ct.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
         return ct;
     }
 }

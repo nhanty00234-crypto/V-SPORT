@@ -14,12 +14,12 @@ public class NotificationPreferenceService {
     private static final Logger logger = LogManager.getLogger(NotificationPreferenceService.class);
 
     public boolean loadMarketingPref(int accountId) {
-        String sql = "SELECT receive_marketing_notification FROM accounts WHERE account_id = ?";
+        String sql = "SELECT NhanThongBaoMarketing FROM Accounts WHERE AccountID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getBoolean("receive_marketing_notification");
+                if (rs.next()) return rs.getBoolean("NhanThongBaoMarketing");
             }
         } catch (Exception e) {
             logger.warn("loadMarketingPref accountId={}: {} — default true", accountId, e.getMessage());
@@ -28,7 +28,7 @@ public class NotificationPreferenceService {
     }
 
     public void saveMarketingPref(int accountId, boolean enable) {
-        String sql = "UPDATE accounts SET receive_marketing_notification = ? WHERE account_id = ?";
+        String sql = "UPDATE Accounts SET NhanThongBaoMarketing = ? WHERE AccountID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBoolean(1, enable);

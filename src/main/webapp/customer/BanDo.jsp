@@ -16,20 +16,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <style>
-        /* ===== V-SPORT Map palette (scoped to this page) ===== */
+        /* ===== V-SPORT Map palette (scoped to this page) =====
+           Line & Scoreboard system — see docs/design/stitch-customer-redesign-prompt.md.
+           Token NAMES kept (--vsm-navy etc.) since every rule below already references
+           them; only values changed, so the whole page recolors from this one block. */
         :root {
-            --vsm-navy: #0B2E59;
-            --vsm-navy-dark: #071D38;
-            --vsm-cyan: #12B8FF;
-            --vsm-cyan-light: #DDF6FF;
-            --vsm-orange: #FF8A1F;
-            --vsm-bg: #F5F8FC;
-            --vsm-surface: #FFFFFF;
-            --vsm-text: #10233E;
-            --vsm-text-secondary: #64748B;
-            --vsm-border: #DCE5EF;
-            --vsm-success: #16A36A;
-            --vsm-danger: #EF4444;
+            --vsm-navy: #10241F;       /* night-ink */
+            --vsm-navy-dark: #0A1712;  /* night-ink, darker (hover/pressed) */
+            --vsm-cyan: #0E6E6A;       /* court-teal (was cyan accent) */
+            --vsm-cyan-light: #DCEEEC; /* light court-teal tint */
+            --vsm-orange: #D6572B;     /* clay-orange */
+            --vsm-bg: #E9EDE7;         /* apron-stone */
+            --vsm-surface: #FFFFFF;    /* apron-card */
+            --vsm-text: #12201B;       /* text-ink */
+            --vsm-text-secondary: #5C6B64; /* text-muted */
+            --vsm-border: #E2E5E0;
+            --vsm-success: #1E8E5A;
+            --vsm-danger: #C23B2E;
         }
 
         html, body {
@@ -385,7 +388,7 @@
             padding: 10px; border-radius: 10px; border: none; cursor: pointer; text-decoration: none;
             background: var(--vsm-orange); color: #fff; font-size: 12.5px; font-weight: 800;
         }
-        .vsm-cta-primary:hover { background: #E67512; }
+        .vsm-cta-primary:hover { background: #B8431E; }
         .vsm-cta-primary svg { width: 15px; height: 15px; }
         .vsm-cta-row { display: flex; gap: 6px; }
         .vsm-cta-secondary {

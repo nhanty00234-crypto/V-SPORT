@@ -52,8 +52,8 @@ public class PayOSPaymentFinalizationService {
                 }
 
                 try (PreparedStatement up = c.prepareStatement(
-                        "UPDATE invoices SET payment_status = N'Đã thanh toán', payment_method = N'PayOS', " +
-                        "issued_at = GETDATE() WHERE invoice_id = ? AND payment_status <> N'Đã thanh toán'")) {
+                        "UPDATE HoaDon SET TrangThaiThanhToan = N'Đã thanh toán', PhuongThucThanhToan = N'PayOS', " +
+                        "NgayLap = GETDATE() WHERE HoaDonID = ? AND TrangThaiThanhToan <> N'Đã thanh toán'")) {
                     up.setInt(1, attempt.hoaDonId);
                     if (up.executeUpdate() != 1) {
                         c.commit(); // hóa đơn đã được đánh dấu paid bởi đường khác (rất hiếm) - coi là idempotent, không lỗi
@@ -61,8 +61,8 @@ public class PayOSPaymentFinalizationService {
                     }
                 }
                 try (PreparedStatement up = c.prepareStatement(
-                        "UPDATE bookings SET payment_method_confirmed = N'PayOS', transaction_code = ?, " +
-                        "confirmed_at = GETDATE(), confirmed_by = NULL, confirm_source = ? WHERE booking_id = ?")) {
+                        "UPDATE LichDatSan SET PaymentMethodConfirmed = N'PayOS', TransactionCode = ?, " +
+                        "ConfirmedAt = GETDATE(), ConfirmedBy = NULL, ConfirmSource = ? WHERE DatSanID = ?")) {
                     up.setString(1, (transactionReference == null || transactionReference.isBlank())
                             ? paymentLinkId : transactionReference.trim());
                     up.setNString(2, confirmSource);
@@ -70,12 +70,12 @@ public class PayOSPaymentFinalizationService {
                     up.executeUpdate();
                 }
                 try (PreparedStatement up = c.prepareStatement(
-                        "UPDATE bookings SET status = N'Đã hoàn thành' WHERE booking_id = ? AND status = N'Đang sử dụng'")) {
+                        "UPDATE LichDatSan SET TrangThai = N'Đã hoàn thành' WHERE DatSanID = ? AND TrangThai = N'Đang sử dụng'")) {
                     up.setInt(1, attempt.datSanId);
                     up.executeUpdate();
                 }
                 try (PreparedStatement up = c.prepareStatement(
-                        "UPDATE courts SET status = N'Sẵn sàng' WHERE court_id = (SELECT court_id FROM bookings WHERE booking_id = ?) AND status = N'Đang sử dụng'")) {
+                        "UPDATE San SET TrangThai = N'Sẵn sàng' WHERE SanID = (SELECT SanID FROM LichDatSan WHERE DatSanID = ?) AND TrangThai = N'Đang sử dụng'")) {
                     up.setInt(1, attempt.datSanId);
                     up.executeUpdate();
                 }

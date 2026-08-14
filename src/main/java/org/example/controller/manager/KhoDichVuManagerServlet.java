@@ -549,7 +549,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                         if (success) {
                             session.setAttribute("successMsg", "Cập nhật nhóm dịch vụ '" + trimmedCatName + "' thành công.");
                             AuditLogService.log(req, user,
-                                AuditLogService.ACTION_UPDATE, "product_categories",
+                                AuditLogService.ACTION_UPDATE, "DanhMucSanPham",
                                 String.valueOf(catId), trimmedCatName,
                                 "Manager đổi tên nhóm dịch vụ từ '" + oldName + "' sang '" + trimmedCatName + "'");
                         } else {
@@ -585,7 +585,7 @@ public class KhoDichVuManagerServlet extends HttpServlet {
                             if (success) {
                                 session.setAttribute("successMsg", "Đã xóa nhóm dịch vụ '" + catName + "' thành công.");
                                 AuditLogService.log(req, user,
-                                    AuditLogService.ACTION_DELETE, "product_categories",
+                                    AuditLogService.ACTION_DELETE, "DanhMucSanPham",
                                     String.valueOf(catId), catName,
                                     "Manager xóa nhóm dịch vụ '" + catName + "'");
                             } else {

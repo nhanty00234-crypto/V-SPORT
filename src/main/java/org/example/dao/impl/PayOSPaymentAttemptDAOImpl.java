@@ -14,9 +14,9 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
 
     @Override
     public Row findActiveByHoaDonId(Connection c, int hoaDonId) throws SQLException {
-        String sql = "SELECT TOP 1 attempt_id, invoice_id, booking_id, facility_id, order_code, payment_link_id, checkout_url, " +
-                "qr_code, status, amount, description FROM payos_payment_attempts WITH (UPDLOCK, ROWLOCK) " +
-                "WHERE invoice_id = ? AND status IN (N'CREATING', N'PENDING') ORDER BY attempt_id DESC";
+        String sql = "SELECT TOP 1 AttemptID, HoaDonID, DatSanID, CoSoID, OrderCode, PaymentLinkID, CheckoutUrl, " +
+                "QrCode, Status, Amount, Description FROM PayOSPaymentAttempt WITH (UPDLOCK, ROWLOCK) " +
+                "WHERE HoaDonID = ? AND Status IN (N'CREATING', N'PENDING') ORDER BY AttemptID DESC";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, hoaDonId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -27,7 +27,7 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
 
     @Override
     public long insertCreating(Connection c, int hoaDonId, int datSanId, int coSoId, BigDecimal amount, String description) throws SQLException {
-        String insertSql = "INSERT INTO payos_payment_attempts (invoice_id, booking_id, facility_id, order_code, status, amount, description) " +
+        String insertSql = "INSERT INTO PayOSPaymentAttempt (HoaDonID, DatSanID, CoSoID, OrderCode, Status, Amount, Description) " +
                 "VALUES (?, ?, ?, 0, N'CREATING', ?, ?)";
         long attemptId;
         try (PreparedStatement ps = c.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -46,7 +46,7 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
         // attempt, và tách biệt hẳn khỏi orderCode=DatSanID của luồng đặt sân online khách hàng (số
         // nhỏ) để webhook không bao giờ nhầm lẫn hai luồng.
         long orderCode = 900_000_000_000L + attemptId;
-        try (PreparedStatement up = c.prepareStatement("UPDATE payos_payment_attempts SET order_code = ? WHERE attempt_id = ?")) {
+        try (PreparedStatement up = c.prepareStatement("UPDATE PayOSPaymentAttempt SET OrderCode = ? WHERE AttemptID = ?")) {
             up.setLong(1, orderCode);
             up.setLong(2, attemptId);
             up.executeUpdate();
@@ -56,8 +56,8 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
 
     @Override
     public void markPending(Connection c, long orderCode, String paymentLinkId, String checkoutUrl, String qrCode) throws SQLException {
-        String sql = "UPDATE payos_payment_attempts SET status = N'PENDING', payment_link_id = ?, checkout_url = ?, qr_code = ? " +
-                "WHERE order_code = ? AND status = N'CREATING'";
+        String sql = "UPDATE PayOSPaymentAttempt SET Status = N'PENDING', PaymentLinkID = ?, CheckoutUrl = ?, QrCode = ? " +
+                "WHERE OrderCode = ? AND Status = N'CREATING'";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, paymentLinkId);
             ps.setString(2, checkoutUrl);
@@ -69,8 +69,8 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
 
     @Override
     public Row findByOrderCode(Connection c, long orderCode) throws SQLException {
-        String sql = "SELECT attempt_id, invoice_id, booking_id, facility_id, order_code, payment_link_id, checkout_url, " +
-                "qr_code, status, amount, description FROM payos_payment_attempts WITH (UPDLOCK, ROWLOCK) WHERE order_code = ?";
+        String sql = "SELECT AttemptID, HoaDonID, DatSanID, CoSoID, OrderCode, PaymentLinkID, CheckoutUrl, " +
+                "QrCode, Status, Amount, Description FROM PayOSPaymentAttempt WITH (UPDLOCK, ROWLOCK) WHERE OrderCode = ?";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, orderCode);
             try (ResultSet rs = ps.executeQuery()) {
@@ -81,8 +81,8 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
 
     @Override
     public boolean markPaid(Connection c, long orderCode) throws SQLException {
-        String sql = "UPDATE payos_payment_attempts SET status = N'PAID', paid_at = SYSDATETIME(), last_checked_at = SYSDATETIME() " +
-                "WHERE order_code = ? AND status <> N'PAID'";
+        String sql = "UPDATE PayOSPaymentAttempt SET Status = N'PAID', PaidAt = SYSDATETIME(), LastCheckedAt = SYSDATETIME() " +
+                "WHERE OrderCode = ? AND Status <> N'PAID'";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, orderCode);
             return ps.executeUpdate() == 1;
@@ -92,9 +92,9 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
     @Override
     public void markCancelledOrExpired(Connection c, long orderCode, PayOSPaymentAttemptStatus status) throws SQLException {
         boolean isCancelled = status == PayOSPaymentAttemptStatus.CANCELLED;
-        String sql = "UPDATE payos_payment_attempts SET status = ?, " +
-                (isCancelled ? "cancelled_at = SYSDATETIME(), " : "") +
-                "last_checked_at = SYSDATETIME() WHERE order_code = ? AND status IN (N'CREATING', N'PENDING')";
+        String sql = "UPDATE PayOSPaymentAttempt SET Status = ?, " +
+                (isCancelled ? "CancelledAt = SYSDATETIME(), " : "") +
+                "LastCheckedAt = SYSDATETIME() WHERE OrderCode = ? AND Status IN (N'CREATING', N'PENDING')";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setNString(1, status.name());
             ps.setLong(2, orderCode);
@@ -105,7 +105,7 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
     @Override
     public void touchLastChecked(Connection c, long orderCode) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement(
-                "UPDATE payos_payment_attempts SET last_checked_at = SYSDATETIME() WHERE order_code = ?")) {
+                "UPDATE PayOSPaymentAttempt SET LastCheckedAt = SYSDATETIME() WHERE OrderCode = ?")) {
             ps.setLong(1, orderCode);
             ps.executeUpdate();
         }
@@ -113,17 +113,17 @@ public class PayOSPaymentAttemptDAOImpl implements PayOSPaymentAttemptDAO {
 
     private Row mapRow(ResultSet rs) throws SQLException {
         Row row = new Row();
-        row.attemptId = rs.getLong("attempt_id");
-        row.hoaDonId = rs.getInt("invoice_id");
-        row.datSanId = rs.getInt("booking_id");
-        row.coSoId = rs.getInt("facility_id");
-        row.orderCode = rs.getLong("order_code");
-        row.paymentLinkId = rs.getString("payment_link_id");
-        row.checkoutUrl = rs.getString("checkout_url");
-        row.qrCode = rs.getString("qr_code");
-        row.status = PayOSPaymentAttemptStatus.valueOf(rs.getNString("status"));
-        row.amount = rs.getBigDecimal("amount");
-        row.description = rs.getNString("description");
+        row.attemptId = rs.getLong("AttemptID");
+        row.hoaDonId = rs.getInt("HoaDonID");
+        row.datSanId = rs.getInt("DatSanID");
+        row.coSoId = rs.getInt("CoSoID");
+        row.orderCode = rs.getLong("OrderCode");
+        row.paymentLinkId = rs.getString("PaymentLinkID");
+        row.checkoutUrl = rs.getString("CheckoutUrl");
+        row.qrCode = rs.getString("QrCode");
+        row.status = PayOSPaymentAttemptStatus.valueOf(rs.getNString("Status"));
+        row.amount = rs.getBigDecimal("Amount");
+        row.description = rs.getNString("Description");
         return row;
     }
 }

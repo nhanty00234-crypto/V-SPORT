@@ -400,11 +400,11 @@ public class CheckInServlet extends HttpServlet {
                 // vì sân đã được giữ chỗ cho họ. Chỉ walk-in mới được áp dụng giảm trừ trả sớm.
                 try (java.sql.Connection connCheck = org.example.util.DBUtil.getConnection();
                      java.sql.PreparedStatement psCheck = connCheck.prepareStatement(
-                             "SELECT time_mode FROM bookings WHERE booking_id = ?")) {
+                             "SELECT TimeMode FROM LichDatSan WHERE DatSanID = ?")) {
                     psCheck.setInt(1, datSanId);
                     try (java.sql.ResultSet rsCheck = psCheck.executeQuery()) {
                         if (rsCheck.next()) {
-                            String timeMode = rsCheck.getNString("time_mode");
+                            String timeMode = rsCheck.getNString("TimeMode");
                             if ("FIXED_BOOKING".equals(timeMode)) {
                                 throw new CheckInException(
                                         "Không thể áp dụng giảm trừ trả sân sớm cho khách đặt trước. " +
@@ -419,7 +419,7 @@ public class CheckInServlet extends HttpServlet {
                 // Write Audit Log
                 org.example.service.AuditLogService.log(req, user, 
                     "EARLY_CHECKOUT_ADJUSTMENT", 
-                    "bookings", 
+                    "LichDatSan", 
                     String.valueOf(datSanId), 
                     "Đơn đặt sân #" + datSanId, 
                     "Giảm trừ trả sân sớm: giảm " + discountAmount + "đ. Lý do: " + reason);
@@ -1085,37 +1085,37 @@ public class CheckInServlet extends HttpServlet {
             String trangThaiThanhToan = "Chưa thanh toán";
 
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection()) {
-                boolean hasLoaiHoaDon = columnExists(conn, "invoices", "invoice_type");
-                String invoiceSql = "SELECT invoice_id, court_total, service_total, grand_total, payment_status, discount_amount, parking_fee FROM invoices WHERE booking_id = ?" +
-                        (hasLoaiHoaDon ? " AND (invoice_type = N'MAIN' OR invoice_type IS NULL)" : "");
+                boolean hasLoaiHoaDon = columnExists(conn, "HoaDon", "LoaiHoaDon");
+                String invoiceSql = "SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan, GiamGia, PhiGuiXe FROM HoaDon WHERE DatSanID = ?" +
+                        (hasLoaiHoaDon ? " AND (LoaiHoaDon = N'MAIN' OR LoaiHoaDon IS NULL)" : "");
                 try (java.sql.PreparedStatement ps = conn.prepareStatement(invoiceSql)) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        hoaDonId = rs.getInt("invoice_id");
-                        tongTienSan = rs.getDouble("court_total");
-                        tongTienDichVu = rs.getDouble("service_total");
-                        tongThanhToan = rs.getDouble("grand_total");
-                        trangThaiThanhToan = rs.getString("payment_status");
-                        giamGia = rs.getDouble("discount_amount");
-                        phiGuiXe = rs.getDouble("parking_fee");
+                        hoaDonId = rs.getInt("HoaDonID");
+                        tongTienSan = rs.getDouble("TongTienSan");
+                        tongTienDichVu = rs.getDouble("TongTienDichVu");
+                        tongThanhToan = rs.getDouble("TongThanhToan");
+                        trangThaiThanhToan = rs.getString("TrangThaiThanhToan");
+                        giamGia = rs.getDouble("GiamGia");
+                        phiGuiXe = rs.getDouble("PhiGuiXe");
                     }
                 }
                 }
             } catch (java.sql.SQLException sqlEx) {
                 // Fallback: LoaiHoaDon column may not exist yet
                 try (java.sql.Connection conn2 = org.example.util.DBUtil.getConnection();
-                     java.sql.PreparedStatement ps2 = conn2.prepareStatement("SELECT invoice_id, court_total, service_total, grand_total, payment_status, discount_amount, parking_fee FROM invoices WHERE booking_id = ?")) {
+                     java.sql.PreparedStatement ps2 = conn2.prepareStatement("SELECT HoaDonID, TongTienSan, TongTienDichVu, TongThanhToan, TrangThaiThanhToan, GiamGia, PhiGuiXe FROM HoaDon WHERE DatSanID = ?")) {
                     ps2.setInt(1, datSanId);
                     try (java.sql.ResultSet rs2 = ps2.executeQuery()) {
                         if (rs2.next()) {
-                            hoaDonId = rs2.getInt("invoice_id");
-                            tongTienSan = rs2.getDouble("court_total");
-                            tongTienDichVu = rs2.getDouble("service_total");
-                            tongThanhToan = rs2.getDouble("grand_total");
-                            trangThaiThanhToan = rs2.getString("payment_status");
-                            giamGia = rs2.getDouble("discount_amount");
-                            phiGuiXe = rs2.getDouble("parking_fee");
+                            hoaDonId = rs2.getInt("HoaDonID");
+                            tongTienSan = rs2.getDouble("TongTienSan");
+                            tongTienDichVu = rs2.getDouble("TongTienDichVu");
+                            tongThanhToan = rs2.getDouble("TongThanhToan");
+                            trangThaiThanhToan = rs2.getString("TrangThaiThanhToan");
+                            giamGia = rs2.getDouble("GiamGia");
+                            phiGuiXe = rs2.getDouble("PhiGuiXe");
                         }
                     }
                 }
@@ -1125,16 +1125,16 @@ public class CheckInServlet extends HttpServlet {
             double donGiaGio = 0.0;
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
                  java.sql.PreparedStatement ps = conn.prepareStatement(
-                     "SELECT ls.price_with_light, ls.price_without_light, lds.apply_light_price " +
-                     "FROM bookings lds " +
-                     "INNER JOIN courts s ON lds.court_id = s.court_id " +
-                     "INNER JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
-                     "WHERE lds.booking_id = ?")) {
+                     "SELECT ls.GiaCoDen, ls.GiaKhongDen, lds.ApDungGiaCoDen " +
+                     "FROM LichDatSan lds " +
+                     "INNER JOIN San s ON lds.SanID = s.SanID " +
+                     "INNER JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                     "WHERE lds.DatSanID = ?")) {
                 ps.setInt(1, datSanId);
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        boolean apDungGiaCoDen = rs.getBoolean("apply_light_price");
-                        donGiaGio = apDungGiaCoDen ? rs.getDouble("price_with_light") : rs.getDouble("price_without_light");
+                        boolean apDungGiaCoDen = rs.getBoolean("ApDungGiaCoDen");
+                        donGiaGio = apDungGiaCoDen ? rs.getDouble("GiaCoDen") : rs.getDouble("GiaKhongDen");
                     }
                 }
             }
@@ -1204,25 +1204,25 @@ public class CheckInServlet extends HttpServlet {
             boolean mainBillPaid = "Đã thanh toán".equals(trangThaiThanhToan);
             java.util.List<java.util.Map<String, Object>> splitBills = new java.util.ArrayList<>();
             try (java.sql.Connection connSplit = org.example.util.DBUtil.getConnection()) {
-                if (!columnExists(connSplit, "invoices", "invoice_type")) {
+                if (!columnExists(connSplit, "HoaDon", "LoaiHoaDon")) {
                     throw new java.sql.SQLException("HoaDon.LoaiHoaDon chưa tồn tại");
                 }
-                boolean hasGhiChu = columnExists(connSplit, "invoices", "note");
-                String sqlSplits = "SELECT hd.invoice_id, hd.grand_total, hd.payment_status, " +
-                                   (hasGhiChu ? "hd.note" : "CAST(NULL AS NVARCHAR(500)) AS note") + ", hd.issued_at " +
-                                   "FROM invoices hd WHERE hd.booking_id = ? AND hd.invoice_type = N'SPLIT' ORDER BY hd.issued_at ASC";
+                boolean hasGhiChu = columnExists(connSplit, "HoaDon", "GhiChu");
+                String sqlSplits = "SELECT hd.HoaDonID, hd.TongThanhToan, hd.TrangThaiThanhToan, " +
+                                   (hasGhiChu ? "hd.GhiChu" : "CAST(NULL AS NVARCHAR(500)) AS GhiChu") + ", hd.NgayLap " +
+                                   "FROM HoaDon hd WHERE hd.DatSanID = ? AND hd.LoaiHoaDon = N'SPLIT' ORDER BY hd.NgayLap ASC";
                 try (java.sql.PreparedStatement psSplit = connSplit.prepareStatement(sqlSplits)) {
                 psSplit.setInt(1, datSanId);
                 try (java.sql.ResultSet rsSplit = psSplit.executeQuery()) {
                     while (rsSplit.next()) {
                         java.util.Map<String, Object> sb = new java.util.HashMap<>();
-                        int sbHdId = rsSplit.getInt("invoice_id");
+                        int sbHdId = rsSplit.getInt("HoaDonID");
                         sb.put("hoaDonId", sbHdId);
-                        sb.put("tongThanhToan", rsSplit.getDouble("grand_total"));
-                        sb.put("trangThai", rsSplit.getString("payment_status"));
-                        sb.put("ghiChu", rsSplit.getString("note"));
-                        sb.put("ngayLap", rsSplit.getTimestamp("issued_at") != null
-                                ? rsSplit.getTimestamp("issued_at").toString().substring(0, 16) : "");
+                        sb.put("tongThanhToan", rsSplit.getDouble("TongThanhToan"));
+                        sb.put("trangThai", rsSplit.getString("TrangThaiThanhToan"));
+                        sb.put("ghiChu", rsSplit.getString("GhiChu"));
+                        sb.put("ngayLap", rsSplit.getTimestamp("NgayLap") != null
+                                ? rsSplit.getTimestamp("NgayLap").toString().substring(0, 16) : "");
                         sb.put("items", chiTietHoaDonToMaps(hdDao.getChiTietByHoaDonId(sbHdId)));
                         splitBills.add(sb);
                     }
@@ -1335,12 +1335,12 @@ public class CheckInServlet extends HttpServlet {
         java.util.List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
         for (org.example.model.ChiTietHoaDon ct : list) {
             java.util.Map<String, Object> m = new java.util.HashMap<>();
-            m.put("invoice_item_id", ct.getChiTietID());
-            m.put("invoice_id", ct.getHoaDonID());
-            m.put("product_id", ct.getSanPhamID());
-            m.put("quantity", ct.getSoLuong());
-            m.put("unit_price_at_sale", ct.getDonGiaTaiThoiDiemBan());
-            m.put("line_total", ct.getThanhTien());
+            m.put("ChiTietID", ct.getChiTietID());
+            m.put("HoaDonID", ct.getHoaDonID());
+            m.put("SanPhamID", ct.getSanPhamID());
+            m.put("SoLuong", ct.getSoLuong());
+            m.put("DonGiaTaiThoiDiemBan", ct.getDonGiaTaiThoiDiemBan());
+            m.put("ThanhTien", ct.getThanhTien());
             result.add(m);
         }
         return result;
@@ -1411,7 +1411,7 @@ public class CheckInServlet extends HttpServlet {
                 String extensionMsg = (extendMinutes != null) ? "Gia hạn thêm " + extendMinutes + " phút" : "Gia hạn đến giờ " + newEndTime;
                 org.example.service.AuditLogService.log(req, user,
                     "EXTEND_SESSION",
-                    "bookings",
+                    "LichDatSan",
                     String.valueOf(datSanId),
                     "Đơn đặt sân #" + datSanId,
                     "Gia hạn chơi thành công cho ca đặt sân #" + datSanId + ": " + extensionMsg + ". Phí phát sinh: " + result.additionalAmount + "đ");

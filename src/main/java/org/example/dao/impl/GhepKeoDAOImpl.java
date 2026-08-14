@@ -117,7 +117,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public int create(GhepKeo keo) {
-        String sql = "INSERT INTO matches(booking_id, creator_account_id, sport_id, description, skill_level, status) " +
+        String sql = "INSERT INTO GhepKeo(DatSanID, AccountID_NguoiTao, MonTheThaoID, MoTa, TrinhDo, TrangThai) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -138,47 +138,47 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
     }
 
     private static final String SELECT_VIEW_BASE =
-            "SELECT g.match_id, g.booking_id, g.creator_account_id, g.sport_id, g.description, g.skill_level, g.status, " +
-            "       tk.full_name AS TenNguoiTao, tk.reputation_score AS DiemUyTinNguoiTao, " +
-            "       mtt.sport_name AS TenMonTheThao, " +
-            "       l.booking_date, l.start_time, l.end_time, l.status AS TrangThaiBooking, " +
-            "       s.court_id, s.court_name, s.facility_id, " +
-            "       cs.facility_name, cs.address AS DiaChiCoSo, " +
-            "       ls.type_name AS TenLoaiSan, " +
-            "       (SELECT COUNT(*) FROM match_participants p WHERE p.match_id = g.match_id AND p.participation_status = N'" + P_STATUS_JOINED + "') AS SoNguoiThamGia " +
-            "FROM matches g " +
-            "LEFT JOIN accounts tk ON g.creator_account_id = tk.account_id " +
-            "LEFT JOIN bookings l ON g.booking_id = l.booking_id " +
-            "LEFT JOIN courts s ON l.court_id = s.court_id " +
-            "LEFT JOIN facilities cs ON s.facility_id = cs.facility_id " +
-            "LEFT JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
-            "LEFT JOIN sports mtt ON g.sport_id = mtt.sport_id ";
+            "SELECT g.KeoID, g.DatSanID, g.AccountID_NguoiTao, g.MonTheThaoID, g.MoTa, g.TrinhDo, g.TrangThai, " +
+            "       tk.FullName AS TenNguoiTao, tk.DiemUyTin AS DiemUyTinNguoiTao, " +
+            "       mtt.TenMon AS TenMonTheThao, " +
+            "       l.NgayDat, l.GioBatDau, l.GioKetThuc, l.TrangThai AS TrangThaiBooking, " +
+            "       s.SanID, s.TenSan, s.CoSoID, " +
+            "       cs.TenCoSo, cs.DiaChi AS DiaChiCoSo, " +
+            "       ls.TenLoai AS TenLoaiSan, " +
+            "       (SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_JOINED + "') AS SoNguoiThamGia " +
+            "FROM GhepKeo g " +
+            "LEFT JOIN Accounts tk ON g.AccountID_NguoiTao = tk.AccountID " +
+            "LEFT JOIN LichDatSan l ON g.DatSanID = l.DatSanID " +
+            "LEFT JOIN San s ON l.SanID = s.SanID " +
+            "LEFT JOIN CoSo cs ON s.CoSoID = cs.CoSoID " +
+            "LEFT JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+            "LEFT JOIN MonTheThao mtt ON g.MonTheThaoID = mtt.MonTheThaoID ";
 
     private GhepKeoView mapView(ResultSet rs) throws SQLException {
         GhepKeoView v = new GhepKeoView();
-        v.keoId = rs.getInt("match_id");
-        v.datSanId = rs.getInt("booking_id");
-        v.accountIdNguoiTao = rs.getInt("creator_account_id");
-        Object monVal = rs.getObject("sport_id");
+        v.keoId = rs.getInt("KeoID");
+        v.datSanId = rs.getInt("DatSanID");
+        v.accountIdNguoiTao = rs.getInt("AccountID_NguoiTao");
+        Object monVal = rs.getObject("MonTheThaoID");
         v.monTheThaoId = monVal == null ? null : (int) monVal;
         v.tenMonTheThao = rs.getString("TenMonTheThao");
-        v.moTa = rs.getString("description");
-        v.trinhDo = rs.getString("skill_level");
-        v.trangThai = rs.getString("status");
+        v.moTa = rs.getString("MoTa");
+        v.trinhDo = rs.getString("TrinhDo");
+        v.trangThai = rs.getString("TrangThai");
         v.tenNguoiTao = rs.getString("TenNguoiTao");
         Object dutVal = rs.getObject("DiemUyTinNguoiTao");
         v.diemUyTinNguoiTao = dutVal == null ? null : (int) dutVal;
-        java.sql.Date ngay = rs.getDate("booking_date");
+        java.sql.Date ngay = rs.getDate("NgayDat");
         v.ngayDat = ngay == null ? null : ngay.toLocalDate();
-        java.sql.Time bd = rs.getTime("start_time");
+        java.sql.Time bd = rs.getTime("GioBatDau");
         v.gioBatDau = bd == null ? null : bd.toString().substring(0, 5);
-        java.sql.Time kt = rs.getTime("end_time");
+        java.sql.Time kt = rs.getTime("GioKetThuc");
         v.gioKetThuc = kt == null ? null : kt.toString().substring(0, 5);
         v.trangThaiBooking = rs.getString("TrangThaiBooking");
-        v.sanId = rs.getInt("court_id");
-        v.tenSan = rs.getString("court_name");
-        v.coSoId = rs.getInt("facility_id");
-        v.tenCoSo = rs.getString("facility_name");
+        v.sanId = rs.getInt("SanID");
+        v.tenSan = rs.getString("TenSan");
+        v.coSoId = rs.getInt("CoSoID");
+        v.tenCoSo = rs.getString("TenCoSo");
         v.diaChiCoSo = rs.getString("DiaChiCoSo");
         v.tenLoaiSan = rs.getString("TenLoaiSan");
         v.soNguoiThamGia = rs.getInt("SoNguoiThamGia");
@@ -188,7 +188,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public GhepKeoView getViewById(int keoId) {
-        String sql = SELECT_VIEW_BASE + " WHERE g.match_id = ?";
+        String sql = SELECT_VIEW_BASE + " WHERE g.KeoID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, keoId);
@@ -204,7 +204,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
     @Override
     public List<GhepKeoView> listOpenMatches(Integer coSoId, Integer monTheThaoId, LocalDate fromDate, LocalDate toDate) {
         StringBuilder sql = new StringBuilder(SELECT_VIEW_BASE);
-        sql.append(" WHERE g.status = N'").append(STATUS_OPEN).append("' ");
+        sql.append(" WHERE g.TrangThai = N'").append(STATUS_OPEN).append("' ");
         // Chỉ kèo có booking hợp lệ + đã được quản lý xác nhận + ngày chưa qua
         sql.append(" AND l.DatSanID IS NOT NULL AND l.TrangThai = N'Đã xác nhận' AND l.NgayDat >= CAST(GETDATE() AS DATE) ");
         List<Object> params = new ArrayList<>();
@@ -212,7 +212,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
         if (monTheThaoId != null) { sql.append(" AND g.MonTheThaoID = ?"); params.add(monTheThaoId); }
         if (fromDate != null) { sql.append(" AND l.NgayDat >= ?"); params.add(Date.valueOf(fromDate)); }
         if (toDate != null) { sql.append(" AND l.NgayDat <= ?"); params.add(Date.valueOf(toDate)); }
-        sql.append(" ORDER BY l.booking_date ASC, l.start_time ASC");
+        sql.append(" ORDER BY l.NgayDat ASC, l.GioBatDau ASC");
 
         List<GhepKeoView> out = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
@@ -240,15 +240,15 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public List<GhepKeoView> listByCreator(int accountId) {
-        String sql = SELECT_VIEW_BASE + " WHERE g.creator_account_id = ? ORDER BY g.match_id DESC";
+        String sql = SELECT_VIEW_BASE + " WHERE g.AccountID_NguoiTao = ? ORDER BY g.KeoID DESC";
         return runViewQuery(sql, ps -> ps.setInt(1, accountId));
     }
 
     @Override
     public List<GhepKeoView> listByParticipant(int accountId) {
         String sql = SELECT_VIEW_BASE +
-                " WHERE g.match_id IN (SELECT p.match_id FROM match_participants p WHERE p.participant_account_id = ? AND p.participation_status <> N'" + P_STATUS_LEFT + "') " +
-                " ORDER BY l.booking_date DESC";
+                " WHERE g.KeoID IN (SELECT p.KeoID FROM ChiTietGhepKeo p WHERE p.AccountID_NguoiThamGia = ? AND p.TrangThaiThamGia <> N'" + P_STATUS_LEFT + "') " +
+                " ORDER BY l.NgayDat DESC";
         return runViewQuery(sql, ps -> ps.setInt(1, accountId));
     }
 
@@ -269,7 +269,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public boolean updateStatusIfOwner(int keoId, String newStatus, int ownerAccountId) {
-        String sql = "UPDATE matches SET status = ? WHERE match_id = ? AND creator_account_id = ?";
+        String sql = "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND AccountID_NguoiTao = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, newStatus);
@@ -293,9 +293,9 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 int accepted;
                 String trangThaiKeo;
                 int accountIdOwner;
-                String sqlLock = "SELECT g.creator_account_id, g.description, g.status, " +
-                        "       (SELECT COUNT(*) FROM match_participants p WHERE p.match_id = g.match_id AND p.participation_status = N'" + P_STATUS_JOINED + "') AS Accepted " +
-                        "FROM matches g WITH (UPDLOCK, ROWLOCK) WHERE g.match_id = ?";
+                String sqlLock = "SELECT g.AccountID_NguoiTao, g.MoTa, g.TrangThai, " +
+                        "       (SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_JOINED + "') AS Accepted " +
+                        "FROM GhepKeo g WITH (UPDLOCK, ROWLOCK) WHERE g.KeoID = ?";
                 try (PreparedStatement psLock = conn.prepareStatement(sqlLock)) {
                     psLock.setInt(1, keoId);
                     try (ResultSet rs = psLock.executeQuery()) {
@@ -303,10 +303,10 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                             conn.rollback();
                             throw new IllegalStateException("Kèo không tồn tại.");
                         }
-                        accountIdOwner = rs.getInt("creator_account_id");
-                        trangThaiKeo = rs.getString("status");
+                        accountIdOwner = rs.getInt("AccountID_NguoiTao");
+                        trangThaiKeo = rs.getString("TrangThai");
                         accepted = rs.getInt("Accepted");
-                        String moTa = rs.getString("description");
+                        String moTa = rs.getString("MoTa");
                         GhepKeoView tmp = new GhepKeoView();
                         decodeMoTaInto(moTa, tmp);
                         capacity = tmp.soNguoiCanTim;
@@ -327,13 +327,13 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 }
 
                 // Bước 2: kiểm tra đã tồn tại participant active của account này chưa
-                String sqlCheck = "SELECT participant_id, participation_status FROM match_participants " +
-                        "WHERE match_id = ? AND participant_account_id = ? AND participation_status IN (N'" + P_STATUS_JOINED + "', N'" + P_STATUS_PENDING + "')";
+                String sqlCheck = "SELECT ChiTietKeoID, TrangThaiThamGia FROM ChiTietGhepKeo " +
+                        "WHERE KeoID = ? AND AccountID_NguoiThamGia = ? AND TrangThaiThamGia IN (N'" + P_STATUS_JOINED + "', N'" + P_STATUS_PENDING + "')";
                 try (PreparedStatement psCheck = conn.prepareStatement(sqlCheck)) {
                     psCheck.setInt(1, keoId); psCheck.setInt(2, accountId);
                     try (ResultSet rs = psCheck.executeQuery()) {
                         if (rs.next()) {
-                            int existingId = rs.getInt("participant_id");
+                            int existingId = rs.getInt("ChiTietKeoID");
                             conn.rollback();
                             throw new IllegalStateException("Bạn đã tham gia hoặc đang chờ duyệt kèo này (mã " + existingId + ").");
                         }
@@ -341,7 +341,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 }
 
                 // Bước 3: insert
-                String sqlIns = "INSERT INTO match_participants(match_id, participant_account_id, participation_status, participation_position) VALUES (?, ?, ?, ?)";
+                String sqlIns = "INSERT INTO ChiTietGhepKeo(KeoID, AccountID_NguoiThamGia, TrangThaiThamGia, ViTriThamGia) VALUES (?, ?, ?, ?)";
                 int newId = -1;
                 try (PreparedStatement psIns = conn.prepareStatement(sqlIns, Statement.RETURN_GENERATED_KEYS)) {
                     psIns.setInt(1, keoId);
@@ -357,7 +357,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 // Bước 4: nếu vừa đủ người → set TrangThai = "Đã đủ người"
                 if (P_STATUS_JOINED.equals(status) && (accepted + 1) >= capacity) {
                     try (PreparedStatement psUp = conn.prepareStatement(
-                            "UPDATE matches SET status = ? WHERE match_id = ? AND status = ?")) {
+                            "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND TrangThai = ?")) {
                         psUp.setNString(1, STATUS_FULL);
                         psUp.setInt(2, keoId);
                         psUp.setNString(3, STATUS_OPEN);
@@ -379,11 +379,11 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
         String sql;
         if (actorIsOwner) {
             // Chủ kèo có thể duyệt/từ chối bất kỳ participant của kèo mình
-            sql = "UPDATE match_participants SET participation_status = ? " +
-                  "WHERE participant_id = ? AND match_id IN (SELECT match_id FROM matches WHERE creator_account_id = ?)";
+            sql = "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? " +
+                  "WHERE ChiTietKeoID = ? AND KeoID IN (SELECT KeoID FROM GhepKeo WHERE AccountID_NguoiTao = ?)";
         } else {
             // Người chơi chỉ có thể tự đổi trạng thái của chính mình sang "Đã rời"
-            sql = "UPDATE match_participants SET participation_status = ? WHERE participant_id = ? AND participant_account_id = ?";
+            sql = "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE ChiTietKeoID = ? AND AccountID_NguoiThamGia = ?";
         }
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -410,10 +410,10 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 // Bước 1: Lấy KeoID và kiểm tra chủ kèo
                 int keoId;
                 String currentParticipantStatus;
-                String sqlGetPart = "SELECT ct.match_id, ct.participation_status " +
-                        "FROM match_participants ct " +
-                        "JOIN matches g WITH (UPDLOCK, ROWLOCK) ON ct.match_id = g.match_id " +
-                        "WHERE ct.participant_id = ? AND g.creator_account_id = ?";
+                String sqlGetPart = "SELECT ct.KeoID, ct.TrangThaiThamGia " +
+                        "FROM ChiTietGhepKeo ct " +
+                        "JOIN GhepKeo g WITH (UPDLOCK, ROWLOCK) ON ct.KeoID = g.KeoID " +
+                        "WHERE ct.ChiTietKeoID = ? AND g.AccountID_NguoiTao = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlGetPart)) {
                     ps.setInt(1, chiTietKeoId);
                     ps.setInt(2, ownerAccountId);
@@ -422,8 +422,8 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                             conn.rollback();
                             throw new IllegalStateException("Không tìm thấy yêu cầu hoặc bạn không phải chủ kèo.");
                         }
-                        keoId = rs.getInt("match_id");
-                        currentParticipantStatus = rs.getString("participation_status");
+                        keoId = rs.getInt("KeoID");
+                        currentParticipantStatus = rs.getString("TrangThaiThamGia");
                     }
                 }
 
@@ -435,9 +435,9 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 // Bước 2: Đọc capacity và số người đã tham gia từ kèo
                 int capacity;
                 int accepted;
-                String sqlKeo = "SELECT g.description, " +
-                        "(SELECT COUNT(*) FROM match_participants p WHERE p.match_id = g.match_id AND p.participation_status = N'" + P_STATUS_JOINED + "') AS Accepted " +
-                        "FROM matches g WHERE g.match_id = ?";
+                String sqlKeo = "SELECT g.MoTa, " +
+                        "(SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_JOINED + "') AS Accepted " +
+                        "FROM GhepKeo g WHERE g.KeoID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlKeo)) {
                     ps.setInt(1, keoId);
                     try (ResultSet rs = ps.executeQuery()) {
@@ -446,7 +446,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                             throw new IllegalStateException("Kèo không tồn tại.");
                         }
                         GhepKeoView tmp = new GhepKeoView();
-                        decodeMoTaInto(rs.getString("description"), tmp);
+                        decodeMoTaInto(rs.getString("MoTa"), tmp);
                         capacity = tmp.soNguoiCanTim;
                         accepted = rs.getInt("Accepted");
                     }
@@ -458,7 +458,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 }
 
                 // Bước 3: Cập nhật trạng thái participant → Đã tham gia
-                String sqlUpdate = "UPDATE match_participants SET participation_status = ? WHERE participant_id = ?";
+                String sqlUpdate = "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE ChiTietKeoID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlUpdate)) {
                     ps.setNString(1, P_STATUS_JOINED);
                     ps.setInt(2, chiTietKeoId);
@@ -467,7 +467,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
                 // Bước 4: Nếu vừa đủ người → chuyển kèo sang "Đã đủ người"
                 if ((accepted + 1) >= capacity) {
-                    String sqlClose = "UPDATE matches SET status = ? WHERE match_id = ? AND status = ?";
+                    String sqlClose = "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND TrangThai = ?";
                     try (PreparedStatement ps = conn.prepareStatement(sqlClose)) {
                         ps.setNString(1, STATUS_FULL);
                         ps.setInt(2, keoId);
@@ -496,9 +496,9 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
             try {
                 // Bước 1: Lấy KeoID của participant này và kiểm tra chủ sở hữu
                 int keoId;
-                String sqlGetPart = "SELECT ct.match_id FROM match_participants ct " +
-                        "WHERE ct.participant_id = ? AND ct.participant_account_id = ? " +
-                        "AND ct.participation_status IN (N'" + P_STATUS_JOINED + "', N'" + P_STATUS_PENDING + "')";
+                String sqlGetPart = "SELECT ct.KeoID FROM ChiTietGhepKeo ct " +
+                        "WHERE ct.ChiTietKeoID = ? AND ct.AccountID_NguoiThamGia = ? " +
+                        "AND ct.TrangThaiThamGia IN (N'" + P_STATUS_JOINED + "', N'" + P_STATUS_PENDING + "')";
                 try (PreparedStatement ps = conn.prepareStatement(sqlGetPart)) {
                     ps.setInt(1, chiTietKeoId);
                     ps.setInt(2, accountId);
@@ -507,12 +507,12 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                             conn.rollback();
                             return false;
                         }
-                        keoId = rs.getInt("match_id");
+                        keoId = rs.getInt("KeoID");
                     }
                 }
 
                 // Bước 2: Cập nhật participant → Đã rời
-                String sqlLeave = "UPDATE match_participants SET participation_status = ? WHERE participant_id = ?";
+                String sqlLeave = "UPDATE ChiTietGhepKeo SET TrangThaiThamGia = ? WHERE ChiTietKeoID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlLeave)) {
                     ps.setNString(1, P_STATUS_LEFT);
                     ps.setInt(2, chiTietKeoId);
@@ -523,22 +523,22 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
                 }
 
                 // Bước 3: Đọc trạng thái kèo + capacity + số người còn lại
-                String sqlKeo = "SELECT g.status, g.description, " +
-                        "(SELECT COUNT(*) FROM match_participants p WHERE p.match_id = g.match_id AND p.participation_status = N'" + P_STATUS_JOINED + "') AS Accepted " +
-                        "FROM matches g WHERE g.match_id = ?";
+                String sqlKeo = "SELECT g.TrangThai, g.MoTa, " +
+                        "(SELECT COUNT(*) FROM ChiTietGhepKeo p WHERE p.KeoID = g.KeoID AND p.TrangThaiThamGia = N'" + P_STATUS_JOINED + "') AS Accepted " +
+                        "FROM GhepKeo g WHERE g.KeoID = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlKeo)) {
                     ps.setInt(1, keoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            String keoStatus = rs.getString("status");
+                            String keoStatus = rs.getString("TrangThai");
                             int accepted = rs.getInt("Accepted");
                             GhepKeoView tmp = new GhepKeoView();
-                            decodeMoTaInto(rs.getString("description"), tmp);
+                            decodeMoTaInto(rs.getString("MoTa"), tmp);
                             int capacity = tmp.soNguoiCanTim;
 
                             // Bước 4: Nếu kèo đang "Đã đủ người" và giờ còn thiếu → mở lại
                             if (STATUS_FULL.equals(keoStatus) && accepted < capacity) {
-                                String sqlReopen = "UPDATE matches SET status = ? WHERE match_id = ? AND status = ?";
+                                String sqlReopen = "UPDATE GhepKeo SET TrangThai = ? WHERE KeoID = ? AND TrangThai = ?";
                                 try (PreparedStatement psRe = conn.prepareStatement(sqlReopen)) {
                                     psRe.setNString(1, STATUS_OPEN);
                                     psRe.setInt(2, keoId);
@@ -566,7 +566,7 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public int countAcceptedParticipants(int keoId) {
-        String sql = "SELECT COUNT(*) FROM match_participants WHERE match_id = ? AND participation_status = N'" + P_STATUS_JOINED + "'";
+        String sql = "SELECT COUNT(*) FROM ChiTietGhepKeo WHERE KeoID = ? AND TrangThaiThamGia = N'" + P_STATUS_JOINED + "'";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, keoId);
@@ -581,10 +581,10 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public List<ChiTietGhepKeoView> listParticipants(int keoId) {
-        String sql = "SELECT p.participant_id, p.match_id, p.participant_account_id, p.participation_status, p.participation_position, " +
-                "       tk.full_name AS TenNguoiChoi, tk.reputation_score AS reputation_score " +
-                "FROM match_participants p LEFT JOIN accounts tk ON p.participant_account_id = tk.account_id " +
-                "WHERE p.match_id = ? ORDER BY p.participant_id ASC";
+        String sql = "SELECT p.ChiTietKeoID, p.KeoID, p.AccountID_NguoiThamGia, p.TrangThaiThamGia, p.ViTriThamGia, " +
+                "       tk.FullName AS TenNguoiChoi, tk.DiemUyTin AS DiemUyTin " +
+                "FROM ChiTietGhepKeo p LEFT JOIN Accounts tk ON p.AccountID_NguoiThamGia = tk.AccountID " +
+                "WHERE p.KeoID = ? ORDER BY p.ChiTietKeoID ASC";
         List<ChiTietGhepKeoView> out = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -592,13 +592,13 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ChiTietGhepKeoView v = new ChiTietGhepKeoView();
-                    v.chiTietKeoId = rs.getInt("participant_id");
-                    v.keoId = rs.getInt("match_id");
-                    v.accountId = rs.getInt("participant_account_id");
-                    v.trangThaiThamGia = rs.getString("participation_status");
-                    v.viTriThamGia = rs.getString("participation_position");
+                    v.chiTietKeoId = rs.getInt("ChiTietKeoID");
+                    v.keoId = rs.getInt("KeoID");
+                    v.accountId = rs.getInt("AccountID_NguoiThamGia");
+                    v.trangThaiThamGia = rs.getString("TrangThaiThamGia");
+                    v.viTriThamGia = rs.getString("ViTriThamGia");
                     v.tenNguoiChoi = rs.getString("TenNguoiChoi");
-                    Object dut = rs.getObject("reputation_score");
+                    Object dut = rs.getObject("DiemUyTin");
                     v.diemUyTin = dut == null ? null : (int) dut;
                     out.add(v);
                 }
@@ -611,24 +611,24 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
 
     @Override
     public ChiTietGhepKeoView getActiveParticipant(int keoId, int accountId) {
-        String sql = "SELECT p.participant_id, p.match_id, p.participant_account_id, p.participation_status, p.participation_position, " +
-                "       tk.full_name AS TenNguoiChoi, tk.reputation_score AS reputation_score " +
-                "FROM match_participants p LEFT JOIN accounts tk ON p.participant_account_id = tk.account_id " +
-                "WHERE p.match_id = ? AND p.participant_account_id = ? AND p.participation_status IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "') " +
-                "ORDER BY p.participant_id DESC";
+        String sql = "SELECT p.ChiTietKeoID, p.KeoID, p.AccountID_NguoiThamGia, p.TrangThaiThamGia, p.ViTriThamGia, " +
+                "       tk.FullName AS TenNguoiChoi, tk.DiemUyTin AS DiemUyTin " +
+                "FROM ChiTietGhepKeo p LEFT JOIN Accounts tk ON p.AccountID_NguoiThamGia = tk.AccountID " +
+                "WHERE p.KeoID = ? AND p.AccountID_NguoiThamGia = ? AND p.TrangThaiThamGia IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "') " +
+                "ORDER BY p.ChiTietKeoID DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, keoId); ps.setInt(2, accountId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ChiTietGhepKeoView v = new ChiTietGhepKeoView();
-                    v.chiTietKeoId = rs.getInt("participant_id");
-                    v.keoId = rs.getInt("match_id");
-                    v.accountId = rs.getInt("participant_account_id");
-                    v.trangThaiThamGia = rs.getString("participation_status");
-                    v.viTriThamGia = rs.getString("participation_position");
+                    v.chiTietKeoId = rs.getInt("ChiTietKeoID");
+                    v.keoId = rs.getInt("KeoID");
+                    v.accountId = rs.getInt("AccountID_NguoiThamGia");
+                    v.trangThaiThamGia = rs.getString("TrangThaiThamGia");
+                    v.viTriThamGia = rs.getString("ViTriThamGia");
                     v.tenNguoiChoi = rs.getString("TenNguoiChoi");
-                    Object dut = rs.getObject("reputation_score");
+                    Object dut = rs.getObject("DiemUyTin");
                     v.diemUyTin = dut == null ? null : (int) dut;
                     return v;
                 }
@@ -653,14 +653,14 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
         // Lấy 30 ChiTietGhepKeo mới nhất của các kèo mà ownerAccountId là chủ,
         // trạng thái Chờ duyệt hoặc Đã tham gia (không lấy rời/từ chối).
         String sql =
-            "SELECT TOP 30 ct.participant_id, ct.match_id, ct.participation_status, " +
-            "       tk.full_name AS TenNguoiChoi " +
-            "FROM match_participants ct " +
-            "JOIN matches g ON ct.match_id = g.match_id " +
-            "JOIN accounts tk ON ct.participant_account_id = tk.account_id " +
-            "WHERE g.creator_account_id = ? " +
-            "  AND ct.participation_status IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "', N'" + P_STATUS_LEFT + "') " +
-            "ORDER BY ct.participant_id DESC";
+            "SELECT TOP 30 ct.ChiTietKeoID, ct.KeoID, ct.TrangThaiThamGia, " +
+            "       tk.FullName AS TenNguoiChoi " +
+            "FROM ChiTietGhepKeo ct " +
+            "JOIN GhepKeo g ON ct.KeoID = g.KeoID " +
+            "JOIN Accounts tk ON ct.AccountID_NguoiThamGia = tk.AccountID " +
+            "WHERE g.AccountID_NguoiTao = ? " +
+            "  AND ct.TrangThaiThamGia IN (N'" + P_STATUS_PENDING + "', N'" + P_STATUS_JOINED + "', N'" + P_STATUS_LEFT + "') " +
+            "ORDER BY ct.ChiTietKeoID DESC";
         List<NotificationItem> out = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -668,10 +668,10 @@ public class GhepKeoDAOImpl implements GhepKeoDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     NotificationItem item = new NotificationItem();
-                    item.id = rs.getInt("participant_id");
-                    item.keoId = rs.getInt("match_id");
+                    item.id = rs.getInt("ChiTietKeoID");
+                    item.keoId = rs.getInt("KeoID");
                     item.tenNguoiChoi = rs.getString("TenNguoiChoi");
-                    item.trangThai = rs.getString("participation_status");
+                    item.trangThai = rs.getString("TrangThaiThamGia");
                     // Dùng ChiTietKeoID để tạo "thời gian giả" — client chỉ cần relative label
                     // Không có cột ngày giờ nên để null, frontend sẽ hiển thị "Vừa xong" hoặc bỏ qua
                     item.thoiGian = null;

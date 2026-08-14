@@ -107,7 +107,7 @@ public class AdminTrashServlet extends HttpServlet {
             return;
         }
 
-        if ("facilities".equals(item.getEntityType())) {
+        if ("CoSo".equals(item.getEntityType())) {
             // Dùng service transaction duy nhất (CoSo + AdminTrash cùng commit/rollback).
             FacilityTrashService.Result result = facilityTrashService.restoreFacility(trashId, admin.getAccountId());
             if (result.success) {

@@ -359,7 +359,7 @@ public class QuanLyNguoiDungServlet extends HttpServlet {
                 boolean deleted = TaiKhoanDAO.softDeleteAccount(id, actingAdmin.getAccountId());
                 if (deleted) {
                     String displayName = accToDelete.getFullName() != null ? accToDelete.getFullName() : accToDelete.getUsername();
-                    new org.example.dao.impl.AdminTrashDAOImpl().log("Account", id, displayName, "accounts",
+                    new org.example.dao.impl.AdminTrashDAOImpl().log("Account", id, displayName, "Accounts",
                             null, actingAdmin.getAccountId(), null);
                     AuditLogService.log(req, actingAdmin,
                         AuditLogService.ACTION_SOFT_DELETE, AuditLogService.ENTITY_ACCOUNT,

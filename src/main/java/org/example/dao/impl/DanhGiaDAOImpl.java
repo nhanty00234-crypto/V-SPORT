@@ -17,7 +17,7 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
 
     @Override
     public int insert(DanhGia dg) {
-        String sql = "INSERT INTO reviews (booking_id, reviewer_account_id, rating, comment, created_at) " +
+        String sql = "INSERT INTO DanhGia (DatSanID, AccountID_NguoiDanhGia, SoSao, BinhLuan, NgayDanhGia) " +
                      "VALUES (?, ?, ?, ?, GETDATE())";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -40,7 +40,7 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
 
     @Override
     public boolean existsByDatSanAndAccount(int datSanId, int accountId) {
-        String sql = "SELECT 1 FROM reviews WHERE booking_id = ? AND reviewer_account_id = ?";
+        String sql = "SELECT 1 FROM DanhGia WHERE DatSanID = ? AND AccountID_NguoiDanhGia = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
@@ -55,8 +55,8 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
     @Override
     public boolean isBookingCompletedByCustomer(int datSanId, int accountId) {
         // Kiểm tra booking hoàn thành thuộc customer — không trust client
-        String sql = "SELECT 1 FROM bookings " +
-                     "WHERE booking_id = ? AND account_id = ? AND status = N'Hoàn thành'";
+        String sql = "SELECT 1 FROM LichDatSan " +
+                     "WHERE DatSanID = ? AND AccountID = ? AND TrangThai = N'Hoàn thành'";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
@@ -79,16 +79,16 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
         boolean hasDateFrom   = dateFrom != null;
         boolean hasDateTo     = dateTo   != null;
         String sql =
-            "SELECT dg.*, tk.full_name AS CustomerName FROM reviews dg " +
-            "JOIN bookings lds ON dg.booking_id = lds.booking_id " +
-            "JOIN courts s ON lds.court_id = s.court_id " +
-            "LEFT JOIN TaiKhoan tk ON dg.reviewer_account_id = tk.account_id " +
-            "WHERE s.facility_id = ? " +
-            (hasStarFilter ? "AND dg.rating = ? " : "") +
-            (hasNameFilter ? "AND tk.full_name LIKE ? " : "") +
-            (hasDateFrom   ? "AND dg.created_at >= ? " : "") +
-            (hasDateTo     ? "AND dg.created_at < DATEADD(day,1,?) " : "") +
-            "ORDER BY dg.created_at DESC " +
+            "SELECT dg.*, tk.FullName AS CustomerName FROM DanhGia dg " +
+            "JOIN LichDatSan lds ON dg.DatSanID = lds.DatSanID " +
+            "JOIN San s ON lds.SanID = s.SanID " +
+            "LEFT JOIN TaiKhoan tk ON dg.AccountID_NguoiDanhGia = tk.AccountID " +
+            "WHERE s.CoSoID = ? " +
+            (hasStarFilter ? "AND dg.SoSao = ? " : "") +
+            (hasNameFilter ? "AND tk.FullName LIKE ? " : "") +
+            (hasDateFrom   ? "AND dg.NgayDanhGia >= ? " : "") +
+            (hasDateTo     ? "AND dg.NgayDanhGia < DATEADD(day,1,?) " : "") +
+            "ORDER BY dg.NgayDanhGia DESC " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -116,10 +116,10 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
     @Override
     public double avgByCoSoId(int coSoId) {
         String sql =
-            "SELECT AVG(CAST(dg.rating AS FLOAT)) FROM reviews dg " +
-            "JOIN bookings lds ON dg.booking_id = lds.booking_id " +
-            "JOIN courts s ON lds.court_id = s.court_id " +
-            "WHERE s.facility_id = ?";
+            "SELECT AVG(CAST(dg.SoSao AS FLOAT)) FROM DanhGia dg " +
+            "JOIN LichDatSan lds ON dg.DatSanID = lds.DatSanID " +
+            "JOIN San s ON lds.SanID = s.SanID " +
+            "WHERE s.CoSoID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -139,8 +139,8 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
     public List<DanhGia> findByAccountId(int accountId, int page, int pageSize) {
         List<DanhGia> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
-        String sql = "SELECT * FROM reviews WHERE reviewer_account_id = ? " +
-                     "ORDER BY created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT * FROM DanhGia WHERE AccountID_NguoiDanhGia = ? " +
+                     "ORDER BY NgayDanhGia DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -157,14 +157,14 @@ public class DanhGiaDAOImpl implements DanhGiaDAO {
 
     private DanhGia map(ResultSet rs) throws SQLException {
         DanhGia dg = new DanhGia();
-        dg.setDanhGiaId(rs.getInt("review_id"));
-        dg.setDatSanId(rs.getInt("booking_id"));
-        dg.setAccountIdNguoiDanhGia(rs.getInt("reviewer_account_id"));
-        int bdb = rs.getInt("reviewed_account_id");
+        dg.setDanhGiaId(rs.getInt("DanhGiaID"));
+        dg.setDatSanId(rs.getInt("DatSanID"));
+        dg.setAccountIdNguoiDanhGia(rs.getInt("AccountID_NguoiDanhGia"));
+        int bdb = rs.getInt("AccountID_NguoiBiDanhGia");
         if (!rs.wasNull()) dg.setAccountIdNguoiBiDanhGia(bdb);
-        dg.setSoSao(rs.getInt("rating"));
-        dg.setBinhLuan(rs.getString("comment"));
-        Timestamp ts = rs.getTimestamp("created_at");
+        dg.setSoSao(rs.getInt("SoSao"));
+        dg.setBinhLuan(rs.getString("BinhLuan"));
+        Timestamp ts = rs.getTimestamp("NgayDanhGia");
         if (ts != null) dg.setNgayDanhGia(ts.toLocalDateTime());
         return dg;
     }

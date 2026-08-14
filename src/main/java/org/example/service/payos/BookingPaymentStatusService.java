@@ -164,12 +164,12 @@ public class BookingPaymentStatusService {
 
     /** CoSoID của một DatSanID — để lấy đúng credentials PayOS theo cơ sở (không tin client). */
     public Integer findCoSoIdByDatSanId(int datSanId) {
-        String sql = "SELECT s.facility_id FROM bookings l JOIN courts s ON s.court_id = l.court_id WHERE l.booking_id = ?";
+        String sql = "SELECT s.CoSoID FROM LichDatSan l JOIN San s ON s.SanID = l.SanID WHERE l.DatSanID = ?";
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getInt("facility_id") : null;
+                return rs.next() ? rs.getInt("CoSoID") : null;
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "findCoSoIdByDatSanId lỗi datSanId=" + datSanId, e);

@@ -93,10 +93,10 @@ public class CoSoGalleryServlet extends HttpServlet {
 
     private List<String> loadUrls(int coSoId) {
         try (Connection conn = org.example.util.DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT image_path FROM facilities WHERE facility_id=?")) {
+             PreparedStatement ps = conn.prepareStatement("SELECT HinhAnh FROM CoSo WHERE CoSoID=?")) {
             ps.setInt(1, coSoId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return parseJson(rs.getString("image_path"));
+                if (rs.next()) return parseJson(rs.getString("HinhAnh"));
             }
         } catch (Exception e) { /* log */ }
         return new ArrayList<>();
@@ -105,7 +105,7 @@ public class CoSoGalleryServlet extends HttpServlet {
     private void saveUrls(int coSoId, List<String> urls) {
         String json = urls.isEmpty() ? null : GSON.toJson(urls);
         try (Connection conn = org.example.util.DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement("UPDATE facilities SET image_path=? WHERE facility_id=?")) {
+             PreparedStatement ps = conn.prepareStatement("UPDATE CoSo SET HinhAnh=? WHERE CoSoID=?")) {
             ps.setString(1, json);
             ps.setInt(2, coSoId);
             ps.executeUpdate();

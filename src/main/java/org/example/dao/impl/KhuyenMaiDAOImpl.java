@@ -20,8 +20,8 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     public List<KhuyenMai> findByCoSoId(int coSoId, int page, int pageSize) {
         List<KhuyenMai> list = new ArrayList<>();
         int offset = (Math.max(page, 1) - 1) * pageSize;
-        String sql = "SELECT * FROM promotions WHERE facility_id = ? " +
-                     "ORDER BY start_date DESC " +
+        String sql = "SELECT * FROM KhuyenMai WHERE CoSoID = ? " +
+                     "ORDER BY NgayBatDau DESC " +
                      "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -40,7 +40,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     @Override
     public List<KhuyenMai> findByCoSoId(int coSoId) {
         List<KhuyenMai> list = new ArrayList<>();
-        String sql = "SELECT * FROM promotions WHERE facility_id = ? ORDER BY start_date DESC";
+        String sql = "SELECT * FROM KhuyenMai WHERE CoSoID = ? ORDER BY NgayBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -55,7 +55,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public KhuyenMai findById(int id) {
-        String sql = "SELECT * FROM promotions WHERE promotion_id = ?";
+        String sql = "SELECT * FROM KhuyenMai WHERE KhuyenMaiID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -70,7 +70,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public KhuyenMai findByIdAndCoSoId(int id, int coSoId) {
-        String sql = "SELECT * FROM promotions WHERE promotion_id = ? AND facility_id = ?";
+        String sql = "SELECT * FROM KhuyenMai WHERE KhuyenMaiID = ? AND CoSoID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -86,7 +86,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public KhuyenMai findByCodeAndCoSoId(String maCode, int coSoId) {
-        String sql = "SELECT * FROM promotions WHERE promo_code = ? AND facility_id = ?";
+        String sql = "SELECT * FROM KhuyenMai WHERE MaCode = ? AND CoSoID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maCode);
@@ -102,7 +102,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public boolean existsByCode(String maCode) {
-        String sql = "SELECT 1 FROM promotions WHERE promo_code = ?";
+        String sql = "SELECT 1 FROM KhuyenMai WHERE MaCode = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maCode);
@@ -115,7 +115,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public boolean existsByCodeExcluding(String maCode, int excludeId) {
-        String sql = "SELECT 1 FROM promotions WHERE promo_code = ? AND promotion_id <> ?";
+        String sql = "SELECT 1 FROM KhuyenMai WHERE MaCode = ? AND KhuyenMaiID <> ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maCode);
@@ -129,8 +129,8 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public int insert(KhuyenMai km) {
-        String sql = "INSERT INTO promotions (promo_code, description, discount_type, discount_value, start_date, end_date, " +
-                     "max_usage_count, used_count, facility_id, status, is_public) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)";
+        String sql = "INSERT INTO KhuyenMai (MaCode, MoTa, LoaiGiam, GiaTriGiam, NgayBatDau, NgayKetThuc, " +
+                     "SoLanToiDa, SoLanDaDung, CoSoID, TrangThai, HienThiCongKhai) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, km.getMaCode());
@@ -159,9 +159,9 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public boolean update(KhuyenMai km) {
-        String sql = "UPDATE promotions SET promo_code=?, description=?, discount_type=?, discount_value=?, " +
-                     "start_date=?, end_date=?, max_usage_count=?, status=? " +
-                     "WHERE promotion_id=? AND facility_id=?";
+        String sql = "UPDATE KhuyenMai SET MaCode=?, MoTa=?, LoaiGiam=?, GiaTriGiam=?, " +
+                     "NgayBatDau=?, NgayKetThuc=?, SoLanToiDa=?, TrangThai=? " +
+                     "WHERE KhuyenMaiID=? AND CoSoID=?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, km.getMaCode());
@@ -177,14 +177,14 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
             ps.setInt(10, km.getCoSoID());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.error("update promotion_id={}: {}", km.getKhuyenMaiID(), e.getMessage(), e);
+            logger.error("update KhuyenMaiID={}: {}", km.getKhuyenMaiID(), e.getMessage(), e);
         }
         return false;
     }
 
     @Override
     public boolean updateTrangThai(int khuyenMaiId, int coSoId, String trangThai) {
-        String sql = "UPDATE promotions SET status=? WHERE promotion_id=? AND facility_id=?";
+        String sql = "UPDATE KhuyenMai SET TrangThai=? WHERE KhuyenMaiID=? AND CoSoID=?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, trangThai);
@@ -199,7 +199,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public boolean delete(int khuyenMaiId, int coSoId) {
-        String sql = "DELETE FROM promotions WHERE promotion_id = ? AND facility_id = ?";
+        String sql = "DELETE FROM KhuyenMai WHERE KhuyenMaiID = ? AND CoSoID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
@@ -215,9 +215,9 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     public boolean incrementUsage(Connection conn, int khuyenMaiId) {
         // Tăng SoLanDaDung chỉ khi TrangThai='Hoạt động' và (SoLanToiDa IS NULL OR SoLanDaDung < SoLanToiDa)
         String sql =
-            "UPDATE promotions SET used_count = used_count + 1 " +
-            "WHERE promotion_id = ? AND status = N'Hoạt động' " +
-            "AND (max_usage_count IS NULL OR used_count < max_usage_count)";
+            "UPDATE KhuyenMai SET SoLanDaDung = SoLanDaDung + 1 " +
+            "WHERE KhuyenMaiID = ? AND TrangThai = N'Hoạt động' " +
+            "AND (SoLanToiDa IS NULL OR SoLanDaDung < SoLanToiDa)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, khuyenMaiId);
             return ps.executeUpdate() > 0;
@@ -229,7 +229,7 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     @Override
     public int countByCoSoId(int coSoId) {
-        String sql = "SELECT COUNT(*) FROM promotions WHERE facility_id = ?";
+        String sql = "SELECT COUNT(*) FROM KhuyenMai WHERE CoSoID = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -245,10 +245,10 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     @Override
     public KhuyenMai findApplicable(String maCode, int coSoId, LocalDate today) {
         String sql =
-            "SELECT * FROM promotions WHERE promo_code = ? AND facility_id = ? " +
-            "AND status = N'Hoạt động' " +
-            "AND start_date <= ? AND end_date >= ? " +
-            "AND (max_usage_count IS NULL OR used_count < max_usage_count)";
+            "SELECT * FROM KhuyenMai WHERE MaCode = ? AND CoSoID = ? " +
+            "AND TrangThai = N'Hoạt động' " +
+            "AND NgayBatDau <= ? AND NgayKetThuc >= ? " +
+            "AND (SoLanToiDa IS NULL OR SoLanDaDung < SoLanToiDa)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maCode);
@@ -267,15 +267,15 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     @Override
     public List<KhuyenMai> findPublicActiveByCoSoId(int coSoId, LocalDate today) {
         List<KhuyenMai> list = new ArrayList<>();
-        String sql = "SELECT km.* FROM promotions km " +
-                "JOIN facilities c ON km.facility_id = c.facility_id " +
-                "WHERE km.facility_id = ? " +
-                "  AND km.status = N'Hoạt động' " +
-                "  AND km.is_public = 1 " +
-                "  AND km.start_date <= ? AND km.end_date >= ? " +
-                "  AND (km.max_usage_count IS NULL OR km.used_count < km.max_usage_count) " +
-                "  AND c.status = N'Đang hoạt động' AND (c.is_deleted = 0 OR c.is_deleted IS NULL) " +
-                "ORDER BY km.start_date DESC";
+        String sql = "SELECT km.* FROM KhuyenMai km " +
+                "JOIN CoSo c ON km.CoSoID = c.CoSoID " +
+                "WHERE km.CoSoID = ? " +
+                "  AND km.TrangThai = N'Hoạt động' " +
+                "  AND km.HienThiCongKhai = 1 " +
+                "  AND km.NgayBatDau <= ? AND km.NgayKetThuc >= ? " +
+                "  AND (km.SoLanToiDa IS NULL OR km.SoLanDaDung < km.SoLanToiDa) " +
+                "  AND c.TrangThai = N'Đang hoạt động' AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
+                "ORDER BY km.NgayBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coSoId);
@@ -296,15 +296,15 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
         if (coSoIds == null || coSoIds.isEmpty()) return list;
         List<Integer> ids = new ArrayList<>(new java.util.LinkedHashSet<>(coSoIds));
         String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
-        String sql = "SELECT km.* FROM promotions km " +
-                "JOIN facilities c ON km.facility_id = c.facility_id " +
-                "WHERE km.facility_id IN (" + placeholders + ") " +
-                "  AND km.status = N'Hoạt động' " +
-                "  AND km.is_public = 1 " +
-                "  AND km.start_date <= ? AND km.end_date >= ? " +
-                "  AND (km.max_usage_count IS NULL OR km.used_count < km.max_usage_count) " +
-                "  AND c.status = N'Đang hoạt động' AND (c.is_deleted = 0 OR c.is_deleted IS NULL) " +
-                "ORDER BY km.facility_id ASC, km.start_date DESC";
+        String sql = "SELECT km.* FROM KhuyenMai km " +
+                "JOIN CoSo c ON km.CoSoID = c.CoSoID " +
+                "WHERE km.CoSoID IN (" + placeholders + ") " +
+                "  AND km.TrangThai = N'Hoạt động' " +
+                "  AND km.HienThiCongKhai = 1 " +
+                "  AND km.NgayBatDau <= ? AND km.NgayKetThuc >= ? " +
+                "  AND (km.SoLanToiDa IS NULL OR km.SoLanDaDung < km.SoLanToiDa) " +
+                "  AND c.TrangThai = N'Đang hoạt động' AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
+                "ORDER BY km.CoSoID ASC, km.NgayBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             int idx = 1;
@@ -323,14 +323,14 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
     @Override
     public List<KhuyenMai> findPublicActiveAll(LocalDate today, int limit) {
         List<KhuyenMai> list = new ArrayList<>();
-        String sql = "SELECT TOP (?) km.* FROM promotions km " +
-                "JOIN facilities c ON km.facility_id = c.facility_id " +
-                "WHERE km.status = N'Hoạt động' " +
-                "  AND km.is_public = 1 " +
-                "  AND km.start_date <= ? AND km.end_date >= ? " +
-                "  AND (km.max_usage_count IS NULL OR km.used_count < km.max_usage_count) " +
-                "  AND c.status = N'Đang hoạt động' AND (c.is_deleted = 0 OR c.is_deleted IS NULL) " +
-                "ORDER BY km.start_date DESC";
+        String sql = "SELECT TOP (?) km.* FROM KhuyenMai km " +
+                "JOIN CoSo c ON km.CoSoID = c.CoSoID " +
+                "WHERE km.TrangThai = N'Hoạt động' " +
+                "  AND km.HienThiCongKhai = 1 " +
+                "  AND km.NgayBatDau <= ? AND km.NgayKetThuc >= ? " +
+                "  AND (km.SoLanToiDa IS NULL OR km.SoLanDaDung < km.SoLanToiDa) " +
+                "  AND c.TrangThai = N'Đang hoạt động' AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL) " +
+                "ORDER BY km.NgayBatDau DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Math.max(1, limit));
@@ -347,29 +347,29 @@ public class KhuyenMaiDAOImpl implements KhuyenMaiDAO {
 
     private KhuyenMai map(ResultSet rs) throws SQLException {
         KhuyenMai km = new KhuyenMai();
-        km.setKhuyenMaiID(rs.getInt("promotion_id"));
-        km.setMaCode(rs.getString("promo_code"));
-        km.setMoTa(rs.getString("description"));
-        km.setLoaiGiam(rs.getString("discount_type"));
-        km.setGiaTriGiam(rs.getDouble("discount_value"));
-        Date nd = rs.getDate("start_date");
+        km.setKhuyenMaiID(rs.getInt("KhuyenMaiID"));
+        km.setMaCode(rs.getString("MaCode"));
+        km.setMoTa(rs.getString("MoTa"));
+        km.setLoaiGiam(rs.getString("LoaiGiam"));
+        km.setGiaTriGiam(rs.getDouble("GiaTriGiam"));
+        Date nd = rs.getDate("NgayBatDau");
         if (nd != null) km.setNgayBatDau(nd.toLocalDate());
-        Date nkt = rs.getDate("end_date");
+        Date nkt = rs.getDate("NgayKetThuc");
         if (nkt != null) km.setNgayKetThuc(nkt.toLocalDate());
-        int slt = rs.getInt("max_usage_count");
+        int slt = rs.getInt("SoLanToiDa");
         if (!rs.wasNull()) km.setSoLanToiDa(slt);
-        km.setSoLanDaDung(rs.getInt("used_count"));
-        int coSo = rs.getInt("facility_id");
+        km.setSoLanDaDung(rs.getInt("SoLanDaDung"));
+        int coSo = rs.getInt("CoSoID");
         if (!rs.wasNull()) km.setCoSoID(coSo);
-        km.setTrangThai(rs.getString("status"));
+        km.setTrangThai(rs.getString("TrangThai"));
         try {
-            km.setGiaTriToiThieu(rs.getBigDecimal("min_order_amount"));
-            km.setGiamToiDa(rs.getBigDecimal("max_discount_amount"));
+            km.setGiaTriToiThieu(rs.getBigDecimal("GiaTriToiThieu"));
+            km.setGiamToiDa(rs.getBigDecimal("GiamToiDa"));
         } catch (SQLException ignored) {
             // Cột có thể không tồn tại trên một số môi trường DB chưa chạy migration bổ sung.
         }
         try {
-            km.setHienThiCongKhai(rs.getBoolean("is_public"));
+            km.setHienThiCongKhai(rs.getBoolean("HienThiCongKhai"));
         } catch (SQLException ignored) {
             // Môi trường chưa chạy migration_khuyenmai_hinhanh.sql - mặc định true (đã set ở model).
         }

@@ -49,21 +49,21 @@ public class FacilityTrashService {
                 String tenCoSo;
                 String oldStatus;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT facility_name, status FROM facilities WHERE facility_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)")) {
+                        "SELECT TenCoSo, TrangThai FROM CoSo WHERE CoSoID = ? AND (IsDeleted = 0 OR IsDeleted IS NULL)")) {
                     ps.setInt(1, coSoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
                             conn.rollback();
                             return Result.fail("Cơ sở không tồn tại hoặc đã bị xóa trước đó.");
                         }
-                        tenCoSo = rs.getNString("facility_name");
-                        oldStatus = rs.getNString("status");
+                        tenCoSo = rs.getNString("TenCoSo");
+                        oldStatus = rs.getNString("TrangThai");
                     }
                 }
 
                 int sanDangSuDung = 0;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM courts WHERE facility_id = ? AND status = N'Đang sử dụng'")) {
+                        "SELECT COUNT(*) FROM San WHERE CoSoID = ? AND TrangThai = N'Đang sử dụng'")) {
                     ps.setInt(1, coSoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) sanDangSuDung = rs.getInt(1);
@@ -72,7 +72,7 @@ public class FacilityTrashService {
 
                 int paymentPending = 0;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM payos_payment_attempts WHERE facility_id = ? AND status = N'PENDING'")) {
+                        "SELECT COUNT(*) FROM PayOSPaymentAttempt WHERE CoSoID = ? AND Status = N'PENDING'")) {
                     ps.setInt(1, coSoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) paymentPending = rs.getInt(1);
@@ -91,8 +91,8 @@ public class FacilityTrashService {
 
                 int updated;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE facilities SET is_deleted = 1, deleted_at = SYSUTCDATETIME(), deleted_by = ? " +
-                        "WHERE facility_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)")) {
+                        "UPDATE CoSo SET IsDeleted = 1, DeletedAt = SYSUTCDATETIME(), DeletedBy = ? " +
+                        "WHERE CoSoID = ? AND (IsDeleted = 0 OR IsDeleted IS NULL)")) {
                     ps.setInt(1, actorId);
                     ps.setInt(2, coSoId);
                     updated = ps.executeUpdate();
@@ -103,7 +103,7 @@ public class FacilityTrashService {
                 }
 
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM admin_trash WHERE entity_type = 'facilities' AND entity_id = ? AND is_restored = 0")) {
+                        "SELECT COUNT(*) FROM AdminTrash WHERE EntityType = 'CoSo' AND EntityID = ? AND IsRestored = 0")) {
                     ps.setInt(1, coSoId);
                     try (ResultSet rs = ps.executeQuery()) {
                         rs.next();
@@ -117,8 +117,8 @@ public class FacilityTrashService {
 
                 int trashId = -1;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO admin_trash (entity_type, entity_id, display_name, source_table, old_status, deleted_by, is_restored) " +
-                        "VALUES ('facilities', ?, ?, 'facilities', ?, ?, 0)",
+                        "INSERT INTO AdminTrash (EntityType, EntityID, DisplayName, SourceTable, OldStatus, DeletedBy, IsRestored) " +
+                        "VALUES ('CoSo', ?, ?, 'CoSo', ?, ?, 0)",
                         Statement.RETURN_GENERATED_KEYS)) {
                     ps.setInt(1, coSoId);
                     ps.setNString(2, tenCoSo);
@@ -164,24 +164,24 @@ public class FacilityTrashService {
                 int entityId;
                 String oldStatus;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "SELECT entity_id, old_status, entity_type FROM admin_trash WHERE trash_id = ? AND is_restored = 0")) {
+                        "SELECT EntityID, OldStatus, EntityType FROM AdminTrash WHERE TrashID = ? AND IsRestored = 0")) {
                     ps.setInt(1, trashId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
                             conn.rollback();
                             return Result.fail("Không tìm thấy mục cần thu hồi hoặc đã được thu hồi trước đó.");
                         }
-                        if (!"facilities".equals(rs.getString("entity_type"))) {
+                        if (!"CoSo".equals(rs.getString("EntityType"))) {
                             conn.rollback();
                             return Result.fail("Loại dữ liệu không hợp lệ cho thao tác này.");
                         }
-                        entityId = rs.getInt("entity_id");
-                        oldStatus = rs.getNString("old_status");
+                        entityId = rs.getInt("EntityID");
+                        oldStatus = rs.getNString("OldStatus");
                     }
                 }
 
-                String updateCoSoSql = "UPDATE facilities SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL" +
-                        (oldStatus != null ? ", status = ?" : "") + " WHERE facility_id = ?";
+                String updateCoSoSql = "UPDATE CoSo SET IsDeleted = 0, DeletedAt = NULL, DeletedBy = NULL" +
+                        (oldStatus != null ? ", TrangThai = ?" : "") + " WHERE CoSoID = ?";
                 int updated;
                 try (PreparedStatement ps = conn.prepareStatement(updateCoSoSql)) {
                     int idx = 1;
@@ -195,8 +195,8 @@ public class FacilityTrashService {
                 }
 
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE admin_trash SET is_restored = 1, restored_by = ?, restored_at = SYSUTCDATETIME() " +
-                        "WHERE trash_id = ? AND is_restored = 0")) {
+                        "UPDATE AdminTrash SET IsRestored = 1, RestoredBy = ?, RestoredAt = SYSUTCDATETIME() " +
+                        "WHERE TrashID = ? AND IsRestored = 0")) {
                     ps.setInt(1, actorId);
                     ps.setInt(2, trashId);
                     if (ps.executeUpdate() == 0) {
@@ -207,7 +207,7 @@ public class FacilityTrashService {
 
                 conn.commit();
                 logger.info("Admin restored trash item: adminId={}, trashId={}, entityType={}, entityId={}",
-                        actorId, trashId, "facilities", entityId);
+                        actorId, trashId, "CoSo", entityId);
                 return Result.ok("Đã thu hồi thành công.");
             } catch (SQLException e) {
                 conn.rollback();

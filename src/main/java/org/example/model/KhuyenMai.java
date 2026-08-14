@@ -4,53 +4,53 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "promotions")
+@Table(name = "KhuyenMai")
 public class KhuyenMai {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "promotion_id")
+    @Column(name = "KhuyenMaiID")
     private int KhuyenMaiID;
 
-    @Column(name = "promo_code", unique = true, nullable = false, length = 50)
+    @Column(name = "MaCode", unique = true, nullable = false, length = 50)
     private String MaCode;
 
-    @Column(name = "description", length = 255)
+    @Column(name = "MoTa", length = 255)
     private String MoTa;
 
-    @Column(name = "discount_type", nullable = false, length = 20)
+    @Column(name = "LoaiGiam", nullable = false, length = 20)
     private String LoaiGiam;
 
-    @Column(name = "discount_value", nullable = false)
+    @Column(name = "GiaTriGiam", nullable = false)
     private double GiaTriGiam;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "NgayBatDau", nullable = false)
     private LocalDate NgayBatDau;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "NgayKetThuc", nullable = false)
     private LocalDate NgayKetThuc;
 
-    @Column(name = "max_usage_count")
+    @Column(name = "SoLanToiDa")
     private Integer SoLanToiDa;
 
-    @Column(name = "used_count")
+    @Column(name = "SoLanDaDung")
     private int SoLanDaDung;
 
-    @Column(name = "facility_id")
+    @Column(name = "CoSoID")
     private Integer CoSoID;
 
-    @Column(name = "status", length = 20)
+    @Column(name = "TrangThai", length = 20)
     private String TrangThai;
 
-    @Column(name = "min_order_amount")
+    @Column(name = "GiaTriToiThieu")
     private java.math.BigDecimal GiaTriToiThieu;
 
-    @Column(name = "max_discount_amount")
+    @Column(name = "GiamToiDa")
     private java.math.BigDecimal GiamToiDa;
 
     // Cờ cho phép Customer nhìn thấy khuyến mãi này (ảnh + thông tin) ở các trang công khai.
     // Độc lập với TrangThai: TrangThai điều khiển việc mã có áp dụng được không, còn cờ này chỉ
     // điều khiển hiển thị. Mặc định true (xem sql/migration_khuyenmai_hinhanh.sql).
-    @Column(name = "is_public")
+    @Column(name = "HienThiCongKhai")
     private boolean HienThiCongKhai = true;
 
     public KhuyenMai() {

@@ -95,19 +95,19 @@ public class TimKiemServlet extends HttpServlet {
                 ids.append(c.getCoSoID());
             }
             String sportBatchSql =
-                "SELECT s.facility_id, MIN(mt.sport_name) AS sport_name " +
-                "FROM courts s " +
-                "JOIN court_types ls ON s.court_type_id = ls.court_type_id " +
-                "JOIN sports mt ON ls.sport_id = mt.sport_id " +
-                "WHERE s.facility_id IN (" + ids + ") " +
-                "  AND (s.is_deleted = 0 OR s.is_deleted IS NULL) " +
-                "  AND (ls.is_deleted = 0 OR ls.is_deleted IS NULL) " +
-                "GROUP BY s.facility_id";
+                "SELECT s.CoSoID, MIN(mt.TenMon) AS TenMon " +
+                "FROM San s " +
+                "JOIN LoaiSan ls ON s.LoaiSanID = ls.LoaiSanID " +
+                "JOIN MonTheThao mt ON ls.MonTheThaoID = mt.MonTheThaoID " +
+                "WHERE s.CoSoID IN (" + ids + ") " +
+                "  AND (s.IsDeleted = 0 OR s.IsDeleted IS NULL) " +
+                "  AND (ls.IsDeleted = 0 OR ls.IsDeleted IS NULL) " +
+                "GROUP BY s.CoSoID";
             try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
                  java.sql.Statement st = conn.createStatement();
                  java.sql.ResultSet rs = st.executeQuery(sportBatchSql)) {
                 while (rs.next()) {
-                    facilityFirstSport.put(rs.getInt("facility_id"), rs.getString("sport_name"));
+                    facilityFirstSport.put(rs.getInt("CoSoID"), rs.getString("TenMon"));
                 }
             } catch (Exception e) {
                 LOGGER.warn("TIM_KIEM_SPORT_BATCH_WARN", e);

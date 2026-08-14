@@ -4,39 +4,39 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "facility_capabilities")
+@Table(name = "CoSoCapability")
 public class CoSoCapability {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "capability_id")
+    @Column(name = "CapabilityID")
     private int capabilityId;
 
-    @Column(name = "facility_id", nullable = false)
+    @Column(name = "CoSoID", nullable = false)
     private int coSoId;
 
-    @Column(name = "capability_type", nullable = false, length = 50)
+    @Column(name = "CapabilityType", nullable = false, length = 50)
     private String capabilityType;
 
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "TrangThai", nullable = false, length = 20)
     private String trangThai;
 
-    @Column(name = "requested_at", nullable = false)
+    @Column(name = "RequestedAt", nullable = false)
     private LocalDateTime requestedAt;
 
-    @Column(name = "approved_by")
+    @Column(name = "ApprovedBy")
     private Integer approvedBy;
 
-    @Column(name = "approved_at")
+    @Column(name = "ApprovedAt")
     private LocalDateTime approvedAt;
 
-    @Column(name = "reject_reason", length = 500)
+    @Column(name = "RejectReason", length = 500)
     private String rejectReason;
 
-    @Column(name = "note", length = 500)
+    @Column(name = "Note", length = 500)
     private String note;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "UpdatedAt", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

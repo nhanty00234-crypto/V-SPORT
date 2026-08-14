@@ -35,6 +35,8 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
         try {
             trans.begin();
             TaiKhoan.setDiemUyTin(100);
+            TaiKhoan.setDiemTrinhDo(1000);
+            TaiKhoan.setNhanThongBaoSos(true);
             em.persist(TaiKhoan);
             trans.commit();
             return true;
@@ -234,6 +236,8 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
             
             acc.setRoleId(3);
             acc.setDiemUyTin(100);
+            acc.setDiemTrinhDo(1000);
+            acc.setNhanThongBaoSos(true);
             acc.setIsLocked(false);
             
             em.persist(acc);
@@ -249,7 +253,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
                         case "Tennis": sportId = 4; break;
                     }
                     if (sportId != 0) {
-                        em.createNativeQuery("INSERT INTO favorite_sports (account_id, sport_id) VALUES (?, ?)")
+                        em.createNativeQuery("INSERT INTO MonTheThaoYeuThich (AccountID, MonTheThaoID) VALUES (?, ?)")
                           .setParameter(1, acc.getAccountId())
                           .setParameter(2, sportId)
                           .executeUpdate();
@@ -545,7 +549,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
 
     @Override
     public void updateBankInfo(int accountId, String maNganHang, String soTaiKhoan) throws Exception {
-        String sql = "UPDATE accounts SET bank_code = ?, bank_account_number = ? WHERE account_id = ?";
+        String sql = "UPDATE Accounts SET MaNganHang = ?, SoTaiKhoan = ? WHERE AccountID = ?";
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, blankToNull(maNganHang));
@@ -557,7 +561,7 @@ public class TaiKhoanDAOImpl implements TaiKhoanDAO {
 
     @Override
     public void updateQrImagePath(int accountId, String qrImagePath) throws Exception {
-        String sql = "UPDATE accounts SET qr_image_path = ? WHERE account_id = ?";
+        String sql = "UPDATE Accounts SET QrImagePath = ? WHERE AccountID = ?";
         try (java.sql.Connection conn = org.example.util.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, blankToNull(qrImagePath));

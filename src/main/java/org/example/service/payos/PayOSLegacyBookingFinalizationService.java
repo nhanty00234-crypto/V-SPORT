@@ -49,16 +49,16 @@ public class PayOSLegacyBookingFinalizationService {
                 BigDecimal expected;
                 int khachHangAccountId;
                 try (PreparedStatement ps = c.prepareStatement(
-                        "SELECT status, estimated_total, account_id FROM bookings WITH (UPDLOCK, ROWLOCK) WHERE booking_id = ?")) {
+                        "SELECT TrangThai, TongTienDuKien, AccountID FROM LichDatSan WITH (UPDLOCK, ROWLOCK) WHERE DatSanID = ?")) {
                     ps.setInt(1, datSanId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
                             c.rollback();
                             return new Result(ResultCode.NOT_FOUND, null, null);
                         }
-                        status = rs.getNString("status");
-                        expected = rs.getBigDecimal("estimated_total");
-                        khachHangAccountId = rs.getInt("account_id");
+                        status = rs.getNString("TrangThai");
+                        expected = rs.getBigDecimal("TongTienDuKien");
+                        khachHangAccountId = rs.getInt("AccountID");
                     }
                 }
 
@@ -99,9 +99,9 @@ public class PayOSLegacyBookingFinalizationService {
                 String invoiceStatus = fullyPaid ? "Đã thanh toán" : "Đã cọc";
 
                 if (hoaDonId == null) {
-                    boolean hasLoaiHoaDon = columnExists(c, "invoices", "invoice_type");
-                    String sqlInsert = "INSERT INTO invoices (booking_id, customer_account_id, issued_at, court_total, service_total, parking_fee, discount_amount, grand_total, payment_method, payment_status" +
-                            (hasLoaiHoaDon ? ", invoice_type" : "") + ") VALUES (?, ?, GETDATE(), ?, 0, 0, 0, ?, N'PayOS', ?" +
+                    boolean hasLoaiHoaDon = columnExists(c, "HoaDon", "LoaiHoaDon");
+                    String sqlInsert = "INSERT INTO HoaDon (DatSanID, AccountID_KhachHang, NgayLap, TongTienSan, TongTienDichVu, PhiGuiXe, GiamGia, TongThanhToan, PhuongThucThanhToan, TrangThaiThanhToan" +
+                            (hasLoaiHoaDon ? ", LoaiHoaDon" : "") + ") VALUES (?, ?, GETDATE(), ?, 0, 0, 0, ?, N'PayOS', ?" +
                             (hasLoaiHoaDon ? ", N'MAIN'" : "") + ")";
                     try (PreparedStatement ins = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setInt(1, datSanId);
@@ -116,8 +116,8 @@ public class PayOSLegacyBookingFinalizationService {
                     }
                 } else {
                     try (PreparedStatement up = c.prepareStatement(
-                            "UPDATE invoices SET payment_status=?, payment_method=N'PayOS', issued_at=GETDATE() " +
-                            "WHERE invoice_id=? AND payment_status<>N'Đã thanh toán'")) {
+                            "UPDATE HoaDon SET TrangThaiThanhToan=?, PhuongThucThanhToan=N'PayOS', NgayLap=GETDATE() " +
+                            "WHERE HoaDonID=? AND TrangThaiThanhToan<>N'Đã thanh toán'")) {
                         up.setNString(1, invoiceStatus);
                         up.setInt(2, hoaDonId);
                         up.executeUpdate();
@@ -125,10 +125,10 @@ public class PayOSLegacyBookingFinalizationService {
                 }
 
                 try (PreparedStatement up = c.prepareStatement(
-                        "UPDATE bookings SET status=N'Đã xác nhận', deposit_amount=?, payment_method_confirmed=N'PayOS', " +
-                        "transaction_code=?, confirmed_at=GETDATE(), confirmed_by=NULL, confirm_source=N'PAYOS_WEBHOOK', " +
-                        "note=CONCAT(ISNULL(note,N''), N' [PayOS webhook xác nhận thanh toán thành công]') " +
-                        "WHERE booking_id=? AND status IN (N'Chờ thanh toán', N'Quá hạn')")) {
+                        "UPDATE LichDatSan SET TrangThai=N'Đã xác nhận', DepositAmount=?, PaymentMethodConfirmed=N'PayOS', " +
+                        "TransactionCode=?, ConfirmedAt=GETDATE(), ConfirmedBy=NULL, ConfirmSource=N'PAYOS_WEBHOOK', " +
+                        "GhiChu=CONCAT(ISNULL(GhiChu,N''), N' [PayOS webhook xác nhận thanh toán thành công]') " +
+                        "WHERE DatSanID=? AND TrangThai IN (N'Chờ thanh toán', N'Quá hạn')")) {
                     up.setBigDecimal(1, amountPaid);
                     up.setString(2, (transactionCode == null || transactionCode.isBlank()) ? null : transactionCode.trim());
                     up.setInt(3, datSanId);
@@ -154,9 +154,9 @@ public class PayOSLegacyBookingFinalizationService {
     }
 
     private Integer findMainInvoiceId(Connection c, int datSanId) throws SQLException {
-        boolean hasLoaiHoaDon = columnExists(c, "invoices", "invoice_type");
-        String sql = "SELECT TOP 1 invoice_id FROM invoices WITH (UPDLOCK, ROWLOCK) WHERE booking_id=?" +
-                (hasLoaiHoaDon ? " AND (invoice_type=N'MAIN' OR invoice_type IS NULL)" : "");
+        boolean hasLoaiHoaDon = columnExists(c, "HoaDon", "LoaiHoaDon");
+        String sql = "SELECT TOP 1 HoaDonID FROM HoaDon WITH (UPDLOCK, ROWLOCK) WHERE DatSanID=?" +
+                (hasLoaiHoaDon ? " AND (LoaiHoaDon=N'MAIN' OR LoaiHoaDon IS NULL)" : "");
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, datSanId);
             try (ResultSet rs = ps.executeQuery()) {

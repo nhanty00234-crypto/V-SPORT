@@ -21,7 +21,7 @@ public class KhuyenMaiService {
     private static final Logger logger = LogManager.getLogger(KhuyenMaiService.class);
 
     public static final String LOAI_GIAM_PHAN_TRAM = "PhanTram";
-    public static final String LOAI_GIAM_SO_TIEN   = "amount";
+    public static final String LOAI_GIAM_SO_TIEN   = "SoTien";
 
     private final KhuyenMaiDAO dao;
 

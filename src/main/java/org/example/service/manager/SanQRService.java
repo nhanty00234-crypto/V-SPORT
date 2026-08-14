@@ -53,7 +53,7 @@ public class SanQRService {
     public static final String ACTION_ENABLE_QR = "ENABLE_QR";
     public static final String ACTION_DISABLE_QR = "DISABLE_QR";
     public static final String ACTION_REGENERATE_QR = "REGENERATE_QR";
-    public static final String ENTITY_SAN_QR = "court_qr_codes";
+    public static final String ENTITY_SAN_QR = "SanQR";
 
     public enum ErrorCode { NOT_FOUND, FORBIDDEN, INVALID_TRANSITION, CONFLICT, SYSTEM }
 

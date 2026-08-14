@@ -103,8 +103,8 @@ public class PromotionService {
         }
 
         String cleanCode = maCode.trim().toUpperCase();
-        String sqlKM = "SELECT promotion_id, promo_code, description, discount_type, discount_value, start_date, end_date, max_usage_count, used_count, facility_id, status, min_order_amount, max_discount_amount FROM promotions WHERE UPPER(promo_code) = ?";
-        String sqlUserCount = "SELECT COUNT(*) FROM promotion_usages WHERE account_id = ? AND promotion_id = ?";
+        String sqlKM = "SELECT KhuyenMaiID, MaCode, MoTa, LoaiGiam, GiaTriGiam, NgayBatDau, NgayKetThuc, SoLanToiDa, SoLanDaDung, CoSoID, TrangThai, GiaTriToiThieu, GiamToiDa FROM KhuyenMai WHERE UPPER(MaCode) = ?";
+        String sqlUserCount = "SELECT COUNT(*) FROM LichSuKhuyenMai WHERE AccountID = ? AND KhuyenMaiID = ?";
 
         try (Connection conn = DBUtil.getConnection()) {
             KhuyenMai km = null;
@@ -117,21 +117,21 @@ public class PromotionService {
                         return new PromotionResult(false, "Mã khuyến mãi '" + cleanCode + "' không tồn tại.", BigDecimal.ZERO, originalAmount, null);
                     }
                     km = new KhuyenMai();
-                    km.setKhuyenMaiID(rs.getInt("promotion_id"));
-                    km.setMaCode(rs.getString("promo_code"));
-                    km.setMoTa(rs.getString("description"));
-                    km.setLoaiGiam(rs.getString("discount_type"));
-                    km.setGiaTriGiam(rs.getDouble("discount_value"));
-                    if (rs.getDate("start_date") != null) km.setNgayBatDau(rs.getDate("start_date").toLocalDate());
-                    if (rs.getDate("end_date") != null) km.setNgayKetThuc(rs.getDate("end_date").toLocalDate());
-                    int maxCount = rs.getInt("max_usage_count");
+                    km.setKhuyenMaiID(rs.getInt("KhuyenMaiID"));
+                    km.setMaCode(rs.getString("MaCode"));
+                    km.setMoTa(rs.getString("MoTa"));
+                    km.setLoaiGiam(rs.getString("LoaiGiam"));
+                    km.setGiaTriGiam(rs.getDouble("GiaTriGiam"));
+                    if (rs.getDate("NgayBatDau") != null) km.setNgayBatDau(rs.getDate("NgayBatDau").toLocalDate());
+                    if (rs.getDate("NgayKetThuc") != null) km.setNgayKetThuc(rs.getDate("NgayKetThuc").toLocalDate());
+                    int maxCount = rs.getInt("SoLanToiDa");
                     if (!rs.wasNull()) km.setSoLanToiDa(maxCount);
-                    km.setSoLanDaDung(rs.getInt("used_count"));
-                    int csId = rs.getInt("facility_id");
+                    km.setSoLanDaDung(rs.getInt("SoLanDaDung"));
+                    int csId = rs.getInt("CoSoID");
                     if (!rs.wasNull()) km.setCoSoID(csId);
-                    km.setTrangThai(rs.getString("status"));
-                    giaTriToiThieu = rs.getBigDecimal("min_order_amount");
-                    giamToiDa = rs.getBigDecimal("max_discount_amount");
+                    km.setTrangThai(rs.getString("TrangThai"));
+                    giaTriToiThieu = rs.getBigDecimal("GiaTriToiThieu");
+                    giamToiDa = rs.getBigDecimal("GiamToiDa");
                 }
             }
 
